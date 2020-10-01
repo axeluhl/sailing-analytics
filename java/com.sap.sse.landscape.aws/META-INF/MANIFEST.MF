@@ -15,3 +15,4 @@ Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
  com.sap.sse.mongodb
 Import-Package: org.osgi.framework;version="1.8.0"
 Bundle-Activator: com.sap.sse.landscape.aws.impl.Activator
+Export-Package: com.sap.sse.landscape.aws

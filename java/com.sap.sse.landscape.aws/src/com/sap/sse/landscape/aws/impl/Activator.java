@@ -10,7 +10,7 @@ import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
 public class Activator implements BundleActivator {
     private static Activator instance;
     
-    private AwsLandscapeImpl<?, ApplicationProcessMetrics> landscape;
+    private AwsLandscapeImpl<?, ApplicationProcessMetrics, ?, ?> landscape;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -25,11 +25,11 @@ public class Activator implements BundleActivator {
         return instance;
     }
     
-    public AwsLandscapeImpl<?, ApplicationProcessMetrics> getLandscape() {
+    public AwsLandscapeImpl<?, ApplicationProcessMetrics, ?, ?> getLandscape() {
         return landscape;
     }
 
-    public void setLandscape(AwsLandscapeImpl<?, ApplicationProcessMetrics> landscape) {
+    public void setLandscape(AwsLandscapeImpl<?, ApplicationProcessMetrics, ?, ?> landscape) {
         this.landscape = landscape;
     }
 

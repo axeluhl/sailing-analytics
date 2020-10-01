@@ -4,7 +4,7 @@
   xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.socialfooter.SocialFooterResources" />
   <g:HTMLPanel ui:field="htmlPanel">
     <!-- The search/social media page footer-->

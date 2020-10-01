@@ -6,16 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -25,6 +27,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -35,7 +38,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
@@ -43,13 +45,14 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
-import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementService;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = 4458564336368629101L;
@@ -107,18 +110,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         Util.addAll(securityDTOFactory.createRoleDefinitionDTOs(getSecurityService().getRoleDefinitions(),
                 getSecurityService()), result);
         return result;
-    }
-
-    @Override
-    public OwnershipDTO setOwnership(final String username, final UUID userGroupId,
-            final QualifiedObjectIdentifier idOfOwnedObject, final String displayNameOfOwnedObject) {
-        SecurityUtils.getSubject()
-                .checkPermission(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP));
-        final User user = getSecurityService().getUserByName(username);
-        // no security check if current user can see the user associated with the given username
-        final Ownership result = getSecurityService().setOwnership(idOfOwnedObject, user,
-                getSecurityService().getUserGroup(userGroupId), displayNameOfOwnedObject);
-        return securityDTOFactory.createOwnershipDTO(result, new HashMap<>(), new HashMap<>());
     }
 
     @Override
@@ -268,31 +259,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            AccessControlListDTO acl) throws UnauthorizedException {
-        if (SecurityUtils.getSubject()
-                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
-            
-            Map<UserGroup, Set<String>> aclActionsByGroup = new HashMap<>();
-            for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-                final StrippedUserGroupDTO groupDTO = entry.getKey();
-                final UserGroup userGroup;
-                if (groupDTO == null) {
-                    userGroup = null;
-                } else {
-                    userGroup = getSecurityService().getUserGroup(groupDTO.getId());
-                }
-                aclActionsByGroup.put(userGroup, entry.getValue());
-            }
-
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
-                    .overrideAccessControlList(idOfAccessControlledObject, aclActionsByGroup));
-        } else {
-            throw new UnauthorizedException("Not permitted to update the ACL for a user");
-        }
-    }
-
-    @Override
     public AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
                 .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
@@ -365,4 +331,62 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new SecurityServiceSharingDTO(getSecurityService().getSharedAcrossSubdomainsOf(),
                 getSecurityService().getBaseUrlForCrossDomainStorage());
     }
+
+    protected Credential createCredentialFromDTO(CredentialDTO credentialDTO) {
+        Credential credential = new Credential();
+        credential.setAuthProvider(credentialDTO.getAuthProvider());
+        credential.setAuthProviderName(credentialDTO.getAuthProviderName());
+        credential.setEmail(credentialDTO.getEmail());
+        credential.setLoginName(credentialDTO.getLoginName());
+        credential.setPassword(credentialDTO.getPassword());
+        credential.setRedirectUrl(credentialDTO.getRedirectUrl());
+        credential.setState(credentialDTO.getState());
+        credential.setVerifier(credentialDTO.getVerifier());
+        credential.setOauthToken(credentialDTO.getOauthToken());
+        return credential;
+    }
+
+    @Override
+    public Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO) {
+        User user = null;
+        try {
+            user = getSecurityService().verifySocialUser(createCredentialFromDTO(credentialDTO));
+        } catch (UserManagementException e) {
+            e.printStackTrace();
+        }
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        return new Triple<>(userDTO, getAllUser(), getServerInfo());
+    }
+
+    @Override
+    public SuccessInfo logout() {
+        logger.info("Logging out user: " + SecurityUtils.getSubject());
+        getSecurityService().logout();
+        getHttpSession().invalidate();
+        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        getThreadLocalResponse().addCookie(cookie);
+        logger.info("Invalidated HTTP session");
+        return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
+    }
+
+    @Override
+    public SuccessInfo login(String username, String password) {
+        try {
+            String redirectURL = getSecurityService().login(username, password);
+            UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
+                    getSecurityService());
+            return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
+                    new Triple<>(user, getAllUser(), getServerInfo()));
+        } catch (UserManagementException | AuthenticationException e) {
+            return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
+        }
+    }
+
+    private HttpSession getHttpSession() {
+        return getThreadLocalRequest().getSession();
+    }
+
+
 }

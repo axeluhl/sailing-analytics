@@ -36,6 +36,23 @@
          ]
       },
       {
+         "collectionName":"Manage2SailImport",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.manage2sail.resultimport/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
          "collectionName":"RacelogTracking",
          "folders":[  
             {  

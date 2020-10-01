@@ -154,6 +154,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceDetailsToShow();
     String tracking();
     String legDetailsToShow();
+    String showCarryColumn();
+    String showCarryColumnCheckbox();
+    String showCarryColumnTitle();
     String columnMoveUp();
     String columnMoveDown();
     String raceStartTimeColumn();
@@ -1155,10 +1158,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sharingMailTooltip();
     String sharingTwitterTooltip();
     String sharingFacebookTooltip();
+    String sharingCopyToClipBoardTooltip();
     String eventSharingShortText(String eventName, String venue, String dateString);
-    String eventSharingLongText(String eventName, String venue, String dateString, String url);
     String seriesSharingShortText(String seriesName);
-    String seriesSharingLongText(String seriesName, String url);
     String competitorsAnalytics();
     String mediaNoContent();
     String media();
@@ -1805,6 +1807,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String appendResult();
     String sampleColor();
     String leaderboardPage();
+    String editableLeaderboardPage();
     String showLiveNow();
     String useOnlyOneOfStartTimeInferenceAndControlTrackingFromStartAndFinishTimes();
     String estimatedDistance();
@@ -2393,4 +2396,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String unableToLoadCourseAreas(String message);
     String insufficientPermissions();
     String manageEvents();
+    String sharingLinkCopied();
 }

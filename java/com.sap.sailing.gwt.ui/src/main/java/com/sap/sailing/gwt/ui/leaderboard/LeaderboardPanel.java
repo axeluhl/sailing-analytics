@@ -313,7 +313,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     Anchor playPause;
 
-    final CompetitorSelectionProvider competitorSelectionProvider;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
     private Label filterStatusLabel;
     private Button filterClearButton;
@@ -481,6 +481,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
+        totalRankColumn.setCellStyleNames("totalRankColumn");
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
                 style.getTableresources());
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
@@ -906,7 +907,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
 
-        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
@@ -3212,7 +3213,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return needsCarryColumn ? zeroBasedIndexOfCarryColumn + 1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+    protected void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn && getLeaderboardTable()
                 .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);

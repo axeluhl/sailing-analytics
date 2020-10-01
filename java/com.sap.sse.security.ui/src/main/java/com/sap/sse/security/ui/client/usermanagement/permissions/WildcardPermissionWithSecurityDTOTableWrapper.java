@@ -101,10 +101,10 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         });
         final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
         final EditOwnershipDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, permission -> refreshPermissionList(),
+                .create(userService.getUserManagementWriteService(), type, permission -> refreshPermissionList(),
                         stringMessages);
         final EditACLDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 permission -> configACL.openACLDialog(permission));
@@ -129,6 +129,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 .setUpdatePermissionFilterForCheckbox(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
         mainPanel.insert(filterField, 0);
         // setup table
+        table.ensureDebugId("WildcardPermissionWithSecurityDTOTable");
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.permission());
         table.addColumn(userActionColumn, stringMessages.actions());

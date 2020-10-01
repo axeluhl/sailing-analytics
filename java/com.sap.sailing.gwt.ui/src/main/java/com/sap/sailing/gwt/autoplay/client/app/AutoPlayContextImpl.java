@@ -59,7 +59,7 @@ public class AutoPlayContextImpl implements AutoPlayContext {
             RegattaAndRaceIdentifier currentLiveRace) {
         if (this.liveRace != null) {
             if (!this.liveRace.equals(currentLiveRace)) {
-                LOG.info("Autoplay: Lastrace was " + lastRace + " liferace is now " + liveRace);
+                LOG.info("Autoplay: Last race was " + lastRace + " live race is now " + liveRace);
                 this.lastRace = this.liveRace;
             }
         }

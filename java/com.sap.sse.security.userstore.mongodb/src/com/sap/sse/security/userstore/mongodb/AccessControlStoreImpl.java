@@ -2,9 +2,13 @@ package com.sap.sse.security.userstore.mongodb;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.LockUtil.RunnableWithResult;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -30,6 +34,20 @@ public class AccessControlStoreImpl implements AccessControlStore {
      * maps from object ID string representations to the access control lists for the respective key object
      */
     private final ConcurrentHashMap<QualifiedObjectIdentifier, AccessControlListAnnotation> accessControlLists;
+    
+    /**
+     * For quick lookup of denying ACLs during meta-permission checks (permission to grant a permission) this map
+     * contains a subset of the {@link #accessControlList} map, keyed by the
+     * {@link QualifiedObjectIdentifier#getTypeIdentifier() type identifier} (which is a {@link String}) of the objects
+     * to which those ACLs pertain, and as a nested map, by the {@link UserGroup} that is the key in the ACL that denies
+     * permission to an action (could be the {@code null} group, in that case meaning the anonymous users). Access to
+     * this map, like access to {@link #accessControlLists}, has to be synchronized under the
+     * {@link #lockForManagementMappings}.<p>
+     * 
+     * As the inner maps are implemented as non-concurrent maps, {@code null} keys are permissible, so the anonymous
+     * group is actually represented as a {@code null} key.
+     */
+    private final ConcurrentHashMap<String, Map<UserGroup, Set<QualifiedObjectIdentifier>>> accessControlListsWithDenials;
 
     /**
      * maps from object ID string representations to the ownership information for the respective key object
@@ -42,7 +60,17 @@ public class AccessControlStoreImpl implements AccessControlStore {
      * (prevented by the lock)
      */
     private final ConcurrentHashMap<User, Set<OwnershipAnnotation>> userToOwnership;
+    
+    /**
+     * The anonymous {@code null} group is represented by {@link #NULL_GROUP} instead as a {@link ConcurrentHashMap}
+     * cannot handle {@code null} keys/values.
+     */
     private final ConcurrentHashMap<UserGroup, Set<OwnershipAnnotation>> userGroupToOwnership;
+
+    /**
+     * The anonymous {@code null} group is represented by {@link #NULL_GROUP} instead as a {@link ConcurrentHashMap}
+     * cannot handle {@code null} keys/values.
+     */
     private final ConcurrentHashMap<UserGroup, Set<AccessControlListAnnotation>> userGroupToAccessControlListAnnotation;
 
     private static final UserGroupImpl NULL_GROUP = new UserGroupImpl(null, "<null group>");
@@ -75,12 +103,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory,
             final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
         accessControlLists = new ConcurrentHashMap<>();
+        accessControlListsWithDenials = new ConcurrentHashMap<>();
         ownerships = new ConcurrentHashMap<>();
         userToOwnership = new ConcurrentHashMap<>();
         userGroupToOwnership = new ConcurrentHashMap<>();
         userGroupToAccessControlListAnnotation = new ConcurrentHashMap<>();
         lockForManagementMappings = new NamedReentrantReadWriteLock("ownershipLock", true);
-
         this.mongoObjectFactory = mongoObjectFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.userStore = userStore;
@@ -104,6 +132,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private void internalAddACL(AccessControlListAnnotation acl) {
+        assert lockForManagementMappings.isWriteLockedByCurrentThread();
         accessControlLists.put(acl.getIdOfAnnotatedObject(), acl);
         for (UserGroup owner : acl.getAnnotation().getActionsByUserGroup().keySet()) {
             internalMapUserGroupToACL(owner, acl);
@@ -139,9 +168,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
             final String displayNameOfAccessControlledObject) {
         return LockUtil.executeWithWriteLockAndResult(lockForManagementMappings,
                 new RunnableWithResult<AccessControlListAnnotation>() {
-
                     @Override
                     public AccessControlListAnnotation run() {
+                        removeAccessControlList(idOfAccessControlledObject);
                         AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlList(),
                                 idOfAccessControlledObject, displayNameOfAccessControlledObject);
                         accessControlLists.put(idOfAccessControlledObject, acl);
@@ -166,6 +195,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        assert lockForManagementMappings.isWriteLockedByCurrentThread();
         return accessControlLists.computeIfAbsent(idOfAccessControlledObject,
                 id->new AccessControlListAnnotation(new AccessControlList(), id, /* display name */ null));
     }
@@ -199,34 +229,56 @@ public class AccessControlStoreImpl implements AccessControlStore {
         });
     }
 
-    private void internalMapUserGroupToACL(final UserGroup userGroup2, final AccessControlListAnnotation acl) {
+    private void internalMapUserGroupToACL(final UserGroup userGroup, final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
-
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
-                .get(userGroup);
+                .get(effectiveUserGroup);
         if (currentACLsContainingGroup == null) {
             currentACLsContainingGroup = Collections
                     .newSetFromMap(new ConcurrentHashMap<AccessControlListAnnotation, Boolean>());
-            userGroupToAccessControlListAnnotation.put(userGroup, currentACLsContainingGroup);
+            userGroupToAccessControlListAnnotation.put(effectiveUserGroup, currentACLsContainingGroup);
         }
         currentACLsContainingGroup.add(acl);
+        final String type = acl.getIdOfAnnotatedObject().getTypeIdentifier();
+        // FIXME bug5239: add if an action is denied; remove if no action denied for group
+        Map<UserGroup, Set<QualifiedObjectIdentifier>> aclsByGroupForType = accessControlListsWithDenials.get(type);
+        final Set<String> deniedActions = acl.getAnnotation().getDeniedActions(userGroup);
+        if (deniedActions == null || deniedActions.isEmpty()) {
+            if (aclsByGroupForType != null) {
+                Util.removeFromValueSet(aclsByGroupForType, userGroup, acl.getIdOfAnnotatedObject());
+            }
+        } else {
+            if (aclsByGroupForType == null) {
+                aclsByGroupForType = new HashMap<>();
+                accessControlListsWithDenials.put(type, aclsByGroupForType);
+                Util.addToValueSet(aclsByGroupForType, userGroup, acl.getIdOfAnnotatedObject());
+            }
+        }
     }
 
-    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup2,
+    private void internalRemoveUserGroupToACLMapping(final UserGroup userGroup,
             final AccessControlListAnnotation acl) {
         if (!lockForManagementMappings.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException("Current thread has no write lock!");
         }
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         Set<AccessControlListAnnotation> currentACLsContainingGroup = userGroupToAccessControlListAnnotation
-                .get(userGroup);
+                .get(effectiveUserGroup);
         if (currentACLsContainingGroup != null) {
             currentACLsContainingGroup.remove(acl);
             if (currentACLsContainingGroup.isEmpty()) {
-                userGroupToAccessControlListAnnotation.remove(userGroup);
+                userGroupToAccessControlListAnnotation.remove(effectiveUserGroup);
+            }
+        }
+        final String typeIdentifier = acl.getIdOfAnnotatedObject().getTypeIdentifier();
+        final Map<UserGroup, Set<QualifiedObjectIdentifier>> aclsByGroupForEvent = accessControlListsWithDenials.get(typeIdentifier);
+        if (aclsByGroupForEvent != null) {
+            aclsByGroupForEvent.remove(userGroup);
+            if (aclsByGroupForEvent.isEmpty()) {
+                accessControlListsWithDenials.remove(typeIdentifier);
             }
         }
     }
@@ -371,6 +423,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     private void removeAll() {
         accessControlLists.clear();
+        accessControlListsWithDenials.clear();
         ownerships.clear();
         userGroupToAccessControlListAnnotation.clear();
         userGroupToOwnership.clear();
@@ -392,14 +445,26 @@ public class AccessControlStoreImpl implements AccessControlStore {
             }
         });
     }
+    
+    @Override
+    public Set<AccessControlListAnnotation> getAccessControlListsForGroup(UserGroup group) {
+        final Set<AccessControlListAnnotation> aclsForGroup = userGroupToAccessControlListAnnotation.get(group);
+        return aclsForGroup == null ? null : Collections.unmodifiableSet(aclsForGroup);
+    }
 
     @Override
-    public void removeAllOwnershipsFor(final UserGroup userGroup2) {
-        final UserGroup userGroup = userGroup2 == null ? NULL_GROUP : userGroup2;
+    public Map<UserGroup, Set<QualifiedObjectIdentifier>> getAccessControlListsWithDenials(String typeIdentifier) {
+        final Map<UserGroup, Set<QualifiedObjectIdentifier>> aclsForType = accessControlListsWithDenials.get(typeIdentifier);
+        return aclsForType == null ? null : Collections.unmodifiableMap(aclsForType);
+    }
+
+    @Override
+    public void removeAllOwnershipsFor(final UserGroup userGroup) {
+        final UserGroup effectiveUserGroup = userGroup == null ? NULL_GROUP : userGroup;
         LockUtil.executeWithWriteLock(lockForManagementMappings, new Runnable() {
             @Override
             public void run() {
-                Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(userGroup);
+                Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(effectiveUserGroup);
                 if (knownOwnerships != null) {
                     // do not use setOwnership, we know the user will not change, and we can use the more effective
                     // remove
@@ -411,17 +476,20 @@ public class AccessControlStoreImpl implements AccessControlStore {
                         ownerships.put(ownership.getIdOfAnnotatedObject(), groupLessOwnership);
                         mongoObjectFactory.storeOwnership(groupLessOwnership);
                     }
-                    userGroupToOwnership.remove(userGroup);
+                    userGroupToOwnership.remove(effectiveUserGroup);
                 }
-
                 Set<AccessControlListAnnotation> knownACLEntries = userGroupToAccessControlListAnnotation
-                        .get(userGroup);
+                        .get(effectiveUserGroup);
                 if (knownACLEntries != null) {
                     for (AccessControlListAnnotation acl : knownACLEntries) {
-                        internalRemoveUserGroupToACLMapping(userGroup, acl);
+                        acl.getAnnotation().setPermissions(effectiveUserGroup, Collections.emptySet());
+                        internalRemoveUserGroupToACLMapping(effectiveUserGroup, acl);
                         mongoObjectFactory.storeAccessControlList(acl);
                     }
-                    userGroupToAccessControlListAnnotation.remove(userGroup);
+                    userGroupToAccessControlListAnnotation.remove(effectiveUserGroup);
+                    for (final Entry<String, Map<UserGroup, Set<QualifiedObjectIdentifier>>> e : accessControlListsWithDenials.entrySet()) {
+                        e.getValue().remove(effectiveUserGroup);
+                    }
                 }
             }
         });

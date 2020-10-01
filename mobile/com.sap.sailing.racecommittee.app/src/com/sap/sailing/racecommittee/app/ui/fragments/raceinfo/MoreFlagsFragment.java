@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -53,6 +54,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sendIntent(AppConstants.ACTION_TIME_HIDE);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.flag_list, container, false);
 
@@ -63,6 +70,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     @Override
@@ -77,20 +90,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             replaceFragment(FinishTimeFragment.newInstance(0),
                     getFrameId(requireActivity(), R.id.race_edit, R.id.race_content, true));
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     public static class FinishTimeFragment extends BaseFragment
@@ -226,14 +225,14 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         public void onResume() {
             super.onResume();
 
-            sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+            sendIntent(AppConstants.ACTION_TIME_HIDE);
         }
 
         @Override
         public void onPause() {
             super.onPause();
 
-            sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+            sendIntent(AppConstants.ACTION_TIME_SHOW);
         }
 
         @Override
@@ -246,7 +245,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 case R.id.date_button: {
                     final Object tag = mDateButton.getTag();
                     final Calendar time = tag instanceof Calendar ? (Calendar) tag : Calendar.getInstance();
-                    TimeUtils.showDatePickerDialog(getChildFragmentManager(), time, mEvent);
+                    TimeUtils.showDatePickerDialog(requireFragmentManager(), time, mEvent);
                     break;
                 }
                 case R.id.finish_custom: {
@@ -265,19 +264,20 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     break;
                 }
                 default:
-                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
             }
         }
 
         @Override
-        public void notifyTick(TimePoint now) {
-            super.notifyTick(now);
+        public TickListener getCurrentTimeTickListener() {
+            return this::onCurrentTimeTick;
+        }
 
+        private void onCurrentTimeTick(TimePoint now) {
             if (mCurrentTime != null) {
                 mCurrentTime.setText(TimeUtils.formatTime(now));
-                mCurrentTime.setVisibility(View.VISIBLE);
             }
         }
 
@@ -292,7 +292,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         private void updateDateButton(final Calendar calendar) {
             if (mDateButton != null) {
                 final long millis = calendar.getTimeInMillis();
-                CharSequence text = DateUtils.formatDateTime(requireContext(), millis, 0);
+                CharSequence text = DateUtils.formatDateTime(requireContext(), millis, DateUtils.FORMAT_ABBREV_ALL);
                 if (DateUtils.isToday(millis)) {
                     text = TextUtils.concat(getText(R.string.today), ", ", text);
                 }

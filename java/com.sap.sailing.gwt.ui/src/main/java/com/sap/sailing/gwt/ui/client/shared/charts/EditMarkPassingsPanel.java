@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -57,7 +58,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener {
+public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener, HasAvailabilityCheck {
     private static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -354,7 +355,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         }
         return true;
     }
-   
+
     @Override
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
@@ -503,6 +504,12 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 }
             }
         }
+    }
+
+    @Override
+    public void checkBackendAvailability(Consumer<Boolean> callback) {
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
+                stringMessages);
     }
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {

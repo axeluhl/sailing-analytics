@@ -118,7 +118,7 @@ public class StartModeFragment extends BaseFragment {
                 }
             });
 
-            sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+            sendIntent(AppConstants.ACTION_TIME_HIDE);
         }
     }
 
@@ -126,7 +126,7 @@ public class StartModeFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
 
-        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     public void onClick(StartModeItem startMode) {
@@ -140,7 +140,7 @@ public class StartModeFragment extends BaseFragment {
             openMainScheduleFragment();
         } else {
             if (sameFlag) {
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
             }
         }
     }

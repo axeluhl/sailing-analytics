@@ -104,10 +104,15 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     
     private Iterable<Spot> loadSpots() throws IOException, ParseException, MalformedURLException {
         final Iterable<Spot> result;
-        JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(new InputStreamReader(
-                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent()));
-        result = parser.parseSpots(spotsAsJson, this);
-        return result;
+        final InputStreamReader in = new InputStreamReader(
+                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent());
+        try {
+            JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+            result = parser.parseSpots(spotsAsJson, this);
+            return result;
+        } finally {
+            in.close();
+        }
     }
 
     @Override

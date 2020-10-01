@@ -20,7 +20,6 @@ import org.apache.shiro.SecurityUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
@@ -33,14 +32,23 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -71,7 +79,7 @@ public class LoginTest {
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        securityService = new SecurityServiceImpl(userStore, accessControlStore);
+        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
         Activator.setSecurityService(securityService);
     }
 
@@ -95,8 +103,6 @@ public class LoginTest {
     }
 
     @Test
-    // FIXME Bug 5239: Negative ACL actions are currently disabled due to bugs
-    @Ignore
     public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,
@@ -107,11 +113,76 @@ public class LoginTest {
         permissionMap.put(null, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
         AccessControlList acl = securityService.overrideAccessControlList(
                 QualifiedObjectIdentifierImpl.fromDBWithoutEscaping("someid/more"), permissionMap);
-
         Map<UserGroup, Set<String>> result = acl.getActionsByUserGroup();
-
         Assert.assertThat(result.get(defaultUserGroup), Matchers.contains("!READ", "UPDATE"));
         Assert.assertThat(result.get(null), Matchers.contains("UPDATE"));
+    }
+    
+    @Test
+    public void testDenialInAclAffectsMetaPermissionCheck() throws UserManagementException, MailException, UserGroupManagementException {
+        final WithQualifiedObjectIdentifier my = new WithQualifiedObjectIdentifier() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public String getName() {
+                return "my";
+            }
+            
+            @Override
+            public HasPermissions getPermissionType() {
+                return SecuredSecurityTypes.SERVER;
+            }
+            
+            @Override
+            public QualifiedObjectIdentifier getIdentifier() {
+                return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getName()));
+            }
+        };
+        securityService.initialize(); // create admin user/tenant
+        final String username = "TheNewUser";
+        final String password = "Humba";
+        final User admin = securityService.getUserByName("admin");
+        final RoleDefinition adminRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance());
+        final UserGroup adminTenant = securityService.getUserGroupByName(admin.getName()+SecurityService.TENANT_SUFFIX);
+        securityService.createSimpleUser(username, "u@a.b", password, username, /* company */ null,
+                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
+        final QualifiedObjectIdentifier myId = my.getIdentifier();
+        // grant admin role to user unqualified, implying READ on all objects including the "my" SERVER
+        securityService.addRoleForUser(username, new Role(securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance())));
+        securityService.login(username, password);
+        securityService.setOwnership(myId, admin, adminTenant);
+        // check explicit permission:
+        assertTrue(securityService.hasCurrentUserExplicitPermissions(my, ServerActions.READ_REPLICATOR));
+        // check for meta-permission SERVER:*:*
+        assertTrue(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).build()));
+        // now add an ACL to the "my" server that disallows READ_REPLICATOR for the user's default group
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
+        permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ_REPLICATOR" })));
+        securityService.overrideAccessControlList(myId, permissionMap);
+        // now the user is expected to have lost the READ_REPLICATOR permission on "my"
+        assertFalse(securityService.hasCurrentUserExplicitPermissions(my, ServerActions.READ_REPLICATOR));
+        // and therefore no meta-permission (permission to grant) for SERVER:*:* anymore:
+        assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).build()));
+        // and therefore no meta-permission (permission to grant) for SERVER:*:my anymore:
+        assertFalse(securityService.hasCurrentUserMetaPermissionWithOwnershipLookup(
+                WildcardPermission.builder().withTypes(SecuredSecurityTypes.SERVER).withIds(myId.getTypeRelativeObjectIdentifier()).build()));
+        // The current user belongs to defaultUserGroup for which READ_REPLICATOR has been denied on SERVER/my. However,
+        // the SERVER/my object is owned by the admin-tenant group. Wanting to grant a role qualified to the defaultUserGroup
+        // would entail permissions only for objects owned by the defaultUserGroup, hence not for SERVER/my; so the
+        // denial of READ_REPLICATOR shouldn't matter for granting the "admin" role qualified to objects owned by
+        // group defaultUserGroup:
+        assertTrue(securityService.hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                adminRoleDefinition, new Ownership(/* user */ null, defaultUserGroup)));
+        // granting role "admin" qualified to the "admin-tenant" group, however, should not be allowed
+        // because a denying ACL entry exists for the SERVER/my object owned by the "admin-tenant" group that
+        // denies READ_REPLICATOR for users who belong to group defaultUserGroup.
+        // (As a matter of fact, granting this role would be possible if the receiver of the role did *not*
+        // belong to the defaultUserGroup...)
+        assertFalse(securityService.hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                adminRoleDefinition, new Ownership(/* user */ null, adminTenant)));
     }
     
     @Test
@@ -120,14 +191,14 @@ public class LoginTest {
     }
     
     @Test
-    public void setPreferencesTest() throws UserGroupManagementException, UserManagementException {
+    public void setPreferencesTest() throws UserStoreManagementException {
         userStore.setPreference("me", "key", "value");
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertEquals("value", store2.getPreference("me", "key"));
     }
 
     @Test
-    public void setAndUnsetPreferencesTest() throws UserGroupManagementException, UserManagementException {
+    public void setAndUnsetPreferencesTest() throws UserStoreManagementException {
         userStore.setPreference("me", "key", "value");
         userStore.unsetPreference("me", "key");
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
@@ -135,7 +206,7 @@ public class LoginTest {
     }
 
     @Test
-    public void rolesTest() throws UserManagementException, UserGroupManagementException {
+    public void rolesTest() throws UserStoreManagementException {
         userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition);
@@ -145,7 +216,7 @@ public class LoginTest {
     }
 
     @Test
-    public void roleWithQualifiersTest() throws UserManagementException, UserGroupManagementException {
+    public void roleWithQualifiersTest() throws UserStoreManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
@@ -159,7 +230,7 @@ public class LoginTest {
     }
 
     @Test
-    public void permissionsTest() throws UserManagementException, UserGroupManagementException {
+    public void permissionsTest() throws UserStoreManagementException {
         userStore.createUser("me", "me@sap.com");
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = createAndLoadUserStore();
@@ -168,7 +239,7 @@ public class LoginTest {
         assertTrue(PermissionChecker.isPermitted(new WildcardPermission("a:b:c"), user, allUser, null, null));
     }
 
-    private UserStoreImpl createAndLoadUserStore() throws UserGroupManagementException, UserManagementException {
+    private UserStoreImpl createAndLoadUserStore() throws UserStoreManagementException {
         final UserStoreImpl store = new UserStoreImpl(DEFAULT_TENANT_NAME);
         store.loadAndMigrateUsers();
         return store;

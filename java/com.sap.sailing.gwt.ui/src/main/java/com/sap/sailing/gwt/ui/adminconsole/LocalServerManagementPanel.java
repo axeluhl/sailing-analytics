@@ -28,7 +28,6 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -86,9 +85,9 @@ public class LocalServerManagementPanel extends SimplePanel {
         final HasPermissions type = SecuredSecurityTypes.SERVER;
         final Consumer<ServerInfoDTO> updateCallback = event -> userService.updateUser(false);
         final EditOwnershipDialog.DialogConfig<ServerInfoDTO> configOwner = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
         final EditACLDialog.DialogConfig<ServerInfoDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, updateCallback, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, updateCallback, stringMessages);
 
         final Predicate<DefaultActions> permissionCheck = action -> currentServerInfo != null
                 && userService.hasPermission(type.getPermission(action), currentServerInfo.getOwnership());
@@ -114,7 +113,9 @@ public class LocalServerManagementPanel extends SimplePanel {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverConfiguration(), 3);
         final Command callback = this::serverConfigurationChanged;
         isStandaloneServerCheckbox = captionPanel.addChekBox(stringMessages.standaloneServer() + ":", callback);
+        isStandaloneServerCheckbox.ensureDebugId("isStandaloneServerCheckbox");
         isPublicServerCheckbox = captionPanel.addChekBox(stringMessages.publicServer() + ":", callback);
+        isPublicServerCheckbox.ensureDebugId("isPublicServerCheckbox");
         isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
         isSelfServiceServerCheckbox.ensureDebugId("isSelfServiceServerCheckbox");
         return captionPanel;
@@ -162,8 +163,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         groupOwnerInfo.setText(hasGroupOwner ? ownership.getTenantOwner().getName() : "---");
         userOwnerInfo.setText(hasUserOwner ? ownership.getUserOwner().getName() : "---");
         // Update changeability
-        isSelfServiceServerCheckbox.setEnabled(userService.hasCurrentUserMetaPermission(
-                serverInfo.getIdentifier().getPermission(ServerActions.CREATE_OBJECT), serverInfo.getOwnership()));
+        isSelfServiceServerCheckbox.setEnabled(userService.hasServerPermission(DefaultActions.CHANGE_ACL));
         // TODO update isPublicServerCheckbox -> default server tenant is currently not available in the UI
         isPublicServerCheckbox.setEnabled(true);
     }

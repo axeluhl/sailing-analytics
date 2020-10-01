@@ -54,8 +54,8 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
@@ -154,11 +154,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         });
         final HasPermissions type = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
         final DialogConfig<ExpeditionDeviceConfiguration> config = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 deviceConfiguration -> config.openOwnershipDialog(deviceConfiguration));
         final EditACLDialog.DialogConfig<ExpeditionDeviceConfiguration> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 deviceConfiguration -> configACL.openACLDialog(deviceConfiguration));
         SecuredDTOOwnerColumn.configureOwnerColumns(allDeviceConfigurations, deviceConfigurationColumnListHandler,

@@ -3,6 +3,8 @@ package com.sap.sse.gwt.common;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 
 
 public interface CommonSharedResources extends ClientBundle {
@@ -17,6 +19,10 @@ public interface CommonSharedResources extends ClientBundle {
 
     @Source(MEDIA)
     CommonMediaCss mediaCss();
+
+    @Source("buttonarrowrightwhite.png")
+    @MimeType("image/png")
+    DataResource buttonarrowrightwhite();
     
     public interface CommonMainCss extends CssResource {
         String button();

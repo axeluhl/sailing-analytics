@@ -39,12 +39,10 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
     private final Timer raceboardTimer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
 
-
     public LiveRaceBoardNode(AutoPlayClientFactory cf) {
         super(LiveRaceBoardNode.class.getName());
         this.cf = cf;
         SailingServiceAsync sailingService = cf.getSailingService();
-
         raceboardTimer = new Timer(PlayModes.Live, TIMER_ADVANCE_STEPSIZE);
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
@@ -52,14 +50,12 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                 cf.getErrorReporter(),
                 new ArrayList<RegattaAndRaceIdentifier>(), RACETIME_UPDATE_INTERVAL);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-
     }
 
     public void onStart() {
         raceboardTimer.setTime(MillisecondsTimePoint.now().asMillis());
         raceboardTimer.play();
         raceTimesInfoProvider.addRaceIdentifier(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), true);
-
         PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings = cf.getAutoPlayCtxSignalError().getAutoplaySettings();
         AutoplayPerspectiveLifecycle autoplayLifecycle = cf.getAutoPlayCtxSignalError().getAutoplayLifecycle();
         UserService userService = cf.getUserService();

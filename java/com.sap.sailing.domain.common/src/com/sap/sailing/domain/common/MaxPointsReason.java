@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import java.util.Arrays;
+
 /**
  * The reasons why a competitor may get the maximum number of points, usually equaling the
  * number of competitors enlisted for the regatta plus one.
@@ -79,5 +81,11 @@ public enum MaxPointsReason {
 
     public boolean isAppliesAtStartOfRace() {
         return appliesAtStartOfRace;
+    }
+
+    public static MaxPointsReason[] getLexicographicalValues() {
+        MaxPointsReason[] result = MaxPointsReason.values();
+        Arrays.sort(result, (o1, o2) -> o1.name().compareToIgnoreCase(o2.name()));
+        return result;
     }
 }

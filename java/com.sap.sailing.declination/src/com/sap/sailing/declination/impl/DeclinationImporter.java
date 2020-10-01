@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -17,6 +16,7 @@ import org.xml.sax.SAXException;
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public abstract class DeclinationImporter {
     private static final Logger logger = Logger.getLogger(DeclinationImporter.class.getName());
@@ -38,7 +38,8 @@ public abstract class DeclinationImporter {
      */
     public Declination getDeclination(final Position position, final TimePoint timePoint,
             long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        ExecutorService executorService = ThreadPoolUtil.INSTANCE.
+            createBackgroundTaskThreadPoolExecutor(1, "DeclinationImporterThreadPoolExecutor");
         try {
             return executorService.submit(
                     () -> importRecord(position, timePoint)

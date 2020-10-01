@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.Util.Triple;
@@ -15,17 +14,16 @@ import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementService extends RemoteService {
-    OwnershipDTO setOwnership(String username, UUID userGroupId, QualifiedObjectIdentifier idOfOwnedObject,
-            String displayNameOfOwnedObject) throws org.apache.shiro.authz.UnauthorizedException;
 
     Collection<AccessControlListAnnotationDTO> getAccessControlLists()
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
@@ -66,10 +64,6 @@ public interface UserManagementService extends RemoteService {
     String getOrCreateAccessToken(String username)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-
-    AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
-            AccessControlListDTO acl) throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
-
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
@@ -82,4 +76,10 @@ public interface UserManagementService extends RemoteService {
     Boolean userGroupExists(String userGroupName) throws org.apache.shiro.authz.UnauthorizedException;
 
     SecurityServiceSharingDTO getSharingConfiguration();
+    
+    Triple<UserDTO, UserDTO, ServerInfoDTO> verifySocialUser(CredentialDTO credentialDTO);
+
+    SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
+
+    SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
 }
