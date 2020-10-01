@@ -91,7 +91,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
-        jsch.addIdentity(keyName, landscape.getDescryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* passphrase */ null);
+        jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* passphrase */ null);
         final InetAddress address = getPublicAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");

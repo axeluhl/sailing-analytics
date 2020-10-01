@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSch;
@@ -27,6 +28,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.ReverseProxy;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
@@ -55,11 +57,15 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.Placement;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.RunInstancesRequest.Builder;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Certificate;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
@@ -68,11 +74,15 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTarget
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import software.amazon.awssdk.services.route53.Route53Client;
@@ -92,15 +102,18 @@ MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterPro
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
+    // the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07
+    private static final String DEFAULT_CERTIFICATE_ARN = "arn:aws:acm:eu-west-2:017363970217:certificate/48c51d6a-b4f2-4fa0-8dcc-426cd9c7aadc";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
+    private final Map<com.sap.sse.landscape.Region, ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> centralReverseProxyByRegion;
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also
-     * {@link #getDescryptedPrivateKey(SSHKeyPair)}.
+     * {@link #getDecryptedPrivateKey(SSHKeyPair)}.
      */
     private final byte[] privateKeyEncryptionPassphrase;
     
@@ -114,6 +127,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
             DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
+        this.centralReverseProxyByRegion = new HashMap<>();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
@@ -122,6 +136,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
+        // TODO automate handling of central reverse proxy instances across regions and AZs, e.g., based on tags
+        final AwsRegion euWest2 = new AwsRegion("eu-west-2");
+        final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
+        final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> euWest2CentralReverseProxy = new ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>(
+                "Central Reverse Proxy eu-west-2", this, euWest2);
+        euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
+        centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
     }
     
     /**
@@ -178,14 +199,67 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final CreateLoadBalancerResponse response = client
                 .createLoadBalancer(CreateLoadBalancerRequest.builder().name(name)
                         .subnetMappings(subnetMappings).build());
-        return new ApplicationLoadBalancerImpl(region, response.loadBalancers().iterator().next());
+        final ApplicationLoadBalancer result = new ApplicationLoadBalancerImpl(region, response.loadBalancers().iterator().next(), this);
+        final Listener httpListener = createLoadBalancerListener(result, ProtocolEnum.HTTP);
+        final Listener httpsListener = createLoadBalancerListener(result, ProtocolEnum.HTTPS);
+        return result;
     }
     
+    private Listener createLoadBalancerListener(ApplicationLoadBalancer alb, ProtocolEnum protocol) {
+        final int port = protocol==ProtocolEnum.HTTP?80:443;
+        final ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), "DefTG-"+alb.getName()+"-"+protocol.name(),
+                port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
+        defaultTargetGroup.addTargets(reverseProxy.getHosts());
+        return getLoadBalancingClient(
+                getRegion(alb.getRegion()))
+                        .createListener(l -> {
+                            l.loadBalancerArn(alb.getArn()).protocol(protocol)
+                                        .port(port)
+                                        .defaultActions(Action.builder()
+                                                .targetGroupArn(defaultTargetGroup.getTargetGroupArn())
+                                                .type(ActionTypeEnum.FORWARD)
+                                                .forwardConfig(f -> f.targetGroups(TargetGroupTuple.builder()
+                                                        .targetGroupArn(defaultTargetGroup.getTargetGroupArn()).build())
+                                                        .build())
+                                                .build());
+                            if (protocol==ProtocolEnum.HTTPS) {
+                                l.certificates(Certificate.builder().certificateArn(DEFAULT_CERTIFICATE_ARN).build());
+                            }
+                        })
+                        .listeners().iterator().next();
+    }
+
     @Override
     public void deleteLoadBalancer(ApplicationLoadBalancer alb) {
         getLoadBalancingClient(getRegion(alb.getRegion())).deleteLoadBalancer(DeleteLoadBalancerRequest.builder().loadBalancerArn(alb.getArn()).build());
     }
+    
+    @Override
+    public Iterable<Listener> getListeners(ApplicationLoadBalancer alb) {
+        final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
+        return client.describeListeners(b->b.loadBalancerArn(alb.getArn())).listeners();
+    }
 
+    @Override
+    public Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, com.sap.sse.landscape.Region region) {
+        return getLoadBalancingClient(getRegion(region)).describeRules(b->b.listenerArn(loadBalancerListener.listenerArn())).rules();
+    }
+
+    @Override
+    public Iterable<Rule> createLoadBalancerListenerRules(com.sap.sse.landscape.Region region,
+            Listener loadBalancerListenerToAddRuleTo, Rule... rules) {
+        final List<Rule> result = new ArrayList<>();
+        for (final Rule rule : rules) {
+            result.add(getLoadBalancingClient(getRegion(region)).createRule(b -> b
+                    .listenerArn(loadBalancerListenerToAddRuleTo.listenerArn())
+                    .conditions(rule.conditions())
+                    .priority(Integer.valueOf(rule.priority()))
+                    .actions(rule.actions())).rules().iterator().next());
+        }
+        return result;
+    }
+    
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
      */
@@ -195,12 +269,21 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public AwsAvailabilityZone getAvailabilityZoneByName(AwsRegion region, String availabilityZoneName) {
+    public AwsAvailabilityZone getAvailabilityZoneByName(com.sap.sse.landscape.Region region, String availabilityZoneName) {
         final software.amazon.awssdk.services.ec2.model.AvailabilityZone awsAz = getEc2Client(getRegion(region))
                 .describeAvailabilityZones(
                         DescribeAvailabilityZonesRequest.builder().zoneNames(availabilityZoneName).build())
                 .availabilityZones().iterator().next();
         return new AwsAvailabilityZoneImpl(awsAz);
+    }
+    
+    @Override
+    public Iterable<ApplicationLoadBalancer> getLoadBalancers(com.sap.sse.landscape.Region region) {
+        final List<LoadBalancer> loadBalancers = getLoadBalancingClient(getRegion(region))
+                .describeLoadBalancers(DescribeLoadBalancersRequest.builder().build())
+                .loadBalancers();
+        return Util.map(loadBalancers, lb->new ApplicationLoadBalancerImpl(region, lb, this));
+        
     }
 
     @Override
@@ -208,7 +291,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final LoadBalancer loadBalancer = getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancerArn).build())
                 .loadBalancers().iterator().next();
-        return new ApplicationLoadBalancerImpl(region, loadBalancer);
+        return new ApplicationLoadBalancerImpl(region, loadBalancer, this);
     }
     
     @Override
@@ -245,6 +328,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public String getDefaultDNSHostedZoneId() {
 //      final String hostedZoneId = "Z2JYWXYWLLRLTE"; // TODO sapsailing.com.
         return "Z1Z1ID6TP8HVB2"; // TODO test zone "wiesen-weg.de."
+    }
+
+    @Override
+    public String getDNSHostedZoneId(String hostedZoneName) {
+        return getRoute53Client().listHostedZonesByName(b->b.dnsName(hostedZoneName)).hostedZones().iterator().next().id().replaceFirst("^\\/hostedzone\\/", "");
     }
 
     private ChangeInfo setDNSRecord(String hostedZoneId, String hostname, RRType type, String value) {
@@ -325,7 +413,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public byte[] getDescryptedPrivateKey(SSHKeyPair keyPair) throws JSchException {
+    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
         return bos.toByteArray();
@@ -345,15 +433,18 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
                     " Consider copying the image to that region.");
         }
-        final RunInstancesRequest launchRequest = RunInstancesRequest.builder()
+        final Builder runInstancesRequestBuilder = RunInstancesRequest.builder()
             .additionalInfo("Test " + getClass().getName())
             .imageId(fromImage.getId().toString())
             .minCount(numberOfHostsToLaunch)
             .maxCount(numberOfHostsToLaunch)
             .instanceType(instanceType).keyName(keyName)
             .placement(Placement.builder().availabilityZone(az.getName()).build())
-            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()))
-            .userData(String.join("\n", userData)).build();
+            .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()));
+        if (userData != null) {
+            runInstancesRequestBuilder.userData(String.join("\n", userData));
+        }
+        final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
         final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
@@ -381,7 +472,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public TargetGroup<ShardingKey, MetricsT> createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
+    public TargetGroup<ShardingKey, MetricsT> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -407,7 +498,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
     
-    private String getVpcId(AwsRegion region) {
+    private String getVpcId(com.sap.sse.landscape.Region region) {
         Vpc vpc = getEc2Client(getRegion(region)).describeVpcs().vpcs().stream().filter(myVpc->myVpc.isDefault()).findAny().
                 orElseThrow(()->new IllegalStateException("No default VPC found in region "+region));
         return vpc.vpcId();
@@ -436,5 +527,49 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                                 getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
                                 targetHealthDescription.targetHealth()));
         return result;
+    }
+
+    @Override
+    public ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        return centralReverseProxyByRegion.get(region);
+    }
+
+    @Override
+    public SecurityGroup getSecurityGroup(String securityGroupId, com.sap.sse.landscape.Region region) {
+        return ()->getEc2Client(getRegion(region)).describeSecurityGroups(sg->sg.groupIds(securityGroupId)).securityGroups().iterator().next().groupId();
+    }
+
+    @Override
+    public void addTargetsToTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(getRegisterTargetsRequestBuilderConsumer(targetGroup, targets));
+    }
+
+    private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+        return Util.toArray(Util.map(targets, t->TargetDescription.builder().id(t.getInstanceId()).build()), new TargetDescription[0]);
+    }
+
+    @Override
+    public void removeTargetsFromTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).deregisterTargets(getDeregisterTargetRequestBuilderConsumers(targetGroup, targets));
+    }
+
+    private Consumer<software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest.Builder> getRegisterTargetsRequestBuilderConsumer(
+            TargetGroup<ShardingKey, MetricsT> targetGroup, Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+        final TargetDescription[] targetDescriptions = getTargetDescriptions(targets);
+        return b->b
+                .targetGroupArn(targetGroup.getTargetGroupArn())
+                .targets(targetDescriptions);
+    }
+
+    private Consumer<software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest.Builder> getDeregisterTargetRequestBuilderConsumers(
+            TargetGroup<ShardingKey, MetricsT> targetGroup, Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+        final TargetDescription[] targetDescriptions = getTargetDescriptions(targets);
+        return b->b
+                .targetGroupArn(targetGroup.getTargetGroupArn())
+                .targets(targetDescriptions);
     }
 }

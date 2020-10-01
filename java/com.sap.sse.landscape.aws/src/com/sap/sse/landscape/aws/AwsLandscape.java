@@ -24,6 +24,8 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
@@ -103,7 +105,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
-    byte[] getDescryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
+    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
 
     void addSSHKeyPair(SSHKeyPair keyPair);
 
@@ -129,6 +131,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer alb);
 
     String getDefaultDNSHostedZoneId();
+    
+    String getDNSHostedZoneId(String hostedZoneName);
 
     /**
      * @param hostname the fully-qualified host name
@@ -156,14 +160,18 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
     
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
+
+    Iterable<ApplicationLoadBalancer> getLoadBalancers(Region region);
     
     ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, Region region);
 
     ApplicationLoadBalancer createLoadBalancer(String name, Region region);
 
+    Iterable<Listener> getListeners(ApplicationLoadBalancer alb);
+
     Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
 
-    AwsAvailabilityZone getAvailabilityZoneByName(AwsRegion region, String availabilityZoneName);
+    AwsAvailabilityZone getAvailabilityZoneByName(Region region, String availabilityZoneName);
 
     void deleteLoadBalancer(ApplicationLoadBalancer alb);
 
@@ -171,7 +179,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
      */
-    TargetGroup<ShardingKey, MetricsT> createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
+    TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort);
 
     default TargetGroup<ShardingKey, MetricsT> getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
@@ -182,4 +191,34 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup);
 
     void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup);
+
+    Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
+
+    /**
+     * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.
+     * Obviously, there is no need to set the {@link Rule.Builder#ruleArn(String) rule's ARN} as this is created by executing
+     * the request.
+     * 
+     * @return the rule objects, now including the {@link Rule#ruleArn() rule ARNs}, created by this request
+     */
+    Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
+    
+    /**
+     * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
+     * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
+     * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
+     * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
+     */
+    ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getCentralReverseProxy(Region region);
+
+    SecurityGroup getSecurityGroup(String securityGroupId, Region region);
+
+    void addTargetsToTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+
+    void removeTargetsFromTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+
 }

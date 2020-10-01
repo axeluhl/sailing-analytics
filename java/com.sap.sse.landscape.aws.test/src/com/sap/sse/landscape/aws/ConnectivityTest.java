@@ -9,7 +9,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -33,6 +37,8 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeStatus;
 
@@ -156,6 +162,19 @@ public class ConnectivityTest {
             logger.info("Shell channel connected. Waiting for it to become responsive...");
             shellChannel.sendCommandLineSynchronously("pwd", System.err);
             assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(shellChannel.getStreamContentsAsByteArray())));
+            // now try a simple command, checking for the "init" process to be found
+            final SshCommandChannel commandChannel = host.createRootSshChannel();
+            final String processToLookFor = "init";
+            final InputStream inputStream = commandChannel.sendCommandLineSynchronously("ps axlw | grep "+processToLookFor, new ByteArrayOutputStream());
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            int b;
+            while ((b=inputStream.read()) != -1) {
+                bos.write(b);
+            }
+            inputStream.close();
+            final String output = bos.toString();
+            assertTrue(output.contains(processToLookFor));
+            assertEquals(0, commandChannel.getExitStatus());
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
@@ -181,10 +200,12 @@ public class ConnectivityTest {
     
     @Test
     public void setDNSRecordTest() {
-        final String hostname = "my-test-host-"+new Random().nextInt()+".wiesen-weg.de.";
+        final String testHostedZoneDnsName = "wiesen-weg.de";
+        final String hostname = "my-test-host-"+new Random().nextInt()+"."+testHostedZoneDnsName+".";
         final String ipAddress = "1.2.3.4";
+        final String dnsHostedZoneId = landscape.getDNSHostedZoneId(testHostedZoneDnsName);
         try {
-            ChangeInfo changeInfo = landscape.setDNSRecordToValue(landscape.getDefaultDNSHostedZoneId(), hostname, ipAddress);
+            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress);
             int attempts = 10;
             while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
                 Thread.sleep(5000);
@@ -193,7 +214,7 @@ public class ConnectivityTest {
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
-            landscape.removeDNSRecord(landscape.getDefaultDNSHostedZoneId(), hostname, ipAddress);
+            landscape.removeDNSRecord(dnsHostedZoneId, hostname, ipAddress);
         }
     }
     
@@ -204,6 +225,17 @@ public class ConnectivityTest {
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());
+            assertTrue(Util.contains(Util.map(landscape.getLoadBalancers(region), ApplicationLoadBalancer::getArn), alb.getArn()));
+            // now add two rules to the load balancer and check they arrive:
+            final String hostnameCondition = "a.wiesen-weg.de";
+            @SuppressWarnings("unchecked")
+            final Iterable<Rule> rulesCreated = alb
+                    .addRules(Rule.builder()
+                            .priority("5")
+                            .conditions(r -> r.field("host-header").hostHeaderConfig(hhc -> hhc.values(hostnameCondition)))
+                            .actions(a -> a.type(ActionTypeEnum.FIXED_RESPONSE).fixedResponseConfig(frc -> frc.statusCode("200").messageBody("Hello world"))).build());
+            assertEquals(1, Util.size(rulesCreated));
+            assertTrue(hostnameCondition, rulesCreated.iterator().next().conditions().iterator().next().hostHeaderConfig().values().contains(hostnameCondition));
         } finally {
             landscape.deleteLoadBalancer(alb);
         }
@@ -219,5 +251,14 @@ public class ConnectivityTest {
         } finally {
             landscape.deleteTargetGroup(targetGroup);
         }
+    }
+    
+    @Test
+    public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
+        final ReverseProxy<String, ApplicationProcessMetrics, ?, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        assertEquals(1, Util.size(proxy.getHosts()));
+        final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
+        assertEquals(200, healthCheckConnection.getResponseCode());
+        healthCheckConnection.disconnect();
     }
 }

@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.aws.impl.AwsRegion;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
@@ -16,7 +16,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  *
  */
 public interface TargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
-    AwsRegion getRegion();
+    Region getRegion();
     
     Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getRegisteredTargets();
     

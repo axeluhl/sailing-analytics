@@ -1,13 +1,14 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -17,7 +18,6 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxy;
-import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -35,28 +35,26 @@ public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcess
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
 extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    private static final String DEFAULT_SECURITY_GROUP_ID = "sg-0b2afd48960251280";
     private static final long serialVersionUID = 8019146973512856147L;
     private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
     private final AwsRegion region;
-    private final String targetGroupArn;
+    private Set<AwsInstance<ShardingKey, MetricsT>> hosts;
     
-    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region, Map<AwsAvailabilityZone, Integer> numberOfInstancesPerAz) {
+    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region) {
         super(name);
         this.landscape = landscape;
         this.region = region;
-        final TargetGroup<ShardingKey, MetricsT> targetGroup = landscape.createTargetGroup(region, getTargetGroupName(), /* port */ 80,
-                getHealthCheckUrl(), /* health check port */ 80);
-        targetGroupArn = targetGroup.getTargetGroupArn();
-        for (final Entry<AwsAvailabilityZone, Integer> e : numberOfInstancesPerAz.entrySet()) {
-            targetGroup.addTargets(addHosts(getDefaultInstanceType(), e.getKey(), e.getValue()));
-        }
+        this.hosts = new HashSet<>();
     }
 
-    private String getHealthCheckUrl() {
+    @Override
+    public String getHealthCheckPath() {
         return "/internal-server-status";
     }
 
-    private String getTargetGroupName() {
+    @Override
+    public String getTargetGroupName() {
         return "ReverseProxy-"+getName();
     }
 
@@ -104,23 +102,36 @@ extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT,
 
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
-        // TODO Implement ReverseProxy.getHosts(...)
-        return null;
+        return Collections.unmodifiableCollection(hosts);
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd) {
-        // TODO Implement ReverseProxy.addHost(...)
-        return null;
+    public void addHost(AwsInstance<ShardingKey, MetricsT> host) {
+        hosts.add(host);
     }
     
+    @Override
+    public AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
+        return landscape.launchHost(getAmiId(), instanceType, az, keyName, Collections.singleton(getSecurityGroup()));
+    }
+    
+    private SecurityGroup getSecurityGroup() {
+        // TODO make this dynamic, based, e.g., on tags
+        return landscape.getSecurityGroup(DEFAULT_SECURITY_GROUP_ID, region);
+    }
+
+    private MachineImage<AwsInstance<ShardingKey, MetricsT>> getAmiId() {
+        // TODO Implement ApacheReverseProxy.getAmiId(...)
+        return null;
+    }
+
     @Override
     public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
             throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
         }
-        landscape.terminate(host);
+        landscape.terminate(host); // this assumes that the host is running only the reverse proxy process...
     }
     
     @Override
@@ -130,11 +141,5 @@ extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT,
         for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
             landscape.terminate(host);
         }
-        landscape.deleteTargetGroup(getTargetGroup());
-    }
-
-    @Override
-    public TargetGroup<ShardingKey, MetricsT> getTargetGroup() {
-        return landscape.getTargetGroup(region, getTargetGroupName(), targetGroupArn);
     }
 }

@@ -1,20 +1,28 @@
 package com.sap.sse.landscape.aws.impl;
 
+import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
-import com.sap.sse.landscape.aws.LoadBalancerRule;
+import com.sap.sse.landscape.aws.AwsLandscape;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
 public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
     private static final long serialVersionUID = -5297220031399131769L;
     
-    final LoadBalancer loadBalancer;
+    private final LoadBalancer loadBalancer;
 
-    private final com.sap.sse.landscape.Region region;
+    private final Region region;
+
+    private final AwsLandscape<?, ?, ?, ?> landscape;
     
-    public ApplicationLoadBalancerImpl(com.sap.sse.landscape.Region region, LoadBalancer loadBalancer) {
+    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<?, ?, ?, ?> landscape) {
         this.region = region;
         this.loadBalancer = loadBalancer;
+        this.landscape = landscape;
     }
 
     @Override
@@ -33,24 +41,27 @@ public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
     }
 
     @Override
-    public com.sap.sse.landscape.Region getRegion() {
+    public Region getRegion() {
         return region;
     }
 
     @Override
-    public Iterable<LoadBalancerRule> getRules() {
-        // TODO Auto-generated method stub
-        return null;
+    public Iterable<Rule> getRules() {
+        final Listener httpsListener = getListener(ProtocolEnum.HTTPS);
+        return landscape.getLoadBalancerListenerRules(httpsListener, getRegion());
+    }
+
+    private Listener getListener(ProtocolEnum protocol) {
+        return Util.filter(landscape.getListeners(this), l->l.protocol() == protocol).iterator().next();
     }
 
     @Override
-    public void addRules(Iterable<LoadBalancerRule> rulesToAdd) {
-        // TODO Auto-generated method stub
-
+    public Iterable<Rule> addRules(Rule... rulesToAdd) {
+        return landscape.createLoadBalancerListenerRules(region, getListener(ProtocolEnum.HTTPS), rulesToAdd);
     }
 
     @Override
-    public void deleteRules(Iterable<LoadBalancerRule> rulesToDelete) {
+    public void deleteRules(Rule... rulesToDelete) {
         // TODO Auto-generated method stub
 
     }

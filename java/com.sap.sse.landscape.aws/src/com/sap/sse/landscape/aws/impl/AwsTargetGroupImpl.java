@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import java.util.Map;
 
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -18,16 +19,16 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private static final long serialVersionUID = -5442598262397393201L;
     private final String arn;
     private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
-    private final AwsRegion region;
+    private final Region region;
 
-    public AwsTargetGroupImpl(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region, String targetGroupName, String arn) {
+    public AwsTargetGroupImpl(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, Region region, String targetGroupName, String arn) {
         super(targetGroupName);
         this.arn = arn;
         this.landscape = landscape;
         this.region = region;
     }
 
-    public AwsRegion getRegion() {
+    public Region getRegion() {
         return region;
     }
 
@@ -38,12 +39,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public void addTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
-        // TODO Implement AwsTargetGroupImpl.addTargets(...)
+        landscape.addTargetsToTargetGroup(this, targets);
     }
 
     @Override
     public void removeTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
-        // TODO Implement AwsTargetGroupImpl.removeTargets(...)
+        landscape.removeTargetsFromTargetGroup(this, targets);
     }
 
     @Override
