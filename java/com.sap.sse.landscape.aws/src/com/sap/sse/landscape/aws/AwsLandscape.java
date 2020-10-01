@@ -14,7 +14,6 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
-import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
@@ -25,6 +24,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.Route53Client;
@@ -128,7 +128,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * @param hostname the fully-qualified host name
      */
-    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer alb);
+    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
 
     String getDefaultDNSHostedZoneId();
     
@@ -161,19 +161,29 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
 
-    Iterable<ApplicationLoadBalancer> getLoadBalancers(Region region);
+    Iterable<ApplicationLoadBalancer<ShardingKey, MetricsT>> getLoadBalancers(Region region);
     
-    ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, Region region);
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, Region region);
 
-    ApplicationLoadBalancer createLoadBalancer(String name, Region region);
+    ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, Region region);
 
-    Iterable<Listener> getListeners(ApplicationLoadBalancer alb);
+    Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
 
     Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
 
     AwsAvailabilityZone getAvailabilityZoneByName(Region region, String availabilityZoneName);
 
-    void deleteLoadBalancer(ApplicationLoadBalancer alb);
+    /**
+     * Deletes this load balancer and all its target groups (the target groups to which this load balancer currently
+     * forwards any traffic).
+     */
+    void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    
+    /**
+     * All target groups that have the load balancer identified by the ARN as "their" load balancer which means that
+     * this load balancer is forwarding traffic to all those target groups.
+     */
+    Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(Region region, String loadBalancerArn);
 
     /**
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
@@ -182,15 +192,17 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
+    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
 
-    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName);
-    
+    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
+
+    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
+
     Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup);
 
-    void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup);
+    <SK, MT extends ApplicationProcessMetrics> void deleteTargetGroup(TargetGroup<SK, MT> targetGroup);
 
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
 
@@ -202,7 +214,9 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * @return the rule objects, now including the {@link Rule#ruleArn() rule ARNs}, created by this request
      */
     Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
-    
+
+    void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
+
     /**
      * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
      * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
@@ -221,4 +235,5 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             TargetGroup<ShardingKey, MetricsT> targetGroup,
             Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
 
+    LoadBalancer getAwsLoadBalancer(String loadBalancerArn, Region region);
 }

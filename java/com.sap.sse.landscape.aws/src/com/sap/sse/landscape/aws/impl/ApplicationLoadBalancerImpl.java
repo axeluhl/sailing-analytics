@@ -1,25 +1,29 @@
 package com.sap.sse.landscape.aws.impl;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
-public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
+public class ApplicationLoadBalancerImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics>
+implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
     private static final long serialVersionUID = -5297220031399131769L;
     
     private final LoadBalancer loadBalancer;
 
     private final Region region;
 
-    private final AwsLandscape<?, ?, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
     
-    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<?, ?, ?, ?> landscape) {
+    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
         this.region = region;
         this.loadBalancer = loadBalancer;
         this.landscape = landscape;
@@ -62,8 +66,33 @@ public class ApplicationLoadBalancerImpl implements ApplicationLoadBalancer {
 
     @Override
     public void deleteRules(Rule... rulesToDelete) {
-        // TODO Auto-generated method stub
-
+        landscape.deleteLoadBalancerListenerRules(region, rulesToDelete);
     }
 
+    @Override
+    public Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups() {
+        return landscape.getTargetGroupsByLoadBalancerArn(getRegion(), getArn());
+    }
+    
+    private void deleteAllRules() {
+        for (final Rule rule : getRules()) {
+            if (!rule.isDefault()) {
+                deleteRules(rule);
+            }
+        }
+    }
+
+    @Override
+    public void delete() throws InterruptedException {
+        // first obtain the target groups to which, based on the current ALB configuration, traffic is forwarded
+        final Iterable<TargetGroup<ShardingKey, MetricsT>> targetGroups = getTargetGroups();
+        // now delete the rules to free up all target groups to which the ALB could have forwarded, except the default rule
+        deleteAllRules();
+        landscape.deleteLoadBalancer(this);
+        Thread.sleep(Duration.ONE_SECOND.times(5).asMillis()); // wait a bit until the target groups are no longer considered "in use"
+        // now that all target groups the ALB used are freed up, delete them:
+        for (final TargetGroup<?, ?> targetGroup : targetGroups) {
+            landscape.deleteTargetGroup(landscape.getTargetGroup(getRegion(), targetGroup.getName(), targetGroup.getTargetGroupArn()));
+        }
+    }
 }

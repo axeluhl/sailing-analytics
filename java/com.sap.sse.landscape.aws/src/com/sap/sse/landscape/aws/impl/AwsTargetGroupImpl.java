@@ -7,6 +7,7 @@ import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -27,6 +28,10 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         this.landscape = landscape;
         this.region = region;
     }
+    
+    private software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup() {
+        return landscape.getAwsTargetGroupByArn(getRegion(), getTargetGroupArn());
+    }
 
     public Region getRegion() {
         return region;
@@ -35,6 +40,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getRegisteredTargets() {
         return landscape.getTargetHealthDescriptions(this);
+    }
+    
+    @Override
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer() {
+        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = getAwsTargetGroup();
+        final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+        if (targetGroup.hasLoadBalancerArns() && !targetGroup.loadBalancerArns().isEmpty()) {
+            result = new ApplicationLoadBalancerImpl<>(getRegion(), landscape.getAwsLoadBalancer(
+                targetGroup.loadBalancerArns().iterator().next(), getRegion()), landscape);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

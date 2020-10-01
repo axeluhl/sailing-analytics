@@ -33,4 +33,6 @@ public interface TargetGroup<ShardingKey, MetricsT extends ApplicationProcessMet
     void removeTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
 
     String getTargetGroupArn();
+
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer();
 }

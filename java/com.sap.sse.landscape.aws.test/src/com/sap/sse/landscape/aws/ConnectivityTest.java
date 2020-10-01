@@ -219,9 +219,9 @@ public class ConnectivityTest {
     }
     
     @Test
-    public void createEmptyLoadBalancerTest() {
+    public void createEmptyLoadBalancerTest() throws InterruptedException {
         final String albName = "MyAlb"+new Random().nextInt();
-        final ApplicationLoadBalancer alb = landscape.createLoadBalancer(albName, region);
+        final ApplicationLoadBalancer<String, ApplicationProcessMetrics> alb = landscape.createLoadBalancer(albName, region);
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());
@@ -237,7 +237,7 @@ public class ConnectivityTest {
             assertEquals(1, Util.size(rulesCreated));
             assertTrue(hostnameCondition, rulesCreated.iterator().next().conditions().iterator().next().hostHeaderConfig().values().contains(hostnameCondition));
         } finally {
-            landscape.deleteLoadBalancer(alb);
+            alb.delete();
         }
     }
     

@@ -190,7 +190,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
     
     @Override
-    public ApplicationLoadBalancer createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
         final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
@@ -199,13 +199,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final CreateLoadBalancerResponse response = client
                 .createLoadBalancer(CreateLoadBalancerRequest.builder().name(name)
                         .subnetMappings(subnetMappings).build());
-        final ApplicationLoadBalancer result = new ApplicationLoadBalancerImpl(region, response.loadBalancers().iterator().next(), this);
-        final Listener httpListener = createLoadBalancerListener(result, ProtocolEnum.HTTP);
-        final Listener httpsListener = createLoadBalancerListener(result, ProtocolEnum.HTTPS);
+        final ApplicationLoadBalancer<ShardingKey, MetricsT> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
+        createLoadBalancerListener(result, ProtocolEnum.HTTP);
+        createLoadBalancerListener(result, ProtocolEnum.HTTPS);
         return result;
     }
     
-    private Listener createLoadBalancerListener(ApplicationLoadBalancer alb, ProtocolEnum protocol) {
+    private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
         final ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), "DefTG-"+alb.getName()+"-"+protocol.name(),
@@ -231,12 +231,18 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public void deleteLoadBalancer(ApplicationLoadBalancer alb) {
+    public void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
         getLoadBalancingClient(getRegion(alb.getRegion())).deleteLoadBalancer(DeleteLoadBalancerRequest.builder().loadBalancerArn(alb.getArn()).build());
     }
-    
+
     @Override
-    public Iterable<Listener> getListeners(ApplicationLoadBalancer alb) {
+    public Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
+        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
+                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn()));
+    }
+
+    @Override
+    public Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
         return client.describeListeners(b->b.loadBalancerArn(alb.getArn())).listeners();
     }
@@ -248,9 +254,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public Iterable<Rule> createLoadBalancerListenerRules(com.sap.sse.landscape.Region region,
-            Listener loadBalancerListenerToAddRuleTo, Rule... rules) {
+            Listener loadBalancerListenerToAddRuleTo, Rule... rulesToAdd) {
         final List<Rule> result = new ArrayList<>();
-        for (final Rule rule : rules) {
+        for (final Rule rule : rulesToAdd) {
             result.add(getLoadBalancingClient(getRegion(region)).createRule(b -> b
                     .listenerArn(loadBalancerListenerToAddRuleTo.listenerArn())
                     .conditions(rule.conditions())
@@ -260,6 +266,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return result;
     }
     
+    @Override
+    public void deleteLoadBalancerListenerRules(com.sap.sse.landscape.Region region, Rule... rulesToDelete) {
+        for (final Rule rule : rulesToDelete) {
+            getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
+        }
+    }
+
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
      */
@@ -278,20 +291,20 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
     
     @Override
-    public Iterable<ApplicationLoadBalancer> getLoadBalancers(com.sap.sse.landscape.Region region) {
+    public Iterable<ApplicationLoadBalancer<ShardingKey, MetricsT>> getLoadBalancers(com.sap.sse.landscape.Region region) {
         final List<LoadBalancer> loadBalancers = getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(DescribeLoadBalancersRequest.builder().build())
                 .loadBalancers();
-        return Util.map(loadBalancers, lb->new ApplicationLoadBalancerImpl(region, lb, this));
+        return Util.map(loadBalancers, lb->new ApplicationLoadBalancerImpl<>(region, lb, this));
         
     }
 
     @Override
-    public ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
         final LoadBalancer loadBalancer = getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancerArn).build())
                 .loadBalancers().iterator().next();
-        return new ApplicationLoadBalancerImpl(region, loadBalancer, this);
+        return new ApplicationLoadBalancerImpl<>(region, loadBalancer, this);
     }
     
     @Override
@@ -313,7 +326,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     @Override
     public ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname,
-            ApplicationLoadBalancer alb) {
+            ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
         final String dnsName = alb.getDNSName();
         return setDNSRecord(hostedZoneId, hostname, RRType.CNAME, dnsName);
     }
@@ -505,13 +518,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName) {
+    public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
         return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
                         .names(targetGroupName).build()).targetGroups().iterator().next();
     }
     
     @Override
-    public void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup) {
+    public software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(com.sap.sse.landscape.Region region, String targetGroupArn) {
+        return getLoadBalancingClient(getRegion(region)).describeTargetGroups(DescribeTargetGroupsRequest.builder()
+                        .targetGroupArns(targetGroupArn).build()).targetGroups().iterator().next();
+    }
+    
+    @Override
+    public <SK, MT extends ApplicationProcessMetrics> void deleteTargetGroup(TargetGroup<SK, MT> targetGroup) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
@@ -571,5 +590,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return b->b
                 .targetGroupArn(targetGroup.getTargetGroupArn())
                 .targets(targetDescriptions);
+    }
+
+    @Override
+    public LoadBalancer getAwsLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
+        return getLoadBalancingClient(getRegion(region))
+                .describeLoadBalancers(lb -> lb.loadBalancerArns(loadBalancerArn)).loadBalancers().iterator().next();
     }
 }
