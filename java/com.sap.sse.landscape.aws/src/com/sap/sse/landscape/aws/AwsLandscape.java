@@ -9,7 +9,9 @@ import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -37,7 +39,10 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @param <ShardingKey>
  * @param <MetricsT>
  */
-public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Landscape<ShardingKey, MetricsT> {
+public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     static String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     static String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -48,20 +53,28 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * returns a landscape object which internally has access to the clients for the underlying AWS landscape, such as
      * an EC2 client, a Route53 client, etc.
      */
-    static <ShardingKey, MetricsT extends ApplicationProcessMetrics> AwsLandscape<ShardingKey, MetricsT> obtain() {
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+    AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> obtain() {
         return new AwsLandscapeImpl<>();
     }
     
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
+     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
+     * @param userData
+     *            zero or more strings representing the user data to be passed to the instance; multiple strings will be
+     *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
+     *            the AWS SDK installed on the instance.
      */
-    default AwsInstance launchHost(MachineImage<AwsInstance> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups) {
-        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups).iterator().next();
+    default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
+        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, userData).iterator().next();
     }
 
     /**
@@ -70,11 +83,12 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
+     * @param userData TODO
      */
-    Iterable<AwsInstance> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups);
+    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData);
     
-    AmazonMachineImage getImage(Region region, String imageId);
+    AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
     
@@ -85,7 +99,7 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      */
     String importKeyPair(Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException;
 
-    void terminate(AwsInstance host);
+    void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
@@ -157,15 +171,15 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
      */
-    TargetGroup createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
+    TargetGroup<ShardingKey, MetricsT> createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
-        return new AwsTargetGroupImpl(this, region, targetGroupName, targetGroupArn);
+    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
 
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName);
     
-    Map<AwsInstance, TargetHealth> getTargetHealthDescriptions(TargetGroup targetGroup);
+    Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup);
 
-    void deleteTargetGroup(TargetGroup targetGroup);
+    void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup);
 }
