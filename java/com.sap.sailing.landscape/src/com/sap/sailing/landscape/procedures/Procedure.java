@@ -1,5 +1,10 @@
 package com.sap.sailing.landscape.procedures;
 
+import com.sap.sse.landscape.Landscape;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+
 /**
  * Encodes a potentially compound sequence of actions that transform the landscape from one state to another, trying to
  * achieve a certain goal. For example, there may be a procedure for setting up a dedicated master application server
@@ -31,6 +36,9 @@ package com.sap.sailing.landscape.procedures;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Procedure {
-
+public interface Procedure<ShardingKey, 
+                           MetricsT extends ApplicationProcessMetrics,
+                           MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+    Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
 }

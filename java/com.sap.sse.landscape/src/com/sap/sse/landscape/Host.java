@@ -1,8 +1,16 @@
 package com.sap.sse.landscape;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.InetAddress;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 public interface Host {
     /**
@@ -20,16 +28,30 @@ public interface Host {
      *            if {@code null}, waits forever
      */
     InetAddress getPublicAddress(Duration timeoutNullMeaningForever);
+    
+    /**
+     * Connects to an SSH session for the username specified, using the SSH key pair used to launch the instance, and
+     * opens a "shell" channel. Use the {@link Channel} returned by {@link Channel#setInputStream(java.io.InputStream)
+     * setting an input stream} from which the commands to be sent to the server will be read, and by
+     * {@link Channel#setOutputStream(java.io.OutputStream) setting the output stream} to which the server will send its
+     * output. You will usually want to use either a {@link ByteArrayInputStream} to provide a set of predefined
+     * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
+     * you set to the channel.
+     */
+    SshCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException;
 
+    /**
+     * Connects to an SSH session for the "root" user with a "shell" channel
+     * 
+     * @see #createSshChannel(String)
+     */
+    SshCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException;
+    
+    ChannelSftp createSftpChannel(String sshUserName) throws JSchException, IOException;
+
+    ChannelSftp createRootSftpChannel() throws JSchException, IOException;
+    
     Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
-    
-    long getPhysicalRamInBytes();
-    
-    long getVirtualMemoryInBytes();
-    
-    int getNumberOfCPUs();
-    
-    long getNetworkBandwidthInBytesPerSecond();
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the

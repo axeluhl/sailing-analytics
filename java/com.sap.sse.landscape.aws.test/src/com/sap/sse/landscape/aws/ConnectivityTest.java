@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
@@ -33,6 +32,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -165,14 +165,8 @@ public class ConnectivityTest {
             // now try a simple command, checking for the "init" process to be found
             final SshCommandChannel commandChannel = host.createRootSshChannel();
             final String processToLookFor = "init";
-            final InputStream inputStream = commandChannel.sendCommandLineSynchronously("ps axlw | grep "+processToLookFor, new ByteArrayOutputStream());
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            int b;
-            while ((b=inputStream.read()) != -1) {
-                bos.write(b);
-            }
-            inputStream.close();
-            final String output = bos.toString();
+            commandChannel.sendCommandLineSynchronously("ps axlw | grep "+processToLookFor, new ByteArrayOutputStream());
+            final String output = new String(commandChannel.getStreamContentsAsByteArray());
             assertTrue(output.contains(processToLookFor));
             assertEquals(0, commandChannel.getExitStatus());
         } finally {
