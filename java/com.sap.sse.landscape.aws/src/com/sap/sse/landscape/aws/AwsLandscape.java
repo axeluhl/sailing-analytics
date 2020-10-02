@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.AvailabilityZone;
@@ -65,7 +66,6 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
-     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
@@ -74,9 +74,10 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
      *            the AWS SDK installed on the instance.
      */
-    default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
-        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, userData).iterator().next();
+    default AwsInstance<ShardingKey, MetricsT> launchHost(
+            MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
+        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
     }
 
     /**
@@ -85,11 +86,12 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
-     * @param userData TODO
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData);
-    
+    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch,
+            MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
+            String... userData);
+
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);

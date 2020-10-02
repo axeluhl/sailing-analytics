@@ -15,6 +15,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -35,8 +36,10 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
@@ -67,9 +70,23 @@ public class ConnectivityTest {
     @Test
     public void testConnectivity() {
         final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"));
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), "Axel", Collections.singleton(()->"sg-0b2afd48960251280"),
+                Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")));
         try {
             assertNotNull(host);
+            final Instance instance = landscape.getInstance(host.getInstanceId(), region);
+            boolean foundName = false;
+            boolean foundHello = false;
+            for (final Tag tag : instance.tags()) {
+                if (tag.key().equals("Name") && tag.value().equals("MyHost")) {
+                    foundName = true;
+                }
+                if (tag.key().equals("Hello") && tag.value().equals("World")) {
+                    foundHello = true;
+                }
+            }
+            assertTrue(foundName);
+            assertTrue(foundHello);
         } finally {
             landscape.terminate(host);
         }
@@ -137,7 +154,7 @@ public class ConnectivityTest {
 
     private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException, IOException {
         final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"));
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"), /* tags */ Optional.empty());
         try {
             assertNotNull(host);
             logger.info("Created instance with ID "+host.getInstanceId());

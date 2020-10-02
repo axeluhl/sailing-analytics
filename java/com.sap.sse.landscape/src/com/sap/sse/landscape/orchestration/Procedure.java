@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sse.landscape.orchestration;
 
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -39,6 +39,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 public interface Procedure<ShardingKey, 
                            MetricsT extends ApplicationProcessMetrics,
                            MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+extends Runnable {
     Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
 }

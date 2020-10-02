@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxy;
+import com.sap.sse.landscape.aws.Tags;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -112,7 +114,7 @@ extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT,
     
     @Override
     public AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
-        return landscape.launchHost(getAmiId(), instanceType, az, keyName, Collections.singleton(getSecurityGroup()));
+        return landscape.launchHost(getAmiId(), instanceType, az, keyName, Collections.singleton(getSecurityGroup()), Optional.of(Tags.with("Name", "ReverseProxy-"+getName())));
     }
     
     private SecurityGroup getSecurityGroup() {

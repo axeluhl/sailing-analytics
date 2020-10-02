@@ -6,10 +6,16 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
+
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsHost<ShardingKey>> {
-    public StartSailingAnalyticsMaster(MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
-            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape) {
-        super(machineImage, landscape);
+    public StartSailingAnalyticsMaster(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
+            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
+            InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
+            Iterable<SecurityGroup> securityGroups, String[] userData) {
+        super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, userData);
     }
 }

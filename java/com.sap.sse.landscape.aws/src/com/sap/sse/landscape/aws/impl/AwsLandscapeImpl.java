@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
@@ -29,6 +31,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxy;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
@@ -56,10 +59,13 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.Placement;
+import software.amazon.awssdk.services.ec2.model.ResourceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest.Builder;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Vpc;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
@@ -439,8 +445,8 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage,
-            InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage,
+            InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
                     " with image "+fromImage+" that lives in region "+fromImage.getRegion()+" which is different."+
@@ -457,6 +463,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         if (userData != null) {
             runInstancesRequestBuilder.userData(String.join("\n", userData));
         }
+        tags.ifPresent(theTags->{
+            final List<Tag> awsTags = new ArrayList<>();
+            for (final Entry<String, String> tag : theTags) {
+                awsTags.add(Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
+            }
+            runInstancesRequestBuilder.tagSpecifications(TagSpecification.builder().resourceType(ResourceType.INSTANCE).tags(awsTags).build());
+        });
         final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
