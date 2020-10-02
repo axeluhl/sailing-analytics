@@ -23,7 +23,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
     public StartSailingAnalyticsHost(String name,
             MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape, InstanceType instanceType, AwsAvailabilityZone availabilityZone,
-            String keyName, Iterable<SecurityGroup> securityGroups, String[] userData) {
-        super(machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, Optional.of(Tags.with("Name", name)), userData);
+            String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
+        super(machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, Optional.of(tags.orElse(Tags.empty()).and("Name", name)), userData);
     }
 }

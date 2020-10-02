@@ -219,7 +219,7 @@ public class ConnectivityTest {
             ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress);
             int attempts = 10;
             while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             };
             assertEquals(ChangeStatus.INSYNC, changeInfo.status());
         } catch (Exception e) {

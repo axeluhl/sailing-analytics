@@ -10,4 +10,8 @@ public interface Tags extends Iterable<Entry<String, String>>{
     }
     
     Tags and(String key, String value);
+
+    static Tags empty() {
+        return new TagsImpl();
+    }
 }
