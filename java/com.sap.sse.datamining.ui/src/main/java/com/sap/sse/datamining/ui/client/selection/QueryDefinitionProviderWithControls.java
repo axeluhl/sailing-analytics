@@ -58,7 +58,7 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
-import com.sap.sse.datamining.ui.client.event.ConfigureDimensionParameterEvent;
+import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.selection.statistic.SuggestBoxStatisticProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
@@ -153,9 +153,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
-        
-        confirmChangeLossDialog = createConfirmChangeLossDialog();
-        configureQueryParametersDialog = new ConfigureQueryParametersDialog(this, context);
 
         // Setting up the query component providers
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
@@ -204,8 +201,11 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providers.add(filterSelectionProvider);
         reloadComponents();
         
-        // Setting up event handlers
-        DataMiningEventBus.addHandler(ConfigureDimensionParameterEvent.TYPE, this::onConfigureDimensionParameter);
+        // Setting up dialogs and event handlers
+        confirmChangeLossDialog = createConfirmChangeLossDialog();
+        configureQueryParametersDialog = new ConfigureQueryParametersDialog(this, context, dataMiningService, errorReporter, session, statisticProvider);
+        
+        DataMiningEventBus.addHandler(ConfigureFilterParameterEvent.TYPE, this::onConfigureFilterParameter);
     }
 
     private DialogBox createConfirmChangeLossDialog() {
@@ -256,8 +256,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         return dialog;
     }
     
-    private void onConfigureDimensionParameter(ConfigureDimensionParameterEvent event) {
-        this.configureQueryParametersDialog.setVisible(true);
+    private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
+        this.configureQueryParametersDialog.show(event);
     }
 
     /**

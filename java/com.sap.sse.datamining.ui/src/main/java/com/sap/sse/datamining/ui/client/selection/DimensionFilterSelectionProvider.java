@@ -54,7 +54,7 @@ import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
-import com.sap.sse.datamining.ui.client.event.ConfigureDimensionParameterEvent;
+import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
@@ -191,7 +191,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         ToggleButton parameterSettingsButton = new ToggleButton("P");
         parameterSettingsButton.addClickHandler(e -> {
             DataMiningEventBus.fire(
-                new ConfigureDimensionParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
+                new ConfigureFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
             );
         });
         headerPanel.add(parameterSettingsButton);

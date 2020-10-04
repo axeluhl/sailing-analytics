@@ -1,7 +1,8 @@
 package com.sap.sse.datamining.ui.client.event;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.web.bindery.event.shared.Event;
@@ -10,21 +11,20 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public class ConfigureDimensionParameterEvent extends Event<ConfigureDimensionParameterEvent.Handler> {
+public class ConfigureFilterParameterEvent extends Event<ConfigureFilterParameterEvent.Handler> {
     
-    public static final Type<Handler> TYPE = new Type<ConfigureDimensionParameterEvent.Handler>();
+    public static final Type<Handler> TYPE = new Type<ConfigureFilterParameterEvent.Handler>();
     
     @FunctionalInterface
     public interface Handler extends EventHandler {
-        void onConfigureDimensionParameter(ConfigureDimensionParameterEvent event);
+        void onConfigureDimensionParameter(ConfigureFilterParameterEvent event);
     }
     
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;
-    private final HashSet<? extends Serializable> selectedValues;
+    private final Set<? extends Serializable> selectedValues;
 
-    public ConfigureDimensionParameterEvent(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension,
-            HashSet<? extends Serializable> selectedValues) {
+    public ConfigureFilterParameterEvent(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension, Set<? extends Serializable> selectedValues) {
         this.retrieverLevel = retrieverLevel;
         this.dimension = dimension;
         this.selectedValues = selectedValues;
@@ -38,8 +38,8 @@ public class ConfigureDimensionParameterEvent extends Event<ConfigureDimensionPa
         return dimension;
     }
 
-    public HashSet<? extends Serializable> getSelectedValues() {
-        return selectedValues;
+    public Set<? extends Serializable> getSelectedValues() {
+        return selectedValues != null ? selectedValues : Collections.emptySet();
     }
 
     @Override
