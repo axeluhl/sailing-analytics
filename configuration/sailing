@@ -26,6 +26,7 @@ JAVA_START_INSTANCES="server"
 SERVERS_DIR=/home/sailing/servers
 GIT_REPOSITORY=/home/sailing/code
 APACHE_CONFIG_DIR=/etc/httpd/conf.d
+EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
 
 echo "Executing with $1" >>/var/log/sailing.out
 
@@ -36,11 +37,11 @@ start_tmux() {
 
 start_servers() {
 	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
-        if which ec2-metadata && ec2-metadata -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
+        if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
           echo "Found image-upgrade in EC2 user data; upgrading image, then shutting down for AMI creation..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupdate.sh
         else
-          echo "No image-upgrade request found in EC2 user data $(ec2-metadata -d); proceding with regular server launch..." >>/var/log/sailing.err
+          echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceding with regular server launch..." >>/var/log/sailing.err
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
 	  MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	  echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
