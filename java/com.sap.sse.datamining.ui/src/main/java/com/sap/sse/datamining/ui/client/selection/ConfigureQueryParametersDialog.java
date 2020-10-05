@@ -40,6 +40,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -89,7 +90,9 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     }
 
     private static final NaturalComparator NaturalComparator = new NaturalComparator();
+    private static final String ContentMinWidth = "550px";
     private static final String FilterValuesGridHeight = "400px";
+    private static final int SearchBoxWidth = 250;
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -124,7 +127,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         this.session = session;
         this.retrieverChainProvider = retrieverChainProvider;
         
-        // Dialog Controls
+        // Header Controls
         retrieverLevelLabel = new Label();
         retrieverLevelLabel.getElement().getStyle().setMarginRight(3, Unit.PX);
         dimensionLabel = new Label();
@@ -142,7 +145,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         parameterTypeSelectionBox.setValue(FilterParameterType.Regex);
         parameterTypeSelectionBox.setAcceptableValues(Arrays.asList(FilterParameterType.values()));
         
-        // Dialog Content
+        // Content Controls
         filteredData = new ListDataProvider<>(o -> o.toString());
         filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData, getDataMiningStringMessages()) {
             public Iterable<String> getSearchableStrings(Serializable element) {
@@ -153,10 +156,9 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                 return dataGrid;
             };
         };
-        filterPanel.setWidth("100%");
+        filterPanel.addFilter(new TextConstraintFilter());
+        filterPanel.setSpacing(0);
         filterPanel.getTextBox().setWidth("100%");
-        filterPanel.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        // TODO Add checkbox for case sensitivity?
         
         busyIndicator = new SimpleBusyIndicator(false, 0.85f);
         busyIndicator.getElement().getStyle().setTextAlign(TextAlign.CENTER);
@@ -172,27 +174,16 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         checkboxColumn = dataGrid.getColumn(0);
         dataGrid.setSelectionModel(selectionModel, selectionEventManager);
         filteredData.addDataDisplay(dataGrid);
-
-        gridHeaderContainer = new FlowPanel();
-        gridHeaderContainer.add(filterPanel);
-        gridHeaderContainer.add(gridLabel);
-
-        contentContainer = new FlowPanel();
-        Style contentPanelStyle = contentContainer.getElement().getStyle();
-        contentPanelStyle.setMarginTop(1, Unit.EM);
-        contentPanelStyle.setMarginBottom(1, Unit.EM);
-        contentContainer.add(gridHeaderContainer);
-        contentContainer.add(busyIndicator);
-        contentContainer.add(dataGrid);
         
         // Dialog Buttons
         Button closeButton = new Button(getDataMiningStringMessages().close());
         closeButton.addClickHandler((e) -> hide());
         
-        // Final Layout
+        // Layout
         FlowPanel controlsPanel = new FlowPanel();
         Style controlsPanelStyle = controlsPanel.getElement().getStyle();
         controlsPanelStyle.setDisplay(Display.FLEX);
+        controlsPanelStyle.setProperty("justifyContent", "flex-end");
         controlsPanel.add(createContextInfoPanel());
         controlsPanel.add(parameterTypeSelectionBoxLabel);
         controlsPanel.add(parameterTypeSelectionBox);
@@ -202,6 +193,20 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         buttonsBarStyle.setProperty("display", "flex");
         buttonsBarStyle.setProperty("justifyContent", "flex-end");
         buttonsBar.add(closeButton);
+
+        gridHeaderContainer = new FlowPanel();
+        gridHeaderContainer.getElement().getStyle().setDisplay(Display.FLEX);
+        gridHeaderContainer.add(filterPanel);
+        gridHeaderContainer.add(gridLabel);
+
+        contentContainer = new FlowPanel();
+        Style contentContainerStyle = contentContainer.getElement().getStyle();
+        contentContainerStyle.setProperty("minWidth", ContentMinWidth);
+        contentContainerStyle.setMarginTop(1, Unit.EM);
+        contentContainerStyle.setMarginBottom(1, Unit.EM);
+        contentContainer.add(gridHeaderContainer);
+        contentContainer.add(busyIndicator);
+        contentContainer.add(dataGrid);
 
         DockPanel dialogPanel = new DockPanel();
         dialogPanel.setWidth("100%");
@@ -214,6 +219,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         dialog.setAnimationEnabled(true);
         dialog.setGlassEnabled(true);
         dialog.setWidget(dialogPanel);
+        dialog.getElement().getStyle().setProperty("minHeight", FilterValuesGridHeight);
         
         showCreationControlsFor(getSelectedParameterType());
     }
@@ -222,11 +228,12 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         Panel dimensionInfoPanel = new FlowPanel();
         Style dimensionInfoPanelStyle = dimensionInfoPanel.getElement().getStyle();
         dimensionInfoPanelStyle.setDisplay(Display.FLEX);
+        dimensionInfoPanelStyle.setProperty("flexGrow", "1");
         dimensionInfoPanelStyle.setFontWeight(FontWeight.BOLD);
         dimensionInfoPanelStyle.setMarginRight(1, Unit.EM);
-        dimensionInfoPanel.add(dimensionLabel);
-        dimensionInfoPanel.add(new Label(" - "));
         dimensionInfoPanel.add(retrieverLevelLabel);
+        dimensionInfoPanel.add(new Label(" - "));
+        dimensionInfoPanel.add(dimensionLabel);
         return dimensionInfoPanel;
     }
     
@@ -329,6 +336,17 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             
             filterValuesToSelect = selectionModel.getSelectedSet();
             dataGrid.setSelectionModel(null);
+            
+            // Update styles
+            final Style headerStyle = gridHeaderContainer.getElement().getStyle();
+            headerStyle.setProperty("flexDirection", "column");
+            headerStyle.setProperty("justifyContent", null);
+            headerStyle.setProperty("alignItems", null);
+            headerStyle.setMarginBottom(0, Unit.PX);
+            
+            final Style filterPanelStyle = filterPanel.getElement().getStyle();
+            filterPanelStyle.setMarginBottom(10, Unit.PX);
+            filterPanelStyle.setWidth(100, Unit.PCT);
         } else {
             filterPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.search());
             filterInputToApply = filterPanel.getTextBox().getValue();
@@ -343,6 +361,17 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             dataGrid.setSelectionModel(selectionModel, selectionEventManager);
             selectionModel.clear();
             filterValuesToSelect.forEach(v -> selectionModel.setSelected(v, true));
+            
+            // Update styles
+            final Style headerStyle = gridHeaderContainer.getElement().getStyle();
+            headerStyle.setProperty("flexDirection", "row-reverse");
+            headerStyle.setProperty("justifyContent", "space-between");
+            headerStyle.setProperty("alignItems", "center");
+            headerStyle.setMarginBottom(2, Unit.PX);
+            
+            final Style filterPanelStyle = filterPanel.getElement().getStyle();
+            filterPanelStyle.setMarginBottom(0, Unit.PX);
+            filterPanelStyle.setWidth(SearchBoxWidth, Unit.PX);
         }
     }
     
@@ -397,6 +426,41 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     @Override
     public String getDependentCssClassName() {
         return "configure-query-parameters-dialog";
+    }
+    
+    private class TextConstraintFilter implements Filter<Serializable> {
+
+        @Override
+        public boolean matches(Serializable object) {
+            final FilterParameterType selectedParameterType = getSelectedParameterType();
+            if (!selectedParameterType.isTextConstrained()) {
+                return true;
+            }
+            
+            final String text = object.toString().toUpperCase();
+            final String constraint = filterPanel.getTextBox().getValue().trim().toUpperCase();
+            if (selectedParameterType == FilterParameterType.Regex) {
+                // TODO Implement me
+                return true;
+            }
+            
+            switch (selectedParameterType) {
+            case Contains:
+                return text.contains(constraint);
+            case EndsWith:
+                return text.endsWith(constraint);
+            case StartsWith:
+                return text.startsWith(constraint);
+            default:
+                throw new IllegalStateException("Not implemented for '" + selectedParameterType + "'");
+            }
+        }
+
+        @Override
+        public String getName() {
+            return getClass().getSimpleName();
+        }
+        
     }
     
     private class CustomCheckboxEventTranslator implements EventTranslator<Serializable> {
