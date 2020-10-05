@@ -78,12 +78,9 @@ checks ()
 copy_user_data_to_tmp_file ()
 {
     echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
-
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     if [[ "$VARS" != "not available" ]]; then
-        for var in $VARS; do
-          echo $var >>"$ec2EnvVars_tmpFile"
-        done
+        ec2-metadata -d | sed "s/user-data\: //g" >>"$ec2EnvVars_tmpFile"
     else
         echo "No user data has been provided."
     fi
@@ -110,11 +107,8 @@ append_user_data_to_envsh ()
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-
-    for var in `cat "$ec2EnvVars_tmpFile"`; do
-        echo $var >> $SERVER_HOME/env.sh
-        echo "Activated: $var"
-    done
+    # Append EC2 user data to env.sh file:
+    cat "$ec2EnvVars_tmpFile" >>$SERVER_HOME/env.sh
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
@@ -251,12 +245,12 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-		copy_user_data_to_tmp_file
+	copy_user_data_to_tmp_file
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
-		# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-		append_user_data_to_envsh
+	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	append_user_data_to_envsh
 
         # make sure to reload data
         source `pwd`/env.sh
