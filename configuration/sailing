@@ -40,7 +40,7 @@ start_servers() {
           echo "Found image-upgrade in EC2 user data; upgrading image, then shutting down for AMI creation..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupdate.sh
         else
-          echo "No image-upgrade request found in EC2 user data; proceding with regular server launch..." >>/var/log/sailing.err
+          echo "No image-upgrade request found in EC2 user data $(ec2-metadata -d); proceding with regular server launch..." >>/var/log/sailing.err
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
 	  MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	  echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
