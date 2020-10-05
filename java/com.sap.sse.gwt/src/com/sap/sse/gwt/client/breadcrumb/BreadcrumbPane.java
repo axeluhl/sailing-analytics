@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
@@ -27,8 +28,11 @@ import com.sap.sse.gwt.client.LinkUtil;
 public class BreadcrumbPane extends Widget {
 
     interface Resources extends ClientBundle {
-        @Source("Breadcrumb.css")
+        @Source("Breadcrumb.gss")
         Style style();
+        
+        @Source("backgroundImage.png")
+        DataResource backgroundImage();
     }
 
     interface Style extends CssResource {
