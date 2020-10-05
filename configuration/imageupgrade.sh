@@ -23,11 +23,16 @@ clean_sailing_logs() {
   rm -rf /home/sailing/servers/*/logs/*
 }
 
+clean_startup_logs() {
+  rm /var/log/sailing*
+}
+
 run_yum_update
 run_git_pull
 run_refresh_instance_install_release
 clean_httpd_logs
 clean_sailing_logs
+clean_startup_logs
 
 # Finally, shut down the node so that a new AMI can be constructed cleanly
 shutdown -h now &
