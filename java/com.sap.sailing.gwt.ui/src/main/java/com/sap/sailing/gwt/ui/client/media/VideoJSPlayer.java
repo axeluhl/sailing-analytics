@@ -138,11 +138,12 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         var that = this;
 
         var player = $wnd.videojs(elementId, {
-            techOrder: ['youtube'],
+            techOrder: ['vimeo', 'youtube', 'html5'],
             "playsInline" : true,
             "customControlsOnMobile" : true,
             youtube: {enablePrivacyEnhancedMode: true }
-        }).ready(function() {
+        });
+        player.ready(function() {
             this.on('play', function() {
                 that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
             });
