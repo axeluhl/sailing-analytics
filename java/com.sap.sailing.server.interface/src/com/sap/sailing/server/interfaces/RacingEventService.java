@@ -65,6 +65,7 @@ import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -978,8 +979,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
 
-    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String markId)
-            throws DoesNotHaveRegattaLogException;
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, String markId)
+            throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException;
 
     void addMarkToRegattaLog(String leaderboardName, Mark mark) throws DoesNotHaveRegattaLogException;
 

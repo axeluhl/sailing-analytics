@@ -160,6 +160,7 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -5194,9 +5195,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String markId)
-            throws DoesNotHaveRegattaLogException {
+    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName,
+            String markId) throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
+        Pair<Boolean, String> markAlreadyUsed = checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName,
+                fleetName, Collections.singleton(markId));
+        if (markAlreadyUsed.getA()) {
+            throw new MarkAlreadyUsedInRaceException("Cannot revoke mark. Mark is used already in another race.",
+                    markAlreadyUsed.getB());
+        }
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog,
                 /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();

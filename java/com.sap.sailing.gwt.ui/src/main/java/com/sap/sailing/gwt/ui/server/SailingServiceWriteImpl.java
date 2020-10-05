@@ -206,6 +206,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -2187,9 +2188,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
-            throws DoesNotHaveRegattaLogException, NotFoundException {
-        getService().revokeMarkDefinitionEventInRegattaLog(leaderboardName, markDTO.getIdAsString());
+    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO)
+            throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException {
+        getService().revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markDTO.getIdAsString());
     }
 
     @Override

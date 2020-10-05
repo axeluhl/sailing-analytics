@@ -1,7 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +54,7 @@ import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -247,16 +247,12 @@ public class MarkResource extends AbstractSailingServerResource {
         if (markIdToRevoke == null) {
             return getBadMarkErrorResponse(regattaName, raceColumnName, markId);
         }
-        Pair<Boolean, String> isMarkIsUsedInOtherRaces;
-        isMarkIsUsedInOtherRaces = getService().checkIfMarksAreUsedInOtherRaceLogs(regattaName, raceColumnName,
-                fleetName, Collections.singleton(markId));
-        if (isMarkIsUsedInOtherRaces.getA()) {
-            return getConflictingMarkErrorResponse(regattaName, isMarkIsUsedInOtherRaces.getB());
-        }
         try {
-            getService().revokeMarkDefinitionEventInRegattaLog(regatta.getName(), markIdToRevoke);
+            getService().revokeMarkDefinitionEventInRegattaLog(regatta.getName(), raceColumnName, fleetName, markIdToRevoke);
         } catch (DoesNotHaveRegattaLogException e) {
             return getNoLogFoundErrorResponse(regattaName);
+        } catch (MarkAlreadyUsedInRaceException e) {
+            return getConflictingMarkErrorResponse(regattaName, e.getRaceNames());
         }
         return Response.ok().build();
     }
