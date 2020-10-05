@@ -251,12 +251,12 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-	copy_user_data_to_tmp_file
+		copy_user_data_to_tmp_file
         activate_user_data
         # then download and install environment and append to env.sh
         install_environment
-	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
+		# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+		append_user_data_to_envsh
 
         # make sure to reload data
         source `pwd`/env.sh
