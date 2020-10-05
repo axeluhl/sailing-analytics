@@ -38,7 +38,7 @@
         <div class="{local_res.css.socialfooter_item} {local_res.css.socialfooter_itemright} {res.mediaCss.small4} {res.mediaCss.columns}">
           <a href="https://www.instagram.com/sapsports" target="_blank" class="{local_res.css.socialfooter_item_contentwrapper} {local_res.css.socialfooter_item_contentwrapperinstagram}">
             <img src="{shr.instagram.getSafeUri}" class="{local_res.css.socialfooter_item_icon}"></img>
-            <div class="{local_res.css.socialfooter_item_text_inverse}">
+            <div class="{local_res.css.socialfooter_item_text} {local_res.css.socialfooter_item_text_inverse}">
               <div class="{local_res.css.socialfooter_item_text_top}">
                 <ui:text from='{i18n.sapSportsOn}' />
               </div>
