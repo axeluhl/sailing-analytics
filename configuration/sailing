@@ -39,7 +39,7 @@ start_servers() {
 	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
         if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
           echo "Found image-upgrade in EC2 user data; upgrading image, then shutting down for AMI creation..." >>/var/log/sailing.err
-          $GIT_REPOSITORY/configuration/imageupdate.sh
+          $GIT_REPOSITORY/configuration/imageupgrade.sh
         else
           echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceding with regular server launch..." >>/var/log/sailing.err
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
