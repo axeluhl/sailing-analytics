@@ -65,7 +65,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<SerializableSettings> {
     
     private enum FilterParameterType {
-        ValueList, Contains, StartsWith, EndsWith, Regex;
+        ValueList, Contains, StartsWith, EndsWith;
         
         public String getDisplayString(StringMessages stringMessages) {
             switch (this) {
@@ -75,8 +75,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                 return stringMessages.containsText();
             case EndsWith:
                 return stringMessages.endsWithText();
-            case Regex:
-                return stringMessages.regularExpression();
             case StartsWith:
                 return stringMessages.startsWithText();
             default:
@@ -116,8 +114,8 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private final Column<Serializable, ?> checkboxColumn;
     private final SimpleBusyIndicator busyIndicator;
     
-    private String filterInputToApply;
-    private Iterable<? extends Serializable> filterValuesToSelect;
+    private String filterInputToApply = null;
+    private Iterable<? extends Serializable> filterValuesToSelect = Collections.emptyList();
     
     public ConfigureQueryParametersDialog(Component<?> parent, ComponentContext<?> componentContext, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider) {
@@ -142,7 +140,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             }
         });
         parameterTypeSelectionBox.addValueChangeHandler(event -> showCreationControlsFor(event.getValue()));
-        parameterTypeSelectionBox.setValue(FilterParameterType.Regex);
+        parameterTypeSelectionBox.setValue(FilterParameterType.ValueList);
         parameterTypeSelectionBox.setAcceptableValues(Arrays.asList(FilterParameterType.values()));
         
         // Content Controls
@@ -176,8 +174,11 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         filteredData.addDataDisplay(dataGrid);
         
         // Dialog Buttons
-        Button closeButton = new Button(getDataMiningStringMessages().close());
+        Button closeButton = new Button(getDataMiningStringMessages().cancel());
         closeButton.addClickHandler((e) -> hide());
+        
+        Button applyButton = new Button(getDataMiningStringMessages().apply());
+        applyButton.addClickHandler(e -> applyParameter());
         
         // Layout
         FlowPanel controlsPanel = new FlowPanel();
@@ -191,8 +192,9 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         FlowPanel buttonsBar = new FlowPanel();
         Style buttonsBarStyle = buttonsBar.getElement().getStyle();
         buttonsBarStyle.setProperty("display", "flex");
-        buttonsBarStyle.setProperty("justifyContent", "flex-end");
+        buttonsBarStyle.setProperty("justifyContent", "space-between");
         buttonsBar.add(closeButton);
+        buttonsBar.add(applyButton);
 
         gridHeaderContainer = new FlowPanel();
         gridHeaderContainer.getElement().getStyle().setDisplay(Display.FLEX);
@@ -265,9 +267,8 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         return filterValues;
     }
     
-    // TODO Parameter Overview
     // TODO Creation/Editing of dimension parameters
-    // TODO Select parameter to be used as filter dimension values
+    // TODO Select existing parameter to be used as filter dimension values
     
     public void show(ConfigureFilterParameterEvent data) {
         this.updateCreationControlsAndContent(data);
@@ -303,7 +304,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                         
                         busyIndicator.setBusy(false);
                         dataGrid.setVisible(true);
-                        contentContainer.add(dataGrid);
+                        contentContainer.add(dataGrid); // Adding dataGrid again to trigger rendering after filling the data provider
                     }
 
                     @Override
@@ -312,10 +313,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                         // TODO Display error message for user
                     }
                 });
-    }
-    
-    public void hide() {
-        dialog.hide();
     }
     
     private void showCreationControlsFor(FilterParameterType type) {
@@ -378,6 +375,15 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private FilterParameterType getSelectedParameterType() {
         return parameterTypeSelectionBox.getValue();
     }
+    
+    private void applyParameter() {
+        // TODO Implement me
+        hide();
+    }
+    
+    public void hide() {
+        dialog.hide();
+    }
 
     @Override
     public String getId() {
@@ -439,11 +445,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             
             final String text = object.toString().toUpperCase();
             final String constraint = filterPanel.getTextBox().getValue().trim().toUpperCase();
-            if (selectedParameterType == FilterParameterType.Regex) {
-                // TODO Implement me
-                return true;
-            }
-            
             switch (selectedParameterType) {
             case Contains:
                 return text.contains(constraint);

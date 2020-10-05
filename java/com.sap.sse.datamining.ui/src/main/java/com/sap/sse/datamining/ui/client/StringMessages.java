@@ -99,9 +99,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String listOfValues();
     String containsText();
     String endsWithText();
-    String regularExpression();
     String startsWithText();
     String itemsMatchingTextConstraint();
     String selectItemsAvailableForParameter();
+    String apply();
     
 }
