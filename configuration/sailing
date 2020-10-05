@@ -52,9 +52,14 @@ start_servers() {
                         echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.out
                         echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 			echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
-            echo "## EVENT ${server_name}" >>$APACHE_CONFIG_DIR/001-events.conf
-			echo "Use Event-SSL ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
-            # check if an secondary event shall be pasted to 001-events.conf
+			if [ "$EVENT_ID" != "" ]; then
+				echo "## EVENT ${server_name}" >>$APACHE_CONFIG_DIR/001-events.conf
+				echo "Use Event-SSL ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
+			else
+				echo "## No event ID provided; forwarding domain to /gwt/Home.html" >>$APACHE_CONFIG_DIR/001-events.conf
+				echo "Use Home-SSL ${server_name}.sapsailing.com 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
+			fi
+            # check if n secondary event shall be pasted to 001-events.conf
             if [[ ${HTTP_SEC_EVENT} && ${HTTP_SEC_EVENT_ID} ]]; then
                 http_sec_event="`echo $HTTP_SEC_EVENT | tr [A-Z] [a-z]`"
                 echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${http_sec_event}.sapsailing.com to event with ID ${HTTP_SEC_EVENT_ID} with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
