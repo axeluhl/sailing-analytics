@@ -37,7 +37,8 @@ start_tmux() {
 start_servers() {
 	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
         if which ec2-metadata && ec2-metadata -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
-           $GIT_REPOSITORY/configuration/imageupdate.sh
+          echo "Found image-upgrade in EC2 user data; upgrading image, then shutting down for AMI creation..." >>/var/log/sailing.err
+          $GIT_REPOSITORY/configuration/imageupdate.sh
         else
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
 	  MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
