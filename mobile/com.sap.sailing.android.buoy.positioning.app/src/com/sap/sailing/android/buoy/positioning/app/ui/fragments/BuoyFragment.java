@@ -89,7 +89,7 @@ public class BuoyFragment extends BaseFragment implements android.location.Locat
 
         positioningActivity = (PositioningActivity) getActivity();
 
-        SupportMapFragment mapFragment = (SupportMapFragment) requireFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -110,7 +110,7 @@ public class BuoyFragment extends BaseFragment implements android.location.Locat
         super.onResume();
         disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
-        SupportMapFragment mapFragment = (SupportMapFragment) requireFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initialLocationUpdate = true;
         MarkInfo mark = positioningActivity.getMarkInfo();

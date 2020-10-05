@@ -49,7 +49,7 @@ public class WindFinderReportParserTest {
 
     @Test
     public void testOtherSpots() throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
-        assertEquals(4, Util.size(new ReviewedSpotsCollectionImpl("kielerfoerde").getSpots(/* cached */ false)));
+        assertEquals(3, Util.size(new ReviewedSpotsCollectionImpl("kielerfoerde").getSpots(/* cached */ false)));
         assertEquals(3, Util.size(new ReviewedSpotsCollectionImpl("chiemsee").getSpots(/* cached */ false)));
         assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("starnbergersee").getSpots(/* cached */ false)));
         assertEquals(1, Util.size(new ReviewedSpotsCollectionImpl("wannsee").getSpots(/* cached */ false)));

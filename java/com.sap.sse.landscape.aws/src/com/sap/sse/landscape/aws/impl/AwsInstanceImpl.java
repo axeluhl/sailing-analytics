@@ -21,6 +21,7 @@ import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.Metrics;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -31,14 +32,14 @@ import com.sap.sse.landscape.ssh.YesUserInfo;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 
-public class AwsInstanceImpl implements AwsInstance {
+public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsInstance<ShardingKey, MetricsT> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
-    private final AwsLandscape<?, ?> landscape;
+    private final AwsLandscape<?, ?, ?, ?> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<?, ?> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<?, ?, ?, ?> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
         this.landscape = landscape;

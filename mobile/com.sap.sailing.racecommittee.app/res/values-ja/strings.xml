@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources>
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    
+    
+    
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
     <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(コース %s 上)"</string>
     <string name="course_design_number_waypoints">"コースに %d の変針点があります"</string>
-
+    
     <string name="service_text_no_races">"監視するレースを待機中…"</string>
     <string name="service_text_num_races">"現在 %d レースを監視中"</string>
-
+    
     <string name="set_time">"開始"</string>
     <string name="reset_time">"再実行"</string>
     <string name="choose">"選択"</string>
@@ -368,9 +373,9 @@
     <string name="race_summary_wind_direction">"平均風向"</string>
     <string name="race_summary_wind_direction_value">"%.0f° から"</string>
     <string name="race_summary_wind_speed">"平均風速"</string>
-
+    
     <string name="race_summary_individual_recalls">"個別リコール"</string>
-
+    
     <string name="record_voice">"音声を録音"</string>
     <string name="finishing_started">"最初のフィニッシュが %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
@@ -470,8 +475,9 @@
     <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d 分"</string>
     <string name="gate_time_schedule_short">"%d 分"</string>
     <string name="not_available">"N/A"</string>
-
-
+    
+    
+    
     <string name="accuracy_timestamp">"(%s から)"</string>
     <string name="prev_course">"以前のコース"</string>
     <string name="layout_course">"コースレイアウト"</string>
@@ -482,7 +488,7 @@
     <string name="reset_state_2">"リセット"</string>
     <string name="reset_message_1">"一覧をクリアしますか"</string>
     <string name="reset_message_2">"最終ステータスにリセットしますか"</string>
-
+    
     <string name="onboarding_scan">"QR コードのスキャン"</string>
     <string name="onboarding_input">"マニュアル入力"</string>
     <string name="race_group">"グループレース中"</string>
@@ -524,7 +530,7 @@
     <string name="abort_title">"レースについて"</string>
     <string name="abort_hint">"中止するのは競技中のどのレースですか。"</string>
     <string name="abort_dismiss">"破棄"</string>
-
+    
     <string name="set_column_factor">"係数設定"</string>
     <string name="set_factor_error">"係数の設定でエラーが発生: %s"</string>
     <string name="sync_to_minute">"分単位で同期"</string>

@@ -5,9 +5,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.common.Util.Triple;
-import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
@@ -16,6 +17,12 @@ import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public interface UserManagementWriteServiceAsync extends UserManagementServiceAsync {
+    void setOwnership(String username, UUID userGroupId,
+            QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject,
+            AsyncCallback<OwnershipDTO> callback);
+
+    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
     void createUserGroup(String name, AsyncCallback<UserGroupDTO> callback);
     
@@ -30,10 +37,6 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
 
     void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString,
             AsyncCallback<Void> callback);
-
-    void login(String username, String password, AsyncCallback<SuccessInfo> callback);
-
-    void logout(AsyncCallback<SuccessInfo> callback);
 
     void createSimpleUser(String name, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL, AsyncCallback<UserDTO> callback);
@@ -71,8 +74,6 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
 
     //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
-
-    void verifySocialUser(CredentialDTO credential, AsyncCallback<Triple<UserDTO, UserDTO, ServerInfoDTO>> markedAsyncCallback);
 
     /**
      * Grants the role associated with the given {@code roleDefinitionId}, {@code userQualifierName} and

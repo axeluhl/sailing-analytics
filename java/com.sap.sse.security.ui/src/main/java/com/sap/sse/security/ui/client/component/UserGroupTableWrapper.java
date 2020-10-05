@@ -92,11 +92,11 @@ public class UserGroupTableWrapper extends
         });
 
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 user -> refreshUserList(null), stringMessages);
 
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(),
                 stringMessages);
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,

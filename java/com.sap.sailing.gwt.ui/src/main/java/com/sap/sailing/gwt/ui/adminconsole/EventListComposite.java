@@ -315,7 +315,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 removeEvent(event);
             }
         });
-        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
+        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), EVENT,
                 event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
@@ -326,7 +326,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     }
                 });
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
+                userService.getUserManagementWriteService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
                 new Consumer<EventDTO>() {

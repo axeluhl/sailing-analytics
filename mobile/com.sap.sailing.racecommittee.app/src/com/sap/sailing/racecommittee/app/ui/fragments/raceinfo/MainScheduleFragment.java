@@ -243,6 +243,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     @Override
+    public TimePoint getStartTime() {
+        return mStartTime;
+    }
+
+    @Override
     public TickListener getStartTimeTickListener() {
         return this::onStartTimeTick;
     }
