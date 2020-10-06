@@ -95,13 +95,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         imageUrlPanel.add(removePanel);
-        
         // the upload panel
         uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
-        if(initiallyEnableUpload) {
+        if (initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
         uploadFormPanel.setAction("/sailingserver/fileupload");
