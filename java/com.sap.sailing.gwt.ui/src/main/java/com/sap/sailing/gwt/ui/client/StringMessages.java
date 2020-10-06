@@ -1721,6 +1721,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String footerLegal();
     String footerPrivacy();
     String footerFeedback();
+    String footerSupport();
     String headerLogo();
     String headerSearchPlaceholder();
     String mainEventShowAll();
