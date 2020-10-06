@@ -8,14 +8,15 @@ import java.util.Optional;
 
 import com.sap.sse.common.Named;
 
-public interface MongoReplicaSet extends Named {
+public interface MongoReplicaSet extends Named, MongoEndpoint {
     Iterable<MongoProcess> getInstances();
     
     /**
      * The {@code "mongodb://..."} URI that application use to connect to this replica set; not specific
      * to any particular database managed by this replica set; see also {@link Database#getConnectionURI()}.
      */
-    default URI getConnectionURI(Optional<Database> optionalDb) throws URISyntaxException {
+    @Override
+    default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
         final StringBuilder result = new StringBuilder("mongodb://");
         final List<String> hostSpecs = new ArrayList<>();
         for (final MongoProcess mongoProcess : getInstances()) {

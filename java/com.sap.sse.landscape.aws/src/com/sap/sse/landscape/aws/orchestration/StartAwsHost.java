@@ -1,7 +1,11 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.SecurityGroup;
@@ -22,6 +26,7 @@ public abstract class StartAwsHost<ShardingKey,
                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                           HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    private static final Logger logger = Logger.getLogger(StartAwsHost.class.getName());
     private final String[] userData;
     private final InstanceType instanceType;
     private final AwsAvailabilityZone availabilityZone;
@@ -49,7 +54,12 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
     @Override
     public void run() {
-        getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(), getUserData());
+        try {
+            getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(), getUserData());
+        } catch (URISyntaxException e) {
+            logger.log(Level.SEVERE, "Exception trying to launch host", e);
+            throw new RuntimeException(e);
+        }
     }
     
     private Optional<Tags> getTags() {
@@ -76,7 +86,21 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * @return the user data to pass to EC2 when launching the instance; based on the {@link #userData} passed to this
      *         object's constructor. Subclasses may override this method to change or add to these user data.
      */
-    protected String[] getUserData() {
+    protected String[] getUserData() throws URISyntaxException {
         return userData;
+    }
+    
+    /**
+     * Joins the result of {@link #getUserData()} with the {@code additionalUserData} passed to this method. The result
+     * is a new array with the additional user data following the {@link #getUserData()} from this object.
+     */
+    protected String[] joinUserData(Iterable<String> additionalUserData) {
+        final String[] result = new String[userData.length + Util.size(additionalUserData)];
+        System.arraycopy(userData, 0, result, 0, userData.length);
+        int i=userData.length;
+        for (final String additionalUserDataElement : additionalUserData) {
+            result[i++] = additionalUserDataElement;
+        }
+        return result;
     }
 }

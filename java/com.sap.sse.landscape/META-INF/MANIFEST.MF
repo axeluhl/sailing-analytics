@@ -13,4 +13,5 @@ Export-Package: com.sap.sse.landscape,
  com.sap.sse.landscape.rabbitmq,
  com.sap.sse.landscape.ssh
 Require-Bundle: com.sap.sse.common,
- com.jcraft.jsch;bundle-version="0.1.54"
+ com.jcraft.jsch;bundle-version="0.1.54",
+ org.mongodb.mongo-java-driver

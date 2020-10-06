@@ -77,7 +77,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     default AwsInstance<ShardingKey, MetricsT> launchHost(
             MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
-        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
+        return launchHosts(/* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
     }
 
     /**
