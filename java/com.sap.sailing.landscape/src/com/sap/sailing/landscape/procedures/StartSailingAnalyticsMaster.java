@@ -20,8 +20,8 @@ public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyt
     public StartSailingAnalyticsMaster(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
             InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
-            Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String[] userData, MongoReplicaSet databaseConfiguration,
+            Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, MongoReplicaSet databaseConfiguration,
             RabbitMQReplicaSet rabbitConfiguration) {
-        super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
+        super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags);
     }
 }

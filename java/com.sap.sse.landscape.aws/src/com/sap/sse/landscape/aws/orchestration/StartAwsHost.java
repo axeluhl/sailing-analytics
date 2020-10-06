@@ -72,7 +72,11 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         return instanceType;
     }
 
-    private String[] getUserData() {
+    /**
+     * @return the user data to pass to EC2 when launching the instance; based on the {@link #userData} passed to this
+     *         object's constructor. Subclasses may override this method to change or add to these user data.
+     */
+    protected String[] getUserData() {
         return userData;
     }
 }
