@@ -40,5 +40,7 @@ clean_httpd_logs
 clean_sailing_logs
 clean_startup_logs
 
-# Finally, shut down the node so that a new AMI can be constructed cleanly
-shutdown -h now &
+# Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
+if /opt/aws/bin/ec2-metadata -d | grep -v "^no-shutdown$"; then
+  shutdown -h now &
+fi
