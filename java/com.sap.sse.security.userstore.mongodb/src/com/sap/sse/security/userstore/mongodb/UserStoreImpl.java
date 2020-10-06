@@ -802,7 +802,7 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
-    private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+    private void deleteUserGroupAndRemoveRelations(UserGroup userGroup) throws UserGroupManagementException {
         assert userGroupsLock.isWriteLockedByCurrentThread();
         if (!userGroups.containsKey(userGroup.getId())) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
@@ -1487,11 +1487,11 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
             LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
                 removeAllQualifiedRolesForUserGroup(userGroup);
-                deleteUserGroup(userGroup);
+                deleteUserGroupAndRemoveRelations(userGroup);
             });
         });
     }

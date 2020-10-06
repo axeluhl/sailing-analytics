@@ -183,7 +183,7 @@ public class UserStoreWithPersistenceTest {
     @Test
     public void testDeleteUserGroup() throws UserGroupManagementException {
         UserGroupImpl createUserGroup = createUserGroup();
-        store.deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(createUserGroup);
+        store.deleteUserGroup(createUserGroup);
         assertNull(store.getUserGroup(userGroupId));
         assertNull(store.getUserGroupByName(userGroupName));
 

@@ -807,7 +807,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
             accessControlStore.removeAllOwnershipsFor(userGroup);
-            store.deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(userGroup);
+            store.deleteUserGroup(userGroup);
         }
         return null;
     }
