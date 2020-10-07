@@ -84,6 +84,8 @@ Our central web server at `www.sapsailing.com` does this periodically every day,
 
 We have now started to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. CloudWatch and Lambda are being used to automatically trigger some form of log analysis every month. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) and the [Lambda function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) containing the queries and configuration.
 
+The results of the queries triggered by the cron job end up in [this S3 folder](https://s3.console.aws.amazon.com/s3/buckets/sapsailing-access-logs/query-results/?region=eu-west-1&tab=overview).
+
 ### Broken or Partly Missing Logs and How We Recover
 
 During a few events we unfortunately failed to create proper Apache log files according to the above rules for scenarios using a load-balanced setup ("ELB scenario"). In some cases, the Apache log format was missing the referrer URL. This is easy to patch into the files because we collected the logs on a per-server basis and we knew which server ran which event. For example, for Kieler Woche 2015 and Travemünder Woche 2015 we needed to insert `kielerwoche2015.sapsailing.com` and `tw2015.sapsailing.com`, respectively, to match the general log format used for analysis.
