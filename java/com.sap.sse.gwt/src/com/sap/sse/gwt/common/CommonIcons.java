@@ -9,7 +9,7 @@ public interface CommonIcons extends ClientBundle {
     @Source("facebook-logo.svg")
     @MimeType("image/svg+xml")
     DataResource facebook();
-    
+
     @Source("twitter-logo.svg")
     @MimeType("image/svg+xml")
     DataResource twitter();
@@ -17,8 +17,16 @@ public interface CommonIcons extends ClientBundle {
     @Source("google.svg")
     @MimeType("image/svg+xml")
     DataResource google();
-    
+
     @Source("search-icon.svg")
     @MimeType("image/svg+xml")
     DataResource search();
+
+    @Source("instagram.svg")
+    @MimeType("image/svg+xml")
+    DataResource instagram();
+
+    @Source("instagram_inverse.svg")
+    @MimeType("image/svg+xml")
+    DataResource instagramInverse();
 }
