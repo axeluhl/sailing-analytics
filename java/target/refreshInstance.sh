@@ -33,12 +33,10 @@ checks ()
     USER_HOME=~
     START_DIR=`pwd`
     PROJECT_HOME=$(find_project_home $START_DIR)
-
     # needed for maven on sapsailing.com to work correctly
     if [ -f $USER_HOME/.bash_profile ]; then
         source $USER_HOME/.bash_profile
     fi
-
     JAVA_BINARY=$JAVA_HOME/bin/java
     if [[ ! -d "$JAVA_HOME" ]]; then
         echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
@@ -50,22 +48,17 @@ checks ()
         JAVA_BINARY=`which java`
         echo "Using Java from $JAVA_BINARY"
     fi
-
     # make sure to set email adresses
     if [[ $BUILD_COMPLETE_NOTIFY == "" ]]; then
         export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
     fi
-
     if [[ $SERVER_STARTUP_NOTIFY == "" ]]; then
         export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
     fi
-
     if [[ $DEPLOY_TO == "" ]]; then
         DEPLOY_TO=server
     fi
-
     SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
-
     if [[ ! -d $SERVER_HOME ]]; then
         SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
         if [[ ! -d $SERVER_HOME ]]; then
@@ -78,12 +71,9 @@ checks ()
 copy_user_data_to_tmp_file ()
 {
     echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
-
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     if [[ "$VARS" != "not available" ]]; then
-        for var in $VARS; do
-          echo $var >>"$ec2EnvVars_tmpFile"
-        done
+        ec2-metadata -d | sed "s/user-data\: //g" >>"$ec2EnvVars_tmpFile"
     else
         echo "No user data has been provided."
     fi
@@ -110,11 +100,8 @@ append_user_data_to_envsh ()
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-
-    for var in `cat "$ec2EnvVars_tmpFile"`; do
-        echo $var >> $SERVER_HOME/env.sh
-        echo "Activated: $var"
-    done
+    # Append EC2 user data to env.sh file:
+    cat "$ec2EnvVars_tmpFile" >>$SERVER_HOME/env.sh
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
