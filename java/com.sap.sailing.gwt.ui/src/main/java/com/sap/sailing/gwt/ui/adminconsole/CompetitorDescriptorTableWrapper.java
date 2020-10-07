@@ -190,7 +190,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 new ImagesBarColumn<CompetitorDescriptor, CompetitorDescriptorTableWrapper.CompetitorImportTableActionIcons>(new CompetitorImportTableActionIcons(stringMessages)) {
                     @Override
                     public String getValue(CompetitorDescriptor competitor) {
-                        return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":"linked";
+                        return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":CompetitorImportTableActionIcons.ACTION_UNLINK;
                     }
         };
         unlinkColumn.setFieldUpdater(new FieldUpdater<CompetitorDescriptor, String>() {
