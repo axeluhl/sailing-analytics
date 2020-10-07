@@ -24,11 +24,9 @@ public abstract class SubscriptionWebHookHandler {
     public abstract void handle(HttpServletRequest request, HttpServletResponse response);
 
     /**
-     * Return request path which this handler will be able to handle. Webhook servlet url mapping has to be configured
+     * Return request path which this handler will be able to handle for. Webhook servlet url mapping has to be configured
      * with a wildcard, ie <code>subscription/hook/*</code>, so if path at the wildcard matches with this handler's path
-     * then the handler will handle this webhook request
-     * 
-     * @return
+     * then it will handle the webhook request
      */
     public abstract String getHandlerPath();
 

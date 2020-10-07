@@ -38,8 +38,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
         subscriptionService = SubscriptionServiceFactory.getInstance();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) subscriptionService.getDefaultService(),
-                subscriptionServiceRemotePath);
+        subscriptionService.registerAsyncServices(subscriptionServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
         mediaServiceWrite = GWT.create(MediaServiceWrite.class);

@@ -42,7 +42,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
-import com.sap.sse.security.shared.subscription.InvalidSubscriptionProvderException;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionFactory;
 import com.sap.sse.security.shared.subscription.SubscriptionProvider;
@@ -547,7 +547,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             trialStart, trialEnd, subscriptionStatus, paymentStatus, transactionType, transactionStatus,
                             invoiceId, invoiceStatus, subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime,
                             manualUpdatedAt);
-                } catch (InvalidSubscriptionProvderException e) {
+                } catch (InvalidSubscriptionProviderException e) {
                     logger.log(Level.SEVERE, "Failed to load subscription for user " + customerId, e);
                 }
             }

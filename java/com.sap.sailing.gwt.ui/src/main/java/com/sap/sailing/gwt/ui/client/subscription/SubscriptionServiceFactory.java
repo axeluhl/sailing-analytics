@@ -3,19 +3,18 @@ package com.sap.sailing.gwt.ui.client.subscription;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
-import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionServiceAsync;
+import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionClientProvider;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 
 /**
  * SubscriptionServiceFactory registers all payment provider services in the system and provides way to access a
- * specific service
+ * specific service. It also registers default payment service for handling new checkout
  */
 public class SubscriptionServiceFactory {
-    private static final String CHARGEBEE_ID = "chargebee";
-
+    private static final String DEFAULT_PROVIDER_NAME = ChargebeeSubscriptionClientProvider.PROVIDER_NAME;
     private static SubscriptionServiceFactory instance;
 
+    private Map<String, SubscriptionClientProvider> providers;
     private Map<String, SubscriptionServiceAsync<?, ?>> services;
 
     public static SubscriptionServiceFactory getInstance() {
@@ -26,26 +25,60 @@ public class SubscriptionServiceFactory {
     }
 
     private SubscriptionServiceFactory() {
+        providers = new HashMap<String, SubscriptionClientProvider>();
         services = new HashMap<String, SubscriptionServiceAsync<?, ?>>();
-        registerServices();
+        registerProviders();
     }
 
-    public ChargebeeSubscriptionServiceAsync getChargebeeService() {
-        return (ChargebeeSubscriptionServiceAsync) services.get(CHARGEBEE_ID);
+    public void initializeProviders() {
+        for (SubscriptionClientProvider p : providers.values()) {
+            p.init();
+        }
+    }
+
+    public void registerAsyncServices(String basePath) {
+        for (SubscriptionClientProvider p : providers.values()) {
+            p.registerAsyncService(basePath);
+        }
+    }
+
+    public SubscriptionServiceAsync<?, ?> getAsyncServiceByProvider(String providerName)
+            throws InvalidSubscriptionProviderException {
+        SubscriptionServiceAsync<?, ?> service = services.get(providerName);
+        if (service == null) {
+            throw new InvalidSubscriptionProviderException(providerName);
+        }
+        return service;
     }
 
     /**
-     * Return default payment service for handling new user subscriptions
+     * Return default provider
      */
-    public SubscriptionServiceAsync<?, ?> getDefaultService() {
-        return getChargebeeService();
+    public SubscriptionClientProvider getDefaultProvider() throws InvalidSubscriptionProviderException {
+        return getProvider(DEFAULT_PROVIDER_NAME);
     }
 
-    private void registerServices() {
-        registerSubscriptionService(CHARGEBEE_ID, GWT.create(ChargebeeSubscriptionService.class));
+    /**
+     * Return default subscription service
+     */
+    public SubscriptionServiceAsync<?, ?> getDefaultAsyncService() throws InvalidSubscriptionProviderException {
+        return getAsyncServiceByProvider(DEFAULT_PROVIDER_NAME);
     }
 
-    private <P, F> void registerSubscriptionService(String id, SubscriptionServiceAsync<P, F> service) {
-        services.put(id, service);
+    private SubscriptionClientProvider getProvider(String name) throws InvalidSubscriptionProviderException {
+        SubscriptionClientProvider provider = providers.get(name);
+        if (provider == null) {
+            throw new InvalidSubscriptionProviderException(name);
+        }
+        return provider;
+    }
+
+    private void registerProviders() {
+        registerSubscriptionProvider(new ChargebeeSubscriptionClientProvider());
+    }
+
+    private void registerSubscriptionProvider(SubscriptionClientProvider provider) {
+        providers.put(provider.getProviderName(), provider);
+        services.put(provider.getProviderName(), provider.getSubscriptionService());
     }
 }

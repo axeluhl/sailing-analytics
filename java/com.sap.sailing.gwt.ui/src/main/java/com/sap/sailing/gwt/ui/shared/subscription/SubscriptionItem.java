@@ -38,17 +38,23 @@ public abstract class SubscriptionItem implements IsSerializable {
      */
     private String transactionType;
 
+    /**
+     * Subscription provider name
+     */
+    private String provider;
+
     public SubscriptionItem() {
     }
 
     public SubscriptionItem(String planId, TimePoint trialStart, TimePoint trialEnd, String subscriptionStatus,
-            String paymentStatus, String transactionType) {
+            String paymentStatus, String transactionType, String provider) {
         this.planId = planId;
         this.trialStart = trialStart;
         this.trialEnd = trialEnd;
         this.subscriptionStatus = subscriptionStatus;
         this.paymentStatus = paymentStatus;
         this.transactionType = transactionType;
+        this.provider = provider;
     }
 
     /**
@@ -61,24 +67,22 @@ public abstract class SubscriptionItem implements IsSerializable {
      */
     public abstract boolean isActive();
 
-    public boolean isPaymentSuccess() {
-        return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
-    }
-
     /**
-     * Get subscription status i18n label
+     * Check if subscription is in paused status
      */
-    public abstract String getSubscriptionStatusLabel();
-
-    /**
-     * Get subscription payment status i18n label
-     */
-    public abstract String getPaymentStatusLabel();
+    public abstract boolean isPaused();
 
     /**
      * Check if subscription transaction is refunded
      */
     public abstract boolean isRefunded();
+
+    /**
+     * Return true if subscription is active and payment status is successful
+     */
+    public boolean isPaymentSuccess() {
+        return paymentStatus != null && paymentStatus.equals(PAYMENT_STATUS_SUCCESS);
+    }
 
     public String getPlanId() {
         return planId;
@@ -126,5 +130,13 @@ public abstract class SubscriptionItem implements IsSerializable {
 
     public void setTransactionType(String transactionType) {
         this.transactionType = transactionType;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 }

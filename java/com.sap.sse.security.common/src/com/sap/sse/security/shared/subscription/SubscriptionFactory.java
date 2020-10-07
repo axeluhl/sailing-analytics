@@ -25,9 +25,9 @@ public class SubscriptionFactory {
     }
 
     public SubscriptionProvider getSubscriptionProvider(String providerName)
-            throws InvalidSubscriptionProvderException {
+            throws InvalidSubscriptionProviderException {
         if (!subscriptionProviders.containsKey(providerName)) {
-            throw new InvalidSubscriptionProvderException("Invalid subscription provider " + providerName);
+            throw new InvalidSubscriptionProviderException("Invalid subscription provider " + providerName);
         }
         return subscriptionProviders.get(providerName);
     }

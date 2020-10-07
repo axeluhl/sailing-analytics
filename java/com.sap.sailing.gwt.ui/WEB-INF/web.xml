@@ -154,7 +154,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ChargebeeSubscriptionService</servlet-name>
-        <url-pattern>/service/subscription</url-pattern>
+        <url-pattern>/service/subscription/chargebee</url-pattern>
     </servlet-mapping>
 
 	<!-- enabling remote logging -->

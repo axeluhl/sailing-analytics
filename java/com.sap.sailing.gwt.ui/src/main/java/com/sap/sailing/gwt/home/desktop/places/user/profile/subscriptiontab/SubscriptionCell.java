@@ -61,7 +61,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         SubscriptionPlan plan = getSubscriptionPlan(subscription);
         if (plan != null) {
             String planName = plan.getName();
-            String subscriptionStatus = subscription.getSubscriptionStatusLabel();
+            String subscriptionStatus = getSubscriptionStatusLabel(subscription);
             String subscriptionStatusCssClass = "";
             String paymentStatus = "";
             String paymentStatusCssClass = "";
@@ -69,7 +69,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
             String trialCssClass = "";
             if (subscription.isActive()) {
                 subscriptionStatusCssClass = renderer.getStyle().blueText();
-                paymentStatus = subscription.getPaymentStatusLabel();
+                paymentStatus = getPaymentStatusLabel(subscription);
                 paymentStatusCssClass = subscription.isPaymentSuccess() && !subscription.isRefunded()
                         ? renderer.getStyle().blueText()
                         : renderer.getStyle().errorText();
@@ -95,7 +95,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     @UiHandler({ "cancelButton" })
     void onCancelButtonPressed(ClickEvent event, Element parent, SubscriptionItem subscription) {
         renderer.getCancelButton(parent).setDisabled(true);
-        presenter.cancelSubscription(subscription.getPlanId());
+        presenter.cancelSubscription(subscription.getPlanId(), subscription.getProvider());
     }
 
     private SubscriptionPlan getSubscriptionPlan(SubscriptionItem subscription) {
@@ -142,5 +142,38 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         }
 
         return remainText.toString();
+    }
+
+    public String getSubscriptionStatusLabel(SubscriptionItem subscription) {
+        final String label;
+        if (subscription.isInTrial()) {
+            label = StringMessages.INSTANCE.inTrial();
+        } else if (subscription.isActive()) {
+            label = StringMessages.INSTANCE.active();
+        } else if (subscription.isPaused()) {
+            label = StringMessages.INSTANCE.paused();
+        } else {
+            label = "";
+        }
+        return label;
+    }
+
+    public String getPaymentStatusLabel(SubscriptionItem subscription) {
+        final String label;
+        final String paymentStatus = subscription.getPaymentStatus();
+        if (paymentStatus != null) {
+            if (subscription.isPaymentSuccess()) {
+                if (subscription.isRefunded()) {
+                    label = StringMessages.INSTANCE.refunded();
+                } else {
+                    label = StringMessages.INSTANCE.paymentStatusSuccess();
+                }
+            } else {
+                label = StringMessages.INSTANCE.paymentStatusNoSuccess();
+            }
+        } else {
+            label = "";
+        }
+        return label;
     }
 }

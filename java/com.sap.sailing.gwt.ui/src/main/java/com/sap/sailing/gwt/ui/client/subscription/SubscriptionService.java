@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
  */
 public interface SubscriptionService<P, F> extends RemoteService {
     /**
-     * Prepare checkout for a plan, and return necessary data for starting checkout process. This is place where we will
-     * build customer data and request for checkout token from payment service provider
+     * Prepare checkout for a plan, and return necessary data from payment provider for starting checkout process. This
+     * is place where we will build customer data and request for checkout token from payment service provider
      */
     public P prepareCheckout(String planId);
 

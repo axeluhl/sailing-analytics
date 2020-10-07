@@ -35,6 +35,8 @@ public class SubscriptionWebHookHandlerFactory {
         final Class<? extends SubscriptionWebHookHandler> handlerCls = handlers.get(path);
         SubscriptionWebHookHandler handler = null;
         if (handlerCls != null) {
+            // New instance of handler should be used for each request so handler object would be thread-safe for any
+            // specific implementation
             handler = createHandlerInstance(handlerCls);
             if (handler != null) {
                 handler.setServletContext(context);

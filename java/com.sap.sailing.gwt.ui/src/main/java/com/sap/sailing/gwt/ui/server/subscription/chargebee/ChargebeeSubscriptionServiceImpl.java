@@ -1,29 +1,21 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.chargebee.Environment;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Transaction;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
+import com.sap.sailing.gwt.ui.server.subscription.BaseSubscriptionServiceImpl;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
@@ -31,13 +23,10 @@ import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
-import com.sap.sse.security.ui.server.Activator;
 import static com.chargebee.models.Subscription.cancel;
 
 /**
@@ -45,20 +34,11 @@ import static com.chargebee.models.Subscription.cancel;
  * 
  * @author Tu Tran
  */
-public class ChargebeeSubscriptionServiceImpl extends RemoteServiceServlet implements ChargebeeSubscriptionService {
+public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImpl
+        implements ChargebeeSubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
-
-    private BundleContext context;
-    private CompletableFuture<SecurityService> securityService;
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        initPaymentService();
-        initSecurityService();
-    }
 
     @Override
     public PrepareCheckoutDTO prepareCheckout(String planId) {
@@ -181,82 +161,9 @@ public class ChargebeeSubscriptionServiceImpl extends RemoteServiceServlet imple
         return result;
     }
 
-    private void updateUserSubscription(User user, Subscription subscription) throws UserManagementException {
-        logger.info(() -> "Update user subscription, user " + user.getName() + ", new subsription "
-                + subscription.toString());
-        getSecurityService().updateUserSubscription(user.getName(), subscription);
-    }
-
-    private void initPaymentService() {
+    @Override
+    protected void initService(ServletConfig config) {
         Environment.configure(SubscriptionConfiguration.getInstance().getSite(),
                 SubscriptionConfiguration.getInstance().getApiKey());
-    }
-
-    private void initSecurityService() {
-        context = Activator.getContext();
-        final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context,
-                SecurityService.class, null);
-        tracker.open();
-        securityService = CompletableFuture.supplyAsync(() -> {
-            SecurityService result = null;
-            try {
-                logger.info("Waiting for SecurityService...");
-                result = tracker.waitForService(0);
-                logger.info("Obtained SecurityService " + result);
-                SecurityUtils.setSecurityManager(result.getSecurityManager());
-            } catch (InterruptedException e) {
-                logger.log(Level.SEVERE, "Interrupted while waiting for SecurityService service", e);
-            }
-            return result;
-        });
-    }
-
-    private boolean isValidPlan(String planId) {
-        return StringUtils.isNotEmpty(planId) && SubscriptionPlanHolder.getInstance().getPlan(planId) != null;
-    }
-
-    private boolean isUserSubscribedToPlan(User user, String planId) {
-        return isValidSubscription(user.getSubscriptionByPlan(planId));
-    }
-
-    private boolean isValidSubscription(Subscription subscription) {
-        return subscription != null && StringUtils.isNotEmpty(subscription.getSubscriptionId());
-    }
-
-    private Pair<String, String> getUserFirstAndLastName(User user) {
-        final Pair<String, String> result;
-        if (user.getFullName() == null || user.getFullName().isEmpty()) {
-            result = new Pair<>(user.getName(), "");
-        } else {
-            final String[] userNameParts = user.getFullName().split("\\s+");
-            final String firstName = userNameParts[0];
-            final String lastName;
-            if (userNameParts.length > 1) {
-                lastName = String.join(" ", Arrays.copyOfRange(userNameParts, 1, userNameParts.length));
-            } else {
-                lastName = "";
-            }
-            result = new Pair<>(firstName, lastName);
-        }
-        return result;
-    }
-
-    private SecurityService getSecurityService() {
-        final SecurityService service;
-        try {
-            service = securityService.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        return service;
-    }
-
-    private User getCurrentUser() throws UserManagementException {
-        User user = getSecurityService().getCurrentUser();
-        if (user == null) {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-
-        return user;
     }
 }

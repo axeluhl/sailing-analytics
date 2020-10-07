@@ -2415,6 +2415,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String failedCancelSubscription();
     String errorCancelSubscription(String errMessage);
     String errorSaveSubscription(String errMessage);
+    String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
     String insufficientPermissions();
     String manageEvents();
