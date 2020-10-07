@@ -173,7 +173,8 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
                 result = null;
             } else {
                 if (isReach(finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)) {
-                    result = bearingOrReverseDependingOnXTEToOther(pinEndPosition, bearingFromBoatMarkToPinEnd.reverse(), previousWaypointPosition);
+                    result = bearingFromBoatMarkToPinEnd == null ? null :
+                        bearingOrReverseDependingOnXTEToOther(pinEndPosition, bearingFromBoatMarkToPinEnd.reverse(), previousWaypointPosition);
                 } else {
                     final boolean pinEndOnPortWhenApproachingLine = pinEndPosition.crossTrackError(previousWaypointPosition, previousWaypointPosition.getBearingGreatCircle(boatMarkPosition)).compareTo(Distance.NULL) < 0;
                     result = getWindFrom(finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind,
