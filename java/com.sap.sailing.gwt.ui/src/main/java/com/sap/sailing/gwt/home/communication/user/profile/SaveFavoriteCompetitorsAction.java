@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
@@ -36,9 +35,14 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>,
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
         CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
-            Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorDTO.getIdAsString());
-            competitorPreferences.add(new CompetitorNotificationPreference(competitorStore, competitor,
-                    favorites.isNotifyAboutResults()));
+            String competitorId = competitorDTO.getIdAsString();
+            if (competitorStore.getExistingCompetitorByIdAsString(competitorId) != null) {
+                competitorPreferences
+                        .add(new CompetitorNotificationPreference(competitorId, favorites.isNotifyAboutResults()));
+            } else {
+                throw new DispatchException(
+                        "Competitor with ID: " + competitorId + "is not an existing Competitor on this server.");
+            }
         }
         prefs.setCompetitors(competitorPreferences);
         ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, prefs);

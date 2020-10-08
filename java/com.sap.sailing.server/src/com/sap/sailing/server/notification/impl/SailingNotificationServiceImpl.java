@@ -14,6 +14,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -60,11 +61,11 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
      * Constructor used for unit tests to not need BundelContext but directly work with a given UserStore.
      * @throws MalformedURLException 
      */
-    public SailingNotificationServiceImpl(UserStore userStore, MailQueue mailQueue) throws MalformedURLException {
+    public SailingNotificationServiceImpl(UserStore userStore, CompetitorAndBoatStore competitorAndBoatStore, MailQueue mailQueue) throws MalformedURLException {
         this(mailQueue,
                 new BoatClassResultsNotificationSet(userStore),
                 new BoatClassUpcomingRaceNotificationSet(userStore),
-                new CompetitorResultsNotificationSet(userStore));
+                new CompetitorResultsNotificationSet(userStore, competitorAndBoatStore));
     }
 
     public SailingNotificationServiceImpl(MailQueue mailQueue, BoatClassResultsNotificationSet boatClassResults,

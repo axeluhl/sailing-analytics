@@ -1,25 +1,23 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 
 public class CompetitorNotificationPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -6510535362114348707L;
 
-    private transient CompetitorSetting competitor;
+    private transient StringSetting competitorId;
     private transient BooleanSetting notifyAboutResults;
 
-    public CompetitorNotificationPreference(CompetitorAndBoatStore competitorStore) {
-        competitor = new CompetitorSetting("competitor", this, competitorStore);
+    public CompetitorNotificationPreference() {
+        competitorId = new StringSetting("competitorId", this);
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
-    public CompetitorNotificationPreference(CompetitorAndBoatStore competitorStore, Competitor competitor,
-            boolean notifyAboutResults) {
-        this(competitorStore);
-        this.competitor.setValue(competitor);
+    public CompetitorNotificationPreference(String competitorId, boolean notifyAboutResults) {
+        this();
+        this.competitorId.setValue(competitorId);
         this.notifyAboutResults.setValue(notifyAboutResults);
     }
 
@@ -32,8 +30,8 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
         // The usage of Java Serialization isn't planned by now, either.
     }
 
-    public Competitor getCompetitor() {
-        return competitor.getValue();
+    public String getCompetitorId() {
+        return competitorId.getValue();
     }
 
     public boolean isNotifyAboutResults() {
