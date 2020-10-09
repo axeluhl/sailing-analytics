@@ -11,7 +11,7 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
     private transient BooleanSetting notifyAboutResults;
 
     public CompetitorNotificationPreference() {
-        competitorId = new StringSetting("competitorId", this);
+        competitorId = new StringSetting("competitor", this);
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
