@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole.desktop.app.header;
+package com.sap.sailing.gwt.ui.adminconsole.mobile.app.header;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;

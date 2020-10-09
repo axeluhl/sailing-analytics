@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole.desktop.app.footer;
+package com.sap.sailing.gwt.ui.adminconsole.mobile.app.footer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

@@ -2,9 +2,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
+import com.sap.sailing.gwt.ui.adminconsole.mobile.app.places.events.MobileEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
 
-@WithTokenizers({AdminConsolePlace.Tokenizer.class})
+@WithTokenizers({AdminConsolePlace.Tokenizer.class, MobileEventsPlace.Tokenizer.class})
 public interface AdminConsolePlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

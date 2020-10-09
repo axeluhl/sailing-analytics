@@ -71,7 +71,7 @@ public class AdminConsoleSwitchingEntryPoint implements EntryPoint {
                 startMobile();
             } else {
                 LOG.info("Using desktop version");
-                startDesktop();
+                startMobile(); // todo sarah switch to desktop version instead 
             }
         }
     }

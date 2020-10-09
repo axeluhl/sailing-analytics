@@ -10,7 +10,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.ui.adminconsole.desktop.app.places.EventsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.desktop.app.places.DesktopEventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sse.gwt.resources.Highcharts;
@@ -52,7 +52,7 @@ public class AdminConsoleDesktopEntryPoint extends AbstractSailingWriteEntryPoin
                 final String token = event.getValue();
                 
                 if (token == null || token.isEmpty()) { 
-                    clientFactory.getPlaceController().goTo(new EventsPlace());       
+                    clientFactory.getPlaceController().goTo(new DesktopEventsPlace());       
                 }
             }
             });
