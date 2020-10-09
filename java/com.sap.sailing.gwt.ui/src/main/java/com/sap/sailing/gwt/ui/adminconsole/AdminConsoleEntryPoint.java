@@ -363,6 +363,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
 
         ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(getSailingService(),
                 getUserService(), this, getStringMessages());
+        resultUrlsListComposite.ensureDebugId("ResultImportURLs");
         panel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<ResultImportUrlsListComposite>(resultUrlsListComposite),
                 getStringMessages().resultImportUrls(),

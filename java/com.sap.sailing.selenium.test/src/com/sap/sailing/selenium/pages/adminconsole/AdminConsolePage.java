@@ -12,6 +12,7 @@ import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
+import com.sap.sailing.selenium.pages.adminconsole.connectors.ResultImportUrlsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
@@ -85,6 +86,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
 
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL = "Smartphone Tracking"; //$NON-NLS-1$
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
+
+    private static final String RESULTIMPORTURLS_PANEL_TAB_LABEL = "Result import URLs"; //$NON-NLS-1$
+    private static final String RESULTIMPORTURLS_PANEL_TAB_IDENTIFIER = "ResultImportURLs"; //$NON-NLS-1$
 
     private static final String USER_MANAGEMENT_PANEL_TAB_LABEL = "User Management"; //$NON-NLS-1$
     private static final String USER_MANAGEMENT_PANEL_TAB_IDENTIFIER = "UserManagementPanel"; //$NON-NLS-1$
@@ -208,6 +212,12 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
                 SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER, false));
+    }
+
+    public ResultImportUrlsPanelPO goToResultImportUrlsPanel() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
+        return new ResultImportUrlsPanelPO(this.driver, goToTab(RESULTIMPORTURLS_PANEL_TAB_LABEL,
+                RESULTIMPORTURLS_PANEL_TAB_IDENTIFIER, false));
     }
 
     public LocalServerPO goToLocalServerPanel() {
