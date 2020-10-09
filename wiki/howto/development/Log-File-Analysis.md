@@ -10,7 +10,7 @@ There are three different types of log files produced by the server landscape un
 
  - Apache log files (access_log, error_log, ...)
 
- - Amazon EC2 Elastic Load Balancer (ELB) logs (017363970217_elasticloadbalancing_eu-west-1_ELBGermanLeague_20151118T1320Z_52.18.137.128_18dpodfi.log)
+ - Amazon EC2 Elastic Load Balancer (ELB) logs (017363970217_elasticloadbalancing_eu-west-1_ELBGermanLeague_20151118T1320Z_52.18.137.128_18dpodfi.log) or more recently Application Load Balancer (ALB) logs.
 
 ### Java Server Logs
 
@@ -62,9 +62,9 @@ Still, in order to provide the true client IP in the log files, we use the `X-Fo
 
 This uses the SetEnvIf module, tries to match an IP address at the start of the `X-Forwarded-For` header field, and if found, assigns it to the `original_client_ip` variable. This variable, in turn, decides which of the two `CustomLog` directives is applied to the request. If the variable is set, instead of using the regular `%h` field for the client IP, the variable value is logged by `%{original_client_ip}`.
 
-### Amazon EC2 Elastic Load Balancer (ELB) Logs
+### Amazon EC2 Elastic / Application Load Balancer (ELB / ALB) Logs
 
-An Amazon ELB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
+An Amazon ELB or ALB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
 
 The format for these logs is
 
@@ -72,13 +72,17 @@ The format for these logs is
 timestamp elb client:port backend:port request_processing_time backend_processing_time response_processing_time elb_status_code backend_status_code received_bytes sent_bytes "request" "user_agent" ssl_cipher ssl_protocol
 </pre>
 
+and it has changed over time, mostly being extended at the end, also for the ALB logs.
+
 It seems a good idea to always capture these logs for archiving purposes. They end up on an S3 bucket, and by default we use `sapsailing-access-logs`.
 
 Content can be synced from there to a local directory using the following command:
 
 ``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
-Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job is defined in `/etc/cron.daily/syncEC2ElbLogs` which is a script also found in git in the `configuration/` folder.
+Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job was defined in `/etc/cron.daily/syncEC2ElbLogs` which was a script also found in git in the `configuration/` folder.
+
+We're now trying to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. While working on a useful set of Athena queries, CloudWatch and Lambda is being used to automatically trigger some form of log analysis every week. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration).
 
 ### Broken or Partly Missing Logs and How We Recover
 

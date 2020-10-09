@@ -106,8 +106,8 @@ public class UserStoreImpl implements UserStore {
     private transient NamedReentrantReadWriteLock usersLock;
     private final Map<String, User> users;
     private final Map<String, Set<User>> usersByEmail;
-    private final Map<String, User> usersByAccessToken;
     private final Map<String, String> emailForUsername;
+    private final Map<String, User> usersByAccessToken;
     private final Map<RoleDefinition, Set<User>> roleDefinitionsToUsers;
 
     private final ConcurrentHashMap<String, Object> settings;
@@ -569,12 +569,35 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void removeRoleDefinition(RoleDefinition roleDefinition) {
+        if(roleDefinition == null) {
+            return;
+        }
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
-                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
+                final Set<User> usersHavingRoleWithRoleDefiniton = roleDefinitionsToUsers.get(roleDefinition);
+                if(usersHavingRoleWithRoleDefiniton != null) {
+                    for (User user : usersHavingRoleWithRoleDefiniton) {
+                        for (Role role : user.getRoles()) {
+                            if (role.getRoleDefinition().equals(roleDefinition)) {
+                                user.removeRole(role);
+                                mongoObjectFactory.storeUser(user);
+                            }
+                        }
+                    }
+                    roleDefinitionsToUsers.remove(roleDefinition);
+                }
+                final Set<UserGroup> userGroupsHavingRoleWithRoleDefinition = roleDefinitionsToUserGroups.get(roleDefinition);
+                if(userGroupsHavingRoleWithRoleDefinition != null) {
+                    for (UserGroup userGroup : userGroupsHavingRoleWithRoleDefinition) {
+                        if (userGroup.getRoleAssociation(roleDefinition)) {
+                            userGroup.remove(roleDefinition);
+                            mongoObjectFactory.storeUserGroup(userGroup);
+                        }
+                    }
+                    roleDefinitionsToUserGroups.remove(roleDefinition);
+                }
                 roleDefinitions.remove(roleDefinition.getId());
-                roleDefinitionsToUsers.remove(roleDefinition);
-                roleDefinitionsToUserGroups.remove(roleDefinition);
+                mongoObjectFactory.deleteRoleDefinition(roleDefinition);
             });
         });
     }
@@ -760,7 +783,17 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.storeUserGroup(group);
         }
     }
-
+    
+    /**
+     * To call this method, the caller must have obtained the read lock of {@link #userGroupsLock}.
+     */
+    private void removeUserFromUserGroup(User user , UserGroup group) {
+        assert userGroupsLock.isWriteLockedByCurrentThread();
+        group.remove(user);
+        Util.removeFromValueSet(usersInUserGroups, group, user);
+        Util.removeFromValueSet(userGroupsContainingUser, user, group);
+    }
+    
     @Override
     public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
@@ -769,7 +802,7 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
-    private void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+    private void deleteUserGroupAndRemoveRelations(UserGroup userGroup) throws UserGroupManagementException {
         assert userGroupsLock.isWriteLockedByCurrentThread();
         if (!userGroups.containsKey(userGroup.getId())) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
@@ -1056,11 +1089,32 @@ public class UserStoreImpl implements UserStore {
             if (mongoObjectFactory != null) {
                 mongoObjectFactory.deleteUser(user);
             }
+            users.remove(name);
+            removeFromUsersByAccessToken(user);
+            removeFromUsersByEmail(user);
+            removeAllQualifiedRolesForUser(user);
             user.getRoles()
             .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
-            removeFromUsersByEmail(users.remove(name));
+            // also remove from all usergroups
+            LockUtil.executeWithWriteLock(userGroupsLock, () -> {
+                for (UserGroup userGroup : user.getUserGroups()) {
+                    removeUserFromUserGroup(user, userGroup);
+                }
+            });
         });
         LockUtil.executeWithWriteLock(preferenceLock, () -> removeAllPreferencesForUser(name));
+        
+    }
+    
+    private void removeFromUsersByAccessToken(User user){
+        assert usersLock.isWriteLockedByCurrentThread();
+        final Set<String> entriesToRemove = new HashSet<>();
+        for (Entry<String, User> entry : usersByAccessToken.entrySet()) {
+            if (entry.getValue().equals(user)) {
+                entriesToRemove.add(entry.getKey());
+            }
+        }
+        entriesToRemove.forEach(entry -> usersByAccessToken.remove(entry));
     }
 
     @Override
@@ -1426,18 +1480,18 @@ public class UserStoreImpl implements UserStore {
                     }
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                            "Could not properly update qualified roles on userGroup delete " + removeOrAdjust);
                 }
             }
         }
     }
 
     @Override
-    public void deleteUserGroupAndRemoveAllQualifiedRolesForUserGroup(UserGroup userGroup) throws UserGroupManagementException {
+    public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         LockUtil.executeWithWriteLockExpectException(usersLock, () -> {
             LockUtil.executeWithWriteLockExpectException(userGroupsLock, () -> {
                 removeAllQualifiedRolesForUserGroup(userGroup);
-                deleteUserGroup(userGroup);
+                deleteUserGroupAndRemoveRelations(userGroup);
             });
         });
     }
