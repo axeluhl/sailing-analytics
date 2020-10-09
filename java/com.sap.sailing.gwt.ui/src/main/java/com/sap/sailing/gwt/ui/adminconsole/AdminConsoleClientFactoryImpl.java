@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sailing.gwt.ui.adminconsole.desktop.app.AdminConsoleDesktopView;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleTopLevelView;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -43,7 +43,7 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
         this.sailingService = sailingService;
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
             
-        //topLevelView = new AdminConsoleDesktopView(eventBus);
+        topLevelView = new AdminConsoleTopLevelView(eventBus);
     }
     
     @Override
@@ -100,4 +100,5 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     public AcceptsOneWidget getContent() {
         return topLevelView.getContent();
     }
+   
 }

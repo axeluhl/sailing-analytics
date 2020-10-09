@@ -6,10 +6,10 @@ import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -64,10 +64,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
         clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
 
-        containerWidget.setWidget(adminConsoleView.asWidget());
-        
-        RootLayoutPanel.get().clear();
-        RootLayoutPanel.get().add(adminConsoleView);
+        containerWidget.setWidget(adminConsoleView.asWidget());   
     }
     
     public void goToMenuAndTab(String menu, String tab) {
@@ -234,6 +231,11 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                         });
             }
         }); 
+    }
+
+    @Override
+    public PlaceController getPlaceController() {
+        return clientFactory.getPlaceController();
     }
 
  

@@ -10,6 +10,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.ui.adminconsole.desktop.app.places.EventsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sse.gwt.resources.Highcharts;
@@ -25,11 +26,11 @@ public class AdminConsoleDesktopEntryPoint extends AbstractSailingWriteEntryPoin
     }
      
     private void initActivitiesAndPlaces() {
-        final AdminConsoleClientFactory clientFactory = new AdminConsoleDesktopClientFactoryImpl(getSailingService());
+        final AdminConsoleDesktopClientFactoryImpl clientFactory = new AdminConsoleDesktopClientFactoryImpl(getSailingService());
         EventBus eventBus = clientFactory.getEventBus();
         PlaceController placeController = clientFactory.getPlaceController();
         
-        AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
+        AdminConsoleDesktopActivityMapper activityMapper = new AdminConsoleDesktopActivityMapper(clientFactory);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(clientFactory.getContent());
         
@@ -44,14 +45,14 @@ public class AdminConsoleDesktopEntryPoint extends AbstractSailingWriteEntryPoin
         historyHandler.handleCurrentHistory();
     }
     
-    private void addHistoryValueChangeHandler(final AdminConsoleClientFactory clientFactory, final AdminConsoleActivityMapper activityMapper) {
+    private void addHistoryValueChangeHandler(final AdminConsoleClientFactory clientFactory, final AdminConsoleDesktopActivityMapper activityMapper) {
         History.addValueChangeHandler(new ValueChangeHandler<String>() {
             
             public void onValueChange(ValueChangeEvent<String> event) {
                 final String token = event.getValue();
                 
                 if (token == null || token.isEmpty()) { 
-                    clientFactory.getPlaceController().goTo(new AdminConsolePlace());       
+                    clientFactory.getPlaceController().goTo(new EventsPlace());       
                 }
             }
             });

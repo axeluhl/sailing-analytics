@@ -11,6 +11,7 @@ import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
@@ -25,7 +26,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
-    private SimplePanel appWidget = new SimplePanel();
+    private SimplePanel appWidget = new SimpleLayoutPanel();
     
     @Override
     protected void doOnModuleLoad() {
@@ -49,7 +50,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new AdminConsolePlace());
         
-        RootLayoutPanel.get().add(appWidget);      
+        RootLayoutPanel.get().add(appWidget);    
         
         addHistoryValueChangeHandler(clientFactory, activityMapper);
         

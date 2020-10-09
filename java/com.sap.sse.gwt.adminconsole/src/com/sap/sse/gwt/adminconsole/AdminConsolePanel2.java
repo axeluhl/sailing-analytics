@@ -11,6 +11,7 @@ import java.util.function.BooleanSupplier;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Anchor;
@@ -26,6 +27,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
+import com.sap.sse.gwt.client.panels.PlacesAwareHorizontalTabLayoutPanel;
+import com.sap.sse.gwt.client.panels.PlacesAwareVerticalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.shared.HasPermissions;
@@ -69,7 +72,7 @@ import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectable {
+public class AdminConsolePanel2 extends HeaderPanel implements HandleTabSelectable {
     private final UserService userService;
     
     /**
@@ -98,6 +101,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      */
     private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
 
+    private final PlaceController placeController;
+
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
      * you add a new tab then make sure to have a look at #refreshDataFor(Widget widget) to ensure that upon
@@ -112,9 +117,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                     final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
                     updateBrowserHistory(tabPanel.getTitle(), selectedPanel.getTitle());  
-                   
-                    refreshDataFor(selectedPanel);    
-                    
+                    if (source instanceof PlacesAwareHorizontalTabLayoutPanel) {
+                        placeController.goTo(((PlacesAwareHorizontalTabLayoutPanel)source).getPlace());
+                    } else {
+                        refreshDataFor(selectedPanel);    
+                    }
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     boolean browserHistoryUpdated = false;
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
@@ -131,9 +138,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                     if (!browserHistoryUpdated) {
                         updateBrowserHistory(widgetAssociatedToVerticalTab.getTitle(), "");
                     }
-                  
-                    refreshDataFor(widgetAssociatedToVerticalTab);
-                    
+                    if (source instanceof PlacesAwareVerticalTabLayoutPanel) {
+                        placeController.goTo(((PlacesAwareVerticalTabLayoutPanel)source).getPlace());
+                    } else {
+                        refreshDataFor(widgetAssociatedToVerticalTab);
+                    }
                 }
             }
         }
@@ -164,10 +173,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return target;
     }
     
-    public AdminConsolePanel(UserService userService,
+    public AdminConsolePanel2(UserService userService,
             ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
-            StringMessages stringMessages) {
+            StringMessages stringMessages, final PlaceController placeController) {
+        this.placeController = placeController;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
         roleSpecificTabs = new LinkedHashSet<>();

@@ -6,6 +6,9 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,6 +41,7 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
+import com.sap.sailing.gwt.ui.adminconsole.desktop.app.header.Header;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -48,6 +52,7 @@ import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
+import com.sap.sse.gwt.adminconsole.AdminConsolePanel2;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
@@ -70,9 +75,15 @@ import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleViewImpl extends Composite implements AdminConsoleView {
 
+    interface AdminConsoleViewUiBinder extends UiBinder<Widget, AdminConsoleViewImpl> {
+    }
+
+    private static AdminConsoleViewUiBinder uiBinder = GWT.create(AdminConsoleViewUiBinder.class);
+    
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
-    private HeaderPanel headerPanel;
+    @UiField
+    HeaderPanel headerPanel;
     
     private Presenter presenter;
     
@@ -88,6 +99,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     
     private AdminConsolePanel adminConsolePanel;
     
+    private PlaceController placeController;
+    
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
@@ -96,8 +109,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private String horizontalTabName;
     
     public AdminConsoleViewImpl() {
-        headerPanel = new HeaderPanel();
-        initWidget(headerPanel);
+        initWidget(uiBinder.createAndBindUi(this));
     }
     
     @Override
@@ -114,7 +126,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         
         this.stringMessages = StringMessages.INSTANCE;
         this.errorReporter = presenter.getErrorReporter();
-
+        
+        this.placeController = presenter.getPlaceController();
     }
     
     private StringMessages getStringMessages() {
@@ -122,8 +135,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
     
     @Override
-    public HeaderPanel createUI(final ServerInfoDTO serverInfo) {
-        Document.get().getElementById("loading").removeFromParent();
+    public HeaderPanel createUI(final ServerInfoDTO serverInfo) {   
         
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
@@ -135,6 +147,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 return createAdminConsolePanel(serverInfo);
             }
         });
+        
         headerPanel.setHeaderWidget(header);
         headerPanel.setContentWidget(authorizedContentDecorator);
         

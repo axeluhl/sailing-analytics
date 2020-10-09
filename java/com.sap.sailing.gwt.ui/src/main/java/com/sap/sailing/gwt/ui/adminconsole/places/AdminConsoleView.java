@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.HashSet;
 
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
@@ -42,6 +43,8 @@ public interface AdminConsoleView extends IsWidget {
         UserService getUserService();
 
         MediaServiceWriteAsync getMediaServiceWrite();
+
+        public PlaceController getPlaceController();
         
     }
 

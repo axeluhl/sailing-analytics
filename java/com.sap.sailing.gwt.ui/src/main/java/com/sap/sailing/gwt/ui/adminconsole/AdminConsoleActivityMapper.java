@@ -5,7 +5,6 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
-import com.sap.sse.gwt.client.DOMUtils;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 
@@ -18,11 +17,11 @@ public class AdminConsoleActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-        //DOMUtils.scrollToTop(clientFactory.getRoot());
 
         if (place instanceof AdminConsolePlace) {
             return new AdminConsoleActivity((AdminConsolePlace) place, clientFactory);
         }
+     
         return null;
     }
 }
