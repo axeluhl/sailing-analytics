@@ -1,7 +1,7 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
@@ -23,14 +23,12 @@ public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyt
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
             InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, Database databaseConfiguration,
-            RabbitMQReplicaSet rabbitConfiguration) {
+            RabbitMQReplicaSet rabbitConfiguration) throws URISyntaxException {
         super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags, databaseConfiguration);
+        addUserData(getLiveMasterEnvironmentUserData());
     }
 
-    @Override
-    protected String[] getUserData() {
-        final List<String> localUserData = new ArrayList<>();
-        
-        return joinUserData(localUserData);
+    private Iterable<String> getLiveMasterEnvironmentUserData() {
+        return Collections.singleton("USE_ENVIRONMENT=live-master-server");
     }
 }

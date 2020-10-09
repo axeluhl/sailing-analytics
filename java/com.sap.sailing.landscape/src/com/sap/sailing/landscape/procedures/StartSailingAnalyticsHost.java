@@ -25,17 +25,14 @@ extends StartAwsHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
     private final Database databaseConfiguration;
 
-    public StartSailingAnalyticsHost(String name,
-            MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
-            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape, InstanceType instanceType, AwsAvailabilityZone availabilityZone,
-            String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, Database databaseConfiguration, String... userData) {
+    public StartSailingAnalyticsHost(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
+            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
+            InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
+            Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, Database databaseConfiguration,
+            String... userData) throws URISyntaxException {
         super(machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, Optional.of(tags.orElse(Tags.empty()).and("Name", name)), userData);
         this.databaseConfiguration = databaseConfiguration;
-    }
-
-    @Override
-    protected String[] getUserData() throws URISyntaxException {
-        return joinUserData(getDatabaseUserData());
+        addUserData(getDatabaseUserData());
     }
 
     private Iterable<String> getDatabaseUserData() throws URISyntaxException {

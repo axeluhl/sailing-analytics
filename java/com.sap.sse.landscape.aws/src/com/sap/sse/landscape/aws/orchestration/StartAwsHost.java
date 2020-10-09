@@ -1,6 +1,8 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +29,7 @@ public abstract class StartAwsHost<ShardingKey,
                           HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
     private static final Logger logger = Logger.getLogger(StartAwsHost.class.getName());
-    private final String[] userData;
+    private final List<String> userData;
     private final InstanceType instanceType;
     private final AwsAvailabilityZone availabilityZone;
     private final String keyName;
@@ -39,7 +41,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
         super(machineImage, landscape);
-        this.userData = userData;
+        this.userData = new ArrayList<>();
+        for (final String ud : userData) {
+            this.userData.add(ud);
+        }
         this.instanceType = instanceType;
         this.availabilityZone = availabilityZone;
         this.keyName = keyName;
@@ -55,7 +60,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     @Override
     public void run() {
         try {
-            getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(), getUserData());
+            getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
+                    Util.toArray(getUserData(), new String[0]));
         } catch (URISyntaxException e) {
             logger.log(Level.SEVERE, "Exception trying to launch host", e);
             throw new RuntimeException(e);
@@ -84,23 +90,17 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
     /**
      * @return the user data to pass to EC2 when launching the instance; based on the {@link #userData} passed to this
-     *         object's constructor. Subclasses may override this method to change or add to these user data.
+     *         object's constructor plus extensions added by calling {@link #addUserData}. Subclasses may override this
+     *         method to change or add to these user data.
      */
-    protected String[] getUserData() throws URISyntaxException {
+    protected Iterable<String> getUserData() throws URISyntaxException {
         return userData;
     }
     
     /**
-     * Joins the result of {@link #getUserData()} with the {@code additionalUserData} passed to this method. The result
-     * is a new array with the additional user data following the {@link #getUserData()} from this object.
+     * Appends {@code moreUserData} to the end of {@link #userData}
      */
-    protected String[] joinUserData(Iterable<String> additionalUserData) {
-        final String[] result = new String[userData.length + Util.size(additionalUserData)];
-        System.arraycopy(userData, 0, result, 0, userData.length);
-        int i=userData.length;
-        for (final String additionalUserDataElement : additionalUserData) {
-            result[i++] = additionalUserDataElement;
-        }
-        return result;
+    protected void addUserData(Iterable<String> moreUserData) {
+        Util.addAll(moreUserData, userData);
     }
 }

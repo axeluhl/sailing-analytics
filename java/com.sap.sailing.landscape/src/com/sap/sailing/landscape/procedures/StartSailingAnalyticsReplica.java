@@ -1,5 +1,7 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
@@ -20,7 +22,12 @@ public class StartSailingAnalyticsReplica<ShardingKey> extends StartSailingAnaly
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
             InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String[] userData, Database databaseConfiguration,
-            SailingAnalyticsMaster<ShardingKey> master) {
+            SailingAnalyticsMaster<ShardingKey> master) throws URISyntaxException {
         super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags, databaseConfiguration, userData);
+        addUserData(getLiveReplicaEnvironmentUserData());
+    }
+
+    private Iterable<String> getLiveReplicaEnvironmentUserData() {
+        return Collections.singleton("USE_ENVIRONMENT=live-replica-server");
     }
 }
