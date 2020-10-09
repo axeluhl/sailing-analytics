@@ -2,10 +2,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -64,6 +67,13 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openACLDialog(e));
 
+        actionsColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE, url -> {
+            if (Window.confirm(stringMessages
+                    .doYouReallyWantToRemoveSelectedElements(url.getName()))) {
+                removeUrl(url); 
+            }
+        });
+
         super.table.addColumn(urlColumn, stringMessages.url());
         SecuredDTOOwnerColumn.configureOwnerColumns(super.table, listHandler, stringMessages);
         super.table.addColumn(actionsColumn, stringMessages.actions());
@@ -92,6 +102,28 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
             });
         } else {
             ResultImportUrlsTableWrapper.super.refresh(Collections.emptyList());
+        }
+    }
+
+    private void removeUrl(UrlDTO url) {
+        Set<UrlDTO> urls = new HashSet<UrlDTO>();
+        urls.add(url);
+        String providerName = lastUsedProviderName;
+        if (providerName != null) {
+            sailingServiceWrite.removeResultImportURLs(providerName, urls, new AsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    update(providerName);
+                }
+    
+                @Override
+                public void onFailure(Throwable caught) {
+                    update(providerName);
+                    ResultImportUrlsTableWrapper.super.errorReporter
+                            .reportError(ResultImportUrlsTableWrapper.super.getStringMessages()
+                                    .errorRemovingResultImportUrls(caught.getMessage()));
+                }
+            });
         }
     }
 }
