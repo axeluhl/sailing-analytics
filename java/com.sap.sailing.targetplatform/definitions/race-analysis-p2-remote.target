@@ -58,6 +58,14 @@
 <unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
 <unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
 <unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
+<unit id="javax.servlet.jsp" version="2.2.0.v201112011158"/>
+<unit id="javax.servlet.jsp.jstl" version="1.2.0.v201105211821"/>
+<unit id="javax.servlet.jsp.jstl.impl" version="1.2.0.v201210211230"/>
+<unit id="javax.servlet.jsp.jstl.impl.source" version="1.2.0.v201210211230"/>
+<unit id="javax.servlet.jsp.jstl.source" version="1.2.0.v201105211821"/>
+<unit id="javax.servlet.jsp.source" version="2.2.0.v201112011158"/>
+<unit id="org.apache.jasper.glassfish" version="2.2.2.v201501141630"/>
+<unit id="org.apache.jasper.glassfish.source" version="2.2.2.v201501141630"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -84,8 +92,6 @@
 <unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
 <unit id="org.eclipse.equinox.io" version="1.1.100.v20150430-1834"/>
 <unit id="org.eclipse.equinox.ip" version="1.1.400.v20161007-1324"/>
-<unit id="org.eclipse.equinox.jsp.jasper" version="1.0.500.v20150119-1358"/>
-<unit id="org.eclipse.equinox.jsp.jasper.registry" version="1.0.300.v20130327-1442"/>
 <unit id="org.eclipse.equinox.launcher" version="1.4.0.v20161219-1356"/>
 <unit id="org.eclipse.equinox.metatype" version="1.4.300.v20170105-1446"/>
 <unit id="org.eclipse.equinox.preferences" version="3.7.0.v20170126-2132"/>
@@ -216,6 +222,7 @@
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
 <plugin id="org.eclipse.jetty.osgi.boot.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl.source"/>
@@ -277,8 +284,16 @@
 <plugin id="org.apache.poi.source"/>
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
-<plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
+<plugin id="org.apache.jasper.glassfish"/>
+<plugin id="org.apache.jasper.glassfish.source"/>
+<plugin id="javax.servlet.jsp"/>
+<plugin id="javax.servlet.jsp.jstl"/>
+<plugin id="javax.servlet.jsp.jstl.impl"/>
+<plugin id="javax.servlet.jsp.jstl.impl.source"/>
+<plugin id="javax.servlet.jsp.jstl.source"/>
+<plugin id="javax.servlet.jsp.source"/>
+    <plugin id="org.eclipse.jetty.apache-jsp"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

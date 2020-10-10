@@ -48,6 +48,10 @@
 <setEntry value="jackson-core-asl@default:default"/>
 <setEntry value="jackson-jaxrs@default:default"/>
 <setEntry value="jackson-mapper-asl@default:default"/>
+<<<<<<< HEAD
+=======
+<setEntry value="javax.servlet.jsp@3:default"/>
+>>>>>>> jsp
 <setEntry value="javax.servlet@default:default"/>
 <setEntry value="javax.validation@default:default"/>
 <setEntry value="javax.ws.rs@default:default"/>
@@ -93,6 +97,10 @@
 <setEntry value="org.eclipse.jetty.http@4:true"/>
 <setEntry value="org.eclipse.jetty.io@4:true"/>
 <setEntry value="org.eclipse.jetty.jmx@4:true"/>
+<<<<<<< HEAD
+=======
+<setEntry value="org.eclipse.jetty.osgi.boot.jsp@default:default"/>
+>>>>>>> jsp
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.security@4:true"/>
 <setEntry value="org.eclipse.jetty.server@4:true"/>
@@ -192,9 +200,12 @@
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
 <setEntry value="com.sap.sse.jettyextensions@default:false"/>
+<<<<<<< HEAD
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws@default:default"/>
 <setEntry value="com.sap.sse.landscape@default:default"/>
+=======
+>>>>>>> jsp
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>
