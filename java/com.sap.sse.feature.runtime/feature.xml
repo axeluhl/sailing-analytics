@@ -25,6 +25,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.mongodb.mongo-java-driver.source"
+         download-size="0"
+         install-size="0"
+         version="3.6.4"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"

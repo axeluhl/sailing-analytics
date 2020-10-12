@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="158">
+<target name="Race Analysis Target" sequenceNumber="159">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -262,6 +262,7 @@
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>
+<plugin id="org.mongodb.mongo-java-driver.source"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
