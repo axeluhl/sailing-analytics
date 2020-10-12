@@ -4,17 +4,14 @@ import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
 
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -48,30 +45,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         
         AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(placeController, eventBus, new AdminConsolePlace());
+        historyHandler.register(placeController, eventBus, new EventsPlace());
         
         RootLayoutPanel.get().add(appWidget);    
         
-        addHistoryValueChangeHandler(clientFactory, activityMapper);
+        //addHistoryValueChangeHandler(clientFactory, activityMapper);
         
         historyHandler.handleCurrentHistory();
-    }
-    
-    private void addHistoryValueChangeHandler(final AdminConsoleClientFactory clientFactory, final AdminConsoleActivityMapper activityMapper) {
-        History.addValueChangeHandler(new ValueChangeHandler<String>() {
-            
-            public void onValueChange(ValueChangeEvent<String> event) {
-                handleHistoryChange(clientFactory, event);
-            }
-            });
-    }
-    
-    private void handleHistoryChange(AdminConsoleClientFactory clientFactory, ValueChangeEvent<String> event) {
-        final String token = event.getValue();
-        
-        if (token == null || token.isEmpty()) { 
-            clientFactory.getPlaceController().goTo(new AdminConsolePlace());       
-        }
     }
 
 }

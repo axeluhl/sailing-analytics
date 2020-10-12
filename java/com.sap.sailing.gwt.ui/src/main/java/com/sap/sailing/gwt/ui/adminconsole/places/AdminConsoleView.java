@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -27,6 +28,10 @@ public interface AdminConsoleView extends IsWidget {
     void selectTabByNames(String verticalTabName, String horizontalTabName);
     
     void goToTabByNames(String menu, String tab);
+    
+    void selectTabByPlace(AdminConsolePlace place);
+    
+    void setRedirectToPlace(AdminConsolePlace redirectoPlace);
     
     public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> {
         
@@ -47,6 +52,5 @@ public interface AdminConsoleView extends IsWidget {
         public PlaceController getPlaceController();
         
     }
-
 
 }

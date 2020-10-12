@@ -4,7 +4,7 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
+import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 
@@ -17,11 +17,18 @@ public class AdminConsoleActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-
+        AdminConsoleActivity activity = null;
         if (place instanceof AdminConsolePlace) {
-            return new AdminConsoleActivity((AdminConsolePlace) place, clientFactory);
+            if (AdminConsoleActivity.instantiated()) {
+                activity = AdminConsoleActivity.getInstance(clientFactory); 
+                activity.goToMenuAndTab((AdminConsolePlace)place);
+            }
+            else {
+                activity = AdminConsoleActivity.getInstance(clientFactory, (AdminConsolePlace)place); 
+            }
         }
-     
-        return null;
+      
+        return activity;
+
     }
 }

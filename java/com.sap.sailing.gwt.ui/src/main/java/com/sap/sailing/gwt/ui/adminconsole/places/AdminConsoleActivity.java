@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -28,11 +29,8 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
-
-    private final String menu;
-    private final String tab;
     
-    private final AdminConsoleClientFactory clientFactory;
+    private AdminConsoleClientFactory clientFactory;
     
     private HashSet<RegattasDisplayer> regattasDisplayers;
     private HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
@@ -40,35 +38,69 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     private AdminConsoleView adminConsoleView;
     
-    private final MediaServiceWriteAsync mediaServiceWrite;
-    private final SailingServiceWriteAsync sailingService;
+    private MediaServiceWriteAsync mediaServiceWrite;
+    private SailingServiceWriteAsync sailingService;
     
-    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
-        this.menu = place.getMenu();
-        this.tab = place.getTab();
+    private static AdminConsoleActivity instance;
+    
+    private AdminConsolePlace defaultPlace;
+    
+    public static boolean instantiated() {
+        return instance != null;
+    }
+    
+    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory) {
+        if(instance == null) {
+            instance = new AdminConsoleActivity(clientFactory);
+        }
+        return instance;
+    }
+    
+    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory, AdminConsolePlace defaultPlace) {
+        if(instance == null) {
+            instance = new AdminConsoleActivity(clientFactory);
+            instance.setRedirectToPlace(defaultPlace);
+        }
+        return instance;
+    }
+    
+    private AdminConsoleActivity(final AdminConsoleClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-    }
-    
-    @Override
-    public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {
+        
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
-        
-        adminConsoleView = new AdminConsoleViewImpl();
-        adminConsoleView.setPresenter(this);
-        adminConsoleView.selectTabByNames(menu, tab);
-        
-        clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
-        clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
-
-        containerWidget.setWidget(adminConsoleView.asWidget());   
     }
     
-    public void goToMenuAndTab(String menu, String tab) {
-        adminConsoleView.goToTabByNames(menu, tab);       
+    public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
+        this(clientFactory); 
+    }
+    
+    @Override
+    public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {     
+        initView(); 
+        containerWidget.setWidget(adminConsoleView.asWidget());    
+    }
+    
+    public void setRedirectToPlace(AdminConsolePlace place) {
+        this.defaultPlace = place;
+    }
+    
+    public void goToMenuAndTab(AdminConsolePlace place) {
+        initView(); 
+        adminConsoleView.selectTabByPlace(place);       
+    }
+    
+    private void initView() {
+        if (adminConsoleView == null) {
+            adminConsoleView = new AdminConsoleViewImpl();
+            adminConsoleView.setPresenter(this);
+            adminConsoleView.setRedirectToPlace(defaultPlace);
+            clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
+            clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
+        }    
     }
     
     @Override
@@ -237,6 +269,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
     }
+
 
  
 }

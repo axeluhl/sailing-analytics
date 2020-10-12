@@ -1,21 +1,18 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-	xmlns:dp="urn:import:com.sap.sailing.gwt.ui.adminconsole.desktop.app"
-	xmlns:sse="urn:import:com.sap.sse.gwt.client"
-	xmlns:auth="urn:import:com.sap.sailing.gwt.common.authentication"
-	xmlns:content="urn:import:com.sap.sse.security.ui.authentication.generic">
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:style>
-	.mainContent {
-	}
-	</ui:style>
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+    xmlns:desktop="urn:import:com.sap.sailing.gwt.ui.adminconsole.desktop.app"
+    xmlns:sse="urn:import:com.sap.sse.gwt.client">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+    .mainContent {
+        height: 100%;
+    }
+    </ui:style>
 
-<g:SimplePanel ui:field="mainContentPanel">
-	<g:HeaderPanel addStyleNames="{style.mainContent}" ui:field="headerPanel">
-	   <auth:SAPSailingHeaderWithAuthentication ui:field="header"></auth:SAPSailingHeaderWithAuthentication>
-	   <content:GenericAuthorizedContentDecorator ui:field="content"></content:GenericAuthorizedContentDecorator>
-	</g:HeaderPanel>
-</g:SimplePanel>
-	
+    <g:HTMLPanel addStyleNames="{style.mainContent}"> 
+        <desktop:header.Header ui:field="header" />    
+        <g:SimplePanel ui:field="content" />
+        <desktop:footer.Footer ui:field="footer" />
+    </g:HTMLPanel>
 </ui:UiBinder>

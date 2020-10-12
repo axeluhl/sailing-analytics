@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.ui.adminconsole.desktop.app.places.DesktopEventsPlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsolePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sse.gwt.resources.Highcharts;
 
@@ -36,7 +36,7 @@ public class AdminConsoleDesktopEntryPoint extends AbstractSailingWriteEntryPoin
         
         AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(placeController, eventBus, new AdminConsolePlace());
+        historyHandler.register(placeController, eventBus, new DesktopEventsPlace());
         
         placeWidgetOnRootPanel(clientFactory.getRoot()); 
         
