@@ -799,7 +799,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 showLayoutsAfterAnimationFinishes();
                             }
                         }
-
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
                                 && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
@@ -816,7 +815,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 }
                                 zoomingAnimationsInProgress--;
                             }
-
                         }.schedule(500);
                     }
                 });

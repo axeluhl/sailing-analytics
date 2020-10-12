@@ -2643,8 +2643,16 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
-    
+
+    @Deprecated
     @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaName}/tracking_devices")
+    public Response getTrackingStatusDeprecated(@PathParam("regattaName") String regattaName) {
+        return getTrackingStatus(regattaName);
+    }
+
+    @POST
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaName}/tracking_devices")
     public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {
