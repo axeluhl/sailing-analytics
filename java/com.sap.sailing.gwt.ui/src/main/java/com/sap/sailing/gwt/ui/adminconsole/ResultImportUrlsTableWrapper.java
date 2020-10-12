@@ -67,7 +67,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openACLDialog(e));
 
-        actionsColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.UPDATE, url -> {
+        actionsColumn.addAction(DefaultActions.DELETE.name(), DefaultActions.DELETE, url -> {
             if (Window.confirm(stringMessages
                     .doYouReallyWantToRemoveSelectedElements(url.getName()))) {
                 removeUrl(url); 
