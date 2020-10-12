@@ -141,7 +141,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             techOrder: ['vimeo', 'youtube', 'html5'],
             "playsInline" : true,
             "customControlsOnMobile" : true,
-            youtube: {enablePrivacyEnhancedMode: true }
+            youtube: {
+                enablePrivacyEnhancedMode: true,
+                customVars: { rel: 0, modestbranding: 1 } 
+                }
         });
         player.ready(function() {
             this.on('play', function() {

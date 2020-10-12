@@ -71,7 +71,9 @@ public class YoutubeVideoControl  {
                 },
                 playerVars : {
                         'autoplay' : 0,
-                        'disablekb': 1
+                        'disablekb': 1,
+                        rel: 0,
+                        modestbranding: 1
                 }
         });
 
