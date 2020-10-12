@@ -33,12 +33,10 @@ checks ()
     USER_HOME=~
     START_DIR=`pwd`
     PROJECT_HOME=$(find_project_home $START_DIR)
-
     # needed for maven on sapsailing.com to work correctly
     if [ -f $USER_HOME/.bash_profile ]; then
         source $USER_HOME/.bash_profile
     fi
-
     JAVA_BINARY=$JAVA_HOME/bin/java
     if [[ ! -d "$JAVA_HOME" ]]; then
         echo "Could not find $JAVA_BINARY set in env.sh. Trying to find the correct one..."
@@ -50,22 +48,17 @@ checks ()
         JAVA_BINARY=`which java`
         echo "Using Java from $JAVA_BINARY"
     fi
-
     # make sure to set email adresses
     if [[ $BUILD_COMPLETE_NOTIFY == "" ]]; then
         export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
     fi
-
     if [[ $SERVER_STARTUP_NOTIFY == "" ]]; then
         export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
     fi
-
     if [[ $DEPLOY_TO == "" ]]; then
         DEPLOY_TO=server
     fi
-
     SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
-
     if [[ ! -d $SERVER_HOME ]]; then
         SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
         if [[ ! -d $SERVER_HOME ]]; then

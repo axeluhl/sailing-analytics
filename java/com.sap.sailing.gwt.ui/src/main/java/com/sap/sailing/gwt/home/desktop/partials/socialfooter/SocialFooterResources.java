@@ -17,10 +17,13 @@ public interface SocialFooterResources extends ClientBundle {
         String socialfooter_item_contentwrapper();
         String socialfooter_item_contentwrappertwitter();
         String socialfooter_item_contentwrapperfacebook();
+        String socialfooter_item_contentwrapperinstagram();
         String socialfooter_itemleft();
         String socialfooter_itemright();
+        String socialfooter_itemcenter();
         String socialfooter_item_icon();
         String socialfooter_item_text();
+        String socialfooter_item_text_inverse();
         String socialfooter_item_text_top();
         String socialfooter_item_text_bottom();
     }
