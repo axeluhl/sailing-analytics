@@ -106,24 +106,24 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
     }
 
     private void removeUrl(UrlDTO url) {
-        Set<UrlDTO> urls = new HashSet<UrlDTO>();
+        final Set<UrlDTO> urls = new HashSet<>();
         urls.add(url);
-        String providerName = lastUsedProviderName;
-        if (providerName != null) {
-            sailingServiceWrite.removeResultImportURLs(providerName, urls, new AsyncCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                    update(providerName);
-                }
-    
-                @Override
-                public void onFailure(Throwable caught) {
-                    update(providerName);
-                    ResultImportUrlsTableWrapper.super.errorReporter
-                            .reportError(ResultImportUrlsTableWrapper.super.getStringMessages()
-                                    .errorRemovingResultImportUrls(caught.getMessage()));
-                }
-            });
+        if (lastUsedProviderName != null) {
+            sailingServiceWrite.removeResultImportURLs(lastUsedProviderName, urls,
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            update(lastUsedProviderName);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            update(lastUsedProviderName);
+                            ResultImportUrlsTableWrapper.super.errorReporter
+                                    .reportError(ResultImportUrlsTableWrapper.super.getStringMessages()
+                                            .errorRemovingResultImportUrls(caught.getMessage()));
+                        }
+                    });
         }
     }
 }

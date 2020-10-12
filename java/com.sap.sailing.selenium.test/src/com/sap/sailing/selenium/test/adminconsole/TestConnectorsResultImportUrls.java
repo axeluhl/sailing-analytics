@@ -32,7 +32,6 @@ public class TestConnectorsResultImportUrls extends AbstractSeleniumTest {
         // add
         resultImportUrlsPanel.addUrl(TEST_URL);
         resultImportUrlsPanel.removeUrl(TEST_URL);
-        
     }
 
     @Test
