@@ -2748,7 +2748,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) throws IllegalStateException {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
                 /* display name */ deviceConfiguration.getName(), () -> {
