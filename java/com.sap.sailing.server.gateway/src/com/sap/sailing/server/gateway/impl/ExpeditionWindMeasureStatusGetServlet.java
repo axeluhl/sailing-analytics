@@ -23,9 +23,8 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 
-public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServlet implements ExpeditionListener {
+public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServletWithPostBasedConrentReplacing implements ExpeditionListener {
     private static final long serialVersionUID = -6791613843435009810L;
 
     private Map<Integer, ExpeditionMessageInfo> lastMessageInfosPerBoat;
@@ -45,13 +44,13 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
         if (!isExpeditionListenerRegistered) {
             isExpeditionListenerRegistered = registerExpeditionListener();
         }
+        writePostRefreshingHeadAndEmptyBody(req, resp, "Expedition Wind Status");
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Expedition Wind Status</title>");
-        out.println("</head>");
-        out.println("<body>");
         out.println("<h3>Expedition Wind Status</h3>");
         out.println("<input type='button' value='Refresh' onClick='window.location.reload()'><br/>");
         if (lastMessageInfosPerBoat.size() > 0) {
@@ -87,8 +86,6 @@ public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServ
         } else {
             out.println("No expedition wind sources available.");
         }
-        out.println("</body>");
-        out.println("</html>");
         out.close();
     }
 
