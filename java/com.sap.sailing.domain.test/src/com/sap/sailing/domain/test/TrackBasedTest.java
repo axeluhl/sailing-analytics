@@ -218,7 +218,7 @@ public abstract class TrackBasedTest {
     }
 
     public static RegattaImpl createTestRegatta(String regattaName, Iterable<String> raceColumnNames) {
-        final BoatClass boatClass = new BoatClassImpl("boat class name", BoatClassMasterdata._12M);
+        final BoatClass boatClass = new BoatClassImpl(BoatClassMasterdata._12M);
         final TimePoint startDate = MillisecondsTimePoint.now();
         final TimePoint endDate = startDate.plus(MillisecondsDurationImpl.ONE_DAY);
         final boolean isMedal = false;
