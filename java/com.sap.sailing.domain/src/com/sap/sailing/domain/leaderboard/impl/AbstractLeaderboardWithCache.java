@@ -689,6 +689,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
             if (track != null) {
                 entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenRawFixes();
+                entryDTO.currentSpeedAndCourseOverGround = track.getEstimatedSpeed(timePoint);
             }
             if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
                 long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();
