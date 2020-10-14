@@ -113,12 +113,12 @@ abstract class RaceLogTrackingInvitationMailBuilder {
         final SerializableMultipartSupplier alternativeSupplier = new SerializableMultipartSupplier("alternative");
         mixedSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(alternativeSupplier));
 
-        alternativeSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain"));
+        alternativeSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain; charset=UTF-8"));
 
         final SerializableMultipartSupplier relatedSupplier = new SerializableMultipartSupplier("related");
         alternativeSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(relatedSupplier));
 
-        relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html"));
+        relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html; charset=UTF-8"));
 
         for (Entry<String, byte[]> imageEntry : pngAttachAndInline.entrySet()) {
             final String contentType = "image/png";
