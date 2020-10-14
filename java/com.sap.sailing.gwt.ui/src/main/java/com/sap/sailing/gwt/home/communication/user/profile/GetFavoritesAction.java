@@ -36,8 +36,8 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         boolean notifyAboutUpcomingRaces = false, notifyAboutResults = false;
         if (preferences != null) {
             for (BoatClassNotificationPreference pref : preferences.getBoatClasses()) {
-                String name = pref.getBoatClass().getName(), displayName = pref.getBoatClass().getDisplayName();
-                selected.add(new BoatClassDTO(name, displayName, pref.getBoatClass().getHullLength(), pref.getBoatClass().getHullBeam()));
+                String name = pref.getBoatClass().getName();
+                selected.add(new BoatClassDTO(name, pref.getBoatClass().getHullLength(), pref.getBoatClass().getHullBeam()));
                 notifyAboutUpcomingRaces |= pref.isNotifyAboutUpcomingRaces();
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }

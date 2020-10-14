@@ -45,8 +45,6 @@ public interface BoatClass extends Named, IsManagedByCache<SharedDomainFactory<?
      */
     boolean typicallyStartsUpwind();
 
-    String getDisplayName();
-
     Distance getHullLength();
     
     Distance getHullBeam();

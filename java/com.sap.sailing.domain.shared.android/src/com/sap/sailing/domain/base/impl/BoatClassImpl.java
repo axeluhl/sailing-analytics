@@ -39,7 +39,6 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     
     private final boolean typicallyStartsUpwind;
     
-    private final String displayName;
 
     private final Distance hullLength;
     
@@ -48,22 +47,20 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     private final BoatHullType hullType;
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
-        this(name, typicallyStartsUpwind, name,
-                // use the typical dinghy parameters as default
-                /* hull length */ new MeterDistance(5), /* hullBeam */ new MeterDistance(1.8),
-                /* hullType */ BoatHullType.MONOHULL);
+        this(name, typicallyStartsUpwind, // use the typical dinghy parameters as default
+                /* hull length */ new MeterDistance(5),
+                /* hullBeam */ new MeterDistance(1.8), /* hullType */ BoatHullType.MONOHULL);
     }
     
-    public BoatClassImpl(String name, BoatClassMasterdata masterData) {
-        this(name, masterData.isTypicallyStartsUpwind(), masterData.getDisplayName(), masterData.getHullLength(),
-                masterData.getHullBeam(), masterData.getHullType());
+    public BoatClassImpl(BoatClassMasterdata masterData) {
+        this(masterData.getDisplayName(), masterData.isTypicallyStartsUpwind(), masterData.getHullLength(), masterData.getHullBeam(),
+                masterData.getHullType());
     }
     
-    public BoatClassImpl(String name, boolean typicallyStartsUpwind, String displayName, 
-            Distance hullLength, Distance hullBeam, BoatHullType hullType) {
+    public BoatClassImpl(String name, boolean typicallyStartsUpwind, Distance hullLength, 
+            Distance hullBeam, BoatHullType hullType) {
         super(name);
         this.typicallyStartsUpwind = typicallyStartsUpwind;     
-        this.displayName = displayName;
         this.hullLength = hullLength;
         this.hullBeam = hullBeam;
         this.hullType = hullType;
@@ -134,10 +131,6 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public BoatClass resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getOrCreateBoatClass(getName(), typicallyStartsUpwind());
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 
     public Distance getHullBeam() {

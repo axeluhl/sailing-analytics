@@ -82,7 +82,9 @@ Content can be synced from there to a local directory using the following comman
 
 Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job was defined in `/etc/cron.daily/syncEC2ElbLogs` which was a script also found in git in the `configuration/` folder.
 
-We're now trying to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. While working on a useful set of Athena queries, CloudWatch and Lambda is being used to automatically trigger some form of log analysis every week. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration).
+We have now started to analyze those ALB logs using Amazon Athena. See [https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query](https://eu-west-1.console.aws.amazon.com/athena/home?force&region=eu-west-1#query) for details. CloudWatch and Lambda are being used to automatically trigger some form of log analysis every month. See the CloudWatch event rule ``RunALBLogAnalysis`` and how it triggers the Lambda named [RunALBLogAnalysis](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) and the [Lambda function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/RunALBLogAnalysis?tab=configuration) containing the queries and configuration.
+
+The results of the queries triggered by the cron job end up in [this S3 folder](https://s3.console.aws.amazon.com/s3/buckets/sapsailing-access-logs/query-results/?region=eu-west-1&tab=overview).
 
 ### Broken or Partly Missing Logs and How We Recover
 
