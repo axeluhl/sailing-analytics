@@ -209,8 +209,8 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return new NotificationMailTemplate(
-                            messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName()), 
-                            messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
+                            messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getName()), 
+                            messages.get(locale, "boatClassRaceFinishedBody", boatClass.getName(),
                                     raceDescription),
                             RaceBoardLinkFactory.getBaseURL(event),
                             createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
@@ -229,8 +229,8 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return new NotificationMailTemplate(
-                            messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getDisplayName()), 
-                            messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(),
+                            messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getName()), 
+                            messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getName(),
                                     leaderboardDescription),
                             RaceBoardLinkFactory.getBaseURL(event),
                             createHomeLeaderboardLink(leaderboard, event, locale));
@@ -249,8 +249,8 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                     String time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale)
                             .format(when.asDate());
                     return new NotificationMailTemplate(
-                            messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
-                            messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
+                            messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getName()),
+                            messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getName(),
                                     raceDescription, time),
                             RaceBoardLinkFactory.getBaseURL(event),
                             createHomeRacesListLink(leaderboard, event, locale));

@@ -353,7 +353,7 @@ public class SharedDomainFactoryImpl<RLR extends RaceLogResolver> implements Sha
             result = boatClassCache.get(unifiedBoatClassName);
             if (result == null) {
                 if (unifiedBoatClassName != null && boatClassMasterdata != null) {
-                    result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
+                    result = new BoatClassImpl(boatClassMasterdata);
                     boatClassCache.put(unifiedBoatClassName, result);
                 }
             }
