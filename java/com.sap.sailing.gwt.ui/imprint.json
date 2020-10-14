@@ -789,9 +789,9 @@
             "content": "Please visit ${link} to view the general SAP legal disclosure."
         },
         {
-            "title":"YouToube",
+            "title":"YouTube",
             "link": "https://www.youtube.com/t/terms",
-            "content": "The Application utilizes the YouToube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouToube, found under ${link}."
+            "content": "The Application utilizes the YouTube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouTube, found under ${link}."
         },
         {
             "title":"Google Privacy",
