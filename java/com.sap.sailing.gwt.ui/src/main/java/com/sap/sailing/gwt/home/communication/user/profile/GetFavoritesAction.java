@@ -58,7 +58,7 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
                 final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
                 DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
                 selected.add(competitor == null ?
-                        new SimpleCompetitorWithIdDTO(competitorId,competitorId,"Competitor was not found on the server", null, null) 
+                        new SimpleCompetitorWithIdDTO(competitorId,"Not found","ID:" + competitorId, null, null) 
                         : new SimpleCompetitorWithIdDTO(competitor));
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }
