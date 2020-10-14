@@ -753,7 +753,7 @@
             "acknowledgements": [
                 "Copyright 2016 yanwsh@gmail.com"
             ],
-            "key": "Apache License 2.0"
+            "key": "ASL2.0"
         }
     ],
     "licenses": [
@@ -780,6 +780,28 @@
         {
             "key": "UNIDATA",
             "file": "unidata.txt"
+        }
+    ],
+    "disclaimers":[
+        {
+            "title":"SAP Legal Disclosure",
+            "link": "https://www.sap.com/corporate/en/legal/impressum.html",
+            "content": "Please visit ${link} to view the general SAP legal disclosure."
+        },
+        {
+            "title":"YouToube",
+            "link": "https://www.youtube.com/t/terms",
+            "content": "The Application utilizes the YouToube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouToube, found under ${link}."
+        },
+        {
+            "title":"Google Privacy",
+            "link": "https://policies.google.com/privacy",
+            "content": "The application utilizes services of Google. Therefore, by using the application, users implicitly agree to the privacy policies of Google, as stated under ${link}."
+        },
+        {
+            "title":"Google Maps",
+            "link": "http://www.google.com/intl/en/policies/terms/",
+            "content": "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, Customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at ${link}. If Customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, Customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute Customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider."
         }
     ]
 }

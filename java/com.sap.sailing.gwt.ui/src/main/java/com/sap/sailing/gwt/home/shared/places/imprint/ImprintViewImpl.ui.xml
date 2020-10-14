@@ -3,67 +3,19 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:cell="urn:import:com.google.gwt.user.cellview.client"
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res"
-        type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-        .outerPanel {
-            margin-top: 20px;
-        }
-        
-        .listbox {
-            display: block;
-            width: 100%;
-            height: 3em;
-            line-height: 2em;
-            
-            font-size: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-            margin-top: 40px;
-        }
-        .owner {
-           margin-top: 50px;
-        }
-        .homepage {
-            display: block;
-            margin-top: 40px;
-        }
-        .acknowledgment {
-            margin-top: 40px;
-            display: block;
-            overflow: auto;
-            font-size: smaller;
-        }
-        .licenseText {
-            display: block;
-            margin: 50px 10px;
-            padding: 10px 10px;
-            
-        }
-        .googleMaps {
-	        border-color: black;
-	        border-width: 1px;
-	        border-style: solid;
-            font-family: monospace, monospace;
-            display: block;
-            margin-top: 1em;
-            margin-bottom: 1em;
-            padding: 1em;
-        }
-        
-    </ui:style>
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {style.outerPanel}">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.imprint.ImprintResources" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {local_res.css.outerPanel}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-            <a href="http://www.sap.com/about/legal/impressum.html"><ui:text from='{i18n.footerLegal}' /></a>
-            <g:Label styleName="{style.googleMaps}" ui:field="googleLegal"/>
+            <div class= "{local_res.css.majorHeader}">Legal Disclaimers: </div>
+            <div ui:field="disclaimers"/>
+            <div class= "{local_res.css.majorHeader}">Further Components used: </div>
             <g:ValueListBox ui:field="componentListUi"
-                styleName="{style.listbox}" />
-            <h1 ui:field="nameUi" class="{style.owner}"/>
-            <h2 ui:field="ownerUi" class="{style.owner}"/>
-            <a ui:field="homepageUi" class="{style.homepage}"/>
-            <div ui:field="acknowledgmentUi" class="{style.acknowledgment}"/>
-            <div ui:field="licenseTextUi" class="{style.licenseText}"/>
+                addStyleNames="{local_res.css.listbox}" />
+            <div ui:field="ownerUi" class="{local_res.css.owner}"/>
+            <a ui:field="homepageUi" class="{local_res.css.homepage}"/>
+            <div ui:field="acknowledgmentUi" class="{local_res.css.acknowledgement}"/>
+            <div ui:field="licenseTextUi" class="{local_res.css.licenseText}"/>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>    

@@ -28,6 +28,7 @@ public class ImprintActivity extends AbstractActivity implements ImprintView.Pre
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
+        ImprintResources.INSTANCE.css().ensureInjected();
         view = new ImprintViewImpl();
         view.registerPresenter(this);
         panel.setWidget(view.asWidget());
@@ -44,6 +45,7 @@ public class ImprintActivity extends AbstractActivity implements ImprintView.Pre
                         for (LicenseData license : data.getLicenses()) {
                             licenseMap.put(license.getKey(), license);
                         }
+                        view.addDisclaimers(imprintData.getDisclaimers());
                         view.showComponents(imprintData.getComponents());
                     }
                 } catch (Exception e) {
