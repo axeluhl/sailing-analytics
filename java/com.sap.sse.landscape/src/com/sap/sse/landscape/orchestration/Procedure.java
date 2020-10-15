@@ -1,9 +1,12 @@
 package com.sap.sse.landscape.orchestration;
 
+import java.util.Arrays;
+
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
 
 /**
  * Encodes a potentially compound sequence of actions that transform the landscape from one state to another, trying to
@@ -42,4 +45,12 @@ public interface Procedure<ShardingKey,
                            ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
 extends Runnable {
     Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
+    
+    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> andThen(Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> nextStep) {
+        return new ProcedureSequence<>(getLandscape(), Arrays.asList(this, nextStep));
+    }
+    
+    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> fromSteps(Iterable<Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> steps) {
+        return new ProcedureSequence<>(getLandscape(), steps);
+    }
 }
