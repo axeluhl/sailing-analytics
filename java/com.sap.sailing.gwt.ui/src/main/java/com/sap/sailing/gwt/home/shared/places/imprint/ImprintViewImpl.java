@@ -17,8 +17,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.ComponentData;
@@ -27,16 +25,13 @@ import com.sap.sailing.gwt.home.shared.places.imprint.data.LicenseData;
 
 public class ImprintViewImpl extends Composite implements ImprintView {
 
-    private static final String LINK_PLACEHOLDER = "${link}";
+    private static ImprintViewImplUiBinder uiBinder = GWT.create(ImprintViewImplUiBinder.class);
 
-    private static SponsoringPageViewUiBinder uiBinder = GWT.create(SponsoringPageViewUiBinder.class);
-
-    interface SponsoringPageViewUiBinder extends UiBinder<Widget, ImprintViewImpl> {
+    interface ImprintViewImplUiBinder extends UiBinder<Widget, ImprintViewImpl> {
     }
 
     private Presenter currentPresenter;
 
-    ImprintResources local_res;
     @UiField(provided = true)
     ValueListBox<ComponentData> componentListUi;
     @UiField
@@ -48,12 +43,10 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     @UiField
     DivElement licenseTextUi;
     @UiField 
-    DivElement disclaimers;
+    FlowPanel disclaimers;
 
     public ImprintViewImpl() {
         super();
-        local_res = ImprintResources.INSTANCE;
-        local_res.css().ensureInjected();
         componentListUi = new ValueListBox<ComponentData>(new Renderer<ComponentData>() {
             @Override
             public String render(ComponentData c) {
@@ -94,17 +87,9 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     public void addDisclaimers(final DisclaimerData[] disclaimers) {
         if(disclaimers!= null) {
             for(DisclaimerData disclaimer : disclaimers) {
-                final FlowPanel disclaimerItem = new FlowPanel();
-                disclaimerItem.addStyleName(local_res.css().disclaimerItem());
-                final Label disclaimerItemTitle = new Label(disclaimer.getTitle());
-                disclaimerItemTitle.addStyleName(local_res.css().disclaimerItemTitle());
-                disclaimerItem.add(disclaimerItemTitle);
-                final String content = disclaimer.getContent();
-                final String contentWithLink = content.replace(LINK_PLACEHOLDER,
-                        "<a href=\"" + disclaimer.getLink() + "\" >" + disclaimer.getLink() + "</a>");
-                final HTMLPanel disclaimerItemContent = new HTMLPanel(contentWithLink);
-                disclaimerItem.add(disclaimerItemContent);
-                this.disclaimers.appendChild(disclaimerItem.getElement());
+                DisclaimerItem disclaimerItem = new DisclaimerItem();
+                disclaimerItem.setDisclaimer(disclaimer);
+                this.disclaimers.add(disclaimerItem);
             }
         }
     }

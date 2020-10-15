@@ -4,18 +4,63 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.imprint.ImprintResources" />
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {local_res.css.outerPanel}">
+	<ui:style>
+		.outerPanel {
+			margin-top: 20px;
+		}
+		
+		.majorHeader {
+			margin: 30px 0 30px 0;
+			font-weight: bold;
+			font-size: 2em;
+		}
+		
+		.listbox {
+			display: block;
+			width: 100%;
+			height: 3em;
+			line-height: 2em;
+			font-size: 1.6em;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+			font-weight: bold;
+		}
+		
+		.owner {
+			margin-top: 30px;
+			font-size: 1.3em;
+		}
+		
+		.homepage {
+			display: block;
+			margin-top: 40px;
+		}
+		
+		.acknowledgement {
+			margin-top: 40px;
+			display: block;
+			overflow: auto;
+			font-size: smaller;
+		}
+		
+		.licenseText {
+			display: block;
+			margin: 50px 10px;
+			padding: 10px 0 10px 0;
+		}
+	</ui:style>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {style.outerPanel}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-            <div class= "{local_res.css.majorHeader}">Legal Disclaimers: </div>
-            <div ui:field="disclaimers"/>
-            <div class= "{local_res.css.majorHeader}">Further Components used: </div>
+            <div class= "{style.majorHeader}">Legal Disclaimers: </div>
+            <g:FlowPanel ui:field="disclaimers"/>
+            <div class= "{style.majorHeader}">Further Components used: </div>
             <g:ValueListBox ui:field="componentListUi"
-                addStyleNames="{local_res.css.listbox}" />
-            <div ui:field="ownerUi" class="{local_res.css.owner}"/>
-            <a ui:field="homepageUi" class="{local_res.css.homepage}"/>
-            <div ui:field="acknowledgmentUi" class="{local_res.css.acknowledgement}"/>
-            <div ui:field="licenseTextUi" class="{local_res.css.licenseText}"/>
+                addStyleNames="{style.listbox}" />
+            <div ui:field="ownerUi" class="{style.owner}"/>
+            <a ui:field="homepageUi" class="{style.homepage}"/>
+            <div ui:field="acknowledgmentUi" class="{style.acknowledgement}"/>
+            <div ui:field="licenseTextUi" class="{style.licenseText}"/>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>    

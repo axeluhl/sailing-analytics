@@ -28,7 +28,6 @@ public class ImprintActivity extends AbstractActivity implements ImprintView.Pre
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        ImprintResources.INSTANCE.css().ensureInjected();
         view = new ImprintViewImpl();
         view.registerPresenter(this);
         panel.setWidget(view.asWidget());
