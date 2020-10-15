@@ -170,7 +170,7 @@ import com.sap.sse.gwt.shared.DebugConstants;
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
     /* Line colors */
-    static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d");
+    static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d"); // selected by Larry Rosenfeld...
     static final Color ADVANTAGE_LINE_COLOR = new RGBColor("#ff9900"); // orange
     static final Color START_LINE_COLOR = Color.WHITE;
     static final Color FINISH_LINE_COLOR = Color.BLACK;
@@ -1994,8 +1994,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boolean showCourseMiddleLine = keysAlreadyHandled.containsKey(key) && keysAlreadyHandled.get(key).getA() ||
                         settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) ||
                         (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)
-                         && courseDTO.currentLegNumber > 0
-                         && courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint);
+                        // show the line for the current leg or for the first leg if we are still before the start
+                         && (courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
+                             courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0);
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
@@ -2069,7 +2070,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         };
         return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO,
-                lineInfoProvider, COURSE_MIDDLE_LINE_COLOR.getAsHtml() /* selected by Larry Rosenfeld... */, STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
+                lineInfoProvider, COURSE_MIDDLE_LINE_COLOR.getAsHtml(), STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
     }
 
     /**

@@ -48,7 +48,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         this(name, typicallyStartsUpwind, // use the typical dinghy parameters as default
-        /* hull length */ new MeterDistance(5),
+                /* hull length */ new MeterDistance(5),
                 /* hullBeam */ new MeterDistance(1.8), /* hullType */ BoatHullType.MONOHULL);
     }
     
