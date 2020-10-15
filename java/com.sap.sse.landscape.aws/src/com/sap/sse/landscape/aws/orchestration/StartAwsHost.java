@@ -22,6 +22,18 @@ import com.sap.sse.landscape.orchestration.StartHost;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
+/**
+ * Launches an AWS host when {@link #run() run}. The resulting {@link AwsInstance} can then be obtained by
+ * calling {@link #getHost()}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <ShardingKey>
+ * @param <MetricsT>
+ * @param <MasterProcessT>
+ * @param <ReplicaProcessT>
+ * @param <HostT>
+ */
 public abstract class StartAwsHost<ShardingKey,
                           MetricsT extends ApplicationProcessMetrics,
                           MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
@@ -35,6 +47,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     private final String keyName;
     private final Iterable<SecurityGroup> securityGroups;
     private final Optional<Tags> tags;
+    private AwsInstance<ShardingKey, MetricsT> host;
     
     public StartAwsHost(MachineImage<HostT> machineImage, Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
             InstanceType instanceType,
@@ -60,7 +73,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     @Override
     public void run() {
         try {
-            getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
+            host = getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
                     Util.toArray(getUserData(), new String[0]));
         } catch (URISyntaxException e) {
             logger.log(Level.SEVERE, "Exception trying to launch host", e);
@@ -68,6 +81,17 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         }
     }
     
+    /**
+     * @return {@code null} before {@link #run()} is called; the host launched afterwards
+     */
+    public AwsInstance<ShardingKey, MetricsT> getHost() {
+        return host;
+    }
+
+    public void setHost(AwsInstance<ShardingKey, MetricsT> host) {
+        this.host = host;
+    }
+
     private Optional<Tags> getTags() {
         return tags;
     }

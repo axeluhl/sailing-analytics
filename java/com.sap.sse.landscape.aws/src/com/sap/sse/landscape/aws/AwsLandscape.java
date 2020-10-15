@@ -9,6 +9,7 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -16,6 +17,8 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -80,6 +83,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         return launchHosts(/* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
     }
 
+    // -------------------- technical landscape services -----------------
+    
     /**
      * Launches a number of new {@link Host}s from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
@@ -219,14 +224,6 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
 
-    /**
-     * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
-     * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
-     * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
-     * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
-     */
-    ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getCentralReverseProxy(Region region);
-
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
     void addTargetsToTargetGroup(
@@ -238,4 +235,44 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
 
     LoadBalancer getAwsLoadBalancer(String loadBalancerArn, Region region);
+    
+    // --------------- abstract landscape view --------------
+    /**
+     * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
+     * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
+     * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
+     * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
+     */
+    ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
+    
+    /**
+     * Each region can have a single load balancer that is the target for the "*" (asterisk, catch-all) domain.
+     * This load balancer shall be used for rather short-lived scope mappings and their rules because changes become
+     * effective immediately with the change, other than for DNS records, for example, which take a while to propagate
+     * through the world-wide DNS infrastructure.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(Region region);
+    
+    /**
+     * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
+     * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(Region region, String hostname);
+    
+    /**
+     * The default MongoDB configuration to connect to.
+     */
+    MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
+    
+    /**
+     * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified
+     * explicitly, application server replica sets launched in the {@code region} shall use this for their replication
+     * message channels and exchanges.
+     */
+    RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(Region region);
+    
+    /**
+     * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...
+     */
+    Region getDefaultRegion();
 }

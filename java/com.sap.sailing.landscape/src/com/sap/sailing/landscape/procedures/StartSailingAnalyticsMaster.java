@@ -22,6 +22,16 @@ public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyt
     public StartSailingAnalyticsMaster(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
             InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
+            Optional<Tags> tags, Database databaseConfiguration,
+            RabbitMQReplicaSet rabbitConfiguration) throws URISyntaxException {
+        this(name, machineImage, landscape, instanceType, availabilityZone, keyName,
+                Collections.singleton(landscape.getDefaultSecurityGroupForApplicationHosts(availabilityZone.getRegion())), tags,
+                databaseConfiguration, rabbitConfiguration);
+    }
+
+    public StartSailingAnalyticsMaster(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
+            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
+            InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, Database databaseConfiguration,
             RabbitMQReplicaSet rabbitConfiguration) throws URISyntaxException {
         super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags, databaseConfiguration);

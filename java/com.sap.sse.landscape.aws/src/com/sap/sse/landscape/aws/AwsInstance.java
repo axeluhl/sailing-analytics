@@ -13,4 +13,6 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
  */
 public interface AwsInstance<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Host {
     String getInstanceId();
+
+    void terminate();
 }

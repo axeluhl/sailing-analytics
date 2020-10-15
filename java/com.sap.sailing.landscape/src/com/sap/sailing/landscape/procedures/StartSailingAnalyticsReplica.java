@@ -21,6 +21,16 @@ public class StartSailingAnalyticsReplica<ShardingKey> extends StartSailingAnaly
     public StartSailingAnalyticsReplica(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
             Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
             InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
+            Optional<Tags> tags, String[] userData, Database databaseConfiguration,
+            SailingAnalyticsMaster<ShardingKey> master) throws URISyntaxException {
+        this(name, machineImage, landscape, instanceType, availabilityZone, keyName,
+                Collections.singleton(landscape.getDefaultSecurityGroupForApplicationHosts(availabilityZone.getRegion())), tags,
+                userData, databaseConfiguration, master);
+    }
+
+    public StartSailingAnalyticsReplica(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
+            Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
+            InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String[] userData, Database databaseConfiguration,
             SailingAnalyticsMaster<ShardingKey> master) throws URISyntaxException {
         super(name, machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, tags, databaseConfiguration, userData);

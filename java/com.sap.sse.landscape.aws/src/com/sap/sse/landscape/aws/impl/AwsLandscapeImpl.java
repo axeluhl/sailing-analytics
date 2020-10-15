@@ -20,6 +20,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -30,12 +31,14 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.ReverseProxy;
+import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
@@ -108,14 +111,16 @@ MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterPro
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
-    // the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07
+    // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
     private static final String DEFAULT_CERTIFICATE_ARN = "arn:aws:acm:eu-west-2:017363970217:certificate/48c51d6a-b4f2-4fa0-8dcc-426cd9c7aadc";
+    // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID = "sg-0b2afd48960251280";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final Map<com.sap.sse.landscape.Region, ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> centralReverseProxyByRegion;
+    private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also
@@ -145,7 +150,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         // TODO automate handling of central reverse proxy instances across regions and AZs, e.g., based on tags
         final AwsRegion euWest2 = new AwsRegion("eu-west-2");
         final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
-        final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> euWest2CentralReverseProxy = new ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>(
+        final ApacheReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
                 "Central Reverse Proxy eu-west-2", this, euWest2);
         euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
         centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
@@ -213,7 +218,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
-        final ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), "DefTG-"+alb.getName()+"-"+protocol.name(),
                 port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
@@ -562,7 +567,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+    public ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         return centralReverseProxyByRegion.get(region);
     }
 
@@ -609,5 +614,47 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public LoadBalancer getAwsLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
         return getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(lb -> lb.loadBalancerArns(loadBalancerArn)).loadBalancers().iterator().next();
+    }
+
+    @Override
+    public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
+        return getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID, region);
+    }
+
+    @Override
+    public SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        return getDefaultSecurityGroupForApplicationHosts(region); // TODO currently using the same experimental SG as for the app servers
+    }
+
+    @Override
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
+            com.sap.sse.landscape.Region region) {
+        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getNonDNSMappedLoadBalancer(...)
+        return null;
+    }
+
+    @Override
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(
+            com.sap.sse.landscape.Region region, String hostname) {
+        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDNSMappedLoadBalancerFor(...)
+        return null;
+    }
+
+    @Override
+    public MongoEndpoint getDatabaseConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
+        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDatabaseConfigurationForDefaultCluster(...)
+        return null;
+    }
+
+    @Override
+    public RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
+        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getMessagingConfigurationForDefaultCluster(...)
+        return null;
+    }
+
+    @Override
+    public com.sap.sse.landscape.Region getDefaultRegion() {
+        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDefaultRegion(...)
+        return null;
     }
 }

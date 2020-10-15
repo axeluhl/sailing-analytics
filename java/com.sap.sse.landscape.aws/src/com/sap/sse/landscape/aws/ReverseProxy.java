@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Log;
+import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -43,26 +45,13 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  */
 public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> extends Named {
-    /**
-     * A reverse proxy may scale out by adding more hosts.
-     * 
-     * @return at least one host
-     */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts();
-    
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+LogT extends Log>
+extends Process<LogT, MetricsT>, Named {
     default InstanceType getDefaultInstanceType() {
         return InstanceType.T3_SMALL;
     }
 
-    /**
-     * Add zero or more hosts of the instance type specified to the availability zone {@code az}.
-     * 
-     * @return the hosts that were added by this request; they will also be part of the response of {@link #getHosts()}
-     *         now
-     */
-    AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
-    
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /index.html} landing page for the application replica set provided.
@@ -105,14 +94,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * exists, the method does nothing.
      */
     void removeRedirect(String hostname);
-
-    /**
-     * Removes a single host from this reverse proxy, terminating the host. When trying to remove the last remaining
-     * host, an {@link IllegalStateException} will be thrown and the method will not complete the request. Consider
-     * using {@link #terminate()} to terminate all hosts forming this reverse proxy.
-     */
-    void removeHost(AwsInstance<ShardingKey, MetricsT> host);
-
+    
     /**
      * {@link AwsLandscape#terminate(AwsInstance) Terminates} all {@link #getHosts() hosts} that form this reverse
      * proxy.
@@ -122,6 +104,4 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     String getHealthCheckPath();
 
     String getTargetGroupName();
-
-    void addHost(AwsInstance<ShardingKey, MetricsT> host);
 }

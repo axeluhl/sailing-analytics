@@ -168,4 +168,9 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     public String getInstanceId() {
         return instanceId;
     }
+    
+    @Override
+    public void terminate() {
+        landscape.terminate(this);
+    }
 }

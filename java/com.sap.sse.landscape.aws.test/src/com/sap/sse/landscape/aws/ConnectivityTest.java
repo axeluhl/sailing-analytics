@@ -266,7 +266,7 @@ public class ConnectivityTest {
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxy<String, ApplicationProcessMetrics, ?, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, ?, ?, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());
