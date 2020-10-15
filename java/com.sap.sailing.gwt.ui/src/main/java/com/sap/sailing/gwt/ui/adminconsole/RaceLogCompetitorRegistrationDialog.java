@@ -53,7 +53,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
             String result = null;
             if (getCompetitorRegistrationInRaceLogCheckBox() != null && !getCompetitorRegistrationInRaceLogCheckBox().getValue()) {
-                result = stringMessages.competitorRegistrationsOnRaceDisabled();
+                result = stringMessages.competitorRegistrationsOnRaceDisabled(stringMessages.registerCompetitorsOnRace());
             } else {
                 Set<CompetitorDTO> difference = new HashSet<>();
                 for (Set<CompetitorDTO> competitors : fleetsWithCompetitors.values()) {
@@ -232,7 +232,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         if (isEnabled) {
                             competitorRegistrationsPanel.activateRegistrationButtons();
                         } else {
-                            competitorRegistrationsPanel.deactivateRegistrationButtons(stringMessages.competitorRegistrationsOnRaceDisabled());
+                            competitorRegistrationsPanel.deactivateRegistrationButtons(stringMessages.competitorRegistrationsOnRaceDisabled(stringMessages.registerCompetitorsOnRace()));
                         }
                     }
 
@@ -283,7 +283,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                                 public void onSuccess(Void isEnabled) {
                                                     getOrCreateCompetitorRegistrationInRaceLogCheckBox(stringMessages).setValue(false);
                                                     competitorRegistrationsPanel.deactivateRegistrationButtons(stringMessages
-                                                            .competitorRegistrationsOnRaceDisabled());
+                                                            .competitorRegistrationsOnRaceDisabled(stringMessages.registerCompetitorsOnRace()));
                                                     competitorRegistrationsPanel.refreshCompetitors();
                                                 }
 

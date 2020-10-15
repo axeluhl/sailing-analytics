@@ -965,7 +965,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private BoatClassDTO convertToBoatClassDTO(BoatClass boatClass) {
-        return boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam());
+        return boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam());
     }
 
     private List<SeriesDTO> convertToSeriesDTOs(Regatta regatta) {

@@ -11,9 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
@@ -66,9 +64,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      */
     private final Map<T, Set<String>> notifications = new HashMap<>();
 
-    private final BundleContext context;
-
-    private final String key;
+    protected final BundleContext context;
 
     private final ServiceTracker<UserStore, UserStore> tracker;
     
@@ -78,15 +74,29 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      * Constructor used to automatically track {@link UserStore} as OSGi service.
      */
     public PreferenceObjectBasedNotificationSet(String key, BundleContext context) {
-        this.key = key;
         this.context = context;
         if (context == null) {
             this.tracker = null;
         } else {
-            this.tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, new Cutomizer());
+            this.tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, 
+                    new StoreServiceTrackerCustomizer<UserStore>(context, logger) {
+                        @Override
+                        protected void setStore(UserStore store) {
+                            PreferenceObjectBasedNotificationSet.this.store = store;
+                            store.addPreferenceObjectListener(key, listener, true);
+                        }
+                        @Override
+                        protected void removeStore() {
+                            PreferenceObjectBasedNotificationSet.this.store = null;
+                        }
+                        @Override
+                        protected UserStore getStore() {
+                            return PreferenceObjectBasedNotificationSet.this.store;
+                        }
+            });
             this.tracker.open();
         }
-        this.lock = new NamedReentrantReadWriteLock(getClass().getName()+" for "+key, /* fair */ false);
+        this.lock = new NamedReentrantReadWriteLock(getClass().getName()+" for "+ key, /* fair */ false);
     }
 
     /**
@@ -106,7 +116,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
         removeStore();
     }
 
-    private void removeStore() {
+    protected void removeStore() {
         if (store != null) {
             store.removePreferenceObjectListener(listener);
             store = null;
@@ -183,33 +193,6 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
                 }
             } finally {
                 LockUtil.unlockAfterWrite(lock);
-            }
-        }
-    }
-
-    private class Cutomizer implements ServiceTrackerCustomizer<UserStore, UserStore> {
-        @Override
-        public UserStore addingService(ServiceReference<UserStore> reference) {
-            UserStore store = context.getService(reference);
-            if (PreferenceObjectBasedNotificationSet.this.store != null
-                    && PreferenceObjectBasedNotificationSet.this.store != store) {
-                logger.severe("Multiple " + UserStore.class.getSimpleName()
-                        + " instances found. Only one instance is handled.");
-            } else {
-                PreferenceObjectBasedNotificationSet.this.store = store;
-                store.addPreferenceObjectListener(key, listener, true);
-            }
-            return store;
-        }
-
-        @Override
-        public void modifiedService(ServiceReference<UserStore> reference, UserStore service) {
-        }
-
-        @Override
-        public void removedService(ServiceReference<UserStore> reference, UserStore service) {
-            if (PreferenceObjectBasedNotificationSet.this.store == service) {
-                removeStore();
             }
         }
     }
