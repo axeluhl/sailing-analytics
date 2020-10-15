@@ -791,7 +791,7 @@
         {
             "title":"YouTube",
             "link": "https://www.youtube.com/t/terms",
-            "content": "The Application utilizes the YouTube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouTube, found under ${link}."
+            "content": "The application utilizes the YouTube video streaming service. Therefore, by using the application, users implicitly agree to the terms of service provided by YouTube, found under ${link}."
         },
         {
             "title":"Google Privacy",
@@ -801,7 +801,7 @@
         {
             "title":"Google Maps",
             "link": "http://www.google.com/intl/en/policies/terms/",
-            "content": "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, Customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at ${link}. If Customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, Customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute Customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider."
+            "content": "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at ${link}. If customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider."
         }
     ]
 }
