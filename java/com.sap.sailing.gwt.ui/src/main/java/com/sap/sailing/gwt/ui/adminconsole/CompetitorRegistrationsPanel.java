@@ -278,7 +278,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         });
     }
 
-    public void deactivateRegistrationButtons(String tooltip){
+    public void deactivateRegistrationButtons(String tooltip) {
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
         addCompetitorWithBoatButton.setEnabled(false);
