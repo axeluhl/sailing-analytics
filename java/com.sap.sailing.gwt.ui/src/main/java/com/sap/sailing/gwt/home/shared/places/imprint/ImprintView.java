@@ -23,5 +23,4 @@ public interface ImprintView {
     void showComponents(ComponentData component, LicenseData license);
 
     void showLicenseText(String text);
-    
 }
