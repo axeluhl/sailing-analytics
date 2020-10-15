@@ -23,15 +23,13 @@
 		}
 		
 		.disclaimerItemContent {
-			font-size: 1.3em;
-			margin: 20px 0px 5px 0px;
-			font-weight: bold;
 			overflow-wrap: break-word;
 		}
 	</ui:style>
     <g:HTMLPanel>
-        <div ui:field="disclaimerItem" styleName="{style.disclaimerItem}" />
-        <g:Label ui:field="disclaimerItemTitle" styleName="{style.disclaimerItemTitle}" />
-        <div ui:field="disclaimerItemContent" styleName="{style.disclaimerItemContent}" />
+        <div ui:field="disclaimerItem" class="{style.disclaimerItem}" >
+	        <g:Label ui:field="disclaimerItemTitle" styleName="{style.disclaimerItemTitle}" />
+	        <div ui:field="disclaimerItemContent" class="{style.disclaimerItemContent}" />
+        </div>
     </g:HTMLPanel>
 </ui:UiBinder>    
