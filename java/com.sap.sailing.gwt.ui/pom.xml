@@ -144,6 +144,7 @@
                 <module>com.sap.sailing.gwt.home.Home</module>
                 <module>com.sap.sailing.gwt.autoplay.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+                <module>com.sap.sailing.gwt.ui.AdminConsolePwa</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
                 <module>com.sap.sailing.gwt.ui.RaceBoard</module>

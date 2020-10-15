@@ -88,7 +88,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     
     private final Map<String, String> verticalTabNameToTitleMap;
     
-    private final Map<Class, String> placeToLeftMenuItemMap;
+    private final Map<Class<? extends AdminConsolePlace>, String> placeToLeftMenuItemMap;
     
     private final SelectionHandler<Integer> tabSelectionHandler;
     
@@ -121,13 +121,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                     final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
 
-                    Widget unwrapped = unwrapScrollPanel(selectedPanel);
-                    if (widgetPlacesMap.containsKey(selectedPanel)) {
-                        Place gotoPlace = widgetPlacesMap.get(selectedPanel);
-                        placeController.goTo(gotoPlace);
-                    } else {
-                        refreshDataFor(selectedPanel);      
-                    }
+                    refreshDataFor(selectedPanel);
+                    goToTabPlace(selectedPanel);
+                    
                } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
@@ -138,19 +134,20 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
                     }
-
-                    Widget unwrapped = unwrapScrollPanel(widgetAssociatedToVerticalTab);
-                    if (widgetPlacesMap.containsKey(widgetAssociatedToVerticalTab)) {
-                        Place gotoPlace = widgetPlacesMap.get(widgetAssociatedToVerticalTab);
-                        placeController.goTo(gotoPlace);
-                    } else { 
-                        refreshDataFor(widgetAssociatedToVerticalTab);
-                    }
+                    
+                    refreshDataFor(widgetAssociatedToVerticalTab);
+                    goToTabPlace(widgetAssociatedToVerticalTab);
                 }
             }
         }
         
-
+        private void goToTabPlace(Widget widget) {
+            if (widgetPlacesMap.containsKey(widget)) {
+                Place gotoPlace = widgetPlacesMap.get(widget);
+                placeController.goTo(gotoPlace);
+            }
+        }
+        
         private void refreshDataFor(Widget target) {
             RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
             if (refreshTarget != null) {
@@ -175,7 +172,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     
     public AdminConsolePanel(UserService userService,
             ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
+            String releaseNotesURL, Anchor pwaAnchor, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
             StringMessages stringMessages, PlaceController placeController) {
         this.placeController = placeController;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
@@ -245,6 +242,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             sysinfoPanel.add(releaseNotesLink);
             informationPanel.add(releaseNotesLink, DockPanel.EAST);
         }
+        
+        informationPanel.add(pwaAnchor, DockPanel.EAST);
+        
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);

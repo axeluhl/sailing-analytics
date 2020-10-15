@@ -3,6 +3,8 @@
 	xmlns:dp="urn:import:com.sap.sailing.gwt.ui.pwa.desktop"
 	xmlns:sse="urn:import:com.sap.sse.gwt.client">
 
-	<g:HeaderPanel ui:field="headerPanel">
-	</g:HeaderPanel>
+ <g:HTMLPanel>
+
+  </g:HTMLPanel>
+	
 </ui:UiBinder>

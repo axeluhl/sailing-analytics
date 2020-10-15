@@ -5,8 +5,10 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -59,7 +61,6 @@ import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkPropertiesP
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkRolesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.coursecreation.MarkTemplatesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.AbstractLeaderboardsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.racemanager.DeviceConfigurationPlace;
@@ -215,8 +216,24 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
     
     private AdminConsolePanel createAdminConsolePanel(final ServerInfoDTO serverInfo) {
+        
+        final Anchor pwaAnchor = new Anchor(
+                new SafeHtmlBuilder().appendEscaped(getStringMessages().pwaAnchor()).toSafeHtml(), "AdminConsolePwa.html");
+        pwaAnchor.addStyleName("releaseNotesAnchor");
+        
+        /**DOM.sinkEvents(awpAnchor, Event.ONCLICK);
+        DOM.setEventListener(awpAnchor, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                if (event.getTypeInt() == Event.ONCLICK) {
+                    event.preventDefault();
+                    SwitchingEntryPoint.switchToMobile();
+                }
+            }
+        });**/
+        
         adminConsolePanel = new AdminConsolePanel(userService, 
-                serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", errorReporter,
+                serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", pwaAnchor, errorReporter,
                 SecurityStylesheetResources.INSTANCE.css(), stringMessages, placeController);
         adminConsolePanel.addStyleName("adminConsolePanel");
         
