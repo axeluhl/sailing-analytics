@@ -1,4 +1,4 @@
-1. [General Introduction to SAP Sailing Analytics](https://sap-my.sharepoint.com/:v:/p/axel_uhl/EY9F2kN56RdFu97laEHmmy8B1XyhX-jxcQJdvcaUDU3O5Q?e=1yBaSl)
+1. [General Introduction to SAP Sailing Analytics](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
 
 2. General Introduction to SAP Sailing Analytics Backend
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
