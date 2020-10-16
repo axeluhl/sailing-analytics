@@ -2,6 +2,7 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -654,7 +655,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public com.sap.sse.landscape.Region getDefaultRegion() {
-        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDefaultRegion(...)
-        return null;
+        return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
+    }
+
+    @Override
+    public Iterable<com.sap.sse.landscape.Region> getRegions() {
+        return Util.map(Arrays.asList(Region.EU_WEST_2, Region.CA_CENTRAL_1), AwsRegion::new);
     }
 }

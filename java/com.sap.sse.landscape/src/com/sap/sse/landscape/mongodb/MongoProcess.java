@@ -9,9 +9,6 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 
 public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics>, MongoEndpoint {
     int DEFAULT_PORT = 27017;
-    boolean isHidden();
-    int getPriority();
-    int getVotes();
     
     @Override
     default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
@@ -23,5 +20,14 @@ public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics
         sb.append("/");
         optionalDb.ifPresent(db->sb.append(db.getName()));
         return new URI(sb.toString());
+    }
+    
+    boolean isInReplicaSet();
+    
+    /**
+     * If not {@link #isInReplicaSet()} then a {@link ClassCastException} will be thrown.
+     */
+    default MongoProcessInReplicaSet asMongoProcessInReplicaSet() {
+        return (MongoProcessInReplicaSet) this;
     }
 }

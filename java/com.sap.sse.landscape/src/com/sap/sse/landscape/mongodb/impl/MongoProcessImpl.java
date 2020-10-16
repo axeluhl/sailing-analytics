@@ -1,11 +1,24 @@
 package com.sap.sse.landscape.mongodb.impl;
 
+import java.net.URISyntaxException;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.mongodb.ClientSessionOptions;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.session.ClientSession;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoMetrics;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 
 public class MongoProcessImpl implements MongoProcess {
+    private static final String LOCAL_DB_NAME = "local";
+    private static final Logger logger = Logger.getLogger(MongoProcessImpl.class.getName());
     private final int port;
     private final Host host;
     
@@ -42,33 +55,29 @@ public class MongoProcessImpl implements MongoProcess {
     }
 
     @Override
-    public boolean isAlive() {
-        // TODO Implement MongoProcessImpl.isAlive(...)
-        return false;
-    }
-
-    @Override
     public boolean isReady() {
-        // TODO Implement MongoProcessImpl.isReady(...)
+        try {
+            return Util.contains(getClient().listDatabaseNames(), LOCAL_DB_NAME);
+        } catch (URISyntaxException e) {
+            logger.log(Level.SEVERE, "Internal error constructing MongoDB client URI", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean isInReplicaSet() {
         return false;
     }
-
-    @Override
-    public boolean isHidden() {
-        // TODO Implement MongoProcessImpl.isHidden(...)
-        return false;
+    
+    protected MongoClientURI getMongoClientURI(Optional<Database> optionalDb) throws URISyntaxException {
+        return new MongoClientURI(getURI(optionalDb).toString());
     }
-
-    @Override
-    public int getPriority() {
-        // TODO Implement MongoProcessImpl.getPriority(...)
-        return 0;
+    protected MongoClient getClient() throws URISyntaxException {
+        return new MongoClient(getMongoClientURI(Optional.empty()));
     }
-
-    @Override
-    public int getVotes() {
-        // TODO Implement MongoProcessImpl.getVotes(...)
-        return 0;
+    
+    protected ClientSession getClientSession() throws URISyntaxException {
+        return getClient().startSession(ClientSessionOptions.builder().causallyConsistent(true).build());
     }
 
 }

@@ -27,4 +27,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      *         proxy cluster in a region
      */
     SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region);
+    
+    /**
+     * Tells the regions supported. The underlying hyperscaler may have more, but we may not want to run in all.
+     */
+    Iterable<Region> getRegions();
+    
+    
 }

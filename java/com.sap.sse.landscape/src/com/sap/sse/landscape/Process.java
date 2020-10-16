@@ -24,9 +24,13 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
      * become {@link #isReady() ready} to accept requests. An example of a process {@link #isAlive() alive}
      * but not {@link #isReady() ready} would be a replica process that has started to receive the initial
      * load from its master. It can answer in a well-defined way to health check / status requests, but you
-     * shouldn't route regular traffic to it yet. 
+     * shouldn't route regular traffic to it yet.<p>
+     * 
+     * The default implementation simply returns what {@link #isReady()} returns.
      */
-    boolean isAlive();
+    default boolean isAlive() {
+        return isReady();
+    }
     
     /**
      * Tells whether this process is ready to accept requests. Use this for a health check in a target group

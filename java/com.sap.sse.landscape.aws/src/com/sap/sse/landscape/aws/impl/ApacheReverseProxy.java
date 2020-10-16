@@ -105,12 +105,6 @@ extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, Replic
     }
 
     @Override
-    public boolean isAlive() {
-        // TODO Implement Process<LogT,MetricsT>.isAlive(...)
-        return false;
-    }
-
-    @Override
     public boolean isReady() {
         // TODO Implement Process<LogT,MetricsT>.isReady(...)
         return false;
