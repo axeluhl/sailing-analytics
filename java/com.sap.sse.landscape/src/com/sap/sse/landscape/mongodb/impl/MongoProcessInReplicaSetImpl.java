@@ -1,37 +1,31 @@
 package com.sap.sse.landscape.mongodb.impl;
 
+import java.net.URISyntaxException;
+
+import com.mongodb.MongoClient;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
+import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 
 public class MongoProcessInReplicaSetImpl extends MongoProcessImpl implements MongoProcessInReplicaSet {
-    public MongoProcessInReplicaSetImpl(Host host) {
+    private final MongoReplicaSet replicaSet;
+    
+    public MongoProcessInReplicaSetImpl(MongoReplicaSet replicaSet, Host host) {
         super(host);
+        this.replicaSet = replicaSet;
     }
 
-    public MongoProcessInReplicaSetImpl(int port, Host host) {
+    public MongoProcessInReplicaSetImpl(MongoReplicaSet replicaSet, int port, Host host) {
         super(port, host);
+        this.replicaSet = replicaSet;
     }
     
     @Override
-    public boolean isHidden() {
-        // TODO Implement MongoProcessImpl.isHidden(...)
-        return false;
+    public boolean isInReplicaSet() throws URISyntaxException {
+        return getReplicaSetClient().getReplicaSetStatus() != null;
     }
 
-    @Override
-    public int getPriority() {
-        // TODO Implement MongoProcessImpl.getPriority(...)
-        return 0;
-    }
-
-    @Override
-    public int getVotes() {
-        // TODO Implement MongoProcessImpl.getVotes(...)
-        return 0;
-    }
-
-    @Override
-    public boolean isInReplicaSet() {
-        return true;
+    private MongoClient getReplicaSetClient() throws URISyntaxException {
+        return replicaSet.getClient();
     }
 }

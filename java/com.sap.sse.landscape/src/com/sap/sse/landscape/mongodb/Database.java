@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Named;
 
 public interface Database extends Named {
@@ -12,20 +13,12 @@ public interface Database extends Named {
      * database. See also {@link MongoReplicaSet#getConnectionURI()}.
      */
     default URI getConnectionURI() throws URISyntaxException {
-        return getEndoint().getURI(Optional.of(this));
+        return getEndpoint().getURI(Optional.of(this));
     }
     
-    MongoEndpoint getEndoint();
+    MongoEndpoint getEndpoint();
     
-    /**
-     * @return the collections currently stored in this database
-     */
-    Iterable<Collection> getCollections();
-    
-    String getMD5Hash();
-    
-    /**
-     * Drops this database with all its collections and all their contents. Use with care!
-     */
-    void drop();
+    default MongoDatabase getMongoDatabase() throws URISyntaxException {
+        return getEndpoint().getMongoDatabase(getName());
+    }
 }

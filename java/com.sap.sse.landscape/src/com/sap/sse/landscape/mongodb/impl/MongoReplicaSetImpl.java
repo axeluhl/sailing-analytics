@@ -1,52 +1,40 @@
 package com.sap.sse.landscape.mongodb.impl;
 
-import com.sap.sse.landscape.mongodb.Database;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 
-public class MongoReplicaSetImpl implements MongoReplicaSet {
+public class MongoReplicaSetImpl extends MongoEndpointImpl implements MongoReplicaSet {
     private static final long serialVersionUID = 2055195945588247106L;
+    private final String name;
+    private final Set<MongoProcess> instances;
+    
+    public MongoReplicaSetImpl(String name) {
+        super();
+        this.name = name;
+        this.instances = new HashSet<>();
+    }
 
     @Override
     public String getName() {
-        // TODO Implement MongoReplicaSetImpl.getName(...)
-        return null;
+        return name;
     }
 
     @Override
     public Iterable<MongoProcess> getInstances() {
-        // TODO Implement MongoReplicaSetImpl.getInstances(...)
-        return null;
+        return Collections.unmodifiableSet(instances);
     }
 
     @Override
     public void addReplica(MongoProcess newReplica) {
-        // TODO Implement MongoReplicaSetImpl.addReplica(...)
-
+        instances.add(newReplica);
     }
 
     @Override
     public void removeReplica(MongoProcess replicaToRemove) {
-        // TODO Implement MongoReplicaSetImpl.removeReplica(...)
-
+        instances.remove(replicaToRemove);
     }
-
-    @Override
-    public Iterable<Database> getDatabases() {
-        // TODO Implement MongoReplicaSetImpl.getDatabases(...)
-        return null;
-    }
-
-    @Override
-    public Database getDatabase(String dbName) {
-        // TODO Implement MongoReplicaSetImpl.getDatabase(...)
-        return null;
-    }
-
-    @Override
-    public Database importDatabase(Database from) {
-        // TODO Implement MongoReplicaSetImpl.importDatabase(...)
-        return null;
-    }
-
 }

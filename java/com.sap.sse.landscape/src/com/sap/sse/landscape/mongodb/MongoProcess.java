@@ -22,7 +22,7 @@ public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics
         return new URI(sb.toString());
     }
     
-    boolean isInReplicaSet();
+    boolean isInReplicaSet() throws URISyntaxException;
     
     /**
      * If not {@link #isInReplicaSet()} then a {@link ClassCastException} will be thrown.
