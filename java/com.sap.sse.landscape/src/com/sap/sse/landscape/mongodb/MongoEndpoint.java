@@ -39,4 +39,10 @@ public interface MongoEndpoint {
     MongoClient getClient() throws URISyntaxException;
 
     ClientSession getClientSession() throws URISyntaxException;
+    
+    default String getMD5Hash(String databaseName) throws URISyntaxException {
+        return getMD5Hash(getMongoDatabase(databaseName));
+    }
+    
+    String getMD5Hash(MongoDatabase database) throws URISyntaxException;
 }

@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetAddress;
@@ -27,8 +28,8 @@ public class MongoTests {
         Mockito.when(localhost.getPublicAddress()).thenReturn(InetAddress.getByName("127.0.0.1"));
         mongoProcess = new MongoProcessImpl(localhost);
         mongoReplicaSet = new MongoReplicaSetImpl("rs0");
-        mongoReplicaSet.addReplica(mongoProcess);
         mongoProcessInReplicaSet = new MongoProcessInReplicaSetImpl(mongoReplicaSet, 10222, localhost);
+        mongoReplicaSet.addReplica(mongoProcessInReplicaSet);
     }
     
     @Test
@@ -44,5 +45,12 @@ public class MongoTests {
     @Test
     public void testMongoProcessInReplicaSetCanReportPriority() throws URISyntaxException {
         assertTrue(mongoProcessInReplicaSet.isInReplicaSet());
+    }
+    
+    @Test
+    public void testMd5() throws URISyntaxException {
+        final String hash = mongoReplicaSet.getMD5Hash("local");
+        assertNotNull(hash);
+        assertTrue(!hash.isEmpty());
     }
 }

@@ -3,6 +3,8 @@ package com.sap.sse.landscape.mongodb.impl;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+import org.bson.Document;
+
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -50,4 +52,9 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
         return getClient().startSession(ClientSessionOptions.builder().causallyConsistent(true).build());
     }
 
+    
+    @Override
+    public String getMD5Hash(MongoDatabase database) throws URISyntaxException {
+        return database.runCommand(new Document("dbHash", 1)).get("md5").toString();
+    }
 }
