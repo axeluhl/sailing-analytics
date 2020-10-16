@@ -372,7 +372,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
     
     /**
-     * @return a thread-safe copy of the service events filtered by {@link eventIds} parameter with taking the
+     * @return a thread-safe copy of the service' Regattas filtered by {@link regattaIds} parameter with taking the
+     *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
+     *         returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<Regatta> getRegattasSelectively(boolean include, Iterable<UUID> regattaIds);
+    
+    /**
+     * @return a thread-safe copy of the service' events filtered by {@link eventIds} parameter with taking the
      *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
      *         returned, and no risk of a {@link ConcurrentModificationException} exists
      */
