@@ -13,6 +13,8 @@ public class ImprintData extends JavaScriptObject {
     public final native ComponentData[] getComponents() /*-{
 	return this.components;
     }-*/;
-
-
+    
+    public final native DisclaimerData[] getDisclaimers() /*-{
+	return this.disclaimers;
+    }-*/;
 }

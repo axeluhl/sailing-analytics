@@ -1203,6 +1203,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
+                            new RaceCurrentCourseOverGroundInTrueDegrees(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
             result.put(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                     new RideHeightColumn(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                             new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
@@ -1586,6 +1590,44 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
+        private class RaceCurrentSpeedOverGroundInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.currentSpeedAndCourseOverGround == null ? null :
+                        fieldsForRace.currentSpeedAndCourseOverGround.getKnots();
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average absolute (distance always counted as positive, no matter whether left or right)
+         * cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceCurrentCourseOverGroundInTrueDegrees implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.currentSpeedAndCourseOverGround == null ? null :
+                        fieldsForRace.currentSpeedAndCourseOverGround.getBearing().getDegrees();
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average absolute (distance always counted as positive, no matter whether left or right)
+         * cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
         private class RaceAverageAbsoluteCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1909,18 +1951,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             @Override
             public String getRaceColumnName() {
                 return TextRaceColumn.this.getRaceColumnName();
-            }
-        }
-
-        private class RaceCurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {
-            @Override
-            protected Double getBeforeLastLegFinished(LegEntryDTO currentLegDetail) {
-                return currentLegDetail.currentSpeedOverGroundInKnots;
-            }
-
-            @Override
-            protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
-                return new RaceAverageSpeedInKnots().get(row);
             }
         }
 
