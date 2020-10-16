@@ -833,12 +833,12 @@ public class PolarDiagramBase implements PolarDiagram, Serializable {
     public long getTurnLoss() {
         // TODO: retrieve values from polar data mining
         int turnLoss;
-        if ((this.boatClass.getDisplayName() != null) && (this.boatClass.getDisplayName().equals(BoatClassMasterdata.EXTREME_40.getDisplayName()))) {
+        if ((this.boatClass.getName() != null) && (this.boatClass.getName().equals(BoatClassMasterdata.EXTREME_40.getDisplayName()))) {
             turnLoss = 2000;
-        } else if ((this.boatClass.getDisplayName() != null) && (this.boatClass.getDisplayName().equals(BoatClassMasterdata.GC_32.getDisplayName()))) {
+        } else if ((this.boatClass.getName() != null) && (this.boatClass.getName().equals(BoatClassMasterdata.GC_32.getDisplayName()))) {
             // TODO: Needs to be validated
             turnLoss = 2000;
-        } else if ((this.boatClass.getDisplayName() != null) && (this.boatClass.getDisplayName().equals(BoatClassMasterdata._5O5.getDisplayName()))) {
+        } else if ((this.boatClass.getName() != null) && (this.boatClass.getName().equals(BoatClassMasterdata._5O5.getDisplayName()))) {
             turnLoss = 5000;
         } else {
             turnLoss = 4000; // default value
