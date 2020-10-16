@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -39,7 +40,13 @@ public class UserManagementPanelPO extends PageArea {
     public DataEntryPO findUser(final String username) {
         final CellTablePO<DataEntryPO> table = getUserTable();
         for (DataEntryPO entry : table.getEntries()) {
-            final String name = entry.getColumnContent("Username");
+            String name;
+            try {
+                name = entry.getColumnContent("Username");
+            } catch (StaleElementReferenceException e) {
+                // entry is not existing any more but must not break iteration
+                name = null;
+            }
             if (username.equals(name)) {
                 return entry;
             }
@@ -90,10 +97,17 @@ public class UserManagementPanelPO extends PageArea {
     public void deleteUser(String name) {
         selectUser(name);
         deleteSelectedUser();
+        driver.switchTo().alert().accept();
+        // wait until cell is removed from page
+        waitUntil(() -> findUser(name) == null); 
     }
-    
+
     public void deleteSelectedUser() {
         deleteUserButton.click();
+    }
+
+    public void waitUntilUserFound(String userName) {
+        waitUntil(() -> findUser(userName) != null);
     }
 
     public WildcardPermissionPanelPO getUserPermissions() {

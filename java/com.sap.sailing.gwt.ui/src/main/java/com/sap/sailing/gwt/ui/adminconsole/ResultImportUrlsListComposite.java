@@ -56,8 +56,8 @@ public class ResultImportUrlsListComposite extends Composite {
         add.ensureDebugId("AddUrlButton");
         add.setEnabled(false);
 
-        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), table.getSelectionModel(), true,
-                () -> removeUrls(table.getSelectionModel().getSelectedSet()));
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), table.getSelectionModel(),
+                /* withConfirmation */ true, () -> removeUrls(table.getSelectionModel().getSelectedSet()));
         remove.ensureDebugId("RemoveUrlButton");
 
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);

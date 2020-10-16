@@ -3,12 +3,10 @@ package com.sap.sailing.selenium.pages.adminconsole.connectors;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -63,54 +61,20 @@ public class ResultImportUrlsPanelPO extends PageArea {
         testUrlEntry.select();
         pushRemoveButton();
         driver.switchTo().alert().accept();
-        FluentWait<DataEntryPO> wait = createFluentWait(testUrlEntry, DEFAULT_WAIT_TIMEOUT_SECONDS,
-                DEFAULT_POLLING_INTERVAL);
-        wait.until(new Function<DataEntryPO, Object>() {
-            @Override
-            public Object apply(DataEntryPO testUrlEntry) {
-                try {
-                    testUrlEntry.getColumnContent(url);
-                } catch (StaleElementReferenceException e) {
-                    return Boolean.TRUE;
-                }
-                return Boolean.FALSE;
-            }
-        });
+        waitUntil(()-> findUrl(url) == null);
     }
 
     private void pushRemoveButton() {
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                return removeButton.isEnabled();
-            }
-        });
+        waitUntil(() -> removeButton.isEnabled());
         this.removeButton.click();
     }
 
     public void removeWithInlineButton(String url) {
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                return findUrl(url) != null;
-            }
-        });
+        waitUntil(() -> findUrl(url) != null);
         DataEntryPO testUrlEntry = findUrl(url);
         testUrlEntry.clickActionImage("DELETE");
         driver.switchTo().alert().accept();
-        FluentWait<DataEntryPO> wait = createFluentWait(testUrlEntry, DEFAULT_WAIT_TIMEOUT_SECONDS,
-                DEFAULT_POLLING_INTERVAL);
-        wait.until(new Function<DataEntryPO, Object>() {
-            @Override
-            public Object apply(DataEntryPO testUrlEntry) {
-                try {
-                    testUrlEntry.getColumnContent(url);
-                } catch (StaleElementReferenceException e) {
-                    return Boolean.TRUE;
-                }
-                return Boolean.FALSE;
-            }
-        });
+        waitUntil(() -> findUrl(url) == null);
     }
 
     private CellTablePO<DataEntryPO> getUserTable() {
@@ -120,7 +84,13 @@ public class ResultImportUrlsPanelPO extends PageArea {
     public DataEntryPO findUrl(final String url) {
         final CellTablePO<DataEntryPO> table = getUserTable();
         for (DataEntryPO entry : table.getEntries()) {
-            final String name = entry.getColumnContent("URL");
+            String name;
+            try {
+                name = entry.getColumnContent("URL");
+            } catch (StaleElementReferenceException e) {
+                // entry is not existing any more but must not break iteration
+                name = null;
+            }
             if (url.equals(name)) {
                 return entry;
             }
