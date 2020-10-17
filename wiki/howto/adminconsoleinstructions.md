@@ -25,7 +25,7 @@
 - Anlegen eines einfachen Events in der Admin Console
 - Rechteverwaltung des Events: "Publishing"-Levels (show on homepage und/vs. Group Ownership Management)
 - Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships
-- Create an event with multiple regattas
+- [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
 	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
@@ -63,6 +63,8 @@
 	* Race Manager App
 	* Buoy Pinger App
 - Setting up and running ORC PCS regattas
+- [Setting up a Matchrace Regatta](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
+- Setting up a 4 boat final
 - Tips and Tricks for Cleansing Your Event
 	* check max speeds to find outliers
 	* check for mark passing completeness
