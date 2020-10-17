@@ -64,7 +64,7 @@
 	* Buoy Pinger App
 - Setting up and running ORC PCS regattas
 - [Setting up a Matchrace Regatta](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
-
+- Setting up a 4 boat final
 - Tips and Tricks for Cleansing Your Event
 	* check max speeds to find outliers
 	* check for mark passing completeness
