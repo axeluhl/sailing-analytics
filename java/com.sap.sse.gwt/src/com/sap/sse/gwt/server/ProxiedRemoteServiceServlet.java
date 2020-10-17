@@ -19,10 +19,10 @@ import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.shared.RpcConstants;
 
 /**
  * Using GWT in a proxyfied environment can be tricky and leads to strange errors
@@ -102,7 +102,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     protected Locale getClientLocale() {
         final HttpServletRequest request = getThreadLocalRequest();
         if (request != null) {
-            final String localeString = request.getHeader(RpcConstants.HEADER_LOCALE);
+            final String localeString = request.getHeader(HttpRequestHeaderConstants.HEADER_LOCALE);
             if (localeString != null && ! localeString.isEmpty()) {
                 try {
                     return Locale.forLanguageTag(localeString);

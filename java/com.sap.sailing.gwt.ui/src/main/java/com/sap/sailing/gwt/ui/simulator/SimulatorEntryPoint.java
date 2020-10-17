@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import java.util.logging.Logger;
 

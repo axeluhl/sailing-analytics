@@ -44,6 +44,7 @@ public class ImprintActivity extends AbstractActivity implements ImprintView.Pre
                         for (LicenseData license : data.getLicenses()) {
                             licenseMap.put(license.getKey(), license);
                         }
+                        view.addDisclaimers(imprintData.getDisclaimers());
                         view.showComponents(imprintData.getComponents());
                     }
                 } catch (Exception e) {

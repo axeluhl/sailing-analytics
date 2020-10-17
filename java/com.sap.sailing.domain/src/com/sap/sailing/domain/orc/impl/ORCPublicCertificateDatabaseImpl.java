@@ -629,7 +629,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             final Set<CertificateHandle> restrictedResults = new HashSet<>();
             for (final CertificateHandle handle : filterHandlesForCurrentYear(certificateHandles)) {
                 final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(handle.getBoatClassName());
-                if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getDisplayName())) {
+                if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getName())) {
                     restrictedResults.add(handle);
                 }
             }
