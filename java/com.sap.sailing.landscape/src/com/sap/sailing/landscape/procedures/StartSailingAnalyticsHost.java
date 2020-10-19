@@ -4,6 +4,8 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.sap.sailing.landscape.Release;
+import com.sap.sailing.landscape.ReleaseRepository;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
@@ -23,6 +25,12 @@ public abstract class StartSailingAnalyticsHost<ShardingKey,
                                                 HostT extends SailingAnalyticsHost<ShardingKey>>
 extends StartAwsHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
+    /**
+     * The user data variable to use to specify the release to install and run on the host. See also
+     * {@link ReleaseRepository} and {@link #getReleaseUserData}.
+     */
+    private final static String INSTALL_FROM_RELEASE = "INSTALL_FROM_RELEASE";
+    
     private final Database databaseConfiguration;
 
     public StartSailingAnalyticsHost(String name, MachineImage<SailingAnalyticsHost<ShardingKey>> machineImage,
@@ -33,6 +41,16 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         super(machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, Optional.of(tags.orElse(Tags.empty()).and("Name", name)), userData);
         this.databaseConfiguration = databaseConfiguration;
         addUserData(getDatabaseUserData());
+    }
+    
+    /**
+     * To launch the instance with a specific release, pass the result of this method as a {@code userData} string to
+     * the
+     * {@link #StartSailingAnalyticsHost(String, MachineImage, Landscape, InstanceType, AwsAvailabilityZone, String, Iterable, Optional, Database, String...)
+     * constructor}.
+     */
+    public static String getReleaseUserData(Release release) {
+        return INSTALL_FROM_RELEASE+"="+release.getName();
     }
 
     private Iterable<String> getDatabaseUserData() throws URISyntaxException {

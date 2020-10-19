@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: com.sap.sailing.landscape.test
+Bundle-SymbolicName: com.sap.sailing.landscape.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: com.sap.sailing.landscape
+Automatic-Module-Name: com.sap.sailing.landscape.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit
