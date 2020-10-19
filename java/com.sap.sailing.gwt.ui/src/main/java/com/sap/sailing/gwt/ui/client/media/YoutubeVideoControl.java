@@ -69,6 +69,7 @@ public class YoutubeVideoControl  {
                                     that.@com.sap.sailing.gwt.ui.client.media.YoutubeVideoControl::initPlayState(Lcom/google/gwt/core/client/JavaScriptObject;)(player);
                                }
                 },
+                host: 'https://www.youtube-nocookie.com',
                 playerVars : {
                         'autoplay' : 0,
                         'disablekb': 1,
