@@ -29,6 +29,8 @@
 	* (boat) classes
 	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
+        * [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
+ 
 - Details of regatta set-up explained:
 	* Provisioned/changing boats
 	* all the bells and whistles including advanced discarding rules
