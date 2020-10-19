@@ -1,0 +1,36 @@
+package com.sap.sailing.domain.coursetemplate.impl;
+
+import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithTags;
+import com.sap.sse.common.Color;
+
+public class CommonMarkPropertiesWithTagsImpl extends CommonMarkPropertiesImpl implements CommonMarkPropertiesWithTags {
+    private static final long serialVersionUID = -925045903410189747L;
+    private Iterable<String> tags;
+
+    public CommonMarkPropertiesWithTagsImpl(String name, String shortName, Color color, String shape, String pattern, MarkType type, Iterable<String> tags) {
+        super(name, shortName, color, shape, pattern, type);
+        this.tags = tags;
+    }
+
+    public CommonMarkPropertiesWithTagsImpl(final CommonMarkPropertiesWithTags commonMarkProperties) {
+        this(commonMarkProperties.getName(), commonMarkProperties.getShortName(), commonMarkProperties.getColor(),
+                commonMarkProperties.getShape(), commonMarkProperties.getPattern(), commonMarkProperties.getType(), commonMarkProperties.getTags());
+    }
+    
+    public CommonMarkPropertiesWithTagsImpl(final CommonMarkProperties commonMarkProperties) {
+        this(commonMarkProperties.getName(), commonMarkProperties.getShortName(), commonMarkProperties.getColor(),
+                commonMarkProperties.getShape(), commonMarkProperties.getPattern(), commonMarkProperties.getType(), /* tags */ null);
+    }
+
+    @Override
+    public Iterable<String> getTags() {
+        return this.tags;
+    }
+    
+    @Override
+    public void setTags(Iterable<String> tags) {
+        this.tags = tags;
+    }
+}
