@@ -27,7 +27,7 @@
 - Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships
 - [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
-	* assigning regattas to course areas
+	* [assigning regattas to course areas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/WorkingWithCourseAreas_Part1.mp4)
 	* leaderboards, including sub-divisions
 	* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
  
