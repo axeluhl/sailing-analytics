@@ -1,23 +1,23 @@
 1. General Introduction to SAP Sailing Analytics
 
-2. General Introduction to SAP Sailing Analytics Backend
+2. [General Introduction to SAP Sailing Analytics Backend](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/ALookAroundAdminConsole.mp4)
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
 	
 3. How to enhance events created with Sail Insight
-	Moving Marks
-	Adding Marks
-	Managing Media (enhance event website)
-	Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
-	How to correct results
-	How to combine single regattas into one event
-	How to add GPS data of individual boats
-	Adding Video Playback to a Race Replay 
+	* Moving Marks
+	* Adding Marks
+	* Managing Media (enhance event website)
+	* Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
+	* How to correct results
+	* How to combine single regattas into one event
+	* How to add GPS data of individual boats
+	* Adding Video Playback to a Race Replay 
 
 4. Using the race Manager app in combination with Sail insight
-	To manage results
-	To add and update Wind data
-	To manage a daily schedule 
-	To manage start times
+	* To manage results
+	* To add and update Wind data
+	* To manage a daily schedule 
+	* To manage start times
 	…
 
 
