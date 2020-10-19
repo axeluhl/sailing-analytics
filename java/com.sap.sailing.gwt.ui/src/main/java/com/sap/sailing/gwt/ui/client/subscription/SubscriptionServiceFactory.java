@@ -7,8 +7,10 @@ import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptio
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 
 /**
- * SubscriptionServiceFactory registers all payment provider services in the system and provides way to access a
- * specific service. It also registers default payment service for handling new checkout
+ * SubscriptionServiceFactory registers all payment provider services in the system and provides a way to access a
+ * specific service. It also registers a default payment service for checkout handling. This class implements a
+ * "singleton" pattern, and the single instance can be obtained using the {@link #getInstance()} class method. The
+ * providers known are registered in {@link #registerProviders()}.
  */
 public class SubscriptionServiceFactory {
     private static final String DEFAULT_PROVIDER_NAME = ChargebeeSubscriptionClientProvider.PROVIDER_NAME;
