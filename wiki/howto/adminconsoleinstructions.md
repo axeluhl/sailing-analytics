@@ -1,4 +1,4 @@
-1. [General Introduction to SAP Sailing Analytics](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
+1. General Introduction to SAP Sailing Analytics
 
 2. General Introduction to SAP Sailing Analytics Backend
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
@@ -29,6 +29,8 @@
 	* (boat) classes
 	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
+* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
+ 
 - Details of regatta set-up explained:
 	* Provisioned/changing boats
 	* all the bells and whistles including advanced discarding rules
