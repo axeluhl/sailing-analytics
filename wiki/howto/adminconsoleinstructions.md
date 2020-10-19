@@ -24,7 +24,7 @@
 
 - [Create a simple event in the AdminConsole](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/CreatingYourFirstEvent.mp4)
 - Rechteverwaltung des Events: "Publishing"-Levels (show on homepage und/vs. Group Ownership Management)
-- [Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/IntroductionSecuritySystem.mp4)
+- [Gerneral introduction to the security system: User, Group, Permissions, Roles, Ownerships](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/IntroductionSecuritySystem.mp4)
 - [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
 	* assigning regattas to course areas
