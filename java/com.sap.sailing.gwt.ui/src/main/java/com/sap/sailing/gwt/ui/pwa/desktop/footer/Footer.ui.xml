@@ -2,6 +2,6 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <g:HTMLPanel tag="footer" ui:field="footerPanel">
     <!-- Website footer-->
-     
+     <g:Anchor text="Switch to mobile view" ui:field="mobileViewAnchor" />
   </g:HTMLPanel>
 </ui:UiBinder>

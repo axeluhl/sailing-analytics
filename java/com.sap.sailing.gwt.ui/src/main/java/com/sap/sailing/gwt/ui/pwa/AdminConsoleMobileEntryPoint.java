@@ -7,9 +7,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
@@ -47,9 +48,15 @@ public class AdminConsoleMobileEntryPoint extends AbstractSailingWriteEntryPoint
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new MobileEventsPlace());
         
-        RootLayoutPanel.get().add(appWidget);      
+        placeWidgetOnRootPanel(clientFactory.getRoot()); 
         
-        historyHandler.handleCurrentHistory();
+        historyHandler.handleCurrentHistory();        
+    }
+    
+    protected void placeWidgetOnRootPanel(Widget rootWidget) {
+        if (rootWidget != null) {
+            RootPanel.get().add(rootWidget);
+        }
     }
 
 }

@@ -50,7 +50,6 @@
 	
 	<source path='pwa'/>
 
-    <inherits name='com.sap.sailing.gwt.ui.AdminConsole'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
@@ -65,6 +64,7 @@
     <set-configuration-property name="CssResource.enableGss" value="true" />
     <set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
+	<source path='adminconsole'/>
 	<source path='masterdataimport'/>
 	<source path='test'/>
 	<source path='actions'/>

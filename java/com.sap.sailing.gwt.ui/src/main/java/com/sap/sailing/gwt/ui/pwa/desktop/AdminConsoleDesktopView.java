@@ -42,7 +42,6 @@ public class AdminConsoleDesktopView extends Composite implements TopLevelView {
     public AdminConsoleDesktopView(final EventBus eventBus, final UserService userService, final SailingServiceWriteAsync sailingService) {
         initWidget(uiBinder.createAndBindUi(this));
     }
-
     
     @Override
     public AcceptsOneWidget getContent() {
