@@ -334,6 +334,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return dbSettingTypes;
     }
 
+    /**
+     * Stores the data exposed by the {@code subscriptions} through the {@link Subscription} type persistently.
+     * Should sub-classes add more state that requires persistence handling then we would probably need an additional
+     * "type" indicator which then picks a persistence handler from a registry, keyed by this type.
+     */
     private BasicDBList createSubscriptions(Subscription[] subscriptions) {
         final BasicDBList result;
         if (subscriptions != null) {

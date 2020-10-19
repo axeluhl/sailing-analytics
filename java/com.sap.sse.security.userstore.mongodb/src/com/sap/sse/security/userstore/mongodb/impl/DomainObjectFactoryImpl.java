@@ -511,6 +511,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    /**
+     * Loads the data exposed hrough the {@link Subscription} type. Should sub-classes have added more state that
+     * requires persistence handling then we would probably need an additional "type" indicator which then picks a
+     * persistence handler from a registry, keyed by this type.
+     */
     private Subscription[] loadSubscriptions(List<?> subscriptionsDoc) {
         final Subscription[] subscriptions;
         if (subscriptionsDoc != null) {
