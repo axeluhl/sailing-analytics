@@ -59,9 +59,9 @@ public interface UserSubscriptionView extends IsWidget {
          * 
          * @param planId
          *            Id of plan to cancel
-         * @param provider
+         * @param providerName
          *            subscription provider name
          */
-        public void cancelSubscription(String planId, String provider);
+        public void cancelSubscription(String planId, String providerName);
     }
 }
