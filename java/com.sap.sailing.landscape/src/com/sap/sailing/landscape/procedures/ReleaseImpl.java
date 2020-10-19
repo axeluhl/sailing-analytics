@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.procedures;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +36,9 @@ public class ReleaseImpl extends NamedImpl implements Release {
     public TimePoint getCreationDate() {
         final String dateSubstring = getName().substring(getName().lastIndexOf("-")+1);
         try {
-            return TimePoint.of(new SimpleDateFormat("yyyyMMddHHmm").parse(dateSubstring));
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return TimePoint.of(simpleDateFormat.parse(dateSubstring));
         } catch (ParseException e) {
             logger.log(Level.WARNING, "Error parsing release date "+dateSubstring+". Returning null instead.", e);
             return null;

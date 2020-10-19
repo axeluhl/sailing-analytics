@@ -6,6 +6,12 @@ import java.net.URL;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Obtain from a {@link ReleaseRepository}. A release has a name that is composed of a base name and a time stamp.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public interface Release extends Named {
     String RELEASE_NOTES_FILE_NAME = "release-notes.txt";
     String ARCHIVE_EXTENSION = ".tar.gz";
