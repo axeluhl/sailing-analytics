@@ -1,4 +1,4 @@
-1. [General Introduction to SAP Sailing Analytics](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
+1. General Introduction to SAP Sailing Analytics
 
 2. General Introduction to SAP Sailing Analytics Backend
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
@@ -25,10 +25,12 @@
 - Anlegen eines einfachen Events in der Admin Console
 - Rechteverwaltung des Events: "Publishing"-Levels (show on homepage und/vs. Group Ownership Management)
 - Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships
-- Create an event with multiple regattas
+- [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
 	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
+* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
+ 
 - Details of regatta set-up explained:
 	* Provisioned/changing boats
 	* all the bells and whistles including advanced discarding rules
@@ -63,6 +65,8 @@
 	* Race Manager App
 	* Buoy Pinger App
 - Setting up and running ORC PCS regattas
+- [Setting up a Matchrace Regatta](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/MatchraceSetup.mp4)
+- Setting up a 4 boat final
 - Tips and Tricks for Cleansing Your Event
 	* check max speeds to find outliers
 	* check for mark passing completeness
