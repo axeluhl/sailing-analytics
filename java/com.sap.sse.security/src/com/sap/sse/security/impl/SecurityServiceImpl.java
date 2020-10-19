@@ -169,12 +169,11 @@ import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionPlan;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
@@ -2566,19 +2565,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         // in case new subscription has no planId, it means user doesn't subscribe to any plans
         // so all plan's roles assigned to the user must be removed
         if (newSubscription != null && !newSubscription.hasPlan()) {
-            SubscriptionPlan[] plans = SubscriptionPlanHolder.getInstance().getPlanList();
+            SubscriptionPlan[] plans = SubscriptionPlan.values();
             for (SubscriptionPlan plan : plans) {
                 removeUserPlanRoles(user, plan);
             }
         } else {
             if (currentSubscription != null && currentSubscription.hasPlan()
                     && currentSubscription.isActiveSubscription()) {
-                SubscriptionPlan currentPlan = SubscriptionPlanHolder.getInstance()
-                        .getPlan(currentSubscription.getPlanId());
+                SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
                 removeUserPlanRoles(user, currentPlan);
             }
             if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
-                SubscriptionPlan newPlan = SubscriptionPlanHolder.getInstance().getPlan(newSubscription.getPlanId());
+                SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
                 addUserPlanRoles(user, newPlan);
             }
         }

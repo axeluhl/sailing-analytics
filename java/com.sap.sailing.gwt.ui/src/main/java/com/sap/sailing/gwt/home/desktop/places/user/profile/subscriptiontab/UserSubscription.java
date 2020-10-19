@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
 
 /**
  * Implementation view for {@link UserSubscriptionView}
@@ -109,7 +108,7 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         if (subscription == null) {
             planListUi.addItem("", "");
         }
-        SubscriptionPlan[] planList = SubscriptionPlanHolder.getInstance().getPlanList();
+        SubscriptionPlan[] planList = SubscriptionPlan.values();
         for (SubscriptionPlan plan : planList) {
             planListUi.addItem(plan.getName(), plan.getId());
         }

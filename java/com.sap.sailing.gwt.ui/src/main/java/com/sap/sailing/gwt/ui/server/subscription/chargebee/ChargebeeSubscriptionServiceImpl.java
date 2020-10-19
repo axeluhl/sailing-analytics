@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
+import static com.chargebee.models.Subscription.cancel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -8,12 +10,14 @@ import java.util.logging.Logger;
 import javax.servlet.ServletConfig;
 
 import org.apache.commons.lang.StringUtils;
+
 import com.chargebee.Environment;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Transaction;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
 import com.sap.sailing.gwt.ui.server.subscription.BaseSubscriptionServiceImpl;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
@@ -25,9 +29,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
-import static com.chargebee.models.Subscription.cancel;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -56,7 +59,7 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
                     response.setHostedPageJSONString(result.hostedPage().toJson());
                 } else {
                     response.setError("User has already subscribed to "
-                            + SubscriptionPlanHolder.getInstance().getPlan(planId).getName() + " plan");
+                            + SubscriptionPlan.getPlan(planId).getName() + " plan");
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);

@@ -20,7 +20,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.ui.server.Activator;
 
 /**
@@ -78,7 +78,7 @@ public class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
      * Check if planId is valid
      */
     protected boolean isValidPlan(String planId) {
-        return StringUtils.isNotEmpty(planId) && SubscriptionPlanHolder.getInstance().getPlan(planId) != null;
+        return StringUtils.isNotEmpty(planId) && SubscriptionPlan.getPlan(planId) != null;
     }
 
     /**

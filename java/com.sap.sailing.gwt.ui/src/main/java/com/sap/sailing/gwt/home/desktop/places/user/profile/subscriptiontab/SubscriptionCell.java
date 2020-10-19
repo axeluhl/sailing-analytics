@@ -17,7 +17,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
-import com.sap.sse.security.shared.subscription.SubscriptionPlanHolder;
 
 public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     interface Style extends CssResource {
@@ -99,7 +98,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     }
 
     private SubscriptionPlan getSubscriptionPlan(SubscriptionItem subscription) {
-        return subscription != null ? SubscriptionPlanHolder.getInstance().getPlan(subscription.getPlanId()) : null;
+        return subscription != null ? SubscriptionPlan.getPlan(subscription.getPlanId()) : null;
     }
 
     private String buildTrialText(SubscriptionItem subscription) {
