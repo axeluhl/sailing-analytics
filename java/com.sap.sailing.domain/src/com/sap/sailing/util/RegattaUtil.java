@@ -29,7 +29,7 @@ public class RegattaUtil {
         return buyZoneRadius;
     }
     
-    public static Iterable<Regatta> getRegattasByEvent(Event event) {
+    public static Set<Regatta> getRegattasByEvent(Event event) {
         Set<Regatta> regattas = new HashSet<Regatta>();
         Iterable<LeaderboardGroup> leaderboardGroups = event.getLeaderboardGroups();
         for(LeaderboardGroup lbg:leaderboardGroups) {
