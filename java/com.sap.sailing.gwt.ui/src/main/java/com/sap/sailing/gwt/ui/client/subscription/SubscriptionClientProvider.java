@@ -9,25 +9,25 @@ public interface SubscriptionClientProvider {
     /**
      * Initialize service on client
      */
-    public void init();
+    void init();
 
     /**
      * Return unique name for this provider
      */
-    public String getProviderName();
+    String getProviderName();
 
     /**
      * Return {@code SubscriptionService} for this provider
      */
-    public SubscriptionServiceAsync<?, ?> getSubscriptionService();
+    SubscriptionServiceAsync<?, ?> getSubscriptionService();
 
     /**
      * Register GWT async service
      */
-    public void registerAsyncService(String serviceBasePath);
+    void registerAsyncService(String serviceBasePath);
 
     /**
      * Return {@code SubscriptionViewPresenter} for this provider
      */
-    public SubscriptionViewPresenter getSubscriptionViewPresenter();
+    SubscriptionViewPresenter getSubscriptionViewPresenter();
 }
