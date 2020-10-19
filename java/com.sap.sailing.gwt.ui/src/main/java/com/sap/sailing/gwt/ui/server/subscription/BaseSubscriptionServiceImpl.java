@@ -12,10 +12,10 @@ import javax.servlet.ServletException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
@@ -50,14 +50,12 @@ public class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
 
     private void initSecurityService() {
         context = Activator.getContext();
-        final ServiceTracker<SecurityService, SecurityService> tracker = new ServiceTracker<>(context,
-                SecurityService.class, null);
-        tracker.open();
+        final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         securityService = CompletableFuture.supplyAsync(() -> {
             SecurityService result = null;
             try {
                 logger.info("Waiting for SecurityService...");
-                result = tracker.waitForService(0);
+                result = tracker.getInitializedService(0);
                 logger.info("Obtained SecurityService " + result);
                 SecurityUtils.setSecurityManager(result.getSecurityManager());
             } catch (InterruptedException e) {
