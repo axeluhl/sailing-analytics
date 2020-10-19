@@ -9,7 +9,6 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
  * @author Tu Tran
  */
 public class SubscriptionDTO implements IsSerializable {
-
     /**
      * User's subscriptions
      */
@@ -38,9 +37,5 @@ public class SubscriptionDTO implements IsSerializable {
 
     public void setSubscriptionItems(SubscriptionItem[] subscriptionItems) {
         this.subscriptionItems = subscriptionItems;
-    }
-
-    public void setError(String error) {
-        this.error = error;
     }
 }
