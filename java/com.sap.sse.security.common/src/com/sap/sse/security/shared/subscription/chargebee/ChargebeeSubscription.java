@@ -4,13 +4,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.subscription.Subscription;
 
 public class ChargebeeSubscription extends Subscription {
-    public static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
-    public static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    private static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
+    private static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
     public static final String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
-    public static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
+    protected static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
 
     public static final String TRANSACTION_TYPE_PAYMENT = "payment";
-    public static final String TRANSACTION_TYPE_REFUND = "refund";
+    protected static final String TRANSACTION_TYPE_REFUND = "refund";
 
     public static final String TRANSACTION_STATUS_SUCCESS = "success";
 
