@@ -22,12 +22,12 @@
 
 
 
-- Anlegen eines einfachen Events in der Admin Console
+- Create a simple event in the Admin Console
 - Rechteverwaltung des Events: "Publishing"-Levels (show on homepage und/vs. Group Ownership Management)
 - Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships
 - [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
-	* [assigning regattas to course areas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/WorkingWithCourseAreas_Part1.mp4)
+	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
 	* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
  
