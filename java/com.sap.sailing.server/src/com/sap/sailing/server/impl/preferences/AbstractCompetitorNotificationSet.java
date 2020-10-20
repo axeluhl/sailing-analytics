@@ -3,7 +3,6 @@ package com.sap.sailing.server.impl.preferences;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -13,8 +12,8 @@ import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
-import com.sap.sse.security.StoreServiceTrackerCustomizer;
 import com.sap.sse.security.interfaces.UserStore;
 
 /**
@@ -24,13 +23,12 @@ import com.sap.sse.security.interfaces.UserStore;
  */
 public abstract class AbstractCompetitorNotificationSet
         extends PreferenceObjectBasedNotificationSet<CompetitorNotificationPreferences, Competitor> {
-    private static final Logger logger = Logger.getLogger(AbstractCompetitorNotificationSet.class.getName());
-    private CompetitorAndBoatStore competitorAndBoatStore;
-    private ServiceTracker<CompetitorAndBoatStore, CompetitorAndBoatStore> tracker;
+    private ServiceTracker<RacingEventService, RacingEventService> tracker;
+    //TODO: Evaluate if this TimeOut is appropriate.
+    private final long TIMEOUT = 2500;
 
-    public AbstractCompetitorNotificationSet(UserStore userStore, CompetitorAndBoatStore competitorAndBoatStore) {
+    public AbstractCompetitorNotificationSet(UserStore userStore) {
         super(CompetitorNotificationPreferences.PREF_NAME, userStore);
-        this.competitorAndBoatStore = competitorAndBoatStore;
     }
 
     /**
@@ -41,36 +39,36 @@ public abstract class AbstractCompetitorNotificationSet
         if (bundleContext == null) {
             this.tracker = null;
         } else {
-            this.tracker = new ServiceTracker<CompetitorAndBoatStore, CompetitorAndBoatStore>(bundleContext,
-                    CompetitorAndBoatStore.class,
-                    new StoreServiceTrackerCustomizer<CompetitorAndBoatStore>(bundleContext, logger) {
-                        @Override
-                        protected void setStore(CompetitorAndBoatStore store) {
-                            AbstractCompetitorNotificationSet.this.competitorAndBoatStore = store;
-                        }
-                        @Override
-                        protected void removeStore() {
-                            AbstractCompetitorNotificationSet.this.competitorAndBoatStore = null;
-                        }
-                        @Override
-                        protected CompetitorAndBoatStore getStore() {
-                            return AbstractCompetitorNotificationSet.this.competitorAndBoatStore;
-                        }
-            });
+            this.tracker = new ServiceTracker<RacingEventService, RacingEventService>(bundleContext,
+                    RacingEventService.class, null);
             this.tracker.open();
         }
+    }
+    
+    private CompetitorAndBoatStore getStore() {
+        CompetitorAndBoatStore competitorAndBoatStoreOrNull = null; 
+        try {
+            RacingEventService service = tracker.waitForService(TIMEOUT);
+            competitorAndBoatStoreOrNull = service.getCompetitorAndBoatStore();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return competitorAndBoatStoreOrNull;
     }
 
     @Override
     protected Collection<Competitor> calculateObjectsToNotify(CompetitorNotificationPreferences preference) {
         Set<Competitor> result = new HashSet<>();
         for (CompetitorNotificationPreference pref : preference.getCompetitors()) {
-            if (shouldNotifyFor(pref)) {
+            if (pref.isNotifyAboutResults()) {
                 String competitorId = pref.getCompetitorId();
-                DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
-                if (competitor != null) {
-                    result.add(competitor);
-                }
+                    CompetitorAndBoatStore store = getStore();
+                    if(store != null) {
+                        DynamicCompetitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
+                        if (competitor != null) {
+                            result.add(competitor);
+                        }
+                    }
             }
         }
         return result;

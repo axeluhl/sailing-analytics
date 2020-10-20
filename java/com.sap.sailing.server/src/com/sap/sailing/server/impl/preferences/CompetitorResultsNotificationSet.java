@@ -13,8 +13,8 @@ import com.sap.sse.security.interfaces.UserStore;
  */
 public class CompetitorResultsNotificationSet extends AbstractCompetitorNotificationSet {
 
-    public CompetitorResultsNotificationSet(UserStore store, CompetitorAndBoatStore competitorAndBoatStore) {
-        super(store, competitorAndBoatStore);
+    public CompetitorResultsNotificationSet(UserStore store) {
+        super(store);
     }
 
     /**
