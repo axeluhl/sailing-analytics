@@ -35,13 +35,13 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>,
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
         CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
-            String competitorId = competitorDTO.getIdAsString();
-            if (competitorStore.getExistingCompetitorByIdAsString(competitorId) != null) {
+            String competitorIdAsString = competitorDTO.getIdAsString();
+            if (competitorStore.getExistingCompetitorByIdAsString(competitorIdAsString) != null) {
                 competitorPreferences
-                        .add(new CompetitorNotificationPreference(competitorId, favorites.isNotifyAboutResults()));
+                        .add(new CompetitorNotificationPreference(competitorIdAsString, favorites.isNotifyAboutResults()));
             } else {
                 throw new DispatchException(
-                        "Competitor with ID: " + competitorId + "is not an existing Competitor on this server.");
+                        "Competitor with ID: " + competitorIdAsString + "is not an existing Competitor on this server.");
             }
         }
         prefs.setCompetitors(competitorPreferences);
