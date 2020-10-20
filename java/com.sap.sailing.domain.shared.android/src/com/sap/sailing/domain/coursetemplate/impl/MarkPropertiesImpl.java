@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -29,11 +28,6 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesWithTagsImpl impleme
     public MarkPropertiesImpl(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
         super(name, shortName, color, shape, pattern, type, /* tags */ null);
-        this.id = id;
-    }
-
-    public MarkPropertiesImpl(UUID id, final CommonMarkProperties commonMarkProperties) {
-        super(commonMarkProperties);
         this.id = id;
     }
     

@@ -14,14 +14,9 @@ public class CommonMarkPropertiesWithTagsImpl extends CommonMarkPropertiesImpl i
         this.tags = tags;
     }
 
-    public CommonMarkPropertiesWithTagsImpl(final CommonMarkPropertiesWithTags commonMarkProperties) {
+    public CommonMarkPropertiesWithTagsImpl(final CommonMarkProperties commonMarkProperties, Iterable<String> tags) {
         this(commonMarkProperties.getName(), commonMarkProperties.getShortName(), commonMarkProperties.getColor(),
-                commonMarkProperties.getShape(), commonMarkProperties.getPattern(), commonMarkProperties.getType(), commonMarkProperties.getTags());
-    }
-    
-    public CommonMarkPropertiesWithTagsImpl(final CommonMarkProperties commonMarkProperties) {
-        this(commonMarkProperties.getName(), commonMarkProperties.getShortName(), commonMarkProperties.getColor(),
-                commonMarkProperties.getShape(), commonMarkProperties.getPattern(), commonMarkProperties.getType(), /* tags */ null);
+                commonMarkProperties.getShape(), commonMarkProperties.getPattern(), commonMarkProperties.getType(), tags);
     }
 
     @Override

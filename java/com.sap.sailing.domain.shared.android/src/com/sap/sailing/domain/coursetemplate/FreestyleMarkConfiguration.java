@@ -10,7 +10,7 @@ package com.sap.sailing.domain.coursetemplate;
  *
  */
 public interface FreestyleMarkConfiguration<P> extends MarkConfiguration<P> {
-    CommonMarkProperties getFreestyleProperties();
+    CommonMarkPropertiesWithTags getFreestyleProperties();
 
     /**
      * @return a non-{@code null} object if this mark configuration originated from a {@link MarkProperties} object

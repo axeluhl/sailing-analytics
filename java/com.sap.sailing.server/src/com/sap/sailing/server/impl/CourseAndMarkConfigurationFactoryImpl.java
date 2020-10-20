@@ -73,6 +73,7 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesWithTagsImpl;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl;
@@ -316,11 +317,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
                             effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl<>(markPropertiesOrNull,
                                     effectiveMarkTemplate, markConfiguration.getAnnotationInfo());
-                        } else {
-                            effectiveConfiguration = new FreestyleMarkConfigurationImpl<>(effectiveMarkTemplate,
-                                    markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getAnnotationInfo());
-                        }
-                    } else {
+                                } else {
+                                    effectiveConfiguration = new FreestyleMarkConfigurationImpl<>(effectiveMarkTemplate,
+                                            markPropertiesOrNull,
+                                            new CommonMarkPropertiesWithTagsImpl(effectiveMarkTemplate,
+                                                    /* tags */ null),
+                                            markConfiguration.getAnnotationInfo());
+                                }
+                            } else {
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl<>(effectiveMarkTemplate,
                                 markConfiguration.getAnnotationInfo());
                     }
