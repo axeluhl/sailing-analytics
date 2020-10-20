@@ -6,6 +6,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
@@ -103,11 +104,11 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
-     * @see #createSshChannel(String)
+     * @see #createSshChannel(String, Optional)
      */
     @Override
-    public SshCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException {
-        return createSshChannel(ROOT_USER_NAME);
+    public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+        return createSshChannel(ROOT_USER_NAME, optionalTimeout);
     }
     
     /**
@@ -119,28 +120,43 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      * {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which you set to the channel.
      */
     @Override
-    public SshCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException {
-        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec"));
+    public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout));
     }
     
-    private Channel createSshChannelInternal(String sshUserName, String channelType) throws JSchException, IOException {
+    private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout) throws JSchException, IOException {
+        final TimePoint start = TimePoint.now();
+        final int connectTimeoutInMillis = 5000;
         logger.info("Creating SSH "+channelType+" channel for SSH user "+sshUserName+
                 " to instance with ID "+getInstanceId());
-        final Session session = createSshSession(sshUserName);
-        session.setUserInfo(new YesUserInfo());
-        session.connect(/* timeout in millis */ 5000);
-        final Channel channel = session.openChannel(channelType);
+        Channel channel = null;
+        while (channel == null && (!optionalTimeout.isPresent() || start.until(TimePoint.now()).compareTo(optionalTimeout.get()) < 0)) {
+            try {
+                final Session session = createSshSession(sshUserName);
+                session.setUserInfo(new YesUserInfo());
+                session.connect(/* timeout in millis */ connectTimeoutInMillis);
+                channel = session.openChannel(channelType);
+            } catch (JSchException e) {
+                logger.info(e.getMessage()
+                        + " while trying to connect. Probably timeout trying early SSH connection.");
+            }
+            if (optionalTimeout.isPresent()) {
+                logger.info("Retrying until "+start.plus(optionalTimeout.get()));
+            } else {
+                logger.info("Retrying forever");
+            }
+        }
         return channel;
     }
     
     @Override
-    public ChannelSftp createSftpChannel(String sshUserName) throws JSchException, IOException {
-        return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp");
+    public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException {
+        return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout);
     }
 
     @Override
-    public ChannelSftp createRootSftpChannel() throws JSchException, IOException {
-        return createSftpChannel(ROOT_USER_NAME);
+    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException {
+        return createSftpChannel(ROOT_USER_NAME, optionalTimeout);
     }
 
     @Override
@@ -152,10 +168,6 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public AwsAvailabilityZone getAvailabilityZone() {
         return availabilityZone;
-    }
-
-    private AwsRegion getRegion() {
-        return getAvailabilityZone().getRegion();
     }
 
     @Override

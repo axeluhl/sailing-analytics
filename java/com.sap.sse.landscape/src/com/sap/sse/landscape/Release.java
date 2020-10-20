@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape;
+package com.sap.sse.landscape;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,6 +13,12 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface Release extends Named {
+    /**
+     * The user data variable to use to specify the release to install and run on the host. See also
+     * {@link ReleaseRepository} and {@link #getReleaseUserData}.
+     */
+    String INSTALL_FROM_RELEASE = "INSTALL_FROM_RELEASE";
+    
     String RELEASE_NOTES_FILE_NAME = "release-notes.txt";
     String ARCHIVE_EXTENSION = ".tar.gz";
     
@@ -33,4 +39,9 @@ public interface Release extends Named {
     default URL getDeployableArchiveURL() throws MalformedURLException {
         return new URL(getFolderURL()+getName()+ARCHIVE_EXTENSION);
     }
+    
+    /**
+     * @return the user data (or {@code env.sh} line) required to force the server process to use this release
+     */
+    Iterable<String> getUserData();
 }

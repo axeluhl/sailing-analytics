@@ -2,7 +2,8 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.UUID;
 
-import com.sap.sse.landscape.Log;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -24,14 +25,14 @@ import com.sap.sse.landscape.aws.AwsLandscape;
  */
 public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-LogT extends Log>
-extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, LogT> {
-    private static final long serialVersionUID = 8019146973512856147L;
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
+implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private AwsInstance<ShardingKey, MetricsT> host;
     
-    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region) {
-        super(name, landscape, region);
+    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+        super(landscape);
+        this.host = host;
     }
 
     @Override
@@ -83,17 +84,20 @@ extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, Replic
 
     @Override
     public int getPort() {
-        // TODO Implement Process<LogT,MetricsT>.getPort(...)
-        return 0;
+        return 443; // TODO currently, we offload SSL only at the reverse proxies; but we should change this to SSL offloading at the load balancer, and then this would have to become 80 (HTTP)
     }
 
+    /**
+     * Making things more specific: as we're in the AWS universe here, the {@link Host} returned more specifically is an
+     * {@link AwsInstance}.
+     */
     @Override
     public AwsInstance<ShardingKey, MetricsT> getHost() {
         return host;
     }
 
     @Override
-    public LogT getLog() {
+    public RotatingFileBasedLog getLog() {
         // TODO Implement Process<LogT,MetricsT>.getLog(...)
         return null;
     }

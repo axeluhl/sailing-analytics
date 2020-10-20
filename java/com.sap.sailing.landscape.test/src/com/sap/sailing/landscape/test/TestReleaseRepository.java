@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.sap.sailing.landscape.ReleaseRepository;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.ReleaseRepository;
 
 public class TestReleaseRepository {
     @Test

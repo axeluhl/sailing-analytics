@@ -152,7 +152,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final AwsRegion euWest2 = new AwsRegion("eu-west-2");
         final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
         final ApacheReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
-                "Central Reverse Proxy eu-west-2", this, euWest2);
+                this);
         euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
         centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
     }
@@ -451,7 +451,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage,
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
@@ -619,7 +619,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
-        return getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID, region);
+        final SecurityGroup result;
+        if (region.getId().equals(Region.EU_WEST_2.id())) {
+            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID, region);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -649,8 +655,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
-        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getMessagingConfigurationForDefaultCluster(...)
-        return null;
+        final RabbitMQEndpoint result;
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = ()->"rabbit.internal.sapsailing.com";
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

@@ -9,30 +9,9 @@ MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterPro
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
         extends Process<RotatingFileBasedLog, MetricsT> {
     /**
-     * @return the configuration as requested when this process was launched
-     */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getRequestedConfiguration();
-    
-    /**
-     * @return the effective configuration with which this process is running, resulting from the
-     *         {@link #getRequestedConfiguration() requested configuration} by filling in the "blanks" with defaults as
-     *         deemed appropriate by the {@link ApplicationHost} {@link Process#getHost() running} this this process, e.g.,
-     *         to avoid any conflicting resource assignments.
-     */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getEffectiveConfiguration();
-
-    /**
      * @return the replica set to which this process belongs
      */
     ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
-    
-    String getJavaVirtualMachineName();
-    
-    String getJavaVirtualMachineVendor();
-    
-    String getJavaVirtualMachineVersion();
-    
-    JMXConnection getJMXConnection();
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this

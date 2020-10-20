@@ -13,10 +13,10 @@ public abstract class StartHost<ShardingKey,
                        ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                        HostT extends Host>
 implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private final MachineImage<HostT> machineImage;
+    private final MachineImage machineImage;
     private final Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
     
-    public StartHost(MachineImage<HostT> machineImage,
+    public StartHost(MachineImage machineImage,
             Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
         super();
         this.machineImage = machineImage;
@@ -28,7 +28,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         return landscape;
     }
 
-    protected MachineImage<HostT> getMachineImage() {
+    protected MachineImage getMachineImage() {
         return machineImage;
     }
 }

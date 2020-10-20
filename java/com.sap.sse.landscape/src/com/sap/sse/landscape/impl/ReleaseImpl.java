@@ -1,15 +1,16 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sse.landscape.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.landscape.Release;
-import com.sap.sailing.landscape.ReleaseRepository;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 
 public class ReleaseImpl extends NamedImpl implements Release {
     private static final Logger logger = Logger.getLogger(ReleaseImpl.class.getName());
@@ -43,5 +44,10 @@ public class ReleaseImpl extends NamedImpl implements Release {
             logger.log(Level.WARNING, "Error parsing release date "+dateSubstring+". Returning null instead.", e);
             return null;
         }
+    }
+
+    @Override
+    public Iterable<String> getUserData() {
+        return Collections.singleton(INSTALL_FROM_RELEASE+"="+getName());
     }
 }

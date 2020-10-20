@@ -49,7 +49,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     private final Optional<Tags> tags;
     private AwsInstance<ShardingKey, MetricsT> host;
     
-    public StartAwsHost(MachineImage<HostT> machineImage, Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
+    public StartAwsHost(MachineImage machineImage, Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
             InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {

@@ -2,10 +2,8 @@ package com.sap.sse.landscape.aws;
 
 import java.util.UUID;
 
-import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Log;
-import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -46,8 +44,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-LogT extends Log>
-extends Process<LogT, MetricsT>, Named {
+LogT extends Log> {
     default InstanceType getDefaultInstanceType() {
         return InstanceType.T3_SMALL;
     }
@@ -102,6 +99,4 @@ extends Process<LogT, MetricsT>, Named {
     void terminate();
 
     String getHealthCheckPath();
-
-    String getTargetGroupName();
 }

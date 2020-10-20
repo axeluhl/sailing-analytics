@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
+import java.util.Optional;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -38,18 +39,18 @@ public interface Host {
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
      */
-    SshCommandChannel createSshChannel(String sshUserName) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
-     * @see #createSshChannel(String)
+     * @see #createSshChannel(String, Optional)
      */
-    SshCommandChannel createRootSshChannel() throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
     
-    ChannelSftp createSftpChannel(String sshUserName) throws JSchException, IOException;
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException;
 
-    ChannelSftp createRootSftpChannel() throws JSchException, IOException;
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException;
     
     Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
     
@@ -58,6 +59,10 @@ public interface Host {
      * {@link Region}.
      */
     AvailabilityZone getAvailabilityZone();
+    
+    default Region getRegion() {
+        return getAvailabilityZone().getRegion();
+    }
     
     Iterable<SecurityGroup> getSecurityGroups();
 }

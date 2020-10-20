@@ -7,6 +7,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 public interface Landscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
@@ -27,6 +28,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      *         proxy cluster in a region
      */
     SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region);
+    
+    /**
+     * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified
+     * explicitly, application server replica sets launched in the {@code region} shall use this for their replication
+     * message channels and exchanges.
+     */
+    RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(Region region);
     
     /**
      * Tells the regions supported. The underlying hyperscaler may have more, but we may not want to run in all.

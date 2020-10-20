@@ -18,7 +18,6 @@ import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
-import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -78,7 +77,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            the AWS SDK installed on the instance.
      */
     default AwsInstance<ShardingKey, MetricsT> launchHost(
-            MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            MachineImage fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         return launchHosts(/* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
     }
@@ -93,7 +92,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch,
-            MachineImage<? extends AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
+            MachineImage fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
             String... userData);
 
@@ -263,13 +262,6 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * The default MongoDB configuration to connect to.
      */
     MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
-    
-    /**
-     * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified
-     * explicitly, application server replica sets launched in the {@code region} shall use this for their replication
-     * message channels and exchanges.
-     */
-    RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(Region region);
     
     /**
      * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...

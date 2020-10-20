@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sse.landscape.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.landscape.Release;
-import com.sap.sailing.landscape.ReleaseRepository;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 
 public class ReleaseRepositoryImpl implements ReleaseRepository {
     private static final Logger logger = Logger.getLogger(ReleaseRepositoryImpl.class.getName());

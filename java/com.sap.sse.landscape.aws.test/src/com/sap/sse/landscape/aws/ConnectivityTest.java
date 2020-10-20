@@ -163,24 +163,13 @@ public class ConnectivityTest {
             InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(20));
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
-            SshCommandChannel shellChannel = null;
-            int sshConnectAttempts = 20;
-            while (shellChannel == null && sshConnectAttempts-- > 0) {
-                try {
-                    shellChannel = host.createRootSshChannel();
-                } catch (JSchException e) {
-                    logger.info(e.getMessage()
-                            + " while trying to connect. Probably timeout trying early SSH connection. Retrying "
-                            + sshConnectAttempts + " more times...");
-                    Thread.sleep(10000);
-                }
-            }
+            SshCommandChannel shellChannel = host.createRootSshChannel(Optional.of(Duration.ONE_MINUTE.times(3)));
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
             shellChannel.sendCommandLineSynchronously("pwd", System.err);
             assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(shellChannel.getStreamContentsAsByteArray())));
             // now try a simple command, checking for the "init" process to be found
-            final SshCommandChannel commandChannel = host.createRootSshChannel();
+            final SshCommandChannel commandChannel = host.createRootSshChannel(Optional.empty());
             final String processToLookFor = "init";
             commandChannel.sendCommandLineSynchronously("ps axlw | grep "+processToLookFor, new ByteArrayOutputStream());
             final String output = new String(commandChannel.getStreamContentsAsByteArray());

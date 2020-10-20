@@ -1,6 +1,6 @@
-package com.sap.sailing.landscape;
+package com.sap.sse.landscape;
 
-import com.sap.sailing.landscape.procedures.ReleaseRepositoryImpl;
+import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 
 /**
  * Contains ready-built releases that can be used as part of the {@code INSTALL_FROM_RELEASE} directive. Iterating over
