@@ -2,6 +2,8 @@ package com.sap.sse.landscape;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
@@ -12,7 +14,7 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Release extends Named {
+public interface Release extends UserDataProvider, Named {
     String RELEASE_NOTES_FILE_NAME = "release-notes.txt";
     String ARCHIVE_EXTENSION = ".tar.gz";
     
@@ -32,5 +34,12 @@ public interface Release extends Named {
     
     default URL getDeployableArchiveURL() throws MalformedURLException {
         return new URL(getFolderURL()+getName()+ARCHIVE_EXTENSION);
+    }
+    
+    @Override
+    default Map<UserData, String> getUserData() {
+        final Map<UserData, String> result = new HashMap<>();
+        result.put(UserData.INSTALL_FROM_RELEASE, getName());
+        return result;
     }
 }

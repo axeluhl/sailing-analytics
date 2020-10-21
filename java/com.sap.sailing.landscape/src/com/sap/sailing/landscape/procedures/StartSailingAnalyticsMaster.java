@@ -9,11 +9,11 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
-import com.sap.sailing.landscape.UserData;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.UserData;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.mongodb.Database;
@@ -45,10 +45,6 @@ public class StartSailingAnalyticsMaster<ShardingKey>
                 databaseConfiguration, rabbitConfiguration,
                 /* use {name} as outbound replication exchange name for master */ name, replicationConfiguration,
                 commaSeparatedEmailAddressesToNotifyOfStartup, tags);
-        addUserData(getLiveMasterEnvironmentUserData());
-    }
-
-    private Iterable<String> getLiveMasterEnvironmentUserData() {
-        return Collections.singleton(UserData.USE_ENVIRONMENT.name() + "=live-master-server");
+        addUserData(UserData.USE_ENVIRONMENT, "live-master-server");
     }
 }

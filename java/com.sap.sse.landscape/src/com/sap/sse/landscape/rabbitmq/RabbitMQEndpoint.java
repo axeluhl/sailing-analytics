@@ -1,6 +1,10 @@
 package com.sap.sse.landscape.rabbitmq;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.UserDataProvider;
 
 /**
  * Shall allow a client to connect to a RabbitMQ service which may or may not be replicated. For now, we assume that the
@@ -15,7 +19,7 @@ import java.util.Arrays;
  *
  */
 @FunctionalInterface
-public interface RabbitMQEndpoint {
+public interface RabbitMQEndpoint extends UserDataProvider {
     int DEFAULT_PORT = 5672;
     
     default int getPort() {
@@ -28,7 +32,10 @@ public interface RabbitMQEndpoint {
      * Renders the RabbitMQ configuration as a set of variable assignments usable in either an {@code env.sh} file or in the
      * AWS EC2 instance user data (which eventually get appended to an {@code env.sh} file).
      */
-    default Iterable<String> getUserData() {
-        return Arrays.asList("REPLICATION_HOST="+getNodeName(), "REPLICATE_MASTER_QUEUE_PORT="+getPort());
+    default Map<UserData, String> getUserData() {
+        final Map<UserData, String> result = new HashMap<>();
+        result.put(UserData.REPLICATION_HOST, getNodeName());
+        result.put(UserData.REPLICATE_MASTER_QUEUE_PORT, ""+getPort());
+        return result;
     }
 }

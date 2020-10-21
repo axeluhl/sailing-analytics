@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +12,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.SecurityGroup;
+import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -126,5 +129,18 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      */
     protected void addUserData(Iterable<String> moreUserData) {
         Util.addAll(moreUserData, userData);
+    }
+    
+    protected void addUserData(UserData userDataVariable, String value) {
+        userData.add(userDataVariable.name()+"="+value);
+    }
+
+    /**
+     * Appends {@code moreUserData} to the end of {@link #userData}
+     */
+    protected void addUserData(UserDataProvider userDataProvider) {
+        for (final Entry<UserData, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
+            addUserData(userDataEntry.getKey(), userDataEntry.getValue());
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.landscape;
 
+import com.sap.sse.landscape.UserDataProvider;
+
 /**
  * Can be used to authenticate a replica to its master. Authentication may happen by
  * username/password or by a bearer token. These different types of credentials know how
@@ -9,6 +11,5 @@ package com.sap.sailing.landscape;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReplicationCredentials {
-    Iterable<String> getUserData();
+public interface ReplicationCredentials extends UserDataProvider {
 }

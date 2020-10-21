@@ -1,10 +1,11 @@
 package com.sap.sailing.landscape;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
+import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 /**
@@ -20,24 +21,19 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReplicationConfiguration {
-    String REPLICATE_MASTER_SERVLET_HOST = "REPLICATE_MASTER_SERVLET_HOST";
-    String REPLICATE_MASTER_SERVLET_PORT = "REPLICATE_MASTER_SERVLET_PORT";
-    String REPLICATE_MASTER_EXCHANGE_NAME = "REPLICATE_MASTER_EXCHANGE_NAME";
-    String REPLICATE_ON_START = "REPLICATE_ON_START";
-    
+public interface ReplicationConfiguration extends UserDataProvider {
     String getMasterHostname();
     int getMasterHttpPort();
     String getMasterExchangeName();
     ReplicationCredentials getCredentials();
     Iterable<String> getReplicableIds();
-    default Iterable<String> getUserData() {
-        final List<String> result = new ArrayList<>();
-        result.add(REPLICATE_MASTER_SERVLET_HOST+"="+getMasterHostname());
-        result.add(REPLICATE_MASTER_SERVLET_PORT+"="+getMasterHttpPort());
-        result.add(REPLICATE_MASTER_EXCHANGE_NAME+"="+getMasterExchangeName());
-        result.add(REPLICATE_ON_START+"="+String.join(",", getReplicableIds()));
-        Util.addAll(getCredentials().getUserData(), result);
+    default Map<UserData, String> getUserData() {
+        final Map<UserData, String> result = new HashMap<>();
+        result.put(UserData.REPLICATE_MASTER_SERVLET_HOST, getMasterHostname());
+        result.put(UserData.REPLICATE_MASTER_SERVLET_PORT, ""+getMasterHttpPort());
+        result.put(UserData.REPLICATE_MASTER_EXCHANGE_NAME, getMasterExchangeName());
+        result.put(UserData.REPLICATE_ON_START, String.join(",", getReplicableIds()));
+        result.putAll(getCredentials().getUserData());
         return result;
     }
 }
