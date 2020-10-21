@@ -1,35 +1,36 @@
 1. General Introduction to SAP Sailing Analytics
 
-2. General Introduction to SAP Sailing Analytics Backend
+2. [General Introduction to SAP Sailing Analytics Backend](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/ALookAroundAdminConsole.mp4)
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
 	
 3. How to enhance events created with Sail Insight
-	Moving Marks
-	Adding Marks
-	Managing Media (enhance event website)
-	Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
-	How to correct results
-	How to combine single regattas into one event
-	How to add GPS data of individual boats
-	Adding Video Playback to a Race Replay 
+	* Moving Marks
+	* Adding Marks
+	* Managing Media (enhance event website)
+	* Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
+	* How to correct results
+	* How to combine single regattas into one event
+	* How to add GPS data of individual boats
+	* Adding Video Playback to a Race Replay 
 
 4. Using the race Manager app in combination with Sail insight
-	To manage results
-	To add and update Wind data
-	To manage a daily schedule 
-	To manage start times
+	* To manage results
+	* To add and update Wind data
+	* To manage a daily schedule 
+	* To manage start times
 	…
 
 
 
-- Anlegen eines einfachen Events in der Admin Console
+- [Create a simple event in the AdminConsole](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/CreatingYourFirstEvent.mp4)
 - Rechteverwaltung des Events: "Publishing"-Levels (show on homepage und/vs. Group Ownership Management)
-- Grundlagen Rechteverwaltung: User, Group, Permissions, Roles, Ownerships
+- [Gerneral introduction to the security system: User, Group, Permissions, Roles, Ownerships](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/IntroductionSecuritySystem.mp4)
+- [Make everything your group owns readable for everyone](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/MakingEverythingYourGroupOwnsReadableForEveryone.mp4)
 - [Create an event with multiple regattas](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Setting+up+Events+with+multiple+Regattas+or+Classes.mp4)
 	* (boat) classes
 	* assigning regattas to course areas
 	* leaderboards, including sub-divisions
-* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
+	* [what are leaderboard groups?](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4)
  
 - Details of regatta set-up explained:
 	* Provisioned/changing boats
