@@ -9,6 +9,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
+import com.sap.sailing.landscape.UserData;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Release;
@@ -51,6 +52,6 @@ public class StartSailingAnalyticsReplica<ShardingKey>
     }
 
     private Iterable<String> getLiveReplicaEnvironmentUserData() {
-        return Collections.singleton(USE_ENVIRONMENT + "=live-replica-server");
+        return Collections.singleton(UserData.USE_ENVIRONMENT.name() + "=live-replica-server");
     }
 }

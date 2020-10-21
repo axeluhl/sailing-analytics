@@ -10,6 +10,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
+import com.sap.sailing.landscape.UserData;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Release;
@@ -27,36 +28,6 @@ public abstract class StartSailingAnalyticsHost<ShardingKey,
                                                 HostT extends SailingAnalyticsHost<ShardingKey>>
 extends StartAwsHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
-    /**
-     * The user data variable used to specify the MongoDB connection URI
-     */
-    private final static String MONGODB_URI = "MONGODB_URI";
-    
-    /**
-     * The user data variable used to define the name of the replication channel to which this master node
-     * will send its operations bound for its replica nodes.
-     */
-    private final static String REPLICATION_CHANNEL = "REPLICATION_CHANNEL";
-    
-    /**
-     * The user data variable used to define the server's name. This is relevant in particular for the user group
-     * created/used for all new server-specific objects such as the {@code SERVER} object itself. The group's
-     * name is constructed by appending "-server" to the server name.
-     */
-    private final static String SERVER_NAME = "SERVER_NAME";
-    
-    /**
-     * User data variable that defines one or more comma-separated e-mail addresses to which a notification will
-     * be sent after the server has started successfully.
-     */
-    private final static String SERVER_STARTUP_NOTIFY = "SERVER_STARTUP_NOTIFY";
-    
-    /**
-     * User data variable defining the environment file (stored at {@code http://releases.sapsailing.com/environments})
-     * which provides default combinations of variables
-     */
-    protected final static String USE_ENVIRONMENT = "USE_ENVIRONMENT";
-    
     private final Database databaseConfiguration;
 
     /**
@@ -74,15 +45,19 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
             String commaSeparatedEmailAddressesToNotifyOfStartup, Optional<Tags> tags, String... additionalUserData) throws URISyntaxException {
         super(machineImage, landscape, instanceType, availabilityZone, keyName, securityGroups, Optional.of(tags.orElse(Tags.empty()).and("Name", name)), additionalUserData);
         this.databaseConfiguration = databaseConfiguration;
-        addUserData(release.getUserData());
+        addUserData(getReleaseUserData(release));
         addUserData(getDatabaseUserData());
         addUserData(rabbitConfiguration.getUserData());
-        addUserData(Arrays.asList(SERVER_NAME + "=" + name, REPLICATION_CHANNEL + "=" + outputReplicationExchangeName,
-                SERVER_STARTUP_NOTIFY + "=" + commaSeparatedEmailAddressesToNotifyOfStartup));
+        addUserData(Arrays.asList(UserData.SERVER_NAME.name() + "=" + name, UserData.REPLICATION_CHANNEL.name() + "=" + outputReplicationExchangeName,
+                UserData.SERVER_STARTUP_NOTIFY.name() + "=" + commaSeparatedEmailAddressesToNotifyOfStartup));
         replicationConfiguration.ifPresent(rc->addUserData(rc.getUserData()));
     }
     
+    private Iterable<String> getReleaseUserData(Release release) {
+        return Collections.singleton(UserData.INSTALL_FROM_RELEASE.name()+"="+release.getName());
+    }
+    
     private Iterable<String> getDatabaseUserData() throws URISyntaxException {
-        return Collections.singleton(MONGODB_URI+"=\""+databaseConfiguration.getConnectionURI().toString()+"\"");
+        return Collections.singleton(UserData.MONGODB_URI.name()+"=\""+databaseConfiguration.getConnectionURI().toString()+"\"");
     }
 }

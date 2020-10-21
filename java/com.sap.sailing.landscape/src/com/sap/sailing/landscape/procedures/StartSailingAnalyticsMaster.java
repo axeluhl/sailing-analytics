@@ -9,6 +9,7 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
+import com.sap.sailing.landscape.UserData;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Release;
@@ -48,6 +49,6 @@ public class StartSailingAnalyticsMaster<ShardingKey>
     }
 
     private Iterable<String> getLiveMasterEnvironmentUserData() {
-        return Collections.singleton(USE_ENVIRONMENT + "=live-master-server");
+        return Collections.singleton(UserData.USE_ENVIRONMENT.name() + "=live-master-server");
     }
 }

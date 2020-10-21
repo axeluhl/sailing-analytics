@@ -115,7 +115,8 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
     private static final String DEFAULT_CERTIFICATE_ARN = "arn:aws:acm:eu-west-2:017363970217:certificate/48c51d6a-b4f2-4fa0-8dcc-426cd9c7aadc";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID = "sg-0b2afd48960251280";
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
+    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
@@ -620,8 +621,10 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         final SecurityGroup result;
-        if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID, region);
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
+        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
+            result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
         } else {
             result = null;
         }

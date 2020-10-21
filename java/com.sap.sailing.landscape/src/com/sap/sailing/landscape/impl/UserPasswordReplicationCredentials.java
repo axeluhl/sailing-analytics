@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sailing.landscape.impl;
 
 import java.util.Arrays;
 

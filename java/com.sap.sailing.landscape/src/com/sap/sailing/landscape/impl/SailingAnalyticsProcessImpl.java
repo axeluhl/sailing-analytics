@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sailing.landscape.impl;
 
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;

@@ -2,7 +2,6 @@ package com.sap.sse.landscape.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,10 +43,5 @@ public class ReleaseImpl extends NamedImpl implements Release {
             logger.log(Level.WARNING, "Error parsing release date "+dateSubstring+". Returning null instead.", e);
             return null;
         }
-    }
-
-    @Override
-    public Iterable<String> getUserData() {
-        return Collections.singleton(INSTALL_FROM_RELEASE+"="+getName());
     }
 }
