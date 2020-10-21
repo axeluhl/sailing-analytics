@@ -53,7 +53,7 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         boolean notifyAboutResults = false;
         if (preferences != null) {
             for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
-                final String competitorId = pref.getCompetitorId();
+                final String competitorId = pref.getCompetitorIdAsString();
                 final RacingEventService racingEventService = ctx.getRacingEventService();
                 final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
                 DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
