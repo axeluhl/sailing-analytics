@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
@@ -27,12 +27,12 @@ public interface ReplicationConfiguration extends UserDataProvider {
     String getMasterExchangeName();
     ReplicationCredentials getCredentials();
     Iterable<String> getReplicableIds();
-    default Map<UserData, String> getUserData() {
-        final Map<UserData, String> result = new HashMap<>();
-        result.put(UserData.REPLICATE_MASTER_SERVLET_HOST, getMasterHostname());
-        result.put(UserData.REPLICATE_MASTER_SERVLET_PORT, ""+getMasterHttpPort());
-        result.put(UserData.REPLICATE_MASTER_EXCHANGE_NAME, getMasterExchangeName());
-        result.put(UserData.REPLICATE_ON_START, String.join(",", getReplicableIds()));
+    default Map<ProcessConfigurationVariable, String> getUserData() {
+        final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_SERVLET_HOST, getMasterHostname());
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_SERVLET_PORT, ""+getMasterHttpPort());
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_EXCHANGE_NAME, getMasterExchangeName());
+        result.put(ProcessConfigurationVariable.REPLICATE_ON_START, String.join(",", getReplicableIds()));
         result.putAll(getCredentials().getUserData());
         return result;
     }

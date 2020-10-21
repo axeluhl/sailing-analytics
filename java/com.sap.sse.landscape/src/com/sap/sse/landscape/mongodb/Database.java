@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Named;
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.UserDataProvider;
 
 public interface Database extends UserDataProvider, Named {
@@ -27,10 +27,10 @@ public interface Database extends UserDataProvider, Named {
     }
 
     @Override
-    default Map<UserData, String> getUserData() {
-        final Map<UserData, String> result = new HashMap<>();
+    default Map<ProcessConfigurationVariable, String> getUserData() {
+        final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
         try {
-            result.put(UserData.MONGODB_URI, getConnectionURI().toString());
+            result.put(ProcessConfigurationVariable.MONGODB_URI, getConnectionURI().toString());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

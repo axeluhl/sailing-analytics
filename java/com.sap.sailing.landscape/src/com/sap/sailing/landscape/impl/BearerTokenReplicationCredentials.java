@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.landscape.ReplicationCredentials;
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 public class BearerTokenReplicationCredentials implements ReplicationCredentials {
     private final String bearerToken;
@@ -14,9 +14,9 @@ public class BearerTokenReplicationCredentials implements ReplicationCredentials
     }
 
     @Override
-    public Map<UserData, String> getUserData() {
-        final Map<UserData, String> result = new HashMap<>();
-        result.put(UserData.REPLICATE_MASTER_BEARER_TOKEN, bearerToken);
+    public Map<ProcessConfigurationVariable, String> getUserData() {
+        final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_BEARER_TOKEN, bearerToken);
         return result;
     }
 

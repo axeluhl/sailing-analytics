@@ -12,7 +12,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -131,7 +131,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         Util.addAll(moreUserData, userData);
     }
     
-    protected void addUserData(UserData userDataVariable, String value) {
+    protected void addUserData(ProcessConfigurationVariable userDataVariable, String value) {
         userData.add(userDataVariable.name()+"="+value);
     }
 
@@ -139,7 +139,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * Appends {@code moreUserData} to the end of {@link #userData}
      */
     protected void addUserData(UserDataProvider userDataProvider) {
-        for (final Entry<UserData, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
+        for (final Entry<ProcessConfigurationVariable, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
             addUserData(userDataEntry.getKey(), userDataEntry.getValue());
         }
     }

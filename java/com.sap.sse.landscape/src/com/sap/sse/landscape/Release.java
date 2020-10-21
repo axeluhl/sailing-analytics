@@ -37,9 +37,9 @@ public interface Release extends UserDataProvider, Named {
     }
     
     @Override
-    default Map<UserData, String> getUserData() {
-        final Map<UserData, String> result = new HashMap<>();
-        result.put(UserData.INSTALL_FROM_RELEASE, getName());
+    default Map<ProcessConfigurationVariable, String> getUserData() {
+        final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
+        result.put(ProcessConfigurationVariable.INSTALL_FROM_RELEASE, getName());
         return result;
     }
 }

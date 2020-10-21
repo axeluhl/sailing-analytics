@@ -7,12 +7,12 @@ import java.util.Map;
  * launching or may be appended to an {@code env.sh} file that sets environment variables
  * for processes to launch on a host.
  * 
- * @see UserData
+ * @see ProcessConfigurationVariable
  * 
  * @author Axel Uhl (D043530)
  *
  */
 @FunctionalInterface
 public interface UserDataProvider {
-    Map<UserData, String> getUserData();
+    Map<ProcessConfigurationVariable, String> getUserData();
 }

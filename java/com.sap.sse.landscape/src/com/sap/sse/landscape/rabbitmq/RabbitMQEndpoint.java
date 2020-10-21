@@ -3,7 +3,7 @@ package com.sap.sse.landscape.rabbitmq;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.UserDataProvider;
 
 /**
@@ -32,10 +32,10 @@ public interface RabbitMQEndpoint extends UserDataProvider {
      * Renders the RabbitMQ configuration as a set of variable assignments usable in either an {@code env.sh} file or in the
      * AWS EC2 instance user data (which eventually get appended to an {@code env.sh} file).
      */
-    default Map<UserData, String> getUserData() {
-        final Map<UserData, String> result = new HashMap<>();
-        result.put(UserData.REPLICATION_HOST, getNodeName());
-        result.put(UserData.REPLICATE_MASTER_QUEUE_PORT, ""+getPort());
+    default Map<ProcessConfigurationVariable, String> getUserData() {
+        final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
+        result.put(ProcessConfigurationVariable.REPLICATION_HOST, getNodeName());
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_QUEUE_PORT, ""+getPort());
         return result;
     }
 }

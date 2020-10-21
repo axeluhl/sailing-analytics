@@ -12,7 +12,7 @@ import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.UserData;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
@@ -43,9 +43,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         addUserData(release);
         addUserData(databaseConfiguration);
         addUserData(rabbitConfiguration);
-        addUserData(UserData.SERVER_NAME, name);
-        addUserData(UserData.REPLICATION_CHANNEL, outputReplicationExchangeName);
-        addUserData(UserData.SERVER_STARTUP_NOTIFY, commaSeparatedEmailAddressesToNotifyOfStartup);
+        addUserData(ProcessConfigurationVariable.SERVER_NAME, name);
+        addUserData(ProcessConfigurationVariable.REPLICATION_CHANNEL, outputReplicationExchangeName);
+        addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, commaSeparatedEmailAddressesToNotifyOfStartup);
         replicationConfiguration.ifPresent(this::addUserData);
     }
 }

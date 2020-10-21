@@ -15,7 +15,7 @@ import com.jcraft.jsch.ChannelSftp;
  * @author Axel Uhl (D043530)
  *
  */
-public enum UserData {
+public enum ProcessConfigurationVariable {
     /**
      * The user data variable to use to specify the release to install and run on the host. See also
      * {@link ReleaseRepository} and {@link #getReleaseUserData}.
