@@ -5045,18 +5045,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public ArrayList<EventDTO> getEventsForLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        HashMap<UUID, EventDTO> events = new HashMap<>();
-        for (Event e : getService().getAllEvents()) {
-            for (LeaderboardGroup g : e.getLeaderboardGroups()) {
-                for (Leaderboard l : g.getLeaderboards()) {
-                    if (leaderboard.equals(l)) {
-                        events.put(e.getId(), convertToEventDTO(e, false));
-                    }
-                }
-            }
+        final RacingEventService service = getService();
+        final Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
+        final Set<Event> events = service.findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
+        ArrayList<EventDTO> eventDTOs = new ArrayList<>();
+        for (Event event : events) {
+            eventDTOs.add(convertToEventDTO(event, false));
         }
-        return new ArrayList<>(events.values());
+        return eventDTOs;
     }
 
     @Override
