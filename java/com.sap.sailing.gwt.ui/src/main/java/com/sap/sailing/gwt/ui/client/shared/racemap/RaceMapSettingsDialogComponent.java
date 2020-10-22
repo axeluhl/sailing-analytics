@@ -56,7 +56,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private IntegerBox hoverlineStrokeWeight;
     private DoubleBox startCountDownFontSizeScalingBox;
     private CheckBox maneuverLossVisualizationCheckBox;
-    
+    private CheckBox windLadderCheckBox;
+    private CheckBox windLadderOverrideManeuverAngleCheckBox;
+    private DoubleBox windLadderManeuverAngleDoubleBox;
+
     private boolean isSimulationEnabled;
     
     private final StringMessages stringMessages;
@@ -245,7 +248,35 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
         maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
         vp.add(maneuverLossVisualizationCheckBox);
-        
+
+        windLadderCheckBox = dialog.createCheckbox(stringMessages.showWindLadder());
+        windLadderCheckBox.setValue(initialSettings.isShowWindLadder());
+        windLadderCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                boolean enabled = event.getValue();
+                windLadderOverrideManeuverAngleCheckBox.setEnabled(enabled);
+                windLadderManeuverAngleDoubleBox.setEnabled(enabled);
+            }
+        });
+        vp.add(windLadderCheckBox);
+        final HorizontalPanel windLadderAnglePanel = new HorizontalPanel();
+        windLadderOverrideManeuverAngleCheckBox = dialog.createCheckbox(stringMessages.windLadderOverride());
+        windLadderOverrideManeuverAngleCheckBox.setValue(initialSettings.isWindLadderOverride());
+        windLadderOverrideManeuverAngleCheckBox.setEnabled(initialSettings.isShowWindLadder());
+        windLadderAnglePanel.add(windLadderOverrideManeuverAngleCheckBox);
+        windLadderAnglePanel.setCellVerticalAlignment(windLadderOverrideManeuverAngleCheckBox,
+                HasVerticalAlignment.ALIGN_TOP);
+        final Label windLadderManeuverAngleLabel = dialog.createLabel(stringMessages.windLadderManeuverAngle());
+        windLadderAnglePanel.add(windLadderManeuverAngleLabel);
+        windLadderAnglePanel.setCellVerticalAlignment(windLadderManeuverAngleLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        windLadderManeuverAngleDoubleBox = dialog.createDoubleBox(initialSettings.getWindLadderManeuverAngle(), 4);
+        windLadderManeuverAngleDoubleBox.setEnabled(initialSettings.isShowWindLadder());
+        windLadderAnglePanel.add(windLadderManeuverAngleDoubleBox);
+        windLadderAnglePanel.setCellVerticalAlignment(windLadderManeuverAngleDoubleBox,
+                HasVerticalAlignment.ALIGN_MIDDLE);
+        vp.add(windLadderAnglePanel);
+
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
         transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
         transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
@@ -318,7 +349,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
                 startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue(),
-                showSatelliteLayerCheckbox.getValue());
+                showSatelliteLayerCheckbox.getValue(), windLadderCheckBox.getValue(),
+                windLadderOverrideManeuverAngleCheckBox.getValue(), windLadderManeuverAngleDoubleBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

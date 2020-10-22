@@ -30,6 +30,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
     public static final String PARAM_BUOY_ZONE_RADIUS_IN_METERS = "buoyZoneRadiusInMeters";
+    public static final String PARAM_SHOW_WIND_LADDER = "showWindLadder";
 
     public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
 
@@ -76,7 +77,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     private BooleanSetting windUp;
     
     private BooleanSetting showEstimatedDuration;
-    
+
+    private BooleanSetting showWindLadder;
+    private BooleanSetting windLadderOverride;
+    private DoubleSetting windLadderManeuverAngle;
+
     /**
      * The factor by which the start count down shown at one side of the start line shall be scaled compared to the
      * other small info overlays such as the course geometry. Defaults to 1.0.
@@ -93,6 +98,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showWindStreamletOverlay = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false);
         showWindStreamletColors = new BooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false);
         showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
+        showWindLadder = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
+        windLadderOverride = new BooleanSetting("windLadderOverride", this, false);
+        windLadderManeuverAngle = new DoubleSetting("windLadderManeuverAngle", this, 90d);
         zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
         hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
@@ -115,7 +123,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
             Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization,
-            Boolean showSatelliteLayer) {
+            Boolean showSatelliteLayer, Boolean showWindLadder, Boolean windLadderOverride,
+            Double windLadderManeuverAngle) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
@@ -135,6 +144,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.startCountDownFontSizeScaling.setValue(startCountDownFontSizeScaling);
         this.showManeuverLossVisualization.setValue(showManeuverLossVisualization);
         this.showSatelliteLayer.setValue(showSatelliteLayer);
+        this.showWindLadder.setValue(showWindLadder);
+        this.windLadderOverride.setValue(windLadderOverride);
+        this.windLadderManeuverAngle.setValue(windLadderManeuverAngle);
     }
 
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
@@ -167,7 +179,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showEstimatedDuration*/ false,
                 /* startCountDownFontSizeScaling */ 1.0,
                 /* showManeuverLossVisualization */ false,
-                /* showSatelliteLayer */ showSatelliteLayer);
+                /* showSatelliteLayer */ showSatelliteLayer,
+                /* showWindLadder */ false,
+                /* windLadderOverride */ false,
+                /* windLadderManeuverAngle */ 90d);
     }
     
     private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
@@ -211,7 +226,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
              /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
              /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
              /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization(),
-             /* showSatelliteLayer */ settings.isShowSatelliteLayer());
+             /* showSatelliteLayer */ settings.isShowSatelliteLayer(),
+             /* showWindLadder */ settings.isShowWindLadder(),
+             /* windLadderOverride */ settings.isWindLadderOverride(),
+             /* windLadderManeuverAngle */ settings.getWindLadderManeuverAngle());
     }
 
     /**
@@ -237,7 +255,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 /* showEstimatedDuration */ settings.isShowEstimatedDuration(),
                 /* startCountDownFontSizeScaling */ settings.getStartCountDownFontSizeScaling(),
                 /* showManeuverLossLineVisualization */ settings.isShowManeuverLossVisualization(),
-                /* showSatelliteLayer */ settings.isShowSatelliteLayer());
+                /* showSatelliteLayer */ settings.isShowSatelliteLayer(),
+                /* showWindLadder */ settings.isShowWindLadder(),
+                /* windLadderOverride */ settings.isWindLadderOverride(),
+                /* windLadderManeuverAngle */ settings.getWindLadderManeuverAngle());
     }
 
     /**
@@ -330,7 +351,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
                 settings.isShowDouglasPeuckerPoints(),settings.isShowEstimatedDuration(),
                 settings.getStartCountDownFontSizeScaling(),
                 settings.isShowManeuverLossVisualization(),
-                settings.isShowSatelliteLayer());
+                settings.isShowSatelliteLayer(),
+                settings.isShowWindLadder(),
+                settings.isWindLadderOverride(),
+                settings.getWindLadderManeuverAngle());
         return newRaceMapSettings;
     }
 
@@ -344,6 +368,18 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     public boolean isShowSatelliteLayer() {
         return showSatelliteLayer.getValue();
+    }
+
+    public boolean isShowWindLadder() {
+        return showWindLadder.getValue();
+    }
+
+    public boolean isWindLadderOverride() {
+        return windLadderOverride.getValue();
+    }
+
+    public double getWindLadderManeuverAngle() {
+        return windLadderManeuverAngle.getValue();
     }
 
     public static HashSet<ManeuverType> getDefaultManeuvers() {

@@ -77,7 +77,10 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.isShowEstimatedDuration(),
                 defaultSettings.getStartCountDownFontSizeScaling(),
                 defaultSettings.isShowManeuverLossVisualization(),
-                defaultSettings.isShowSatelliteLayer());
+                defaultSettings.isShowSatelliteLayer(),
+                defaultSettings.isShowWindLadder(),
+                defaultSettings.isWindLadderOverride(),
+                defaultSettings.getWindLadderManeuverAngle());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
