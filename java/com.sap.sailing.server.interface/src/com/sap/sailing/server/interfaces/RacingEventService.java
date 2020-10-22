@@ -983,4 +983,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
+
+    Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard);
 }

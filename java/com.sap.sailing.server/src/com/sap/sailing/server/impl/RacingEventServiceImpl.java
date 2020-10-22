@@ -4814,18 +4814,35 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+        /*
+         * TODO: bug5424: The code previously contained within this method has been extracted to
+         * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea for public use. Investigate whether a more
+         * precise selection of which event to choose can be made in the use cases for this method or if all events
+         * found should be considered.
+         */
+        Set<Event> events = findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
+        if(!events.isEmpty()) {
+            return events.iterator().next();
+        }else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+        Set<Event> events = new HashSet<>();
         if (!Util.isEmpty(leaderboard.getCourseAreas())) {
             for (final Event event : getAllEvents()) {
                 if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
                     for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                         if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
-                            return event;
+                            events.add(event);
                         }
                     }
                 }
             }
         }
-        return null;
+        return events;
     }
 
     @Override
