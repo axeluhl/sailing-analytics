@@ -68,20 +68,20 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.dto.MarkContext;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkContextJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkContextJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.security.SecurityService;
@@ -414,7 +414,7 @@ public class MarkResource extends AbstractSailingServerResource {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
         }
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
-        Set<Triple<Mark, String, String>> markContexts = new HashSet<>();
+        Set<MarkContext> markContexts = new HashSet<>();
         Iterable<Event> events = getEventsWithSufficientPermissions(eventIds);
         for (Event event : events) {
             Set<Regatta> regattas = getRegattasOfEventWithSufficientPermissionsFilteredByIds(event, regattaIds);
@@ -426,14 +426,14 @@ public class MarkResource extends AbstractSailingServerResource {
                     if (originatingMarkPropertiesIdOrNull != null
                             && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
                         markContexts.add(
-                                new Triple<Mark, String, String>(mark, event.getId().toString(), regatta.getName()));
+                                new MarkContext(mark, event, regatta));
                     }
                 }
             }
         }
         JSONArray jsonContexts = new JSONArray();
         MarkContextJsonSerializer markContextJsonSerializer = new MarkContextJsonSerializer();
-        for (Triple<Mark, String, String> markContext : markContexts) {
+        for (MarkContext markContext : markContexts) {
             jsonContexts.add(markContextJsonSerializer.serialize(markContext));
         }
         Response response = Response.ok(streamingOutput(jsonContexts)).build();
