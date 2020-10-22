@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +73,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPoint
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkContextJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -402,15 +404,18 @@ public class MarkResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("/searchMarks")
+    @Path("/searchMarks/{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
-            @QueryParam(value = "regattaIds") Set<UUID> regattaIds) {
+            @QueryParam(value = "regattaIds") Set<String> regattaIds) {
         final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
+        if(markPropertiesObject == null) {
+            throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
+        }
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
-        Set<Triple<Event, Regatta, Mark>> markContexts = new HashSet<>();
-        Iterable<Event> events = getEventsWithSufficientPermissions(regattaIds);
+        Set<Triple<Mark, String, String>> markContexts = new HashSet<>();
+        Iterable<Event> events = getEventsWithSufficientPermissions(eventIds);
         for (Event event : events) {
             Set<Regatta> regattas = getRegattasOfEventWithSufficientPermissionsFilteredByIds(event, regattaIds);
             for (Regatta regatta : regattas) {
@@ -420,27 +425,32 @@ public class MarkResource extends AbstractSailingServerResource {
                     UUID originatingMarkPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
                     if (originatingMarkPropertiesIdOrNull != null
                             && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
-                        markContexts.add(new Triple<Event, Regatta, Mark>(event, regatta, mark));
+                        markContexts.add(
+                                new Triple<Mark, String, String>(mark, event.getId().toString(), regatta.getName()));
                     }
                 }
             }
         }
-        Response response = Response.ok(markContexts).build();
+        JSONArray jsonContexts = new JSONArray();
+        MarkContextJsonSerializer markContextJsonSerializer = new MarkContextJsonSerializer();
+        for (Triple<Mark, String, String> markContext : markContexts) {
+            jsonContexts.add(markContextJsonSerializer.serialize(markContext));
+        }
+        Response response = Response.ok(streamingOutput(jsonContexts)).build();
         return response;
     }
 
-    private Set<Regatta> getRegattasOfEventWithSufficientPermissionsFilteredByIds(Event event, Set<UUID> regattaIds) {
+    private Set<Regatta> getRegattasOfEventWithSufficientPermissionsFilteredByIds(Event event, Set<String> regattaIds) {
         final SecurityService securityService = getSecurityService();
         final Set<Regatta> regattasByEvent = RegattaUtil.getRegattasByEvent(event);
+        for (Regatta regatta : regattasByEvent) {
+            Serializable id = regatta.getName();
+            System.out.println(regattaIds.contains(id));
+        } 
         final Set<Regatta> filteredRegattas = regattasByEvent.stream()
-                .filter((regatta) -> regattaIds.contains(regatta.getId())).collect(Collectors.toSet());
-        final Set<Regatta> regattasWithReadPermission = new HashSet<Regatta>();
-        for (Regatta regatta : filteredRegattas) {
-            if (securityService.hasCurrentUserReadPermission(regatta)) {
-                regattasWithReadPermission.add(regatta);
-            }
-        }
-        return regattasWithReadPermission;
+                .filter((regatta) -> regattaIds.isEmpty() || regattaIds.contains(regatta.getName()))
+                .filter(securityService::hasCurrentUserReadPermission).collect(Collectors.toSet());
+        return filteredRegattas;
     }
 
     private Set<Event> getEventsWithSufficientPermissions(Set<UUID> eventIds) {
