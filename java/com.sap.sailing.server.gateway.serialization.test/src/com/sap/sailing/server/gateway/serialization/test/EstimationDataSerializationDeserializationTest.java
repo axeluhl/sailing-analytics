@@ -353,7 +353,7 @@ public class EstimationDataSerializationDeserializationTest {
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true);
         String name = boatClass.getName();
         boolean typicallyStartsUpwind = boatClass.typicallyStartsUpwind();
-        String displayName = boatClass.getDisplayName();
+        String displayName = boatClass.getName();
         Distance hullLength = boatClass.getHullLength();
         Distance hullBeam = boatClass.getHullBeam();
         BoatHullType hullType = boatClass.getHullType();
@@ -363,7 +363,7 @@ public class EstimationDataSerializationDeserializationTest {
         BoatClass deserialized = deserializer.deserialize(json);
         assertEquals(name, deserialized.getName());
         assertEquals(typicallyStartsUpwind, deserialized.typicallyStartsUpwind());
-        assertEquals(displayName, deserialized.getDisplayName());
+        assertEquals(displayName, deserialized.getName());
         assertEquals(hullLength, deserialized.getHullLength());
         assertEquals(hullBeam, deserialized.getHullBeam());
         assertEquals(hullType, deserialized.getHullType());

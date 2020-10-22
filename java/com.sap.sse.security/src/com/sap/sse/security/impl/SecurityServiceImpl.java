@@ -149,6 +149,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.AclResolver;
 import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -176,11 +177,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
-    
-    // TODO remove, once we allow denied ACLs again
-    private static final boolean supportDeniedActions = false;
 
-    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
+    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();
 
     private CachingSecurityManager securityManager;
     
@@ -236,6 +234,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private String baseUrlForCrossDomainStorage;
     
     private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
+    
+    private final AclResolver<AccessControlList, Ownership> aclResolver;
     
     static {
         shiroConfiguration = new Ini();
@@ -311,8 +311,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
+        aclResolver = new SecurityServiceAclResolver(accessControlStore);
     }
-
+    
     private ReplicatingCacheManager loadReplicationCacheManagerContents() {
         logger.info("Loading session cache manager contents");
         int count = 0;
@@ -567,18 +568,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap, String displayNameOfAccessControlledObject) {
-        // TODO remove, once we allow denied ACLs again
-        if (!supportDeniedActions) {
-            for (Set<String> actions : permissionMap.values()) {
-                for (String action : actions) {
-                    if (SecurityAccessControlList.isDeniedAction(action)) {
-                        throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
-                    }
-                }
-            }
-        }
         setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
-        
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UserGroup userGroup = entry.getKey();
             final Set<String> actionsToSet;
@@ -610,10 +600,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String action) {
-        // TODO remove, once we allow denied ACLs again
-        if (!supportDeniedActions && SecurityAccessControlList.isDeniedAction(action)) {
-            throw new IllegalArgumentException("Adding denied actions to an ACL is not allowed");
-        }
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
@@ -821,7 +807,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
             accessControlStore.removeAllOwnershipsFor(userGroup);
-            store.removeAllQualifiedRolesForUserGroup(userGroup);
             store.deleteUserGroup(userGroup);
         }
         return null;
@@ -1244,13 +1229,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete != null) {
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
-            store.removeAllQualifiedRolesForUser(userToDelete);
+            store.deleteUser(username);
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
             final UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
             if (defaultTenantUserGroup != null) {
                 List<User> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
-                if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
-                    // no other user is in group, delete it as well
+                if (usersInGroupList.isEmpty()) {
+                    // no other user is in group, delete it as well and remove Owenerships
                     try {
                         internalDeleteUserGroup(defaultTenantUserGroup.getId());
                     } catch (UserGroupManagementException e) {
@@ -1258,16 +1243,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     }
                 }
             }
-            // also remove from all usergroups
-            final Iterable<UserGroup> userGroups = userToDelete.getUserGroups();
-            final Collection<UserGroup> userGroupsToLoopOver = new ArrayList<>();
-            Util.addAll(userGroups, userGroupsToLoopOver); // avoid concurrent modification exception
-            for (UserGroup userGroup : userGroupsToLoopOver) {
-                if (userGroup != defaultTenantUserGroup) { // the defaultTenantUserGroup has already been deleted above
-                    internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
-                }
-            }
-            store.deleteUser(username);
         }
         return null;
     }
@@ -1952,7 +1927,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
         } else {
             return PermissionChecker.checkMetaPermission(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership);
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
+                    aclResolver);
         }
     }
     
@@ -1972,7 +1948,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     qualifiedObjectId -> {
                         OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
                         return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
-                    });
+                    }, aclResolver);
         }
     }
     
@@ -2411,8 +2387,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName) {
         User user = getUserByName(username);
         UserGroup newDefaultTenant = getUserGroup(defaultTenantId);
-        user.setDefaultTenant(newDefaultTenant, serverName);
-        store.updateUser(user);
+        store.setDefaultTennantForUserAndUpdate(user, newDefaultTenant, serverName);
         return null;
     }
     

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Bearing;
@@ -141,6 +142,8 @@ public class LeaderboardEntryDTO implements Serializable {
      * farthest ahead for all subsequent legs.
      */
     public Duration calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
+    
+    public SpeedWithBearing currentSpeedAndCourseOverGround;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -618,6 +621,8 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((calculatedTime == null) ? 0 : calculatedTime.hashCode());
         result = prime * result + ((calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0
                 : calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
+        result = prime * result + ((currentSpeedAndCourseOverGround == null) ? 0
+                : currentSpeedAndCourseOverGround.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((distanceToStarboardSideOfStartLineInMeters == null) ? 0
                 : distanceToStarboardSideOfStartLineInMeters.hashCode());
@@ -702,6 +707,12 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead
                 .equals(other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead))
+            return false;
+        if (currentSpeedAndCourseOverGround == null) {
+            if (other.currentSpeedAndCourseOverGround != null)
+                return false;
+        } else if (!currentSpeedAndCourseOverGround
+                .equals(other.currentSpeedAndCourseOverGround))
             return false;
         if (discarded != other.discarded)
             return false;

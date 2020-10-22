@@ -554,7 +554,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             }
         });
         final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
@@ -565,7 +565,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     }
                 });
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)

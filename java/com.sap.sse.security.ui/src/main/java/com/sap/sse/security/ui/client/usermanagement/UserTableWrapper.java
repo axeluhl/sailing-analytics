@@ -183,10 +183,10 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             }
         });
         final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
         final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,

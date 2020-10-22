@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
 import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
-import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceWriteRemotePath;
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
@@ -38,7 +37,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
         mediaServiceWrite = GWT.create(MediaServiceWrite.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceWriteRemotePath,
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }

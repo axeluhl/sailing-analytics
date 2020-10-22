@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.client;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -26,7 +26,7 @@ public class DefaultWithSecurityImpl implements WithSecurity {
                 HEADER_FORWARD_TO_REPLICA);
         userManagementWriteService = GWT.create(UserManagementWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) userManagementWriteService,
-                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceWriteRemotePath,
+                com.sap.sse.security.ui.client.RemoteServiceMappingConstants.userManagementServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         userService = new UserService(userManagementService, userManagementWriteService);
     }

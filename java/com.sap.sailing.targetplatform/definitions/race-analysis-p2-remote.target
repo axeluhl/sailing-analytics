@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="157">
+<target name="Race Analysis Target" sequenceNumber="160">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -16,9 +16,6 @@
 <unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
 <unit id="org.junit" version="4.12.0.v201504281640"/>
 <unit id="org.junit.source" version="4.12.0.v201504281640"/>
-<unit id="com.fasterxml.jackson.core.jackson-annotations" version="2.9.2.v20180207-1730"/>
-<unit id="com.fasterxml.jackson.core.jackson-core" version="2.9.2.v20180207-1730"/>
-<unit id="com.fasterxml.jackson.core.jackson-databind" version="2.9.2.v20180207-1730"/>
 <unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
 <unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
 <unit id="javax.servlet" version="3.1.0.v201410161800"/>
@@ -123,14 +120,11 @@
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.13.61"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.14.24"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
 <includeBundles>
-<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
-<plugin id="com.fasterxml.jackson.core.jackson-core"/>
-<plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.rabbitmq.client"/>
 <plugin id="com.sun.activation.javax.activation"/>
 <plugin id="com.sun.istack.commons-runtime"/>
@@ -193,6 +187,9 @@
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.apache.shiro.core.source"/>
+<plugin id="org.apache.shiro.ehcache.source"/>
+<plugin id="org.apache.shiro.web.source"/>
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
@@ -268,6 +265,7 @@
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>
+<plugin id="org.mongodb.mongo-java-driver.source"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
@@ -277,9 +275,6 @@
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-databind.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-core.source"/>
-<plugin id="com.fasterxml.jackson.core.jackson-annotations.source"/>
 <plugin id="org.apache.commons.codec.source"/>
 <plugin id="org.apache.poi.ooxml.schemas.source"/>
 <plugin id="org.apache.poi.ooxml.source"/>

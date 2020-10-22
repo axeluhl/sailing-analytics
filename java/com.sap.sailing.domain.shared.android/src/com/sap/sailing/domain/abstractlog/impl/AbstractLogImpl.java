@@ -73,7 +73,6 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
      */
     public AbstractLogImpl(String nameForReadWriteLock, Serializable identifier, Comparator<Timed> comparator) {
         super(new ArrayListNavigableSet<Timed>(comparator), nameForReadWriteLock);
-
         this.listeners = new HashSet<VisitorT>();
         this.id = identifier;
     }

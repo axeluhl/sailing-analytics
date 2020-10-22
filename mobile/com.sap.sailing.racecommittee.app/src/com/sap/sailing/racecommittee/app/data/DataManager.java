@@ -41,7 +41,7 @@ public abstract class DataManager implements ReadonlyDataManager {
     }
 
     /**
-     * {@link InMemoryDataStore#clearRaces(Context)}, fires the {@link AppConstants#INTENT_ACTION_CLEAR_RACES} intent which is expected to
+     * {@link InMemoryDataStore#clearRaces(Context)}, fires the {@link AppConstants#ACTION_CLEAR_RACES} intent which is expected to
      * be handled by the {@link RaceStateService} which responds by unregistering all its races, stopping to listen on
      * and poll their race logs and by clearing the data store's races collection.
      * {@link InMemoryDataStore#reset()} resets the data store properly.

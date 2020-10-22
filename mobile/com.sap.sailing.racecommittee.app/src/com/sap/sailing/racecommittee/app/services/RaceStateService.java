@@ -117,11 +117,11 @@ public class RaceStateService extends Service {
             return;
         }
 
-        if (AppConstants.INTENT_ACTION_CLEAR_RACES.equals(action)) {
+        if (AppConstants.ACTION_CLEAR_RACES.equals(action)) {
             handleClearRaces();
             stopSelf(startId);
         } else {
-            String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
+            String id = intent.getStringExtra(AppConstants.EXTRA_RACE_ID);
             ManagedRace race = dataManager.getDataStore().getRace(id);
             if (race == null) {
                 ExLog.w(this, TAG, "No race for id " + id);
@@ -129,16 +129,16 @@ public class RaceStateService extends Service {
             }
 
             switch (action) {
-                case AppConstants.INTENT_ACTION_REGISTER_RACE:
+                case AppConstants.ACTION_REGISTER_RACE:
                     registerRace(race);
                     break;
-                case AppConstants.INTENT_ACTION_UNREGISTER_RACE:
+                case AppConstants.ACTION_UNREGISTER_RACE:
                     unregisterRace(race);
                     break;
 
-                case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                    long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
-                    String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
+                case AppConstants.ACTION_ALARM_ACTION:
+                    long timePoint = intent.getLongExtra(AppConstants.EXTRA_TIME_POINT_MILLIS, 0);
+                    String eventName = intent.getStringExtra(AppConstants.EXTRA_EVENT_NAME);
                     RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint),
                             RaceStateEvents.valueOf(eventName));
                     ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
@@ -151,7 +151,7 @@ public class RaceStateService extends Service {
 
     private void unregisterAllRaces() {
         Intent intent = new Intent(this, RaceLogPollingService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_POLLING_STOP);
+        intent.setAction(AppConstants.ACTION_POLLING_STOP);
         startService(intent);
 
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
@@ -176,8 +176,8 @@ public class RaceStateService extends Service {
 
     private void unregisterRace(ManagedRace race) {
         Intent intent = new Intent(this, RaceLogPollingService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
+        intent.setAction(AppConstants.ACTION_POLLING_RACE_REMOVE);
+        intent.putExtra(AppConstants.EXTRA_RACE_ID, race.getId());
         startService(intent);
         race.getState().getRaceLog().removeAllListeners();
         registeredLogListeners.remove(race);
@@ -241,8 +241,8 @@ public class RaceStateService extends Service {
 
             // ... and register for polling!
             Intent intent = new Intent(this, RaceLogPollingService.class);
-            intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_ADD);
-            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
+            intent.setAction(AppConstants.ACTION_POLLING_RACE_ADD);
+            intent.putExtra(AppConstants.EXTRA_RACE_ID, race.getId());
             startService(intent);
 
             registeredLogListeners.put(race, logListener);
@@ -260,10 +260,10 @@ public class RaceStateService extends Service {
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
         Intent intent = new Intent().setClass(this, RaceStateService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
-        intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
-        intent.putExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, event.getTimePoint().asMillis());
-        intent.putExtra(AppConstants.INTENT_EXTRA_EVENTNAME, event.getEventName().name());
+        intent.setAction(AppConstants.ACTION_ALARM_ACTION);
+        intent.putExtra(AppConstants.EXTRA_RACE_ID, managedRace.getId());
+        intent.putExtra(AppConstants.EXTRA_TIME_POINT_MILLIS, event.getTimePoint().asMillis());
+        intent.putExtra(AppConstants.EXTRA_EVENT_NAME, event.getEventName().name());
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
