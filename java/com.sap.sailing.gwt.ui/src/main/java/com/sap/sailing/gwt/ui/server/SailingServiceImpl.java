@@ -3778,7 +3778,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         result.setTags(tags);
         return result;
     }
-    
+
     private String convertToNoCookieUrlWhereApplicable(URL videoUrl, MimeType mimeType) {
         String result = videoUrl.toString();
         switch (mimeType) {
@@ -3786,15 +3786,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.replace("youtube", "youtube-nocookies");
             break;
         case vimeo:
-            result += videoUrl.getQuery() == null ? "?" : "&";
-            result += "dnt=true";
+            String query = videoUrl.getQuery();
+            result += query == null ? "?" : "&";
+            if (query != null && !query.contains("dnt=")) {
+                result += "dnt=1";
+            }
             break;
         default:
             break;
         }
         return result;
     }
-    
+
     //READ
     private Locale toLocale(String localeName) {
         if(localeName == null || localeName.isEmpty()) {
