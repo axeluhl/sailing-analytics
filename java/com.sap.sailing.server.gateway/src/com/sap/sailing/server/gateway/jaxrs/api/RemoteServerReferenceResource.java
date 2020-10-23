@@ -48,7 +48,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                 final URL remoteServerUrl = RemoteServerUtil.createBaseUrl(remoteServerUrlAsString);
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
                 final RemoteSailingServerReference serverRef = getService()
-                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl));
+                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl, true));
                 final JSONObject jsonResponse = new JSONObject();
                 jsonResponse.put("remoteServerNameAdded", serverRef.getName());
                 jsonResponse.put("remoteServerUrlAdded", serverRef.getURL().toString());
@@ -105,7 +105,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
 
     private List<String> getRemoteEventsList(RemoteSailingServerReference serverRef) {
         final Pair<Iterable<EventBase>, Exception> remoteServerEventsAndExceptions = getService()
-                .updateRemoteServerEventCacheSynchronously(serverRef);
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
         final List<String> remoteEventsList = new LinkedList<>();
         for (EventBase event : remoteServerEventsAndExceptions.getA()) {
             remoteEventsList.add(event.getName());

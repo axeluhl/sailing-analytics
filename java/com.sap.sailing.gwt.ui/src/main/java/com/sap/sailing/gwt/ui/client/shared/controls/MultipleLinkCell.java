@@ -118,7 +118,7 @@ public class MultipleLinkCell extends AbstractCell<List<MultipleLinkCell.CellLin
             if (parent.isOrHasChild(Element.as(eventTarget))) {
                 Element el = Element.as(eventTarget);
                 if (el.getNodeName().equalsIgnoreCase("a")) {
-                    onLinkClickHandler.update(el.getInnerText());
+                    onLinkClickHandler.update(el.getAttribute("target"));
                 }
             }
         }

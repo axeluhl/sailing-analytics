@@ -94,7 +94,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), idOfAccessControlledObject.toString());
         aclCollection.deleteOne(dbACL);
     }
-    
+
+    @Override
+    public void deleteAllAccessControlLists() {
+        final MongoCollection<org.bson.Document> aclCollection = db
+                .getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        aclCollection.deleteMany(new Document());
+    }
+
     @Override
     public void storeOwnership(OwnershipAnnotation owner) {
         MongoCollection<org.bson.Document> ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
@@ -114,6 +121,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document dbOwnership = new Document();
         dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), ownedObjectId.toString());
         ownershipCollection.deleteOne(dbOwnership);
+    }
+
+    @Override
+    public void deleteAllOwnerships() {
+        final MongoCollection<org.bson.Document> ownershipCollection = db
+                .getCollection(CollectionNames.OWNERSHIPS.name());
+        ownershipCollection.deleteMany(new Document());
     }
 
     @Override
@@ -263,6 +277,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void deleteAllSettings() {
+        final MongoCollection<org.bson.Document> settingsCollection = db
+                .getCollection(CollectionNames.SETTINGS.name());
+        settingsCollection.deleteMany(new Document());
+    }
+
+    @Override
     public void storePreferences(String username, Map<String, String> userMap) {
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
@@ -275,6 +296,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document update = new Document(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
         settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void deleteAllPreferences() {
+        final MongoCollection<org.bson.Document> preferencesCollection = db
+                .getCollection(CollectionNames.PREFERENCES.name());
+        preferencesCollection.deleteMany(new Document());
     }
 
     @Override
@@ -303,4 +331,5 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return dbSettingTypes;
     }
+
 }

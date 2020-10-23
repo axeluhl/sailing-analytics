@@ -62,7 +62,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         @Override
         public String getErrorMessage(MediaTrack media) {
             String errorMessage = null;
-
             if (media.url == null || media.url.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (media.title == null || media.title.trim().isEmpty()) {
@@ -74,10 +73,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             } else if (media.duration == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.duration());
             }
-
             return errorMessage;
         }
-
     }
 
     protected final StringMessages stringMessages;

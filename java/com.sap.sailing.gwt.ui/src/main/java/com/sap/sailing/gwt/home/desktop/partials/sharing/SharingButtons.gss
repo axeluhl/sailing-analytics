@@ -1,6 +1,8 @@
 .eventheader_sharing {
   text-align: right;
-  padding: 1.333333333333333em 0;
+  padding: 1.333333333333333em 0 !important;
+  display: inline-block;
+  float: right;
 }
 .eventheader_sharing_item {
   display: inline-block;
@@ -47,4 +49,30 @@
 .eventheader_sharing_itemfacebook:hover,
 .eventheader_sharing_itemfacebook:focus {
   background-color: #355089;
+}
+
+.eventheader_sharing_itemcopytoclipboard {
+  float: right;
+  position: relative;
+  margin-left: 0.5em;
+  font-size: 1rem;
+  background-color: #737373 ;
+}
+.eventheader_sharing_itemcopytoclipboard:after {
+  content: "";
+  position: absolute;
+  width: 55%;
+  height: 55%;
+  top: 22.5%;
+  left: 22.5%;
+  background-image: resourceUrl("copyIcon");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+}
+
+.eventheader_sharing_itemcopytoclipboard:hover,
+.eventheader_sharing_itemcopytoclipboard:focus {
+  background-color: #808080;
 }

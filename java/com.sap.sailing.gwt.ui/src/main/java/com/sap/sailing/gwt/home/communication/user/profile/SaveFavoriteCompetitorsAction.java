@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sse.gwt.dispatch.shared.commands.HasWriteAction;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
@@ -18,7 +17,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link SailingAction} implementation to save favorite competitors for the currently logged in user as selected on
  * the preferences page.
  */
-public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult> {
+public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>, HasWriteAction {
     
     private FavoriteCompetitorsDTO favorites;
     
@@ -33,15 +32,13 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult> 
     public VoidResult execute(SailingDispatchContext ctx) throws DispatchException {
         CompetitorNotificationPreferences prefs = new CompetitorNotificationPreferences(ctx.getRacingEventService());
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
-        CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
-            Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorDTO.getIdAsString());
-            competitorPreferences.add(new CompetitorNotificationPreference(competitorStore, competitor,
-                    favorites.isNotifyAboutResults()));
+            String competitorIdAsString = competitorDTO.getIdAsString();
+
+            competitorPreferences.add(new CompetitorNotificationPreference(competitorIdAsString, favorites.isNotifyAboutResults()));
         }
         prefs.setCompetitors(competitorPreferences);
         ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, prefs);
         return new VoidResult();
     }
-
 }

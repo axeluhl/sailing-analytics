@@ -19,6 +19,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog.AclDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -85,7 +86,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
      * {@link DialogConfig#openACLDialog(Named) open} a {@link EditACLDialog dialog}.
      * 
-     * @param userManagementService
+     * @param userManagementWriteService
      *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
      * @param type
      *            {@link SecuredDomainType} specifying the type of required permissions to modify the secured object
@@ -97,23 +98,23 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
      *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
     public static <T extends Named & SecuredDTO> DialogConfig<T> create(
-            final UserManagementServiceAsync userManagementService, final HasPermissions type,
+            final UserManagementWriteServiceAsync userManagementWriteService, final HasPermissions type,
             final Consumer<T> updateCallback,
             final StringMessages stringMessages) {
-        return new DialogConfig<>(userManagementService, type, updateCallback, stringMessages);
+        return new DialogConfig<>(userManagementWriteService, type, updateCallback, stringMessages);
     }
 
     public static class DialogConfig<T extends SecuredDTO> {
-        private final UserManagementServiceAsync userManagementService;
+        private final UserManagementWriteServiceAsync userManagementWriteService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
         private final Supplier<Action[]> availableActionsFactory;
         private final StringMessages stringMessages;
 
-        private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
+        private DialogConfig(final UserManagementWriteServiceAsync userManagementWriteService, final HasPermissions type,
                 final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
-            this.userManagementService = userManagementService;
+            this.userManagementWriteService = userManagementWriteService;
             this.identifierFactory = SecuredDTO::getIdentifier;
             this.availableActionsFactory = type::getAvailableActions;
             this.updateCallback = updateCallback;
@@ -127,7 +128,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
         public void openACLDialog(final T securedObject) {
-            new EditACLDialog(userManagementService, identifierFactory.apply(securedObject),
+            new EditACLDialog(userManagementWriteService, identifierFactory.apply(securedObject),
                     availableActionsFactory.get(), stringMessages, new EditAclDialogCallback(securedObject)).show();
         }
 
@@ -142,7 +143,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
             @Override
             public void ok(AclDialogResult aclResult) {
                 final QualifiedObjectIdentifier objectIdentifier = identifierFactory.apply(securedObject);
-                userManagementService.overrideAccessControlList(objectIdentifier, aclResult.getAcl(),
+                userManagementWriteService.overrideAccessControlList(objectIdentifier, aclResult.getAcl(),
                         new AsyncCallback<AccessControlListDTO>() {
                             @Override
                             public void onSuccess(AccessControlListDTO result) {

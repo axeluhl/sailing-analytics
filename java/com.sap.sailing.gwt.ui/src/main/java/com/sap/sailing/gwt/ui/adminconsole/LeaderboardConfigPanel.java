@@ -293,7 +293,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         courseAreasColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(courseAreasColumn,
                 (o1, o2) -> new NaturalComparator().compare(Util.joinStrings(", ", Util.map(o1.courseAreas, CourseAreaDTO::getName)),
-                        Util.join(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
+                        Util.joinStrings(", ", Util.map(o2.courseAreas, CourseAreaDTO::getName))));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = create(
@@ -358,7 +358,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, READ,
                 this::openPairingListEntryPoint);
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 new Consumer<StrippedLeaderboardDTOWithSecurity>() {
@@ -368,7 +368,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
         });
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 new Consumer<StrippedLeaderboardDTOWithSecurity>() {

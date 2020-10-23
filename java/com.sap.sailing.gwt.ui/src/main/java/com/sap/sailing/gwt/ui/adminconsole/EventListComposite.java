@@ -266,7 +266,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public List<MultipleLinkCell.CellLink> getValue(EventDTO event) {
                 List<MultipleLinkCell.CellLink> links = new ArrayList<>();
                 for (LeaderboardGroupDTO lg : event.getLeaderboardGroups()) {
-                    links.add(new MultipleLinkCell.CellLink(lg.getName()));
+                    final String leaderboardGroupId = String.valueOf(lg.getId());
+                    MultipleLinkCell.CellLink cellLink = new MultipleLinkCell.CellLink(leaderboardGroupId, leaderboardGroupId, lg.getName());
+                    links.add(cellLink);
                 }
                 return links;
             }
@@ -275,9 +277,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void update(String value) {
                 Map<String, String> params = new HashMap<>();
-                params.put("LeaderBoardGroupName", value);
-                handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(),
-                        params);
+                params.put(LeaderboardGroupConfigPanel.LEADERBOARD_GROUP_ID, value);
+                handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(), params);
             }
         });
         TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
@@ -285,8 +286,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public String getValue(EventDTO event) {
                 String result = "";
                 int imageCount = Util.size(event.getImages());
-                if(imageCount > 0) {
-                    result = imageCount + " image(s)"; // TODO i18n
+                if (imageCount > 0) {
+                    result = stringMessages.imagesWithCount(imageCount);
                 }
                 return result;
             }
@@ -296,8 +297,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public String getValue(EventDTO event) {
                 String result = "";
                 int videoCount = Util.size(event.getVideos());
-                if(videoCount > 0) {
-                    result = videoCount + " video(s)"; // TODO i18n
+                if (videoCount > 0) {
+                    result = stringMessages.videosWithCount(videoCount);
                 }
                 return result;
             }
@@ -312,11 +313,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 removeEvent(event);
             }
         });
-        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
+        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), EVENT,
                 event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
+                userService.getUserManagementWriteService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openACLDialog(e));
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog

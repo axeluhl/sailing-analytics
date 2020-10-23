@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -393,7 +394,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(), addOverallDetails,
-                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam()));
+                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
         result.setName(this.getName());
@@ -564,6 +565,13 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                     }
                 }
             }
+            if (isLeaderboardThatHasRegattaLike) {
+                LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+                final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
+                final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
+                row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
+                row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
+            }
         }
         final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
         logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
@@ -681,6 +689,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
             if (track != null) {
                 entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenRawFixes();
+                entryDTO.currentSpeedAndCourseOverGround = track.getEstimatedSpeed(timePoint);
             }
             if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
                 long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();

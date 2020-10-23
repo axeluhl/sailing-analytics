@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -37,6 +39,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.impl.KeywordMatcher;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -49,8 +52,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;   
-
-    private List<String> allLeaderboardGroupNames;
+    /**
+     * A map containing a leaderboardgroup UUID as key and the name of that leaderboard group as value.
+     */
+    private Map<String, String> allLeaderboardGroupsNameAndIdsMap;
 
     private final StringMessages stringMessages;
     private String currentHost;
@@ -142,7 +147,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] groupNames = createLeaderBoardGroupNamesFromListBox();
+        UUID[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -152,14 +157,14 @@ public class MasterDataImportPanel extends VerticalPanel {
         this.add(subProgressName);
         final CustomProgressBar subProgressBar = CustomProgressBar.determinate();
         this.add(subProgressBar);
-        if (groupNames.length >= 1) {
+        if (leaderboardGroupIds.length >= 1) {
             disableAllButtons();
             boolean override = overrideSwitch.getValue();
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
-            sailingServiceWrite.importMasterData(currentHost, groupNames, override, compress, exportWind,
+            sailingServiceWrite.importMasterData(currentHost, leaderboardGroupIds, override, compress, exportWind,
                     exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -291,14 +296,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     }
 
-    private String[] createLeaderBoardGroupNamesFromListBox() {
-        List<String> names = new ArrayList<String>();
+    private UUID[] createLeaderboardGroupIdsFromListBox() {
+        List<UUID> uuids = new ArrayList<UUID>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
-                names.add(leaderboardgroupListBox.getValue(i));
+                uuids.add(UUID.fromString(leaderboardgroupListBox.getValue(i)));
             }
         }
-        return names.toArray(new String[names.size()]);
+        return uuids.toArray(new UUID[uuids.size()]);
     }
 
     protected void fireIdRequestsAndFillLists() {
@@ -311,29 +316,25 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingServiceWrite.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
-                new AsyncCallback<List<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
-                changeButtonStateAccordingToApplicationState();
-            }
+        sailingServiceWrite.getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(host, usernameBox.getValue(),
+                passwordBox.getValue(), new AsyncCallback<Map<String, String>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
+                        changeButtonStateAccordingToApplicationState();
+                    }
 
-            @Override
-            public void onSuccess(List<String> result) {
-                clearListBox();
-                Collections.sort(result);
-                allLeaderboardGroupNames = result;
-                leaderboardgroupListBox.setVisibleItemCount(result.size());
-                for (String lgName : result) {
-                    leaderboardgroupListBox.addItem(lgName);
-                }
-                changeButtonStateAccordingToApplicationState();
-                if (!filterBox.getValue().isEmpty()) {
-                    filterLeaderboardGroupList();
-                }
-            }
-        });
+                    @Override
+                    public void onSuccess(Map<String, String> result) {
+                        clearListBox();
+                        allLeaderboardGroupsNameAndIdsMap = result;
+                        fillLeaderboardGroupListBox(allLeaderboardGroupsNameAndIdsMap);
+                        changeButtonStateAccordingToApplicationState();
+                        if (!filterBox.getValue().isEmpty()) {
+                            filterLeaderboardGroupList();
+                        }
+                    }
+                });
     }
 
     private void showErrorAlert(String string) {
@@ -408,7 +409,6 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void filterLeaderboardGroupList() {
         clearListBox();
-        int visibleNameCount = 0;
         Iterable<String> filterTexts = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterBox.getText());
         final KeywordMatcher<String> matcher = new KeywordMatcher<String>() {
             @Override
@@ -416,18 +416,26 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        for (String name : allLeaderboardGroupNames) {
-            if (matcher.matches(filterTexts, name)) {
-                leaderboardgroupListBox.addItem(name);
-                visibleNameCount++;
-            }
-        }
-        leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
+        Map<String, String> filteredMap = allLeaderboardGroupsNameAndIdsMap.entrySet().stream()
+                .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        fillLeaderboardGroupListBox(filteredMap);
         changeButtonStateAccordingToApplicationState();
+    }
+
+    private void fillLeaderboardGroupListBox(Map<String, String> leaderboardGroupsMap) {
+        final List<Pair<String, String>> list = new ArrayList<>();
+        for (final String key : leaderboardGroupsMap.keySet()) {
+            list.add(new Pair<>(leaderboardGroupsMap.get(key), key));
+        }
+        Collections.sort(list, (a, b)->a.getA().compareTo(b.getA()));
+        for (final Pair<String, String> pair : list) {
+            leaderboardgroupListBox.addItem(pair.getA(), pair.getB());
+        }
+        leaderboardgroupListBox.setVisibleItemCount(list.size());
     }
 
     private void deleteProgressIndication(IsWidget... widgetsToRemove) {
         Arrays.asList(widgetsToRemove).forEach(this::remove);
     }
-
 }

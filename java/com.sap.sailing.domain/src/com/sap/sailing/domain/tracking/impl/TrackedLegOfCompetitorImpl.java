@@ -563,12 +563,36 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getAbsoluteCrossTrackError(TimePoint timePoint) throws NoWindException {
-        return getTrackedLeg().getAbsoluteCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+        final Distance result;
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        if (track != null) {
+            final Position estimatedPosition = track.getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (estimatedPosition != null) {
+                result = getTrackedLeg().getAbsoluteCrossTrackError(estimatedPosition, timePoint);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
     public Distance getSignedCrossTrackError(TimePoint timePoint) throws NoWindException {
-        return getTrackedLeg().getSignedCrossTrackError(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+        final Distance result;
+        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
+        if (track != null) {
+            final Position estimatedPosition = track.getEstimatedPosition(timePoint, /* extrapolate */ true);
+            if (estimatedPosition != null) {
+                result = getTrackedLeg().getSignedCrossTrackError(estimatedPosition, timePoint);
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override

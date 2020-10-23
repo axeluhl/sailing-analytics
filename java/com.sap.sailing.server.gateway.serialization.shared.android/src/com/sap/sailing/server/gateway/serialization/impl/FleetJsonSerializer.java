@@ -7,7 +7,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 
 public class FleetJsonSerializer implements JsonSerializer<Fleet> {
-    public static final String FIELD_NAME =	"name";
+    public static final String FIELD_NAME = "name";
     public static final String FIELD_ORDERING =	"ordering";
     public static final String FIELD_COLOR = "color";
 
@@ -20,14 +20,11 @@ public class FleetJsonSerializer implements JsonSerializer<Fleet> {
     @Override
     public JSONObject serialize(Fleet object) {
         JSONObject result = new JSONObject();
-
         result.put(FIELD_NAME, object.getName());
         result.put(FIELD_ORDERING, object.getOrdering());
         if (object.getColor() != null) {
             result.put(FIELD_COLOR, colorSerializer.serialize(object.getColor()));
         }
-
-
         return result;
     }
 

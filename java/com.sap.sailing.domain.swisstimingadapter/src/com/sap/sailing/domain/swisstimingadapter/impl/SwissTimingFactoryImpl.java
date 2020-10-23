@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -44,12 +45,12 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
+    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, String raceId, URL raceDataUrl,
+            String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
             return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
         } else {
-            Util.Triple<String, Integer, String> key = new Util.Triple<String, Integer, String>(host, port, raceId);
+            Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
             if (result == null || result.isStopped()) {
                 if (result == null) {
@@ -57,7 +58,14 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
                 } else {
                     logger.info("Creating a new connector for "+key+" because the old one was stopped");
                 }
-                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
+                if (host == null) {
+                    if (raceDataUrl == null) {
+                        throw new IllegalArgumentException("raceDataUrl must be provided if no host/port is provided");
+                    }
+                    result = new SailMasterConnectorForUrlDownload(raceId, raceDataUrl, raceName, raceDescription, boatClass, swissTimingRaceTracker);
+                } else {
+                    result = new SailMasterConnectorForSocket(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
+                }
                 connectors.put(key, result);
                 // TODO how do connectors get stopped, terminated and removed from the connectors map again?
             } else {
@@ -72,13 +80,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
             String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
-        if (result == null) {
+        if (result == null || result.isStopped()) {
             result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
-        } else if (result.isStopped()) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
-            connectors.put(key, result);
         }
         return result;
     }

@@ -56,7 +56,7 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                             RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
                                     raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
-                                    selectedLeaderboardName, null, null, null);
+                                    selectedLeaderboardName, null, null, null, null);
                             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                                     .createDefaultWithCanReplayDuringLiveRaces(true);
                             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(

@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.util.RaceBoardLinkFactory;
 import com.sap.sse.common.TimePoint;
@@ -70,20 +72,41 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLeaderboardGroups() {
-        JSONArray jsonLeaderboardGroups = new JSONArray();
-        Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        for (Entry<String, LeaderboardGroup> leaderboardGroupEntry : leaderboardGroups.entrySet()) {
-            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry.getValue())) {
-                jsonLeaderboardGroups.add(leaderboardGroupEntry.getKey());
-            }
-        }
-
-        String json = jsonLeaderboardGroups.toJSONString();
-
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->leaderboardGroup.getName());
         // header option is set to allow communication between two sapsailing servers, especially for
         // the master data import functionality
-        return Response.ok(json).header("Access-Control-Allow-Origin", "*")
-                .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return addAccessControlAllowOriginHeader(Response.ok(streamingOutput(jsonLeaderboardGroups))).build();
+    }
+
+    private ResponseBuilder addAccessControlAllowOriginHeader(ResponseBuilder responseBuilder) {
+        return responseBuilder.header("Access-Control-Allow-Origin", "*");
+    }
+    
+    private JSONArray getLeaderboardGroups(Function<LeaderboardGroup, Object> resultObjectSupplier) {
+        JSONArray jsonLeaderboardGroups = new JSONArray();
+        for (final LeaderboardGroup leaderboardGroupEntry : getService().getLeaderboardGroups().values()) {
+            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry)) {
+                jsonLeaderboardGroups.add(resultObjectSupplier.apply(leaderboardGroupEntry));
+            }
+        }
+        // header option is set to allow communication between two sapsailing servers, especially for
+        // the master data import functionality
+        return jsonLeaderboardGroups;
+    }
+
+    @GET
+    @Path("/identifiable")
+    @Produces("application/json;charset=UTF-8")
+    public Response getLeaderboardGroupsIdentifiable() {
+        final JSONArray jsonLeaderboardGroups = getLeaderboardGroups(leaderboardGroup->{
+            JSONObject leaderboardGroupObject = new JSONObject();
+            leaderboardGroupObject.put(LeaderboardGroupConstants.ID, leaderboardGroup.getId().toString());
+            leaderboardGroupObject.put(LeaderboardGroupConstants.NAME, leaderboardGroup.getName());
+            return leaderboardGroupObject;
+        });
+        // header option is set to allow communication between two sapsailing servers, especially for
+        // the master data import functionality
+        return addAccessControlAllowOriginHeader(Response.ok(streamingOutput(jsonLeaderboardGroups))).build();
     }
 
     @GET
@@ -197,9 +220,11 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                             jsonRaceColumn.put("regattaName",
                                                     trackedRace.getTrackedRegatta().getRegatta().getName());
                                             jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
+                                            jsonRaceColumn.put("trackingProviderType", trackedRace.getTrackingConnectorInfo().getTrackingConnectorName());
+                                            jsonRaceColumn.put("raceId", trackedRace.getRace().getId().toString());
                                             final JSONObject raceBoardURLsByEventID = new JSONObject();
                                             for (Event event : eventsReferencingLeaderboardGroup) {
-                                                if (Util.contains(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                                                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
                                                     raceBoardURLsByEventID.put(event.getId().toString(), RaceBoardLinkFactory.createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
                                                             /* locale */ null));
                                                 }
@@ -210,6 +235,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                         } else {
                                             jsonRaceColumn.put("isTracked", false);
                                             jsonRaceColumn.put("trackedRaceName", null);
+                                            jsonRaceColumn.put("trackingProviderType", null);
+                                            jsonRaceColumn.put("raceId", null);
                                             jsonRaceColumn.put("hasGpsData", false);
                                             jsonRaceColumn.put("hasWindData", false);
                                         }

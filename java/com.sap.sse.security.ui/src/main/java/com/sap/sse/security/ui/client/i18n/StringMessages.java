@@ -123,6 +123,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filterRoles();
     String actions();
     String actionEdit();
+    String actionExcludeEvents();
     String actionRemove();
     String actionChangeOwnership();
     String errorUpdatingOwnership(String name);

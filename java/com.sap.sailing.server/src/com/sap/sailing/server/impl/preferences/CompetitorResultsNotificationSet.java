@@ -3,6 +3,7 @@ package com.sap.sailing.server.impl.preferences;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sse.security.interfaces.UserStore;
 
@@ -11,13 +12,8 @@ import com.sap.sse.security.interfaces.UserStore;
  * whenever new results are available for a {@link Competitor}.
  */
 public class CompetitorResultsNotificationSet extends AbstractCompetitorNotificationSet {
-
-    public CompetitorResultsNotificationSet(UserStore store) {
-        super(store);
-    }
-
     /**
-     * Constructor used to automatically track {@link UserStore} as OSGi service.
+     * Constructor used to automatically track {@link UserStore} and {@link CompetitorAndBoatStore} as OSGi service.
      */
     public CompetitorResultsNotificationSet(BundleContext bundleContext) {
         super(bundleContext);
@@ -27,5 +23,4 @@ public class CompetitorResultsNotificationSet extends AbstractCompetitorNotifica
     protected boolean shouldNotifyFor(CompetitorNotificationPreference pref) {
         return pref.isNotifyAboutResults();
     }
-
 }

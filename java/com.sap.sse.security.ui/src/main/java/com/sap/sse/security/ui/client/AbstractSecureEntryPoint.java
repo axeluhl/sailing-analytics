@@ -34,7 +34,12 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
     public UserManagementServiceAsync getUserManagementService() {
         return securityProvider.getUserManagementService();
     }
-    
+
+    @Override
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return securityProvider.getUserManagementWriteService();
+    }
+
     @Override
     public UserService getUserService() {
         return securityProvider.getUserService();

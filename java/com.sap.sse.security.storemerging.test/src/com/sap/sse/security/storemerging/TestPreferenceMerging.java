@@ -11,8 +11,7 @@ import org.junit.Test;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 
 public class TestPreferenceMerging extends AbstractStoreMergeTest {
     private final static String PREF_A = "a";
@@ -20,13 +19,13 @@ public class TestPreferenceMerging extends AbstractStoreMergeTest {
     private final static String PREF_C = "c";
     
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         // using another test's set-up as a dummy, mainly to get the admin user object
         setUp("source_TestRoleHandlingInUserGroupMerge", "target_TestRoleHandlingInUserGroupMerge");
     }
     
     @Test
-    public void testPreferenceMerging() throws UserGroupManagementException, UserManagementException {
+    public void testPreferenceMerging() throws UserStoreManagementException {
         // assertions against unmodified target
         assertNull(targetUserStore.getPreference("admin", PREF_A));
         assertNull(targetUserStore.getPreference("admin", PREF_B));

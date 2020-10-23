@@ -93,7 +93,9 @@ public class LogEntry {
     }
     
     public TimePoint getTimepoint() throws ParseException {
-        return new MillisecondsTimePoint(dateFormat.parse(getTimestampString()));
+        synchronized (dateFormat) {
+            return new MillisecondsTimePoint(dateFormat.parse(getTimestampString()));
+        }
     }
 
     public String getRequest() {

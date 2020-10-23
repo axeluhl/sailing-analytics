@@ -594,7 +594,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     private void reloadPrivateTags() {
         tagListProvider.removePrivateTags();
         if (userService.getCurrentUser() != null) {
-            sailingServiceWrite.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
+            sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
                     new AsyncCallback<List<TagDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {

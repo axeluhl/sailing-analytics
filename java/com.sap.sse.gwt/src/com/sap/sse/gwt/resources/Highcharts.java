@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
 
 /**
- * Convinience class to inject common control css content
+ * Convenience class to inject common control css content
  * 
  * @author pgtaboada
  *
