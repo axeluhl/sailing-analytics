@@ -82,23 +82,4 @@ public class FieldNames {
         SALTED_PW,
         SALT;
     }
-    
-    public static enum Subscription {
-        SUBSCRIPTION_ID,
-        CUSTOMER_ID,
-        PLAN_ID,
-        TRIAL_START,
-        TRIAL_END,
-        SUBSCRIPTION_STATUS,
-        PAYMENT_STATUS,
-        TRANSACTION_TYPE,
-        TRANSACTION_STATUS,
-        INVOICE_ID,
-        INVOICE_STATUS,
-        SUBSCRIPTION_CREATED_AT,
-        SUBSCRIPTION_UPDATED_AT,
-        LATEST_EVENT_TIME,
-        MANUAL_UPDATED_AT,
-        PROVIDER;
-    }
 }

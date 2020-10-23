@@ -31,7 +31,10 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionFactory;
+import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -334,36 +337,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return dbSettingTypes;
     }
 
-    /**
-     * Stores the data exposed by the {@code subscriptions} through the {@link Subscription} type persistently.
-     * Should sub-classes add more state that requires persistence handling then we would probably need an additional
-     * "type" indicator which then picks a persistence handler from a registry, keyed by this type.
-     */
     private BasicDBList createSubscriptions(Subscription[] subscriptions) {
         final BasicDBList result;
         if (subscriptions != null) {
             result = new BasicDBList();
             for (final Subscription subscription : subscriptions) {
-                final Document doc = new Document();
-                doc.put(FieldNames.Subscription.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
-                doc.put(FieldNames.Subscription.PLAN_ID.name(), subscription.getPlanId());
-                doc.put(FieldNames.Subscription.CUSTOMER_ID.name(), subscription.getCustomerId());
-                doc.put(FieldNames.Subscription.TRIAL_START.name(), subscription.getTrialStart().asMillis());
-                doc.put(FieldNames.Subscription.TRIAL_END.name(), subscription.getTrialEnd().asMillis());
-                doc.put(FieldNames.Subscription.SUBSCRIPTION_STATUS.name(), subscription.getSubscriptionStatus());
-                doc.put(FieldNames.Subscription.PAYMENT_STATUS.name(), subscription.getPaymentStatus());
-                doc.put(FieldNames.Subscription.TRANSACTION_TYPE.name(), subscription.getTransactionType());
-                doc.put(FieldNames.Subscription.TRANSACTION_STATUS.name(), subscription.getTransactionStatus());
-                doc.put(FieldNames.Subscription.INVOICE_ID.name(), subscription.getInvoiceId());
-                doc.put(FieldNames.Subscription.INVOICE_STATUS.name(), subscription.getInvoiceStatus());
-                doc.put(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name(),
-                        subscription.getSubscriptionCreatedAt().asMillis());
-                doc.put(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name(),
-                        subscription.getSubscriptionUpdatedAt().asMillis());
-                doc.put(FieldNames.Subscription.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime().asMillis());
-                doc.put(FieldNames.Subscription.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt().asMillis());
-                doc.put(FieldNames.Subscription.PROVIDER.name(), subscription.getProvider());
-                result.add(doc);
+                try {
+                    final Document doc = new Document();
+                    final SubscriptionProvider subscriptionProvider = SubscriptionFactory.getInstance()
+                            .getSubscriptionProvider(subscription.getProvider());
+                    doc.putAll(subscriptionProvider.getDataHandler().toMap(subscription));
+                    result.add(doc);
+                } catch (InvalidSubscriptionProviderException e) {
+                    logger.log(Level.SEVERE, "Failed to store subscription: " + subscription.toString(), e);
+                }
             }
         } else {
             result = null;

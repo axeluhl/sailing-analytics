@@ -18,7 +18,6 @@ import org.bson.types.Binary;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.interfaces.UserImpl;
@@ -44,6 +43,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionData;
 import com.sap.sse.security.shared.subscription.SubscriptionFactory;
 import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
@@ -511,49 +511,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    /**
-     * Loads the data exposed hrough the {@link Subscription} type. Should sub-classes have added more state that
-     * requires persistence handling then we would probably need an additional "type" indicator which then picks a
-     * persistence handler from a registry, keyed by this type.
-     */
     private Subscription[] loadSubscriptions(List<?> subscriptionsDoc) {
         final Subscription[] subscriptions;
         if (subscriptionsDoc != null) {
             subscriptions = new Subscription[subscriptionsDoc.size()];
             int i = 0;
             for (Object o : subscriptionsDoc) {
-
                 final Document doc = (Document) o;
-                final String customerId = doc.getString(FieldNames.Subscription.CUSTOMER_ID.name());
-                final String planId = doc.getString(FieldNames.Subscription.PLAN_ID.name());
-                final String subscriptionStatus = doc.getString(FieldNames.Subscription.SUBSCRIPTION_STATUS.name());
-                final String subscriptionId = doc.getString(FieldNames.Subscription.SUBSCRIPTION_ID.name());
-                final TimePoint trialStart = Subscription
-                        .getTime(doc.getLong(FieldNames.Subscription.TRIAL_START.name()));
-                final TimePoint trialEnd = Subscription.getTime(doc.getLong(FieldNames.Subscription.TRIAL_END.name()));
-                final String paymentStatus = doc.getString(FieldNames.Subscription.PAYMENT_STATUS.name());
-                final String transactionType = doc.getString(FieldNames.Subscription.TRANSACTION_TYPE.name());
-                final String transactionStatus = doc.getString(FieldNames.Subscription.TRANSACTION_STATUS.name());
-                final String invoiceId = doc.getString(FieldNames.Subscription.INVOICE_ID.name());
-                final String invoiceStatus = doc.getString(FieldNames.Subscription.INVOICE_STATUS.name());
-                final TimePoint subscriptionCreatedAt = Subscription
-                        .getTime(doc.getLong(FieldNames.Subscription.SUBSCRIPTION_CREATED_AT.name()));
-                final TimePoint subscriptionUpdatedAt = Subscription
-                        .getTime(doc.getLong(FieldNames.Subscription.SUBSCRIPTION_UPDATED_AT.name()));
-                final TimePoint latestEventTime = Subscription
-                        .getTime(doc.getLong(FieldNames.Subscription.LATEST_EVENT_TIME.name()));
-                final TimePoint manualUpdatedAt = Subscription
-                        .getTime(doc.getLong(FieldNames.Subscription.MANUAL_UPDATED_AT.name()));
-                final String providerName = doc.getString(FieldNames.Subscription.PROVIDER.name());
+                Map<String, Object> data = new HashMap<String, Object>();
+                for (Entry<String, Object> entry : doc.entrySet()) {
+                    data.put(entry.getKey(), entry.getValue());
+                }
+                SubscriptionData subscriptionData = new SubscriptionData(data);
                 try {
                     final SubscriptionProvider subscriptionProvider = SubscriptionFactory.getInstance()
-                            .getSubscriptionProvider(providerName);
-                    subscriptions[i++] = subscriptionProvider.createSubscription(subscriptionId, planId, customerId,
-                            trialStart, trialEnd, subscriptionStatus, paymentStatus, transactionType, transactionStatus,
-                            invoiceId, invoiceStatus, subscriptionCreatedAt, subscriptionUpdatedAt, latestEventTime,
-                            manualUpdatedAt);
+                            .getSubscriptionProvider(subscriptionData.getProvider());
+                    subscriptions[i++] = subscriptionProvider.getDataHandler().restore(subscriptionData);
                 } catch (InvalidSubscriptionProviderException e) {
-                    logger.log(Level.SEVERE, "Failed to load subscription for user " + customerId, e);
+                    logger.log(Level.SEVERE, "Failed to load subscription for user " + subscriptionData.getCustomerId(),
+                            e);
                 }
             }
         } else {
