@@ -143,10 +143,9 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             "customControlsOnMobile" : true,
             youtube: {
                 enablePrivacyEnhancedMode: true,
-                customVars: { rel: 0, modestbranding: 1 } 
+                customVars: { rel: 0, modestbranding: 1 }
                 },
             vimeo: {
-                "color": "#fbc51b",
                 "dnt": 1,
             }
         });
