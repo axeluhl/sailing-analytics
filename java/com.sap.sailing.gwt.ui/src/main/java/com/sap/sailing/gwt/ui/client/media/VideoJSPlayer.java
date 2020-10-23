@@ -144,7 +144,11 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             youtube: {
                 enablePrivacyEnhancedMode: true,
                 customVars: { rel: 0, modestbranding: 1 } 
-                }
+                },
+            vimeo: {
+                "color": "#fbc51b",
+                "dnt": 1,
+            }
         });
         player.ready(function() {
             this.on('play', function() {
