@@ -21,7 +21,6 @@ public class SocialFooter extends Composite {
     public SocialFooter() {
         SocialFooterResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             htmlPanel.getElement().getStyle().setDisplay(Display.NONE);
         }

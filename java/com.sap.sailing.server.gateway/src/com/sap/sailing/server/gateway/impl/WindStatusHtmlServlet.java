@@ -38,39 +38,9 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String reinitializeWindReceiverParameter = req.getParameter(PARAM_RELOAD_WIND_RECEIVER);
         initializeWindReceiver(reinitializeWindReceiverParameter != null && reinitializeWindReceiverParameter.equalsIgnoreCase("true"));
-        resp.setContentType("text/html");
-        PrintWriter out = resp.getWriter();
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Wind Status</title>");
-        out.println("<script>\r\n" + 
-                "  function loadAndReplace() {\r\n" + 
-                "        var request = new XMLHttpRequest();\r\n" + 
-                "        request.open(\"POST\", \"" + req.getRequestURI() + "\" );\r\n" + 
-                "        request.setRequestHeader(\"X-SAPSSE-Forward-Request-To\",\"master\");\r\n" +
-                "        request.addEventListener(\"load\", function(event) {\r\n" + 
-                "                if (request.status >= 200 && request.status < 300) {\r\n" + 
-                "                        document.getElementById(\"body\").innerHTML = request.responseText;\r\n" + 
-                "                } else {\r\n" + 
-                "                        document.getElementById(\"body\").innerHTML = \"<b>error reading data from server</b>\";\r\n" + 
-                "                }\r\n" + 
-                "        });\r\n" + 
-                "        request.send(); \r\n" + 
-                "  }\r\n" + 
-                "  \r\n" + 
-                "  function refresh() {\r\n" +
-                "        loadAndReplace();\r\n" + 
-                "        window.setInterval(loadAndReplace, 10000);\r\n" + 
-                "  }\r\n" + 
-                "  \r\n" + 
-                "</script>");
-        out.println("</head>");
-        out.println("<body id=\"body\" onload=\"refresh()\" >");
-        out.println("</body>");
-        out.println("</html>");
-        out.close();
+        writePostRefreshingHeadAndEmptyBody(req, resp, "Wind Status");
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
