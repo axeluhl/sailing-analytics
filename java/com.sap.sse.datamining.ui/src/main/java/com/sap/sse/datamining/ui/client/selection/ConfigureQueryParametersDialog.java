@@ -193,6 +193,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             if (onCancel != null) {
                 onCancel.run();
             }
+            clearForm();
         });
         
         Button applyButton = new Button(getDataMiningStringMessages().apply());
@@ -311,6 +312,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         busyIndicator.setBusy(true);
         HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
+        // TODO Filter values by current selection for WYSIWYG effect?
         dataMiningService.getDimensionValuesFor(session, retrieverChainProvider.getDataRetrieverChainDefinition(), retrieverLevel,
                 dimensionDTOs, retrieverChainProvider.getRetrieverSettings(), /*filterSelection*/ new HashMap<>(), LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<QueryResultDTO<HashSet<Object>>>() {
@@ -336,7 +338,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": " + caught.getMessage());
-                        // TODO Display error message for user
                     }
                 });
     }
@@ -402,7 +403,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         return parameterTypeSelectionBox.getValue();
     }
     
-    // TODO Clear controls after apply/hide
     private void applyParameter() {
         hide();
         ParameterizedFilterDimension parameter;
@@ -423,10 +423,20 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
             throw new IllegalStateException("Not implemented for '" + getSelectedParameterType() + "'");
         }
         onApply.accept(parameter);
+        clearForm();
     }
     
     public void hide() {
         dialog.hide();
+    }
+    
+    private void clearForm() {
+        filterInputToApply = null;
+        filterValuesToSelect = Collections.emptyList();
+        filterPanel.updateAll(Collections.emptyList());
+        filterPanel.search(null);
+        onApply = null;
+        onCancel = null;
     }
 
     @Override
