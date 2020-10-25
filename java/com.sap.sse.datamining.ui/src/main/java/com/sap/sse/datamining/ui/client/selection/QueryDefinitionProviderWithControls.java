@@ -257,7 +257,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     }
     
     private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
-        this.configureQueryParametersDialog.show(event);
+        this.configureQueryParametersDialog.show(event, parameter -> {
+            // TODO Implement me
+        });
     }
 
     /**
