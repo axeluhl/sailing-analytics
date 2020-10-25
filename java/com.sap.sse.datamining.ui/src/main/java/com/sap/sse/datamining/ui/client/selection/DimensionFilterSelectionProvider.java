@@ -40,6 +40,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -56,8 +57,10 @@ import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
+import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
+import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -95,6 +98,9 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private final DataGrid<Serializable> dataGrid;
     private final Column<Serializable, Boolean> checkboxColumn;
     
+    private ParameterizedFilterDimension parameter;
+    
+    private String searchInputToApply;
     private Iterable<? extends Serializable> selectionToBeApplied;
     private Consumer<Iterable<String>> selectionCallback;
 
@@ -132,10 +138,20 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                 return dataGrid;
             }
         };
+        filterPanel.addFilter(new Filter<Serializable>() {
+            @Override
+            public boolean matches(Serializable object) {
+                return parameter == null || parameter.matches(object);
+            }
+            @Override
+            public String getName() {
+                return "ParameterFilter";
+            }
+        });
         filterPanel.setWidth("100%");
         filterPanel.setSpacing(1);
         filterPanel.getTextBox().setWidth("100%");
-        filterPanel.getAllListDataProvider().addDataDisplay(dataGrid);
+        filteredData.addDataDisplay(dataGrid);
         
         selectionModel = new MultiSelectionModel<>(this::elementAsString);
         selectionModel.addSelectionChangeHandler(this::selectionChanged);
@@ -170,6 +186,25 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         mainPanel.addNorth(filterPanel, 35);
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
+        
+        DataMiningEventBus.addHandler(FilterParameterChangedEvent.TYPE, event -> {
+           ParameterizedFilterDimension parameter = event.getParameter();
+           if (parameter.getRetrieverLevel().equals(retrieverLevel) && parameter.getDimension().equals(dimension)) {
+               this.parameter = parameter;
+               this.filterPanel.filter();
+               
+               boolean selectionChanged = false;
+               for (Serializable value: selectionModel.getSelectedSet()) {
+                   if (!parameter.matches(value)) {
+                       selectionModel.setSelected(value, false);
+                       selectionChanged = true;
+                   }
+               }
+               if (!selectionChanged) {
+                   this.selectionChanged(null);
+               }
+           }
+        });
         
         updateContent(null);
     }
@@ -207,11 +242,12 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
                     filterPanel.getTextBox().selectAll();
                 });
             }
-
-            ListDataProvider<Serializable> oldProvider = enabled ? filterPanel.getAllListDataProvider(): filteredData;
-            ListDataProvider<Serializable> newProvider = enabled ? filteredData : filterPanel.getAllListDataProvider();
-            oldProvider.removeDataDisplay(dataGrid);
-            newProvider.addDataDisplay(dataGrid);
+            if (enabled) {
+                filterPanel.search(searchInputToApply);
+            } else {
+                searchInputToApply = filterPanel.getTextBox().getValue();
+                filterPanel.search(null);
+            }
         });
         headerPanel.add(toggleFilterButton);
         headerPanel.setCellHorizontalAlignment(toggleFilterButton, HasHorizontalAlignment.ALIGN_RIGHT);
@@ -278,7 +314,11 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     }
 
     public HashSet<? extends Serializable> getSelection() {
-        return new HashSet<>(selectionModel.getSelectedSet());
+        Collection<? extends Serializable> selection = selectionModel.getSelectedSet();
+        if (selection.isEmpty() && parameter != null) {
+            selection = parameter.getAvailableValues(availableData);
+        }
+        return new HashSet<>(selection);
     }
     
     public void setSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
@@ -296,7 +336,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         clearSelection();
         Collection<Serializable> missingValues = new ArrayList<>();
         for (Serializable value : selection) {
-            if (availableData.contains(value)) {
+            if (availableData.contains(value) && (parameter == null || parameter.matches(value))) {
                 selectionModel.setSelected(value, true);
             } else {
                 missingValues.add(value);

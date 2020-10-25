@@ -1,5 +1,9 @@
 package com.sap.sse.datamining.ui.client.parameterization;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
@@ -21,6 +25,17 @@ public abstract class AbstractParameterizedDimensionFilter implements Parameteri
     @Override
     public FunctionDTO getDimension() {
         return this.dimension;
+    }
+    
+    @Override
+    public Collection<? extends Serializable> getAvailableValues(Iterable<? extends Serializable> allValues) {
+        Collection<Serializable> values = new ArrayList<>();
+        for (Serializable value : allValues) {
+            if (value != null && matches(value)) {
+                values.add(value);
+            }
+        }
+        return values;
     }
 
 }

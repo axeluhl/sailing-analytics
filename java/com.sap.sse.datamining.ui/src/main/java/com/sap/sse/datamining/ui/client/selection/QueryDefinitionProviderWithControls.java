@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -34,6 +35,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -60,6 +62,8 @@ import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
 import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
+import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
+import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
 import com.sap.sse.datamining.ui.client.selection.statistic.SuggestBoxStatisticProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings.ChangeLossStrategy;
@@ -97,6 +101,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
     
+    private final Map<Pair<DataRetrieverLevelDTO, FunctionDTO>, ParameterizedFilterDimension> filterParameters;
+    
     private final Panel applyQueryBusyIndicator;
     
     private final DialogBox confirmChangeLossDialog;
@@ -111,6 +117,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             Consumer<StatisticQueryDefinitionDTO> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
+        filterParameters = new HashMap<>();
         mainPanel = new LayoutPanel();
         
         // Creating the header panel, that contains the retriever chain provider and the controls
@@ -258,7 +265,13 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     
     private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
         this.configureQueryParametersDialog.show(event, parameter -> {
-            // TODO Implement me
+            if (parameter == null) {
+                filterParameters.remove(new Pair<>(event.getRetrieverLevel(), event.getDimension()));
+                // TODO Remove parameter from triggering filter selection provider
+            } else {                
+                filterParameters.put(new Pair<>(parameter.getRetrieverLevel(), parameter.getDimension()), parameter);
+                DataMiningEventBus.fire(new FilterParameterChangedEvent(parameter));
+            }
         });
     }
 

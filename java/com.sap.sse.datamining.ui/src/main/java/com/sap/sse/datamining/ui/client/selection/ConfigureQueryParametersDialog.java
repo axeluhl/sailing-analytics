@@ -402,6 +402,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         return parameterTypeSelectionBox.getValue();
     }
     
+    // TODO Clear controls after apply/hide
     private void applyParameter() {
         hide();
         ParameterizedFilterDimension parameter;
