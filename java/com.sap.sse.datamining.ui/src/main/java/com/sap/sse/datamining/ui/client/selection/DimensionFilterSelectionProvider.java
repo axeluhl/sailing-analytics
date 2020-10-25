@@ -72,7 +72,7 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> {
 
-    private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
+    private static final DataMiningResources Resources = GWT.create(DataMiningResources.class);
     private static final NaturalComparator NaturalComparator = new NaturalComparator();
     
     private final DataMiningServiceAsync dataMiningService;
@@ -223,7 +223,9 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
         
-        ToggleButton parameterSettingsButton = new ToggleButton("P");
+        Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
+        parameterIcon.setSize("16px", "16px");
+        ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
         parameterSettingsButton.addClickHandler(e -> {
             DataMiningEventBus.fire(
                 new ConfigureFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
@@ -232,7 +234,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.add(parameterSettingsButton);
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
 
-        ToggleButton toggleFilterButton = new ToggleButton(new Image(resources.searchIcon()));
+        ToggleButton toggleFilterButton = new ToggleButton(new Image(Resources.searchIcon()));
         toggleFilterButton.addClickHandler(e -> {
             boolean enabled = toggleFilterButton.isDown();
             mainPanel.setWidgetHidden(filterPanel, !enabled);

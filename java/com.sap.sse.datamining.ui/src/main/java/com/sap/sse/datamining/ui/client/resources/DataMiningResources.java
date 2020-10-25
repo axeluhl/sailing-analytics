@@ -1,6 +1,8 @@
 package com.sap.sse.datamining.ui.client.resources;
 
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
 
 public interface DataMiningResources extends ClientBundle {
@@ -19,5 +21,9 @@ public interface DataMiningResources extends ClientBundle {
 
     @Source("com/sap/sse/datamining/ui/images/magnifier_small.png")
     ImageResource searchIcon();
+    
+    @Source("com/sap/sse/datamining/ui/svg/parameter-icon.svg")
+    @MimeType("image/svg+xml")
+    DataResource parameterIcon();
 
 }
