@@ -138,7 +138,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
                     StoredDataMiningReportsProvider reportsProvider = new StoredDataMiningReportsProvider(
                             dataMiningService, dataMiningWriteService);
                     queryDefinitionProvider.addControl(new DataMiningReportStoreControls(DataMiningEntryPoint.this,
-                            session, dataMiningService, reportsProvider, mainPanel, resultsPresenter));
+                            session, dataMiningService, reportsProvider, mainPanel, queryDefinitionProvider.getRetrieverChainProvider(), resultsPresenter));
                 }
 
                 Anchor orientationAnchor = new Anchor(

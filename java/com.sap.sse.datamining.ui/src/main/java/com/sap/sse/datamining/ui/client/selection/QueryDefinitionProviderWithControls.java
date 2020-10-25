@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -35,7 +34,6 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -50,6 +48,7 @@ import com.sap.sse.datamining.ui.client.DataMiningComponentProvider;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
+import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.GroupingChangedListener;
@@ -60,10 +59,6 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
-import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
-import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
-import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
 import com.sap.sse.datamining.ui.client.selection.statistic.SuggestBoxStatisticProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings.ChangeLossStrategy;
@@ -101,12 +96,9 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
     
-    private final Map<Pair<DataRetrieverLevelDTO, FunctionDTO>, ParameterizedFilterDimension> filterParameters;
-    
     private final Panel applyQueryBusyIndicator;
     
     private final DialogBox confirmChangeLossDialog;
-    private final ConfigureQueryParametersDialog configureQueryParametersDialog;
     
     private StatisticQueryDefinitionDTO queryDefinitionToBeApplied;
     private boolean queryDefinitionChanged;
@@ -117,7 +109,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
             Consumer<StatisticQueryDefinitionDTO> queryRunner) {
         super(parent, context, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
-        filterParameters = new HashMap<>();
         mainPanel = new LayoutPanel();
         
         // Creating the header panel, that contains the retriever chain provider and the controls
@@ -210,9 +201,6 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         
         // Setting up dialogs and event handlers
         confirmChangeLossDialog = createConfirmChangeLossDialog();
-        configureQueryParametersDialog = new ConfigureQueryParametersDialog(this, context, dataMiningService, errorReporter, session, statisticProvider);
-        
-        DataMiningEventBus.addHandler(ConfigureFilterParameterEvent.TYPE, this::onConfigureFilterParameter);
     }
 
     private DialogBox createConfirmChangeLossDialog() {
@@ -263,16 +251,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         return dialog;
     }
     
-    private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
-        this.configureQueryParametersDialog.show(event, parameter -> {
-            if (parameter == null) {
-                filterParameters.remove(new Pair<>(event.getRetrieverLevel(), event.getDimension()));
-                // TODO Remove parameter from triggering filter selection provider
-            } else {                
-                filterParameters.put(new Pair<>(parameter.getRetrieverLevel(), parameter.getDimension()), parameter);
-                DataMiningEventBus.fire(new FilterParameterChangedEvent(parameter));
-            }
-        });
+    public DataRetrieverChainDefinitionProvider getRetrieverChainProvider() {
+        return this.statisticProvider;
     }
 
     /**

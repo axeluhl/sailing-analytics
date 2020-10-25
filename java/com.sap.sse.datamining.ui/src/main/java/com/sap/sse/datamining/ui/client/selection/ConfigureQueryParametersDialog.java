@@ -64,10 +64,8 @@ import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
-import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<SerializableSettings> {
     
@@ -130,9 +128,9 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private Consumer<ParameterizedFilterDimension> onApply;
     private Runnable onCancel;
     
-    public ConfigureQueryParametersDialog(Component<?> parent, ComponentContext<?> componentContext, DataMiningServiceAsync dataMiningService,
+    public ConfigureQueryParametersDialog(DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider) {
-        super(parent, componentContext);
+        super(null, null);
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         this.session = session;
