@@ -30,7 +30,7 @@ public class UserGroupUserPanelPO extends PageArea {
         }
     }
     
-    private static final String TABLE_PERMISSION_COLUMN = "Username";
+    private static final String TABLE_PERMISSION_COLUMN = "User name";
     @FindBy(how = BySeleniumId.class, using = "AddUserButton")
     private WebElement addButton;
     @FindBy(how = BySeleniumId.class, using = "UserSuggestion")
