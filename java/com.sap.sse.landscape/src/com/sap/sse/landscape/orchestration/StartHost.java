@@ -12,20 +12,14 @@ public abstract class StartHost<ShardingKey,
                        MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                        ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                        HostT extends Host>
+extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
 implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private final MachineImage machineImage;
-    private final Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
     
     public StartHost(MachineImage machineImage,
             Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-        super();
+        super(landscape);
         this.machineImage = machineImage;
-        this.landscape = landscape;
-    }
-
-    @Override
-    public Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
-        return landscape;
     }
 
     protected MachineImage getMachineImage() {
