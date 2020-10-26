@@ -1,19 +1,21 @@
 package com.sap.sailing.server.gateway.dto;
 
+import java.util.Set;
+
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
 
 public class MarkContext {
     private Mark mark;
-    private Event event;
+    private Iterable<Event> events;
     private Regatta regatta;
     
-    public MarkContext(Mark mark, Event event, Regatta regatta) {
+    public MarkContext(Mark mark, Regatta regatta, Set<Event> events) {
         super();
         this.mark = mark;
-        this.event = event;
         this.regatta = regatta;
+        this.events = events;
     }
     
     public Mark getMark() {
@@ -22,11 +24,11 @@ public class MarkContext {
     public void setMark(Mark mark) {
         this.mark = mark;
     }
-    public Event getEvent() {
-        return event;
+    public Iterable<Event> getEvent() {
+        return events;
     }
-    public void setEvent(Event event) {
-        this.event = event;
+    public void setEvents(Iterable<Event> events) {
+        this.events = events;
     }
     public Regatta getRegatta() {
         return regatta;
