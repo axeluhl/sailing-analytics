@@ -54,6 +54,11 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
         final Listener httpsListener = getListener(ProtocolEnum.HTTPS);
         return landscape.getLoadBalancerListenerRules(httpsListener, getRegion());
     }
+    
+    @Override
+    public void deleteListener(Listener listener) {
+        landscape.deleteLoadBalancerListener(getRegion(), listener);
+    }
 
     private Listener getListener(ProtocolEnum protocol) {
         return Util.filter(landscape.getListeners(this), l->l.protocol() == protocol).iterator().next();
@@ -88,11 +93,24 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
         final Iterable<TargetGroup<ShardingKey, MetricsT>> targetGroups = getTargetGroups();
         // now delete the rules to free up all target groups to which the ALB could have forwarded, except the default rule
         deleteAllRules();
+        deleteAllListeners();
         landscape.deleteLoadBalancer(this);
         Thread.sleep(Duration.ONE_SECOND.times(5).asMillis()); // wait a bit until the target groups are no longer considered "in use"
         // now that all target groups the ALB used are freed up, delete them:
         for (final TargetGroup<?, ?> targetGroup : targetGroups) {
             landscape.deleteTargetGroup(landscape.getTargetGroup(getRegion(), targetGroup.getName(), targetGroup.getTargetGroupArn()));
         }
+    }
+    
+    private void deleteListener(ProtocolEnum protocol) {
+        final Listener httpListener = getListener(protocol);
+        if (httpListener != null) {
+            deleteListener(httpListener);
+        }
+    }
+    
+    private void deleteAllListeners() {
+        deleteListener(ProtocolEnum.HTTP);
+        deleteListener(ProtocolEnum.HTTPS);
     }
 }

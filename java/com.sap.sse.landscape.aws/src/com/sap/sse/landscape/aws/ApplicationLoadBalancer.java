@@ -4,6 +4,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
 /**
@@ -57,4 +58,6 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
      * Deletes this application load balancer and all its {@link #getTargetGroups target groups}.
      */
     void delete() throws InterruptedException;
+
+    void deleteListener(Listener listener);
 }

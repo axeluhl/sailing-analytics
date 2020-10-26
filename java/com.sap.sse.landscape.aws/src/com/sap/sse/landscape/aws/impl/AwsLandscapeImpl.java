@@ -286,6 +286,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         }
     }
 
+    @Override
+    public void deleteLoadBalancerListener(com.sap.sse.landscape.Region region, Listener listener) {
+        getLoadBalancingClient(getRegion(region)).deleteListener(b->b.listenerArn(listener.listenerArn()));
+    }
+
     /**
      * Grabs all subnets that are default subnet for any of the availability zones specified
      */

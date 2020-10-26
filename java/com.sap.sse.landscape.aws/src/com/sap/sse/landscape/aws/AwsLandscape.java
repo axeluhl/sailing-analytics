@@ -223,6 +223,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
 
+    void deleteLoadBalancerListener(Region region, Listener listener);
+
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
     void addTargetsToTargetGroup(
