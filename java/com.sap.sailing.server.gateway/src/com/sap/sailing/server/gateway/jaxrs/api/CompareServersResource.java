@@ -83,7 +83,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
     public Response compareServers(
             @FormParam("server1") String server1, 
             @FormParam("server2") String server2,
-            @FormParam("UUID[]") Set<String> uuidset,
+            @FormParam("leaderboardgroupUUID[]") Set<String> uuidset,
             @FormParam("user1") String user1,
             @FormParam("user2") String user2,
             @FormParam("password1") String password1,
