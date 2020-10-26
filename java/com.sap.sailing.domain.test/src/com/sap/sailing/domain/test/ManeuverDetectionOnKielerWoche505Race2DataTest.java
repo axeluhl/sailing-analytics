@@ -73,7 +73,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends AbstractMane
         TimePoint firstWindwardMarkPassing = hassosMarkPassingsIter.next().getTimePoint();
         List<GPSFixMoving> firstLegFineApproximation = dp.approximate(new MeterDistance(20), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegFineApproximation);
-        assertEquals(11, firstLegFineApproximation.size());
+        assertEquals(9, firstLegFineApproximation.size()); // changed from 11 to 9 with bug 5425 because a few outliers are now removed
         List<GPSFixMoving> firstLegCoarseApproximation = dp.approximate(new MeterDistance(50), startMarkPassing, firstWindwardMarkPassing);
         assertNotNull(firstLegCoarseApproximation);
         assertEquals(4, firstLegCoarseApproximation.size());
