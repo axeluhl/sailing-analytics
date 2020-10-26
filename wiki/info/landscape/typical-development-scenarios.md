@@ -8,6 +8,15 @@ We distinguish two cases: adding a 3rd-party bundle to the target platform and a
 ## Adding a Bundle to the Target Platform
 * Add a New Library which can not be found in any SAP Repository
 * Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
+* If you happen to have a corresponding source JAR, make sure it also has a MANIFEST.MF file in its META-INF folder. This manifest has to contain the ``Eclipse-SourceBundle`` header, as in the following example:
+```
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: mongo-java-driver-source
+Bundle-SymbolicName: org.mongodb.mongo-java-driver.source
+Eclipse-SourceBundle: org.mongodb.mongo-java-driver;version="3.6.4";roots:="."
+Bundle-Version: 3.6.4
+```
 * In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
 * Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
 * Add a corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base

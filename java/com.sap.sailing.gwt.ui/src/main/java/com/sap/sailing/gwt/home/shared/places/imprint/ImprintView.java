@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.imprint;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.ComponentData;
+import com.sap.sailing.gwt.home.shared.places.imprint.data.DisclaimerData;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.LicenseData;
 
 public interface ImprintView {
@@ -12,6 +13,8 @@ public interface ImprintView {
     interface Presenter {
         void didSelect(ComponentData selectedObject);
     }
+    
+    public void addDisclaimers(final DisclaimerData[] disclaimers);
 
     void showComponents(ComponentData[] components);
 

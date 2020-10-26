@@ -51,7 +51,7 @@ public class BearerTokenOrBasicOrFormAuthenticationFilter extends BasicHttpAuthe
         if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             String[] authTokens = authorizationHeader.split(" ");
             if (authTokens[0].equalsIgnoreCase(BEARER)) {
-                return new BearerAuthenticationToken(authTokens[1]);
+                return authTokens.length < 2 ? null : new BearerAuthenticationToken(authTokens[1]);
             } else if (authTokens[0].equalsIgnoreCase(HttpServletRequest.BASIC_AUTH)) {
                 return super.createToken(request, response);
             }

@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.home.communication.user.profile;
 import java.util.TreeSet;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
@@ -11,6 +13,7 @@ import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPrefer
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
@@ -33,8 +36,8 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         boolean notifyAboutUpcomingRaces = false, notifyAboutResults = false;
         if (preferences != null) {
             for (BoatClassNotificationPreference pref : preferences.getBoatClasses()) {
-                String name = pref.getBoatClass().getName(), displayName = pref.getBoatClass().getDisplayName();
-                selected.add(new BoatClassDTO(name, displayName, pref.getBoatClass().getHullLength(), pref.getBoatClass().getHullBeam()));
+                String name = pref.getBoatClass().getName();
+                selected.add(new BoatClassDTO(name, pref.getBoatClass().getHullLength(), pref.getBoatClass().getHullBeam()));
                 notifyAboutUpcomingRaces |= pref.isNotifyAboutUpcomingRaces();
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }
@@ -50,7 +53,13 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         boolean notifyAboutResults = false;
         if (preferences != null) {
             for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
-                selected.add(new SimpleCompetitorWithIdDTO(pref.getCompetitor()));
+                final String competitorId = pref.getCompetitorIdAsString();
+                final RacingEventService racingEventService = ctx.getRacingEventService();
+                final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
+                DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
+                selected.add(competitor == null ?
+                        new SimpleCompetitorWithIdDTO(competitorId,"Not found","ID:" + competitorId, null, null) 
+                        : new SimpleCompetitorWithIdDTO(competitor));
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }
         }
