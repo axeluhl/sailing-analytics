@@ -24,7 +24,7 @@ public class MarkContext {
     public void setMark(Mark mark) {
         this.mark = mark;
     }
-    public Iterable<Event> getEvent() {
+    public Iterable<Event> getEvents() {
         return events;
     }
     public void setEvents(Iterable<Event> events) {
