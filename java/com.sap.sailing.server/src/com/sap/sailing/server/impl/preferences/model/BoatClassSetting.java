@@ -38,7 +38,7 @@ public class BoatClassSetting extends AbstractValueSetting<BoatClass> {
 
         @Override
         public String toStringValue(BoatClass value) {
-            return value == null ? null : value.getDisplayName();
+            return value == null ? null : value.getName();
         }
 
         @Override

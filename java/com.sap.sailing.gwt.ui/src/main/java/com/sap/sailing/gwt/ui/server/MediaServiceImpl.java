@@ -49,7 +49,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
-    private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
+    private String YOUTUBE_V3_API_KEY = "AIzaSyBPJQx0nIjYJmIaOBu0m28pEau8WKENMxs";
 
     private static final Logger logger = Logger.getLogger(MediaServiceImpl.class.getName());
 
