@@ -16,7 +16,7 @@ public class MarkAlreadyUsedInRaceException extends Exception implements Seriali
         this.raceNames = raceNames;
     }
     
-    private final String raceNames;
+    private String raceNames;
     
     public String getRaceNames() {
         return raceNames;
