@@ -2017,15 +2017,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             Set<CompetitorWithBoatDTO> competitorDTOs)
             throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-
         Map<CompetitorWithBoat, Boat> competitorsToRegister = new HashMap<>();
         for (CompetitorWithBoatDTO dto : competitorDTOs) {
             competitorsToRegister.put(getCompetitor(dto), getBoat(dto.getBoat()));
         }
-
         Map<CompetitorWithBoat, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
         for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
             competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
@@ -2148,10 +2145,10 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         int flightCount = 0;
         int groupCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if (Util.contains(selectedFlightNames, raceColumn.getName())) {
-                groupCount = 0;
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+            groupCount = 0;
+            for (Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+                if (Util.contains(selectedFlightNames, raceColumn.getName())) {
                     Map<CompetitorDTO, BoatDTO> competitors = new HashMap<>();
                     List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
@@ -2163,14 +2160,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);
                     groupCount++;
-                }
-                flightCount++;
-            } else {
-                for (Fleet fleet : raceColumn.getFleets()) {
+                } else {
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), new HashSet<CompetitorWithBoatDTO>());
                 }
             }
+            flightCount++;
         }
         if (leaderboard instanceof LeaderboardThatHasRegattaLike && flightMultiplier > 1) {
             final IsRegattaLike regattaLike = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike();
@@ -2729,7 +2724,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) throws IllegalStateException {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
                 /* display name */ deviceConfiguration.getName(), () -> {

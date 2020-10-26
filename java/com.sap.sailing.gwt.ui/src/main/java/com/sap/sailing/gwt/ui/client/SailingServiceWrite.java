@@ -485,7 +485,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws UnauthorizedException, DoesNotHaveRegattaLogException;
 
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration)
-            throws UnauthorizedException;
+            throws UnauthorizedException, IllegalStateException;
 
     BoatDTO addOrUpdateBoat(BoatDTO boat) throws UnauthorizedException, Exception;
 

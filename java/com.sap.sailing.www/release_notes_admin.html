@@ -23,6 +23,19 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">October 2020</h2>
+                    <ul class="bulletList">
+                    	<li>Fixed a regression regarding the transmission of a time-on-time/time-on-distance ranking metric
+                    	    configuration to a new replica server in the initial load.</li>
+                    	<li>The "unlink" button in the competitor import dialog now shows again correctly.</li>
+                    	<li>Competitors to be imported for which a competitor already exists with an equal ID are
+                    	    now recognized as "similar" and suggested for mapping.</li>
+                    	<li>Fixed bug that occurred when a pairing list was to be inserted into a regatta's series,
+                    	    and another series existed whose races not yet had the flag set that allows per-race competitor
+                    	    assignments.</li>
+                    	<li>WindFinder has offered us a new spot collection <tt>new_york</tt> which is now listed in the corresponding
+                    	    content assist in the Events editing dialog, tab "WindFinder".</li>
+                    </ul>
                     <h2 class="articleSubheadline">September 2020</h2>
                     <ul class="bulletList">
                         <li>Due to loadbalancing request between master and replica all GET requests are routed to replicas. As API calls 
