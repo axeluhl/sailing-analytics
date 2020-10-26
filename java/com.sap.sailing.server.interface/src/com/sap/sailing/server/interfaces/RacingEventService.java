@@ -984,5 +984,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
 
+    /**
+     * Identifies all Events, that use the given {@link Leaderboard}'s {@link CourseArea}s and contain it in their
+     * {@link LeaderboardGroup}
+     * 
+     * @param leaderboard
+     * @return A Set of Events, may be empty, but never {@code null}
+     */
     Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard);
 }

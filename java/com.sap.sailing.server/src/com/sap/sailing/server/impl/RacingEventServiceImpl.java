@@ -4822,7 +4822,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
          */
         Set<Event> events = findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
         if(!events.isEmpty()) {
-            return events.iterator().next();
+            return Util.get(events, 0);
         }else {
             return null;
         }
