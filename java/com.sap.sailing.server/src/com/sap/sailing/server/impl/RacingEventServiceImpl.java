@@ -2198,17 +2198,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         @Override
         public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore,
                 Double newCorrectedScore) {
-            notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
+            notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
 
         @Override
         public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
-            notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, raceColumn);
+            notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
 
         @Override
         public void carriedPointsChanged(Competitor competitor, Double oldCarriedPoints, Double newCarriedPoints) {
-            notifyForCompetitorIfNotAlreadyNotifiedRecently(competitor, /* no raceColumn in case of carried points */ null);
+            notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, /* no raceColumn in case of carried points */ null);
         }
 
         @Override
@@ -2242,7 +2242,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
          *            may be {@code null} which means that something may have changed for the competitor outside of a
          *            specific race column, such as the carried points
          */
-        private void notifyForCompetitorIfNotAlreadyNotifiedRecently(Competitor competitor, RaceColumn raceColumn) {
+        private void notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(Competitor competitor, RaceColumn raceColumn) {
             final TimePoint now = MillisecondsTimePoint.now();
             if (notificationService != null && (!lastNotificationForCompetitor.containsKey(competitor) ||
                     lastNotificationForCompetitor.get(competitor).until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {

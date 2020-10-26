@@ -10,7 +10,11 @@ import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetche
 import com.sap.sse.common.TimePoint;
 
 /**
- * Scoring system indented to by used for match racing where the winner gets 1 points and the loser gets 0 points
+ * Scoring system indented to by used for match racing where the winner gets 1 points and the loser gets 0 points.<p>
+ * 
+ * See also <a href="https://www.racingrulesofsailing.org/rules?part_id=44">https://www.racingrulesofsailing.org/rules?part_id=44</a><p>
+ * 
+ * TODO: tie breaking according to the rules in C11.1
  */
 public class HighPointMatchRacing extends HighPoint {
     private static final long serialVersionUID = 9124974081268072297L;

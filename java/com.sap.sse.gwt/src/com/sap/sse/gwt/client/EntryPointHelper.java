@@ -7,8 +7,8 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.shared.RpcConstants;
 
 public class EntryPointHelper {
     /**
@@ -33,7 +33,7 @@ public class EntryPointHelper {
      * where <code>service/sailing</code> is the URL path where the remote servlet is registered in the <code>web.xml</code>
      * descriptor.
      * <p>
-     * Also custom HTTP headers can be set. For possible options see {@link RpcConstants#HEADER_FORWARD_TO_MASTER} or {@link RpcConstants#HEADER_FORWARD_TO_REPLICA}
+     * Also custom HTTP headers can be set. For possible options see {@link HttpRequestHeaderConstants#HEADER_FORWARD_TO_MASTER} or {@link HttpRequestHeaderConstants#HEADER_FORWARD_TO_REPLICA}
      * </p>
      */
     @SafeVarargs
@@ -52,7 +52,7 @@ public class EntryPointHelper {
                             rb.setHeader(header.getA(), header.getB());
                     }
                 }
-                rb.setHeader(RpcConstants.HEADER_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
+                rb.setHeader(HttpRequestHeaderConstants.HEADER_LOCALE, LocaleInfo.getCurrentLocale().getLocaleName());
             }
         });
     }

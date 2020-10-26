@@ -66,7 +66,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     public Response raceList(@QueryParam("transitive") Boolean transitive) {
         final boolean includeRemotes = transitive != null && Boolean.TRUE.equals(transitive);
         final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> distinctRaces = getDistinctRaces(includeRemotes);
-
         final HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
         distinctRaces.values().forEach(raceInfo -> {
             final String remoteUrl = raceInfo.getRemoteUrl() == null ? null : raceInfo.getRemoteUrl().toExternalForm();
@@ -76,7 +75,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             }
             remoteList.add(raceInfo);
         });
-
         final JSONArray json = new JSONArray();
         for (Entry<String, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
             JSONArray list = new JSONArray();
