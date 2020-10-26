@@ -241,7 +241,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         final EditACLDialog.DialogConfig<AccountWithSecurityDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
 
         table.addColumn(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getHeader());
         table.addColumn(accountNameColumn, stringMessages.name());

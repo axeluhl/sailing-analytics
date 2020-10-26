@@ -161,7 +161,7 @@ public class DeviceConfigurationListComposite extends Composite  {
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());
