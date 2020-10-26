@@ -46,20 +46,20 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ContainsTextFilterParameter;
+import com.sap.sse.datamining.shared.impl.dto.parameters.EndsWithFilterParameter;
+import com.sap.sse.datamining.shared.impl.dto.parameters.StartsWithFilterParameter;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ValueListFilterParameter;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
-import com.sap.sse.datamining.ui.client.parameterization.ContainsTextFilterParameter;
-import com.sap.sse.datamining.ui.client.parameterization.EndsWithFilterParameter;
-import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
-import com.sap.sse.datamining.ui.client.parameterization.StartsWithFilterParameter;
-import com.sap.sse.datamining.ui.client.parameterization.ValueListFilterParameter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -67,7 +67,7 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.controls.AbstractObjectRenderer;
 
-public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<SerializableSettings> {
+public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<SerializableSettings> { 
     
     private enum FilterParameterType {
         ValueList, Contains, StartsWith, EndsWith;
@@ -125,7 +125,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private DataRetrieverLevelDTO retrieverLevel;
     private FunctionDTO dimension;
     
-    private Consumer<ParameterizedFilterDimension> onApply;
+    private Consumer<FilterDimensionParameter> onApply;
     private Runnable onCancel;
     
     public ConfigureQueryParametersDialog(DataMiningServiceAsync dataMiningService,
@@ -287,11 +287,11 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     // TODO Select existing parameter to be used as filter dimension values
     
     // TODO Allow editing of the parameter if the dimension is already parameterized
-    public void show(ConfigureFilterParameterEvent data, Consumer<ParameterizedFilterDimension> onApply) {
+    public void show(ConfigureFilterParameterEvent data, Consumer<FilterDimensionParameter> onApply) {
         this.show(data, onApply, null);
     }
     
-    public void show(ConfigureFilterParameterEvent data, Consumer<ParameterizedFilterDimension> onApply, Runnable onCancel) {
+    public void show(ConfigureFilterParameterEvent data, Consumer<FilterDimensionParameter> onApply, Runnable onCancel) {
         this.filterValuesToSelect = data.getSelectedValues();
         this.retrieverLevel = data.getRetrieverLevel();
         this.dimension = data.getDimension();
@@ -403,7 +403,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     
     private void applyParameter() {
         hide();
-        ParameterizedFilterDimension parameter;
+        FilterDimensionParameter parameter;
         switch (getSelectedParameterType()) {
         case ValueList:
             parameter = new ValueListFilterParameter(retrieverLevel, dimension, selectionModel.getSelectedSet());

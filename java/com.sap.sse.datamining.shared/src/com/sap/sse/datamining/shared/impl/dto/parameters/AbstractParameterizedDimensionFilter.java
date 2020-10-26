@@ -1,13 +1,14 @@
-package com.sap.sse.datamining.ui.client.parameterization;
+package com.sap.sse.datamining.shared.impl.dto.parameters;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public abstract class AbstractParameterizedDimensionFilter implements ParameterizedFilterDimension {
+public abstract class AbstractParameterizedDimensionFilter implements FilterDimensionParameter {
 
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;

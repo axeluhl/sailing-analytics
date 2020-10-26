@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.ui.client.parameterization;
+package com.sap.sse.datamining.shared.impl.dto.parameters;
 
 import java.io.Serializable;
 import java.util.Collection;

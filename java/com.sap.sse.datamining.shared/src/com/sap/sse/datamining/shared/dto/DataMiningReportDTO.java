@@ -7,6 +7,6 @@ public interface DataMiningReportDTO extends Serializable {
     
     ArrayList<StatisticQueryDefinitionDTO> getQueryDefinitions();
     
-    // TODO Add parameters
+    DataMiningReportParametersDTO getParameters();
 
 }

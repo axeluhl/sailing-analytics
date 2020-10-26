@@ -4,7 +4,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 
 public class FilterParameterChangedEvent extends Event<FilterParameterChangedEvent.Handler> {
     
@@ -15,13 +15,13 @@ public class FilterParameterChangedEvent extends Event<FilterParameterChangedEve
         void onFilterParameterChenge(FilterParameterChangedEvent event);
     }
     
-    private final ParameterizedFilterDimension parameter;
+    private final FilterDimensionParameter parameter;
 
-    public FilterParameterChangedEvent(ParameterizedFilterDimension parameter) {
+    public FilterParameterChangedEvent(FilterDimensionParameter parameter) {
         this.parameter = parameter;
     }
 
-    public ParameterizedFilterDimension getParameter() {
+    public FilterDimensionParameter getParameter() {
         return parameter;
     }
 

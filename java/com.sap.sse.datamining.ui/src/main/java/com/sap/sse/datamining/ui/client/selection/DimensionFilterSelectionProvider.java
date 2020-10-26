@@ -45,6 +45,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -60,7 +61,6 @@ import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
-import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -98,7 +98,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
     private final DataGrid<Serializable> dataGrid;
     private final Column<Serializable, Boolean> checkboxColumn;
     
-    private ParameterizedFilterDimension parameter;
+    private FilterDimensionParameter parameter;
     
     private String searchInputToApply;
     private Iterable<? extends Serializable> selectionToBeApplied;
@@ -188,7 +188,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         mainPanel.add(contentContainer);
         
         DataMiningEventBus.addHandler(FilterParameterChangedEvent.TYPE, event -> {
-           ParameterizedFilterDimension parameter = event.getParameter();
+           FilterDimensionParameter parameter = event.getParameter();
            if (parameter.getRetrieverLevel().equals(retrieverLevel) && parameter.getDimension().equals(dimension)) {
                this.parameter = parameter;
                this.filterPanel.filter();

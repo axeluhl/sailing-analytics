@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.ui.client.parameterization;
+package com.sap.sse.datamining.shared.impl.dto.parameters;
 
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;

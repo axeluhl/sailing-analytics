@@ -3,9 +3,7 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -33,13 +31,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO.ParameterKey;
+import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO.QueryKey;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ModifiableDataMiningReportParametersDTO;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
@@ -47,7 +46,6 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
 import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
-import com.sap.sse.datamining.ui.client.parameterization.ParameterizedFilterDimension;
 import com.sap.sse.datamining.ui.client.selection.ConfigureQueryParametersDialog;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -85,7 +83,7 @@ public class DataMiningReportStoreControls extends Composite {
     private final MultiWordSuggestOracle oracle;
     private final Panel applyReportBusyIndicator;
 
-    private final Map<Pair<DataRetrieverLevelDTO, FunctionDTO>, ParameterizedFilterDimension> filterParameters;
+    private final ModifiableDataMiningReportParametersDTO filterParameters;
 
     private final ConfigureQueryParametersDialog configureQueryParametersDialog;
 
@@ -95,7 +93,7 @@ public class DataMiningReportStoreControls extends Composite {
         this.errorReporter = errorReporter;
         this.session = session;
         this.dataMiningService = dataMiningService;
-        this.filterParameters = new HashMap<>();
+        this.filterParameters = new ModifiableDataMiningReportParametersDTO();
         this.reportsProvider = reportsProvider;
         this.reportsProvider.addReportsChangedListener(
                 reports -> updateOracle(reports.stream().map(r -> r.getName()).collect(Collectors.toList())));
@@ -183,11 +181,13 @@ public class DataMiningReportStoreControls extends Composite {
     
     private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
         this.configureQueryParametersDialog.show(event, parameter -> {
+//            StatisticQueryDefinitionDTO query = this.resultsPresenter.getCurrentQueryDefinition();
+//            QueryKey queryKey = new QueryKey(query.getStatisticToCalculate(), query.getAggregatorDefinition());
             if (parameter == null) {
-                filterParameters.remove(new Pair<>(event.getRetrieverLevel(), event.getDimension()));
+                filterParameters.remove(new ParameterKey(event.getRetrieverLevel(), event.getDimension()));
                 // TODO Remove parameter from triggering filter selection provider
             } else {                
-                filterParameters.put(new Pair<>(parameter.getRetrieverLevel(), parameter.getDimension()), parameter);
+                filterParameters.add(new ParameterKey(parameter.getRetrieverLevel(), parameter.getDimension()), parameter);
                 DataMiningEventBus.fire(new FilterParameterChangedEvent(parameter));
             }
         });
@@ -198,7 +198,7 @@ public class DataMiningReportStoreControls extends Composite {
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)
                 .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList());
         if (!queryDefinitions.isEmpty()) {
-            return new ModifiableDataMiningReportDTO(new ArrayList<>(queryDefinitions));
+            return new ModifiableDataMiningReportDTO(new ArrayList<>(queryDefinitions), new ModifiableDataMiningReportParametersDTO(filterParameters));
         } else {
             return null;
         }
