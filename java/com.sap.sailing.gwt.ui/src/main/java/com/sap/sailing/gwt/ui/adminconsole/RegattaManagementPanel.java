@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -47,15 +48,13 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private final RegattaDetailsComposite regattaDetailsComposite;
     private final UserService userService;
     
-    public RegattaManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
-            EventsRefresher eventsRefresher) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
+    public RegattaManagementPanel(StringMessages stringMessages, Presenter presenter) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+        this.errorReporter = presenter.getErrorReporter();
+        this.regattaRefresher = presenter;
+        this.eventsRefresher = presenter;
         final VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");

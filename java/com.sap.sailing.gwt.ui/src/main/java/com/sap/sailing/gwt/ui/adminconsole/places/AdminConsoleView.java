@@ -5,6 +5,7 @@ import java.util.HashSet;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -33,24 +34,27 @@ public interface AdminConsoleView extends IsWidget {
     
     void setRedirectToPlace(AdminConsolePlace redirectoPlace);
     
-    public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> {
-        
-        public ErrorReporter getErrorReporter();
-        
-        public HashSet<RegattasDisplayer> getRegattasDisplayers();
-        
-        public HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayer();
-        
-        public HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayer();
-        
+    public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher,
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, EventsRefresher {
+
+        ErrorReporter getErrorReporter();
+
+        HashSet<RegattasDisplayer> getRegattasDisplayers();
+
+        HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayer();
+
+        HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayer();
+
         SailingServiceWriteAsync getSailingService();
-        
+
         UserService getUserService();
 
         MediaServiceWriteAsync getMediaServiceWrite();
 
-        public PlaceController getPlaceController();
+        PlaceController getPlaceController();
         
+        void setEventRefresher(EventsRefresher eventRefresher);
+
     }
 
 }

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -44,6 +45,8 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private static AdminConsoleActivity instance;
     
     private AdminConsolePlace defaultPlace;
+    
+    private EventsRefresher eventRefresher;
     
     public static boolean instantiated() {
         return instance != null;
@@ -270,6 +273,16 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         return clientFactory.getPlaceController();
     }
 
+    @Override
+    public void fillEvents() {
+        if (eventRefresher != null) {
+            eventRefresher.fillEvents();
+        }
+    }
+
+    public void setEventRefresher(EventsRefresher eventRefresher) {
+        this.eventRefresher = eventRefresher;
+    }
 
  
 }

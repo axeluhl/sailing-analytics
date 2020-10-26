@@ -23,11 +23,13 @@ import com.sap.sailing.gwt.ui.adminconsole.EventManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanel;
 import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupConfigPanel;
 import com.sap.sailing.gwt.ui.adminconsole.LocalServerManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.MediaPanel;
 import com.sap.sailing.gwt.ui.adminconsole.RaceCourseManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.RegattaManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.RegattaManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteServerInstancesManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.ResultImportUrlsListComposite;
 import com.sap.sailing.gwt.ui.adminconsole.SmartphoneTrackingEventManagementPanel;
@@ -249,37 +251,28 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, getStringMessages().events(), new EventsPlace(), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
         leaderboardGroupsDisplayers.add(eventManagementPanel);
+        presenter.setEventRefresher(eventManagementPanel);
         
         /* REGATTAS */
-        
-        //SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-        //ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
-        //EventsRefresher eventsRefresher
-        RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
-                sailingService, userService, errorReporter, getStringMessages(), presenter, eventManagementPanel);
-        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanel) {
+        RegattaManagementPanelSupplier regattaManagementPanelSupplier = new RegattaManagementPanelSupplier(stringMessages, presenter, regattasDisplayers);
+        adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.fillRegattas();
             }
         }, getStringMessages().regattas(), new RegattasPlace(), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
-        regattasDisplayers.add(regattaManagementPanel);
         
         /* LEADERBOARDS */
-        final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().leaderboards(), LEADERBOARDS);
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, userService, presenter, errorReporter,
-                getStringMessages(), /* showRaceDetails */true, presenter);
-        leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
-        adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanel) {
+        final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel
+                .addVerticalTab(getStringMessages().leaderboards(), LEADERBOARDS);
+        LeaderboardConfigPanelSupplier leaderboardConfigPanelSupplier = new LeaderboardConfigPanelSupplier(
+                stringMessages, presenter, regattasDisplayers, leaderboardsDisplayers, true);
+        adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.fillLeaderboards();
             }
         }, getStringMessages().leaderboards(), new LeaderboardsPlace(), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));     
-        
-        regattasDisplayers.add(leaderboardConfigPanel);
-        leaderboardsDisplayers.add(leaderboardConfigPanel);
 
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(
                 sailingService, userService, presenter, presenter, presenter, errorReporter, getStringMessages());
