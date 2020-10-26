@@ -2524,7 +2524,7 @@ var Vimeo = function (_Tech) {
   };
 
   Vimeo.prototype.createEl = function createEl() {
-    var div = _video2.default.createEl('div', {
+    var div = _video2.default.dom.createEl('div', {
       id: this.options_.techId
     });
 
