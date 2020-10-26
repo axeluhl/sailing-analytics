@@ -67,4 +67,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     String getServerName();
     
     String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+
+    /**
+     * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
+     * appended to the protocol, hostname and port specification in order to produce a full health check URL. The
+     * health check URL, when connected to, is expected to return a 200 response if the service is healthy, and anything
+     * else in case it's not.
+     */
+    String getHealthCheckPath();
 }

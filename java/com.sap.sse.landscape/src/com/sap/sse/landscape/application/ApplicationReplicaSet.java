@@ -78,7 +78,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * Otherwise, if one or more replicas are available, the master node will receive only modifying transactions, and
      * reading requests require a replica to be {@link Process#isAlive(Optional) available} in this replica set; if trying
      * to set to {@code false} and no replica is currently available, the method throws an
-     * {@link IllegalStateException}.
+     * {@link IllegalStateException}.<p>
+     * 
+     * TODO Maybe this should move to the {@link ApplicationLoadBalancer} interface; otherwise, ApplicationReplicaSet would need to know about the load balancer(s) responsible for it
      * 
      * @throws IllegalStateException
      *             in case {@code readFromMaster} is {@code false} and there is currently no {@link #getReplicas()

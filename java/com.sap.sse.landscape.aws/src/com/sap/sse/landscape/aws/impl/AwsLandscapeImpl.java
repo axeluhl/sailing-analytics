@@ -522,9 +522,10 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                 .healthCheckIntervalSeconds(5)
                 .healthCheckPath(healthCheckPath)
                 .healthCheckPort(""+healthCheckPort)
+                .healthCheckProtocol(guessProtocolFromPort(healthCheckPort))
                 .port(port)
                 .vpcId(getVpcId(region))
-                .protocol(port == 80 ? ProtocolEnum.HTTP : ProtocolEnum.HTTPS)
+                .protocol(guessProtocolFromPort(port))
                 .targetType(TargetTypeEnum.INSTANCE)
                 .build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
@@ -534,6 +535,10 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                             TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
                             .build()).build());
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
+    }
+
+    private ProtocolEnum guessProtocolFromPort(int healthCheckPort) {
+        return healthCheckPort == 443 ? ProtocolEnum.HTTPS : ProtocolEnum.HTTP;
     }
     
     private String getVpcId(com.sap.sse.landscape.Region region) {

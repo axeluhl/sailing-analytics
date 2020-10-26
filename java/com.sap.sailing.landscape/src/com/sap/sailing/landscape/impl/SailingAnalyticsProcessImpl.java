@@ -25,8 +25,13 @@ SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> imple
         super(port, host, "/home/sailing/servers/server");
     }
     
+    @Override
+    public String getHealthCheckPath() {
+        return HEALTH_CHECK_PATH;
+    }
+    
     private URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
-        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), HEALTH_CHECK_PATH);
+        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath());
     }
 
     @Override

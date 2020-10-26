@@ -135,6 +135,15 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return bos.toString();
     }
 
+    
+    /**
+     * No health check path known for arbitrary process; returning {@code null} as a default value.
+     */
+    @Override
+    public String getHealthCheckPath() {
+        return null;
+    }
+
     /**
      * Without knowledge about how to do an availability check, we report {@code true} as the default result.
      */
