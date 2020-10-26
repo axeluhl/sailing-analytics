@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.FileStoragePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.advanced.LocalServerPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.MasterDataImportPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.RemoteServerInstancesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.ReplicationPlace;
@@ -495,7 +496,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                             public void refreshAfterBecomingVisible() {
                                 localServerInstancesManagementPanel.refreshServerConfiguration();
                             }
-        }, getStringMessages().localServer(), new UserManagementPlace(), 
+        }, getStringMessages().localServer(), new LocalServerPlace(), 
                 // We explicitly use a different permission check here.
                 // Most panels show a list of domain objects which means we check if the user has permissions for any
                 // potentially existing object to decide about the visibility.
