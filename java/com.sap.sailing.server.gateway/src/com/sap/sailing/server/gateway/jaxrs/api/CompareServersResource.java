@@ -29,7 +29,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -44,21 +46,29 @@ public class CompareServersResource extends AbstractSailingServerResource {
     /**
      * The list of keys that are compared during a compare run.
      */
-    private static final String[] KEYLISTTOCOMPARE = new String[] {"id", "description", "events", "leaderboards", "displayName",
-            "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
-            "regattaName", "series", "isMedalSeries", "fleets", "color", "ordering", "races", "isMedalRace",
-            "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData"};
+    private static final String[] KEYLISTTOCOMPARE = new String[] { LeaderboardGroupConstants.ID,
+            LeaderboardGroupConstants.DESCRIPTION, LeaderboardGroupConstants.EVENTS,
+            LeaderboardGroupConstants.LEADERBOARDS, LeaderboardGroupConstants.DISPLAYNAME,
+            LeaderboardNameConstants.ISMETALEADERBOARD, LeaderboardNameConstants.ISREGATTALEADERBOARD,
+            LeaderboardNameConstants.SCORINGCOMMENT, LeaderboardNameConstants.LASTSCORINGUPDATE,
+            LeaderboardNameConstants.SCORINGSCHEME, LeaderboardNameConstants.REGATTANAME,
+            LeaderboardNameConstants.SERIES, LeaderboardNameConstants.ISMEDALSERIES, LeaderboardNameConstants.FLEETS,
+            LeaderboardNameConstants.COLOR, LeaderboardNameConstants.ORDERING, LeaderboardNameConstants.RACES,
+            LeaderboardNameConstants.ISMEDALRACE, LeaderboardNameConstants.ISTRACKED,
+            LeaderboardNameConstants.REGATTANAME, LeaderboardNameConstants.TRACKEDRACENAME,
+            LeaderboardNameConstants.HASGPSDATA, LeaderboardNameConstants.HASWINDDATA };
     private static final Set<String> KEYSETTOCOMPARE = new HashSet<>(Arrays.asList(KEYLISTTOCOMPARE));
     /**
      * The list of keys that are not compared.
      */
-    private static final String[] KEYSTOIGNORE = new String[] { "timepoint", "raceViewerUrls" };
+    private static final String[] KEYSTOIGNORE = new String[] { LeaderboardGroupConstants.TIMEPOINT,
+            LeaderboardNameConstants.RACEVIEWERURLS };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
     /**
      * The list of keys that get always printed. "name" needs a special treatment, as it should be printed, but also
      * during a compare run there is no need to compare entries with different values for "name".
      */
-    private static final String[] KEYSTOPRINT = new String[] { "id" };
+    private static final String[] KEYSTOPRINT = new String[] { LeaderboardGroupConstants.ID };
     private static final Set<String> KEYSETTOPRINT = new HashSet<>(Arrays.asList(KEYSTOPRINT));
 
     private static final String SERVERTOOLD = "At least one server you are trying to compare has not yet enabled the "
