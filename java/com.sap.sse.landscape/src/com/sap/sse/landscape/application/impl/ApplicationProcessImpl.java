@@ -1,5 +1,12 @@
 package com.sap.sse.landscape.application.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Optional;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
@@ -11,15 +18,19 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.impl.ProcessImpl;
 
-public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
         extends ProcessImpl<RotatingFileBasedLog, MetricsT>
         implements ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    
+    private static final String ENV_SH = "env.sh";
+    private static final String DEFAULT_SERVER_DIRECTORY = "server";
+    private final String serverDirectory;
 
-    public ApplicationProcessImpl(int port, Host host) {
+    public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host);
-        // TODO Auto-generated constructor stub
+        this.serverDirectory = serverDirectory;
     }
 
     @Override
@@ -49,18 +60,29 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public String getServerDirectory() {
         // TODO Implement SailingAnalyticsProcess<ShardingKey>.getServerDirectory(...)
-        return null;
+        // TODO does this have to be a constructor parameter, or do we want to make it discoverable through the REST API, e.g., /gwt/status?
+        return serverDirectory;
     }
 
     @Override
     public String getServerName() {
-        // TODO Implement SailingAnalyticsProcess<ShardingKey>.getServerName(...)
-        return null;
+        return DEFAULT_SERVER_DIRECTORY;
     }
 
     @Override
-    public String getEnvSh() {
-        // TODO Implement SailingAnalyticsProcess<ShardingKey>.getEnvSh(...)
-        return null;
+    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+        final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
+        sftpChannel.get(getServerDirectory()+"/"+ENV_SH, bos);
+        return bos.toString();
+    }
+
+    /**
+     * Without knowledge about how to do an availability check, we report {@code true} as the default result.
+     */
+    @Override
+    public boolean isReady() {
+        return true;
     }
 }

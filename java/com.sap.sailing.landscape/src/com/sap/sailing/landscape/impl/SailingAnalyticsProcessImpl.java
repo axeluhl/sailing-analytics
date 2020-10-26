@@ -9,8 +9,9 @@ import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 
 public class SailingAnalyticsProcessImpl<ShardingKey> extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics,
 SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> implements SailingAnalyticsProcess<ShardingKey> {
+    
     public SailingAnalyticsProcessImpl(int port, Host host) {
-        super(port, host);
+        super(port, host, "/home/sailing/servers/server");
     }
 
     @Override

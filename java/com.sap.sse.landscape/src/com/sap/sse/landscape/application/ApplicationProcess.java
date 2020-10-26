@@ -1,6 +1,11 @@
 package com.sap.sse.landscape.application;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Release;
@@ -57,5 +62,5 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     String getServerName();
     
-    String getEnvSh();
+    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
 }
