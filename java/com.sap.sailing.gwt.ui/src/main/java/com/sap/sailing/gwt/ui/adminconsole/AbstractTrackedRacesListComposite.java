@@ -427,7 +427,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
 
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
                 this::removeAndUntrackRace);
