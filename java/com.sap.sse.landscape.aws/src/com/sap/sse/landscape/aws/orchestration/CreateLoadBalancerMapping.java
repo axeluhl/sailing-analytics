@@ -13,7 +13,10 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 
 /**
  * For an {@link ApplicationProcess} creates a set of rules in an {@link ApplicationLoadBalancer} which drives traffic
@@ -64,20 +67,25 @@ MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterPro
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
         extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private static final String MASTER_TARGET_GROUP_SUFFIX = "-m";
+    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
+    protected static final int MAX_RULES_PER_ALB = 100;
+    protected static final int MAX_ALBS_PER_REGION = 20;
     private final ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
     private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
     private final String targetGroupNamePrefix;
+    private final String hostname;
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
 
     public CreateLoadBalancerMapping(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process,
-            ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed,
+            ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed, String hostname,
             String targetGroupNamePrefix, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
         super(landscape);
         this.loadBalancerUsed = loadBalancerUsed;
         this.targetGroupNamePrefix = targetGroupNamePrefix;
         this.process = process;
+        this.hostname = hostname;
     }
     
     @Override
@@ -96,13 +104,36 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
         getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
         getLoadBalancerUsed().addRules(createRules());
-        // TODO Implement CreateLoadBalancerMapping.run(...)
     }
     
-    private Rule[] createRules() {
-        final Rule[] rules = new Rule[4];
-        // TODO continue here with implementing the four default load balancer rules...
+    protected Rule[] createRules() {
+        final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
+        int ruleCount = 0;
+        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
+                httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA())).
+                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                build();
+        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
+                httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getA())).
+                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                build();
+        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
+                httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).
+                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                build();
+        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
+                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                build();
+        assert ruleCount == NUMBER_OF_RULES_PER_REPLICA_SET;
         return rules;
+    }
+
+    protected String getHostName() {
+        return hostname;
     }
 
     private AwsInstance<ShardingKey, MetricsT> getHost() {
