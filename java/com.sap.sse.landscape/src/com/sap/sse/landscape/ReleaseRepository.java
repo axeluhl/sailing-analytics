@@ -1,7 +1,5 @@
 package com.sap.sse.landscape;
 
-import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
-
 /**
  * Contains ready-built releases that can be used as part of the {@code INSTALL_FROM_RELEASE} directive. Iterating over
  * this iterable's elements lists the {@link Release}s available.
@@ -10,8 +8,6 @@ import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
  *
  */
 public interface ReleaseRepository extends Iterable<Release> {
-    ReleaseRepository SAILING_RELEASE_REPOSITORY = new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build");
-
     /**
      * @return the latest build with name prefix {@link #MASTER_RELEASE_NAME_PREFIX} if such a release exists in this
      *         repository, or {@code null} otherwise

@@ -1,5 +1,12 @@
 package com.sap.sse.landscape;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.util.Optional;
+
+import com.sap.sse.common.Duration;
+
 public interface Process<LogT extends Log, MetricsT extends Metrics> {
     /**
      * The TCP port through which this process is typically accessed. For example, a MongoDB
@@ -21,20 +28,28 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
     
     /**
      * Tells whether this process is still alive and will at some point (again)
-     * become {@link #isReady() ready} to accept requests. An example of a process {@link #isAlive() alive}
-     * but not {@link #isReady() ready} would be a replica process that has started to receive the initial
+     * become {@link #isReady(Optional<Duration>) ready} to accept requests. An example of a process {@link #isAlive(Optional) alive}
+     * but not {@link #isReady(Optional<Duration>) ready} would be a replica process that has started to receive the initial
      * load from its master. It can answer in a well-defined way to health check / status requests, but you
      * shouldn't route regular traffic to it yet.<p>
      * 
-     * The default implementation simply returns what {@link #isReady()} returns.
+     * The default implementation tries to open a socket connection to the host's public address and the {@link #getPort() port}.
      */
-    default boolean isAlive() {
-        return isReady();
+    default boolean isAlive(Optional<Duration> optionalTimeout) throws IOException {
+        Socket socket = null;
+        try {
+            socket = new Socket(getHost().getPublicAddress(optionalTimeout), getPort());
+            return socket.isConnected();
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
+        }
     }
     
     /**
      * Tells whether this process is ready to accept requests. Use this for a health check in a target group
-     * that decides whether traffic will be sent to this process. {@link #isReady()} implies {@link #isAlive()}.
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
      */
-    boolean isReady();
+    boolean isReady(Optional<Duration> optionalTimeout) throws MalformedURLException, IOException;
 }

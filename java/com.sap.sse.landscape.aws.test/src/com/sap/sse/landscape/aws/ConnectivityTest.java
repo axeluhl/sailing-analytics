@@ -31,11 +31,13 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -60,6 +62,7 @@ import software.amazon.awssdk.services.route53.model.ChangeStatus;
  */
 public class ConnectivityTest {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
+    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
     private AwsLandscape<String, ApplicationProcessMetrics, ?, ?> landscape;
     private AwsRegion region;
     private byte[] keyPass;
@@ -72,7 +75,7 @@ public class ConnectivityTest {
     }
     
     @Test
-    public void testConnectivity() throws JSchException, IOException, SftpException {
+    public void testConnectivity() throws JSchException, IOException, SftpException, NumberFormatException, InterruptedException {
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
@@ -95,9 +98,12 @@ public class ConnectivityTest {
             assertTrue(foundHello);
             // check env.sh access
             final ApplicationProcess<?, ?, ?, ?> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
-            final String envSh = process.getEnvSh(/* timeout */ Optional.of(Duration.ONE_MINUTE.times(5)));
+            final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
+            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout);
+            assertNotNull(release);
+            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
@@ -172,10 +178,10 @@ public class ConnectivityTest {
             logger.info("Created instance with ID "+host.getInstanceId());
             logger.info("Waiting for public IP address...");
             // wait for public IPv4 address to become available:
-            InetAddress address = host.getPublicAddress(Duration.ONE_SECOND.times(20));
+            InetAddress address = host.getPublicAddress(optionalTimeout);
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
-            SshCommandChannel shellChannel = host.createRootSshChannel(Optional.of(Duration.ONE_MINUTE.times(3)));
+            SshCommandChannel shellChannel = host.createRootSshChannel(optionalTimeout);
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
             shellChannel.sendCommandLineSynchronously("pwd", System.err);

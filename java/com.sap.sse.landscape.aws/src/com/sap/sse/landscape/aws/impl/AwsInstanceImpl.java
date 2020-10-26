@@ -65,12 +65,12 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     }
 
     @Override
-    public InetAddress getPublicAddress(Duration timeoutNullMeaningForever) {
+    public InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever) {
         InetAddress result;
         final TimePoint started = TimePoint.now();
         while ((result = getPublicAddress()) == null &&
-                (timeoutNullMeaningForever == null ||
-                 started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever) < 0));
+                (!timeoutNullMeaningForever.isPresent() ||
+                 started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
         return result;
     }
 
@@ -136,7 +136,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
                 session.setUserInfo(new YesUserInfo());
                 session.connect(/* timeout in millis */ connectTimeoutInMillis);
                 channel = session.openChannel(channelType);
-            } catch (JSchException e) {
+            } catch (JSchException | IllegalStateException e) {
                 logger.info(e.getMessage()
                         + " while trying to connect. Probably timeout trying early SSH connection.");
             }

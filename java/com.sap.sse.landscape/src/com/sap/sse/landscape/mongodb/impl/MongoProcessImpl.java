@@ -1,9 +1,11 @@
 package com.sap.sse.landscape.mongodb.impl;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -49,7 +51,7 @@ public class MongoProcessImpl extends MongoEndpointImpl implements MongoProcess 
     }
 
     @Override
-    public boolean isReady() {
+    public boolean isReady(Optional<Duration> optionalTimeout) {
         try {
             return Util.contains(getClient().listDatabaseNames(), LOCAL_DB_NAME);
         } catch (URISyntaxException e) {

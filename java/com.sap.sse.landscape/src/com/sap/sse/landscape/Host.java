@@ -17,7 +17,7 @@ public interface Host {
     /**
      * Obtains the public IP address of this host. Note that during the boot phase a host may not yet have such
      * a public IP address assigned. In this case, {@code null} may be returned. To avoid this, you can alternatively
-     * call {@link #getPublicAddress(long)} to wait for a public IP address to become available.
+     * call {@link #getPublicAddress(Optional)} to wait for a public IP address to become available.
      */
     InetAddress getPublicAddress();
     
@@ -28,7 +28,7 @@ public interface Host {
      * @param timeoutNullMeaningForever
      *            if {@code null}, waits forever
      */
-    InetAddress getPublicAddress(Duration timeoutNullMeaningForever);
+    InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever);
     
     /**
      * Connects to an SSH session for the username specified, using the SSH key pair used to launch the instance, and

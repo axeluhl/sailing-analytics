@@ -9,6 +9,7 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 
@@ -26,9 +27,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
     
     /**
+     * @param releaseRepository
+     *            mandatory parameter required to enable resolving the release and enabling the download of its
+     *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease();
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -45,7 +49,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
     
-    int getTelnetPortToOSGiConsole();
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to

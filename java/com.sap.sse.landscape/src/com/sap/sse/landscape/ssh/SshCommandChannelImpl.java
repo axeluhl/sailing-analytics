@@ -42,6 +42,17 @@ public class SshCommandChannelImpl implements SshCommandChannel {
     
     @Override
     public byte[] getStreamContentsAsByteArray() throws IOException, JSchException {
+        final ByteArrayOutputStream bos = readStdout();
+        return bos.toByteArray();
+    }
+
+    @Override
+    public String getStreamContentsAsString() throws IOException, JSchException {
+        final ByteArrayOutputStream bos = readStdout();
+        return bos.toString();
+    }
+
+    private ByteArrayOutputStream readStdout() throws IOException, JSchException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final byte[] buf = new byte[8192];
         int read;
@@ -57,7 +68,7 @@ public class SshCommandChannelImpl implements SshCommandChannel {
             }
         }
         channel.disconnect();
-        return bos.toByteArray();
+        return bos;
     }
     
     private String getHost() throws JSchException {

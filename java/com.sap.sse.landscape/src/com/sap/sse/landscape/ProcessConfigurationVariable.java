@@ -53,6 +53,16 @@ public enum ProcessConfigurationVariable {
     SERVER_NAME,
     
     /**
+     * The port on which the built-in web server of an application server process can be reached using HTTP
+     */
+    SERVER_PORT,
+    
+    /**
+     * The port on which the OSGi console of a server process can be reached
+     */
+    TELNET_PORT,
+    
+    /**
      * User data variable that defines one or more comma-separated e-mail addresses to which a notification will
      * be sent after the server has started successfully.
      */

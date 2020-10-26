@@ -5,17 +5,18 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.ReleaseRepository;
 
 public class TestReleaseRepository {
+
     @Test
     public void testForAtLeastOneRelease() {
-        assertFalse(Util.isEmpty(ReleaseRepository.SAILING_RELEASE_REPOSITORY));
+        assertFalse(Util.isEmpty(SailingReleaseRepository.INSTANCE));
     }
 
     @Test
     public void testForAtLeastOneMasterRelease() {
-        assertNotNull(ReleaseRepository.SAILING_RELEASE_REPOSITORY.getLatestMasterRelease());
+        assertNotNull(SailingReleaseRepository.INSTANCE.getLatestMasterRelease());
     }
 }

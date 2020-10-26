@@ -1,7 +1,9 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Optional;
 import java.util.UUID;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -109,7 +111,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     @Override
-    public boolean isReady() {
+    public boolean isReady(Optional<Duration> optionalTimeout) {
         // TODO Implement Process<LogT,MetricsT>.isReady(...)
         return false;
     }

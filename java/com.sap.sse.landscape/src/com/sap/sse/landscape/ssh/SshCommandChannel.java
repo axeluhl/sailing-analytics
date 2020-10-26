@@ -32,4 +32,10 @@ public interface SshCommandChannel {
      * disconnects and closes the channel.
      */
     byte[] getStreamContentsAsByteArray() throws IOException, JSchException;
+
+    /**
+     * Consumes the entire input stream content as provided by {@link #sendCommandLineSynchronously(String, OutputStream)} and then
+     * disconnects and closes the channel.
+     */
+    String getStreamContentsAsString() throws IOException, JSchException;
 }
