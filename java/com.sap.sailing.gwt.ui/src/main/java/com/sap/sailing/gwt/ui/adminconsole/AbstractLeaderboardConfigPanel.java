@@ -52,6 +52,8 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -71,7 +73,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> , FilterablePanel, SelectablePanel {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -386,7 +388,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards) {
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
-        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
     }
@@ -901,5 +903,17 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 callback.onSuccess(competitorToBoatMap.keySet());
             }
         });
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        leaderboardSelectionModel.clear();
+        filterLeaderboardPanel.search(searchString);
+    }
+    
+    @Override
+    public void select(String searchString) {
+        filter(searchString);
+        filterLeaderboardPanel.selectMatchingOrFirstVisibleItem(StrippedLeaderboardDTOWithSecurity::getName);
     }
 }

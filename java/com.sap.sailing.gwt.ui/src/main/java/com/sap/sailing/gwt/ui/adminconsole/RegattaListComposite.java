@@ -141,6 +141,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         initWidget(panel);
     }
 
+    public void search(String searchString) {
+        refreshableRegattaMultiSelectionModel.clear();
+        filterablePanelRegattas.search(searchString);  
+    }
+    
+    public void searchAndSelect(String searchString) {
+        search(searchString);  
+        filterablePanelRegattas.selectMatchingOrFirstVisibleItem(RegattaDTO::getName);
+    }
+    
     /**
      * True {@link RegattaDTO}s as managed by this panel usually shall be filterable based on the user's
      * permission to update. However, this panel may also be subclassed and used for objects that have not
@@ -407,7 +417,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
-        filterablePanelRegattas.updateAll(allRegattas);
+        filterablePanelRegattas.updateAll(allRegattas); 
     }
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {

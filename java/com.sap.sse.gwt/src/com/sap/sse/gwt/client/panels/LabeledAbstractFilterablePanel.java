@@ -1,5 +1,10 @@
 package com.sap.sse.gwt.client.panels;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
@@ -31,5 +36,26 @@ public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterab
             StringMessages stringMessages) {
         super(all, filtered, stringMessages);
         insert(label, 0);
+    }
+    
+    public void selectMatchingOrFirstVisibleItem(Function<T, String> matchesExactly) {
+        Optional<T> firstItemMatchingSearch = filtered.getList().stream().filter
+                (item -> matchesExactly.apply(item).equals(getTextBox().getValue())).findFirst();
+        if (firstItemMatchingSearch.isPresent()) {
+            select(firstItemMatchingSearch.get());
+        } else {
+            selectFirstVisible();
+        }
+    }
+    
+    private void selectFirstVisible() {
+        final Collection<T> visibleRegattas = filtered.getList();
+        if (!visibleRegattas.isEmpty()) {
+            select(visibleRegattas.iterator().next());
+        }
+    }
+    
+    private void select(T item) {
+        getCellTable().getSelectionModel().setSelected(item, true);
     }
 }

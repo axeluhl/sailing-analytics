@@ -21,12 +21,9 @@ public class Header extends Composite {
     public Header() {
         HeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
-        
-        Label label = new Label("Desktop View");
-        headerPanel.add(label);
-        
-        
+       
+        Label label = new Label("Mobile View");
+        headerPanel.add(label); 
     }
 
 }

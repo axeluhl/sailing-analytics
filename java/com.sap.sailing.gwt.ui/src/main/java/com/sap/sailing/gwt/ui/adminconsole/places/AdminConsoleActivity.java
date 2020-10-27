@@ -89,7 +89,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
     
     public void goToMenuAndTab(AdminConsolePlace place) {
-        initView(); 
         adminConsoleView.selectTabByPlace(place);       
     }
     

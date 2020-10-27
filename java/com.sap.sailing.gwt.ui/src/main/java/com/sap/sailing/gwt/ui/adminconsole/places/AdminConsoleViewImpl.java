@@ -185,9 +185,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public Widget get() {
                 AdminConsolePanel panel = createAdminConsolePanel(serverInfo);
-                if (defaultPlace != null) {
-                    panel.selectTabByPlace(defaultPlace);
-                }
+              
                 return panel;
             }
         });
@@ -221,17 +219,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         final Anchor pwaAnchor = new Anchor(
                 new SafeHtmlBuilder().appendEscaped(getStringMessages().pwaAnchor()).toSafeHtml(), "AdminConsolePwa.html");
         pwaAnchor.addStyleName("releaseNotesAnchor");
-        
-        /**DOM.sinkEvents(awpAnchor, Event.ONCLICK);
-        DOM.setEventListener(awpAnchor, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                if (event.getTypeInt() == Event.ONCLICK) {
-                    event.preventDefault();
-                    SwitchingEntryPoint.switchToMobile();
-                }
-            }
-        });**/
         
         adminConsolePanel = new AdminConsolePanel(userService, 
                 serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", pwaAnchor, errorReporter,
@@ -590,6 +577,11 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         presenter.fillRegattas();
         presenter.fillLeaderboardGroups();
         presenter.fillLeaderboards();
+        
+        if (defaultPlace != null) {
+            adminConsolePanel.selectTabByPlace(defaultPlace);
+        }
+        
         return adminConsolePanel;
     }
 

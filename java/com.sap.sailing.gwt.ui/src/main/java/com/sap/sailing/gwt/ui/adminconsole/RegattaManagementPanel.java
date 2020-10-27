@@ -23,6 +23,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -35,7 +37,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, FilterablePanel, SelectablePanel {
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -165,5 +167,15 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             regattas.add(regatta.getRegattaIdentifier());
         }
         return regattas;
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        regattaListComposite.search(searchString);
+    }
+    
+    @Override
+    public void select(String searchString) {
+        regattaListComposite.searchAndSelect(searchString);
     }
 }

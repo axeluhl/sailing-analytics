@@ -49,8 +49,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         
         RootLayoutPanel.get().add(appWidget);    
         
-        //addHistoryValueChangeHandler(clientFactory, activityMapper);
-        
         historyHandler.handleCurrentHistory();
     }
 
