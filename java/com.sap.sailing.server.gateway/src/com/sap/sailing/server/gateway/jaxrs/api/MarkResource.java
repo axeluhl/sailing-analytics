@@ -406,10 +406,9 @@ public class MarkResource extends AbstractSailingServerResource {
     @Path("/searchMarksByMarkPropertiesObject/{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
-            @QueryParam(value = "onlyCurrentlyActive") Boolean onlyCurrentlyActive,
+            @QueryParam(value = "onlyCurrentlyActive") boolean onlyCurrentlyActive,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
             @QueryParam(value = "regattaIds") Set<String> regattaINames) {
-        final boolean onlyIncludeCurrentlyActiveEventsAndRegattas = onlyCurrentlyActive.booleanValue();
         final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (markPropertiesObject == null) {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
@@ -417,9 +416,9 @@ public class MarkResource extends AbstractSailingServerResource {
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
         final Set<MarkContext> regattaMarkContexts = new HashSet<>();
         final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getFilteredRegattasWithPermission(
-                regattaINames, onlyIncludeCurrentlyActiveEventsAndRegattas);
+                regattaINames, onlyCurrentlyActive);
         final Iterable<Event> events = getFilteredEventsWithPermission(eventIds,
-                onlyIncludeCurrentlyActiveEventsAndRegattas);
+                onlyCurrentlyActive);
         for (Pair<Regatta, Leaderboard> regattaWithLeaderboard : regattasWithLeaderBoards) {
             final Regatta regatta = regattaWithLeaderboard.getA();
             final Leaderboard leaderboard = regattaWithLeaderboard.getB();
@@ -429,7 +428,6 @@ public class MarkResource extends AbstractSailingServerResource {
                 UUID originatingMarkPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
                 if (originatingMarkPropertiesIdOrNull != null
                         && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
-
                     final Set<Event> regattaContextEvents = getService()
                             .findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, events);
                     regattaMarkContexts.add(new MarkContext(mark, regatta, regattaContextEvents));
@@ -451,8 +449,9 @@ public class MarkResource extends AbstractSailingServerResource {
         SecurityService securityService = getSecurityService();
         Set<Event> eventsWithPermission = new HashSet<Event>();
         for (Event event : eventsSelectively) {
-            if (securityService.hasCurrentUserReadPermission(event) && (onlyIncludeCurrentlyActiveEvents
-                    && (event.getEndDate() == null || event.getEndDate().before(TimePoint.now())))) {
+            final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(event);
+            final boolean eventIsCurrent = event.getEndDate() == null || event.getEndDate().before(TimePoint.now());
+            if (hasCurrentUserReadPermission && (!onlyIncludeCurrentlyActiveEvents || eventIsCurrent)) {
                 eventsWithPermission.add(event);
             }
         }
@@ -469,9 +468,12 @@ public class MarkResource extends AbstractSailingServerResource {
         Set<Pair<Regatta, Leaderboard>> filteredRegattasWithLeaderboards = new HashSet<>();
         for (RegattaLeaderboard leaderboard : regattaLeaderboards) {
             Regatta regatta = leaderboard.getRegatta();
-            if ((regattaIds.isEmpty() || regattaIds.contains(regatta.getName()))
-                    && securityService.hasCurrentUserReadPermission(regatta) && (onlyIncludeCurrentlyActiveRegattas
-                            && (regatta.getEndDate() == null || regatta.getEndDate().before(TimePoint.now())))) {
+            final boolean regattaIsInIds = regattaIds.isEmpty() || regattaIds.contains(regatta.getName());
+            final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(regatta);
+            final boolean regattaIsCurrent = regatta.getEndDate() == null
+                    || regatta.getEndDate().before(TimePoint.now());
+            if (regattaIsInIds && hasCurrentUserReadPermission
+                    && (!onlyIncludeCurrentlyActiveRegattas || regattaIsCurrent)) {
                 filteredRegattasWithLeaderboards.add(new Pair<>(regatta, leaderboard));
             }
         }
