@@ -22,8 +22,9 @@ public class UserProfileSubscriptionPresenter implements UserProfileSubscription
             final UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
-        this.userSubscriptionPresenter = new UserSubscriptionPresenter<UserProfileClientFactory>(
+        userSubscriptionPresenter = new UserSubscriptionPresenter<UserProfileClientFactory>(
                 userProfilePresenter.getClientFactory());
+        userSubscriptionPresenter.init();
         view.setPresenter(this);
     }
 
@@ -36,7 +37,6 @@ public class UserProfileSubscriptionPresenter implements UserProfileSubscription
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         view.getDecorator().setAuthenticationContext(authenticationContext);
         if (authenticationContext.isLoggedIn()) {
-            userSubscriptionPresenter.init();
             userSubscriptionPresenter.loadSubscription();
         }
     }

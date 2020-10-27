@@ -18,6 +18,7 @@ public class SubscriptionServiceFactory {
 
     private Map<String, SubscriptionClientProvider> providers;
     private Map<String, SubscriptionServiceAsync<?, ?>> services;
+    private boolean inited;
 
     public static SubscriptionServiceFactory getInstance() {
         if (instance == null) {
@@ -33,9 +34,13 @@ public class SubscriptionServiceFactory {
     }
 
     public void initializeProviders() {
-        for (SubscriptionClientProvider p : providers.values()) {
-            p.init();
+        if (!inited) {
+            for (SubscriptionClientProvider p : providers.values()) {
+                p.init();
+            }
+            inited = true;
         }
+
     }
 
     public void registerAsyncServices(String basePath) {
