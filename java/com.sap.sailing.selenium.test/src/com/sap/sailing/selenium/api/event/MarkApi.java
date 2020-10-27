@@ -10,6 +10,7 @@ public class MarkApi {
 
     private static final String URL_ADD_MARK_TO_REGATTA = "api/v1/mark/addMarkToRegatta";
     private static final String URL_ADD_MARK_FIX = "api/v1/mark/addMarkFix";
+    private static final String URL_REVOKE_MARK_ON_REGATTA = "api/v1/mark/revokeMarkOnRegatta";
 
     private static final String ATTRIBUTE_REGATTA_NAME = "regattaName";
     private static final String ATTRIBUTE_LEADERBOARD_NAME = "leaderboardName";
@@ -44,6 +45,16 @@ public class MarkApi {
         json.put(ATTRIBUTE_ORIGINATING_MARK_TEMPLATE_ID, markTemplateId != null ? markTemplateId.toString() : null);
         json.put(ATTRIBUTE_ORIGINATING_MARK_PROPERTIES_ID, markPropertiesId != null ? markPropertiesId.toString() : null);
         return ctx.post(URL_ADD_MARK_FIX, null, json);
+    }
+    
+    public JSONObject revokeMarkOnRegatta(final ApiContext ctx, final String regattaName, final String raceColumnName,
+            final String fleetName, final UUID markId) {
+        final JSONObject json = new JSONObject();
+        json.put(ATTRIBUTE_REGATTA_NAME, regattaName);
+        json.put(ATTRIBUTE_RACECOLUMN_NAME, raceColumnName);
+        json.put(ATTRIBUTE_FLEET_NAME, fleetName);
+        json.put(ATTRIBUTE_MARK_ID, markId.toString());
+        return ctx.post(URL_REVOKE_MARK_ON_REGATTA, null, json);
     }
 
 }

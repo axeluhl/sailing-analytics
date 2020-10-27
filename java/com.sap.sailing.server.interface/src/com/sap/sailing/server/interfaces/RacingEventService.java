@@ -64,6 +64,8 @@ import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -992,4 +994,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return A Set of Events, may be empty, but never {@code null}
      */
     Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard, Iterable<Event> events);
+
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, String markId)
+            throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException;
+
+    void addMarkToRegattaLog(String leaderboardName, Mark mark) throws DoesNotHaveRegattaLogException;
+
+    Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
+            String fleetName, Set<String> markIds);
 }

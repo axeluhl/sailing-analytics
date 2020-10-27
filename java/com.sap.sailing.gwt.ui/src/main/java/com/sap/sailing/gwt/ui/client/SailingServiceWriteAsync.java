@@ -156,7 +156,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, int priority, AsyncCallback<Void> callback);
 
-    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO, AsyncCallback<Void> callback);
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, 
+            MarkDTO markDTO, AsyncCallback<Void> callback);
 
     void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> asyncCallback);

@@ -160,7 +160,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         final EditACLDialog.DialogConfig<ExpeditionDeviceConfiguration> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                deviceConfiguration -> configACL.openACLDialog(deviceConfiguration));
+                deviceConfiguration -> configACL.openDialog(deviceConfiguration));
         SecuredDTOOwnerColumn.configureOwnerColumns(allDeviceConfigurations, deviceConfigurationColumnListHandler,
                 stringMessages);
         allDeviceConfigurations.addColumn(actionsColumn, stringMessages.actions());

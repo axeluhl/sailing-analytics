@@ -96,7 +96,6 @@ fi
 # REPLICATE_MASTER_BEARER_TOKEN=
 
 # Automatic build and test configuration
-DEPLOY_TO=server
 BUILD_BEFORE_START=False
 BUILD_FROM=master
 COMPILE_GWT=True
