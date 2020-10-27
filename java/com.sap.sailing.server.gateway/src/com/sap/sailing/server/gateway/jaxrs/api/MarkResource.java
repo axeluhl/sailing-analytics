@@ -78,6 +78,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkContextJsonSerializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -405,16 +406,20 @@ public class MarkResource extends AbstractSailingServerResource {
     @Path("/searchMarksByMarkPropertiesObject/{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
+            @QueryParam(value = "onlyCurrentlyActive") Boolean onlyCurrentlyActive,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
             @QueryParam(value = "regattaIds") Set<String> regattaINames) {
+        final boolean onlyIncludeCurrentlyActiveEventsAndRegattas = onlyCurrentlyActive.booleanValue();
         final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
-        if(markPropertiesObject == null) {
+        if (markPropertiesObject == null) {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
         }
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
         final Set<MarkContext> regattaMarkContexts = new HashSet<>();
-        final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getRegattasWithSufficientPermissionsFilteredByNames(
-                regattaINames);
+        final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getFilteredRegattasWithPermission(
+                regattaINames, onlyIncludeCurrentlyActiveEventsAndRegattas);
+        final Iterable<Event> events = getFilteredEventsWithPermission(eventIds,
+                onlyIncludeCurrentlyActiveEventsAndRegattas);
         for (Pair<Regatta, Leaderboard> regattaWithLeaderboard : regattasWithLeaderBoards) {
             final Regatta regatta = regattaWithLeaderboard.getA();
             final Leaderboard leaderboard = regattaWithLeaderboard.getB();
@@ -424,9 +429,10 @@ public class MarkResource extends AbstractSailingServerResource {
                 UUID originatingMarkPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
                 if (originatingMarkPropertiesIdOrNull != null
                         && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
-                    final Set<Event> events = getService()
-                            .findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
-                    regattaMarkContexts.add(new MarkContext(mark, regatta, events));
+
+                    final Set<Event> regattaContextEvents = getService()
+                            .findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, events);
+                    regattaMarkContexts.add(new MarkContext(mark, regatta, regattaContextEvents));
                 }
             }
         }
@@ -439,18 +445,34 @@ public class MarkResource extends AbstractSailingServerResource {
         return response;
     }
 
-    private Set<Pair<Regatta, Leaderboard>> getRegattasWithSufficientPermissionsFilteredByNames(Set<String> regattaIds) {
+    private Iterable<Event> getFilteredEventsWithPermission(Iterable<UUID> eventIds,
+            boolean onlyIncludeCurrentlyActiveEvents) {
+        Iterable<Event> eventsSelectively = getService().getEventsSelectively(true, eventIds);
+        SecurityService securityService = getSecurityService();
+        Set<Event> eventsWithPermission = new HashSet<Event>();
+        for (Event event : eventsSelectively) {
+            if (securityService.hasCurrentUserReadPermission(event) && (onlyIncludeCurrentlyActiveEvents
+                    && (event.getEndDate() == null || event.getEndDate().before(TimePoint.now())))) {
+                eventsWithPermission.add(event);
+            }
+        }
+        return eventsWithPermission;
+    }
+
+    private Set<Pair<Regatta, Leaderboard>> getFilteredRegattasWithPermission(Set<String> regattaIds,
+            boolean onlyIncludeCurrentlyActiveRegattas) {
         final SecurityService securityService = getSecurityService();
         final Collection<Leaderboard> allLeaderboards = getService().getLeaderboards().values();
         final Set<RegattaLeaderboard> regattaLeaderboards = allLeaderboards.stream()
-                .filter(lb -> lb instanceof RegattaLeaderboard)
-                .map(lb -> (RegattaLeaderboard) lb).collect(Collectors.toSet());
+                .filter(lb -> lb instanceof RegattaLeaderboard).map(lb -> (RegattaLeaderboard) lb)
+                .collect(Collectors.toSet());
         Set<Pair<Regatta, Leaderboard>> filteredRegattasWithLeaderboards = new HashSet<>();
         for (RegattaLeaderboard leaderboard : regattaLeaderboards) {
             Regatta regatta = leaderboard.getRegatta();
             if ((regattaIds.isEmpty() || regattaIds.contains(regatta.getName()))
-                    && securityService.hasCurrentUserReadPermission(regatta)) {
-                filteredRegattasWithLeaderboards.add(new Pair<>(regatta,leaderboard));
+                    && securityService.hasCurrentUserReadPermission(regatta) && (onlyIncludeCurrentlyActiveRegattas
+                            && (regatta.getEndDate() == null || regatta.getEndDate().before(TimePoint.now())))) {
+                filteredRegattasWithLeaderboards.add(new Pair<>(regatta, leaderboard));
             }
         }
         return filteredRegattasWithLeaderboards;

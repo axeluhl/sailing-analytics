@@ -4820,29 +4820,30 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
          * precise selection of which event to choose can be made in the use cases for this method or if all events
          * found should be considered.
          */
-        Set<Event> events = findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
-        if(!events.isEmpty()) {
+        Set<Event> events = findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, getAllEvents());
+        if (!events.isEmpty()) {
             return Util.get(events, 0);
-        }else {
+        } else {
             return null;
         }
     }
     
     @Override
-    public Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
-        Set<Event> events = new HashSet<>();
+    public Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard,
+            Iterable<Event> events) {
+        Set<Event> foundEvents = new HashSet<>();
         if (!Util.isEmpty(leaderboard.getCourseAreas())) {
-            for (final Event event : getAllEvents()) {
+            for (final Event event : events) {
                 if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
                     for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                         if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
-                            events.add(event);
+                            foundEvents.add(event);
                         }
                     }
                 }
             }
         }
-        return events;
+        return foundEvents;
     }
 
     @Override

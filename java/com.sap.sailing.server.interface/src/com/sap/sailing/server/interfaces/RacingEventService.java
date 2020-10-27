@@ -991,5 +991,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param leaderboard
      * @return A Set of Events, may be empty, but never {@code null}
      */
-    Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard);
+    Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard, Iterable<Event> events);
 }
