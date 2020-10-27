@@ -82,10 +82,13 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTarget
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -117,12 +120,14 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
+    private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefaultDynamicALB";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
     private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
+    private final String s3BucketForAlbLogs;
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also
@@ -134,11 +139,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE));
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), System.getProperty(S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME));
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
+            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, String s3BucketForAlbLogs) {
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
         this.centralReverseProxyByRegion = new HashMap<>();
         this.accessKeyId = accessKeyId;
@@ -146,6 +151,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.mongoObjectFactory = mongoObjectFactory;
         this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
+        this.s3BucketForAlbLogs = s3BucketForAlbLogs;
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
@@ -212,6 +218,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final CreateLoadBalancerResponse response = client
                 .createLoadBalancer(CreateLoadBalancerRequest.builder().name(name)
                         .subnetMappings(subnetMappings).build());
+        client.modifyLoadBalancerAttributes(b->b.loadBalancerArn(response.loadBalancers().iterator().next().loadBalancerArn()).
+                attributes(
+                        LoadBalancerAttribute.builder().key("access_logs.s3.enabled").value("true").build(),
+                        LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(s3BucketForAlbLogs).build(),
+                        LoadBalancerAttribute.builder().key("idle_timeout.timeout_seconds").value("4000").build()).build());
         final ApplicationLoadBalancer<ShardingKey, MetricsT> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
         createLoadBalancerListener(result, ProtocolEnum.HTTP);
         createLoadBalancerListener(result, ProtocolEnum.HTTPS);
@@ -258,6 +269,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
         return client.describeListeners(b->b.loadBalancerArn(alb.getArn())).listeners();
+    }
+
+    @Override
+    public LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
+        final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
+        final DescribeLoadBalancersResponse response = client.describeLoadBalancers(b->b.loadBalancerArns(alb.getArn()));
+        return response.loadBalancers().iterator().next().state();
     }
 
     @Override
@@ -352,13 +370,6 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value) {
         return setDNSRecord(hostedZoneId, hostname, RRType.A, value);
-    }
-
-    // TODO should the default DNS hosted zone ID for a landscape be configurable? persistent? A property at all?
-    @Override
-    public String getDefaultDNSHostedZoneId() {
-//      final String hostedZoneId = "Z2JYWXYWLLRLTE"; // TODO sapsailing.com.
-        return "Z1Z1ID6TP8HVB2"; // TODO test zone "wiesen-weg.de."
     }
 
     @Override
@@ -649,14 +660,22 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
             com.sap.sse.landscape.Region region) {
-        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getNonDNSMappedLoadBalancer(...)
-        return null;
+        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(DEFAULT_NON_DNS_MAPPED_ALB_NAME));
+        return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
     }
 
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(
             com.sap.sse.landscape.Region region, String hostname) {
-        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDNSMappedLoadBalancerFor(...)
+        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(DEFAULT_NON_DNS_MAPPED_ALB_NAME));
+        for (final LoadBalancer lb : response.loadBalancers()) {
+            final ApplicationLoadBalancer<ShardingKey, MetricsT> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
+            for (final Rule rule : alb.getRules()) {
+                if (rule.conditions().stream().filter(r->r.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()) {
+                    return alb;
+                }
+            }
+        }
         return null;
     }
 

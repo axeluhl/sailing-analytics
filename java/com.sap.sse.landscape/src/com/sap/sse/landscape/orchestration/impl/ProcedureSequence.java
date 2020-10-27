@@ -24,8 +24,10 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, It
     }
 
     @Override
-    public void run() {
-        forEach(s->s.run());
+    public void run() throws Exception {
+        for (final Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> s : this) {
+            s.run();
+        }
     }
 
     @Override

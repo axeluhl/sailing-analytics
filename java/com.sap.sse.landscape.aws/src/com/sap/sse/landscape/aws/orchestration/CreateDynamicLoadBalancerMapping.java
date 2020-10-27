@@ -1,5 +1,11 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -18,10 +24,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
         implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     public CreateDynamicLoadBalancerMapping(
-            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process,
-            String hostname,
+            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process, String hostname,
             String targetGroupNamePrefix,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-        super(process, landscape.getNonDNSMappedLoadBalancer(process.getHost().getRegion()), hostname, targetGroupNamePrefix, landscape);
+            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
+            Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
+        super(process, landscape.getNonDNSMappedLoadBalancer(process.getHost().getRegion()), hostname,
+                targetGroupNamePrefix, landscape, optionalTimeout);
     }
 }

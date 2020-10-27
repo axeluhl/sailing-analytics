@@ -64,7 +64,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
-    String getServerName();
+    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
     
     String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
 

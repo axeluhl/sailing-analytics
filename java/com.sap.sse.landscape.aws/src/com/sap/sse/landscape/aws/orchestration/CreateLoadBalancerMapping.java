@@ -1,7 +1,12 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -74,18 +79,24 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
     private final String targetGroupNamePrefix;
     private final String hostname;
+    private final String servername;
+    private final Optional<Duration> optionalTimeout;
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
 
     public CreateLoadBalancerMapping(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process,
             ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed, String hostname,
-            String targetGroupNamePrefix, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+            String targetGroupNamePrefix,
+            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
+            Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
         super(landscape);
         this.loadBalancerUsed = loadBalancerUsed;
         this.targetGroupNamePrefix = targetGroupNamePrefix;
         this.process = process;
         this.hostname = hostname;
+        this.optionalTimeout = optionalTimeout;
+        this.servername = process.getServerName(optionalTimeout);
     }
     
     @Override
@@ -94,19 +105,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public void run() {
+    public void run() throws JSchException, IOException, InterruptedException, SftpException {
         masterTargetGroupCreated = getLandscape().createTargetGroup(loadBalancerUsed.getRegion(),
-                getMasterTargetGroupName(), getProcess().getPort(), getProcess().getHealthCheckPath(),
+                getMasterTargetGroupName(optionalTimeout), getProcess().getPort(), getProcess().getHealthCheckPath(),
                 /* use traffic port as health check port, too */ getProcess().getPort());
         publicTargetGroupCreated = getLandscape().createTargetGroup(loadBalancerUsed.getRegion(),
-                getPublicTargetGroupName(), getProcess().getPort(), getProcess().getHealthCheckPath(),
+                getPublicTargetGroupName(optionalTimeout), getProcess().getPort(), getProcess().getHealthCheckPath(),
                 /* use traffic port as health check port, too */ getProcess().getPort());
         getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
         getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
         getLoadBalancerUsed().addRules(createRules());
     }
     
-    protected Rule[] createRules() {
+    private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
         rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
@@ -142,12 +153,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return result;
     }
     
-    private String getMasterTargetGroupName() {
-        return getPublicTargetGroupName()+MASTER_TARGET_GROUP_SUFFIX;
+    private String getMasterTargetGroupName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
+        return getPublicTargetGroupName(optionalTimeout)+MASTER_TARGET_GROUP_SUFFIX;
     }
     
-    private String getPublicTargetGroupName() {
-        return targetGroupNamePrefix+getProcess().getServerName();
+    private String getPublicTargetGroupName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
+        return targetGroupNamePrefix+servername;
     }
     
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() {

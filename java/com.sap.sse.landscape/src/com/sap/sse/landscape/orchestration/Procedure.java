@@ -2,6 +2,7 @@ package com.sap.sse.landscape.orchestration;
 
 import java.util.Arrays;
 
+import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -43,7 +44,7 @@ public interface Procedure<ShardingKey,
                            MetricsT extends ApplicationProcessMetrics,
                            MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                            ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends Runnable {
+extends RunnableWithException<Exception> {
     Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
     
     default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> andThen(Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> nextStep) {

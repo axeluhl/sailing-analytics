@@ -116,9 +116,8 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public String getServerName() {
-        // TODO Implement ApplicationProcessImpl.getServerName(...)
-        return null;
+    public String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
+        return getEnvShValueFor(getEnvSh(optionalTimeout), ProcessConfigurationVariable.SERVER_NAME, optionalTimeout);
     }
 
     @Override

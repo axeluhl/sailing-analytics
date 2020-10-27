@@ -45,12 +45,37 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
     String getArn();
 
     /**
+     * Application load balancer rules have a {@link Rule#priority() priority} which must be unique in the scope of a
+     * load balancer's listener. This way, when rules come and go, holes in the priority numbering scheme will start to exist.
+     * If a set of rules is to be added ({@code rulesToAdd}), consider using {@link #assignUnusedPriorities} to make room
+     * for interleaved or contiguous addition of the new rules.
+     * 
      * @param rulesToAdd
      *            rules (without an ARN set yet), specifying which rules to add to the HTTPS listener of this load
-     *            balancer
+     *            balancer. All rules must have a priority that is not used currently by the listener.
      * @return the rules created, with ARNs set
      */
     Iterable<Rule> addRules(Rule... rulesToAdd);
+    
+    /**
+     * As the rule {@link Rule#priority() priorities} within a load balancer's listener have to be unique, this method
+     * supports adding rules by assigning yet unused priorities to them. It keeps the order in which the {@code rules}
+     * are passed. If {@code forceContiguous} is {@code false}, for each rule the next available priority is chosen and
+     * assigned by creating a copy of the {@link Rule} object and adding it to the resulting sequence. This can lead to
+     * existing rules interleaving with the rules to add while ensuring that the {@code rules} have priorities in
+     * numerically ascending order, consistent with the order in which they were passed to this method.
+     * <p>
+     * 
+     * If {@code forceContiguous} is {@code true}, the rules that result will have contiguously increasing priority
+     * values, hence not interleaving with other existing rules. If there are enough contiguous unused priorities
+     * available, they are selected and assigned by creating copies of the {@link Rule} objects and adding them in their
+     * original order to the resulting sequence. Otherwise, the existing rules are "compressed" by re-numbering their
+     * priorities to make space for the new rules at the end of the list.
+     * 
+     * @return copies of the original rules, with unused {@link Rule#priority() priorities} assigned, ready for passing
+     *         to {@link #addRules(Rule...)}.
+     */
+    Iterable<Rule> assignUnusedPriorities(boolean forceContiguous, Rule... rules);
     
     Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups();
 

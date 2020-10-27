@@ -32,11 +32,14 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
@@ -50,6 +53,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEn
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeStatus;
+import software.amazon.awssdk.services.route53.model.RRType;
 
 /**
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
@@ -75,7 +79,11 @@ public class ConnectivityTest {
     }
     
     @Test
-    public void testConnectivity() throws JSchException, IOException, SftpException, NumberFormatException, InterruptedException {
+    public <MasterT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>, ReplicaT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>>
+    void testConnectivity() throws JSchException, IOException, SftpException, NumberFormatException, InterruptedException {
+        final String TARGET_GROUP_NAME_PREFIX = "S-test-";
+        final String hostedZoneName = "wiesen-weg.de";
+        final String hostname = "test-"+new Random().nextInt()+"."+hostedZoneName;
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         final AwsInstance<String, ApplicationProcessMetrics> host = landscape.launchHost(landscape.getImage(region, "ami-01b4b27a5699e33e6"),
@@ -97,13 +105,30 @@ public class ConnectivityTest {
             assertTrue(foundName);
             assertTrue(foundHello);
             // check env.sh access
-            final ApplicationProcess<?, ?, ?, ?> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
+            final ApplicationProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
             final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout);
             assertNotNull(release);
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
+            @SuppressWarnings("unchecked")
+            final AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT> castLandscape = (AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT>) landscape;
+            final CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> createDNSBasedLoadBalancerMappingProcedure =
+                    new CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>>(
+                            process, hostname, TARGET_GROUP_NAME_PREFIX, castLandscape, optionalTimeout);
+            final String wiesenWegId = landscape.getDNSHostedZoneId(hostedZoneName);
+            try {
+                createDNSBasedLoadBalancerMappingProcedure.run();
+                assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed());
+                assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getMasterTargetGroupCreated());
+                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated());
+            } finally {
+                if (createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed() != null) {
+                    createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().delete();
+                }
+                landscape.removeDNSRecord(wiesenWegId, hostname, RRType.CNAME, createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().getDNSName());
+            }
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);
