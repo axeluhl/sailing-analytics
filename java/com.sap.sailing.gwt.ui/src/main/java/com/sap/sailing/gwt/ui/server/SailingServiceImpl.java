@@ -5047,7 +5047,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public ArrayList<EventDTO> getEventsForLeaderboard(String leaderboardName) {
         final RacingEventService service = getService();
         final Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
-        final Set<Event> events = service.findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard);
+        final Set<Event> events = service.findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, service.getAllEvents());
         ArrayList<EventDTO> eventDTOs = new ArrayList<>();
         for (Event event : events) {
             eventDTOs.add(convertToEventDTO(event, false));
