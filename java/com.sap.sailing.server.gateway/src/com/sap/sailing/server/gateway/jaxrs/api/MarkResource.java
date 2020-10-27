@@ -450,7 +450,8 @@ public class MarkResource extends AbstractSailingServerResource {
         Set<Event> eventsWithPermission = new HashSet<Event>();
         for (Event event : eventsSelectively) {
             final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(event);
-            final boolean eventIsCurrent = event.getEndDate() == null || event.getEndDate().before(TimePoint.now());
+            final TimePoint endDate = event.getEndDate();
+            final boolean eventIsCurrent = endDate == null || !endDate.before(TimePoint.now());
             if (hasCurrentUserReadPermission && (!onlyIncludeCurrentlyActiveEvents || eventIsCurrent)) {
                 eventsWithPermission.add(event);
             }
@@ -470,8 +471,9 @@ public class MarkResource extends AbstractSailingServerResource {
             Regatta regatta = leaderboard.getRegatta();
             final boolean regattaIsInIds = regattaIds.isEmpty() || regattaIds.contains(regatta.getName());
             final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(regatta);
-            final boolean regattaIsCurrent = regatta.getEndDate() == null
-                    || regatta.getEndDate().before(TimePoint.now());
+            final TimePoint endDate = regatta.getEndDate();
+            final boolean regattaIsCurrent = endDate == null
+                    || !regatta.getEndDate().before(TimePoint.now());
             if (regattaIsInIds && hasCurrentUserReadPermission
                     && (!onlyIncludeCurrentlyActiveRegattas || regattaIsCurrent)) {
                 filteredRegattasWithLeaderboards.add(new Pair<>(regatta, leaderboard));
