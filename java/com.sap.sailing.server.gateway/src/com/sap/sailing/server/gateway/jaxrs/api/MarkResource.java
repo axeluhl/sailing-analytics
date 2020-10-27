@@ -402,7 +402,7 @@ public class MarkResource extends AbstractSailingServerResource {
     }
 
     @GET
-    @Path("/searchMarks/{markPropertiesId}")
+    @Path("/searchMarksByMarkPropertiesObject/{markPropertiesId}")
     @Produces("application/json;charset=UTF-8")
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
@@ -412,7 +412,7 @@ public class MarkResource extends AbstractSailingServerResource {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
         }
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
-        final Set<MarkContext> markContexts = new HashSet<>();
+        final Set<MarkContext> regattaMarkContexts = new HashSet<>();
         final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getRegattasWithSufficientPermissionsFilteredByNames(
                 regattaINames);
         for (Pair<Regatta, Leaderboard> regattaWithLeaderboard : regattasWithLeaderBoards) {
@@ -420,7 +420,6 @@ public class MarkResource extends AbstractSailingServerResource {
             final Leaderboard leaderboard = regattaWithLeaderboard.getB();
             final MarkFinder markFinder = new MarkFinder(regattaWithLeaderboard.getA().getRegattaLog());
             final Set<Mark> marksOfRegatta = markFinder.analyze();
-            final Set<MarkContext> regattaMarkContexts = new HashSet<>();
             for (Mark mark : marksOfRegatta) {
                 UUID originatingMarkPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
                 if (originatingMarkPropertiesIdOrNull != null
@@ -430,12 +429,10 @@ public class MarkResource extends AbstractSailingServerResource {
                     regattaMarkContexts.add(new MarkContext(mark, regatta, events));
                 }
             }
-            
-            
         }
         final JSONArray jsonContexts = new JSONArray();
         final MarkContextJsonSerializer markContextJsonSerializer = new MarkContextJsonSerializer();
-        for (MarkContext markContext : markContexts) {
+        for (MarkContext markContext : regattaMarkContexts) {
             jsonContexts.add(markContextJsonSerializer.serialize(markContext));
         }
         Response response = Response.ok(streamingOutput(jsonContexts)).build();
