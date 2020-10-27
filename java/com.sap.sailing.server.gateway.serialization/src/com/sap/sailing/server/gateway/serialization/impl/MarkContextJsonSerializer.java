@@ -30,6 +30,7 @@ public class MarkContextJsonSerializer implements JsonSerializer<MarkContext> {
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put(FIELD_EVENT_ID, event.getId());
             jsonEvent.put(FIELD_EVENT_NAME, event.getName());
+            jsonEvents.add(jsonEvent);
         }
         jsonMarkContext.put(FIELD_EVENT_KEY, jsonEvents);
         JSONObject jsonRegatta = new JSONObject();
