@@ -107,7 +107,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final String hostname = this.getHostName();
         final ApplicationLoadBalancer<ShardingKey, MetricsT> alb = getLoadBalancerUsed();
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
-                getLandscape().getDNSHostedZoneId(getHostedZoneName(hostname))), hostname, alb);
+                getHostedZoneName(hostname)), hostname, alb);
     }
 
     private String getHostedZoneName(String hostname) {

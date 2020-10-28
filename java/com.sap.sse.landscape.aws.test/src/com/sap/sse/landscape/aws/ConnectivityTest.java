@@ -122,7 +122,7 @@ public class ConnectivityTest {
                 createDNSBasedLoadBalancerMappingProcedure.run();
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed());
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getMasterTargetGroupCreated());
-                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated());
+                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated().getName());
             } finally {
                 if (createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed() != null) {
                     createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().delete();
