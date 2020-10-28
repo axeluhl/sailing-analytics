@@ -126,8 +126,8 @@ public class ConnectivityTest {
             } finally {
                 if (createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed() != null) {
                     createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().delete();
+                    landscape.removeDNSRecord(wiesenWegId, hostname, RRType.CNAME, createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().getDNSName());
                 }
-                landscape.removeDNSRecord(wiesenWegId, hostname, RRType.CNAME, createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().getDNSName());
             }
         } finally {
             landscape.terminate(host);

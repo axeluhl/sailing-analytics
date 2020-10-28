@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetRulePrioritiesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SubnetMapping;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
@@ -303,7 +306,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
     }
-
+    
+    @Override
+    public void updateLoadBalancerListenerRulePriorities(com.sap.sse.landscape.Region region, Collection<RulePriorityPair> newRulePriorities) {
+        getLoadBalancingClient(getRegion(region)).setRulePriorities(SetRulePrioritiesRequest.builder().rulePriorities(newRulePriorities).build());
+    }
+    
     @Override
     public void deleteLoadBalancerListener(com.sap.sse.landscape.Region region, Listener listener) {
         getLoadBalancingClient(getRegion(region)).deleteListener(b->b.listenerArn(listener.listenerArn()));

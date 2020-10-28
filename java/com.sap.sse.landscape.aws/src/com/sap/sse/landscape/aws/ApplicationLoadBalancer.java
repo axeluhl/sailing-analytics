@@ -72,10 +72,10 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
      * original order to the resulting sequence. Otherwise, the existing rules are "compressed" by re-numbering their
      * priorities to make space for the new rules at the end of the list.
      * 
-     * @return copies of the original rules, with unused {@link Rule#priority() priorities} assigned, ready for passing
+     * @return copies of the original rules, with unused {@link Rule#priority() priorities} assigned, as passed already
      *         to {@link #addRules(Rule...)}.
      */
-    Iterable<Rule> assignUnusedPriorities(boolean forceContiguous, Rule... rules);
+    Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
     
     Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups();
 

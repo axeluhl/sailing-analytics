@@ -19,6 +19,7 @@ import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
@@ -114,30 +115,30 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                 /* use traffic port as health check port, too */ getProcess().getPort());
         getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
         getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
-        getLoadBalancerUsed().addRules(createRules());
+        getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
     }
     
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
-        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
-                httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA())).
-                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+        rules[ruleCount++] = Rule.builder().conditions(
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA())).build(),
+                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();
-        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
-                httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getA())).
-                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+        rules[ruleCount++] = Rule.builder().conditions(
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getA())).build(),
+                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();
-        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
-                httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).
-                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+        rules[ruleCount++] = Rule.builder().conditions(
+                RuleCondition.builder().field("http-request-method").httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).build(),
+                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();
-        rules[ruleCount++] = Rule.builder().conditions(RuleCondition.builder().
-                hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+        rules[ruleCount++] = Rule.builder().conditions(
+                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
+                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();
         assert ruleCount == NUMBER_OF_RULES_PER_REPLICA_SET;
         return rules;

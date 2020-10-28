@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.sap.sse.common.Duration;
@@ -17,6 +18,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 
 public class ApplicationLoadBalancerImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics>
 implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
@@ -80,7 +82,7 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
     }
 
     @Override
-    public Iterable<Rule> assignUnusedPriorities(boolean forceContiguous, Rule... rules) {
+    public Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules) {
         final Iterable<Rule> existingRules = getRules();
         if (Util.size(existingRules)-1 + rules.length > MAX_PRIORITY) { // -1 due to the default rule being part of existingRules
             throw new IllegalArgumentException("The "+rules.length+" new rules won't find enough unused priority numbers because there are already "+
@@ -89,7 +91,7 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
         }
         final List<Rule> result = new ArrayList<>(rules.length);
         final List<Rule> sortedExistingNonDefaultRules = new ArrayList<>(Util.size(existingRules)-1);
-        Util.addAll(Util.filter(existingRules, r->!r.priority().equals("default")), sortedExistingNonDefaultRules);
+        Util.addAll(Util.filter(existingRules, r->!r.isDefault()), sortedExistingNonDefaultRules);
         Collections.sort(sortedExistingNonDefaultRules, (r1, r2)->Integer.valueOf(r1.priority()).compareTo(Integer.valueOf(r2.priority())));
         final int stepwidth;
         if (forceContiguous) {
@@ -98,35 +100,47 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
             stepwidth = 1;
         }
         int rulesIndex = 0;
-        int lastUsedPriority = 0;
+        int previousPriority = 0;
         final Iterator<Rule> existingRulesIter = sortedExistingNonDefaultRules.iterator();
         while (rulesIndex < rules.length) {
             // find next available slot
-            int nextPriority;
-            while (existingRulesIter.hasNext() && (nextPriority=Integer.valueOf(existingRulesIter.next().priority())) <= lastUsedPriority+stepwidth) {
+            int nextPriority = MAX_PRIORITY+1; // if no further rule exists, the usable gap ends after MAX_PRIORITY
+            while (existingRulesIter.hasNext() && (nextPriority=Integer.valueOf(existingRulesIter.next().priority())) <= previousPriority+stepwidth) {
                 // not enough space for stepwidth many rules; keep on searching
-                lastUsedPriority = nextPriority;
+                previousPriority = nextPriority;
+                if (!existingRulesIter.hasNext()) {
+                    nextPriority = MAX_PRIORITY+1;
+                }
             }
-            lastUsedPriority++;
-            final int priorityToUseForNextRule = lastUsedPriority;
-            if (priorityToUseForNextRule > MAX_PRIORITY) {
-                if (!forceContiguous) {
+            if (previousPriority+stepwidth > MAX_PRIORITY) {
+                if (forceContiguous) {
+                    previousPriority = squeezeExistingRulesAndReturnLastUsedPriority(sortedExistingNonDefaultRules);
+                    nextPriority = MAX_PRIORITY+1;
+                    // we previously checked already that there is enough room for the new set of rules
+                    assert previousPriority + rules.length <= MAX_PRIORITY;
+                } else {
                     throw new IllegalStateException(
                             "The " + rules.length + " new rules don't fit into the existing rule set of load balancer "
                                     + getName() + " without exceeding the maximum priority of " + MAX_PRIORITY);
-                } else {
-                    squeezeExistingRulesAndThenAddContiguouslyToEnd(rules);
                 }
             }
-            result.add(rules[rulesIndex].copy(b->b.priority(""+priorityToUseForNextRule)));
-            rulesIndex++;
+            while (rulesIndex < rules.length && ++previousPriority < nextPriority) {
+                final int priorityToUseForNextRule = previousPriority;
+                result.add(rules[rulesIndex++].copy(b->b.priority(""+priorityToUseForNextRule)));
+            }
         }
+        addRules(result.toArray(new Rule[0]));
         return result;
     }
 
-    private void squeezeExistingRulesAndThenAddContiguouslyToEnd(Rule[] rules) {
-        // TODO continue here...
-        // TODO Implement ApplicationLoadBalancerImpl.squeezeExistingRulesAndThenAddContiguouslyToEnd(...)
+    private int squeezeExistingRulesAndReturnLastUsedPriority(final List<Rule> sortedExistingNonDefaultRules) {
+        final List<RulePriorityPair> newPrioritiesForExistingRules = new LinkedList<>();
+        int priority = 0;
+        for (final Rule existingRule : sortedExistingNonDefaultRules) {
+            newPrioritiesForExistingRules.add(RulePriorityPair.builder().ruleArn(existingRule.ruleArn()).priority(++priority).build());
+        }
+        landscape.updateLoadBalancerListenerRulePriorities(getRegion(), newPrioritiesForExistingRules);
+        return priority;
     }
 
     @Override

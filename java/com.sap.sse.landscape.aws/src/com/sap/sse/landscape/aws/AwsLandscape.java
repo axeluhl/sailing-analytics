@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
@@ -231,6 +233,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
 
     void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
+
+    void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
 
     void deleteLoadBalancerListener(Region region, Listener listener);
 
