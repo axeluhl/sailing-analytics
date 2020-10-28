@@ -115,6 +115,8 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
 
     Subscription[] getSubscriptions();
     
+    boolean hasActiveSubscription();
+    
     void setSubscriptions(Subscription[] subscriptions);
     
     Subscription getSubscriptionByPlan(String planId);

@@ -413,4 +413,18 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
         }
         return null;
     }
+
+    @Override
+    public boolean hasActiveSubscription() {
+        boolean result = false;
+        if (subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.isActiveSubscription()) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

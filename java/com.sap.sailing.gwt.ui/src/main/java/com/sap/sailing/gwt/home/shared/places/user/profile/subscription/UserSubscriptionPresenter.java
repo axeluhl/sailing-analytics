@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.StringMessages;

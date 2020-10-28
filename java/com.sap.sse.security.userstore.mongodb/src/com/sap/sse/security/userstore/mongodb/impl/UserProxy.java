@@ -228,4 +228,9 @@ public class UserProxy implements User {
     public Subscription getSubscriptionById(String subscriptionId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean hasActiveSubscription() {
+        throw new UnsupportedOperationException();
+    }
 }
