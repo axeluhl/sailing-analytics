@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.Image;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -423,6 +426,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return new AmazonMachineImage<>(response.images().iterator().next(), region);
     }
     
+    @Override
+    public AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
+        final DescribeImagesResponse response = getEc2Client(getRegion(region))
+                .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
+        return new AmazonMachineImage<>(response.images().stream().min(getMachineImageCreationDateComparator()).get(), region);
+    }
+    
+    private Comparator<? super Image> getMachineImageCreationDateComparator() {
+        return (ami1, ami2)->{
+            return ami1.creationDate().compareTo(ami2.creationDate());
+        };
+    }
+
     private AwsCredentials getCredentials() {
         return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
     }
@@ -650,6 +666,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         final SecurityGroup result;
+        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for application hosts
         if (region.getId().equals(Region.EU_WEST_1.id())) {
             result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
         } else if (region.getId().equals(Region.EU_WEST_2.id())) {
@@ -662,7 +679,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        return getDefaultSecurityGroupForApplicationHosts(region); // TODO currently using the same experimental SG as for the app servers
+        return getDefaultSecurityGroupForApplicationHosts(region);
     }
 
     @Override

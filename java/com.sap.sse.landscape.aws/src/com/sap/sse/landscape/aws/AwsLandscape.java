@@ -102,6 +102,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             String... userData);
 
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
+
+    AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
     
