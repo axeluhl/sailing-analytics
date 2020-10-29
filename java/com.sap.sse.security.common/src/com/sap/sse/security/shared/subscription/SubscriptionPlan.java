@@ -14,6 +14,9 @@ public enum SubscriptionPlan {
     STARTER("starter", "Starter", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
                     SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
+            new SubscriptionPlanRole(PredefinedRoles.mediaeditor.getId(),
+                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
                     SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) }),
     PREMIUM("premium", "Premium", new SubscriptionPlanRole[] {
             new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),

@@ -2564,17 +2564,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info(() -> "Update user subscription roles for user " + user.getName());
         // in case new subscription has no planId, it means the subscription is an empty one with just meta data for
         // update times, and user doesn't subscribe to any plans, so all plan's roles assigned to the user must be
-        // removed
+        // removed, but only if no other plan that the user still is subscribed to implies an equal role:
         if (newSubscription != null && !newSubscription.hasPlan()) {
             SubscriptionPlan[] plans = SubscriptionPlan.values();
             for (SubscriptionPlan plan : plans) {
-                removeUserPlanRoles(user, plan, false);
+                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
             }
         } else {
+            assert currentSubscription == null || newSubscription == null || currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             if (currentSubscription != null && currentSubscription.hasPlan()
                     && currentSubscription.isActiveSubscription()) {
                 SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
-                removeUserPlanRoles(user, currentPlan, true);
+                removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
             }
             if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
                 SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
@@ -2584,23 +2585,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     /**
-     * Remove premium user roles of a subscription plan=
+     * Remove user roles implied by a subscription plan
      * 
      * @param checkOverlappingRoles
-     *            true if it needs to check overlapping roles with other user active subscription plans, otherwise roles
-     *            will be removed without necessary for checking
+     *            true if it needs to check overlapping roles with other active subscription plans of the same user,
+     *            otherwise roles will be removed without any overlap check
      */
     private void removeUserPlanRoles(User user, SubscriptionPlan plan, boolean checkOverlappingRoles)
             throws UserManagementException {
         if (plan != null) {
             logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
-            final Role[] roles;
+            final Role[] rolesToRemove;
             if (checkOverlappingRoles) {
-                roles = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
+                rolesToRemove = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
             } else {
-                roles = getSubscriptionPlanUserRoles(user, plan);
+                rolesToRemove = getSubscriptionPlanUserRoles(user, plan);
             }
-            for (Role role : roles) {
+            for (Role role : rolesToRemove) {
                 store.removeRoleFromUser(user.getName(), role);
             }
         }
@@ -2746,6 +2747,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             // In case new subscription is null, user's subscriptions won't be changed
             result = false;
         } else {
+            assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             // in this case user roles will be needed to update only when subscription active status is changed
             result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
         }
