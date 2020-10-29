@@ -62,7 +62,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         EditACLDialog.DialogConfig<UrlDTO> configACL = EditACLDialog.create(userService.getUserManagementWriteService(),
                 SecuredDomainType.RESULT_IMPORT_URL, event -> update(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openACLDialog(e));
+                e -> configACL.openDialog(e));
 
         super.table.addColumn(urlColumn, stringMessages.url());
         SecuredDTOOwnerColumn.configureOwnerColumns(super.table, listHandler, stringMessages);

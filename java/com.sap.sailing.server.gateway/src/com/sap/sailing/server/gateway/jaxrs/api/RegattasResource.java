@@ -243,7 +243,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
-    
+
+    private Response getBadCourseErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No course found for given race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "'.").build();
+    }
+
     private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
@@ -1173,7 +1180,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     course = courseDesginFinder.analyze();
                 }
                 if (course == null) {
-                    response = Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+                    response = getBadCourseErrorResponse(regattaName, raceColumnName, fleetName);
                 } else {
                     response = getCourseResult(course, trackedRace);
                 }

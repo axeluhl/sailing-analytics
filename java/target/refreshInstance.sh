@@ -56,9 +56,10 @@ checks ()
         export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
     fi
     if [[ $DEPLOY_TO == "" ]]; then
-        DEPLOY_TO=server
+        SERVER_HOME=.
+    else
+        SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
     fi
-    SERVER_HOME=$USER_HOME/servers/$DEPLOY_TO
     if [[ ! -d $SERVER_HOME ]]; then
         SERVER_HOME=`pwd`/../../servers/$DEPLOY_TO
         if [[ ! -d $SERVER_HOME ]]; then
@@ -324,6 +325,7 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo "TELNET_PORT: $TELNET_PORT"
         echo "MONGODB_HOST: $MONGODB_HOST"
         echo "MONGODB_PORT: $MONGODB_PORT"
+        echo "MONGODB_URI: $MONGODB_URI"
         echo "EXPEDITION_PORT: $EXPEDITION_PORT"
         echo "REPLICATION_HOST: $REPLICATION_HOST"
         echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
