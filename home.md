@@ -94,6 +94,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
+* [[Managing Events with the AdminConsole|wiki/howto/adminconsoleinstructions]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]

@@ -12,11 +12,6 @@ import com.sap.sse.security.interfaces.UserStore;
  * whenever new results are available for a {@link Competitor}.
  */
 public class CompetitorResultsNotificationSet extends AbstractCompetitorNotificationSet {
-
-    public CompetitorResultsNotificationSet(UserStore store, CompetitorAndBoatStore competitorAndBoatStore) {
-        super(store, competitorAndBoatStore);
-    }
-
     /**
      * Constructor used to automatically track {@link UserStore} and {@link CompetitorAndBoatStore} as OSGi service.
      */
@@ -28,5 +23,4 @@ public class CompetitorResultsNotificationSet extends AbstractCompetitorNotifica
     protected boolean shouldNotifyFor(CompetitorNotificationPreference pref) {
         return pref.isNotifyAboutResults();
     }
-
 }

@@ -14,7 +14,6 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -34,7 +33,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
-import com.sap.sse.security.interfaces.UserStore;
 
 public class SailingNotificationServiceImpl implements SailingNotificationService {
     public static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -57,17 +55,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 new CompetitorResultsNotificationSet(bundleContext));
     }
     
-    /**
-     * Constructor used for unit tests to not need BundelContext but directly work with a given UserStore.
-     * @throws MalformedURLException 
-     */
-    public SailingNotificationServiceImpl(UserStore userStore, CompetitorAndBoatStore competitorAndBoatStore, MailQueue mailQueue) throws MalformedURLException {
-        this(mailQueue,
-                new BoatClassResultsNotificationSet(userStore),
-                new BoatClassUpcomingRaceNotificationSet(userStore),
-                new CompetitorResultsNotificationSet(userStore, competitorAndBoatStore));
-    }
-
     public SailingNotificationServiceImpl(MailQueue mailQueue, BoatClassResultsNotificationSet boatClassResults,
             BoatClassUpcomingRaceNotificationSet boatClassUpcomingRace,
             CompetitorResultsNotificationSet competitorResults) throws MalformedURLException {
@@ -264,9 +251,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnCompetitorPassesFinish(Competitor competitor, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
+            mailQueue.addNotification(new NotificationSetNotification<String>(competitor.getId().toString(), competitorResults) {
                 @Override
-                protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(String objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return new NotificationMailTemplate(
                             messages.get(locale, "competitorPassesFinishSubject", competitor.getName()),
@@ -282,10 +269,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     @Override
     public void notifyUserOnCompetitorScoreCorrections(Competitor competitor, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
-            mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
+            mailQueue.addNotification(new NotificationSetNotification<String>(competitor.getId().toString(), competitorResults) {
                 @Override
-                protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(String objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return new NotificationMailTemplate(
                             messages.get(locale, "competitorScoreCorrectionSubject", competitor.getName()),
