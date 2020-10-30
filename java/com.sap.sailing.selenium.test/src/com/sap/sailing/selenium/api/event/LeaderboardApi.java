@@ -28,6 +28,7 @@ public class LeaderboardApi {
     private static final String SET_TRACKING_TIMES_URL = LEADERBOARDS_V1_RESOURCE_URL
             + "/{leaderboardname}/settrackingtimes";
     private static final String START_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/starttracking";
+    private static final String STOP_TRACKING_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/stoptracking";
     private static final String UPDATE_LEADERBOARD_URL = LEADERBOARDS_V1_RESOURCE_URL + "/{leaderboardname}/update";
     private static final String PARAM_RESULT_DISCARDING_THRESHOLDS = "resultDiscardingThresholds";
     private static final String PARAM_LEADERBOARD_DISPLAY_NAME = "leaderboardDisplayName";
@@ -110,6 +111,14 @@ public class LeaderboardApi {
         queryParams.put(PARAM_TRACK_WIND, Boolean.FALSE.toString());
         queryParams.put(PARAM_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION, Boolean.FALSE.toString());
         return ctx.post(toUrl(START_TRACKING_URL, leaderboardName), queryParams);
+    }
+
+    public JSONArray stopRaceLogTracking(ApiContext ctx, String leaderboardName, String raceColumnName,
+            String fleetName) {
+        final Map<String, String> queryParams = new TreeMap<>();
+        queryParams.put(PARAM_RACE_COLUMN_NAME, raceColumnName);
+        queryParams.put(PARAM_RACE_FLEET_NAME, fleetName);
+        return ctx.post(toUrl(STOP_TRACKING_URL, leaderboardName), queryParams);
     }
 
     public StartTime getStartTime(final ApiContext ctx, final String leaderboardName, final String raceColumnName,
