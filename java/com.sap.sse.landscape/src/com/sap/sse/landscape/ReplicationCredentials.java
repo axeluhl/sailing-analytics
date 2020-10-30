@@ -1,6 +1,4 @@
-package com.sap.sailing.landscape;
-
-import com.sap.sse.landscape.UserDataProvider;
+package com.sap.sse.landscape;
 
 /**
  * Can be used to authenticate a replica to its master. Authentication may happen by

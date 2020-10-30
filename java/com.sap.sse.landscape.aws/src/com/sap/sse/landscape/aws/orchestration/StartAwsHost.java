@@ -8,16 +8,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReplicationConfiguration;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -29,7 +28,9 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.orchestration.StartHost;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -38,12 +39,6 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * calling {@link #getHost()}.
  * 
  * @author Axel Uhl (D043530)
- *
- * @param <ShardingKey>
- * @param <MetricsT>
- * @param <MasterProcessT>
- * @param <ReplicaProcessT>
- * @param <HostT>
  */
 public abstract class StartAwsHost<ShardingKey,
                           MetricsT extends ApplicationProcessMetrics,
@@ -51,8 +46,6 @@ public abstract class StartAwsHost<ShardingKey,
                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
                           HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-    private static final Logger logger = Logger.getLogger(StartAwsHost.class.getName());
-    
     /**
      * The {@link AwsLandscape#getLatestImageWithTag(com.sap.sse.landscape.Region, String, String)} method is
      * used to obtain default images for specific AWS host starting procedures that subclass this class. The
@@ -69,34 +62,413 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     private final String keyName;
     private final Iterable<SecurityGroup> securityGroups;
     private final Optional<Tags> tags;
-    private AwsInstance<ShardingKey, MetricsT> host;
+    private HostT host;
     
-    public StartAwsHost(MachineImage machineImage, Optional<Release> release,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
-            InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
-            Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
-        super(machineImage, landscape);
+    /**
+     * A builder that helps building an instance of type {@link StartAwsHost} or any subclass thereof (then using
+     * specialized builders). The following default rules apply:
+     * <ul>
+     * <li>If an {@link #getImageType() image type} has been specified, it serves as the default for looking up the
+     * {@link #getMachineImage() image} to launch from. However, an image type set explicitly, or subclasses overriding
+     * {@link #getMachineImage()} may take precedence.</li>
+     * <li>If no {@link #setRelease(Release) release is set}, an empty {@link Optional} will be returned by
+     * {@link #getRelease()}, indicating to use the default release pre-deployed in the image launched.</li>
+     * <li>If no {@link #setAvailabilityZone(AwsAvailabilityZone) availability zone} is specified, this builder will try
+     * to obtain the {@link #getRegion()} which in this case must have been {@link #setRegion(AwsRegion)} or otherwise
+     * be returned from an overridden {@link #getRegion()} in a specialized builder, and will
+     * {@link StartAwsHost#getRandomAvailabilityZone(AwsRegion, AwsLandscape) pick an availability zone randomly} within
+     * that region.</li>
+     * <li>Conversely, if an {@link #setAvailabilityZone(AwsAvailabilityZone) availability zone has been set}, its
+     * {@link AwsAvailabilityZone#getRegion() region} will be the default answer of {@link #getRegion()}.</li>
+     * <li>If no {@link #setSecurityGroups(Iterable) security group} has been set, the {@link #getLandscape() landscape}
+     * is asked to provide its {@link AwsLandscape#getDefaultSecurityGroupForApplicationHosts(Region) default security
+     * group for application hosts} in the {@link #getRegion() region} used by this builder.</li>
+     * <li>If no {@link #setDatabaseName(String) database name is set explicitly}, it defaults to the
+     * {@link #getServerName() server name}.</li>
+     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional}, meaning
+     * that waiting for the instance won't timeout by default.</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends StartHost.Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        @Override
+        AmazonMachineImage<ShardingKey, MetricsT> getMachineImage();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setMachineImage(AmazonMachineImage<ShardingKey, MetricsT> machineImage);
+        
+        /**
+         * When not {@code null}, the newest {@link AmazonMachineImage} tagged with a tag named as specified by the constant {@link #IMAGE_TYPE_TAG_NAME}
+         * with the value provided by the result of this method will be searched and will be used as the default for {@link #getMachineImage()}.
+         */
+        String getImageType();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>  setImageType(String imageType);
+
+        /**
+         * By default, the release pre-deployed in the image will be used, represented by an empty {@link Optional}
+         * returned by this default method implementation.
+         */
+        Optional<Release> getRelease();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release);
+
+        @Override
+        AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>  setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
+
+        InstanceType getInstanceType();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setInstanceType(InstanceType instanceType);
+
+        AwsAvailabilityZone getAvailabilityZone();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setAvailabilityZone(AwsAvailabilityZone availabilityZone);
+
+        String getKeyName();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setKeyName(String keyName);
+
+        Iterable<SecurityGroup> getSecurityGroups();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setSecurityGroups(Iterable<SecurityGroup> securityGroups);
+
+        Optional<Tags> getTags();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTags(Optional<Tags> tags);
+
+        String[] getUserData();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setUserData(String[] userData);
+
+        AwsRegion getRegion();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRegion(AwsRegion region);
+        
+        String getInstanceName();
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setInstanceName(String name);
+        
+        String getServerName();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName);
+
+        String getDatabaseName();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName);
+        
+        Optional<ReplicationConfiguration> getReplicationConfiguration();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(
+                Optional<ReplicationConfiguration> replicationConfiguration);
+
+        String getOutputReplicationExchangeName();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutputReplicationExchangeName(String outputReplicationExchangeName);
+
+        RabbitMQEndpoint getRabbitConfiguration();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
+
+        Database getDatabaseConfiguration();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration);
+        
+        String getCommaSeparatedEmailAddressesToNotifyOfStartup();
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setCommaSeparatedEmailAddressesToNotifyOfStartup(
+                String commaSeparatedEmailAddressesToNotifyOfStartup);
+        
+        /**
+         * A timeout for interacting with the instance, such as when creating an SSH / SFTP connection or waiting for its
+         * public IP address.
+         */
+        Optional<Duration> getOptionalTimeout();
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOptionalTimeout(Optional<Duration> optionalTimeout);
+    }
+    
+    protected abstract static class BuilderImpl<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>> implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private AmazonMachineImage<ShardingKey, MetricsT> machineImage;
+        private String imageType;
+        private Optional<Release> release = Optional.empty();
+        private AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
+        private InstanceType instanceType;
+        private AwsAvailabilityZone availabilityZone;
+        private String keyName;
+        private Iterable<SecurityGroup> securityGroups;
+        private Optional<Tags> tags = Optional.empty();
+        private String[] userData;
+        private AwsRegion region;
+        private String instanceName;
+        private String serverName;
+        private String databaseName;
+        private Database databaseConfiguration;
+        private RabbitMQEndpoint rabbitConfiguration;
+        private String outputReplicationExchangeName;
+        private Optional<ReplicationConfiguration> replicationConfiguration;
+        private String commaSeparatedEmailAddressesToNotifyOfStartup;
+        private Optional<Duration> optionalTimeout;
+        
+        @Override
+        public AmazonMachineImage<ShardingKey, MetricsT> getMachineImage() {
+            return machineImage == null ? getLatestImageOfType(getImageType(), getLandscape(), getRegion()) : machineImage;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setMachineImage(
+                AmazonMachineImage<ShardingKey, MetricsT> machineImage) {
+            this.machineImage = machineImage;
+            return this;
+        }
+
+        @Override
+        public String getImageType() {
+            return imageType;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(
+                String imageType) {
+            this.imageType = imageType;
+            return this;
+        }
+
+        @Override
+        public Optional<Release> getRelease() {
+            return release;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release) {
+            this.release = release;
+            return this;
+        }
+
+        @Override
+        public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
+            return landscape;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(
+                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+            this.landscape = landscape;
+            return this;
+        }
+
+        @Override
+        public InstanceType getInstanceType() {
+            return instanceType;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setInstanceType(
+                InstanceType instanceType) {
+            this.instanceType = instanceType;
+            return this;
+        }
+
+        @Override
+        public AwsAvailabilityZone getAvailabilityZone() {
+            return availabilityZone == null ? getRandomAvailabilityZone(getRegion(), getLandscape()) : availabilityZone;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setAvailabilityZone(
+                AwsAvailabilityZone availabilityZone) {
+            this.availabilityZone = availabilityZone;
+            return this;
+        }
+
+        @Override
+        public String getKeyName() {
+            return keyName;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setKeyName(String keyName) {
+            this.keyName = keyName;
+            return this;
+        }
+
+        @Override
+        public Iterable<SecurityGroup> getSecurityGroups() {
+            return securityGroups == null ? Collections.singleton(getLandscape().getDefaultSecurityGroupForApplicationHosts(getRegion())) : securityGroups;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setSecurityGroups(
+                Iterable<SecurityGroup> securityGroups) {
+            this.securityGroups = securityGroups;
+            return this;
+        }
+
+        @Override
+        public Optional<Tags> getTags() {
+            return tags;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTags(Optional<Tags> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        @Override
+        public String[] getUserData() {
+            return userData;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setUserData(
+                String[] userData) {
+            this.userData = userData;
+            return this;
+        }
+
+        @Override
+        public AwsRegion getRegion() {
+            return region == null ? getAvailabilityZone().getRegion() : region;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRegion(AwsRegion region) {
+            this.region = region;
+            return this;
+        }
+        
+        @Override
+        public String getInstanceName() {
+            return instanceName;
+        }
+        
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setInstanceName(String instanceName) {
+            this.instanceName = instanceName;
+            return this;
+        }
+
+        @Override
+        public String getServerName() {
+            return serverName;
+        }
+        
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName) {
+            this.serverName = serverName;
+            return this;
+        }
+
+        @Override
+        public String getDatabaseName() {
+            return databaseName == null ? getServerName() : databaseName;
+        }
+        
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName) {
+            this.databaseName = databaseName;
+            return this;
+        }
+
+        @Override
+        public Database getDatabaseConfiguration() {
+            return databaseConfiguration == null ? getLandscape().getDatabase(getRegion(), getDatabaseName()) : databaseConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration) {
+            this.databaseConfiguration = databaseConfiguration;
+            return this;
+        }
+
+        @Override
+        public RabbitMQEndpoint getRabbitConfiguration() {
+            return rabbitConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
+            this.rabbitConfiguration = rabbitConfiguration;
+            return this;
+        }
+        
+        @Override
+        public String getOutputReplicationExchangeName() {
+            return outputReplicationExchangeName;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutputReplicationExchangeName(String outputReplicationExchangeName) {
+            this.outputReplicationExchangeName = outputReplicationExchangeName;
+            return this;
+        }
+        
+        @Override
+        public Optional<ReplicationConfiguration> getReplicationConfiguration() {
+            return replicationConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(Optional<ReplicationConfiguration> replicationConfiguration) {
+            this.replicationConfiguration = replicationConfiguration;
+            return this;
+        }
+        
+        @Override
+        public String getCommaSeparatedEmailAddressesToNotifyOfStartup() {
+            return commaSeparatedEmailAddressesToNotifyOfStartup;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup) {
+            this.commaSeparatedEmailAddressesToNotifyOfStartup = commaSeparatedEmailAddressesToNotifyOfStartup;
+            return this;
+        }
+
+        @Override
+        public Optional<Duration> getOptionalTimeout() {
+            return optionalTimeout == null ? Optional.empty() : optionalTimeout;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOptionalTimeout(
+                Optional<Duration> optionalTimeout) {
+            this.optionalTimeout = optionalTimeout;
+            return this;
+        }
+    }
+    
+    protected StartAwsHost(Builder<? extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+        super(builder);
         this.userData = new ArrayList<>();
-        for (final String ud : userData) {
+        for (final String ud : builder.getUserData()) {
             this.userData.add(ud);
         }
-        this.instanceType = instanceType;
-        this.availabilityZone = availabilityZone;
-        this.keyName = keyName;
-        this.tags = tags;
-        this.securityGroups = securityGroups;
-        release.ifPresent(this::addUserData);
+        this.instanceType = builder.getInstanceType();
+        this.availabilityZone = builder.getAvailabilityZone();
+        this.keyName = builder.getKeyName();
+        this.tags = builder.getTags();
+        this.securityGroups = builder.getSecurityGroups();
+        builder.getRelease().ifPresent(this::addUserData);
+        addUserData(builder.getDatabaseConfiguration());
+        addUserData(builder.getRabbitConfiguration());
+        addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
+        addUserData(ProcessConfigurationVariable.REPLICATION_CHANNEL, builder.getOutputReplicationExchangeName());
+        addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
+        builder.getReplicationConfiguration().ifPresent(this::addUserData);
     }
     
-    public StartAwsHost(AmazonMachineImage<ShardingKey, MetricsT> machineImage,
-            Optional<Release> release,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, InstanceType instanceType, AwsAvailabilityZone availabilityZone, String keyName,
-            Optional<Tags> tags, String[] userData) {
-        this(machineImage, release, landscape, instanceType, availabilityZone,
-                keyName,
-                Collections.singleton(landscape.getDefaultSecurityGroupForApplicationHosts(availabilityZone.getRegion())), tags, userData);
-    }
-
     protected static <ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
@@ -132,25 +504,18 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     }
 
     @Override
-    public void run() {
-        try {
-            host = getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
-                    Util.toArray(getUserData(), new String[0]));
-        } catch (URISyntaxException e) {
-            logger.log(Level.SEVERE, "Exception trying to launch host", e);
-            throw new RuntimeException(e);
-        }
+    public void run() throws Exception {
+        @SuppressWarnings({ "unchecked" })
+        HostT castHost = (HostT) getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
+                Util.toArray(getUserData(), new String[0]));
+        host = castHost;
     }
     
     /**
      * @return {@code null} before {@link #run()} is called; the host launched afterwards
      */
-    public AwsInstance<ShardingKey, MetricsT> getHost() {
+    public HostT getHost() {
         return host;
-    }
-
-    public void setHost(AwsInstance<ShardingKey, MetricsT> host) {
-        this.host = host;
     }
 
     private Optional<Tags> getTags() {

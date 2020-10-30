@@ -40,7 +40,9 @@ import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
@@ -708,6 +710,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public MongoEndpoint getDatabaseConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
         // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDatabaseConfigurationForDefaultCluster(...)
         return null;
+    }
+
+    @Override
+    public Database getDatabase(com.sap.sse.landscape.Region region, String databaseName) {
+        return new DatabaseImpl(getDatabaseConfigurationForDefaultCluster(region), databaseName);
     }
 
     @Override

@@ -18,6 +18,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
@@ -280,6 +281,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      */
     MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
     
+    Database getDatabase(Region region, String databaseName);
+
     /**
      * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...
      */

@@ -16,10 +16,27 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProc
 implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     private final MachineImage machineImage;
     
-    public StartHost(MachineImage machineImage,
-            Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-        super(landscape);
-        this.machineImage = machineImage;
+    /**
+     * A builder that helps building an instance of type {@link StartHost} or any subclass thereof (then using
+     * specialized builders).
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends Host> {
+        T build();
+
+        MachineImage getMachineImage();
+        
+        Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
+    }
+    
+    protected StartHost(Builder<? extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+        super(builder.getLandscape());
+        this.machineImage = builder.getMachineImage();
     }
 
     protected MachineImage getMachineImage() {

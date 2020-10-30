@@ -1,11 +1,8 @@
-package com.sap.sailing.landscape;
+package com.sap.sse.landscape;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 /**

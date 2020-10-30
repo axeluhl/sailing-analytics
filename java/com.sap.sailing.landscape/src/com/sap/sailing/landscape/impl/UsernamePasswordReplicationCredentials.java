@@ -3,8 +3,8 @@ package com.sap.sailing.landscape.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.landscape.ReplicationCredentials;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.ReplicationCredentials;
 
 public class UsernamePasswordReplicationCredentials implements ReplicationCredentials {
     private final String username;
