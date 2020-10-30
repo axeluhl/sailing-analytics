@@ -190,7 +190,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
