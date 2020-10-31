@@ -33,7 +33,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
         optionalDb.ifPresent(db->result.append(db.getName()));
         result.append("?replicaSet=");
         result.append(getName());
-        result.append("&retryWrites=true");
+        result.append("&retryWrites=true&readPreference=nearest");
         return new URI(result.toString());
     }
     
