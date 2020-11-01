@@ -29,7 +29,7 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
 SERVER_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true&readPreference=nearest"
 # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
@@ -65,7 +65,7 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 #     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
 SERVER_NAME=MYSPECIFICEVENT
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
 EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```

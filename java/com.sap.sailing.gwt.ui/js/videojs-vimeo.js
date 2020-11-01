@@ -731,7 +731,7 @@
   /**
    * @module lib/embed
    */
-  var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'height', 'id', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'title', 'transparent', 'url', 'width'];
+  var oEmbedParameters = ['dnt', 'autopause', 'autoplay', 'background', 'byline', 'color', 'height', 'id', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'title', 'transparent', 'url', 'width'];
   /**
    * Get the 'data-vimeo'-prefixed attributes from an element as an object.
    *
@@ -2433,7 +2433,8 @@ var Vimeo = function (_Tech) {
       url: this.options_.source.src,
       byline: false,
       portrait: false,
-      title: false
+      title: false,
+      dnt: true
     };
 
     if (this.options_.autoplay) {
@@ -2457,6 +2458,9 @@ var Vimeo = function (_Tech) {
     if (this.options_.color) {
       // vimeo is the only API on earth to reject hex color with leading #
       vimeoOptions.color = this.options_.color.replace(/^#/, '');
+    }
+    if (this.options_.dnt) {
+      vimeoOptions.dnt = this.options_.dnt;
     }
 
     this._player = new _player2.default(this.el(), vimeoOptions);
@@ -2520,7 +2524,7 @@ var Vimeo = function (_Tech) {
   };
 
   Vimeo.prototype.createEl = function createEl() {
-    var div = _video2.default.createEl('div', {
+    var div = _video2.default.dom.createEl('div', {
       id: this.options_.techId
     });
 
