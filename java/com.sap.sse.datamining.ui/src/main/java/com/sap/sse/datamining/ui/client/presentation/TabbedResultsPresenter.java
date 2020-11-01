@@ -42,7 +42,8 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     private final DrillDownCallback drillDownCallback;
     private final Map<String, ResultsPresenterFactory<?>> registeredPresenterFactories;
     private final ResultsPresenterFactory<MultiResultsPresenter> defaultFactory;
-    private final Set<CurrentPresenterChangedListener> listeners;
+    private final Set<CurrentPresenterChangedListener> currentPresenterChangedListeners;
+    private final Set<PresenterRemovedListener> presenterRemovedListeners;
     
     public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback) {
         super(parent, context);
@@ -54,14 +55,15 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         registeredPresenterFactories = new HashMap<>();
         defaultFactory = new ResultsPresenterFactory<>(MultiResultsPresenter.class,
                 () -> new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
-        listeners = new HashSet<>();
+        currentPresenterChangedListeners = new HashSet<>();
+        presenterRemovedListeners = new HashSet<>();
 
         addNewTabTab();
         addTabAndFocus(new MultiResultsPresenter(this, context, drillDownCallback));
         
         tabPanel.addSelectionHandler(event -> {
             String presenterId = ((CloseablePresenterTab) tabPanel.getTabWidget(event.getSelectedItem())).getId();
-            for (CurrentPresenterChangedListener listener : listeners) {
+            for (CurrentPresenterChangedListener listener : currentPresenterChangedListeners) {
                 listener.currentPresenterChanged(presenterId);
             }
         });
@@ -87,6 +89,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     public String getCurrentPresenterId() {
         return getSelectedTab().getId();
     }
+    
+    @Override
+    public int getCurrentPresenterIndex() {
+        return tabPanel.getSelectedIndex();
+    }
 
     @Override
     public Iterable<String> getPresenterIds() {
@@ -97,6 +104,12 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public boolean containsPresenter(String presenterId) {
         return tabsMappedById.containsKey(presenterId);
+    }
+    
+    @Override
+    public int getPresenterIndex(String presenterId) {
+        CloseablePresenterTab tab = getTab(presenterId);
+        return tab != null ? tabPanel.getWidgetIndex(tab) : -1;
     }
     
     @Override
@@ -199,12 +212,22 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
 
     @Override
     public void addCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
-        listeners.add(listener);
+        currentPresenterChangedListeners.add(listener);
     }
 
     @Override
     public void removeCurrentPresenterChangedListener(CurrentPresenterChangedListener listener) {
-        listeners.remove(listener);
+        currentPresenterChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addPresenterRemovedListener(PresenterRemovedListener listener) {
+        presenterRemovedListeners.add(listener);
+    }
+    
+    @Override
+    public void removePresenterRemovedListener(PresenterRemovedListener listener) {
+        presenterRemovedListeners.remove(listener);
     }
 
     /**
@@ -253,8 +276,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     protected void removeTab(CloseablePresenterTab tab) {
+        String presenterId = tab.getId();
+        int index = getPresenterIndex(presenterId);
         tab.removeFromParent();
-        tabsMappedById.remove(tab.getId());
+        tabsMappedById.remove(presenterId);
+        this.presenterRemovedListeners.forEach(l -> l.onPresenterRemoved(presenterId, index, tab.getPresenter().getCurrentQueryDefinition()));
     }
 
     @Override

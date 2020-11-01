@@ -6,18 +6,18 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 
-public class FilterParameterChangedEvent extends Event<FilterParameterChangedEvent.Handler> {
+public class EditFilterParameterEvent extends Event<EditFilterParameterEvent.Handler> {
     
-    public static final Type<Handler> TYPE = new Type<FilterParameterChangedEvent.Handler>();
+    public static final Type<Handler> TYPE = new Type<EditFilterParameterEvent.Handler>();
     
     @FunctionalInterface
     public interface Handler extends EventHandler {
-        void onFilterParameterChenge(FilterParameterChangedEvent event);
+        void onConfigureDimensionParameter(EditFilterParameterEvent event);
     }
     
     private final FilterDimensionParameter parameter;
 
-    public FilterParameterChangedEvent(FilterDimensionParameter parameter) {
+    public EditFilterParameterEvent(FilterDimensionParameter parameter) {
         this.parameter = parameter;
     }
 
@@ -32,7 +32,7 @@ public class FilterParameterChangedEvent extends Event<FilterParameterChangedEve
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onFilterParameterChenge(this);
+        handler.onConfigureDimensionParameter(this);
     }
     
     public static HandlerRegistration register(EventBus eventBus, Handler handler) {

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.datamining;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,10 +32,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
-import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO.ParameterKey;
-import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO.QueryKey;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningReportDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableDataMiningReportDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -43,9 +44,10 @@ import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
-import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
+import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
 import com.sap.sse.datamining.ui.client.selection.ConfigureQueryParametersDialog;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
@@ -83,7 +85,7 @@ public class DataMiningReportStoreControls extends Composite {
     private final MultiWordSuggestOracle oracle;
     private final Panel applyReportBusyIndicator;
 
-    private final ModifiableDataMiningReportParametersDTO filterParameters;
+    private ModifiableDataMiningReportParametersDTO filterParameters;
 
     private final ConfigureQueryParametersDialog configureQueryParametersDialog;
 
@@ -128,7 +130,15 @@ public class DataMiningReportStoreControls extends Composite {
         applyReportBusyIndicator.add(labeledBusyIndicator);
 
         configureQueryParametersDialog = new ConfigureQueryParametersDialog(dataMiningService, errorReporter, session, retrieverChainProvider);
-        DataMiningEventBus.addHandler(ConfigureFilterParameterEvent.TYPE, this::onConfigureFilterParameter);
+        DataMiningEventBus.addHandler(CreateFilterParameterEvent.TYPE, this::onCreateFilterParameter);
+        DataMiningEventBus.addHandler(EditFilterParameterEvent.TYPE, this::onEditFilterParameter);
+        
+        this.resultsPresenter.addPresenterRemovedListener((a, index, b) -> {
+            filterParameters.removeUsagesAndShiftKeys(index);
+        });
+        this.resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
+            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
+        });
     }
 
     private void updateSaveLoadButtons() {
@@ -179,26 +189,45 @@ public class DataMiningReportStoreControls extends Composite {
         }
     }
     
-    private void onConfigureFilterParameter(ConfigureFilterParameterEvent event) {
-        this.configureQueryParametersDialog.show(event, parameter -> {
-//            StatisticQueryDefinitionDTO query = this.resultsPresenter.getCurrentQueryDefinition();
-//            QueryKey queryKey = new QueryKey(query.getStatisticToCalculate(), query.getAggregatorDefinition());
-            if (parameter == null) {
-                filterParameters.remove(new ParameterKey(event.getRetrieverLevel(), event.getDimension()));
-                // TODO Remove parameter from triggering filter selection provider
-            } else {                
-                filterParameters.add(new ParameterKey(parameter.getRetrieverLevel(), parameter.getDimension()), parameter);
-                DataMiningEventBus.fire(new FilterParameterChangedEvent(parameter));
-            }
+    private void onCreateFilterParameter(CreateFilterParameterEvent event) {
+        this.configureQueryParametersDialog.show(event, result -> {
+            FilterDimensionParameter parameter = result.get();
+            int activeIndex = resultsPresenter.getCurrentPresenterIndex();
+            filterParameters.add(parameter);
+            filterParameters.addUsage(activeIndex, parameter);
+            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, activeIndex));
+        });
+    }
+    
+    private void onEditFilterParameter(EditFilterParameterEvent event) {
+        this.configureQueryParametersDialog.show(event, result -> {
+            final int activeIndex = resultsPresenter.getCurrentPresenterIndex();
+            filterParameters.remove(event.getParameter());
+            result.ifPresent(parameter -> {
+                filterParameters.add(parameter);
+                filterParameters.addUsage(activeIndex, parameter);
+            });
+            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, activeIndex));
         });
     }
 
     private DataMiningReportDTO buildReport() {
-        List<StatisticQueryDefinitionDTO> queryDefinitions = StreamSupport
+        ArrayList<StatisticQueryDefinitionDTO> queryDefinitions = new ArrayList<>(StreamSupport
                 .stream(resultsPresenter.getPresenterIds().spliterator(), false)
-                .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList());
+                .map(resultsPresenter::getQueryDefinition).filter(Objects::nonNull).collect(Collectors.toList()));
+        
         if (!queryDefinitions.isEmpty()) {
-            return new ModifiableDataMiningReportDTO(new ArrayList<>(queryDefinitions), new ModifiableDataMiningReportParametersDTO(filterParameters));
+            for (int i = 0; i < queryDefinitions.size(); i++) {
+                DataRetrieverChainDefinitionDTO retrieverChain = queryDefinitions.get(i).getDataRetrieverChainDefinition();
+                HashSet<FilterDimensionParameter> parameters = filterParameters.getUsages(i);
+                if (parameters.stream().anyMatch(p -> !retrieverChain.getRetrieverLevel(p.getRetrieverLevel().getLevel()).equals(p.getRetrieverLevel()))) {
+                    throw new IllegalStateException("The parameters retriever level is not contained by the associated queries data retriever definition");
+                }
+            }
+            
+            // TODO Check for unused parameters and ask if they should be removed
+            
+            return new ModifiableDataMiningReportDTO(queryDefinitions, new ModifiableDataMiningReportParametersDTO(filterParameters));
         } else {
             return null;
         }
@@ -207,11 +236,14 @@ public class DataMiningReportStoreControls extends Composite {
     private void applyReport(StoredDataMiningReportDTO storedReport) {
         showBusyIndicator(true);
         DataMiningReportDTO report = storedReport.getReport();
+        filterParameters = new ModifiableDataMiningReportParametersDTO(report.getParameters());
         ArrayList<StatisticQueryDefinitionDTO> reportQueries = report.getQueryDefinitions();
 
         SequentialQueryExecutor executor = new SequentialQueryExecutor(reportQueries);
         executor.run(results -> {
             resultsPresenter.showResults(results);
+            DataMiningEventBus.fire(new FilterParametersChangedEvent(filterParameters, resultsPresenter.getCurrentPresenterIndex()));
+            
             showBusyIndicator(false);
             if (!executor.hasErrorOccurred()) {
                 Notification.notify(

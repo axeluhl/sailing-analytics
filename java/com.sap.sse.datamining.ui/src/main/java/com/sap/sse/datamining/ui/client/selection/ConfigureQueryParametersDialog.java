@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -54,12 +55,14 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.parameters.ContainsTextFilterParameter;
 import com.sap.sse.datamining.shared.impl.dto.parameters.EndsWithFilterParameter;
 import com.sap.sse.datamining.shared.impl.dto.parameters.StartsWithFilterParameter;
+import com.sap.sse.datamining.shared.impl.dto.parameters.TextConstrainedFilterParameter;
 import com.sap.sse.datamining.shared.impl.dto.parameters.ValueListFilterParameter;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
-import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -71,6 +74,20 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     
     private enum FilterParameterType {
         ValueList, Contains, StartsWith, EndsWith;
+        
+        public static FilterParameterType fromParameter(FilterDimensionParameter parameter) {
+            if (parameter instanceof ValueListFilterParameter) {
+                return ValueList;
+            } else if (parameter instanceof ContainsTextFilterParameter) {
+                return Contains;
+            } else if (parameter instanceof StartsWithFilterParameter) {
+                return StartsWith;
+            } else if (parameter instanceof EndsWithFilterParameter) {
+                return EndsWith;
+            } else {
+                throw new IllegalArgumentException("Unknown parameter type " + parameter.getClass().getName());
+            }
+        }
         
         public String getDisplayString(StringMessages stringMessages) {
             switch (this) {
@@ -125,8 +142,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
     private DataRetrieverLevelDTO retrieverLevel;
     private FunctionDTO dimension;
     
-    private Consumer<FilterDimensionParameter> onApply;
-    private Runnable onCancel;
+    private Consumer<Optional<FilterDimensionParameter>> onApply;
     
     public ConfigureQueryParametersDialog(DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider) {
@@ -188,9 +204,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         Button closeButton = new Button(getDataMiningStringMessages().cancel());
         closeButton.addClickHandler((e) -> {
             hide();
-            if (onCancel != null) {
-                onCancel.run();
-            }
             clearForm();
         });
         
@@ -284,27 +297,36 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         return filterValues;
     }
     
-    // TODO Select existing parameter to be used as filter dimension values
+    // TODO Choose from existing parameter to be used as filter dimension values
     
-    // TODO Allow editing of the parameter if the dimension is already parameterized
-    public void show(ConfigureFilterParameterEvent data, Consumer<FilterDimensionParameter> onApply) {
-        this.show(data, onApply, null);
-    }
-    
-    public void show(ConfigureFilterParameterEvent data, Consumer<FilterDimensionParameter> onApply, Runnable onCancel) {
+    public void show(CreateFilterParameterEvent data, Consumer<Optional<FilterDimensionParameter>> onApply) {
         this.filterValuesToSelect = data.getSelectedValues();
         this.retrieverLevel = data.getRetrieverLevel();
         this.dimension = data.getDimension();
-        this.updateCreationControlsAndContent();
+        
+        this.updateCreationControlsAndContent(FilterParameterType.ValueList);
         this.onApply = onApply;
-        this.onCancel = onCancel;
         dialog.center();
     }
     
-    private void updateCreationControlsAndContent() {
+    public void show(EditFilterParameterEvent data, Consumer<Optional<FilterDimensionParameter>> onApply) {
+        FilterDimensionParameter parameter = data.getParameter();
+        this.retrieverLevel = parameter.getRetrieverLevel();
+        this.dimension = parameter.getDimension();
+        
+        if (parameter instanceof ValueListFilterParameter) {
+            filterValuesToSelect = ((ValueListFilterParameter) parameter).getValues();
+        } else if (parameter instanceof TextConstrainedFilterParameter) {
+            filterInputToApply = ((TextConstrainedFilterParameter) parameter).getConstraint();
+        }
+        
+        this.updateCreationControlsAndContent(FilterParameterType.fromParameter(parameter));
+    }
+    
+    private void updateCreationControlsAndContent(FilterParameterType parameterType) {
         retrieverLevelLabel.setText(this.retrieverLevel.getRetrievedDataType().getDisplayName());
         dimensionLabel.setText(this.dimension.getDisplayName());
-        parameterTypeSelectionBox.setValue(FilterParameterType.ValueList, true);
+        parameterTypeSelectionBox.setValue(parameterType, true);
         
         dataGrid.setVisible(false);
         busyIndicator.setBusy(true);
@@ -406,7 +428,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         FilterDimensionParameter parameter;
         switch (getSelectedParameterType()) {
         case ValueList:
-            parameter = new ValueListFilterParameter(retrieverLevel, dimension, selectionModel.getSelectedSet());
+            parameter = new ValueListFilterParameter(retrieverLevel, dimension, new HashSet<>(selectionModel.getSelectedSet()));
             break;
         case Contains:
             parameter = new ContainsTextFilterParameter(retrieverLevel, dimension, filterPanel.getTextBox().getValue());
@@ -420,7 +442,7 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         default:
             throw new IllegalStateException("Not implemented for '" + getSelectedParameterType() + "'");
         }
-        onApply.accept(parameter);
+        onApply.accept(Optional.of(parameter));
         clearForm();
     }
     
@@ -434,7 +456,6 @@ public class ConfigureQueryParametersDialog extends AbstractDataMiningComponent<
         filterPanel.updateAll(Collections.emptyList());
         filterPanel.search(null);
         onApply = null;
-        onCancel = null;
     }
 
     @Override

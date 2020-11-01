@@ -56,9 +56,10 @@ import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.ManagedDataMiningQueriesCounter;
-import com.sap.sse.datamining.ui.client.event.ConfigureFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.CreateFilterParameterEvent;
 import com.sap.sse.datamining.ui.client.event.DataMiningEventBus;
-import com.sap.sse.datamining.ui.client.event.FilterParameterChangedEvent;
+import com.sap.sse.datamining.ui.client.event.EditFilterParameterEvent;
+import com.sap.sse.datamining.ui.client.event.FilterParametersChangedEvent;
 import com.sap.sse.datamining.ui.client.execution.ManagedDataMiningQueryCallback;
 import com.sap.sse.datamining.ui.client.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
@@ -187,12 +188,11 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         mainPanel.setWidgetHidden(filterPanel, true);
         mainPanel.add(contentContainer);
         
-        DataMiningEventBus.addHandler(FilterParameterChangedEvent.TYPE, event -> {
-           FilterDimensionParameter parameter = event.getParameter();
-           if (parameter.getRetrieverLevel().equals(retrieverLevel) && parameter.getDimension().equals(dimension)) {
-               this.parameter = parameter;
-               this.filterPanel.filter();
+        DataMiningEventBus.addHandler(FilterParametersChangedEvent.TYPE, event -> {
+           this.parameter = event.getParameter(this.retrieverLevel, this.dimension);
+           this.filterPanel.filter();
                
+           if (this.parameter != null) {
                boolean selectionChanged = false;
                for (Serializable value: selectionModel.getSelectedSet()) {
                    if (!parameter.matches(value)) {
@@ -227,9 +227,13 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         parameterIcon.setSize("16px", "16px");
         ToggleButton parameterSettingsButton = new ToggleButton(parameterIcon);
         parameterSettingsButton.addClickHandler(e -> {
-            DataMiningEventBus.fire(
-                new ConfigureFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
-            );
+            if (this.parameter == null) {                
+                DataMiningEventBus.fire(
+                    new CreateFilterParameterEvent(this.retrieverLevel, this.dimension, this.getSelection())
+                );
+            } else {
+                DataMiningEventBus.fire(new EditFilterParameterEvent(parameter));
+            }
         });
         headerPanel.add(parameterSettingsButton);
         headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);

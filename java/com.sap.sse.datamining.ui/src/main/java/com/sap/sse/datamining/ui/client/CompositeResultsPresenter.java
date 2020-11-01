@@ -14,15 +14,23 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     
     @FunctionalInterface
     public interface CurrentPresenterChangedListener {
-        
         void currentPresenterChanged(String presenterId);
-        
+    }
+    
+    @FunctionalInterface
+    public interface PresenterRemovedListener {
+        void onPresenterRemoved(String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition);
     }
 
     /**
      * @return The identifier for the currently active presenter
      */
     String getCurrentPresenterId();
+    
+    /**
+     * @return The index of the currently active presenter
+     */
+    int getCurrentPresenterIndex();
     
     /**
      * @return All ids of the currently contained presenters
@@ -34,6 +42,13 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
      * @return <code>true</code>, if a presenter with the given id exists
      */
     boolean containsPresenter(String presenterId);
+    
+    /**
+     * @param presenterId The id of the presenter to the the index of
+     * @return The index of the presenter with the given id or -1, if no
+     *         presenter for the id exists.
+     */
+    int getPresenterIndex(String presenterId);
     
     /**
      * @param presenterId The id of the presenter to get the results from
@@ -98,6 +113,9 @@ public interface CompositeResultsPresenter<SettingsType extends Settings> extend
     
     void addCurrentPresenterChangedListener(CurrentPresenterChangedListener listener);
     void removeCurrentPresenterChangedListener(CurrentPresenterChangedListener listener);
+    
+    void addPresenterRemovedListener(PresenterRemovedListener listener);
+    void removePresenterRemovedListener(PresenterRemovedListener listener);
     
     @Override
     default QueryResultDTO<?> getCurrentResult() {

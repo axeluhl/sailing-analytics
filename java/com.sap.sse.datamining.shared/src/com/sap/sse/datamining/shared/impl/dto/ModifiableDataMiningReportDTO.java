@@ -17,7 +17,7 @@ public class ModifiableDataMiningReportDTO implements DataMiningReportDTO {
         this(new ArrayList<>(), new ModifiableDataMiningReportParametersDTO());
     }
     
-    public ModifiableDataMiningReportDTO(ArrayList<StatisticQueryDefinitionDTO> queryDefinitions, DataMiningReportParametersDTO parameters) {
+    public ModifiableDataMiningReportDTO(ArrayList<StatisticQueryDefinitionDTO> queryDefinitions, ModifiableDataMiningReportParametersDTO parameters) {
         this.queryDefinitions = queryDefinitions;
         this.parameters = parameters;
     }

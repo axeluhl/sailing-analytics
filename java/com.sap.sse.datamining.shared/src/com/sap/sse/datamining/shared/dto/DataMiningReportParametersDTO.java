@@ -1,32 +1,20 @@
 package com.sap.sse.datamining.shared.dto;
 
-import java.util.Map;
-
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public interface DataMiningReportParametersDTO {
     
-    public static class ParameterKey extends Pair<DataRetrieverLevelDTO, FunctionDTO> {
-        private static final long serialVersionUID = -6819556797537594552L;
-
-        public ParameterKey(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension) {
-            super(retrieverLevel, dimension);
-        }
-    }
+    boolean isEmpty();
     
-    public static class QueryKey extends Pair<FunctionDTO, AggregationProcessorDefinitionDTO> {
-        private static final long serialVersionUID = -4239175922626327780L;
-
-        public QueryKey(FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition) {
-            super(statisticToCalculate, aggregatorDefinition);
-        }
-    }
+    HashSet<FilterDimensionParameter> getAll();
+    boolean contains(FilterDimensionParameter parameter);
     
-    Map<ParameterKey, FilterDimensionParameter> getAll();
-    boolean contains(ParameterKey key);
-    FilterDimensionParameter get(ParameterKey key);
+    HashMap<Integer, HashSet<FilterDimensionParameter>> getAllUsages();
+    HashSet<FilterDimensionParameter> getUsages(Integer key);
+    
+    boolean hasUsages();
+    boolean hasUsages(Integer key);
+    boolean isUsed(FilterDimensionParameter parameter);
     
 }

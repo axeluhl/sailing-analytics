@@ -11,20 +11,20 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public class ConfigureFilterParameterEvent extends Event<ConfigureFilterParameterEvent.Handler> {
+public class CreateFilterParameterEvent extends Event<CreateFilterParameterEvent.Handler> {
     
-    public static final Type<Handler> TYPE = new Type<ConfigureFilterParameterEvent.Handler>();
+    public static final Type<Handler> TYPE = new Type<CreateFilterParameterEvent.Handler>();
     
     @FunctionalInterface
     public interface Handler extends EventHandler {
-        void onConfigureDimensionParameter(ConfigureFilterParameterEvent event);
+        void onConfigureDimensionParameter(CreateFilterParameterEvent event);
     }
     
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;
     private final Set<? extends Serializable> selectedValues;
 
-    public ConfigureFilterParameterEvent(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension, Set<? extends Serializable> selectedValues) {
+    public CreateFilterParameterEvent(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension, Set<? extends Serializable> selectedValues) {
         this.retrieverLevel = retrieverLevel;
         this.dimension = dimension;
         this.selectedValues = selectedValues;
