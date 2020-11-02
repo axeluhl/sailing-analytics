@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -47,6 +48,8 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private AdminConsolePlace defaultPlace;
     
     private EventsRefresher eventRefresher;
+    
+    private MediaTracksRefresher mediaTracksRefresher;
     
     public static boolean instantiated() {
         return instance != null;
@@ -282,6 +285,17 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
 
     public void setEventRefresher(EventsRefresher eventRefresher) {
         this.eventRefresher = eventRefresher;
+    }
+
+    @Override
+    public void loadMediaTracks() {
+        if (mediaTracksRefresher != null) {
+            mediaTracksRefresher.loadMediaTracks();
+        }
+    }
+    
+    public void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher) {
+        this.mediaTracksRefresher = mediaTracksRefresher;
     }
 
  

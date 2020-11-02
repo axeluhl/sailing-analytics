@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,12 +44,11 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     
     private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
-    public DeviceConfigurationPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            StringMessages stringMessages, ErrorReporter reporter) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
+    public DeviceConfigurationPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = reporter;
+        this.errorReporter = presenter.getErrorReporter();
         listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages,
                 userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();

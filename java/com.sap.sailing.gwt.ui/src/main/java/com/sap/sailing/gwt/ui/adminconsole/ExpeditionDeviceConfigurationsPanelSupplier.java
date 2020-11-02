@@ -8,43 +8,43 @@ import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
-public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<RegattaManagementPanel> {
-    
-    private Logger logger = Logger.getLogger(AdminConsolePanelSupplier.class.toString());
+public class ExpeditionDeviceConfigurationsPanelSupplier
+        extends AdminConsolePanelSupplier<ExpeditionDeviceConfigurationsPanel> {
+
+    private Logger logger = Logger.getLogger(this.getClass().toString());
 
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public RegattaManagementPanelSupplier(StringMessages stringMessages, Presenter presenter) {
+    public ExpeditionDeviceConfigurationsPanelSupplier(StringMessages stringMessages, Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
-    public RegattaManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
-        RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
-        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        presenter.getRegattasDisplayers().add(regattaManagementPanel);
-        presenter.fillRegattas();
-        return regattaManagementPanel;
+    public ExpeditionDeviceConfigurationsPanel init() {
+        logger.info("Create ExpeditionDeviceConfigurationsPanel");
+        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(
+                presenter, stringMessages);
+        expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
+        expeditionDeviceConfigurationsPanel.refresh();
+        return expeditionDeviceConfigurationsPanel;
     }
 
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-            
+
             @Override
             public void onSuccess() {
                 widget = init();
                 callback.onSuccess();
             }
-            
+
             @Override
             public void onFailure(Throwable reason) {
                 callback.onFailure(reason);
             }
         });
     }
-    
 }

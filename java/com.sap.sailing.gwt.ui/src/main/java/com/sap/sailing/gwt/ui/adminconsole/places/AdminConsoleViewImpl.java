@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
@@ -17,28 +16,45 @@ import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActio
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.adminconsole.BoatPanel;
+import com.sap.sailing.gwt.ui.adminconsole.BoatPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorPanel;
+import com.sap.sailing.gwt.ui.adminconsole.CompetitorPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationPanel;
+import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.EventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.EventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanel;
+import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanel;
+import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupConfigPanel;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupConfigPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LocalServerManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.MediaPanel;
+import com.sap.sailing.gwt.ui.adminconsole.MediaPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceCourseManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.RaceCourseManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.RegattaManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.RegattaManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.RemoteServerInstancesManagementPanel;
 import com.sap.sailing.gwt.ui.adminconsole.ResultImportUrlsListComposite;
+import com.sap.sailing.gwt.ui.adminconsole.ResultImportUrlsListCompositeSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.SmartphoneTrackingEventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.SmartphoneTrackingEventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.StructureImportManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.SwissTimingEventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.SwissTimingEventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.SwissTimingReplayConnectorPanel;
+import com.sap.sailing.gwt.ui.adminconsole.SwissTimingReplayConnectorPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.TracTracEventManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.TracTracEventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.TrackedRacesManagementPanel;
+import com.sap.sailing.gwt.ui.adminconsole.TrackedRacesManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.WindPanel;
+import com.sap.sailing.gwt.ui.adminconsole.WindPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.CourseTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
@@ -74,15 +90,10 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CompetitorsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CourseLayoutPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.TrackedRacesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -90,7 +101,6 @@ import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -133,17 +143,11 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     
     private SailingServiceWriteAsync sailingService;
 
-    private MediaServiceWriteAsync mediaServiceWrite;
-    
     private ErrorReporter errorReporter;
     
     private AdminConsolePanel adminConsolePanel;
     
     private PlaceController placeController;
-    
-    private Set<RegattasDisplayer> regattasDisplayers;
-    private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
-    private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
     
     private String verticalTabName;
     private String horizontalTabName;
@@ -158,13 +162,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     public void setPresenter(final Presenter presenter) {
         this.presenter = presenter;
         
-        this.regattasDisplayers = presenter.getRegattasDisplayers();
-        this.leaderboardsDisplayers = presenter.getLeaderboardsDisplayer();
-        this.leaderboardGroupsDisplayers = presenter.getLeaderboardGroupsDisplayer();
-        
         this.userService = presenter.getUserService();
         this.sailingService = presenter.getSailingService();
-        this.mediaServiceWrite = presenter.getMediaServiceWrite();
         
         this.stringMessages = StringMessages.INSTANCE;
         this.errorReporter = presenter.getErrorReporter();
@@ -241,33 +240,31 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addStyleName("adminConsolePanel");
         
         /* EVENTS */
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService,
-                userService, errorReporter, presenter, getStringMessages(), adminConsolePanel);
-        eventManagementPanel.ensureDebugId("EventManagement");
-        adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
+        final EventManagementPanelSupplier eventManagementPanelSupplier = new EventManagementPanelSupplier(stringMessages, presenter, adminConsolePanel);
+        adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 getWidget().fillEvents();
                 presenter.fillLeaderboardGroups();
             }
         }, getStringMessages().events(), new EventsPlace(), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
-        leaderboardGroupsDisplayers.add(eventManagementPanel);
-        presenter.setEventRefresher(eventManagementPanel);
-        
+
         /* REGATTAS */
-        RegattaManagementPanelSupplier regattaManagementPanelSupplier = new RegattaManagementPanelSupplier(stringMessages, presenter, regattasDisplayers);
+        RegattaManagementPanelSupplier regattaManagementPanelSupplier = new RegattaManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.fillRegattas();
             }
         }, getStringMessages().regattas(), new RegattasPlace(), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
-        
+
         /* LEADERBOARDS */
         final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel
                 .addVerticalTab(getStringMessages().leaderboards(), LEADERBOARDS);
+
+        /* Leaderboard */
         LeaderboardConfigPanelSupplier leaderboardConfigPanelSupplier = new LeaderboardConfigPanelSupplier(
-                stringMessages, presenter, regattasDisplayers, leaderboardsDisplayers, true);
+                stringMessages, presenter, true);
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
@@ -275,10 +272,10 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, getStringMessages().leaderboards(), new LeaderboardsPlace(), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));     
 
-        final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(
-                sailingService, userService, presenter, presenter, presenter, errorReporter, getStringMessages());
-        leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
-        adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanel) {
+        /* Leaderboard Group */
+        LeaderboardGroupConfigPanelSupplier leaderboardGroupConfigPanelSupplier = new LeaderboardGroupConfigPanelSupplier(
+                stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.fillLeaderboards();
@@ -288,32 +285,27 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void setupWidgetByParams(Map<String, String> params) {
                 refreshAfterBecomingVisible(); //Refresh to sure that actual data is provided
-                presenter.setupLeaderboardGroups(leaderboardGroupConfigPanel, params);
+                presenter.setupLeaderboardGroups(getWidget(), params);
             }
         }, getStringMessages().leaderboardGroups(), new LeaderboardGroupsPlace(), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-        regattasDisplayers.add(leaderboardGroupConfigPanel);
-        leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
-        leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
         
         /* RACES */
         final HorizontalTabLayoutPanel racesTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().trackedRaces(), RACES);
 
-        final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(
-                sailingService, userService, errorReporter, presenter, getStringMessages());
-        trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
+        /* Tracked races */
+        final TrackedRacesManagementPanelSupplier trackedRacesManagementPanelSupplier = new TrackedRacesManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel,
-                new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanel) {
+                new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
                         presenter.fillRegattas();
                     }
                 }, getStringMessages().trackedRaces(), new TrackedRacesPlace(),
                 SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
-        regattasDisplayers.add(trackedRacesManagementPanel);
 
-        final CompetitorPanel competitorPanel = new CompetitorPanel(sailingService, userService, getStringMessages(), errorReporter);
-        competitorPanel.ensureDebugId("CompetitorPanel");
-        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanel) {
+        /* Competitor */
+        CompetitorPanelSupplier competitorPanelSupplier = new CompetitorPanelSupplier(stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshCompetitorList();
@@ -321,9 +313,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().competitors(), new CompetitorsPlace(), 
                 SecuredDomainType.COMPETITOR.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
-        final BoatPanel boatPanel = new BoatPanel(sailingService, userService, getStringMessages(), errorReporter);
-        boatPanel.ensureDebugId("BoatPanel");
-        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanel) {
+        /* Boat */
+        final BoatPanelSupplier boatPanelSupplier = new BoatPanelSupplier(stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 getWidget().refreshBoatList();
@@ -331,33 +323,30 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         }, getStringMessages().boats(), new BoatsPlace(),
                 SecuredDomainType.BOAT.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
 
-        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, errorReporter,
-                presenter, getStringMessages(), userService);
+        /* Race */
+        RaceCourseManagementPanelSupplier raceCourseManagementPanelSupplier = 
+                new RaceCourseManagementPanelSupplier(getStringMessages(), presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel,
-                new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanel) {
+                new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
                         presenter.fillRegattas();
                     }
                 }, getStringMessages().courseLayout(), new CourseLayoutPlace(),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
-        regattasDisplayers.add(raceCourseManagementPanel);
 
-        final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-
-        final WindPanel windPanel = new WindPanel(sailingService, userService, asyncActionsExecutor, errorReporter,
-                presenter, getStringMessages());
-        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel) {
+        /* Wind */
+        final WindPanelSupplier windPanelSupplier = new WindPanelSupplier(getStringMessages(), presenter);
+        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.fillRegattas();
             }
         }, getStringMessages().wind(), new WindPlace(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
-        regattasDisplayers.add(windPanel);
 
-        final MediaPanel mediaPanel = new MediaPanel(regattasDisplayers, sailingService, presenter, mediaServiceWrite, errorReporter,
-                getStringMessages(), userService);
-        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanel) {
+        /* Media */
+        final MediaPanelSupplier mediaPanelSupplier = new MediaPanelSupplier(stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
                 getWidget().onShow();
@@ -367,91 +356,98 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
 
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().raceCommitteeApp(), RACE_COMMITEE);
-        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(
-                sailingService, userService, getStringMessages(), errorReporter);
+
+        /* Device Configuration User */
+        final DeviceConfigurationPanelSupplier deviceConfigurationUserPanelSupplier = new DeviceConfigurationPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(raceCommitteeTabPanel,
-                new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanel),
+                new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanelSupplier),
                 getStringMessages().deviceConfiguration(), new DeviceConfigurationPlace(),
                 SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getPermission(DefaultActions.MUTATION_ACTIONS));
-        
+
         /* CONNECTORS */
         final HorizontalTabLayoutPanel connectorsTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().connectors(), CONNECTORS);
-        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
-                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
-        tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
+
+        /* TracTrac Event Management */
+        TracTracEventManagementPanelSupplier tracTracEventManagementPanelSupplier = 
+                new TracTracEventManagementPanelSupplier(stringMessages, presenter, tableResources);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
-                new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tractracEventManagementPanel) {
+                new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tracTracEventManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        tractracEventManagementPanel.refreshTracTracConnectors();
+                        getWidget().refreshTracTracConnectors();
                     }
                 },
                 getStringMessages().tracTracEvents(), new TracTracEventsPlace(),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
-        regattasDisplayers.add(tractracEventManagementPanel);
-        
-        SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(
-                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
-        adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(swissTimingReplayConnectorPanel),
+
+        /* Swiss Timing Replay Connector */
+        SwissTimingReplayConnectorPanelSupplier swissTimingReplayConnectorPanelSupplier = 
+                new SwissTimingReplayConnectorPanelSupplier(stringMessages, presenter, tableResources);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<SwissTimingReplayConnectorPanel>(
+                        swissTimingReplayConnectorPanelSupplier),
                 getStringMessages().swissTimingArchiveConnector(), new SwissTimingArchivedEventsPlace(),
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
-        regattasDisplayers.add(swissTimingReplayConnectorPanel);
 
-        SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(
-                sailingService, userService, errorReporter, presenter, getStringMessages(), tableResources);
-        adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swisstimingEventManagementPanel),
+        /* Swiss Timing Event Management */
+        SwissTimingEventManagementPanelSupplier swissTimingEventManagementPanelSupplier = 
+                new SwissTimingEventManagementPanelSupplier(stringMessages, presenter, tableResources);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swissTimingEventManagementPanelSupplier),
                 getStringMessages().swissTimingEvents(), new SwissTimingEventsPlace(),
                 SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
-        regattasDisplayers.add(swisstimingEventManagementPanel);
 
-        final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
-                sailingService, userService, presenter, presenter, errorReporter, getStringMessages());
-        raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
+        /* Smartphone Tracking Event Management */
+        SmartphoneTrackingEventManagementPanelSupplier trackingEventManagementPanelSupplier = 
+                new SmartphoneTrackingEventManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
                 new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(
-                        raceLogTrackingEventManagementPanel) {
+                        trackingEventManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
                         presenter.fillLeaderboards();
                     }
                 }, getStringMessages().smartphoneTracking(), new SmartphoneTrackingPlace(),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
-        regattasDisplayers.add(raceLogTrackingEventManagementPanel);
-        leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 
-        IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(sailingService, errorReporter,
-                getStringMessages(), userService);
-        igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
+        /* Igtimi Accounts */
+        IgtimiAccountsPanelSupplier accountsPanelSupplier = new IgtimiAccountsPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
-                new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel) {
+                new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(accountsPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        igtimiAccountsPanel.refresh();
+                        getWidget().refresh();
                     }
-                },
-                getStringMessages().igtimiAccounts(), new IgtimiAccountsPlace(),
+                }, getStringMessages().igtimiAccounts(), new IgtimiAccountsPlace(),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-        ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(sailingService, errorReporter, getStringMessages(), userService);
-        expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
-        adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanel) {
+
+        /* Expedition Device Configurations */
+        ExpeditionDeviceConfigurationsPanelSupplier expeditionDeviceConfigurationsPanelSupplier = 
+                new ExpeditionDeviceConfigurationsPanelSupplier(stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel, 
+                new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                expeditionDeviceConfigurationsPanel.refresh();
+                getWidget().refresh();
             }
         }, getStringMessages().expeditionDeviceConfigurations(), new ExpeditionDeviceConfigurationsPlace(),
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
 
-        ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(sailingService,
-                userService, errorReporter, getStringMessages());
+        /* Result Import Urls List */
+        ResultImportUrlsListCompositeSupplier urlsListCompositeSupplier = new ResultImportUrlsListCompositeSupplier(
+                stringMessages, presenter);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
-                new DefaultRefreshableAdminConsolePanel<ResultImportUrlsListComposite>(resultUrlsListComposite),
+                new DefaultRefreshableAdminConsolePanel<ResultImportUrlsListComposite>(urlsListCompositeSupplier),
                 getStringMessages().resultImportUrls(), new ResultImportUrlsPlace(),
                 SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.values()));
 
-        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
-                sailingService, userService, errorReporter, getStringMessages(), presenter, eventManagementPanel);
-        adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
-                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), new Manage2SailRegattaStructureImportPlace(),
+        /* Structure Import Management */
+        StructureImportManagementPanelSupplier structureImportManagementPanelSupplier = new StructureImportManagementPanelSupplier(
+                stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(connectorsTabPanel,
+                new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(
+                        structureImportManagementPanelSupplier),
+                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
+                new Manage2SailRegattaStructureImportPlace(),
                 SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
 
         /* ADVANCED */
@@ -467,8 +463,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }, getStringMessages().replication(), new ReplicationPlace(),
                 () -> userService.hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
                         ServerActions.READ_REPLICATOR));
-        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
-                presenter, eventManagementPanel, presenter, presenter, mediaPanel);
+        final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(presenter, stringMessages);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), new MasterDataImportPlace(), SecuredSecurityTypes.SERVER.getPermissionForObject(
@@ -580,9 +575,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }, getStringMessages().markRoles(), new MarkRolesPlace(), 
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
         adminConsolePanel.initUI(verticalTabName, horizontalTabName);
-        presenter.fillRegattas();
-        presenter.fillLeaderboardGroups();
-        presenter.fillLeaderboards();
+
         return adminConsolePanel;
     }
 

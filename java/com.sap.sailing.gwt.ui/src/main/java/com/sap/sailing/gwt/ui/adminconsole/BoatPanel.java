@@ -8,12 +8,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
@@ -27,17 +25,16 @@ public class BoatPanel extends SimplePanel {
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private Button allowReloadButton;
 
-    public BoatPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public BoatPanel(final Presenter presenter, final StringMessages stringMessages) {
         super();
-        this.boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
+        this.boatTable = new BoatTableWrapper<>(presenter.getSailingService(), presenter.getUserService(), stringMessages, presenter.getErrorReporter(),
                 /* multiSelection */ true, /* enablePager */ true, 100, true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, BOAT);
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(), BOAT);
         mainPanel.add(buttonPanel);
 
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
@@ -50,7 +47,7 @@ public class BoatPanel extends SimplePanel {
             public void onSelectionChange(SelectionChangeEvent event) {
                 boolean allUpdateable = true;
                 for (BoatDTO boat : refreshableBoatSelectionModel.getSelectedSet()) {
-                    if (!userService.hasPermission(boat, DefaultActions.UPDATE)) {
+                    if (!presenter.getUserService().hasPermission(boat, DefaultActions.UPDATE)) {
                         allUpdateable = false;
                     }
                 }

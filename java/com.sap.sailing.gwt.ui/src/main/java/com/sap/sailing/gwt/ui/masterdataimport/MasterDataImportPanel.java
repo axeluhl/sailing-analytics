@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -74,17 +75,14 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
-        this.sailingServiceWrite = sailingServiceWrite;
+    public MasterDataImportPanel(final Presenter presenter, StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
         this.stringMessages = stringMessages;
-        this.regattaRefresher = regattaRefresher;
-        this.eventRefresher = eventsRefresher;
-        this.leaderboardsRefresher = leaderboardsRefresher;
-        this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
-        this.mediaTracksRefresher = mediaTracksRefresher;
+        this.regattaRefresher = presenter;
+        this.eventRefresher = presenter;
+        this.leaderboardsRefresher = presenter;
+        this.leaderboardGroupsRefresher = presenter;
+        this.mediaTracksRefresher = presenter;
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();

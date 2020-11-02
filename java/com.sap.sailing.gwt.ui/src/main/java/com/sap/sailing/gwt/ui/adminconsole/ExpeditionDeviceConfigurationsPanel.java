@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -67,12 +68,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
     private final UserService userService;
 
-    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
-            final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    public ExpeditionDeviceConfigurationsPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.userService = userService;
+        this.userService = presenter.getUserService();
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         allDeviceConfigurations = new BaseCelltable<>(/* pageSize */10000, tableRes);
         final ListDataProvider<ExpeditionDeviceConfiguration> filteredDeviceConfigurations = new ListDataProvider<>();

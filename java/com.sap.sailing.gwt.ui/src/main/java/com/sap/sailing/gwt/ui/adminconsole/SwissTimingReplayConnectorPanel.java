@@ -27,9 +27,9 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionTableWrapper;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -65,10 +65,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     private final SwissTimingArchivedConnectionTableWrapper connectionsTable;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
-        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringMessages);
-        this.errorReporter = errorReporter;
+    public SwissTimingReplayConnectorPanel(final Presenter presenter, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
+        super(presenter.getSailingService(), presenter.getUserService(), presenter, presenter.getErrorReporter(), true, stringMessages);
+        this.errorReporter = presenter.getErrorReporter();
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
 
         // setup UI
@@ -85,13 +84,13 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         captionPanelConnections.setStyleName("bold");
 
         // add connections table
-        connectionsTable = new SwissTimingArchivedConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
+        connectionsTable = new SwissTimingArchivedConnectionTableWrapper(presenter.getUserService(), sailingServiceWrite, stringMessages,
                 errorReporter, true, tableResources, () -> {
                 });
         connectionsTable.refreshConnectionList();
 
         // create button UI
-        final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingServiceWrite, userService, errorReporter,
+        final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingServiceWrite, presenter.getUserService(), errorReporter,
                 stringMessages);
         verticalPanel.add(buttonPanel);
         verticalPanel.add(connectionsTable);

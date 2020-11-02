@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
@@ -92,10 +93,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
     }
 
-    public IgtimiAccountsPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    public IgtimiAccountsPanel(final Presenter presenter,
+            final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -117,7 +118,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 return null;
             }
         };
-        createIgtimiAccountsTable(cellTable, tableRes, userService, filteredAccounts, filterAccountsPanel);
+        createIgtimiAccountsTable(cellTable, tableRes, presenter.getUserService(), filteredAccounts, filterAccountsPanel);
         // refreshableAccountsSelectionModel will be of correct type, see below in createIgtimiAccountsTable
         @SuppressWarnings("unchecked")
         final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
@@ -125,10 +126,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
         final Panel controlsPanel = new HorizontalPanel();
         filterAccountsPanel
-                .setUpdatePermissionFilterForCheckbox(account -> userService.hasPermission(account, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(account -> presenter.getUserService().hasPermission(account, DefaultActions.UPDATE));
         controlsPanel.add(filterAccountsPanel);
 
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(),
                 SecuredDomainType.IGTIMI_ACCOUNT);
         controlsPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());

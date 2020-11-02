@@ -7,31 +7,34 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 
-public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<LeaderboardConfigPanel> {
+public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSupplier<TracTracEventManagementPanel> {
 
     private Logger logger = Logger.getLogger(this.getClass().toString());
 
     private final StringMessages stringMessages;
     private final Presenter presenter;
-    private final boolean showRaceDetails;
+    private final AdminConsoleTableResources tableResources;
 
-    public LeaderboardConfigPanelSupplier(StringMessages stringMessages, Presenter presenter, boolean showRaceDetails) {
+    public TracTracEventManagementPanelSupplier(StringMessages stringMessages, Presenter presenter,
+            AdminConsoleTableResources tableResources) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
-        this.showRaceDetails = showRaceDetails;
+        this.tableResources = tableResources;
     }
 
-    public LeaderboardConfigPanel init() {
+    public TracTracEventManagementPanel init() {
         logger.info("Create RegattaManagementPanel");
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(presenter, stringMessages,
-                showRaceDetails);
-        leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
-        presenter.getRegattasDisplayers().add(leaderboardConfigPanel);
-        presenter.getLeaderboardsDisplayer().add(leaderboardConfigPanel);
-        presenter.fillLeaderboards();
-        return leaderboardConfigPanel;
+        TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
+                presenter.getSailingService(), presenter.getUserService(), presenter.getErrorReporter(), presenter,
+                stringMessages, tableResources);
+        tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
+        tractracEventManagementPanel.refreshTracTracConnectors();
+        presenter.getRegattasDisplayers().add(tractracEventManagementPanel);
+        presenter.fillRegattas();
+        return tractracEventManagementPanel;
     }
 
     @Override

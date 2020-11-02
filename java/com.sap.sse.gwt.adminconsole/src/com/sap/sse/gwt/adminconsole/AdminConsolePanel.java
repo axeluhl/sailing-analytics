@@ -125,8 +125,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
                     logger.info("onSelection widget: " + selectedPanel.getClass().getName());
                     if (selectedPanel instanceof PanelSupplierScollPanel) {
-                        PanelSupplierScollPanel dummyScrollPanel = (PanelSupplierScollPanel) selectedPanel;
-                        dummyScrollPanel.activate();
+                        PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) selectedPanel;
+                        supplierScollPanel.activate();
                     }
 
                     refreshDataFor(selectedPanel);
@@ -280,6 +280,12 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 selectTabByNamesWithoutSetup(menu, tab);
             } else {
                 topLevelTabPanel.selectTab(0);
+                // activate 1st initial widget this way because selection logic will not be called in this case
+                Widget currentSelectedWidget = topLevelTabPanel.getWidget(0);
+                if (currentSelectedWidget instanceof PanelSupplierScollPanel) {
+                    PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentSelectedWidget;
+                    supplierScollPanel.activate();
+                }
             }
         }
     }

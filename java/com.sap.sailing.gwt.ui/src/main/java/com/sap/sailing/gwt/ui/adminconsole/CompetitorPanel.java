@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
@@ -39,10 +40,9 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private final String boatClassName;
     private final BusyIndicator busyIndicator;
 
-    public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
-        this(sailingServiceWrite, userService, /* leaderboardName */ null, /* boatClassName */ null, /* createWithBoatByDefault */ true,
-                stringMessages, errorReporter);
+    public CompetitorPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this(presenter.getSailingService(), presenter.getUserService(), /* leaderboardName */ null, /* boatClassName */ null, /* createWithBoatByDefault */ true,
+                stringMessages, presenter.getErrorReporter());
     }
 
     public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final String leaderboardName,

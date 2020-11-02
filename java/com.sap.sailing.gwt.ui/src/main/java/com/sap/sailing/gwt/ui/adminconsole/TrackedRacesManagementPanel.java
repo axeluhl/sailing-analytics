@@ -14,10 +14,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -33,11 +31,10 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Grid raceDataGrid;
     private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+    public TrackedRacesManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
+        super(presenter.getSailingService(), presenter.getUserService(), presenter.getErrorReporter(), presenter, /* actionButtonsEnabled */ true,
                 stringMessages);
-        this.userService = userService;
+        this.userService = presenter.getUserService();
         this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

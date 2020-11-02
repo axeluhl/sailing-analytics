@@ -50,6 +50,7 @@ import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -109,16 +110,14 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceWriteAsync sailingServiceWrite,
-            RegattaRefresher regattaRefresher, MediaServiceWriteAsync mediaServiceWrite,
-            ErrorReporter errorReporter, StringMessages stringMessages, final UserService userService) {
-        this.regattasDisplayers = regattasDisplayers;
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
-        this.regattaRefresher = regattaRefresher;
-        this.mediaServiceWrite = mediaServiceWrite;
+    public MediaPanel(Presenter presenter, StringMessages stringMessages) {
+        this.regattasDisplayers = presenter.getRegattasDisplayers();
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
+        this.regattaRefresher = presenter;
+        this.mediaServiceWrite = presenter.getMediaServiceWrite();
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
+        this.errorReporter = presenter.getErrorReporter();
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MEDIA_TRACK);
