@@ -1,28 +1,27 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
-public class SmartphoneTrackingEventManagementPanelSupplier extends AdminConsolePanelSupplier<SmartphoneTrackingEventManagementPanel> {
-
-    private Logger logger = Logger.getLogger(this.getClass().toString());
+public class SmartphoneTrackingEventManagementPanelSupplier
+        extends AdminConsolePanelSupplier<SmartphoneTrackingEventManagementPanel> {
 
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public SmartphoneTrackingEventManagementPanelSupplier(StringMessages stringMessages, Presenter presenter) {
+    public SmartphoneTrackingEventManagementPanelSupplier(final StringMessages stringMessages,
+            final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
+    @Override
     public SmartphoneTrackingEventManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create SmartphoneTrackingEventManagementPanel");
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 presenter, stringMessages);
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
@@ -49,4 +48,5 @@ public class SmartphoneTrackingEventManagementPanelSupplier extends AdminConsole
             }
         });
     }
+
 }

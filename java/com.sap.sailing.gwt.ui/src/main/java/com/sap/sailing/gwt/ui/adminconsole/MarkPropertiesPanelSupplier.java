@@ -2,29 +2,29 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
+import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
-public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<RegattaManagementPanel> {
+public class MarkPropertiesPanelSupplier extends AdminConsolePanelSupplier<MarkPropertiesPanel> {
 
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public RegattaManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
+    public MarkPropertiesPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
     @Override
-    public RegattaManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
-        RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
-        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        presenter.getRegattasDisplayers().add(regattaManagementPanel);
-        presenter.fillRegattas();
-        return regattaManagementPanel;
+    public MarkPropertiesPanel init() {
+        logger.info("Create MarkPropertiesPanel");
+        final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(presenter.getSailingService(),
+                presenter.getErrorReporter(), stringMessages, presenter.getUserService());
+        markPropertiesPanel.ensureDebugId("markPropertiesPanel");
+        return markPropertiesPanel;
     }
 
     @Override

@@ -5,26 +5,27 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 
-public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<RegattaManagementPanel> {
+public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<RoleDefinitionsPanel> {
 
-    private final StringMessages stringMessages;
     private final Presenter presenter;
+    private final AdminConsoleTableResources tableResources;
 
-    public RegattaManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
+    public RoleDefinitionsPanelSupplier(final Presenter presenter, final AdminConsoleTableResources tableResources) {
         super();
-        this.stringMessages = stringMessages;
+        this.tableResources = tableResources;
         this.presenter = presenter;
     }
 
     @Override
-    public RegattaManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
-        RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
-        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        presenter.getRegattasDisplayers().add(regattaManagementPanel);
-        presenter.fillRegattas();
-        return regattaManagementPanel;
+    public RoleDefinitionsPanel init() {
+        logger.info("Create RoleDefinitionsPanel");
+        final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE,
+                presenter.getUserService(), tableResources, presenter.getErrorReporter());
+        roleManagementPanel.ensureDebugId("roleManagementPanel");
+        return roleManagementPanel;
     }
 
     @Override

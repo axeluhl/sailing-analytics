@@ -5,26 +5,25 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
+import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 
-public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<RegattaManagementPanel> {
+public class ReplicationPanelSupplier extends AdminConsolePanelSupplier<ReplicationPanel> {
 
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public RegattaManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
+    public ReplicationPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
-    @Override
-    public RegattaManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
-        RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
-        regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
-        presenter.getRegattasDisplayers().add(regattaManagementPanel);
-        presenter.fillRegattas();
-        return regattaManagementPanel;
+    public ReplicationPanel init() {
+        logger.info("Create ReplicationPanel");
+        final ReplicationPanel replicationPanel = new ReplicationPanel(presenter.getSailingService(),
+                presenter.getUserService(), presenter.getErrorReporter(), stringMessages);
+        replicationPanel.ensureDebugId("replicationPanel");
+        return replicationPanel;
     }
 
     @Override

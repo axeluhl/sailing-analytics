@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -10,20 +8,20 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupplier<ResultImportUrlsListComposite> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public ResultImportUrlsListCompositeSupplier(StringMessages stringMessages, Presenter presenter) {
+    public ResultImportUrlsListCompositeSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
+    @Override
     public ResultImportUrlsListComposite init() {
         logger.info("Create ResultImportUrlsListComposite");
-        ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(presenter, stringMessages);
+        ResultImportUrlsListComposite resultUrlsListComposite = new ResultImportUrlsListComposite(presenter,
+                stringMessages);
         resultUrlsListComposite.ensureDebugId("resultUrlsListComposite");
         return resultUrlsListComposite;
     }
@@ -44,4 +42,5 @@ public class ResultImportUrlsListCompositeSupplier extends AdminConsolePanelSupp
             }
         });
     }
+
 }

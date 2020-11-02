@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -12,22 +10,21 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 public class SwissTimingReplayConnectorPanelSupplier
         extends AdminConsolePanelSupplier<SwissTimingReplayConnectorPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final CellTableWithCheckboxResources tableResources;
 
-    public SwissTimingReplayConnectorPanelSupplier(StringMessages stringMessages, Presenter presenter,
-            CellTableWithCheckboxResources tableResources) {
+    public SwissTimingReplayConnectorPanelSupplier(final StringMessages stringMessages, final Presenter presenter,
+            final CellTableWithCheckboxResources tableResources) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
         this.tableResources = tableResources;
     }
 
+    @Override
     public SwissTimingReplayConnectorPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create SwissTimingReplayConnectorPanel");
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(presenter,
                 stringMessages, tableResources);
         swissTimingReplayConnectorPanel.ensureDebugId("swissTimingReplayConnectorPanel");

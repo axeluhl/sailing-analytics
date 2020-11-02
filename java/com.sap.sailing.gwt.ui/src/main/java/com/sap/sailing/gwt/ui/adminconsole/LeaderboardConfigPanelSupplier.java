@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -10,21 +8,21 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<LeaderboardConfigPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final boolean showRaceDetails;
 
-    public LeaderboardConfigPanelSupplier(StringMessages stringMessages, Presenter presenter, boolean showRaceDetails) {
+    public LeaderboardConfigPanelSupplier(final StringMessages stringMessages, final Presenter presenter,
+            final boolean showRaceDetails) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
         this.showRaceDetails = showRaceDetails;
     }
 
+    @Override
     public LeaderboardConfigPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create LeaderboardConfigPanel");
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(presenter, stringMessages,
                 showRaceDetails);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");

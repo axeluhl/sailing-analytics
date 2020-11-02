@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -10,20 +8,20 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public WindPanelSupplier(StringMessages stringMessages, Presenter presenter) {
+    public WindPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
+    @Override
     public WindPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create WindPanel");
         final WindPanel windPanel = new WindPanel(presenter, stringMessages);
+        windPanel.ensureDebugId("windPanel");
         presenter.getRegattasDisplayers().add(windPanel);
         presenter.fillRegattas();
         return windPanel;
@@ -45,4 +43,5 @@ public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
             }
         });
     }
+
 }

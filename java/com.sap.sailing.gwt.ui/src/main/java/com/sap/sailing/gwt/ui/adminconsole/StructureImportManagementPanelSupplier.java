@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -10,17 +8,16 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class StructureImportManagementPanelSupplier extends AdminConsolePanelSupplier<StructureImportManagementPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public StructureImportManagementPanelSupplier(StringMessages stringMessages, Presenter presenter) {
+    public StructureImportManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
+    @Override
     public StructureImportManagementPanel init() {
         logger.info("Create StructureImportManagementPanel");
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
@@ -45,4 +42,5 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
             }
         });
     }
+
 }

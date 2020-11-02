@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -10,19 +8,18 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class CompetitorPanelSupplier extends AdminConsolePanelSupplier<CompetitorPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
 
-    public CompetitorPanelSupplier(StringMessages stringMessages, Presenter presenter) {
+    public CompetitorPanelSupplier(final StringMessages stringMessages, final Presenter presenter) {
         super();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
     }
 
+    @Override
     public CompetitorPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create CompetitorPanel");
         final CompetitorPanel competitorPanel = new CompetitorPanel(presenter, stringMessages);
         competitorPanel.ensureDebugId("CompetitorPanel");
         competitorPanel.refreshCompetitorList();

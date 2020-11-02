@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public abstract class AdminConsolePanelSupplier<W extends Widget> {
     
-    private Logger logger = Logger.getLogger(AdminConsolePanelSupplier.class.toString());
+    protected Logger logger = Logger.getLogger(AdminConsolePanelSupplier.class.toString());
     protected W widget;
     private String title;
 
@@ -22,7 +22,9 @@ public abstract class AdminConsolePanelSupplier<W extends Widget> {
     public String getTitle() {
         return title;
     }
-
+    
+    public abstract W init();
+    
     public abstract void getAsync(RunAsyncCallback callback);
 
     public W get() {

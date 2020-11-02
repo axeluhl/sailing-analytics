@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -11,13 +9,11 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 
 public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSupplier<TracTracEventManagementPanel> {
 
-    private Logger logger = Logger.getLogger(this.getClass().toString());
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final AdminConsoleTableResources tableResources;
 
-    public TracTracEventManagementPanelSupplier(StringMessages stringMessages, Presenter presenter,
+    public TracTracEventManagementPanelSupplier(final StringMessages stringMessages, final Presenter presenter,
             AdminConsoleTableResources tableResources) {
         super();
         this.stringMessages = stringMessages;
@@ -25,8 +21,9 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
         this.tableResources = tableResources;
     }
 
+    @Override
     public TracTracEventManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
+        logger.info("Create TracTracEventManagementPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
                 presenter.getSailingService(), presenter.getUserService(), presenter.getErrorReporter(), presenter,
                 stringMessages, tableResources);
