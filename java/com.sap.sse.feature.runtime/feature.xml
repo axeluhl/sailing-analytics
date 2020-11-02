@@ -241,6 +241,12 @@
          install-size="0"
          version="2.6.0.v201404270220"
          unpack="false"/>
+         
+   <plugin
+         id="org.apache.commons.logging"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v20180409-1502"/>
 
    <plugin
          id="jackson-jaxrs"
