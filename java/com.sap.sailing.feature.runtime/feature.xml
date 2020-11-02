@@ -32,7 +32,7 @@
          id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="1.6.0.v201305230611"
+         version="1.10.0.v20180409-1845"
          unpack="false"/>
 
    <plugin
