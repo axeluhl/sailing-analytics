@@ -106,6 +106,8 @@
 <unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
 <unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
 <unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
+<unit id="org.eclipse.jetty.osgi.boot" version="9.4.8.v20171121" />
+<unit id="org.eclipse.jetty.osgi.boot.warurl" version="9.4.8.v20171121" />
 <unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
 <unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
