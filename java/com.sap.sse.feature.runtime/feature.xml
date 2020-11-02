@@ -35,14 +35,14 @@
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="9.4.33.v20201020"
+         version="9.4.8.v20171121"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.warurl"
          download-size="0"
          install-size="0"
-         version="9.4.33.v20201020"
+         version="9.4.8.v20171121"
          unpack="false"/>
 
    <plugin
