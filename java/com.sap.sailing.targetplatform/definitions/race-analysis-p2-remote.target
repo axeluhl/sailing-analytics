@@ -61,7 +61,7 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.33.v20201020"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
