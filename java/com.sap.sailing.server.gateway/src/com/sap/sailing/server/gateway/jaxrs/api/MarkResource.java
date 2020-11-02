@@ -506,7 +506,7 @@ public class MarkResource extends AbstractSailingServerResource {
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
             @QueryParam(value = "onlyCurrentlyActive") boolean onlyCurrentlyActive,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
-            @QueryParam(value = "regattaIds") Set<String> regattaINames) {
+            @QueryParam(value = "regattaIds") Set<String> regattaNames) {
         final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (markPropertiesObject == null) {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
@@ -514,7 +514,7 @@ public class MarkResource extends AbstractSailingServerResource {
         getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
         final Set<MarkContext> regattaMarkContexts = new HashSet<>();
         final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getFilteredRegattasWithPermission(
-                regattaINames, onlyCurrentlyActive);
+                regattaNames, onlyCurrentlyActive);
         final Iterable<Event> events = getFilteredEventsWithPermission(eventIds,
                 onlyCurrentlyActive);
         for (Pair<Regatta, Leaderboard> regattaWithLeaderboard : regattasWithLeaderBoards) {
@@ -543,9 +543,9 @@ public class MarkResource extends AbstractSailingServerResource {
 
     private Iterable<Event> getFilteredEventsWithPermission(Iterable<UUID> eventIds,
             boolean onlyIncludeCurrentlyActiveEvents) {
-        Iterable<Event> eventsSelectively = getService().getEventsSelectively(true, eventIds);
-        SecurityService securityService = getSecurityService();
-        Set<Event> eventsWithPermission = new HashSet<Event>();
+        final Iterable<Event> eventsSelectively = getService().getEventsSelectively(true, eventIds);
+        final SecurityService securityService = getSecurityService();
+        final Set<Event> eventsWithPermission = new HashSet<Event>();
         for (Event event : eventsSelectively) {
             final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(event);
             final TimePoint endDate = event.getEndDate();
@@ -564,7 +564,7 @@ public class MarkResource extends AbstractSailingServerResource {
         final Set<RegattaLeaderboard> regattaLeaderboards = allLeaderboards.stream()
                 .filter(lb -> lb instanceof RegattaLeaderboard).map(lb -> (RegattaLeaderboard) lb)
                 .collect(Collectors.toSet());
-        Set<Pair<Regatta, Leaderboard>> filteredRegattasWithLeaderboards = new HashSet<>();
+        final Set<Pair<Regatta, Leaderboard>> filteredRegattasWithLeaderboards = new HashSet<>();
         for (RegattaLeaderboard leaderboard : regattaLeaderboards) {
             Regatta regatta = leaderboard.getRegatta();
             final boolean regattaIsInIds = regattaIds.isEmpty() || regattaIds.contains(regatta.getName());
