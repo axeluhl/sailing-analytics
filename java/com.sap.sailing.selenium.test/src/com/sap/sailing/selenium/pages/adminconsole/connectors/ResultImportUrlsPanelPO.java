@@ -2,8 +2,6 @@ package com.sap.sailing.selenium.pages.adminconsole.connectors;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.util.function.BooleanSupplier;
-
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,12 +38,7 @@ public class ResultImportUrlsPanelPO extends PageArea {
     }
 
     public void addUrl(String url) {
-        waitUntil(new BooleanSupplier() {
-            @Override
-            public boolean getAsBoolean() {
-                return addButton.isEnabled();
-            }
-        });
+        waitUntil(addButton::isEnabled);
         this.addButton.click();
         waitForElementBySeleniumId(driver, "ResultImportUrlAddDialog", DEFAULT_WAIT_TIMEOUT_SECONDS);
         WebElement dialog = findElementBySeleniumId(driver, "ResultImportUrlAddDialog");
