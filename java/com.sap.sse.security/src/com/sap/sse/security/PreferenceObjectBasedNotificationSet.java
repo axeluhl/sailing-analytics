@@ -139,7 +139,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      */
     protected abstract Collection<T> calculateObjectsToNotify(PrefT preference);
 
-    public Iterable<String> getUsersnamesToNotifyFor(T object) {
+    public Iterable<String> getUserNamesToNotifyFor(T object) {
         LockUtil.lockForRead(lock);
         try {
             return new HashSet<>(Util.get(notifications, object, Collections.emptySet()));
@@ -153,7 +153,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      * Users without a verified email address will be skipped.
      */
     public void forUsersWithVerifiedEmailMappedTo(T object, Consumer<User> consumer) {
-        for (String username : getUsersnamesToNotifyFor(object)) {
+        for (String username : getUserNamesToNotifyFor(object)) {
             // User objects can change silently. So we just keep the usernames and get the associated user objects on
             // the fly.
             User user = store.getUserByName(username);
@@ -176,13 +176,10 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
                     : calculateObjectsToNotify(oldPreference);
             Collection<T> newObjectsToNotify = newPreference == null ? Collections.emptySet()
                     : calculateObjectsToNotify(newPreference);
-
             Set<T> objectsToRemove = new HashSet<>(oldObjectsToNotify);
             objectsToRemove.removeAll(newObjectsToNotify);
-
             Set<T> objectsToAdd = new HashSet<>(newObjectsToNotify);
             objectsToAdd.removeAll(oldObjectsToNotify);
-
             LockUtil.lockForWrite(lock);
             try {
                 for (T objectToRemove : objectsToRemove) {

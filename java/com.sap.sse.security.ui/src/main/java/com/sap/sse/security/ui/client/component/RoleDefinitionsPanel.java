@@ -220,7 +220,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 userService.getUserManagementWriteService(), type, roleDefinition -> updateRoleDefinitions(),
                 stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
