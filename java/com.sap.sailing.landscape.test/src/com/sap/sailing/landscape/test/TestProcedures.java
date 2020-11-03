@@ -38,7 +38,7 @@ import software.amazon.awssdk.services.ec2.model.Tag;
  *
  */
 public class TestProcedures {
-    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
+    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> landscape;
     private AwsRegion region;
     
