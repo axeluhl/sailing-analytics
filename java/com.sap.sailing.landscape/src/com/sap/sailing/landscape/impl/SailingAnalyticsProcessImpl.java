@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -19,6 +20,7 @@ import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 
 public class SailingAnalyticsProcessImpl<ShardingKey> extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics,
 SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> implements SailingAnalyticsProcess<ShardingKey> {
+    private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());
     private static final String HEALTH_CHECK_PATH = "/gwt/status";
 
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
@@ -36,8 +38,13 @@ SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> imple
 
     @Override
     public boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
-        final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout).openConnection();
-        return connection.getResponseCode() == 200;
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout).openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
     }
 
     @Override
