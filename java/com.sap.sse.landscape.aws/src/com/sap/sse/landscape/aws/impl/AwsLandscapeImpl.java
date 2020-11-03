@@ -439,7 +439,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
-        return new AmazonMachineImage<>(response.images().stream().min(getMachineImageCreationDateComparator()).get(), region);
+        return new AmazonMachineImage<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region);
     }
     
     @Override
