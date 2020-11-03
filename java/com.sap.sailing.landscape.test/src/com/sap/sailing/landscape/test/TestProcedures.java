@@ -58,7 +58,7 @@ public class TestProcedures {
                 .setServerName(serverName)
                 .setLandscape(landscape)
                 .setRegion(region)
-                .setInstanceType(InstanceType.T3_SMALL)
+                .setInstanceType(InstanceType.T3_LARGE)
                 .setKeyName(keyName)
                 .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
                 .setTags(Optional.of(Tags.with("Hello", "World")))
