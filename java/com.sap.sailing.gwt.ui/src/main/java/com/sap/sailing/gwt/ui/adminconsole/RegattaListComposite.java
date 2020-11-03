@@ -293,7 +293,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                regattaDTO -> configACL.openACLDialog(regattaDTO));
+                regattaDTO -> configACL.openDialog(regattaDTO));
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());

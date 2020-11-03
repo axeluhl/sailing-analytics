@@ -362,7 +362,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 this::unsetPosition);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markProperties -> configACL.openACLDialog(markProperties));
+                markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
     }

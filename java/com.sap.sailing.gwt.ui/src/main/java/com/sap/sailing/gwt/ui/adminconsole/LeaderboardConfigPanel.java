@@ -374,7 +374,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 new Consumer<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void accept(StrippedLeaderboardDTOWithSecurity t) {
-                        configACL.openACLDialog(t);
+                        configACL.openDialog(t);
                     }
         });
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());

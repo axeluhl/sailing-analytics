@@ -16,7 +16,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -48,7 +48,7 @@ public class ConnectivityUtils {
         return result.toString();
     }
 
-    public static HttpResponse postForm(String baseUrl, final String action, final Map<String, String> inputFieldsToSubmit, DefaultHttpClient client, String referer)
+    public static HttpResponse postForm(String baseUrl, final String action, final Map<String, String> inputFieldsToSubmit, CloseableHttpClient client, String referer)
             throws UnsupportedEncodingException, IOException, ClientProtocolException {
         HttpPost post = new HttpPost(baseUrl+action);
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();

@@ -18,7 +18,8 @@ public class Activator implements BundleActivator {
         landscape = new AwsLandscapeImpl<>(System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
                 System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                System.getProperty(AwsLandscape.S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME));
     }
     
     public static Activator getInstance() {
