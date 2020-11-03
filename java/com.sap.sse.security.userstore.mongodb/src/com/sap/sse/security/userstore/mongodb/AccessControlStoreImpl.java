@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.LockUtil.RunnableWithResult;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.concurrent.RunnableWithResult;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;

@@ -278,7 +278,7 @@ public class MarkTemplatePanel extends FlowPanel {
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markTemplate -> configACL.openACLDialog(markTemplate));
+                markTemplate -> configACL.openDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
