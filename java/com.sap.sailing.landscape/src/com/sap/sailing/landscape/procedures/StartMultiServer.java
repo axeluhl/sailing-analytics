@@ -4,11 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -32,7 +36,7 @@ public class StartMultiServer<ShardingKey, MetricsT extends ApplicationProcessMe
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends UpgradeAmi<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+extends StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
     private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
     
@@ -46,29 +50,33 @@ extends UpgradeAmi<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends UpgradeAmi.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends StartEmptyServer.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         @Override
         default boolean isNoShutdown() {
             return true;
         }
     }
     
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends UpgradeAmi.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    protected static class BuilderImpl<ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+    extends StartEmptyServer.BuilderImpl<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
         @Override
-        public StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() {
+        public StartMultiServer<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> build() {
             return new StartMultiServer<>(this);
+        }
+
+        @Override
+        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
+            return SailingAnalyticsHostImpl::new;
         }
     }
     
-    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>> Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
+    public static <ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> builder() {
         return new BuilderImpl<>();
     }
 

@@ -16,6 +16,7 @@ import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
+import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.mongodb.Database;
@@ -71,6 +72,15 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         return new AwsLandscapeImpl<>();
     }
     
+
+    default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
+            AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
+            Optional<Tags> tags, String... userData) {
+        final HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> hostSupplier =
+                (instanceId, az, landscape)->new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId, az, landscape);
+        return launchHost(hostSupplier, image, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
+    }
+    
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
@@ -82,10 +92,12 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
      *            the AWS SDK installed on the instance.
      */
-    default AwsInstance<ShardingKey, MetricsT> launchHost(
-            MachineImage fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
-        return launchHosts(/* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
+    default <HostT extends AwsInstance<ShardingKey, MetricsT>> HostT launchHost(
+            HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier,
+            MachineImage fromImage, InstanceType instanceType, AwsAvailabilityZone az, String keyName,
+            Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
+        return launchHosts(hostSupplier, /* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName,
+                securityGroups, tags, userData).iterator().next();
     }
 
     // -------------------- technical landscape services -----------------
@@ -97,7 +109,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch,
+    <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(
+            HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier, int numberOfHostsToLaunch,
             MachineImage fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
             String... userData);
@@ -105,6 +118,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
+    
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName, String tagValue);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
     

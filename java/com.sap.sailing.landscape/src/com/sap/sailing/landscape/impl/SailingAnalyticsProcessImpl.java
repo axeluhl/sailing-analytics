@@ -21,7 +21,7 @@ public class SailingAnalyticsProcessImpl<ShardingKey> extends ApplicationProcess
 SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> implements SailingAnalyticsProcess<ShardingKey> {
     private static final String HEALTH_CHECK_PATH = "/gwt/status";
 
-    public SailingAnalyticsProcessImpl(int port, Host host) {
+    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host, "/home/sailing/servers/server");
     }
     

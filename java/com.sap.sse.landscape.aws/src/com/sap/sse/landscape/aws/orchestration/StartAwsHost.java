@@ -25,6 +25,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -56,13 +57,17 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      */
     private final static String IMAGE_TYPE_TAG_NAME = "image-type";
 
+    private static final String NAME_TAG_NAME = "Name";
+
     private final List<String> userData;
     private final InstanceType instanceType;
     private final AwsAvailabilityZone availabilityZone;
     private final String keyName;
     private final Iterable<SecurityGroup> securityGroups;
     private final Optional<Tags> tags;
+    private final HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier;
     private HostT host;
+
     
     /**
      * A builder that helps building an instance of type {@link StartAwsHost} or any subclass thereof (then using
@@ -85,8 +90,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * group for application hosts} in the {@link #getRegion() region} used by this builder.</li>
      * <li>If no {@link #setDatabaseName(String) database name is set explicitly}, it defaults to the
      * {@link #getServerName() server name}.</li>
-     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional}, meaning
-     * that waiting for the instance won't timeout by default.</li>
+     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
+     * meaning that waiting for the instance won't timeout by default.</li>
+     * <li>The {@link #getOutputReplicationExchangeName() output replication exchange name} defaults to the
+     * {@link #getServerName() server name}.
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -143,7 +150,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTags(Optional<Tags> tags);
 
-        String[] getUserData();
+        Iterable<String> getUserData();
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setUserData(String[] userData);
 
@@ -192,6 +199,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         Optional<Duration> getOptionalTimeout();
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOptionalTimeout(Optional<Duration> optionalTimeout);
+        
+        HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> getHostSupplier();
     }
     
     protected abstract static class BuilderImpl<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
@@ -208,7 +217,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         private String keyName;
         private Iterable<SecurityGroup> securityGroups;
         private Optional<Tags> tags = Optional.empty();
-        private String[] userData;
+        private List<String> userData = new ArrayList<>();
         private AwsRegion region;
         private String instanceName;
         private String serverName;
@@ -216,7 +225,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         private Database databaseConfiguration;
         private RabbitMQEndpoint rabbitConfiguration;
         private String outputReplicationExchangeName;
-        private Optional<ReplicationConfiguration> replicationConfiguration;
+        private Optional<ReplicationConfiguration> replicationConfiguration = Optional.empty();
         private String commaSeparatedEmailAddressesToNotifyOfStartup;
         private Optional<Duration> optionalTimeout;
         
@@ -326,14 +335,17 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         }
 
         @Override
-        public String[] getUserData() {
-            return userData;
+        public Iterable<String> getUserData() {
+            return Collections.unmodifiableList(userData);
         }
 
         @Override
         public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setUserData(
                 String[] userData) {
-            this.userData = userData;
+            this.userData.clear();
+            for (final String userDataElement : userData) {
+                this.userData.add(userDataElement);
+            }
             return this;
         }
 
@@ -351,6 +363,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         @Override
         public String getInstanceName() {
             return instanceName;
+        }
+        
+        protected boolean isInstanceNameSet() {
+            return instanceName != null;
         }
         
         @Override
@@ -405,7 +421,11 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         
         @Override
         public String getOutputReplicationExchangeName() {
-            return outputReplicationExchangeName;
+            return isOutputReplicationExchangeNameSet() ? outputReplicationExchangeName : getServerName();
+        }
+        
+        protected boolean isOutputReplicationExchangeNameSet() {
+            return outputReplicationExchangeName != null;
         }
 
         @Override
@@ -458,8 +478,9 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         this.instanceType = builder.getInstanceType();
         this.availabilityZone = builder.getAvailabilityZone();
         this.keyName = builder.getKeyName();
-        this.tags = builder.getTags();
+        this.tags = Optional.of(builder.getTags().orElse(Tags.empty()).and(NAME_TAG_NAME, builder.getInstanceName()));
         this.securityGroups = builder.getSecurityGroups();
+        this.hostSupplier = builder.getHostSupplier();
         builder.getRelease().ifPresent(this::addUserData);
         addUserData(builder.getDatabaseConfiguration());
         addUserData(builder.getRabbitConfiguration());
@@ -494,10 +515,6 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         return Collections.singleton(landscape.getDefaultSecurityGroupForApplicationHosts(region));
     }
 
-    protected static Optional<Tags> addNameTag(String name, Optional<Tags> tags) {
-        return Optional.of(tags.orElse(Tags.empty()).and("Name", name));
-    }
-
     @Override
     public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
         return (AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>) super.getLandscape();
@@ -505,8 +522,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
     @Override
     public void run() throws Exception {
-        @SuppressWarnings({ "unchecked" })
-        HostT castHost = (HostT) getLandscape().launchHost(getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
+        HostT castHost = getLandscape().launchHost(hostSupplier,
+            getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
                 Util.toArray(getUserData(), new String[0]));
         host = castHost;
     }
@@ -562,8 +579,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * Appends {@code moreUserData} to the end of {@link #userData}
      */
     protected void addUserData(UserDataProvider userDataProvider) {
-        for (final Entry<ProcessConfigurationVariable, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
-            addUserData(userDataEntry.getKey(), userDataEntry.getValue());
+        if (userDataProvider != null) {
+            for (final Entry<ProcessConfigurationVariable, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
+                addUserData(userDataEntry.getKey(), userDataEntry.getValue());
+            }
         }
     }
 }

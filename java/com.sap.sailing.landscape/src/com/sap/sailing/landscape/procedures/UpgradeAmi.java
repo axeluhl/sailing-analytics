@@ -2,11 +2,14 @@ package com.sap.sailing.landscape.procedures;
 
 import java.util.Collections;
 
+import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
@@ -20,12 +23,11 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public class UpgradeAmi<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+public class UpgradeAmi<ShardingKey,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+extends StartEmptyServer<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT> {
     private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
     private static final String NO_SHUTDOWN_USER_DATA = "no-shutdown";
     
@@ -42,54 +44,36 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * </ul>
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.Builder<UpgradeAmi<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        boolean isNoShutdown();
-        
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown);
+    public static interface Builder<ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+    extends StartEmptyServer.Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
     }
 
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.BuilderImpl<UpgradeAmi<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        private boolean noShutdown;
-        
+    protected static class BuilderImpl<ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+    extends StartEmptyServer.BuilderImpl<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<ShardingKey, MasterProcessT, ReplicaProcessT> {
         @Override
-        public UpgradeAmi<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() {
+        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
+            return SailingAnalyticsHostImpl::new;
+        }
+
+        @Override
+        public StartEmptyServer<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> build() {
             return new UpgradeAmi<>(this);
-        }
-
-        @Override
-        public boolean isNoShutdown() {
-            return noShutdown;
-        }
-
-        @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown) {
-            this.noShutdown = noShutdown;
-            return this;
-        }
-
-        @Override
-        public String getInstanceName() {
-            return super.getInstanceName() == null ? IMAGE_UPGRADE_USER_DATA+" for "+getMachineImage().getId() : super.getInstanceName();
         }
     }
     
-    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>> Builder<ShardingKey, MetricsT, MasterProcessT,ReplicaProcessT, HostT> builder() {
+    public static <ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<ShardingKey, MasterProcessT, ReplicaProcessT> builder() {
         return new BuilderImpl<>();
     }
     
-    public UpgradeAmi(Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+    public UpgradeAmi(Builder<ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
         if (builder.isNoShutdown()) {

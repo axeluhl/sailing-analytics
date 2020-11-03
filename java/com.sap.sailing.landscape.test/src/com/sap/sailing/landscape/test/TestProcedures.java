@@ -18,8 +18,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -53,6 +52,7 @@ public class TestProcedures {
     public void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
+        landscape.createKeyPair(region, keyName);
         final StartSailingAnalyticsMaster.Builder<String> builder = StartSailingAnalyticsMaster.builder();
         final StartSailingAnalyticsMaster<String> startSailingAnalyticsMaster = builder
                 .setServerName(serverName)
@@ -72,7 +72,7 @@ public class TestProcedures {
             boolean foundName = false;
             boolean foundHello = false;
             for (final Tag tag : instance.tags()) {
-                if (tag.key().equals("Name") && tag.value().equals("MyHost")) {
+                if (tag.key().equals("Name") && tag.value().equals("SL "+serverName+" (Master)")) {
                     foundName = true;
                 }
                 if (tag.key().equals("Hello") && tag.value().equals("World")) {
@@ -82,7 +82,15 @@ public class TestProcedures {
             assertTrue(foundName);
             assertTrue(foundHello);
             // check env.sh access
-            final ApplicationProcess<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
+            final SailingAnalyticsMaster<String> process = startSailingAnalyticsMaster.getSailingAnalyticsProcess();
+            // TODO The problem here: the /etc/init.d/sailing script takes a while to do its job with downloading, installing
+            // the release, updating git, and running the httpd reverse proxy server. Only then will the env.sh be patched, just before
+            // the instance is launched. We may want to wait for the process to become available on port 8888 before continuing...
+            final TimePoint startingToPollForReady = TimePoint.now();
+            while (!process.isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+                Thread.sleep(1000);
+            }
+            assertTrue(process.isReady(optionalTimeout));
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="+serverName));

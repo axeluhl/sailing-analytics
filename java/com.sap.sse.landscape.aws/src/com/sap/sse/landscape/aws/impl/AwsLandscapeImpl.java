@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -42,7 +44,10 @@ import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
+import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
+import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
@@ -61,6 +66,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesReques
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Image;
@@ -69,6 +75,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.Placement;
+import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.ResourceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest.Builder;
@@ -435,6 +442,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return new AmazonMachineImage<>(response.images().stream().min(getMachineImageCreationDateComparator()).get(), region);
     }
     
+    @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue) {
+        final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
+        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()));
+        for (final Reservation r : instanceResponse.reservations()) {
+            for (final Instance i : r.instances()) {
+                result.add(new AwsInstanceImpl<ShardingKey, MetricsT>(i.instanceId(), getAvailabilityZoneByName(region, i.placement().availabilityZone()), this));
+            }
+        }
+        return result;
+    }
+
     private Comparator<? super Image> getMachineImageCreationDateComparator() {
         return (ami1, ami2)->{
             return ami1.creationDate().compareTo(ami2.creationDate());
@@ -492,9 +512,10 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
         return null;
     }
-
+    
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage fromImage,
+    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier,
+            int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
             throw new IllegalArgumentException("Trying to launch an instance in region "+az.getRegion()+
@@ -510,7 +531,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
             .placement(Placement.builder().availabilityZone(az.getName()).build())
             .securityGroupIds(Util.mapToArrayList(securityGroups, sg->sg.getId()));
         if (userData != null) {
-            runInstancesRequestBuilder.userData(String.join("\n", userData));
+            runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
         tags.ifPresent(theTags->{
             final List<Tag> awsTags = new ArrayList<>();
@@ -522,9 +543,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
         logger.info("Launching instance(s): "+launchRequest);
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
-        final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
+        final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
-            result.add(new AwsInstanceImpl<>(instance.instanceId(), az, this));
+            result.add(hostSupplier.supply(instance.instanceId(), az, this));
         }
         return result;
     }
@@ -708,8 +729,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public MongoEndpoint getDatabaseConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
-        // TODO Implement AwsLandscape<ShardingKey,MetricsT,MasterProcessT,ReplicaProcessT>.getDatabaseConfigurationForDefaultCluster(...)
-        return null;
+        final String MONGO_REPLICA_SET_TAG_NAME = "mongo-replica-set";
+        final String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
+        final MongoReplicaSet result = new MongoReplicaSetImpl("live");
+        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, MONGO_REPLICA_SET_TAG_NAME, MONGO_DEFAULT_REPLICA_SET_NAME)) {
+            result.addReplica(new MongoProcessImpl(host));
+        }
+        return result;
     }
 
     @Override
