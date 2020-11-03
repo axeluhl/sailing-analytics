@@ -571,8 +571,13 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         Util.addAll(moreUserData, userData);
     }
     
+    /**
+     * @param value an unquoted string; it will be mapped to the right hand side of a Bash variable assignment and for 
+     * that purpose will be enclosed in double-quotes ({@code "}), and double-quote characters in the {@code value} string
+     * will be escaped by preceding them with a {@code \} (backslash) character.
+     */
     protected void addUserData(ProcessConfigurationVariable userDataVariable, String value) {
-        userData.add(userDataVariable.name()+"="+value);
+        userData.add(userDataVariable.name()+"=\""+value.replaceAll("\"", "\\\"")+"\"");
     }
 
     /**
