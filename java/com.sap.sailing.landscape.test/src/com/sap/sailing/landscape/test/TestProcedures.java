@@ -102,7 +102,7 @@ public class TestProcedures {
             assertTrue(process.isReady(optionalTimeout));
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
-            assertTrue(envSh.contains("SERVER_NAME="+serverName));
+            assertTrue("Couldn't find SERVER_NAME=\""+serverName+"\" in env.sh:\n"+envSh, envSh.contains("SERVER_NAME=\""+serverName+"\""));
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
         } finally {
             landscape.terminate(host);
