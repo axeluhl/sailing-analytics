@@ -185,7 +185,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());

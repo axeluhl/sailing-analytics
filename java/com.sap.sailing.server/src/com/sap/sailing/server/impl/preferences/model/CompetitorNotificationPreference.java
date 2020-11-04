@@ -15,9 +15,9 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
-    public CompetitorNotificationPreference(String competitorId, boolean notifyAboutResults) {
+    public CompetitorNotificationPreference(String competitorIdAsString, boolean notifyAboutResults) {
         this();
-        this.competitorId.setValue(competitorId);
+        this.competitorId.setValue(competitorIdAsString);
         this.notifyAboutResults.setValue(notifyAboutResults);
     }
 
@@ -30,7 +30,7 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
         // The usage of Java Serialization isn't planned by now, either.
     }
 
-    public String getCompetitorId() {
+    public String getCompetitorIdAsString() {
         return competitorId.getValue();
     }
 
