@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.polars.ReplicablePolarService;
@@ -69,7 +69,7 @@ public class PolarDataClient {
     }
 
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpGet getProcessor = new HttpGet(getAPIString());
         HttpResponse processorResponse = client.execute(getProcessor);
         return processorResponse.getEntity().getContent();
