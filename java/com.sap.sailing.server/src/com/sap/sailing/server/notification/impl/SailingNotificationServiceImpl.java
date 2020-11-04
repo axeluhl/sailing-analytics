@@ -65,7 +65,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
         this(mailQueue,
                 new BoatClassResultsNotificationSet(userStore),
                 new BoatClassUpcomingRaceNotificationSet(userStore),
-                new CompetitorResultsNotificationSet(userStore));
+                new CompetitorResultsNotificationSet(userStore, competitorAndBoatStore));
     }
 
     public SailingNotificationServiceImpl(MailQueue mailQueue, BoatClassResultsNotificationSet boatClassResults,
