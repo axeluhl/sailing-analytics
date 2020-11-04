@@ -18,9 +18,11 @@ import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -119,7 +121,15 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName, String tagValue);
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(Region region, String tagName, String tagValue);
+
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
     
@@ -295,7 +305,14 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * The default MongoDB configuration to connect to.
      */
     MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
-    
+
+    /**
+     * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
+     * 
+     * TODO For now, the method searches for accordingly-tagged instances and picks the first one it finds. We need to extend this to RabbitMQ replication.
+     */
+    RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region);
+
     Database getDatabase(Region region, String databaseName);
 
     /**

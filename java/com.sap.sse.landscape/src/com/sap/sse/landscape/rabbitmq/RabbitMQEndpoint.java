@@ -34,7 +34,7 @@ public interface RabbitMQEndpoint extends UserDataProvider {
      */
     default Map<ProcessConfigurationVariable, String> getUserData() {
         final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
-        result.put(ProcessConfigurationVariable.REPLICATION_HOST, getNodeName());
+        result.put(ProcessConfigurationVariable.REPLICATE_MASTER_QUEUE_HOST, getNodeName());
         result.put(ProcessConfigurationVariable.REPLICATE_MASTER_QUEUE_PORT, ""+getPort());
         return result;
     }

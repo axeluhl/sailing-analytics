@@ -68,6 +68,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeTagsResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Image;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
@@ -136,6 +137,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefaultDynamicALB";
+    private static final String MONGO_REPLICA_SET_TAG_NAME = "mongo-replica-set";
+    private static final String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
+    private static final String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
@@ -443,16 +447,28 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region,
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
+        Filter filter = Filter.builder().name("tag:"+tagName).values(tagValue).build();
+        return getHostsWithFilter(region, filter);
+    }
+
+    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilter(com.sap.sse.landscape.Region region,
+            Filter filter) {
         final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
-        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()));
+        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filter));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
                 result.add(new AwsInstanceImpl<ShardingKey, MetricsT>(i.instanceId(), getAvailabilityZoneByName(region, i.placement().availabilityZone()), this));
             }
         }
         return result;
+    }
+
+    @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
+        Filter filter = Filter.builder().name("tag-key").values(tagName).build();
+        return getHostsWithFilter(region, filter);
     }
 
     private Comparator<? super Image> getMachineImageCreationDateComparator() {
@@ -729,11 +745,40 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public MongoEndpoint getDatabaseConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
-        final String MONGO_REPLICA_SET_TAG_NAME = "mongo-replica-set";
-        final String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
-        final MongoReplicaSet result = new MongoReplicaSetImpl("live");
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, MONGO_REPLICA_SET_TAG_NAME, MONGO_DEFAULT_REPLICA_SET_NAME)) {
+        final MongoReplicaSet result = new MongoReplicaSetImpl(MONGO_DEFAULT_REPLICA_SET_NAME);
+        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTagValue(region, MONGO_REPLICA_SET_TAG_NAME, MONGO_DEFAULT_REPLICA_SET_NAME)) {
             result.addReplica(new MongoProcessImpl(host));
+        }
+        return result;
+    }
+
+    @Override
+    public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
+        final RabbitMQEndpoint result;
+        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getHostsWithTag(region, RABBITMQ_TAG_NAME);
+        if (rabbitMQHostsInRegion.iterator().hasNext()) {
+            final AwsInstance<ShardingKey, MetricsT> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
+            result = new RabbitMQEndpoint() {
+                @Override
+                public int getPort() {
+                    final DescribeTagsResponse tagResponse = getEc2Client(getRegion(region)).describeTags(b->b.filters(
+                            Filter.builder()
+                                .name("resource-id").values(anyRabbitMQHost.getInstanceId()).build(),
+                            Filter.builder()
+                                .name("key").values(RABBITMQ_TAG_NAME).build()));
+                    return tagResponse.tags().stream().map(t->{
+                        final String trimmedPort = t.value().trim();
+                        return trimmedPort.isEmpty() ? RabbitMQEndpoint.DEFAULT_PORT : Integer.valueOf(trimmedPort);
+                    }).findAny().orElse(RabbitMQEndpoint.DEFAULT_PORT);
+                }
+
+                @Override
+                public String getNodeName() {
+                    return anyRabbitMQHost.getPublicAddress().getCanonicalHostName();
+                }
+            };
+        } else {
+            result = null;
         }
         return result;
     }

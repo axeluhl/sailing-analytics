@@ -173,7 +173,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         Optional<ReplicationConfiguration> getReplicationConfiguration();
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(
-                Optional<ReplicationConfiguration> replicationConfiguration);
+                ReplicationConfiguration replicationConfiguration);
 
         String getOutputReplicationExchangeName();
         
@@ -440,8 +440,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(Optional<ReplicationConfiguration> replicationConfiguration) {
-            this.replicationConfiguration = replicationConfiguration;
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(ReplicationConfiguration replicationConfiguration) {
+            this.replicationConfiguration = Optional.of(replicationConfiguration);
             return this;
         }
         

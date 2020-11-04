@@ -16,9 +16,11 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
+import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.ReplicationConfiguration;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -41,11 +43,14 @@ public class TestProcedures {
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> landscape;
     private AwsRegion region;
+    private final static String SECURITY_SERVICE_REPLICATION_BEARER_TOKEN = "security.service.replication.bearer.token";
+    private String securityServiceReplicationBearerToken;
     
     @Before
     public void setUp() {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
+        securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
     }
     
     @Test
@@ -63,6 +68,10 @@ public class TestProcedures {
                 .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
                 .setTags(Optional.of(Tags.with("Hello", "World")))
                 .setOptionalTimeout(optionalTimeout)
+                .setReplicationConfiguration(ReplicationConfiguration.builder()
+                        .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
+                        .build())
+                .setRabbitConfiguration(landscape.getDefaultRabbitConfiguration(region))
                 .build();
         startSailingAnalyticsMaster.run();
         final SailingAnalyticsHost<String> host = startSailingAnalyticsMaster.getHost();
