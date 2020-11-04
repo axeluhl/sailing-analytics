@@ -5,6 +5,6 @@ package com.sap.sailing.domain.coursetemplate;
  * {@link FreestyleMarkConfiguration} property tags.
  * 
  */
-public interface CommonMarkPropertiesWithTags extends CommonMarkProperties, HasTags {
+public interface FreestyleMarkProperties extends CommonMarkProperties, HasTags {
     void setTags(Iterable<String> tags);
 }

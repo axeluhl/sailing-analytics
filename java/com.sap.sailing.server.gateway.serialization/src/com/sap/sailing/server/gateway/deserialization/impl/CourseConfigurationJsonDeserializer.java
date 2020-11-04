@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithTags;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -76,7 +76,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_MARK_ID);
                 final JSONObject freestylePropertiesObject = (JSONObject) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES);
-                final CommonMarkPropertiesWithTags optionalFreestyleProperties = freestylePropertiesObject == null ? null
+                final FreestyleMarkProperties optionalFreestyleProperties = freestylePropertiesObject == null ? null
                         : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
                 final Object positioningObject = markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_POSITIONING);

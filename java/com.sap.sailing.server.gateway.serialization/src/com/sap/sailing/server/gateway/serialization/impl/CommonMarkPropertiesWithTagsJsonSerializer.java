@@ -2,10 +2,10 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.coursetemplate.CommonMarkPropertiesWithTags;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class CommonMarkPropertiesWithTagsJsonSerializer implements JsonSerializer<CommonMarkPropertiesWithTags> {
+public class CommonMarkPropertiesWithTagsJsonSerializer implements JsonSerializer<FreestyleMarkProperties> {
 
     public static final String FIELD_TAGS = "tags";
     
@@ -16,7 +16,7 @@ public class CommonMarkPropertiesWithTagsJsonSerializer implements JsonSerialize
     }
 
     @Override
-    public JSONObject serialize(CommonMarkPropertiesWithTags commonMarkProperties) {
+    public JSONObject serialize(FreestyleMarkProperties commonMarkProperties) {
         JSONObject result = commonMarkPropertiesJsonSerializer.serialize(commonMarkProperties);
         result.put(FIELD_TAGS, commonMarkProperties.getTags().toString());
         return result;

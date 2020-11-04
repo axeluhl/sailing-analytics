@@ -13,7 +13,7 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
-public class MarkPropertiesImpl extends CommonMarkPropertiesWithTagsImpl implements MarkProperties {
+public class MarkPropertiesImpl extends FreestyleMarkPropertiesImpl implements MarkProperties {
     private static final long serialVersionUID = -5588202720707030502L;
     private Positioning positioningInformation;
     private UUID id;

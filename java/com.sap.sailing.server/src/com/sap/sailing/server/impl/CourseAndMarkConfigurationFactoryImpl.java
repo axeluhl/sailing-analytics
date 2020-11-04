@@ -73,7 +73,7 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesWithTagsImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl;
@@ -320,7 +320,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                                 } else {
                                     effectiveConfiguration = new FreestyleMarkConfigurationImpl<>(effectiveMarkTemplate,
                                             markPropertiesOrNull,
-                                            new CommonMarkPropertiesWithTagsImpl(effectiveMarkTemplate,
+                                            new FreestyleMarkPropertiesImpl(effectiveMarkTemplate,
                                                     /* tags */ null),
                                             markConfiguration.getAnnotationInfo());
                                 }
