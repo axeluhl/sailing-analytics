@@ -1,8 +1,11 @@
 package com.sap.sse.landscape.application;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 
@@ -26,8 +29,14 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     Iterable<ReplicaProcessT> getReplicas();
     
-    default Iterable<ReplicaProcessT> getReadyReplicas() {
-        return Util.filter(getReplicas(), r->r.isReady());
+    default Iterable<ReplicaProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
+        return Util.filter(getReplicas(), r->{
+            try {
+                return r.isReady(optionalTimeout);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
     
     /**
@@ -67,13 +76,15 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * more {@link #getReplicas() replicas} configured. If setting this to {@code true}, the {@link #getMaster() master
      * process} will be targeted by regular read requests just like any other {@link #getReplicas() replica} will.
      * Otherwise, if one or more replicas are available, the master node will receive only modifying transactions, and
-     * reading requests require a replica to be {@link Process#isAlive() available} in this replica set; if trying
+     * reading requests require a replica to be {@link Process#isAlive(Optional) available} in this replica set; if trying
      * to set to {@code false} and no replica is currently available, the method throws an
-     * {@link IllegalStateException}.
+     * {@link IllegalStateException}.<p>
+     * 
+     * TODO Maybe this should move to the {@link ApplicationLoadBalancer} interface; otherwise, ApplicationReplicaSet would need to know about the load balancer(s) responsible for it
      * 
      * @throws IllegalStateException
      *             in case {@code readFromMaster} is {@code false} and there is currently no {@link #getReplicas()
-     *             replica} currently {@link Process#isReady() ready} to receive requests.
+     *             replica} currently {@link Process#isReady(Optional<Duration>) ready} to receive requests.
      */
     void setReadFromMaster(boolean readFromMaster) throws IllegalStateException;
 

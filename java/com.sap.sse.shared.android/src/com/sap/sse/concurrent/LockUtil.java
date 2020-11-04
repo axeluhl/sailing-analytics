@@ -50,21 +50,6 @@ import com.sap.sse.util.impl.ApproximateTime;
 public class LockUtil {
     private enum ReadOrWrite { READ, WRITE };
     
-    /**
-     * Can be replaced with java.util.function.Supplier when we can consistently use Java 8.
-     */
-    public interface RunnableWithResult<T> {
-        T run();
-    }
-    
-    public interface RunnableWithResultAndException<T, E extends Throwable> {
-        T run() throws E;
-    }
-    
-    public interface RunnableWithException<E extends Throwable> {
-        void run() throws E;
-    }
-    
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
