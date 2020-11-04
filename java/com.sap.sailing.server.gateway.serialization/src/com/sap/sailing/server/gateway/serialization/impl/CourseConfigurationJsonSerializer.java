@@ -69,7 +69,7 @@ public class CourseConfigurationJsonSerializer implements JsonSerializer<CourseC
     public CourseConfigurationJsonSerializer() {
         this.repeatablePartJsonSerializer = new RepeatablePartJsonSerializer();
         this.commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
-        this.commonMarkPropertiesWithTagsJsonSerializer = new CommonMarkPropertiesWithTagsJsonSerializer();
+        this.commonMarkPropertiesWithTagsJsonSerializer = new FreestyleMarkPropertiesJsonSerializer();
         this.gpsFixJsonSerializer = new GPSFixJsonSerializer();
     }
 

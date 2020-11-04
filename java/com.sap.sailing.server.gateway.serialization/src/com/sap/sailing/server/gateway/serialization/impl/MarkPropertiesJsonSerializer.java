@@ -10,11 +10,11 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
     private static final String FIELD_ID = "id";
     private static final String FIELD_POSITIONING = "positioning";
 
-    private final CommonMarkPropertiesWithTagsJsonSerializer commonMarkPropertiesWithTagsJsonSerializer;
+    private final FreestyleMarkPropertiesJsonSerializer commonMarkPropertiesWithTagsJsonSerializer;
     private final PositioningJsonSerializer positioningJsonSerializer;
 
     public MarkPropertiesJsonSerializer(DeviceIdentifierJsonSerializer deviceIdentifierSerializer) {
-        this.commonMarkPropertiesWithTagsJsonSerializer = new CommonMarkPropertiesWithTagsJsonSerializer();
+        this.commonMarkPropertiesWithTagsJsonSerializer = new FreestyleMarkPropertiesJsonSerializer();
         this.positioningJsonSerializer = new PositioningJsonSerializer(deviceIdentifierSerializer);
     }
 

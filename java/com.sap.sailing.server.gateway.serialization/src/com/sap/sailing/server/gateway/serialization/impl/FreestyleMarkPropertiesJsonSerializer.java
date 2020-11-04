@@ -5,13 +5,13 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class CommonMarkPropertiesWithTagsJsonSerializer implements JsonSerializer<FreestyleMarkProperties> {
+public class FreestyleMarkPropertiesJsonSerializer implements JsonSerializer<FreestyleMarkProperties> {
 
     public static final String FIELD_TAGS = "tags";
     
     private final CommonMarkPropertiesJsonSerializer commonMarkPropertiesJsonSerializer;
 
-    public CommonMarkPropertiesWithTagsJsonSerializer() {
+    public FreestyleMarkPropertiesJsonSerializer() {
         commonMarkPropertiesJsonSerializer = new CommonMarkPropertiesJsonSerializer();
     }
 

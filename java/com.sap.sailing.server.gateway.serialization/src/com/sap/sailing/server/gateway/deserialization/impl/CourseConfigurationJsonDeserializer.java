@@ -30,7 +30,7 @@ import com.sap.sailing.shared.server.SharedSailingData;
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
     private final SharedSailingData sharedSailingData;
-    private final CommonMarkPropertiesWithTagsJsonDeserializer commonMarkPropertiesJsonDeserializer;
+    private final FreestyleMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
     private final Regatta regatta;
     private final PositioningJsonDeserializer positioningJsonDeserializer;
@@ -38,7 +38,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData,
             DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer, final Regatta regatta) {
         this.sharedSailingData = sharedSailingData;
-        commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesWithTagsJsonDeserializer();
+        commonMarkPropertiesJsonDeserializer = new FreestyleMarkPropertiesJsonDeserializer();
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
         positioningJsonDeserializer = new PositioningJsonDeserializer(deviceIdentifierDeserializer);
         this.regatta = regatta;
