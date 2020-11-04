@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.procedures;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.impl.SailingAnalyticsReplicaImpl;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.aws.orchestration.OutboundReplicationConfiguration;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
@@ -27,9 +28,18 @@ public class StartSailingAnalyticsReplica<ShardingKey>
         }
 
         @Override
-        public String getOutputReplicationExchangeName() {
-            return isOutputReplicationExchangeNameSet() ? super.getOutputReplicationExchangeName()
-                    : (super.getOutputReplicationExchangeName() + DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
+        public OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
+            final OutboundReplicationConfiguration.Builder resultBuilder;
+            if (super.getOutboundReplicationConfiguration() != null) {
+                resultBuilder = OutboundReplicationConfiguration.copy(super.getOutboundReplicationConfiguration());
+            } else {
+                resultBuilder = OutboundReplicationConfiguration.builder();
+            }
+            if (!isOutboundReplicationExchangeNameSet()) {
+                // We assume here that the superclass implementation will default the exchange name to the server name
+                resultBuilder.setOutboundReplicationExchangeName(super.getOutboundReplicationConfiguration() + DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
+            }
+            return resultBuilder.build();
         }
     }
     

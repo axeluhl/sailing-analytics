@@ -20,7 +20,7 @@ import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.ReplicationConfiguration;
+import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -68,7 +68,7 @@ public class TestProcedures {
                 .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
                 .setTags(Optional.of(Tags.with("Hello", "World")))
                 .setOptionalTimeout(optionalTimeout)
-                .setReplicationConfiguration(ReplicationConfiguration.builder()
+                .setReplicationConfiguration(InboundReplicationConfiguration.builder()
                         .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
                         .build())
                 .setRabbitConfiguration(landscape.getDefaultRabbitConfiguration(region))

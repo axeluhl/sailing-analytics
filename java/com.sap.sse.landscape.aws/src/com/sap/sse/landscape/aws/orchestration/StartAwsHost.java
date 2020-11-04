@@ -16,7 +16,7 @@ import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
-import com.sap.sse.landscape.ReplicationConfiguration;
+import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -92,8 +92,13 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * {@link #getServerName() server name}.</li>
      * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
      * meaning that waiting for the instance won't timeout by default.</li>
-     * <li>The {@link #getOutputReplicationExchangeName() output replication exchange name} defaults to the
-     * {@link #getServerName() server name}.
+     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * {@link OutboundReplicationConfiguration#getOutboundReplicationExchangeName() exchange name} defaults to the
+     * {@link #getServerName() server name}.</li>
+     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * {@link OutboundReplicationConfiguration#getOutboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the
+     * {@link #getInboundReplicationConfiguration() inbound}
+     * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint}.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -170,14 +175,12 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName);
         
-        Optional<ReplicationConfiguration> getReplicationConfiguration();
+        Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration();
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(
-                ReplicationConfiguration replicationConfiguration);
+                InboundReplicationConfiguration replicationConfiguration);
 
-        String getOutputReplicationExchangeName();
-        
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutputReplicationExchangeName(String outputReplicationExchangeName);
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
         RabbitMQEndpoint getRabbitConfiguration();
         
@@ -201,6 +204,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOptionalTimeout(Optional<Duration> optionalTimeout);
         
         HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> getHostSupplier();
+
+        OutboundReplicationConfiguration getOutboundReplicationConfiguration();
     }
     
     protected abstract static class BuilderImpl<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
@@ -224,8 +229,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         private String databaseName;
         private Database databaseConfiguration;
         private RabbitMQEndpoint rabbitConfiguration;
-        private String outputReplicationExchangeName;
-        private Optional<ReplicationConfiguration> replicationConfiguration = Optional.empty();
+        private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
+        private OutboundReplicationConfiguration outboundReplicationConfiguration;
         private String commaSeparatedEmailAddressesToNotifyOfStartup;
         private Optional<Duration> optionalTimeout;
         
@@ -419,29 +424,60 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
             return this;
         }
         
-        @Override
-        public String getOutputReplicationExchangeName() {
-            return isOutputReplicationExchangeNameSet() ? outputReplicationExchangeName : getServerName();
+        protected boolean isOutboundReplicationExchangeNameSet() {
+            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundReplicationExchangeName() != null;
         }
         
-        protected boolean isOutputReplicationExchangeNameSet() {
-            return outputReplicationExchangeName != null;
+        protected boolean isInboundReplicationRabbitMQEndpointSet() {
+            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
+                    && inboundReplicationConfiguration.get().getInboundRabbitMQEndpoint() != null;
+        }
+        
+        protected boolean isOutboundReplicationRabbitMQEndpointSet() {
+            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
+        }
+        
+        @Override
+        public OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
+            final OutboundReplicationConfiguration.Builder resultBuilder;
+            if (outboundReplicationConfiguration != null) {
+                resultBuilder = OutboundReplicationConfiguration.copy(outboundReplicationConfiguration);
+            } else {
+                resultBuilder = OutboundReplicationConfiguration.builder();
+            }
+            if (!isOutboundReplicationExchangeNameSet()) {
+                resultBuilder.setOutboundReplicationExchangeName(getServerName());
+            }
+            if (!isOutboundReplicationRabbitMQEndpointSet()) {
+                getInboundReplicationConfiguration().ifPresent(irc->resultBuilder.setOutboundRabbitMQEndpoint(irc.getInboundRabbitMQEndpoint()));
+            }
+            return resultBuilder.build();
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutputReplicationExchangeName(String outputReplicationExchangeName) {
-            this.outputReplicationExchangeName = outputReplicationExchangeName;
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration) {
+            this.outboundReplicationConfiguration = outboundReplicationConfiguration;
             return this;
         }
         
         @Override
-        public Optional<ReplicationConfiguration> getReplicationConfiguration() {
-            return replicationConfiguration;
+        public Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
+            final InboundReplicationConfiguration.Builder resultBuilder;
+            if (inboundReplicationConfiguration == null || !inboundReplicationConfiguration.isPresent()) {
+                resultBuilder = InboundReplicationConfiguration.builder();
+            } else {
+                resultBuilder = InboundReplicationConfiguration.copy(inboundReplicationConfiguration.get());
+            }
+            return !isInboundReplicationRabbitMQEndpointSet()
+                    ? Optional.of(resultBuilder
+                            .setInboundRabbitMQEndpoint(getLandscape().getDefaultRabbitConfiguration(getRegion()))
+                            .build())
+                    : inboundReplicationConfiguration;
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(ReplicationConfiguration replicationConfiguration) {
-            this.replicationConfiguration = Optional.of(replicationConfiguration);
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
+            this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
             return this;
         }
         
@@ -483,11 +519,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         this.hostSupplier = builder.getHostSupplier();
         builder.getRelease().ifPresent(this::addUserData);
         addUserData(builder.getDatabaseConfiguration());
-        addUserData(builder.getRabbitConfiguration());
+        addUserData(builder.getOutboundReplicationConfiguration());
         addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
-        addUserData(ProcessConfigurationVariable.REPLICATION_CHANNEL, builder.getOutputReplicationExchangeName());
         addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
-        builder.getReplicationConfiguration().ifPresent(this::addUserData);
+        builder.getInboundReplicationConfiguration().ifPresent(this::addUserData);
     }
     
     protected static <ShardingKey,
