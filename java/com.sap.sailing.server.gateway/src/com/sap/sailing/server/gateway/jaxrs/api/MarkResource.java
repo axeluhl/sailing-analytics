@@ -507,7 +507,7 @@ public class MarkResource extends AbstractSailingServerResource {
     public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
             @QueryParam(value = "onlyCurrentlyActive") boolean onlyCurrentlyActive,
             @QueryParam(value = "eventIds") Set<UUID> eventIds,
-            @QueryParam(value = "regattaIds") Set<String> regattaNames) {
+            @QueryParam(value = "regattaNames") Set<String> regattaNames) {
         final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (markPropertiesObject == null) {
             throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
