@@ -2517,7 +2517,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
                 updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
             }
-            user.setSubscriptions(buildNewUserSubscriptions(user, newSubscription));
+            Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+            if (newSubscriptions != null) {
+                user.setSubscriptions(newSubscriptions);
+            }
             store.updateUser(user);
             return null;
         } else {
@@ -2527,31 +2530,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     /**
      * Build new subscription list for user from new subscription. This might update a subscription model, or add new
-     * one to user's subscription list
+     * one to user's subscription list. In case no updates for current user subscriptions then null will be returned
      */
     private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
         Subscription[] newUserSubscriptions = null;
-        Subscription[] subscriptions = user.getSubscriptions();
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
         if (newSubscription != null) {
-            if (subscriptions == null || subscriptions.length == 0 || !newSubscription.hasPlan()) {
+            if (subscriptions == null || !subscriptions.iterator().hasNext() || !newSubscription.hasPlan()) {
                 newUserSubscriptions = new Subscription[] { newSubscription };
             } else {
-                int i = 0;
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                boolean foundCurrentSubscription = false;
                 for (Subscription subscription : subscriptions) {
                     if (!subscription.hasPlan() || subscription.getPlanId().equals(newSubscription.getPlanId())) {
-                        subscriptions[i] = newSubscription;
-                        newUserSubscriptions = subscriptions;
-                        break;
+                        newSubscriptionList.add(newSubscription);
+                        foundCurrentSubscription = true;
+                    } else {
+                        newSubscriptionList.add(subscription);
                     }
-                    i++;
                 }
-                if (i == subscriptions.length) {
-                    newUserSubscriptions = Arrays.copyOf(subscriptions, subscriptions.length + 1);
-                    newUserSubscriptions[newUserSubscriptions.length - 1] = newSubscription;
+                if (!foundCurrentSubscription) {
+                    newSubscriptionList.add(newSubscription);
                 }
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
             }
-        } else {
-            newUserSubscriptions = subscriptions;
         }
         return newUserSubscriptions;
     }
@@ -2571,9 +2573,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
             }
         } else {
-            assert currentSubscription == null || newSubscription == null || currentSubscription.getPlanId().equals(newSubscription.getPlanId());
+            assert currentSubscription == null || newSubscription == null
+                    || currentSubscription.getPlanId().equals(newSubscription.getPlanId());
             if (currentSubscription != null && currentSubscription.hasPlan()
-                    && currentSubscription.isActiveSubscription()) {
+                    && currentSubscription.isActiveSubscription() && newSubscription != null
+                    && !newSubscription.isActiveSubscription()) {
                 SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
                 removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
             }
@@ -2630,7 +2634,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private Role[] getSubscriptionPlanUserRolesWithoutOverlapping(User user, SubscriptionPlan plan) {
         final Set<Role> otherPlanRoles = new HashSet<Role>();
-        Subscription[] subscriptions = user.getSubscriptions();
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
         for (Subscription subscription : subscriptions) {
             if (subscription.isActiveSubscription() && !subscription.getPlanId().equals(plan.getId())) {
                 SubscriptionPlan otherPlan = SubscriptionPlan.getPlan(subscription.getPlanId());

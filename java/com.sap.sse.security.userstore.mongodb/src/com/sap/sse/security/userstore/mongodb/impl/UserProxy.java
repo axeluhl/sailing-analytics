@@ -210,7 +210,7 @@ public class UserProxy implements User {
     }
 
     @Override
-    public Subscription[] getSubscriptions() {
+    public Iterable<Subscription> getSubscriptions() {
         throw new UnsupportedOperationException();
     }
 

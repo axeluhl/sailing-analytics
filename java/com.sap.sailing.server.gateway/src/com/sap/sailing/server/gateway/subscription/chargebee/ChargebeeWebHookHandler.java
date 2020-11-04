@@ -62,8 +62,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             if (subscription != null) {
                 isOutdated = isOutdatedEventTime(occuredAt, subscription);
             } else {
-                Subscription[] subscriptions = user.getSubscriptions();
-                if (subscriptions != null && subscriptions.length > 0) {
+                Iterable<Subscription> subscriptions = user.getSubscriptions();
+                if (subscriptions != null) {
                     for (Subscription sub : subscriptions) {
                         if (!sub.hasPlan() && isOutdatedEventTime(occuredAt, sub)) {
                             isOutdated = true;
@@ -73,8 +73,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                 }
             }
         } else {
-            Subscription[] subscriptions = user.getSubscriptions();
-            if (subscriptions != null && subscriptions.length > 0) {
+            Iterable<Subscription> subscriptions = user.getSubscriptions();
+            if (subscriptions != null) {
                 for (Subscription subscription : subscriptions) {
                     if (isOutdatedEventTime(occuredAt, subscription)) {
                         isOutdated = true;
