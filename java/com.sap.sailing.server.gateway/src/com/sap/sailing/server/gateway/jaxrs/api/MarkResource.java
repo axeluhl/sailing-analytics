@@ -81,6 +81,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSeri
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkContextJsonSerializer;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -543,7 +544,10 @@ public class MarkResource extends AbstractSailingServerResource {
 
     private Iterable<Event> getFilteredEventsWithPermission(Iterable<UUID> eventIds,
             boolean onlyIncludeCurrentlyActiveEvents) {
-        final Iterable<Event> eventsSelectively = getService().getEventsSelectively(true, eventIds);
+        RacingEventService eventService = getService();
+        final Iterable<Event> eventsSelectively = eventIds == null | Util.isEmpty(eventIds)
+                ? eventService.getAllEvents()
+                : eventService.getEventsSelectively(true, eventIds);
         final SecurityService securityService = getSecurityService();
         final Set<Event> eventsWithPermission = new HashSet<Event>();
         for (Event event : eventsSelectively) {
