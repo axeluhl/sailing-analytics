@@ -47,6 +47,18 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         this.landscape = landscape;
     }
     
+    @Override
+    public boolean equals(Object other) {
+        @SuppressWarnings("unchecked")
+        AwsInstance<?, ? extends ApplicationProcessMetrics> otherCast = (AwsInstance<?, ? extends ApplicationProcessMetrics>) other;
+        return otherCast.getInstanceId().equals(getInstanceId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getInstance().hashCode();
+    }
+    
     /**
      * Obtains a fresh copy of the instance by looking it up in the {@link #getRegion() region} by its {@link #instanceId ID}.
      */
