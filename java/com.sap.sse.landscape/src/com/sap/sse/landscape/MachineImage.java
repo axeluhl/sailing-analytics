@@ -13,7 +13,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MachineImage<HostT extends Host> extends WithID {
+public interface MachineImage extends WithID {
     /**
      * The image lives in a region; it can only be used for {@link Host} creation in that region.
      */
@@ -27,7 +27,7 @@ public interface MachineImage<HostT extends Host> extends WithID {
      * 
      * @return the new machine image that has the updated packages
      */
-    MachineImage<HostT> updateAllPackages();
+    MachineImage updateAllPackages();
     
     /**
      * Deletes this machine image from the infrastructure. When this method returns, this object cannot

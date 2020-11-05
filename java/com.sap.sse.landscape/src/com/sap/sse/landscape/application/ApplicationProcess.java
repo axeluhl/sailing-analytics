@@ -1,38 +1,38 @@
 package com.sap.sse.landscape.application;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.mongodb.Database;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
         extends Process<RotatingFileBasedLog, MetricsT> {
     /**
-     * @return the configuration as requested when this process was launched
-     */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getRequestedConfiguration();
-    
-    /**
-     * @return the effective configuration with which this process is running, resulting from the
-     *         {@link #getRequestedConfiguration() requested configuration} by filling in the "blanks" with defaults as
-     *         deemed appropriate by the {@link ApplicationHost} {@link Process#getHost() running} this this process, e.g.,
-     *         to avoid any conflicting resource assignments.
-     */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getEffectiveConfiguration();
-
-    /**
-     * @return the replica set to which this process belongs
+     * @return the replica set to which this process belongs<p>
+     * 
+     *         TODO define this more precisely; an instance can be replica with regards to the SecurityService and
+     *         SharedSailingData replicables and at the same time be master for RacingEventService and all the other
+     *         replicables. What then is "the" replica set of the process?
      */
     ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
     
-    String getJavaVirtualMachineName();
-    
-    String getJavaVirtualMachineVendor();
-    
-    String getJavaVirtualMachineVersion();
-    
-    JMXConnection getJMXConnection();
+    /**
+     * @param releaseRepository
+     *            mandatory parameter required to enable resolving the release and enabling the download of its
+     *            artifacts, including its release notes
+     * @return the release that this process is currently running
+     */
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -48,4 +48,31 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      *         shutdown didn't work.
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
+    
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
+
+    /**
+     * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
+     *         it or to copy files to or read files from there.
+     */
+    String getServerDirectory();
+    
+    /**
+     * The name that is the basis for the user group name; e.g., a server named "my" will by default be owned by a
+     * dedicated user group named "my-server". For multi-instance servers, a default setup will use this server name also
+     * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
+     * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
+     * for replication.
+     */
+    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    
+    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+
+    /**
+     * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
+     * appended to the protocol, hostname and port specification in order to produce a full health check URL. The
+     * health check URL, when connected to, is expected to return a 200 response if the service is healthy, and anything
+     * else in case it's not.
+     */
+    String getHealthCheckPath();
 }

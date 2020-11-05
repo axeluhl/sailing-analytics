@@ -1,6 +1,8 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.AvailabilityZone;
@@ -8,14 +10,16 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
-import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -24,6 +28,11 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
@@ -43,9 +52,11 @@ public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMe
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
 extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    static String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
+    String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
-    static String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
+    String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
+    
+    String S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.s3bucketforalblogs";
 
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
@@ -63,7 +74,6 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * Launches a new {@link Host} from a given image into the availability zone specified and controls network access
      * to that instance by setting the security groups specified for the resulting host.
-     * 
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
@@ -72,23 +82,29 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
      *            the AWS SDK installed on the instance.
      */
-    default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData) {
-        return launchHosts(1, fromImage, instanceType, az, keyName, securityGroups, userData).iterator().next();
+    default AwsInstance<ShardingKey, MetricsT> launchHost(
+            MachineImage fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
+        return launchHosts(/* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName, securityGroups, tags, userData).iterator().next();
     }
 
+    // -------------------- technical landscape services -----------------
+    
     /**
      * Launches a number of new {@link Host}s from a given image into the availability zone specified and controls
      * network access to that instance by setting the security groups specified for the resulting host.
      * @param keyName
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
-     * @param userData TODO
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch, MachineImage<AwsInstance<ShardingKey, MetricsT>> fromImage, InstanceType instanceType,
-            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, String... userData);
-    
+    Iterable<AwsInstance<ShardingKey, MetricsT>> launchHosts(int numberOfHostsToLaunch,
+            MachineImage fromImage, InstanceType instanceType,
+            AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
+            String... userData);
+
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
+
+    AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
     
@@ -103,7 +119,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
-    byte[] getDescryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
+    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
 
     void addSSHKeyPair(SSHKeyPair keyPair);
 
@@ -126,9 +142,9 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * @param hostname the fully-qualified host name
      */
-    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer alb);
+    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
 
-    String getDefaultDNSHostedZoneId();
+    String getDNSHostedZoneId(String hostedZoneName);
 
     /**
      * @param hostname the fully-qualified host name
@@ -156,30 +172,119 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
     
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
-    
-    ApplicationLoadBalancer getLoadBalancer(String loadBalancerArn, Region region);
 
-    ApplicationLoadBalancer createLoadBalancer(String name, Region region);
+    Iterable<ApplicationLoadBalancer<ShardingKey, MetricsT>> getLoadBalancers(Region region);
+    
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, Region region);
+
+    /**
+     * Creates an application load balancer with the name and in the region specified. The method returns once the request
+     * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
+     * to find out more.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, Region region);
+
+    Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    
+    LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
 
     Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
 
-    AwsAvailabilityZone getAvailabilityZoneByName(AwsRegion region, String availabilityZoneName);
+    AwsAvailabilityZone getAvailabilityZoneByName(Region region, String availabilityZoneName);
 
-    void deleteLoadBalancer(ApplicationLoadBalancer alb);
+    /**
+     * Deletes this load balancer and all its target groups (the target groups to which this load balancer currently
+     * forwards any traffic).
+     */
+    void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    
+    /**
+     * All target groups that have the load balancer identified by the ARN as "their" load balancer which means that
+     * this load balancer is forwarding traffic to all those target groups.
+     */
+    Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(Region region, String loadBalancerArn);
 
     /**
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
+     * The protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
      */
-    TargetGroup<ShardingKey, MetricsT> createTargetGroup(AwsRegion region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort);
+    TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(AwsRegion region, String targetGroupName, String targetGroupArn) {
+    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
 
-    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(AwsRegion region, String targetGroupName);
-    
+    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
+
+    software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
+
     Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup);
 
-    void deleteTargetGroup(TargetGroup<ShardingKey, MetricsT> targetGroup);
+    <SK, MT extends ApplicationProcessMetrics> void deleteTargetGroup(TargetGroup<SK, MT> targetGroup);
+
+    Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
+
+    /**
+     * Use {@link Rule.Builder} to create {@link Rule} objects you'd like to set for the {@link Listener} passed as parameter.
+     * Obviously, there is no need to set the {@link Rule.Builder#ruleArn(String) rule's ARN} as this is created by executing
+     * the request.
+     * 
+     * @return the rule objects, now including the {@link Rule#ruleArn() rule ARNs}, created by this request
+     */
+    Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
+
+    void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
+
+    void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
+
+    void deleteLoadBalancerListener(Region region, Listener listener);
+
+    SecurityGroup getSecurityGroup(String securityGroupId, Region region);
+
+    void addTargetsToTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+
+    void removeTargetsFromTargetGroup(
+            TargetGroup<ShardingKey, MetricsT> targetGroup,
+            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+
+    LoadBalancer getAwsLoadBalancer(String loadBalancerArn, Region region);
+    
+    // --------------- abstract landscape view --------------
+    /**
+     * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
+     * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
+     * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
+     * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
+     */
+    ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
+    
+    /**
+     * Each region can have a single load balancer that is the target for the "*" (asterisk, catch-all) domain.
+     * This load balancer shall be used for rather short-lived scope mappings and their rules because changes become
+     * effective immediately with the change, other than for DNS records, for example, which take a while to propagate
+     * through the world-wide DNS infrastructure.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(Region region);
+    
+    /**
+     * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
+     * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(Region region, String hostname);
+    
+    /**
+     * The default MongoDB configuration to connect to.
+     */
+    MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
+    
+    Database getDatabase(Region region, String databaseName);
+
+    /**
+     * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...
+     */
+    Region getDefaultRegion();
 }

@@ -1,13 +1,11 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
@@ -16,10 +14,6 @@ import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.ReverseProxy;
-import com.sap.sse.landscape.aws.TargetGroup;
-
-import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
  * An Apache2-based reverse proxy implementation (httpd) that makes specific assumptions about the availability of an
@@ -34,30 +28,13 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private static final long serialVersionUID = 8019146973512856147L;
-    private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
-    private final AwsRegion region;
-    private final String targetGroupArn;
+extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
+implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
+    private AwsInstance<ShardingKey, MetricsT> host;
     
-    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region, Map<AwsAvailabilityZone, Integer> numberOfInstancesPerAz) {
-        super(name);
-        this.landscape = landscape;
-        this.region = region;
-        final TargetGroup<ShardingKey, MetricsT> targetGroup = landscape.createTargetGroup(region, getTargetGroupName(), /* port */ 80,
-                getHealthCheckUrl(), /* health check port */ 80);
-        targetGroupArn = targetGroup.getTargetGroupArn();
-        for (final Entry<AwsAvailabilityZone, Integer> e : numberOfInstancesPerAz.entrySet()) {
-            targetGroup.addTargets(addHosts(getDefaultInstanceType(), e.getKey(), e.getValue()));
-        }
-    }
-
-    private String getHealthCheckUrl() {
-        return "/internal-server-status";
-    }
-
-    private String getTargetGroupName() {
-        return "ReverseProxy-"+getName();
+    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+        super(landscape);
+        this.host = host;
     }
 
     @Override
@@ -103,38 +80,39 @@ extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT,
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
-        // TODO Implement ReverseProxy.getHosts(...)
-        return null;
-    }
-
-    @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd) {
-        // TODO Implement ReverseProxy.addHost(...)
-        return null;
-    }
-    
-    @Override
-    public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
-        assert Util.contains(getHosts(), host);
-        if (Util.size(getHosts()) == 1) {
-            throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
-        }
-        landscape.terminate(host);
-    }
-    
-    @Override
     public void terminate() {
-        Set<AwsInstance<ShardingKey, MetricsT>> hosts = new HashSet<>();
-        Util.addAll(getHosts(), hosts);
-        for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
-            landscape.terminate(host);
-        }
-        landscape.deleteTargetGroup(getTargetGroup());
+        getLandscape().terminate(host);
     }
 
     @Override
-    public TargetGroup<ShardingKey, MetricsT> getTargetGroup() {
-        return landscape.getTargetGroup(region, getTargetGroupName(), targetGroupArn);
+    public int getPort() {
+        return 443; // TODO currently, we offload SSL only at the reverse proxies; but we should change this to SSL offloading at the load balancer, and then this would have to become 80 (HTTP)
+    }
+
+    /**
+     * Making things more specific: as we're in the AWS universe here, the {@link Host} returned more specifically is an
+     * {@link AwsInstance}.
+     */
+    @Override
+    public AwsInstance<ShardingKey, MetricsT> getHost() {
+        return host;
+    }
+
+    @Override
+    public RotatingFileBasedLog getLog() {
+        // TODO Implement Process<LogT,MetricsT>.getLog(...)
+        return null;
+    }
+
+    @Override
+    public MetricsT getMetrics() {
+        // TODO Implement Process<LogT,MetricsT>.getMetrics(...)
+        return null;
+    }
+
+    @Override
+    public boolean isReady(Optional<Duration> optionalTimeout) {
+        // TODO Implement Process<LogT,MetricsT>.isReady(...)
+        return false;
     }
 }
