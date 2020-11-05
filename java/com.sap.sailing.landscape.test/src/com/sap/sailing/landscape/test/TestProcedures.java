@@ -21,9 +21,11 @@ import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -103,6 +105,31 @@ public class TestProcedures {
             assertFalse(envSh.isEmpty());
             assertTrue("Couldn't find SERVER_NAME=\""+serverName+"\" in env.sh:\n"+envSh, envSh.contains("SERVER_NAME=\""+serverName+"\""));
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
+            // Now create an ALB mapping, assuming to create the dynamic ALB:
+            final String domain = "wiesen-weg.de";
+            final String hostname = serverName+"."+domain;
+            CreateDynamicLoadBalancerMapping.Builder<String, SailingAnalyticsMetrics,
+            SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
+            createAlbProcedureBuilder
+                .setProcess(process)
+                .setHostname(hostname)
+                .setTargetGroupNamePrefix("S-ded-") // TODO when we combine procedures for launching dedicated hosts (StartSailingAnlayticsHost and specializations) then "S-ded-" should be the default; for DeployProcessOnMultiServer, "S-shared-" should be the default
+                .setLandscape(landscape);
+            optionalTimeout.ifPresent(createAlbProcedureBuilder::setTimeout);
+            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedure =
+                    createAlbProcedureBuilder.build();
+            try {
+                createAlbProcedure.run();
+                // A few validations:
+                // Is the process's host part of the public and master target groups?
+                assertNotNull(createAlbProcedure.getMasterTargetGroupCreated());
+                assertNotNull(createAlbProcedure.getPublicTargetGroupCreated());
+                assertTrue(createAlbProcedure.getMasterTargetGroupCreated().getRegisteredTargets().keySet().contains(process.getHost()));
+                assertTrue(createAlbProcedure.getPublicTargetGroupCreated().getRegisteredTargets().keySet().contains(process.getHost()));
+            } finally {
+                landscape.deleteLoadBalancer(createAlbProcedure.getLoadBalancerUsed());
+                landscape.removeDNSRecord(landscape.getDNSHostedZoneId(domain), hostname, "*."+domain);
+            }
         } finally {
             landscape.terminate(host);
             landscape.deleteKeyPair(region, keyName);

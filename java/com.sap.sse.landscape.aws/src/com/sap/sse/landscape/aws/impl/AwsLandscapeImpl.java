@@ -103,6 +103,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
@@ -130,6 +131,7 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
     // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
@@ -137,7 +139,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
-    private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefaultDynamicALB";
+    private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private static final String MONGO_REPLICA_SET_TAG_NAME = "mongo-replica-set";
     private static final String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
     private static final String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
@@ -252,7 +254,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
         final ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), "DefTG-"+alb.getName()+"-"+protocol.name(),
+        final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
                 port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         return getLoadBalancingClient(
@@ -360,6 +362,16 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         
     }
 
+    @Override
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerByName(String name, com.sap.sse.landscape.Region region) {
+        try {
+            final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(name));
+            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
+        } catch (LoadBalancerNotFoundException e) {
+            return null;
+        }
+    }
+    
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
         final LoadBalancer loadBalancer = getLoadBalancingClient(getRegion(region))
@@ -735,8 +747,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
             com.sap.sse.landscape.Region region, String wildcardDomain) {
-        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(getNonDNSMappedLoadBalancerName(wildcardDomain)));
-        return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
+        return getLoadBalancerByName(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
     }
 
     @Override
@@ -746,13 +757,13 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
-        return DEFAULT_NON_DNS_MAPPED_ALB_NAME + "-" + wildcardDomain.replaceAll(".", "-");
+        return DEFAULT_NON_DNS_MAPPED_ALB_NAME + wildcardDomain.replaceAll("\\.", "-");
     }
 
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(
             com.sap.sse.landscape.Region region, String hostname) {
-        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(DEFAULT_NON_DNS_MAPPED_ALB_NAME));
+        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
         for (final LoadBalancer lb : response.loadBalancers()) {
             final ApplicationLoadBalancer<ShardingKey, MetricsT> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
             for (final Rule rule : alb.getRules()) {

@@ -81,15 +81,81 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
+    
+    /**
+     * Default rules implemented by this builder:
+     * <ul>
+     * <li>The timeout for looking up the process's server name defaults to no timeout.</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends ProcedureWithTargetGroup.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setProcess(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process);
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setHostname(String hostname);
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTimeout(Duration timeout);
+    }
+    
+    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends ProcedureWithTargetGroup.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private String hostname;
+        private ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
+        private Optional<Duration> optionalTimeout = Optional.empty();
 
-    public CreateLoadBalancerMapping(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process,
-            ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed, String hostname,
-            String targetGroupNamePrefix,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
-            Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        super(loadBalancerUsed, targetGroupNamePrefix, landscape, process.getServerName(optionalTimeout));
-        this.process = process;
-        this.hostname = hostname;
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setProcess(
+                ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
+            this.process = process;
+            return this;
+        }
+
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setHostname(String hostname) {
+            this.hostname = hostname;
+            return this;
+        }
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
+            return process;
+        }
+
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTimeout(Duration timeout) {
+            this.optionalTimeout = Optional.of(timeout);
+            return this;
+        }
+
+        public Optional<Duration> getOptionalTimeout() {
+            return optionalTimeout;
+        }
+
+        @Override
+        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+            final String result;
+            if (super.getServerName() != null) {
+                result = super.getServerName();
+            } else {
+                result = getProcess().getServerName(getOptionalTimeout());
+            }
+            return result;
+        }
+    }
+
+    protected CreateLoadBalancerMapping(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+        super(builder);
+        this.process = builder.getProcess();
+        this.hostname = builder.getHostname();
     }
     
     @Override

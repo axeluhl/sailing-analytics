@@ -1,11 +1,9 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -24,43 +22,66 @@ import com.sap.sse.landscape.orchestration.Procedure;
 public class CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-        extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
-        implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    public CreateDynamicLoadBalancerMapping(
-            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process, String hostname,
-            String targetGroupNamePrefix,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
-            Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        super(process, getOrCreateNonDNSMappedLoadBalancer(process.getHost().getRegion(), hostname, landscape), hostname,
-                targetGroupNamePrefix, landscape, optionalTimeout);
-    }
-
-    protected static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateNonDNSMappedLoadBalancer(
-            Region region, String hostname,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-        final String domainName = getHostedZoneName(hostname);
-        final ApplicationLoadBalancer<ShardingKey, MetricsT> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
-        final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
-        if (existingLoadBalancer != null) {
-            result = existingLoadBalancer;
-        } else {
-            result = landscape.createNonDNSMappedLoadBalancer(region, domainName);
-            createWildcardRoute53Mapping(landscape, result, domainName);
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends CreateLoadBalancerMapping.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException;
+    }
+    
+    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends CreateLoadBalancerMapping.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        @Override
+        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
+            final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+            if (super.getLoadBalancerUsed() != null) {
+                result = super.getLoadBalancerUsed();
+            } else {
+                result = getOrCreateNonDNSMappedLoadBalancer(getProcess().getHost().getRegion(), getHostname(), getLandscape());
+            }
+            return result;
         }
-        return result;
+
+        protected ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateNonDNSMappedLoadBalancer(
+                Region region, String hostname, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+            final String domainName = getHostedZoneName(hostname);
+            final ApplicationLoadBalancer<ShardingKey, MetricsT> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
+            final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+            if (existingLoadBalancer != null) {
+                result = existingLoadBalancer;
+            } else {
+                result = landscape.createNonDNSMappedLoadBalancer(region, domainName);
+                createWildcardRoute53Mapping(landscape, result, domainName);
+            }
+            return result;
+        }
+        
+        private void createWildcardRoute53Mapping(
+                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
+                ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer, String domainName) {
+            final String hostname = "*." + domainName;
+            landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer);
+        }
+
+        @Override
+        public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
+            return new CreateDynamicLoadBalancerMapping<>(this);
+        }
     }
 
-    private static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    void createWildcardRoute53Mapping(
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
-            ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer,
-            String domainName) {
-        final String hostname = "*." + domainName;
-        landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer);
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
+        return new BuilderImpl<>();
+    }
+
+    protected CreateDynamicLoadBalancerMapping(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+        super(builder);
     }
 }

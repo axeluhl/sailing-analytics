@@ -31,15 +31,76 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private static final String MASTER_TARGET_GROUP_SUFFIX = "-m";
     private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
     private final String targetGroupNamePrefix;
-    private final String servername;
+    private final String serverName;
     private Iterable<Rule> rulesAdded;
+    
+    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>> {
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLoadBalancerUsed(ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed);
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTargetGroupNamePrefix(String targetGroupNamePrefix);
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName);
+        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
+    }
+    
+    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
+        private String targetGroupNamePrefix;
+        private String serverName;
+        private AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
+        
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLoadBalancerUsed(
+                ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed) {
+            this.loadBalancerUsed = loadBalancerUsed;
+            return this;
+        }
 
-    public ProcedureWithTargetGroup(ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed, String targetGroupNamePrefix,
-            AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, String servername) throws JSchException, IOException, InterruptedException, SftpException {
-        super(landscape);
-        this.loadBalancerUsed = loadBalancerUsed;
-        this.targetGroupNamePrefix = targetGroupNamePrefix;
-        this.servername = servername;
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTargetGroupNamePrefix(
+                String targetGroupNamePrefix) {
+            this.targetGroupNamePrefix = targetGroupNamePrefix;
+            return this;
+        }
+
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName) {
+            this.serverName = serverName;
+            return this;
+        }
+
+        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
+            return loadBalancerUsed;
+        }
+
+        public String getTargetGroupNamePrefix() {
+            return targetGroupNamePrefix;
+        }
+
+        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+            return serverName;
+        }
+
+        @Override
+        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(
+                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+            this.landscape = landscape;
+            return this;
+        }
+
+        public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
+            return landscape;
+        }
+    }
+
+    protected ProcedureWithTargetGroup(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+        super(builder.getLandscape());
+        this.loadBalancerUsed = builder.getLoadBalancerUsed();
+        this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();
+        this.serverName = builder.getServerName();
     }
     
     protected TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName,
@@ -63,7 +124,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
     
     protected String getPublicTargetGroupName() {
-        return targetGroupNamePrefix+servername;
+        return targetGroupNamePrefix+serverName;
     }
     
     protected TargetGroup<ShardingKey, MetricsT> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {

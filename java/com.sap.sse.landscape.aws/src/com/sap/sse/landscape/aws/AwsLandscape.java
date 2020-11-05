@@ -207,6 +207,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     
     ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, Region region);
 
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerByName(String name, Region region);
+
     /**
      * Creates an application load balancer with the name and in the region specified. The method returns once the request
      * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
