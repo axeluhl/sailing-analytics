@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -107,6 +108,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends ProcedureWithTargetGroup.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         private String hostname;
         private ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
         private Optional<Duration> optionalTimeout = Optional.empty();
@@ -157,7 +159,8 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
             final TimePoint startingToPollForReady = TimePoint.now();
             while (landscape.getApplicationLoadBalancerStatus(loadBalancer).code() == LoadBalancerStateEnum.PROVISIONING
                     && (!getOptionalTimeout().isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(getOptionalTimeout().get()) <= 0)) {
-                Thread.sleep(1000); // wait until the ALB has been provisioned or failed
+                logger.info("Application load balancer "+loadBalancer.getName()+" still PROVISIONING. Waiting...");
+                Thread.sleep(5000); // wait until the ALB has been provisioned or failed
             }
         }
     }

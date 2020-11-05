@@ -149,7 +149,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
     private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
-    private final String s3BucketForAlbLogs;
+    private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also

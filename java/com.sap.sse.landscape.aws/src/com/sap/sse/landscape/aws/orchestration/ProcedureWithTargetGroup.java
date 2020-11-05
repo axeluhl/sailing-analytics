@@ -105,7 +105,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     protected TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName,
             ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
-        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), getPublicTargetGroupName(),
+        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
                 process.getPort(), process.getHealthCheckPath(),
                 /* use traffic port as health check port, too */ process.getPort());
     }

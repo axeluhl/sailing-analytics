@@ -33,6 +33,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.route53.model.RRType;
 
 /**
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
@@ -101,7 +102,7 @@ public class TestProcedures {
             // the instance is launched. We may want to wait for the process to become available on port 8888 before continuing...
             final TimePoint startingToPollForReady = TimePoint.now();
             while (!process.isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
             assertTrue(process.isReady(optionalTimeout));
             final String envSh = process.getEnvSh(optionalTimeout);
@@ -132,8 +133,9 @@ public class TestProcedures {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error during test case", e);
             } finally {
-                landscape.deleteLoadBalancer(createAlbProcedure.getLoadBalancerUsed());
-                landscape.removeDNSRecord(landscape.getDNSHostedZoneId(domain), hostname, "*."+domain);
+                createAlbProcedure.getLoadBalancerUsed().delete();
+                landscape.removeDNSRecord(landscape.getDNSHostedZoneId(domain), "*."+domain,
+                        RRType.CNAME, createAlbProcedure.getLoadBalancerUsed().getDNSName());
             }
         } finally {
             landscape.terminate(host);

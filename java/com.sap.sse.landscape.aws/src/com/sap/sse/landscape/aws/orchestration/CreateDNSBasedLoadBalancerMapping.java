@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -52,6 +53,8 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends CreateLoadBalancerMapping.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
+        
         @Override
         public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
             final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
@@ -82,7 +85,9 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
                 }
             }
             if (result == null) {
-                result = landscape.createLoadBalancer(getAvailableDNSMappedAlbName(loadBalancerNames), region);
+                String newLoadBalancerName = getAvailableDNSMappedAlbName(loadBalancerNames);
+                logger.info("Creating DNS-mapped application load balancer "+newLoadBalancerName);
+                result = landscape.createLoadBalancer(newLoadBalancerName, region);
                 waitUntilLoadBalancerProvisioned(landscape, result);
             }
             return result;
