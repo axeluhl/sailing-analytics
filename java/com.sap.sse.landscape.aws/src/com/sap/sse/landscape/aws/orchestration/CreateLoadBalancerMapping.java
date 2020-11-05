@@ -16,7 +16,6 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -26,10 +25,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
 
 /**
  * For an {@link ApplicationProcess} creates a set of rules in an {@link ApplicationLoadBalancer} which drives traffic
- * to one of the two {@link TargetGroup}s that this procedure will also create. One will take the traffic for the single
- * "master" node; the other will take the traffic for all public-facing nodes which by default in the minimal
- * application server replica set configuration will be the single master node. As the number of replicas grows, the
- * master may choose to only serve the writing requests and be removed from the public-facing target group again.
+ * to one of the two {@link TargetGroup}s that this procedure will also create, registering the process as the first
+ * target in both groups. One target group will take the traffic for the single "master" node; the other target group
+ * will take the traffic for all public-facing nodes which by default in the minimal application server replica set
+ * configuration will be the single master node. As the number of replicas grows, the master may choose to only serve
+ * the writing requests and be removed from the public-facing target group again.
  * <p>
  * 
  * The rules that this procedure creates are currently the following:
@@ -46,10 +46,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  * </ol>
  * <p>
  * 
- * The target groups are set up to use HTTP as the protocol such that SSL offloading will happen at the load balancer.
- * The target group names are limited to 32 characters in length. Target group name prefixes should be chosen to be
- * very short strings in order not to unnecessarily limit the number of characters available for application server
- * replica set naming.
+ * The target groups are set up to use HTTP as the protocol in case the {@link ApplicationProcess#getPort() port
+ * specified} is anything but 443, such that SSL offloading will happen at the load balancer in this case. The target
+ * group names are limited to 32 characters in length. Target group name prefixes should be chosen to be very short
+ * strings in order not to unnecessarily limit the number of characters available for application server replica set
+ * naming.
  * <p>
  * 
  * The {@link ApplicationProcess#getPort() port} and the {@link ApplicationProcess#getHealthCheckPath() health check
@@ -71,17 +72,12 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
 public abstract class CreateLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-        extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private static final String MASTER_TARGET_GROUP_SUFFIX = "-m";
+extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
     protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
     private final ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
-    private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
-    private final String targetGroupNamePrefix;
     private final String hostname;
-    private final String servername;
-    private final Optional<Duration> optionalTimeout;
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
@@ -91,13 +87,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
             String targetGroupNamePrefix,
             AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape,
             Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        super(landscape);
-        this.loadBalancerUsed = loadBalancerUsed;
-        this.targetGroupNamePrefix = targetGroupNamePrefix;
+        super(loadBalancerUsed, targetGroupNamePrefix, landscape, process.getServerName(optionalTimeout));
         this.process = process;
         this.hostname = hostname;
-        this.optionalTimeout = optionalTimeout;
-        this.servername = process.getServerName(optionalTimeout);
     }
     
     @Override
@@ -107,12 +99,8 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public void run() throws JSchException, IOException, InterruptedException, SftpException {
-        masterTargetGroupCreated = getLandscape().createTargetGroup(loadBalancerUsed.getRegion(),
-                getMasterTargetGroupName(optionalTimeout), getProcess().getPort(), getProcess().getHealthCheckPath(),
-                /* use traffic port as health check port, too */ getProcess().getPort());
-        publicTargetGroupCreated = getLandscape().createTargetGroup(loadBalancerUsed.getRegion(),
-                getPublicTargetGroupName(optionalTimeout), getProcess().getPort(), getProcess().getHealthCheckPath(),
-                /* use traffic port as health check port, too */ getProcess().getPort());
+        masterTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getMasterTargetGroupName(), getProcess());
+        publicTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getPublicTargetGroupName(), getProcess());
         getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
         getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
         getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
@@ -154,18 +142,6 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return result;
     }
     
-    private String getMasterTargetGroupName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        return getPublicTargetGroupName(optionalTimeout)+MASTER_TARGET_GROUP_SUFFIX;
-    }
-    
-    private String getPublicTargetGroupName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        return targetGroupNamePrefix+servername;
-    }
-    
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() {
-        return loadBalancerUsed;
-    }
-
     public TargetGroup<ShardingKey, MetricsT> getMasterTargetGroupCreated() {
         return masterTargetGroupCreated;
     }
@@ -180,5 +156,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
         return process;
+    }
+
+    protected static String getHostedZoneName(String hostname) {
+        return hostname.substring(hostname.indexOf('.')+1);
     }
 }

@@ -1,11 +1,9 @@
-package com.sap.sse.landscape.aws.orchestration;
+package com.sap.sse.landscape;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.UserDataProvider;
-import com.sap.sse.landscape.aws.orchestration.impl.OutboundReplicationConfigurationImpl;
+import com.sap.sse.landscape.impl.OutboundReplicationConfigurationImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 public interface OutboundReplicationConfiguration extends UserDataProvider {

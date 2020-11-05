@@ -40,6 +40,7 @@ import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
@@ -114,7 +115,7 @@ public class ConnectivityTest {
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
             @SuppressWarnings("unchecked")
             final AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT> castLandscape = (AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT>) landscape;
-            final CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> createDNSBasedLoadBalancerMappingProcedure =
+            final CreateLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> createDNSBasedLoadBalancerMappingProcedure =
                     new CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>>(
                             process, hostname, TARGET_GROUP_NAME_PREFIX, castLandscape, optionalTimeout);
             final String wiesenWegId = landscape.getDNSHostedZoneId(hostedZoneName);

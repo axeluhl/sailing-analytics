@@ -98,6 +98,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTarget
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
@@ -584,6 +585,16 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
+    public TargetGroup<ShardingKey, MetricsT> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
+        final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
+        final DescribeTargetGroupsResponse targetGroupResponse = loadBalancingClient.describeTargetGroups(b->b.names(targetGroupName));
+        return targetGroupResponse.hasTargetGroups()
+                ? new AwsTargetGroupImpl<>(this, region, targetGroupName,
+                        targetGroupResponse.targetGroups().iterator().next().targetGroupArn())
+                : null;
+    }
+
+    @Override
     public TargetGroup<ShardingKey, MetricsT> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
@@ -723,9 +734,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
-            com.sap.sse.landscape.Region region) {
-        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(DEFAULT_NON_DNS_MAPPED_ALB_NAME));
+            com.sap.sse.landscape.Region region, String wildcardDomain) {
+        final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(getNonDNSMappedLoadBalancerName(wildcardDomain)));
         return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
+    }
+
+    @Override
+    public ApplicationLoadBalancer<ShardingKey, MetricsT> createNonDNSMappedLoadBalancer(
+            com.sap.sse.landscape.Region region, String wildcardDomain) {
+        return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
+    }
+
+    private String getNonDNSMappedLoadBalancerName(String wildcardDomain) {
+        return DEFAULT_NON_DNS_MAPPED_ALB_NAME + "-" + wildcardDomain.replaceAll(".", "-");
     }
 
     @Override
@@ -744,9 +765,15 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public MongoEndpoint getDatabaseConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
-        final MongoReplicaSet result = new MongoReplicaSetImpl(MONGO_DEFAULT_REPLICA_SET_NAME);
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTagValue(region, MONGO_REPLICA_SET_TAG_NAME, MONGO_DEFAULT_REPLICA_SET_NAME)) {
+    public MongoEndpoint getDatabaseConfigurationForDefaultReplicaSet(com.sap.sse.landscape.Region region) {
+        return getDatabaseConfigurationForReplicaSet(region, MONGO_DEFAULT_REPLICA_SET_NAME);
+    }
+
+    @Override
+    public MongoEndpoint getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
+        final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
+        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTagValue(region, MONGO_REPLICA_SET_TAG_NAME, mongoReplicaSetName)) {
+            // assume MongoDB default port
             result.addReplica(new MongoProcessImpl(host));
         }
         return result;
@@ -785,7 +812,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
 
     @Override
     public Database getDatabase(com.sap.sse.landscape.Region region, String databaseName) {
-        return new DatabaseImpl(getDatabaseConfigurationForDefaultCluster(region), databaseName);
+        return new DatabaseImpl(getDatabaseConfigurationForDefaultReplicaSet(region), databaseName);
     }
 
     @Override

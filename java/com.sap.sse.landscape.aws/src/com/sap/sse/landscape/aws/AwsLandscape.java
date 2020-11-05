@@ -165,7 +165,12 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host);
 
     /**
-     * @param hostname the fully-qualified host name
+     * Creates a {@code CNAME} record in the DNS's hosted zone identified by the {@code hostedZoneId} that lets
+     * {@code hostname} point to the {@code alb} application load balancer's {@link ApplicationLoadBalancer#getDNSName()
+     * A record name}.
+     * 
+     * @param hostname
+     *            the fully-qualified host name
      */
     ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
 
@@ -230,6 +235,15 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(Region region, String loadBalancerArn);
 
     /**
+     * Looks up a target group by its name in a region. The main reason is to obtain the target group's ARN in order to
+     * enable construction of the {@link TargetGroup} wrapper object.
+     * 
+     * @return {@code null} if no target group named according to the value of {@code targetGroupName} is found in the
+     *         {@code region}
+     */
+    TargetGroup<ShardingKey, MetricsT> getTargetGroup(Region region, String targetGroupName);
+
+    /**
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
      * The protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
@@ -288,12 +302,28 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
     
     /**
-     * Each region can have a single load balancer that is the target for the "*" (asterisk, catch-all) domain.
+     * Each region can have a single load balancer per {@code wildcardDomain} that is the target for any sub-domain of
+     * that wildcard domain. For example, there is a dynamic load balancer for "sapsailing.com" that is the default for
+     * any sub-domain that does not have a dedicated DNS entry (usually then pointing at a dedicated
+     * {@link #getDNSMappedLoadBalancerFor(Region, String) DNS-mapped load balancer}). The wildcard domain is used
+     * in the construction of the load balancer's name which has to be unique per region.<p>
+     * 
      * This load balancer shall be used for rather short-lived scope mappings and their rules because changes become
      * effective immediately with the change, other than for DNS records, for example, which take a while to propagate
      * through the world-wide DNS infrastructure.
+     * 
+     * @param wildcardDomain e.g., "sapsailing.com" without leading and without trailing dot
+     * 
      */
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(Region region);
+    ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
+    
+    /**
+     * Creates an application load balancer (ALB) intended to serve requests for dynamically-mapped sub-domains where
+     * only a wildcard DNS record exists for the domain. There is a naming rule in place such that
+     * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
+     * {@code region}, will deliver the load balancer created by this call.
+     */
+    ApplicationLoadBalancer<ShardingKey, MetricsT> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
     
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
@@ -304,8 +334,10 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * The default MongoDB configuration to connect to.
      */
-    MongoEndpoint getDatabaseConfigurationForDefaultCluster(Region region);
+    MongoEndpoint getDatabaseConfigurationForDefaultReplicaSet(Region region);
 
+    MongoEndpoint getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
+    
     /**
      * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
      * 

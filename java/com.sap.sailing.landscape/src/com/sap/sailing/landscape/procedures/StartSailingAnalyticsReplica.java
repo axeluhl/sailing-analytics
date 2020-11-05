@@ -2,8 +2,8 @@ package com.sap.sailing.landscape.procedures;
 
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.impl.SailingAnalyticsReplicaImpl;
+import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.aws.orchestration.OutboundReplicationConfiguration;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsReplica<ShardingKey>> {

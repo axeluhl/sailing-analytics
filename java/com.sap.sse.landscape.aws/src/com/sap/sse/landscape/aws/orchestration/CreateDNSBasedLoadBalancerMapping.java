@@ -109,8 +109,4 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
                 getHostedZoneName(hostname)), hostname, alb);
     }
-
-    private String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
-    }
 }

@@ -71,7 +71,6 @@ public class TestProcedures {
                 .setReplicationConfiguration(InboundReplicationConfiguration.builder()
                         .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
                         .build())
-                .setRabbitConfiguration(landscape.getDefaultRabbitConfiguration(region))
                 .build();
         startSailingAnalyticsMaster.run();
         final SailingAnalyticsHost<String> host = startSailingAnalyticsMaster.getHost();

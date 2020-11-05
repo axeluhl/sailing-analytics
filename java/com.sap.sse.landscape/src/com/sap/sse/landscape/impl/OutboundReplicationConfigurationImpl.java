@@ -1,6 +1,6 @@
-package com.sap.sse.landscape.aws.orchestration.impl;
+package com.sap.sse.landscape.impl;
 
-import com.sap.sse.landscape.aws.orchestration.OutboundReplicationConfiguration;
+import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 public class OutboundReplicationConfigurationImpl implements OutboundReplicationConfiguration {

@@ -13,6 +13,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Landscape;
+import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
