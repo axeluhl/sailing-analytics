@@ -48,7 +48,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         }
 
         protected ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateNonDNSMappedLoadBalancer(
-                Region region, String hostname, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+                Region region, String hostname, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) throws InterruptedException {
             final String domainName = getHostedZoneName(hostname);
             final ApplicationLoadBalancer<ShardingKey, MetricsT> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
             final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
@@ -56,6 +56,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
                 result = existingLoadBalancer;
             } else {
                 result = landscape.createNonDNSMappedLoadBalancer(region, domainName);
+                waitUntilLoadBalancerProvisioned(landscape, result);
                 createWildcardRoute53Mapping(landscape, result, domainName);
             }
             return result;

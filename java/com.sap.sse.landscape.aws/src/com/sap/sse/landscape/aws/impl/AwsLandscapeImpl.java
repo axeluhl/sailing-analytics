@@ -472,12 +472,20 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filter));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
-                result.add(new AwsInstanceImpl<ShardingKey, MetricsT>(i.instanceId(), getAvailabilityZoneByName(region, i.placement().availabilityZone()), this));
+                result.add(getHost(region, i));
             }
         }
         return result;
     }
 
+    private AwsInstance<ShardingKey, MetricsT> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
+        return new AwsInstanceImpl<ShardingKey, MetricsT>(instance.instanceId(), getAvailabilityZoneByName(region, instance.placement().availabilityZone()), this);
+    }
+
+    private AwsInstance<ShardingKey, MetricsT> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
+        return getHost(region, getInstance(instanceId, region));
+    }
+    
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
         Filter filter = Filter.builder().name("tag-key").values(tagName).build();
@@ -670,9 +678,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
                 .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
                 .targetHealthDescriptions().forEach(
                     targetHealthDescription->result.put(
-                            new AwsInstanceImpl<>(targetHealthDescription.target().id(),
-                                    getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
-                                    targetHealthDescription.targetHealth()));
+                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id()), targetHealthDescription.targetHealth()));
         return result;
     }
 

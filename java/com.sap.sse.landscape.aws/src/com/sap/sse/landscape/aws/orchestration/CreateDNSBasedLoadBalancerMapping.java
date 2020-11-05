@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -20,8 +19,6 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.orchestration.Procedure;
-
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerStateEnum;
 
 /**
  * For an {@link ApplicationProcess} creates a DNS-based load balancer set-up. This entails setting up a Route53 DNS entry
@@ -86,11 +83,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             }
             if (result == null) {
                 result = landscape.createLoadBalancer(getAvailableDNSMappedAlbName(loadBalancerNames), region);
-                final TimePoint startingToPollForReady = TimePoint.now();
-                while (landscape.getApplicationLoadBalancerStatus(result).code() == LoadBalancerStateEnum.PROVISIONING
-                        && (!getOptionalTimeout().isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(getOptionalTimeout().get()) <= 0)) {
-                    Thread.sleep(1000); // wait until the ALB has been provisioned or failed
-                }
+                waitUntilLoadBalancerProvisioned(landscape, result);
             }
             return result;
         }
@@ -123,7 +116,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         return new BuilderImpl<>();
     }
 
-    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateDNSBasedLoadBalancerMapping(com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
         super(builder);
     }
 

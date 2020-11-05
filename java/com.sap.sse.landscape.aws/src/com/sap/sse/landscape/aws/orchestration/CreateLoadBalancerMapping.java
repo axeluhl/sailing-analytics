@@ -8,6 +8,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -19,6 +20,7 @@ import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerStateEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
@@ -149,6 +151,14 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
                 result = getProcess().getServerName(getOptionalTimeout());
             }
             return result;
+        }
+
+        protected void waitUntilLoadBalancerProvisioned(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer) throws InterruptedException {
+            final TimePoint startingToPollForReady = TimePoint.now();
+            while (landscape.getApplicationLoadBalancerStatus(loadBalancer).code() == LoadBalancerStateEnum.PROVISIONING
+                    && (!getOptionalTimeout().isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(getOptionalTimeout().get()) <= 0)) {
+                Thread.sleep(1000); // wait until the ALB has been provisioned or failed
+            }
         }
     }
 
