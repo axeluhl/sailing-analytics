@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +44,7 @@ import software.amazon.awssdk.services.ec2.model.Tag;
  *
  */
 public class TestProcedures {
+    private static final Logger logger = Logger.getLogger(TestProcedures.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> landscape;
     private AwsRegion region;
@@ -126,6 +129,8 @@ public class TestProcedures {
                 assertNotNull(createAlbProcedure.getPublicTargetGroupCreated());
                 assertTrue(createAlbProcedure.getMasterTargetGroupCreated().getRegisteredTargets().keySet().contains(process.getHost()));
                 assertTrue(createAlbProcedure.getPublicTargetGroupCreated().getRegisteredTargets().keySet().contains(process.getHost()));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error during test case", e);
             } finally {
                 landscape.deleteLoadBalancer(createAlbProcedure.getLoadBalancerUsed());
                 landscape.removeDNSRecord(landscape.getDNSHostedZoneId(domain), hostname, "*."+domain);

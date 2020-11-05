@@ -667,11 +667,12 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         final Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> result = new HashMap<>();
         final Region region = getRegion(targetGroup.getRegion());
         getLoadBalancingClient(region)
-                .describeTargetHealth(DescribeTargetHealthRequest.builder().build()).targetHealthDescriptions().forEach(
-                targetHealthDescription->result.put(
-                        new AwsInstanceImpl<>(targetHealthDescription.target().id(),
-                                getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
-                                targetHealthDescription.targetHealth()));
+                .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
+                .targetHealthDescriptions().forEach(
+                    targetHealthDescription->result.put(
+                            new AwsInstanceImpl<>(targetHealthDescription.target().id(),
+                                    getAvailabilityZoneByName(targetGroup.getRegion(), targetHealthDescription.target().availabilityZone()), this),
+                                    targetHealthDescription.targetHealth()));
         return result;
     }
 
