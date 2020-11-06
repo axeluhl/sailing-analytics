@@ -477,7 +477,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     @Override
     public void setSnapshotName(com.sap.sse.landscape.Region region, String snapshotId, String snapshotName) {
-        getEc2Client(getRegion(region)).createTags(b->b.tags(Tag.builder().key("Name").value(snapshotName).build()));
+        getEc2Client(getRegion(region)).createTags(b->b
+                .resources(snapshotId)
+                .tags(Tag.builder().key("Name").value(snapshotName).build()));
     }
 
     @Override
@@ -871,7 +873,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
-    public com.sap.sse.landscape.Region getDefaultRegion() {
+    public AwsRegion getDefaultRegion() {
         return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
     }
 

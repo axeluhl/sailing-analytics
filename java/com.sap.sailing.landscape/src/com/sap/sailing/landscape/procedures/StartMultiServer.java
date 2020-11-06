@@ -34,7 +34,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class StartMultiServer<ShardingKey,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-extends StartEmptyServer<StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+extends StartEmptyServer<StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+implements StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
     
@@ -64,6 +65,11 @@ extends StartEmptyServer<StartMultiServer<ShardingKey, MasterProcessT, ReplicaPr
         @Override
         protected boolean isNoShutdown() {
             return true;
+        }
+
+        @Override
+        protected String getImageType() {
+            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
 
         @Override

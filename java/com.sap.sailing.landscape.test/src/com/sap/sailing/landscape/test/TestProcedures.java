@@ -72,16 +72,28 @@ public class TestProcedures {
     
     @Test
     public void testImageUpgrade() throws Exception {
+        final String keyName = "MyKey-"+UUID.randomUUID();
+        landscape.createKeyPair(region, keyName);
         final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
         final UpgradeAmi<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedure =
-                imageUpgradeProcedureBuilder.build();
+                imageUpgradeProcedureBuilder
+                    .setLandscape(landscape)
+                    .setInstanceType(InstanceType.T2_MEDIUM)
+                    .setKeyName(keyName)
+                    .setOptionalTimeout(optionalTimeout)
+                    .build();
         try {
             imageUpgradeProcedure.run();
             final AmazonMachineImage<String, SailingAnalyticsMetrics> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
             assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(5)) < 0);
             assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception during test", e);
         } finally {
-            imageUpgradeProcedure.getUpgradedAmi().delete();
+            if (imageUpgradeProcedure.getUpgradedAmi() != null) {
+                imageUpgradeProcedure.getUpgradedAmi().delete();
+            }
+            landscape.deleteKeyPair(region, keyName);
         }
     }
     

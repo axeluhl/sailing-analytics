@@ -13,6 +13,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Image;
+import software.amazon.awssdk.services.ec2.model.ImageState;
 
 public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AmazonMachineImage<ShardingKey, MetricsT> {
     private static final long serialVersionUID = 1615200981492476022L;
@@ -74,5 +75,10 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
     @Override
     public Iterable<BlockDeviceMapping> getBlockDeviceMappings() {
         return image.blockDeviceMappings();
+    }
+
+    @Override
+    public ImageState getState() {
+        return image.state();
     }
 }

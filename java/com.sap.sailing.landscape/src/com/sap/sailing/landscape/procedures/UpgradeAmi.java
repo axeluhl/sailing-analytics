@@ -21,6 +21,7 @@ import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.ImageState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 
@@ -49,10 +50,8 @@ public class UpgradeAmi<ShardingKey,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
 extends StartEmptyServer<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT> {
+implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
-    private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
-    private static final String NO_SHUTDOWN_USER_DATA = "no-shutdown";
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
     private final String upgradedImageName;
@@ -92,11 +91,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement);
         
         /**
-         * An optional timeout when waiting for the upgraded instance to shut down for image creation.
-         */
-        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setTimeout(Duration timeout);
-        
-        /**
          * It is possible to assign base names for snapshots based on their device name in the AMI. For example, "/dev/sdc" may
          * be the "Swap" device, and "/dev/xvda" may be the "System" partition. The full name for the snapshot is then assembled from
          * the AMI's name including its version and this base name. If no such basename is provided for a device name for which
@@ -113,11 +107,12 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     implements Builder<ShardingKey, MasterProcessT, ReplicaProcessT> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
-        private Duration timeout;
         private final Map<String, String> deviceNamesToSnapshotBaseNames;
 
         private BuilderImpl() {
             super();
+            // TODO the following is very specific to the way the Sailing Analytics image has been set up;
+            // TODO encapsulate with other image specificities required for upgrading?
             deviceNamesToSnapshotBaseNames = new HashMap<>();
             setSnapshotBaseName("/dev/xvda", "System");
             setSnapshotBaseName("/dev/sdc", "Swap");
@@ -126,14 +121,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
         
         @Override
-        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement) {
-            this.versionPartToIncrement = versionPartToIncrement;
-            return this;
+        protected String getImageType() {
+            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
 
         @Override
-        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setTimeout(Duration timeout) {
-            this.timeout = timeout;
+        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement) {
+            this.versionPartToIncrement = versionPartToIncrement;
             return this;
         }
 
@@ -150,9 +144,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
                         : versionPartToIncrement;
                 final Integer newMajorVersion = partToEffectivelyIncrement == VersionPart.MAJOR ? oldMajorVersion + 1 : oldMajorVersion;
                 final Integer newMinorVersion = partToEffectivelyIncrement == VersionPart.MINOR ? oldMinorVersion + 1 : oldMinorVersion;
-                final Integer newMicroVersion = oldMajorVersion == null ?
-                        partToEffectivelyIncrement == VersionPart.MICRO ? 0 : null :
-                        partToEffectivelyIncrement == VersionPart.MICRO ? oldMajorVersion + 1 : oldMajorVersion;
+                final Integer newMicroVersion = oldMicroVersion == null
+                        ? partToEffectivelyIncrement == VersionPart.MICRO
+                            ? Integer.valueOf(0)
+                            : null
+                        : partToEffectivelyIncrement == VersionPart.MICRO
+                            ? Integer.valueOf(oldMicroVersion + 1)
+                            : oldMicroVersion;
                 final StringBuilder sb = new StringBuilder(imageBaseName);
                 sb.append(' ');
                 sb.append(newMajorVersion);
@@ -190,13 +188,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
             return upgradedImageName;
         }
         
-        /**
-         * @return {@code null} means wait forever
-         */
-        protected Duration getTimeout() {
-            return timeout;
-        }
-        
         protected Map<String, String> getDeviceNamesToSnapshotBaseNames() {
             return Collections.unmodifiableMap(deviceNamesToSnapshotBaseNames);
         }
@@ -220,37 +211,47 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     protected UpgradeAmi(BuilderImpl<ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         upgradedImageName = builder.getUpgradedImageName();
-        timeout = builder.getTimeout();
+        timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
         deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
-        addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
-        if (builder.isNoShutdown()) {
-            addUserData(Collections.singleton(NO_SHUTDOWN_USER_DATA));
-        }
     }
 
     @Override
     public void run() throws Exception {
-        super.run(); // launches the machine in upgrade mode and shuts it down again, preparing for AMI creation
-        final Instance instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
-        if (waitForShutdown) {
-            logger.info("Waiting for shutdown of instance "+instance.instanceId());
-            // wait for the instance to shut down
+        try {
+            super.run(); // launches the machine in upgrade mode and shuts it down again, preparing for AMI creation
+            Instance instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
+            if (waitForShutdown) {
+                logger.info("Waiting for shutdown of instance "+instance.instanceId());
+                // wait for the instance to shut down
+                final TimePoint startedWaiting = TimePoint.now();
+                while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
+                    logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
+                            + ". Waiting " + (timeout == null ? "forever"
+                                    : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
+                    Thread.sleep(5000);
+                    instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
+                }
+            }
+            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
             final TimePoint startedWaiting = TimePoint.now();
-            while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
-                logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
+            while (getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId()).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
+                logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
                         + ". Waiting " + (timeout == null ? "forever"
-                                : ("for " + timeout.minus(startedWaiting.until(TimePoint.now())))));
+                                : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
                 Thread.sleep(5000);
             }
-        }
-        upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
-        for (final BlockDeviceMapping blockDeviceMapping : upgradedAmi.getBlockDeviceMappings()) {
-            if (blockDeviceMapping.ebs() != null) {
-                final String snapshotId = blockDeviceMapping.ebs().snapshotId();
-                final String deviceName = blockDeviceMapping.deviceName();
-                final String snapshotName = getSnapshotName(deviceName);
-                getLandscape().setSnapshotName(getHost().getRegion(), snapshotId, snapshotName);
+            for (final BlockDeviceMapping blockDeviceMapping : upgradedAmi.getBlockDeviceMappings()) {
+                if (blockDeviceMapping.ebs() != null) {
+                    final String snapshotId = blockDeviceMapping.ebs().snapshotId();
+                    final String deviceName = blockDeviceMapping.deviceName();
+                    final String snapshotName = getSnapshotName(deviceName);
+                    getLandscape().setSnapshotName(getHost().getRegion(), snapshotId, snapshotName);
+                }
+            }
+        } finally {
+            if (getHost() != null) {
+                getHost().terminate();
             }
         }
     }

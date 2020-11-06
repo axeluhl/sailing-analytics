@@ -29,8 +29,8 @@ import com.sap.sse.landscape.orchestration.Procedure;
  */
 public abstract class StartSailingAnalyticsHost<ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
 extends StartAwsHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
-    private final static String IMAGE_TYPE_TAG_VALUE_SAILING = "sailing-analytics-server";
+implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>>,
+    StartFromSailingAnalyticsImage {
     private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     private final static String EXPEDITION_PORT_USER_DATA_NAME = "EXPEDITION_PORT";
     private final int DEFAULT_PORT = 8888;
@@ -56,19 +56,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      */
     public static interface Builder<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
     extends StartAwsHost.Builder<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
-        Integer getPort();
-
         Builder<T, ShardingKey, ProcessT> setPort(int port);
-
-        Integer getTelnetPort();
 
         Builder<T, ShardingKey, ProcessT> setTelnetPort(int telnetPort);
 
-        Integer getExpeditionPort();
-
         Builder<T, ShardingKey, ProcessT> setExpeditionPort(int expeditionPort);
-        
-        String getDefaultServerDirectory();
         
         Builder<T, ShardingKey, ProcessT> setDefaultServerDirectory(String serverDirectory);
     }
@@ -82,27 +74,26 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         private String defaultServerDirectory;
         
         @Override
-        public String getImageType() {
-            return super.getImageType() == null ? StartSailingAnalyticsHost.IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+        protected String getImageType() {
+            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
 
         @Override
-        public Optional<Release> getRelease() {
+        protected Optional<Release> getRelease() {
             return Optional.of(super.getRelease().orElse(SailingReleaseRepository.INSTANCE.getLatestMasterRelease()));
         }
 
         @Override
-        public String getInstanceName() {
+        protected String getInstanceName() {
             return isInstanceNameSet() ? super.getInstanceName() : INSTANCE_NAME_DEFAULT_PREFIX+getServerName();
         }
 
         @Override
-        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
+        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
             return SailingAnalyticsHostImpl::new;
         }
         
-        @Override
-        public Integer getPort() {
+        protected Integer getPort() {
             return this.port;
         }
         
@@ -112,7 +103,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
             return this;
         }
         
-        @Override
         public Integer getTelnetPort() {
             return this.telnetPort;
         }
@@ -123,7 +113,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
             return this;
         }
 
-        @Override
         public Integer getExpeditionPort() {
             return expeditionPort;
         }
@@ -135,7 +124,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
 
         // TODO the host start-up should ideally be separated from the process installation/startup
-        @Override
         public String getDefaultServerDirectory() {
             return defaultServerDirectory == null ? "/home/sailing/servers/server" : defaultServerDirectory;
         }

@@ -359,5 +359,5 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     /**
      * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...
      */
-    Region getDefaultRegion();
+    AwsRegion getDefaultRegion();
 }

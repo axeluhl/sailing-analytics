@@ -292,7 +292,11 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         }
 
         protected AwsRegion getRegion() {
-            return region == null ? getAvailabilityZone().getRegion() : region;
+            return region == null
+                    ? availabilityZone == null
+                        ? getLandscape().getDefaultRegion()
+                        : getAvailabilityZone().getRegion()
+                    : region;
         }
 
         @Override
@@ -461,8 +465,12 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         builder.getRelease().ifPresent(this::addUserData);
         addUserData(builder.getDatabaseConfiguration());
         addUserData(builder.getOutboundReplicationConfiguration());
-        addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
-        addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
+        if (builder.getServerName() != null) {
+            addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
+        }
+        if (builder.getCommaSeparatedEmailAddressesToNotifyOfStartup() != null) {
+            addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
+        }
         builder.getInboundReplicationConfiguration().ifPresent(this::addUserData);
     }
     
