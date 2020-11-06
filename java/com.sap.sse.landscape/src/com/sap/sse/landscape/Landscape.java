@@ -41,5 +41,5 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     Iterable<Region> getRegions();
     
-    
+    MachineImage getLatestImageWithTag(Region region, String tagName, String tagValue);
 }

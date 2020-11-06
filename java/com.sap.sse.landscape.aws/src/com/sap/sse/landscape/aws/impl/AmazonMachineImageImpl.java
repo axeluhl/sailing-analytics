@@ -61,6 +61,12 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
 
     @Override
     public void delete() {
+        for (final BlockDeviceMapping blockDeviceMapping : getBlockDeviceMappings()) {
+            if (blockDeviceMapping.ebs() != null) {
+                // TODO landscape.deleteSnapshot(blockDeviceMapping.ebs().snapshotId())
+            }
+        }
+        int forceWarningTODO;
         // TODO implement AmazonMachineImageImpl.delete(); we probably want landscape here...
     }
     

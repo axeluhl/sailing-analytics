@@ -24,6 +24,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
+import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
@@ -65,6 +66,20 @@ public class TestProcedures {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
+    }
+    
+    @Test
+    public void testImageUpgrade() throws Exception {
+        final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
+        final UpgradeAmi<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedure =
+                imageUpgradeProcedureBuilder.build();
+        try {
+            imageUpgradeProcedure.run();
+            int continueHere;
+            // TODO add test verdicts
+        } finally {
+            imageUpgradeProcedure.getUpgradedAmi().delete();
+        }
     }
     
     @Test

@@ -47,7 +47,7 @@ public class StartSailingAnalyticsReplica<ShardingKey>
         return new BuilderImpl<>();
     }
     
-    protected StartSailingAnalyticsReplica(Builder<ShardingKey> builder) {
+    protected StartSailingAnalyticsReplica(BuilderImpl<ShardingKey> builder) {
         super(builder);
         addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }

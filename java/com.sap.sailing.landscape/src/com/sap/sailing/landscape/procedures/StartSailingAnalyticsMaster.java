@@ -46,7 +46,7 @@ public class StartSailingAnalyticsMaster<ShardingKey>
         return new BuilderImpl<>();
     }
 
-    protected StartSailingAnalyticsMaster(Builder<ShardingKey> builder) {
+    protected StartSailingAnalyticsMaster(BuilderImpl<ShardingKey> builder) {
         super(builder);
         addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }

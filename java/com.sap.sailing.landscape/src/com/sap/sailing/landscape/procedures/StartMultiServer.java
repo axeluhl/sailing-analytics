@@ -6,12 +6,11 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
-import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -30,13 +29,12 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  * @param <ShardingKey>
- * @param <HostT>
+ * @param <SailingAnalyticsHost<ShardingKey>>
  */
-public class StartMultiServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+public class StartMultiServer<ShardingKey,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+extends StartEmptyServer<StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
     private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
     
@@ -46,41 +44,48 @@ extends StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT,
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartEmptyServer.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        @Override
-        default boolean isNoShutdown() {
-            return true;
-        }
+    public static interface Builder<ShardingKey,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+    extends StartEmptyServer.Builder<StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
     }
     
     protected static class BuilderImpl<ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
-    implements Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+    extends StartEmptyServer.BuilderImpl<StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<ShardingKey, MasterProcessT, ReplicaProcessT> {
         @Override
-        public StartMultiServer<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> build() {
+        public StartMultiServer<ShardingKey, MasterProcessT, ReplicaProcessT> build() {
             return new StartMultiServer<>(this);
         }
 
         @Override
+        protected boolean isNoShutdown() {
+            return true;
+        }
+
+        @Override
         public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
-            return SailingAnalyticsHostImpl::new;
+            return new HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>() {
+                @Override
+                public SailingAnalyticsHost<ShardingKey> supply(String instanceId, AwsAvailabilityZone az,
+                        AwsLandscape<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT> landscape) {
+                    return null;
+                }
+            };
         }
     }
     
     public static <ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> builder() {
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
+    Builder<ShardingKey, MasterProcessT, ReplicaProcessT> builder() {
         return new BuilderImpl<>();
     }
 
-    protected StartMultiServer(Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+    protected StartMultiServer(BuilderImpl<ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         this.optionalTimeout = builder.getOptionalTimeout();
     }

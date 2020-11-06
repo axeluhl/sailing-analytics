@@ -21,7 +21,8 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public abstract class StartEmptyServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+public abstract class StartEmptyServer<T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 HostT extends AwsInstance<ShardingKey, MetricsT>>
@@ -43,42 +44,40 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * </ul>
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static interface Builder<T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.Builder<StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        boolean isNoShutdown();
-        
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown);
+    extends StartAwsHost.Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown);
     }
 
-    protected abstract static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    protected abstract static class BuilderImpl<T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.BuilderImpl<StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends StartAwsHost.BuilderImpl<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         private boolean noShutdown = true;
         
-        @Override
-        public boolean isNoShutdown() {
+        protected boolean isNoShutdown() {
             return noShutdown;
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown) {
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setNoShutdown(boolean noShutdown) {
             this.noShutdown = noShutdown;
             return this;
         }
 
-        @Override
-        public String getInstanceName() {
+        protected String getInstanceName() {
             return super.getInstanceName() == null ? IMAGE_UPGRADE_USER_DATA+" for "+getMachineImage().getId() : super.getInstanceName();
         }
     }
     
-    public StartEmptyServer(Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+    public StartEmptyServer(BuilderImpl<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
         super(builder);
         addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
         if (builder.isNoShutdown()) {

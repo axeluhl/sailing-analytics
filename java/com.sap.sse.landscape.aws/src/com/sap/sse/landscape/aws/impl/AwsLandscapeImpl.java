@@ -455,6 +455,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     @Override
     public AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName) {
+        logger.info("Creating Amazon Machine Image (AMI) named "+imageName+" for instance "+instance.getInstanceId());
         final Ec2Client client = getEc2Client(getRegion(instance.getRegion()));
         final String imageId = client.createImage(b->b
                 .instanceId(instance.getInstanceId())
@@ -469,6 +470,16 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region);
     }
     
+    @Override
+    public void setSnapshotName(com.sap.sse.landscape.Region region, String snapshotId, String snapshotName) {
+        getEc2Client(getRegion(region)).createTags(b->b.tags(Tag.builder().key("Name").value(snapshotName).build()));
+    }
+
+    @Override
+    public void deleteSnapshot(com.sap.sse.landscape.Region region, String snapshotId) {
+        getEc2Client(getRegion(region)).deleteSnapshot(b->b.snapshotId(snapshotId));
+    }
+
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {

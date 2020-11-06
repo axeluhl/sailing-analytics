@@ -147,7 +147,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
     }
     
-    protected StartSailingAnalyticsHost(Builder<? extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT> builder) {
+    protected StartSailingAnalyticsHost(BuilderImpl<? extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT> builder) {
         super(builder);
         // remember the port we need in order to hand out the process
         this.port = builder.getPort();

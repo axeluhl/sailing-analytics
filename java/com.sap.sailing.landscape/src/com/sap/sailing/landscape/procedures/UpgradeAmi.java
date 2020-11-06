@@ -1,21 +1,28 @@
 package com.sap.sailing.landscape.procedures;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
-import com.sap.sailing.landscape.procedures.UpgradeAmi.Builder;
-import com.sap.sailing.landscape.procedures.UpgradeAmi.Builder.VersionPart;
-import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
+
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 
 /**
  * Upgrades an existing Amazon Machine Image that is expected to be prepared for such an upgrade, by
@@ -41,14 +48,18 @@ import com.sap.sse.landscape.orchestration.Procedure;
 public class UpgradeAmi<ShardingKey,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-extends StartEmptyServer<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+extends StartEmptyServer<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT> {
+    private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
     private static final String NO_SHUTDOWN_USER_DATA = "no-shutdown";
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
     private final String upgradedImageName;
-    private MachineImage upgradedAmi;
+    private final Duration timeout;
+    private final boolean waitForShutdown; // no need to wait if no shutdown was requested
+    private final Map<String, String> deviceNamesToSnapshotBaseNames;
+    private AmazonMachineImage<ShardingKey, SailingAnalyticsMetrics> upgradedAmi;
     
     /**
      * Additional default rules in addition to what the {@link StartAwsHost.Builder parent builder} defines:
@@ -71,8 +82,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     public static interface Builder<ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-            extends
-            StartEmptyServer.Builder<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+    extends StartEmptyServer.Builder<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
@@ -80,18 +90,35 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setUpgradedImageName(String upgradedImageName);
 
         Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement);
+        
+        /**
+         * An optional timeout when waiting for the upgraded instance to shut down for image creation.
+         */
+        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setTimeout(Duration timeout);
+        
+        /**
+         * It is possible to assign base names for snapshots based on their device name in the AMI. For example, "/dev/sdc" may
+         * be the "Swap" device, and "/dev/xvda" may be the "System" partition. The full name for the snapshot is then assembled from
+         * the AMI's name including its version and this base name. If no such basename is provided for a device name for which
+         * a block device mapping to a snapshot exists, the snapshot will only be named after the AMI's name, so when multiple snapshots
+         * are connected to the AMI then their names will not be discernible.
+         */
+        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setSnapshotBaseName(String deviceName, String snapshotBaseName);
     }
 
     protected static class BuilderImpl<ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    extends StartEmptyServer.BuilderImpl<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
     implements Builder<ShardingKey, MasterProcessT, ReplicaProcessT> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
+        private Duration timeout;
+        private final Map<String, String> deviceNamesToSnapshotBaseNames;
 
         private BuilderImpl() {
             super();
+            deviceNamesToSnapshotBaseNames = new HashMap<>();
             setNoShutdown(false);
         }
         
@@ -101,22 +128,36 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
             return this;
         }
 
+        @Override
+        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setTimeout(Duration timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
         private String increaseVersionNumber(String imageName) {
             final String result;
             final Matcher versionNumberMatcher = imageNamePattern.matcher(imageName);
             if (versionNumberMatcher.matches()) {
                 final String imageBaseName = versionNumberMatcher.group(1);
-                final String majorVersion = versionNumberMatcher.group(2);
-                final String minorVersion = versionNumberMatcher.group(3);
-                final String microVersion = versionNumberMatcher.group(5);
+                final Integer oldMajorVersion = Integer.valueOf(versionNumberMatcher.group(2));
+                final Integer oldMinorVersion = Integer.valueOf(versionNumberMatcher.group(3));
+                final Integer oldMicroVersion = versionNumberMatcher.group(5) == null ? null : Integer.valueOf(versionNumberMatcher.group(5));
+                final VersionPart partToEffectivelyIncrement = versionPartToIncrement == null
+                        ? oldMicroVersion == null ? VersionPart.MINOR : VersionPart.MICRO
+                        : versionPartToIncrement;
+                final Integer newMajorVersion = partToEffectivelyIncrement == VersionPart.MAJOR ? oldMajorVersion + 1 : oldMajorVersion;
+                final Integer newMinorVersion = partToEffectivelyIncrement == VersionPart.MINOR ? oldMinorVersion + 1 : oldMinorVersion;
+                final Integer newMicroVersion = oldMajorVersion == null ?
+                        partToEffectivelyIncrement == VersionPart.MICRO ? 0 : null :
+                        partToEffectivelyIncrement == VersionPart.MICRO ? oldMajorVersion + 1 : oldMajorVersion;
                 final StringBuilder sb = new StringBuilder(imageBaseName);
                 sb.append(' ');
-                sb.append(majorVersion);
+                sb.append(newMajorVersion);
                 sb.append('.');
-                sb.append(minorVersion);
-                if (microVersion != null || versionPartToIncrement == VersionPart.MICRO) {
+                sb.append(newMinorVersion);
+                if (newMicroVersion != null) {
                     sb.append('.');
-                    sb.append(microVersion);
+                    sb.append(newMicroVersion);
                 }
                 result = sb.toString();
             } else {
@@ -132,12 +173,29 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
+        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setSnapshotBaseName(String deviceName, String snapshotBaseName) {
+            deviceNamesToSnapshotBaseNames.put(deviceName, snapshotBaseName);
+            return this;
+        }
+
+        @Override
         public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
             return SailingAnalyticsHostImpl::new;
         }
 
         protected String getUpgradedImageName() {
             return upgradedImageName;
+        }
+        
+        /**
+         * @return {@code null} means wait forever
+         */
+        protected Duration getTimeout() {
+            return timeout;
+        }
+        
+        protected Map<String, String> getDeviceNamesToSnapshotBaseNames() {
+            return Collections.unmodifiableMap(deviceNamesToSnapshotBaseNames);
         }
 
         @Override
@@ -159,6 +217,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     protected UpgradeAmi(BuilderImpl<ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         upgradedImageName = builder.getUpgradedImageName();
+        timeout = builder.getTimeout();
+        waitForShutdown = !builder.isNoShutdown();
+        deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
         addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
         if (builder.isNoShutdown()) {
             addUserData(Collections.singleton(NO_SHUTDOWN_USER_DATA));
@@ -168,16 +229,45 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     @Override
     public void run() throws Exception {
         super.run(); // launches the machine in upgrade mode and shuts it down again, preparing for AMI creation
+        final Instance instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
+        if (waitForShutdown) {
+            logger.info("Waiting for shutdown of instance "+instance.instanceId());
+            // wait for the instance to shut down
+            final TimePoint startedWaiting = TimePoint.now();
+            while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
+                logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
+                        + ". Waiting " + (timeout == null ? "forever"
+                                : ("for " + timeout.minus(startedWaiting.until(TimePoint.now())))));
+                Thread.sleep(5000);
+            }
+        }
         upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
-        // TODO now comes the waiting for the shutdown and initiating the creation of an AMI for the instance
-        // TODO then comes the tagging of the volume snapshots created
-        // TODO then tag the resulting AMI according to the original image's tags, except for the name where automatic version number increment should be implemented
+        for (final BlockDeviceMapping blockDeviceMapping : upgradedAmi.getBlockDeviceMappings()) {
+            if (blockDeviceMapping.ebs() != null) {
+                final String snapshotId = blockDeviceMapping.ebs().snapshotId();
+                final String deviceName = blockDeviceMapping.deviceName();
+                final String snapshotName = getSnapshotName(deviceName);
+                getLandscape().setSnapshotName(getHost().getRegion(), snapshotId, snapshotName);
+            }
+        }
     }
     
+    private String getSnapshotName(String deviceName) {
+        final StringBuilder result = new StringBuilder();
+        result.append(upgradedImageName);
+        final String baseName = deviceNamesToSnapshotBaseNames.get(deviceName);
+        if (baseName != null) {
+            result.append(" (");
+            result.append(baseName);
+            result.append(")");
+        }
+        return result.toString();
+    }
+
     /**
      * @return the resulting AMI that has the upgraded version of everything
      */
-    public MachineImage getUpgradedAmi() {
+    public AmazonMachineImage<ShardingKey, SailingAnalyticsMetrics> getUpgradedAmi() {
         return upgradedAmi;
     }
 }

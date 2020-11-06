@@ -122,6 +122,10 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
+    void setSnapshotName(Region region, String snapshotId, String snapshotName);
+    
+    void deleteSnapshot(Region region, String snapshotId);
+    
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}.
      */
