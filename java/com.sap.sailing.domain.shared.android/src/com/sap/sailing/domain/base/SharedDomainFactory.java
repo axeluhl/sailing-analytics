@@ -124,5 +124,4 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
     Mark getOrCreateMark(String name, MarkType markType);
 
     Mark getOrCreateMark(Serializable id, String name, MarkType markType);
-
 }

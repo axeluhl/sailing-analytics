@@ -986,6 +986,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
 
+    /**
+     * Identifies all Events, that use the given {@link Leaderboard}'s {@link CourseArea}s and contain it in their
+     * {@link LeaderboardGroup}
+     * 
+     * @param leaderboard
+     * @return A Set of Events, may be empty, but never {@code null}
+     */
+    Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard, Iterable<Event> events);
+
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, String markId)
             throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException;
 

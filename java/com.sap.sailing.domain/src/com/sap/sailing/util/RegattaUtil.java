@@ -1,15 +1,8 @@
 package com.sap.sailing.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sse.common.Distance;
 
 public class RegattaUtil {
@@ -27,20 +20,5 @@ public class RegattaUtil {
         final Distance buyZoneRadius = boatHullLength == null ? DEFAULT_BUOY_ZONE_RADIUS
                 : boatHullLength.scale(buoyZoneRadiusInHullLengths);
         return buyZoneRadius;
-    }
-    
-    public static Set<Regatta> getRegattasByEvent(Event event) {
-        Set<Regatta> regattas = new HashSet<Regatta>();
-        Iterable<LeaderboardGroup> leaderboardGroups = event.getLeaderboardGroups();
-        for(LeaderboardGroup lbg:leaderboardGroups) {
-            Iterable<Leaderboard> leaderboards = lbg.getLeaderboards();
-            for(Leaderboard lb:leaderboards) {
-                if(lb instanceof RegattaLeaderboard) {
-                    Regatta regatta = ((RegattaLeaderboard) lb).getRegatta();
-                    regattas.add(regatta);
-                }
-            }
-        }
-        return regattas;
     }
 }
