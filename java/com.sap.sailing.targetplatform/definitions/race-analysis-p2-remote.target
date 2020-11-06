@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="160">
+<target name="Race Analysis Target" sequenceNumber="164">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -29,8 +29,8 @@
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
-<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
-<unit id="org.apache.commons.codec.source" version="1.6.0.v201305230611"/>
+<unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
+<unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.collections.source" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
@@ -43,10 +43,11 @@
 <unit id="org.apache.commons.math.source" version="2.1.0.v201105210652"/>
 <unit id="org.apache.commons.math3" version="3.5.0.v20160301-1110"/>
 <unit id="org.apache.commons.math3.source" version="3.5.0.v20160301-1110"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpclient.source" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore.source" version="4.2.5.v201311072007"/>
+<unit id="org.apache.commons.logging" version="1.2.0.v20180409-1502"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.4.9.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore.source" version="4.4.9.v20180409-1525"/>
 <unit id="org.apache.poi" version="3.9.0.v201405241750"/>
 <unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
 <unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
@@ -120,7 +121,7 @@
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.14.24"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.16"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
@@ -166,6 +167,7 @@
 <plugin id="org.apache.commons.math.source"/>
 <plugin id="org.apache.commons.math3"/>
 <plugin id="org.apache.commons.math3.source"/>
+<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
 <plugin id="org.apache.felix.gogo.runtime"/>
