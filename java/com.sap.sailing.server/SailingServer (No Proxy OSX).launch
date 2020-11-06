@@ -50,7 +50,9 @@
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
 <setEntry value="org.mongodb.mongo-java-driver@default:default"/>
+<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
+<setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="slf4j.jdk14@default:default"/>
 <setEntry value="org.apache.felix.shell@0:true"/>
 <setEntry value="org.apache.felix.shell.remote@0:true"/>
@@ -74,14 +76,12 @@
 <setEntry value="org.eclipse.jetty.xml@4:true"/>
 <setEntry value="slf4j.api@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
 <setEntry value="org.apache.commons.io@default:default"/>
 <setEntry value="jcl.over.slf4j@default:default"/>
 <setEntry value="com.sun.mail.javax.mail@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="org.apache.commons.lang@default:default"/>
+<setEntry value="org.apache.commons.logging@default:default"/>
 <setEntry value="jackson-jaxrs@default:default"/>
 <setEntry value="com.sun.jersey@default:default"/>
 <setEntry value="javax.ws.rs@default:default"/>
@@ -89,8 +89,11 @@
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.shiro.core@default:default"/>
+<setEntry value="org.apache.shiro.core.source@default:default"/>
 <setEntry value="org.apache.shiro.ehcache@default:default"/>
+<setEntry value="org.apache.shiro.ehcache.source@default:default"/>
 <setEntry value="org.apache.shiro.web@default:default"/>
+<setEntry value="org.apache.shiro.web.source@default:default"/>
 <setEntry value="jackson-core-asl@default:default"/>
 <setEntry value="jackson-mapper-asl@default:default"/>
 <setEntry value="org.apache.commons.collections@default:default"/>
