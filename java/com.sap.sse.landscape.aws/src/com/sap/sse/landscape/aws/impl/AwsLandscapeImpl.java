@@ -31,6 +31,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
@@ -449,14 +450,23 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public AmazonMachineImage<ShardingKey, MetricsT> getImage(com.sap.sse.landscape.Region region, String imageId) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().imageIds(imageId).build());
-        return new AmazonMachineImage<>(response.images().iterator().next(), region);
+        return new AmazonMachineImageImpl<>(response.images().iterator().next(), region);
     }
     
+    @Override
+    public AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName) {
+        final Ec2Client client = getEc2Client(getRegion(instance.getRegion()));
+        final String imageId = client.createImage(b->b
+                .instanceId(instance.getInstanceId())
+                .name(imageName)).imageId();
+        return getImage(instance.getRegion(), imageId);
+    }
+
     @Override
     public AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
-        return new AmazonMachineImage<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region);
+        return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region);
     }
     
     @Override
@@ -781,7 +791,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         }
         return null;
     }
-
+    
     @Override
     public MongoEndpoint getDatabaseConfigurationForDefaultReplicaSet(com.sap.sse.landscape.Region region) {
         return getDatabaseConfigurationForReplicaSet(region, MONGO_DEFAULT_REPLICA_SET_NAME);

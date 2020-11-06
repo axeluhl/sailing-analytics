@@ -12,8 +12,8 @@ import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.HostSupplier;
-import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
@@ -35,7 +35,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
     private final static String EXPEDITION_PORT_USER_DATA_NAME = "EXPEDITION_PORT";
     private final int DEFAULT_PORT = 8888;
     private final Integer port;
-    private final String serverDirectory;
+    private final String defaultServerDirectory;
     
     /**
      * The following defaults, in addition to the defaults implemented by the more general {@link StartAwsHost.Builder},
@@ -49,7 +49,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
      * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
      * getLatestMasterRelease()} will be used instead.</li>
-     * <li>The {@link #getServerDirectory() server directory} defaults to {@link /home/sailing/servers/server}</li>
+     * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {@link /home/sailing/servers/server}</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -68,9 +68,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
 
         Builder<T, ShardingKey, ProcessT> setExpeditionPort(int expeditionPort);
         
-        String getServerDirectory();
+        String getDefaultServerDirectory();
         
-        Builder<T, ShardingKey, ProcessT> setServerDirectory(String serverDirectory);
+        Builder<T, ShardingKey, ProcessT> setDefaultServerDirectory(String serverDirectory);
     }
     
     protected abstract static class BuilderImpl<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
@@ -79,7 +79,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         private Integer port;
         private Integer telnetPort;
         private Integer expeditionPort;
-        private String serverDirectory;
+        private String defaultServerDirectory;
         
         @Override
         public String getImageType() {
@@ -134,14 +134,15 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
             return this;
         }
 
+        // TODO the host start-up should ideally be separated from the process installation/startup
         @Override
-        public String getServerDirectory() {
-            return serverDirectory == null ? "/home/sailing/servers/server" : serverDirectory;
+        public String getDefaultServerDirectory() {
+            return defaultServerDirectory == null ? "/home/sailing/servers/server" : defaultServerDirectory;
         }
 
         @Override
-        public Builder<T, ShardingKey, ProcessT> setServerDirectory(String serverDirectory) {
-            this.serverDirectory = serverDirectory;
+        public Builder<T, ShardingKey, ProcessT> setDefaultServerDirectory(String defaultServerDirectory) {
+            this.defaultServerDirectory = defaultServerDirectory;
             return this;
         }
     }
@@ -150,7 +151,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         super(builder);
         // remember the port we need in order to hand out the process
         this.port = builder.getPort();
-        this.serverDirectory = builder.getServerDirectory();
+        this.defaultServerDirectory = builder.getDefaultServerDirectory();
         if (builder.getPort() != null) {
             addUserData(ProcessConfigurationVariable.SERVER_PORT, builder.getPort().toString());
         }
@@ -166,8 +167,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         return port == null ? DEFAULT_PORT : port;
     }
     
-    protected String getServerDirectory() {
-        return serverDirectory;
+    protected String getDefaultServerDirectory() {
+        return defaultServerDirectory;
     }
     
     public abstract ProcessT getSailingAnalyticsProcess();

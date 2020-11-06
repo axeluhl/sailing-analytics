@@ -5,15 +5,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
@@ -23,11 +27,15 @@ import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
+import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer.Builder;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -57,6 +65,28 @@ public class TestProcedures {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
+    }
+    
+    @Test
+    public void testMongoReplica() throws Exception {
+        final Builder<String, ApplicationProcessMetrics, ?, ?> startMongoDBServerProcedureBuilder = StartMongoDBServer.builder();
+        final StartMongoDBServer<String, ApplicationProcessMetrics, ?, ?> startMongoDBServerProcedure = startMongoDBServerProcedureBuilder.build();
+        // by default this should add a replica to the only "live" server in the test landscape
+        try {
+            startMongoDBServerProcedure.run();
+            final AwsInstance<String, ApplicationProcessMetrics> host = startMongoDBServerProcedure.getHost();
+            final String internalDNSName = landscape.getInstance(host.getInstanceId(), region).privateDnsName();
+            // now configure a MongoEndpoint against the replica just launched and try to connect (with a timeout)
+            final MongoEndpoint mongoEndpoint = landscape.getDatabaseConfigurationForDefaultReplicaSet(region);
+            final MongoClient mongoClient = mongoEndpoint.getClient();
+            final MongoDatabase database = mongoClient.getDatabase("admin");
+            final Document replicaSetStatus = database.runCommand(new Document("replSetGetStatus", 1));
+            @SuppressWarnings("unchecked")
+            final List<Document> members = (List<Document>) replicaSetStatus.get("members");
+            assertTrue(members.stream().filter(member->member.get("name").equals(internalDNSName+":27017")).findAny().isPresent());
+        } finally {
+            startMongoDBServerProcedure.getHost().terminate();
+        }
     }
     
     @Test

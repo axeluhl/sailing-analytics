@@ -53,6 +53,6 @@ public class StartSailingAnalyticsMaster<ShardingKey>
     
     @Override
     public SailingAnalyticsMaster<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsMasterImpl<>(getPort(), getHost(), getServerDirectory());
+        return new SailingAnalyticsMasterImpl<>(getPort(), getHost(), getDefaultServerDirectory());
     }
 }

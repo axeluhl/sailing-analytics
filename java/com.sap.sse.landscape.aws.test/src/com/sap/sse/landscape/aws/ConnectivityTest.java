@@ -37,7 +37,6 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
-import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;

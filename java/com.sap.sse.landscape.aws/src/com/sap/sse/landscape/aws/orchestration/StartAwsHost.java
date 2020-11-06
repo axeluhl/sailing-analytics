@@ -23,12 +23,12 @@ import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
-import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.orchestration.StartHost;
@@ -613,7 +613,11 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * will be escaped by preceding them with a {@code \} (backslash) character.
      */
     protected void addUserData(ProcessConfigurationVariable userDataVariable, String value) {
-        userData.add(userDataVariable.name()+"=\""+value.replaceAll("\"", "\\\"")+"\"");
+        addUserData(userDataVariable.name(), value);
+    }
+    
+    protected void addUserData(String name, String value) {
+        userData.add(name+"=\""+value.replaceAll("\"", "\\\"")+"\"");
     }
 
     /**

@@ -36,6 +36,8 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * <ul>
      * <li>If no {@link #getInstanceName() instance name} is set, the default instance name will be constructed as
      * {@code IMAGE_UPGRADE+" for "+machineImage.getId()}</li>
+     * <li>The {@link #isNoShutdown()} defaults to {@code true} because "starting" a server is what the {@link StartEmptyServer}
+     * procedure is meant to do. Specialized builders may change this default.</li>
      * <li>The user data are set to the string defined by {@link StartEmptyServer#IMAGE_UPGRADE_USER_DATA}, forcing the image to
      * boot without trying to launch a process instance.</li>
      * </ul>
@@ -57,7 +59,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartAwsHost.BuilderImpl<StartEmptyServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        private boolean noShutdown;
+        private boolean noShutdown = true;
         
         @Override
         public boolean isNoShutdown() {

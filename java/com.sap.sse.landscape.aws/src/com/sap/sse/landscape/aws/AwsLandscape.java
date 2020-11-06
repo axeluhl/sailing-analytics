@@ -15,7 +15,6 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
-import com.sap.sse.landscape.aws.impl.AmazonMachineImage;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -118,6 +117,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             String... userData);
 
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
+
+    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName);
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     

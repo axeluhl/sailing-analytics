@@ -54,6 +54,6 @@ public class StartSailingAnalyticsReplica<ShardingKey>
 
     @Override
     public SailingAnalyticsReplica<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsReplicaImpl<>(getPort(), getHost(), getServerDirectory());
+        return new SailingAnalyticsReplicaImpl<>(getPort(), getHost(), getDefaultServerDirectory());
     }
 }

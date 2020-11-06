@@ -7,17 +7,19 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Image;
 
-public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements MachineImage {
+public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AmazonMachineImage<ShardingKey, MetricsT> {
+    private static final long serialVersionUID = 1615200981492476022L;
     private final Image image;
     private final Region region;
     
-    public AmazonMachineImage(Image image, Region region) {
+    public AmazonMachineImageImpl(Image image, Region region) {
         this.image = image;
         this.region = region;
     }
@@ -25,6 +27,11 @@ public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcess
     @Override
     public Serializable getId() {
         return image.imageId();
+    }
+
+    @Override
+    public String getName() {
+        return image.name();
     }
 
     @Override
@@ -54,7 +61,11 @@ public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcess
 
     @Override
     public void delete() {
-        // TODO Implement MachineImage<AwsInstance>.delete(...)
-        
+        // TODO implement AmazonMachineImageImpl.delete(); we probably want landscape here...
+    }
+    
+    @Override
+    public Iterable<BlockDeviceMapping> getBlockDeviceMappings() {
+        return image.blockDeviceMappings();
     }
 }
