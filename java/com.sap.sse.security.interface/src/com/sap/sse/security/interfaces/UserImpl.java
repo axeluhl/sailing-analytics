@@ -381,7 +381,13 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
 
     @Override
     public Iterable<Subscription> getSubscriptions() {
-        return Arrays.asList(subscriptions);
+        final Iterable<Subscription> result;
+        if (subscriptions == null) {
+            result = null;
+        } else {
+            result = Arrays.asList(subscriptions);
+        }
+        return result;
     }
 
     @Override
