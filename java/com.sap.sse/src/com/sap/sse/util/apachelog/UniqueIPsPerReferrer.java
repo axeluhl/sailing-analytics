@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -338,14 +339,18 @@ public class UniqueIPsPerReferrer {
         final BufferedReader br = new BufferedReader(logfileReader);
         String line;
         while ((line=br.readLine()) != null) {
-            final LogEntry entry = new LogEntry(line);
-            final String hostname = entry.getHostname();
-            final Writer fileWriterForHostname = getFileWriter(hostname, fileWritersPerHostname, this::getHostnameSpecificFile, /* gzipCompressed */ false, /* append */ true);
-            final String dateString = entry.getDateString();
-            final String requestorIpString = entry.getRequestorIpString();
-            final String userAgent = entry.getUserAgent();
-            if (dateString != null && requestorIpString != null && userAgent != null) {
-                fileWriterForHostname.write(requestorIpString+" "+dateString+" "+userAgent+"\n");
+            try {
+                final LogEntry entry = new LogEntry(line);
+                final String hostname = entry.getHostname();
+                final Writer fileWriterForHostname = getFileWriter(hostname, fileWritersPerHostname, this::getHostnameSpecificFile, /* gzipCompressed */ false, /* append */ true);
+                final String dateString = entry.getDateString();
+                final String requestorIpString = entry.getRequestorIpString();
+                final String userAgent = entry.getUserAgent();
+                if (dateString != null && requestorIpString != null && userAgent != null) {
+                    fileWriterForHostname.write(requestorIpString+" "+dateString+" "+userAgent+"\n");
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Unable to parse log line \""+line+"\". Skipping.", e);
             }
         }
         for (final Writer fw : fileWritersPerHostname.values()) {
