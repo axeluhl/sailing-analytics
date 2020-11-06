@@ -374,7 +374,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Iterable<Event> getAllEvents();
     
     /**
-     * @return a thread-safe copy of the service events filtered by {@link eventIds} parameter with taking the
+     * @return a thread-safe copy of the service' Regattas filtered by {@link regattaIds} parameter with taking the
+     *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
+     *         returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<Regatta> getRegattasSelectively(boolean include, Iterable<UUID> regattaIds);
+    
+    /**
+     * @return a thread-safe copy of the service' events filtered by {@link eventIds} parameter with taking the
      *         {@code include} include parameter into account; it's safe for callers to iterate over the iterable
      *         returned, and no risk of a {@link ConcurrentModificationException} exists
      */
@@ -978,6 +985,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesRestoredDoneLoading();
+
+    /**
+     * Identifies all Events, that use the given {@link Leaderboard}'s {@link CourseArea}s and contain it in their
+     * {@link LeaderboardGroup}
+     * 
+     * @param leaderboard
+     * @return A Set of Events, may be empty, but never {@code null}
+     */
+    Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard, Iterable<Event> events);
 
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, String markId)
             throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException;
