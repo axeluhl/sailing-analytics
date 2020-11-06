@@ -337,7 +337,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return dbSettingTypes;
     }
 
-    private BasicDBList createSubscriptions(Subscription[] subscriptions) {
+    private BasicDBList createSubscriptions(Iterable<Subscription> subscriptions) {
         final BasicDBList result;
         if (subscriptions != null) {
             result = new BasicDBList();

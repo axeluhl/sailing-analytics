@@ -380,8 +380,14 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     }
 
     @Override
-    public Subscription[] getSubscriptions() {
-        return subscriptions;
+    public Iterable<Subscription> getSubscriptions() {
+        final Iterable<Subscription> result;
+        if (subscriptions == null) {
+            result = null;
+        } else {
+            result = Arrays.asList(subscriptions);
+        }
+        return result;
     }
 
     @Override

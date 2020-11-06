@@ -113,7 +113,7 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
 
     String createRandomSecret();
 
-    Subscription[] getSubscriptions();
+    Iterable<Subscription> getSubscriptions();
     
     boolean hasActiveSubscription();
     

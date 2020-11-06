@@ -113,8 +113,8 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
         SubscriptionDTO subscriptionDto = null;
         try {
             final User user = getCurrentUser();
-            final Subscription[] subscriptions = user.getSubscriptions();
-            if (subscriptions != null && subscriptions.length > 0) {
+            final Iterable<Subscription> subscriptions = user.getSubscriptions();
+            if (subscriptions != null) {
                 List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
                 for (Subscription subscription : subscriptions) {
                     if (StringUtils.isNotEmpty(subscription.getSubscriptionId())) {
