@@ -85,15 +85,15 @@ public class TestProcedures {
         try {
             imageUpgradeProcedure.run();
             final AmazonMachineImage<String, SailingAnalyticsMetrics> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
-            assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(5)) < 0);
+            assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(10)) < 0);
             assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception during test", e);
         } finally {
+            landscape.deleteKeyPair(region, keyName);
             if (imageUpgradeProcedure.getUpgradedAmi() != null) {
                 imageUpgradeProcedure.getUpgradedAmi().delete();
             }
-            landscape.deleteKeyPair(region, keyName);
         }
     }
     

@@ -235,7 +235,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
             }
             upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
             final TimePoint startedWaiting = TimePoint.now();
-            while (getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId()).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
+            while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                 logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
                         + ". Waiting " + (timeout == null ? "forever"
                                 : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));

@@ -64,12 +64,12 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
 
     @Override
     public void delete() {
+        landscape.deleteImage(getRegion(), getId());
         for (final BlockDeviceMapping blockDeviceMapping : getBlockDeviceMappings()) {
             if (blockDeviceMapping.ebs() != null) {
                 landscape.deleteSnapshot(getRegion(), blockDeviceMapping.ebs().snapshotId());
             }
         }
-        landscape.deleteImage(getRegion(), getId());
     }
     
     @Override
