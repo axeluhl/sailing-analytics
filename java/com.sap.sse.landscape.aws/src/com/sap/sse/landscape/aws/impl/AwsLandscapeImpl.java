@@ -450,7 +450,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public AmazonMachineImage<ShardingKey, MetricsT> getImage(com.sap.sse.landscape.Region region, String imageId) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().imageIds(imageId).build());
-        return new AmazonMachineImageImpl<>(response.images().iterator().next(), region);
+        return new AmazonMachineImageImpl<>(response.images().iterator().next(), region, this);
     }
     
     @Override
@@ -464,10 +464,15 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
+    public void deleteImage(com.sap.sse.landscape.Region region, String imageId) {
+        getEc2Client(getRegion(region)).deregisterImage(b->b.imageId(imageId));
+    }
+
+    @Override
     public AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
-        return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region);
+        return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region, this);
     }
     
     @Override

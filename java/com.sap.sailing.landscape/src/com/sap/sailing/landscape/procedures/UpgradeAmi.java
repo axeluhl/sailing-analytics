@@ -119,6 +119,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         private BuilderImpl() {
             super();
             deviceNamesToSnapshotBaseNames = new HashMap<>();
+            setSnapshotBaseName("/dev/xvda", "System");
+            setSnapshotBaseName("/dev/sdc", "Swap");
+            setSnapshotBaseName("/dev/sdf", "Home");
             setNoShutdown(false);
         }
         

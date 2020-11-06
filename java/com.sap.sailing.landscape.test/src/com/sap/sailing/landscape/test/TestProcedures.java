@@ -27,8 +27,10 @@ import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
@@ -75,8 +77,9 @@ public class TestProcedures {
                 imageUpgradeProcedureBuilder.build();
         try {
             imageUpgradeProcedure.run();
-            int continueHere;
-            // TODO add test verdicts
+            final AmazonMachineImage<String, SailingAnalyticsMetrics> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
+            assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(5)) < 0);
+            assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
         } finally {
             imageUpgradeProcedure.getUpgradedAmi().delete();
         }
