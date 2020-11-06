@@ -529,7 +529,9 @@ public class MarkResource extends AbstractSailingServerResource {
                         && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
                     final Set<Event> regattaContextEvents = getService()
                             .findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, events);
-                    regattaMarkContexts.add(new MarkContext(mark, regatta, regattaContextEvents));
+                    if(Util.isEmpty(eventIds) || !Util.isEmpty(regattaContextEvents)) {
+                        regattaMarkContexts.add(new MarkContext(mark, regatta, regattaContextEvents));
+                    }
                 }
             }
         }
@@ -544,7 +546,7 @@ public class MarkResource extends AbstractSailingServerResource {
 
     private Iterable<Event> getFilteredEventsWithPermission(Iterable<UUID> eventIds,
             boolean onlyIncludeCurrentlyActiveEvents) {
-        RacingEventService eventService = getService();
+        final RacingEventService eventService = getService();
         final Iterable<Event> eventsSelectively = eventIds == null | Util.isEmpty(eventIds)
                 ? eventService.getAllEvents()
                 : eventService.getEventsSelectively(true, eventIds);
