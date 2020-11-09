@@ -24,6 +24,7 @@ import org.json.simple.JSONObject;
 import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -328,7 +329,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withWriteConcern(WriteConcern.MAJORITY);
         try {
             leaderboardCollection.createIndex(new Document(FieldNames.LEADERBOARD_NAME.name(), 1));
         } catch (NullPointerException npe) {
@@ -501,7 +502,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withReadConcern(ReadConcern.MAJORITY);
 
         try {
             leaderboardGroupCollection.createIndex(new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
@@ -532,6 +533,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document leaderboardQuery = new Document(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
             Document dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             if (dbLeaderboard == null) {
+                // TODO use readConcern / writeConcern "majority"
                 storeLeaderboard(leaderboard);
                 dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             }
