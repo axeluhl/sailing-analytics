@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -187,7 +188,7 @@ public class RemoteSailingServerSet {
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
-            final URL raceListURL = getRaceListURL(ref.getURL());
+            final URL raceListURL = getRaceListURL(ref);
             logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
             final SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
             final Set<SimpleRaceInfo> races = new HashSet<>();
@@ -233,8 +234,22 @@ public class RemoteSailingServerSet {
         new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
     }
 
-    private URL getRaceListURL(URL remoteServerBaseURL) throws MalformedURLException {
-        return getEndpointUrl(remoteServerBaseURL, "/trackedRaces/getRaces?transitive=true");
+    private URL getRaceListURL(RemoteSailingServerReference ref) throws MalformedURLException {
+        URL remoteServerBaseURL = ref.getURL();
+        String endpoint = "/trackedRaces/getRaces?transitive=true";
+        if (!ref.getSelectedEventIds().isEmpty()) {
+            endpoint += "&events=";
+
+            Iterator<UUID> iter = ref.getSelectedEventIds().iterator();
+            while (iter.hasNext()) {
+                endpoint += iter.next().toString();
+                if (iter.hasNext()) {
+                    endpoint += ",";
+                }
+            }
+            endpoint += "&pred=" + (ref.isInclude() ? "incl" : "excl");
+        }
+        return getEndpointUrl(remoteServerBaseURL, endpoint);
     }
 
     private URL getEndpointUrl(URL remoteServerBaseURL, final String endpoint) throws MalformedURLException {
