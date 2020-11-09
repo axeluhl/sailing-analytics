@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -71,11 +72,12 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("getRaces")
     public Response raceList(@QueryParam("transitive") @DefaultValue("false") Boolean transitive,
             @QueryParam("events") @DefaultValue("") String strEvents,
-            @QueryParam("pred") @DefaultValue("incl") String predicate) {
+            @QueryParam("pred") @DefaultValue("excl") String predicate) {
         final boolean includeRemotes = transitive != null && Boolean.TRUE.equals(transitive);
 
         Set<UUID> eventUUIDs = Arrays.asList(strEvents.split(","))
                 .stream()
+                .filter(StringUtils::isNotBlank)
                 .map(UUID::fromString)
                 .collect(Collectors.toSet());
 
