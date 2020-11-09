@@ -2,13 +2,17 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -59,22 +63,46 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the
      * {@link DetailedRaceInfoJsonSerializer# FIELD_REMOTEURL remote URL} field. The order of the list returned is
      * undefined.<br>
+     * @param events string list of event UUIDs
+     * @param predicate depicts the semantic of the event UUIDs, when "incl" include only the depicted. When "excl" exclude the depicted events
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
-    public Response raceList(@QueryParam("transitive") Boolean transitive) {
+    public Response raceList(@QueryParam("transitive") @DefaultValue("false") Boolean transitive,
+            @QueryParam("events") @DefaultValue("") String strEvents,
+            @QueryParam("pred") @DefaultValue("incl") String predicate) {
         final boolean includeRemotes = transitive != null && Boolean.TRUE.equals(transitive);
-        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> distinctRaces = getDistinctRaces(includeRemotes);
+
+        Set<UUID> eventUUIDs = Arrays.asList(strEvents.split(","))
+                .stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toSet());
+
+        Function<UUID,Boolean> eventFilter;
+        if ("incl".equals(predicate)) {
+            eventFilter = (uuid)->eventUUIDs.contains(uuid);
+        } else if ("excl".equals(predicate)) {
+            eventFilter = (uuid)->!eventUUIDs.contains(uuid);
+        }else {
+            throw new IllegalArgumentException("unrecognized predicate " + predicate + " only \"excl\" and \"incl\" are possible");
+        }
+
+        final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getDistinctRaces(includeRemotes,
+                eventFilter);
         final HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
-        distinctRaces.values().forEach(raceInfo -> {
-            final String remoteUrl = raceInfo.getRemoteUrl() == null ? null : raceInfo.getRemoteUrl().toExternalForm();
-            List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
-            if (remoteList == null) {
-                raceData.put(remoteUrl, remoteList = new ArrayList<>());
-            }
-            remoteList.add(raceInfo);
-        });
+        distinctRaces.values()
+            .stream()
+            .flatMap(Set::stream)
+                .forEach(raceInfo -> {
+                    final String remoteUrl = raceInfo.getRemoteUrl() == null ? null
+                            : raceInfo.getRemoteUrl().toExternalForm();
+                    List<SimpleRaceInfo> remoteList = raceData.get(remoteUrl);
+                    if (remoteList == null) {
+                        raceData.put(remoteUrl, remoteList = new ArrayList<>());
+                    }
+                    remoteList.add(raceInfo);
+                });
         final JSONArray json = new JSONArray();
         for (Entry<String, List<SimpleRaceInfo>> raced : raceData.entrySet()) {
             JSONArray list = new JSONArray();
@@ -101,14 +129,12 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @Path("allRaces")
     public Response fullRaceList() {
         JSONArray json = new JSONArray();
-        Map<RegattaAndRaceIdentifier, SimpleRaceInfo> store = getDistinctRaces(/* include remotes */ true);
-        ArrayList<SimpleRaceInfo> sorted = new ArrayList<>(store.values());
-        Collections.sort(sorted, new Comparator<SimpleRaceInfo>() {
-            @Override
-            public int compare(SimpleRaceInfo o1, SimpleRaceInfo o2) {
-                return o1.getStartOfRace().compareTo(o2.getStartOfRace());
-            }
-        });
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = getDistinctRaces(/* include remotes */ true, (uuid)->true);
+        List<SimpleRaceInfo> sorted = store.values().stream()
+            .flatMap(races->races.stream())
+            .sorted((o1,o2)->o1.getStartOfRace().compareTo(o2.getStartOfRace()))
+            .collect(Collectors.toList());
+
         for (int i = 0; i < sorted.size(); i++) {
             SimpleRaceInfo current = sorted.get(i);
             JSONObject raceInfo = new JSONObject();
@@ -121,12 +147,23 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         return getJsonResponse(streamingOutput(json));
     }
 
-    private Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getDistinctRaces(boolean includeRemotes) {
-        final Map<RegattaAndRaceIdentifier, SimpleRaceInfo> distinctRaces = new HashMap<>();
+    private Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>>  getDistinctRaces(boolean includeRemotes, Function<UUID,Boolean> eventListFilter) {
+        final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = new HashMap<>();
         if (includeRemotes) {
-            distinctRaces.putAll(getService().getRemoteRaceList());
+            distinctRaces.putAll(getService().getRemoteRaceList(eventListFilter));
         }
-        distinctRaces.putAll(getService().getLocalRaceList());
+
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> localRaces = getService().getLocalRaceList(eventListFilter);
+        localRaces.forEach((identifier, simpleRaceInfoSet) -> distinctRaces.compute(identifier, (key, valueSet) -> {
+            Set<SimpleRaceInfo> mergedSet;
+            if (valueSet != null) {
+                valueSet.addAll(simpleRaceInfoSet);
+                mergedSet = valueSet;
+            } else {
+                mergedSet = simpleRaceInfoSet;
+            }
+            return mergedSet;
+        }));
         return distinctRaces;
     }
 

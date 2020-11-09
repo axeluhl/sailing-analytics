@@ -16,9 +16,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
+import javax.security.auth.Subject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -114,6 +114,7 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -806,7 +807,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         for races obtained through remote server references, the remote URL will be that of the remote server
      *         reference. Callers may modify the map as each call to this method will produce a new copy.
      */
-    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Function<UUID, Boolean> eventListFilter);
 
     /**
      * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
@@ -814,12 +815,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * that the race is linked to a {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
      * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
      * 
+     * @param eventListFilter
+     *            lambda expression that filters by the events UUID. When true is returned the races of this event are
+     *            considered for further processing.
+     * 
      * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
      *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
      *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
      *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
-     */
-    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
+     *///FIXME update api doc here
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Function<UUID, Boolean> eventListFilter);
 
     /**
      * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to

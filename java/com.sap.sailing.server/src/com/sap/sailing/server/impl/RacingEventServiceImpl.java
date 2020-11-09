@@ -46,6 +46,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -57,7 +59,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -336,6 +337,7 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -4695,42 +4697,46 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(
+            Function<UUID, Boolean> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> remoteServerRaces : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
-            if (race.getValue().getB() != null) {
-                throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
+            if (remoteServerRaces.getValue().getB() != null) {
+                throw new RuntimeException("Some remoteserver did not respond " + remoteServerRaces.getKey());
             }
-            for (SimpleRaceInfo raceinfo : race.getValue().getA()) {
-                store.put(raceinfo.getIdentifier(), raceinfo);
-            }
+            stream(remoteServerRaces.getValue().getA())
+                .filter(race->eventListFilter.apply(race.getEventID()))
+                .forEach(race->{
+                    Util.addToValueSet(store, race.getIdentifier(), race);
+                });
         }
         return store;
     }
 
+    private static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
+    }
+    
     @Override
-    public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Event event : getAllEvents()) {
-            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                for (Leaderboard leaderboard : group.getLeaderboards()) {
-                    for (RaceColumn race : leaderboard.getRaceColumns()) {
-                        for (Fleet fleet : race.getFleets()) {
-                            TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null && trackedRace.hasGPSData()) {
-                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                final TimePoint startOfRace = trackedRace.getStartOfRace();
-                                if (startOfRace != null) {
-                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, /* remoteURL */ null);
-                                    store.put(raceInfo.getIdentifier(), raceInfo);
-                                }
-                            }
-                        }
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Function<UUID, Boolean> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        stream(getAllEvents())
+                .filter(event->eventListFilter.apply(event.getId()))
+                .forEach(event -> stream(event.getLeaderboardGroups())
+                        .flatMap(group -> stream(group.getLeaderboards()))
+                        .flatMap(leaderBoard -> stream(leaderBoard.getRaceColumns()))
+                        .flatMap(race -> stream(race.getFleets())
+                                .flatMap(fleet -> Stream.of(race.getTrackedRace(fleet))))
+                        .filter(trackedRace -> trackedRace != null && trackedRace.hasGPSData())
+                        .forEach(trackedRace -> {
+                            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                            final TimePoint startOfRace = trackedRace.getStartOfRace();
+                            if (startOfRace != null) {
+                                Util.addToValueSet(store, raceIdentifier, new SimpleRaceInfo(raceIdentifier, startOfRace,
+                                /* remoteURL */ null, event.getId()));
                     }
-                }
-            }
-        }
+                }));
         return store;
     }
     
