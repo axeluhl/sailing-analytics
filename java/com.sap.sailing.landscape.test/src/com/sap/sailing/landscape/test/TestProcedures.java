@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -16,6 +18,7 @@ import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jcraft.jsch.JSchException;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
@@ -40,7 +43,7 @@ import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer.Builder;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
-import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -86,9 +89,7 @@ public class TestProcedures {
             // this is expected to have connected to the default "live" replica set.
             startMongoDBServerProcedure.run();
             final MongoProcess result = startMongoDBServerProcedure.getMongoProcess();
-            assertTrue(result.isInReplicaSet());
-            final MongoProcessInReplicaSet inRs = result.asMongoProcessInReplicaSet();
-            assertEquals(AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME, inRs.getReplicaSet().getName());
+            connectAndWaitForReplicaSet(result, AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;
@@ -100,6 +101,27 @@ public class TestProcedures {
         }
     }
     
+    private void connectAndWaitForReplicaSet(MongoProcess mongoProcess, String mongoDefaultReplicaSetName) throws JSchException, IOException, InterruptedException {
+        final TimePoint start = TimePoint.now();
+        boolean fine = true;
+        do {
+            try {
+                final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout);
+                final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+                sshChannel.sendCommandLineSynchronously("i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done", stderr);
+                if (stderr.size() > 0) {
+                    logger.log(Level.WARNING, "stderr while trying to fetch replica set members", stderr.toString());
+                }
+                final String stdout = sshChannel.getStreamContentsAsString();
+                sshChannel.disconnect();
+                fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
+            } catch (Exception e) {
+                logger.info("No success (yet) finding replica set "+mongoDefaultReplicaSetName);
+                fine = false;
+            }
+        } while (!fine && start.until(TimePoint.now()).compareTo(optionalTimeout.get()) < 0);
+    }
+
     @Test
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
