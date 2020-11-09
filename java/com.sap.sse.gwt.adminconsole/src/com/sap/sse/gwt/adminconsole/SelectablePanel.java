@@ -1,5 +1,5 @@
 package com.sap.sse.gwt.adminconsole;
 
 public interface SelectablePanel {
-    void select(String select);
+    void setSearchStringForSelection(String searchString);
 }

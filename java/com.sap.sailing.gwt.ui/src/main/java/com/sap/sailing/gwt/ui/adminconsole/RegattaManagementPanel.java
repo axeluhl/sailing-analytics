@@ -175,7 +175,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
     
     @Override
-    public void select(String searchString) {
-        regattaListComposite.searchAndSelect(searchString);
+    public void setSearchStringForSelection(String searchString) {
+        regattaListComposite.setSearchStringForSelection(searchString); 
     }
 }

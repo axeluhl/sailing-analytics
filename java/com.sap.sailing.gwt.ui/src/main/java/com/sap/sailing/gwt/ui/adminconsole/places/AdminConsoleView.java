@@ -25,10 +25,6 @@ public interface AdminConsoleView extends IsWidget {
     
     HeaderPanel createUI(final ServerInfoDTO serverInfo);
     
-    void selectTabByNames(String verticalTabName, String horizontalTabName);
-    
-    void goToTabByNames(String menu, String tab);
-    
     void selectTabByPlace(AdminConsolePlace place);
     
     void setRedirectToPlace(AdminConsolePlace redirectoPlace);

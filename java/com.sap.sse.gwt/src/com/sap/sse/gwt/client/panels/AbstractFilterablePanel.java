@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -97,6 +98,13 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     };
 
+    protected final AbstractKeywordFilter<T> selectionFilter = new AbstractKeywordFilter<T>() {
+        @Override
+        public Iterable<String> getStrings(T t) {
+            return getSearchableStrings(t);
+        }
+    };
+    
     /**
      * @param all
      *            the sequence of all objects that may be displayed in the table and from which the filter may choose.
@@ -238,6 +246,58 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         Util.addAll(filteredElements, filtered.getList());
     }
 
+    public void searchAndSelect(String searchString) {
+        if (searchString != null) {
+            search(searchString);  
+            selectExactMatchesOrAllFiltered();
+        } 
+    }
+    
+    private void selectExactMatchesOrAllFiltered() {
+        if (!selectExactlyMatchingFilteredItems()) {
+            selectAllFiltered();
+        }
+    }
+    
+    private void selectAllFiltered() {
+        select(filtered.getList());
+    }
+    
+    private void select(T item, boolean select) {
+        getCellTable().getSelectionModel().setSelected(item, select);
+    }
+    
+    private void select(T item) {
+        select(item, true);
+    }
+    
+    private void select(List<T> items) {
+        for (T item : items) {
+            select(item);
+        }
+    }
+    
+    private boolean selectExactlyMatchingFilteredItems() {
+        boolean foundExactMatch = false;
+        for (T t : all.getList()) {
+            boolean matches = matchesExactly(t);
+            select(t, matches);
+            if (matches) {
+                foundExactMatch = true;
+            }
+        }
+        return foundExactMatch;
+    }
+    
+    private boolean matchesExactly(T t) {       
+        selectionFilter.setKeywords(Arrays.asList(getTextBox().getText()));
+        if (!selectionFilter.matchesExactly(t)) {
+            return false;
+        }
+        
+        return matches(t);
+    }
+    
     private boolean matches(T t) {
         for (Filter<T> filter : filters) {
             if (!filter.matches(t)) {

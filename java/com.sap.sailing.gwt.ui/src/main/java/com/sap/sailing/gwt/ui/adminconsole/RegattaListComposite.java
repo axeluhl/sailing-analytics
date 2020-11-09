@@ -82,6 +82,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final UserService userService;
     
     private List<RegattaDTO> allRegattas;
+    private String searchString;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -146,9 +147,13 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         filterablePanelRegattas.search(searchString);  
     }
     
-    public void searchAndSelect(String searchString) {
-        search(searchString);  
-        filterablePanelRegattas.selectMatchingOrFirstVisibleItem(RegattaDTO::getName);
+    public void setSearchStringForSelection(String searchString) {
+        this.searchString = searchString; 
+    }
+    
+    private void searchAndSelect() {
+        filterablePanelRegattas.searchAndSelect(searchString);
+        searchString = null;
     }
     
     /**
@@ -418,6 +423,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas); 
+        
+        searchAndSelect();
     }
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {

@@ -27,22 +27,32 @@ public abstract class KeywordMatcher<T> {
         return matchesOrNoKeywords;
     }
 
+    public boolean matchesExactly(Iterable<String> keywords, T t) {
+        return keywords != null && matches(t, keywords, true);
+    }
+    
+    private boolean containsText(T obj, Iterable<String> keywords) {
+        return matches(obj, keywords, false);
+    }
+    
     /**
      * Returns <code>true</code> if for each of the <code>keywords</code> any of the {@link #getStrings(Object) values
      * to check} contains that keyword.
      * 
      * @param keywords
      *            the words to filter on
+     * @param exactMatch
+     *            returns <code>true</code> only if a string matches exactly (still ignores differences in upper/lower case letters)
      * @return <code>true</code> if the <code>valuesToCheck</code> contains all <code>wordsToFilter</code>,
      *         <code>false</code> if not
      */
-    private boolean containsText(T obj, Iterable<String> keywords) {
+    private boolean matches(T obj, Iterable<String> keywords, boolean exactMatch) {
         boolean failed = false;
         for (String word : keywords) {
             String textAsUppercase = word.toUpperCase();
             failed = true;
             for (String s : getStrings(obj)) {
-                if (s != null && s.toUpperCase().contains(textAsUppercase)) {
+                if (matches(s, textAsUppercase, exactMatch)) {
                     failed = false;
                     break;
                 }
@@ -52,5 +62,13 @@ public abstract class KeywordMatcher<T> {
             }
         }
         return true;
+    }
+    
+    private boolean matches(String s, String keyword, boolean exactMatch) {
+        if (s == null) {
+            return false;
+        }
+        
+        return exactMatch ? s.equalsIgnoreCase(keyword) : s.toUpperCase().contains(keyword);
     }
 }

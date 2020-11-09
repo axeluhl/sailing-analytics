@@ -112,6 +112,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected UserService userService;
 
+    private String searchString;
+
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality
             extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTOWithSecurity> {
         private static final long serialVersionUID = -8742476113296862662L;
@@ -391,6 +393,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
+        
+        searchAndSelect();
     }
 
     /**
@@ -912,8 +916,12 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     @Override
-    public void select(String searchString) {
-        filter(searchString);
-        filterLeaderboardPanel.selectMatchingOrFirstVisibleItem(StrippedLeaderboardDTOWithSecurity::getName);
+    public void setSearchStringForSelection(String searchString) {
+        this.searchString = searchString; 
+    }
+    
+    private void searchAndSelect() {
+        filterLeaderboardPanel.searchAndSelect(searchString);
+        this.searchString = null;
     }
 }

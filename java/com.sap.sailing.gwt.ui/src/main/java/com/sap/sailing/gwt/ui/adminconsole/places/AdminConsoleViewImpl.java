@@ -142,9 +142,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
-    
-    private String verticalTabName;
-    private String horizontalTabName;
 
     private AdminConsolePlace defaultPlace;
     
@@ -194,19 +191,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         headerPanel.setContentWidget(authorizedContentDecorator);
         
         return headerPanel;
-    }
-    
-    @Override
-    public void selectTabByNames(final String verticalTabName, final String horizontalTabName) {
-        this.verticalTabName = verticalTabName;
-        this.horizontalTabName = horizontalTabName;
-    }
-    
-    @Override
-    public void goToTabByNames(final String verticalTabName, final String horizontalTabName) {
-        this.verticalTabName = verticalTabName;
-        this.horizontalTabName = horizontalTabName;
-        adminConsolePanel.selectTabByNamesWithoutSetup(verticalTabName, horizontalTabName);
     }
     
     @Override
@@ -573,14 +557,15 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().markRoles(), new MarkRolesPlace(), 
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
-        adminConsolePanel.initUI(verticalTabName, horizontalTabName);
+        
+        if (defaultPlace == null) {
+            adminConsolePanel.initUI();
+        } else {
+            adminConsolePanel.initUI(defaultPlace);
+        }
         presenter.fillRegattas();
         presenter.fillLeaderboardGroups();
         presenter.fillLeaderboards();
-        
-        if (defaultPlace != null) {
-            adminConsolePanel.selectTabByPlace(defaultPlace);
-        }
         
         return adminConsolePanel;
     }
