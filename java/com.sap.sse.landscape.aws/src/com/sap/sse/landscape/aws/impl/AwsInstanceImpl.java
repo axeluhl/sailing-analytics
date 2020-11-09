@@ -7,6 +7,8 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
@@ -33,6 +35,7 @@ import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 
 public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsInstance<ShardingKey, MetricsT> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
@@ -68,22 +71,53 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
 
     @Override
     public InetAddress getPublicAddress() {
+        return getIpAddress(Instance::publicIpAddress);
+    }
+    
+    @Override
+    public InetAddress getPrivateAddress(Optional<Duration> timeoutNullMeaningForever) {
+        return getAddressWithTimeout(timeoutNullMeaningForever, this::getPrivateAddress);
+    }
+
+    @Override
+    public InetAddress getPrivateAddress() {
+        return getIpAddress(Instance::privateIpAddress);
+    }
+
+    private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
         try {
-            final String publicIpAddress = getInstance().publicIpAddress();
-            return publicIpAddress==null?null:InetAddress.getByName(publicIpAddress);
+            final Instance instance = getInstance();
+            final InetAddress result;
+            if (instance.state().name() == InstanceStateName.RUNNING) {
+                final String privateIpAddress = addressAsStringSupplier.apply(instance);
+                result = privateIpAddress==null?null:InetAddress.getByName(privateIpAddress);
+            } else {
+                result = null; // not RUNNING
+            }
+            return result;
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private InetAddress getAddressWithTimeout(Optional<Duration> timeoutNullMeaningForever, Supplier<InetAddress> addressSupplierMethod) {
+        final Instance instance = getInstance();
+        InetAddress result;
+        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+            final TimePoint started = TimePoint.now();
+            while ((result = addressSupplierMethod.get()) == null &&
+                    (!timeoutNullMeaningForever.isPresent() ||
+                     started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
     @Override
     public InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever) {
-        InetAddress result;
-        final TimePoint started = TimePoint.now();
-        while ((result = getPublicAddress()) == null &&
-                (!timeoutNullMeaningForever.isPresent() ||
-                 started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
-        return result;
+        return getAddressWithTimeout(timeoutNullMeaningForever, this::getPublicAddress);
     }
 
     /**

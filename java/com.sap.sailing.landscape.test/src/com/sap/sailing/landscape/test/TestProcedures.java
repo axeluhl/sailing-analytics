@@ -39,6 +39,8 @@ import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer.Builder;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.mongodb.MongoProcess;
+import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -68,6 +70,33 @@ public class TestProcedures {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
+    }
+    
+    @Test
+    public void testAddMongoReplica() throws Exception {
+        final String keyName = "MyKey-"+UUID.randomUUID();
+        landscape.createKeyPair(region, keyName);
+        final StartMongoDBServer.Builder<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMongoDBServer.builder();
+        final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startMongoDBServerProcedure = builder
+              .setLandscape(landscape)
+              .setKeyName(keyName)
+              .setOptionalTimeout(optionalTimeout)
+              .build();
+        try {
+            // this is expected to have connected to the default "live" replica set.
+            startMongoDBServerProcedure.run();
+            final MongoProcess result = startMongoDBServerProcedure.getMongoProcess();
+            assertTrue(result.isInReplicaSet());
+            final MongoProcessInReplicaSet inRs = result.asMongoProcessInReplicaSet();
+            assertEquals(AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME, inRs.getReplicaSet().getName());
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
+        } finally {
+            if (startMongoDBServerProcedure.getHost() != null) {
+                startMongoDBServerProcedure.getHost().terminate();
+            }
+            landscape.deleteKeyPair(region, keyName);
+        }
     }
     
     @Test

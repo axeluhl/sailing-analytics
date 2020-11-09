@@ -45,9 +45,10 @@ import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
-import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
+import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
@@ -131,7 +132,9 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    private static final String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
@@ -140,9 +143,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
+    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
+    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
-    private static final String MONGO_REPLICA_SET_TAG_NAME = "mongo-replica-set";
-    private static final String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
     private static final String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     private final String accessKeyId;
     private final String secretAccessKey;
@@ -780,6 +783,20 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     }
 
     @Override
+    public SecurityGroup getDefaultSecurityGroupForMongoDBHosts(com.sap.sse.landscape.Region region) {
+        final SecurityGroup result;
+        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for MongoDB hosts
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1, region);
+        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
+            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2, region);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
             com.sap.sse.landscape.Region region, String wildcardDomain) {
         return getLoadBalancerByName(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
@@ -814,13 +831,46 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     public MongoEndpoint getDatabaseConfigurationForDefaultReplicaSet(com.sap.sse.landscape.Region region) {
         return getDatabaseConfigurationForReplicaSet(region, MONGO_DEFAULT_REPLICA_SET_NAME);
     }
+    
+    private int getMongoPort(String[] replicaSetNameAndOptionalPort) {
+        final int result;
+        if (replicaSetNameAndOptionalPort.length < 2) {
+            result = MongoProcess.DEFAULT_PORT;
+        } else {
+            result = Integer.valueOf(replicaSetNameAndOptionalPort[1].trim());
+        }
+        return result;
+    }
 
     @Override
-    public MongoEndpoint getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
+    public Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName) {
+        final DescribeTagsResponse tagResponse = getEc2Client(getRegion(host.getRegion())).describeTags(b->b.filters(
+                Filter.builder()
+                    .name("resource-id").values(host.getInstanceId()).build(),
+                Filter.builder()
+                    .name("key").values(tagName).build()));
+        return tagResponse.tags().stream().map(t->t.value()).findAny();
+    }
+
+    @Override
+    public Tags getTagForMongoProcess(Tags tagsToAddTo, String replicaSetName, int port) {
+        return tagsToAddTo.and(MONGO_REPLICA_SETS_TAG_NAME,
+                (replicaSetName==null?"":replicaSetName)+MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR+port);
+    }
+
+    @Override
+    public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
         final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTagValue(region, MONGO_REPLICA_SET_TAG_NAME, mongoReplicaSetName)) {
-            // assume MongoDB default port
-            result.addReplica(new MongoProcessImpl(host));
+        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME)) {
+            getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
+                for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
+                    final String[] splitByColon = replicaNameWithOptionalPortColonSeparated.split(MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR);
+                    if (splitByColon[0].trim().equals(mongoReplicaSetName.trim())) {
+                        // standalone; no replica set name provided; maybe a port?
+                        final int port = getMongoPort(splitByColon);
+                        result.addReplica(new MongoProcessInReplicaSetImpl(result, port, host));
+                    }
+                }});
         }
         return result;
     }
@@ -834,15 +884,9 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
             result = new RabbitMQEndpoint() {
                 @Override
                 public int getPort() {
-                    final DescribeTagsResponse tagResponse = getEc2Client(getRegion(region)).describeTags(b->b.filters(
-                            Filter.builder()
-                                .name("resource-id").values(anyRabbitMQHost.getInstanceId()).build(),
-                            Filter.builder()
-                                .name("key").values(RABBITMQ_TAG_NAME).build()));
-                    return tagResponse.tags().stream().map(t->{
-                        final String trimmedPort = t.value().trim();
-                        return trimmedPort.isEmpty() ? RabbitMQEndpoint.DEFAULT_PORT : Integer.valueOf(trimmedPort);
-                    }).findAny().orElse(RabbitMQEndpoint.DEFAULT_PORT);
+                    return getTag(anyRabbitMQHost, RABBITMQ_TAG_NAME)
+                            .map(t -> t.trim().isEmpty() ? RabbitMQEndpoint.DEFAULT_PORT : Integer.valueOf(t.trim()))
+                            .orElse(RabbitMQEndpoint.DEFAULT_PORT);
                 }
 
                 @Override

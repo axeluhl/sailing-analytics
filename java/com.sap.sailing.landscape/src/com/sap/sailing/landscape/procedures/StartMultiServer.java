@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * after successfully launching, that directory will be removed. A {@link DeployProcessOnMultiServer} procedure needs to
  * be run with the {@link #getHost()} of this procedure telling the host on which to deploy the process.<p>
  * 
- * The implementation specializes the {@link UpgradeAmi} procedure in {@link Builder#setNoShutdown(boolean) no-shutdown} mode.
+ * The implementation specializes the {@link StartEmptyServer} procedure in {@link Builder#setNoShutdown(boolean) no-shutdown} mode.
  * After running that part, the {@code httpd} service is launched.<p>
  * 
  * You want to at least specify an {@link Builder#setInstanceName(String) instance name} and {@link Builder#setInstanceType(InstanceType)}.

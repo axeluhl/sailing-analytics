@@ -1,0 +1,207 @@
+package com.sap.sse.landscape.aws.orchestration;
+
+import java.util.Optional;
+
+import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.OutboundReplicationConfiguration;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
+
+/**
+ * In addition to launching a host, this procedure launches an initial application server process on that host.
+ * Therefore, it offers the configuration of release, server name, as well as replication properties for the application
+ * server process.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class StartAwsApplicationHost<ShardingKey,
+MetricsT extends ApplicationProcessMetrics,
+MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+HostT extends AwsInstance<ShardingKey, MetricsT>>
+extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    /**
+     * A builder that helps building an instance of type {@link StartAwsApplicationHost} or any subclass thereof (then
+     * using specialized builders). The following default rules apply, in addition to the defaults rules of the
+     * builders that this builder interface {@link StartAwsHost.Builder extends}.
+     * <ul>
+     * <li>If no {@link #setRelease(Release) release is set}, an empty {@link Optional} will be returned by
+     * {@link #getRelease()}, indicating to use the default release pre-deployed in the image launched.</li>
+     * <li>If no {@link #setDatabaseName(String) database name is set explicitly}, it defaults to the
+     * {@link #getServerName() server name}.</li>
+     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * {@link OutboundReplicationConfiguration#getOutboundReplicationExchangeName() exchange name} defaults to the
+     * {@link #getServerName() server name}.</li>
+     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * {@link OutboundReplicationConfiguration#getOutboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the
+     * {@link #getInboundReplicationConfiguration() inbound}
+     * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint}.</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends StartAwsHost.Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release);
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName);
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName);
+        
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
+
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration);
+    }
+    
+    protected abstract static class BuilderImpl<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    MetricsT extends ApplicationProcessMetrics,
+    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends StartAwsHost.BuilderImpl<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        private Optional<Release> release = Optional.empty();
+        private String serverName;
+        private String databaseName;
+        private Database databaseConfiguration;
+        private RabbitMQEndpoint rabbitConfiguration;
+        private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
+        private OutboundReplicationConfiguration outboundReplicationConfiguration;
+        
+        /**
+         * By default, the release pre-deployed in the image will be used, represented by an empty {@link Optional}
+         * returned by this default method implementation.
+         */
+        protected Optional<Release> getRelease() {
+            return release;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release) {
+            this.release = release;
+            return this;
+        }
+
+        protected String getServerName() {
+            return serverName;
+        }
+        
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName) {
+            this.serverName = serverName;
+            return this;
+        }
+
+        protected String getDatabaseName() {
+            return databaseName == null ? getServerName() : databaseName;
+        }
+        
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName) {
+            this.databaseName = databaseName;
+            return this;
+        }
+
+        protected Database getDatabaseConfiguration() {
+            return databaseConfiguration == null ? getLandscape().getDatabase(getRegion(), getDatabaseName()) : databaseConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration) {
+            this.databaseConfiguration = databaseConfiguration;
+            return this;
+        }
+
+        protected RabbitMQEndpoint getRabbitConfiguration() {
+            return rabbitConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
+            this.rabbitConfiguration = rabbitConfiguration;
+            return this;
+        }
+        
+        protected boolean isOutboundReplicationExchangeNameSet() {
+            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundReplicationExchangeName() != null;
+        }
+        
+        protected boolean isInboundReplicationRabbitMQEndpointSet() {
+            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
+                    && inboundReplicationConfiguration.get().getInboundRabbitMQEndpoint() != null;
+        }
+        
+        protected boolean isOutboundReplicationRabbitMQEndpointSet() {
+            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
+        }
+        
+        protected OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
+            final OutboundReplicationConfiguration.Builder resultBuilder;
+            if (outboundReplicationConfiguration != null) {
+                resultBuilder = OutboundReplicationConfiguration.copy(outboundReplicationConfiguration);
+            } else {
+                resultBuilder = OutboundReplicationConfiguration.builder();
+            }
+            if (!isOutboundReplicationExchangeNameSet()) {
+                resultBuilder.setOutboundReplicationExchangeName(getServerName());
+            }
+            if (!isOutboundReplicationRabbitMQEndpointSet()) {
+                getInboundReplicationConfiguration().ifPresent(irc->resultBuilder.setOutboundRabbitMQEndpoint(irc.getInboundRabbitMQEndpoint()));
+            }
+            return resultBuilder.build();
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration) {
+            this.outboundReplicationConfiguration = outboundReplicationConfiguration;
+            return this;
+        }
+        
+        protected Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
+            final InboundReplicationConfiguration.Builder resultBuilder;
+            if (inboundReplicationConfiguration == null || !inboundReplicationConfiguration.isPresent()) {
+                resultBuilder = InboundReplicationConfiguration.builder();
+            } else {
+                resultBuilder = InboundReplicationConfiguration.copy(inboundReplicationConfiguration.get());
+            }
+            return !isInboundReplicationRabbitMQEndpointSet()
+                    ? Optional.of(resultBuilder
+                            .setInboundRabbitMQEndpoint(getLandscape().getDefaultRabbitConfiguration(getRegion()))
+                            .build())
+                    : inboundReplicationConfiguration;
+        }
+
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
+            this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
+            return this;
+        }
+    }
+    
+    protected StartAwsApplicationHost(
+            BuilderImpl<? extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+        super(builder);
+        builder.getRelease().ifPresent(this::addUserData);
+        addUserData(builder.getDatabaseConfiguration());
+        addUserData(builder.getOutboundReplicationConfiguration());
+        if (builder.getServerName() != null) {
+            addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
+        }
+        builder.getInboundReplicationConfiguration().ifPresent(this::addUserData);
+    }
+}

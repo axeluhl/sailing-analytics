@@ -21,13 +21,19 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * @return the security group that shall be assigned by default to any application server host, whether master or
      *         replica
      */
-    SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region);
+    SecurityGroup getDefaultSecurityGroupForApplicationHosts(Region region);
     
     /**
      * @return the security group that shall be assigned by default to any host used as part of the central reverse
      *         proxy cluster in a region
      */
-    SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region);
+    SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(Region region);
+
+    /**
+     * @return the security group that shall be assigned by default to any host used as part of a MongoDB replica set;
+     *         we expect public SSH access and local access to the default MongoDB port (usually 27017).
+     */
+    SecurityGroup getDefaultSecurityGroupForMongoDBHosts(Region region);
     
     /**
      * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified

@@ -66,8 +66,6 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * <li>If an {@link #getImageType() image type} has been specified, it serves as the default for looking up the
      * {@link #getMachineImage() image} to launch from. However, an image type set explicitly, or subclasses overriding
      * {@link #getMachineImage()} may take precedence.</li>
-     * <li>If no {@link #setRelease(Release) release is set}, an empty {@link Optional} will be returned by
-     * {@link #getRelease()}, indicating to use the default release pre-deployed in the image launched.</li>
      * <li>If no {@link #setAvailabilityZone(AwsAvailabilityZone) availability zone} is specified, this builder will try
      * to obtain the {@link #getRegion()} which in this case must have been {@link #setRegion(AwsRegion)} or otherwise
      * be returned from an overridden {@link #getRegion()} in a specialized builder, and will
@@ -78,17 +76,8 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
      * <li>If no {@link #setSecurityGroups(Iterable) security group} has been set, the {@link #getLandscape() landscape}
      * is asked to provide its {@link AwsLandscape#getDefaultSecurityGroupForApplicationHosts(Region) default security
      * group for application hosts} in the {@link #getRegion() region} used by this builder.</li>
-     * <li>If no {@link #setDatabaseName(String) database name is set explicitly}, it defaults to the
-     * {@link #getServerName() server name}.</li>
      * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
      * meaning that waiting for the instance won't timeout by default.</li>
-     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
-     * {@link OutboundReplicationConfiguration#getOutboundReplicationExchangeName() exchange name} defaults to the
-     * {@link #getServerName() server name}.</li>
-     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
-     * {@link OutboundReplicationConfiguration#getOutboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the
-     * {@link #getInboundReplicationConfiguration() inbound}
-     * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint}.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -105,7 +94,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release);
 
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>  setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
 
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setInstanceType(InstanceType instanceType);
         
@@ -127,8 +116,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName);
         
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(
-                InboundReplicationConfiguration replicationConfiguration);
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
 
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
@@ -136,8 +124,7 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration);
         
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setCommaSeparatedEmailAddressesToNotifyOfStartup(
-                String commaSeparatedEmailAddressesToNotifyOfStartup);
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup);
         
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOptionalTimeout(Optional<Duration> optionalTimeout);
         
@@ -462,16 +449,9 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         this.tags = Optional.of(builder.getTags().orElse(Tags.empty()).and(NAME_TAG_NAME, builder.getInstanceName()));
         this.securityGroups = builder.getSecurityGroups();
         this.hostSupplier = builder.getHostSupplier();
-        builder.getRelease().ifPresent(this::addUserData);
-        addUserData(builder.getDatabaseConfiguration());
-        addUserData(builder.getOutboundReplicationConfiguration());
-        if (builder.getServerName() != null) {
-            addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
-        }
         if (builder.getCommaSeparatedEmailAddressesToNotifyOfStartup() != null) {
             addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
         }
-        builder.getInboundReplicationConfiguration().ifPresent(this::addUserData);
     }
     
     protected static <ShardingKey,
@@ -506,10 +486,9 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 
     @Override
     public void run() throws Exception {
-        HostT castHost = getLandscape().launchHost(hostSupplier,
+        host = getLandscape().launchHost(hostSupplier,
             getMachineImage(), getInstanceType(), getAvailabilityZone(), getKeyName(), getSecurityGroups(), getTags(),
                 Util.toArray(getUserData(), new String[0]));
-        host = castHost;
     }
     
     /**

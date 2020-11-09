@@ -14,6 +14,7 @@ import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
@@ -28,7 +29,7 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  */
 public abstract class StartSailingAnalyticsHost<ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-extends StartAwsHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>>,
     StartFromSailingAnalyticsImage {
     private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
@@ -55,7 +56,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsHost.Builder<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
+    extends StartAwsApplicationHost.Builder<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
         Builder<T, ShardingKey, ProcessT> setPort(int port);
 
         Builder<T, ShardingKey, ProcessT> setTelnetPort(int telnetPort);
@@ -66,7 +67,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
     }
     
     protected abstract static class BuilderImpl<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsHost.BuilderImpl<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+    extends StartAwsApplicationHost.BuilderImpl<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
     implements Builder<T, ShardingKey, ProcessT> {
         private Integer port;
         private Integer telnetPort;

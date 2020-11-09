@@ -21,6 +21,10 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.landscape.mongodb.MongoProcess;
+import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
+import com.sap.sse.landscape.mongodb.MongoReplicaSet;
+import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
@@ -59,6 +63,30 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
     
     String S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.s3bucketforalblogs";
+    
+    /**
+     * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
+     * provides information about the replica sets and the ports on which the respective {@link MongoProcess} is listening.
+     * If no port is explicitly specified, the default port {@link MongoProcess#DEFAULT_PORT 27017} is assumed. If the replica
+     * set name is empty then the port or at least ":" must be specified and a standalone process is assumed. The
+     * format for the tag value is as follows:<pre>
+     *   ({replica-set-name}(:{port})?)(,({replica-set-name}(:{port})?))*
+     * </pre>
+     * In other words, the tag value is expected to be a comma-separated list of replica set name and optional port specifications
+     * where the optional port specification is appended to the replica set name separated by a colon (:).<p>
+     * 
+     * Examples:<pre>
+     *   archive:10201,:10202,live:10203
+     *   :
+     * </pre>
+     * The first example means that three MongoDB processes are running on the host, one listening on port 10201 which is part of the
+     * replica set "archive", one standalone instance listening on port 10202, and a member of the "live" replica set running
+     * on port 10203. The second example (":") means that a single standalong MongoDB process is assumed to be running on the
+     * default port (usually 27017).
+     */
+    String MONGO_REPLICA_SETS_TAG_NAME = "mongo-replica-sets";
+
+    String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
 
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
@@ -341,12 +369,39 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(Region region, String hostname);
     
     /**
-     * The default MongoDB configuration to connect to.
+     * The default MongoDB configuration to connect to. See also {@link #MONGO_DEFAULT_REPLICA_SET_NAME} and
+     * {@link #getDatabaseConfigurationForReplicaSet(Region, String)}, but expect that this could also be a
+     * standalone MongoDB instance.
      */
     MongoEndpoint getDatabaseConfigurationForDefaultReplicaSet(Region region);
-
-    MongoEndpoint getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
     
+    /**
+     * Computes the {@link Tags tag value} to add for the {@link #MONGO_REPLICA_SETS_TAG_NAME} tag to represent the
+     * configuration of the {@code mongoProcess}. In line with
+     * {@link #getDatabaseConfigurationForReplicaSet(Region, String)}, this will encode the replica set name, if any,
+     * followed by a colon and the port number into the tag value.
+     * 
+     * @param tagsToAddTo
+     *            must not be {@code null}; the {@link #MONGO_REPLICA_SETS_TAG_NAME} tag will be
+     *            {@link Tags#and(String, String) added}.
+     * @return the {@code tagsToAddTo} object, for chaining
+     */
+    Tags getTagForMongoProcess(Tags tagsToAddTo, String replicaSetName, int port);
+
+    /**
+     * Searches the region for {@link AwsInstance hosts} that are tagged with the {@link #MONGO_REPLICA_SETS_TAG_NAME}
+     * tag such that the {@code mongoReplicaSetName} is part of the host's specification. For each such host found, a
+     * {@link MongoProcessInReplicaSet} is constructed and added to the {@link MongoReplicaSet} returned from which the
+     * called may obtain the {@link MongoReplicaSet#getInstances() replicas} and from them, e.g., the
+     * {@link MongoProcess#getPort() port} and the host name
+     * ({@link MongoProcess#getHost()}.{@link AwsInstance#getPrivateAddress() getPrivateAddress()}).
+     * 
+     * @param mongoReplicaSetName
+     *            must not be {@code null}. If you're looking for a standalone {@link MongoProcess}, simply use the
+     *            {@link MongoProcessImpl} constructor.
+     */
+    MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
+
     /**
      * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
      * 
@@ -360,4 +415,10 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * The region to use as the default region for instance creation, DB connectivity, reverse proxy config, ...
      */
     AwsRegion getDefaultRegion();
+
+    /**
+     * Looks for a tag with key as specified by {@code tagName} on the {@code host} specified. If found, the tag's value
+     * is returned. Otherwise, the {@link Optional} returned {@link Optional#isPresent() is not present}.
+     */
+    Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName);
 }
