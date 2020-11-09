@@ -4714,8 +4714,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(
-            Function<UUID, Boolean> eventListFilter) {
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter) {
         Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
         for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> remoteServerRaces : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
@@ -4723,7 +4722,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 throw new RuntimeException("Some remoteserver did not respond " + remoteServerRaces.getKey());
             }
             stream(remoteServerRaces.getValue().getA())
-                .filter(race->eventListFilter.apply(race.getEventID()))
+                .filter(race->eventListFilter.test(race.getEventID()))
                 .forEach(race->{
                     Util.addToValueSet(store, race.getIdentifier(), race);
                 });
@@ -4736,10 +4735,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     @Override
-    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Function<UUID, Boolean> eventListFilter) {
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter) {
         Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
         stream(getAllEvents())
-                .filter(event->eventListFilter.apply(event.getId()))
+                .filter(event->eventListFilter.test(event.getId()))
                 .forEach(event -> stream(event.getLeaderboardGroups())
                         .flatMap(group -> stream(group.getLeaderboards()))
                         .flatMap(leaderBoard -> stream(leaderBoard.getRaceColumns()))

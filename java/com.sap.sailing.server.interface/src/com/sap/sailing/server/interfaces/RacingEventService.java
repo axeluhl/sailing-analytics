@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.security.auth.Subject;
 
@@ -815,7 +815,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         for races obtained through remote server references, the remote URL will be that of the remote server
      *         reference. Callers may modify the map as each call to this method will produce a new copy.
      */
-    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Function<UUID, Boolean> eventListFilter);
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter);
 
     /**
      * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
@@ -832,7 +832,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
      *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
      *///FIXME update api doc here
-    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Function<UUID, Boolean> eventListFilter);
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter);
 
     /**
      * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to

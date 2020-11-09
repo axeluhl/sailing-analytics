@@ -81,7 +81,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
                 .map(UUID::fromString)
                 .collect(Collectors.toSet());
 
-        Function<UUID,Boolean> eventFilter;
+        Predicate<UUID> eventFilter;
         if ("incl".equals(predicate)) {
             eventFilter = (uuid)->eventUUIDs.contains(uuid);
         } else if ("excl".equals(predicate)) {
@@ -149,7 +149,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         return getJsonResponse(streamingOutput(json));
     }
 
-    private Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>>  getDistinctRaces(boolean includeRemotes, Function<UUID,Boolean> eventListFilter) {
+    private Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>>  getDistinctRaces(boolean includeRemotes, Predicate<UUID> eventListFilter) {
         final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = new HashMap<>();
         if (includeRemotes) {
             distinctRaces.putAll(getService().getRemoteRaceList(eventListFilter));
