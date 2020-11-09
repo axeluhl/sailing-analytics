@@ -20,6 +20,8 @@ import java.util.function.Function;
 
 import javax.security.auth.Subject;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -114,7 +116,6 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
