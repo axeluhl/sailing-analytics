@@ -4,8 +4,9 @@
 	Overview Functions, Features, known issues and quirks (Explaining start/stop of races and 	connecting races and how it can go wrong (dos and donts)
 	
 3. How to enhance events created with Sail Insight
-	* Moving Marks
 	* Adding Marks
+        * Setting Mark Positions (e.g., [https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/SettingFirstPositionForAMarkOnTheMap.mp4](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/SettingFirstPositionForAMarkOnTheMap.mp4)
+	* Moving Marks (e.g., [https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/AdjustingMarkPositionByCreatingNewFix.mp4](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/AdjustingMarkPositionByCreatingNewFix.mp4)
 	* Managing Media (enhance event website)
 	* Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
 	* How to correct results
@@ -72,3 +73,7 @@
 	* check max speeds to find outliers
 	* check for mark passing completeness
 	* spot-checks for mark positions in multiple races
+
+## Advanced Topics
+
+* Modify, create and delete device mappings manually
