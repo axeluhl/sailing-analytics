@@ -82,7 +82,7 @@ while [ "$2" != "" ]; do
     else
         echo "Patching $2 ..."
         if echo "$2" | grep -q winddbTest; then
-          patched_workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"com.sap.sailing.server.gateway.test.support@default:default\"\/>${NL}"
+          patched_workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"com.sap.sailing.server.gateway.test.support\@default:default\"\/>${NL}"
         else
           patched_workspace_bundles="${workspace_bundles}"
         fi
