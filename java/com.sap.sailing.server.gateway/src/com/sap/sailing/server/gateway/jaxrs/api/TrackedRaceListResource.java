@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.DefaultValue;
@@ -64,8 +64,16 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
      * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the
      * {@link DetailedRaceInfoJsonSerializer# FIELD_REMOTEURL remote URL} field. The order of the list returned is
      * undefined.<br>
-     * @param events string list of event UUIDs
-     * @param predicate depicts the semantic of the event UUIDs, when "incl" include only the depicted. When "excl" exclude the depicted events
+     * Optionally a list of event UUIDs together with a predicate can be provided. The returned races list will be
+     * filtered by the given ids. The predicate specifies the behavior of the filter.
+     *
+     * @param transitive
+     *            when true indicates that the cached list of remote references shall be considered
+     * @param events
+     *            string list of event UUIDs
+     * @param predicate
+     *            depicts the semantic of the filtering, when "incl" only races belonging to the depicted event UUIDs
+     *            are returned. When "excl" is provided the filtering behaves vice versa.
      */
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)

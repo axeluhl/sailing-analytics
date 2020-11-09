@@ -234,6 +234,13 @@ public class RemoteSailingServerSet {
         new HashSet<>(remoteRaceResultReceivedCallbacks).forEach(Runnable::run);
     }
 
+    /**
+     * Build the URL for retrieving the remote servers race list. This is complemented by the endpoint here:
+     * {@link com.sap.sailing.server.gateway.jaxrs.api.TrackedRaceListResource#raceList(Boolean, String, String)}
+     * @param ref the remote reference
+     * @return the URL for retrieving the remote races.
+     * @throws MalformedURLException
+     */
     private URL getRaceListURL(RemoteSailingServerReference ref) throws MalformedURLException {
         URL remoteServerBaseURL = ref.getURL();
         String endpoint = "/trackedRaces/getRaces?transitive=true";

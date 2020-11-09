@@ -807,13 +807,19 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * instance or reachable through a remote server reference, having a non-{@code null}
      * {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means that the race is linked to a
      * {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
-     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}. The list can be filtered by a predicate that is
+     * used to inspect the UUIDs of the associated events.
+     * 
+     * @param eventListFilter
+     *            a predicate that can be used to filter on the uuids of the events to which the races are assigned to.
      * 
      * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
      *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
-     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this server;
-     *         for races obtained through remote server references, the remote URL will be that of the remote server
-     *         reference. Callers may modify the map as each call to this method will produce a new copy.
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this
+     *         server; for races obtained through remote server references, the remote URL will be that of the remote
+     *         server reference. Callers may modify the map as each call to this method will produce a new copy. The
+     *         value of the map consists out of a set to reflect the situation where races are assigned to multiple
+     *         events. Therefore see also {@link SimpleRaceInfo#getEventID()}.
      */
     Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter);
 
@@ -824,14 +830,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
      * 
      * @param eventListFilter
-     *            lambda expression that filters by the events UUID. When true is returned the races of this event are
-     *            considered for further processing.
+     *            a predicate that can be used to filter on the uuids of the events to which the races are assigned to.
      * 
      * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
      *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
      *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
-     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
-     *///FIXME update api doc here
+     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy. The
+     *         value of the map consists out of a set to reflect the situation where races are assigned to multiple
+     *         events. Therefore see also {@link SimpleRaceInfo#getEventID()}.
+     */
     Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter);
 
     /**
