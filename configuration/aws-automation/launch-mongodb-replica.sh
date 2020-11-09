@@ -64,8 +64,7 @@ do
             exit 4;;
     esac
 done
-
 aws ec2 run-instances --placement AvailabilityZone=$AVAILABILITY_ZONE --instance-type $INSTANCE_TYPE --security-group-ids ${SECURITY_GROUP_ID} --image-id $IMAGE_ID --count 1 --user-data "REPLICA_SET_NAME=$REPLICA_SET_NAME
 REPLICA_SET_PRIMARY=$REPLICA_SET_PRIMARY
 REPLICA_SET_PRIORITY=$REPLICA_SET_PRIORITY
-REPLICA_SET_VOTES=$REPLICA_SET_VOTES" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"
+REPLICA_SET_VOTES=$REPLICA_SET_VOTES" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY},{Key=mongo-replica-sets,Value=$REPLICA_SET_NAME}]" "ResourceType=volume,Tags=[{Key=Name,Value=MongoDB Replica Set $REPLICA_SET_NAME P$REPLICA_SET_PRIORITY}]"
