@@ -12,8 +12,7 @@ public class StoredDataMiningReportDTOImpl implements StoredDataMiningReportDTO 
     private String name;
     private DataMiningReportDTO report;
 
-    @SuppressWarnings("unused")
-    private StoredDataMiningReportDTOImpl() { }
+    public StoredDataMiningReportDTOImpl() { }
 
     public StoredDataMiningReportDTOImpl(UUID id, String name, DataMiningReportDTO report) {
         this.id = id;

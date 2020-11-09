@@ -8,7 +8,9 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class ValueListFilterParameter extends AbstractParameterizedDimensionFilter {
 
-    private final HashSet<? extends Serializable> values;
+    private HashSet<? extends Serializable> values;
+
+    public  ValueListFilterParameter() { }
 
     public ValueListFilterParameter(DataRetrieverLevelDTO retriverLevel, FunctionDTO dimension, HashSet<? extends Serializable> values) {
         super(retriverLevel, dimension);

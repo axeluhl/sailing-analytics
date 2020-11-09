@@ -7,7 +7,9 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public abstract class TextConstrainedFilterParameter extends AbstractParameterizedDimensionFilter {
 
-    protected final String constraint;
+    private String constraint;
+    
+    public TextConstrainedFilterParameter() { }
 
     public TextConstrainedFilterParameter(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension, String constraint) {
         super(retrieverLevel, dimension);

@@ -11,8 +11,8 @@ import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 
 public class ModifiableDataMiningReportParametersDTO implements DataMiningReportParametersDTO {
     
-    private final HashSet<FilterDimensionParameter> parameters;
-    private final HashMap<Integer, HashSet<FilterDimensionParameter>> usages;
+    private HashSet<FilterDimensionParameter> parameters;
+    private HashMap<Integer, HashSet<FilterDimensionParameter>> usages;
     
     public ModifiableDataMiningReportParametersDTO() {
         parameters = new HashSet<>();

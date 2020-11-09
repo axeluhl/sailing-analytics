@@ -10,8 +10,10 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public abstract class AbstractParameterizedDimensionFilter implements FilterDimensionParameter {
 
-    private final DataRetrieverLevelDTO retrieverLevel;
-    private final FunctionDTO dimension;
+    private DataRetrieverLevelDTO retrieverLevel;
+    private FunctionDTO dimension;
+
+    public AbstractParameterizedDimensionFilter() { }
     
     public AbstractParameterizedDimensionFilter(DataRetrieverLevelDTO retrieverLevel, FunctionDTO dimension) {
         this.retrieverLevel = retrieverLevel;
