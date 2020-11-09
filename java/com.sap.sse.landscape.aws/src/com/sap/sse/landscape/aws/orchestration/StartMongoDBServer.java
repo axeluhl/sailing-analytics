@@ -213,7 +213,7 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         @Override
         public StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException {
             setTags(Optional.of(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoProcess.DEFAULT_PORT)));
-            if (getSecurityGroups() == null) {
+            if (!isSecurityGroupsSet()) {
                 setSecurityGroups(Collections.singleton(getLandscape().getDefaultSecurityGroupForMongoDBHosts(getRegion())));
             }
             return new StartMongoDBServer<>(this);

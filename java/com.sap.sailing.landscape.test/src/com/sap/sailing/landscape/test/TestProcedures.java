@@ -91,6 +91,7 @@ public class TestProcedures {
             assertEquals(AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME, inRs.getReplicaSet().getName());
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
+            throw e;
         } finally {
             if (startMongoDBServerProcedure.getHost() != null) {
                 startMongoDBServerProcedure.getHost().terminate();

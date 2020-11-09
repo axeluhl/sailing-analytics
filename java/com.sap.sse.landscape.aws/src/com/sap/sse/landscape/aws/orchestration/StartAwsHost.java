@@ -246,6 +246,10 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         protected Iterable<SecurityGroup> getSecurityGroups() {
             return securityGroups == null ? Collections.singleton(getLandscape().getDefaultSecurityGroupForApplicationHosts(getRegion())) : securityGroups;
         }
+        
+        protected boolean isSecurityGroupsSet() {
+            return securityGroups != null;
+        }
 
         @Override
         public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setSecurityGroups(
