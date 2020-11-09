@@ -2,6 +2,5 @@
   xmlns:g="urn:import:com.google.gwt.user.client.ui">
     
   <g:HTMLPanel tag="header" ui:field="headerPanel">
-
   </g:HTMLPanel>
 </ui:UiBinder>
