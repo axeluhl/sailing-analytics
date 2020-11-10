@@ -1,7 +1,10 @@
 package com.sap.sailing.selenium.api.coursetemplate;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.MarkType;
@@ -21,6 +24,8 @@ public class MarkProperties extends JsonWrapper {
     private static final String FIELD_POSITIONING_DEVICE_IDENTIFIER = "device_identifier";
     private static final String FIELD_POSITIONING_FIXED_POSITION_LATDEG = "latitude_deg";
     private static final String FIELD_POSITIONING_FIXED_POSITION_LONDEG = "longitude_deg";
+    private static final String FIELD_TAGS = "tag";
+    
 
     public MarkProperties(JSONObject json) {
         super(json);
@@ -78,6 +83,17 @@ public class MarkProperties extends JsonWrapper {
     public Double getLonDeg() {
         final JSONObject position = (JSONObject) ((JSONObject) get(FIELD_POSITIONING)).get(FIELD_POSITIONING_POSITION);
         return (Double) (position == null ? null : position.get(FIELD_POSITIONING_FIXED_POSITION_LONDEG));
+    }
+    
+    public Set<String> getTags() {
+        JSONArray jsonTags = get(FIELD_TAGS);
+        final Set<String> tags = new HashSet<>();
+        if(jsonTags != null) {
+            for(Object tag : jsonTags) {
+                tags.add(tag.toString());
+            }
+        }
+        return tags;
     }
 
     public void setLonDeg(double lonDeg) {
