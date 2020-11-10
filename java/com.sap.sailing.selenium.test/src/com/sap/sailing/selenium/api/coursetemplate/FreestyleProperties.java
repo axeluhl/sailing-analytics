@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.api.coursetemplate;
 
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.selenium.api.core.JsonWrapper;
@@ -29,7 +30,8 @@ public class FreestyleProperties extends JsonWrapper {
         getJson().put(FIELD_SHAPE, shape);
         getJson().put(FIELD_PATTERN, pattern);
         getJson().put(FIELD_MARK_TYPE, markType);
-        getJson().put(FIELD_TAG, tags);
+        JSONArray jsonTags = new JSONArray(tags);
+        getJson().put(FIELD_TAG, jsonTags);
     }
 
     public String getName() {
