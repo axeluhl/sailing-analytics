@@ -96,8 +96,8 @@ public class TestProcedures {
             sshChannel.sendCommandLineSynchronously("ls "+SailingAnalyticsHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
             final String result = sshChannel.getStreamContentsAsString();
             assertTrue(result.isEmpty());
-            final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "/").openConnection();
-            assertEquals(200, connection.getResponseCode());
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
+            assertTrue(connection.getHeaderField("Server").startsWith("Apache"));
             connection.disconnect();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
