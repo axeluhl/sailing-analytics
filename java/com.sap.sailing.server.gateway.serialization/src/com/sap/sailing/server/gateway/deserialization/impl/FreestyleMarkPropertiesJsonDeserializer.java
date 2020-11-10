@@ -13,20 +13,21 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.FreestyleMarkPropertiesJsonSerializer;
 
-public class FreestyleMarkPropertiesJsonDeserializer
-        implements JsonDeserializer<FreestyleMarkProperties> {
+public class FreestyleMarkPropertiesJsonDeserializer implements JsonDeserializer<FreestyleMarkProperties> {
     private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
-    
+
     public FreestyleMarkPropertiesJsonDeserializer() {
         this.commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesJsonDeserializer();
     }
 
     @Override
     public FreestyleMarkProperties deserialize(JSONObject json) throws JsonDeserializationException {
-        JSONArray tagsArray = Helpers.getNestedArraySafe(json, FreestyleMarkPropertiesJsonSerializer.FIELD_TAGS);
+        Object tagsArray = json.get(FreestyleMarkPropertiesJsonSerializer.FIELD_TAGS);
         final Set<String> tags = new HashSet<>();
-        for(Object tag:tagsArray) {
-            tags.add(tag.toString());
+        if (tagsArray != null && tagsArray instanceof JSONArray) {
+            for (Object tag : (JSONArray) tagsArray) {
+                tags.add(tag.toString());
+            }
         }
         CommonMarkProperties commonMarkProperties = commonMarkPropertiesJsonDeserializer.deserialize(json);
         return new FreestyleMarkPropertiesImpl(commonMarkProperties, tags);
