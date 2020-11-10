@@ -42,15 +42,17 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * The following defaults, in addition to the defaults implemented by the more general {@link StartAwsHost.Builder},
      * are:
      * <ul>
-     * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the {@link #getServerName() server name}
-     * by pre-pending the prefix "SL ".</li>
+     * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the
+     * {@link #getServerName() server name} by pre-pending the prefix "SL ".</li>
      * <li>Uses the latest machine image of the type described by
-     * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit {@link #setMachineImage(AmazonMachineImage) machine image is set}
-     * and no {@link #setImageType(String) image type is set} of which the latest version would be used otherwise.</li>
+     * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
+     * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
+     * is set} of which the latest version would be used otherwise.</li>
      * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
      * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
      * getLatestMasterRelease()} will be used instead.</li>
-     * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {@link /home/sailing/servers/server}</li>
+     * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {code /home/sailing/servers/server}
+     * (see {@link SailingAnalyticsHost#DEFAULT_SERVER_PATH})</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -126,7 +128,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
 
         // TODO the host start-up should ideally be separated from the process installation/startup
         public String getDefaultServerDirectory() {
-            return defaultServerDirectory == null ? "/home/sailing/servers/server" : defaultServerDirectory;
+            return defaultServerDirectory == null ? SailingAnalyticsHost.DEFAULT_SERVER_PATH : defaultServerDirectory;
         }
 
         @Override

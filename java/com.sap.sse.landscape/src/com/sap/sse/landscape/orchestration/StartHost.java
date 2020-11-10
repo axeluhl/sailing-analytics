@@ -43,6 +43,8 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends Host> {
+        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType);
+
         T build() throws UnknownHostException, URISyntaxException, JSchException, IOException, InterruptedException;
     }
     
@@ -79,7 +81,8 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             return imageType;
         }
 
-        protected Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType) {
+        @Override
+        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType) {
             this.imageType = imageType;
             return this;
         }

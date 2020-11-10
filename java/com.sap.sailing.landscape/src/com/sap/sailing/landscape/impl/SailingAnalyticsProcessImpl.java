@@ -24,7 +24,7 @@ SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> imple
     private static final String HEALTH_CHECK_PATH = "/gwt/status";
 
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
-        super(port, host, "/home/sailing/servers/server");
+        super(port, host, serverDirectory);
     }
     
     @Override

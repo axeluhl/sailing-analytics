@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -26,6 +28,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
@@ -73,6 +76,38 @@ public class TestProcedures {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
+    }
+    
+    @Test
+    public void testStartupEmptyMultiServer() throws Exception {
+        final String keyName = "MyKey-"+UUID.randomUUID();
+        landscape.createKeyPair(region, keyName);
+        final StartMultiServer.Builder<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMultiServer.builder();
+        final StartMultiServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startEmptyMultiServer = builder
+              .setLandscape(landscape)
+              .setKeyName(keyName)
+              .setOptionalTimeout(optionalTimeout)
+              .build();
+        try {
+            // this is expected to have connected to the default "live" replica set.
+            startEmptyMultiServer.run();
+            final AwsInstance<String, SailingAnalyticsMetrics> host = startEmptyMultiServer.getHost();
+            final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
+            sshChannel.sendCommandLineSynchronously("ls "+SailingAnalyticsHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
+            final String result = sshChannel.getStreamContentsAsString();
+            assertTrue(result.isEmpty());
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "/").openConnection();
+            assertEquals(200, connection.getResponseCode());
+            connection.disconnect();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
+            throw e;
+        } finally {
+            if (startEmptyMultiServer.getHost() != null) {
+                startEmptyMultiServer.getHost().terminate();
+            }
+            landscape.deleteKeyPair(region, keyName);
+        }
     }
     
     @Test

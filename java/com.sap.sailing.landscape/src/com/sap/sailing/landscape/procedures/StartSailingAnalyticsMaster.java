@@ -7,14 +7,16 @@ import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 /**
  * This procedure does two things: it {@link StartSailingAnalyticsHost starts} a {@link SailingAnalyticsHost}, and
- * (currently implicitly, based on the way the /etc/init.d/sailing script works) also starts a "master" process
- * that is expected to have the default working directory {@code /home/sailing/servers/server}.<p>
+ * (currently implicitly, based on the way the /etc/init.d/sailing script works) also starts a "master" process that is
+ * expected to have the default working directory {@code /home/sailing/servers/server} (see
+ * {@link SailingAnalyticsHost#DEFAULT_SERVER_PATH}).
+ * <p>
  * 
  * TODO What we should probably be doing instead is harmonize the way the set-up / launching of a regular default master
  * works with how a {@link StartMultiServer multi-server is started}. We could start both empty, with only the default
  * reverse proxy mappings for {@code internal-server-status} and the plain access through the {@code ec2-...} hostname.
  * From there on, all process launching and stopping would work through the {@link DeployProcessOnMultiServer} procedure
- * (which then should be renamed to {@code DeployApplicationProcessOnServer}). That procedure then would have the 
+ * (which then should be renamed to {@code DeployApplicationProcessOnServer}). That procedure then would have the
  *
  * @author Axel Uhl (D043530)
  */

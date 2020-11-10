@@ -88,10 +88,6 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setMachineImage(AmazonMachineImage<ShardingKey, MetricsT> machineImage);
-        
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType);
-
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release);
 
         Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
@@ -138,8 +134,6 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.BuilderImpl<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
     implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        private AmazonMachineImage<ShardingKey, MetricsT> machineImage;
-        private String imageType;
         private Optional<Release> release = Optional.empty();
         private AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
         private InstanceType instanceType;
@@ -160,32 +154,6 @@ extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
         private Optional<Duration> optionalTimeout;
         private HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier;
         
-        protected AmazonMachineImage<ShardingKey, MetricsT> getMachineImage() {
-            return machineImage == null ? getLandscape().getLatestImageWithTag((Region) getRegion(), IMAGE_TYPE_TAG_NAME, getImageType()) : machineImage;
-        }
-
-        @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setMachineImage(
-                AmazonMachineImage<ShardingKey, MetricsT> machineImage) {
-            this.machineImage = machineImage;
-            return this;
-        }
-
-        /**
-         * When not {@code null}, the newest {@link AmazonMachineImage} tagged with a tag named as specified by the constant {@link #IMAGE_TYPE_TAG_NAME}
-         * with the value provided by the result of this method will be searched and will be used as the default for {@link #getMachineImage()}.
-         */
-        protected String getImageType() {
-            return imageType;
-        }
-
-        @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(
-                String imageType) {
-            this.imageType = imageType;
-            return this;
-        }
-
         /**
          * By default, the release pre-deployed in the image will be used, represented by an empty {@link Optional}
          * returned by this default method implementation.
