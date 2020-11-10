@@ -1,10 +1,5 @@
 package com.sap.sse.landscape.orchestration;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
@@ -43,16 +38,9 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends Host> {
+    HostT extends Host>
+    extends com.sap.sse.common.Builder<BuilderT, T> {
         BuilderT setImageType(String imageType);
-
-        T build() throws UnknownHostException, URISyntaxException, JSchException, IOException, InterruptedException;
-        
-        default BuilderT self() {
-            @SuppressWarnings("unchecked")
-            final BuilderT self = (BuilderT) this;
-            return self;
-        }
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,

@@ -102,8 +102,6 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         BuilderT setReplicaSetPriority(int replicaSetPriority);
         
         BuilderT setReplicaSetVotes(int replicaSetVotes);
-        
-        StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException;
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,

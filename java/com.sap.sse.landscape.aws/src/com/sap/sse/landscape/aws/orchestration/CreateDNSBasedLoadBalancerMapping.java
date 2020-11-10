@@ -112,8 +112,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
         @Override
         public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
-//            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>(this);
-            return null;
+            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>(this);
         }
     }
     
