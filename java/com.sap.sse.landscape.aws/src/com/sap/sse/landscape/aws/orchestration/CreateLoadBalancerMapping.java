@@ -93,37 +93,41 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setProcess(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process);
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setHostname(String hostname);
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTimeout(Duration timeout);
+    extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        BuilderT setProcess(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process);
+        BuilderT setHostname(String hostname);
+        BuilderT setTimeout(Duration timeout);
     }
     
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends ProcedureWithTargetGroup.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         private String hostname;
         private ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
         private Optional<Duration> optionalTimeout = Optional.empty();
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setProcess(
+        public BuilderT setProcess(
                 ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
             this.process = process;
-            return this;
+            return self();
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setHostname(String hostname) {
+        public BuilderT setHostname(String hostname) {
             this.hostname = hostname;
-            return this;
+            return self();
         }
 
         public String getHostname() {
@@ -135,9 +139,9 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setTimeout(Duration timeout) {
+        public BuilderT setTimeout(Duration timeout) {
             this.optionalTimeout = Optional.of(timeout);
-            return this;
+            return self();
         }
 
         public Optional<Duration> getOptionalTimeout() {
@@ -165,7 +169,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
         super(builder);
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();

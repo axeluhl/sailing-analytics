@@ -24,18 +24,20 @@ MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterPro
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
 implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException;
+    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
     }
     
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         @Override
         public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
             final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
@@ -71,18 +73,21 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
         @Override
         public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
-            return new CreateDynamicLoadBalancerMapping<>(this);
+            return new CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>(this);
         }
     }
 
-    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static <MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
-        return new BuilderImpl<>();
+    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    HostT extends AwsInstance<ShardingKey, MetricsT>,
+    BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    ShardingKey>
+    Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
+        return new BuilderImpl<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>();
     }
 
-    protected CreateDynamicLoadBalancerMapping(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateDynamicLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
         super(builder);
     }
 }

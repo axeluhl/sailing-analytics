@@ -27,7 +27,6 @@ import org.junit.Test;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -79,7 +78,7 @@ public class ConnectivityTest {
     
     @Test
     public <MasterT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>, ReplicaT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>>
-    void testConnectivity() throws JSchException, IOException, SftpException, NumberFormatException, InterruptedException {
+    void testConnectivity() throws Exception {
         final String TARGET_GROUP_NAME_PREFIX = "S-test-";
         final String hostedZoneName = "wiesen-weg.de";
         final String hostname = "test-"+new Random().nextInt()+"."+hostedZoneName;
@@ -113,7 +112,7 @@ public class ConnectivityTest {
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
             @SuppressWarnings("unchecked")
             final AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT> castLandscape = (AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT>) landscape;
-            final CreateDNSBasedLoadBalancerMapping.Builder<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
+            final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
             builder
                 .setProcess(process)
                 .setHostname(hostname)

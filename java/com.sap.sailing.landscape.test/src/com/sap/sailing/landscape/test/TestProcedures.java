@@ -230,7 +230,7 @@ public class TestProcedures {
             // Now create an ALB mapping, assuming to create the dynamic ALB:
             final String domain = "wiesen-weg.de";
             final String hostname = serverName+"."+domain;
-            CreateDynamicLoadBalancerMapping.Builder<String, SailingAnalyticsMetrics,
+            CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics,
             SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
             createAlbProcedureBuilder
                 .setProcess(process)
