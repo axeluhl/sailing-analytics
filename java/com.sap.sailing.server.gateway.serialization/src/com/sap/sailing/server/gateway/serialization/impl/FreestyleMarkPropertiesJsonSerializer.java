@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
@@ -18,7 +19,11 @@ public class FreestyleMarkPropertiesJsonSerializer implements JsonSerializer<Fre
     @Override
     public JSONObject serialize(FreestyleMarkProperties commonMarkProperties) {
         JSONObject result = commonMarkPropertiesJsonSerializer.serialize(commonMarkProperties);
-        result.put(FIELD_TAGS, commonMarkProperties.getTags().toString());
+        JSONArray jsonTags = new JSONArray();
+        for (String tag : commonMarkProperties.getTags()) {
+            jsonTags.add(tag);
+        }
+        result.put(FIELD_TAGS, jsonTags);
         return result;
     }
 }
