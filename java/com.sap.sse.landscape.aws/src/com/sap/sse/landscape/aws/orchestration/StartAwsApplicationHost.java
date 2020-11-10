@@ -47,34 +47,36 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release);
+    extends StartAwsHost.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+        BuilderT setRelease(Optional<Release> release);
 
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName);
+        BuilderT setServerName(String serverName);
         
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName);
+        BuilderT setDatabaseName(String databaseName);
         
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
+        BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
 
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
+        BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
+        BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
 
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration);
+        BuilderT setDatabaseConfiguration(Database databaseConfiguration);
     }
     
-    protected abstract static class BuilderImpl<T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.BuilderImpl<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         private Optional<Release> release = Optional.empty();
         private String serverName;
         private String databaseName;
@@ -92,9 +94,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRelease(Optional<Release> release) {
+        public BuilderT setRelease(Optional<Release> release) {
             this.release = release;
-            return this;
+            return self();
         }
 
         protected String getServerName() {
@@ -102,9 +104,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
         
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setServerName(String serverName) {
+        public BuilderT setServerName(String serverName) {
             this.serverName = serverName;
-            return this;
+            return self();
         }
 
         protected String getDatabaseName() {
@@ -112,9 +114,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
         
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseName(String databaseName) {
+        public BuilderT setDatabaseName(String databaseName) {
             this.databaseName = databaseName;
-            return this;
+            return self();
         }
 
         protected Database getDatabaseConfiguration() {
@@ -122,9 +124,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setDatabaseConfiguration(Database databaseConfiguration) {
+        public BuilderT setDatabaseConfiguration(Database databaseConfiguration) {
             this.databaseConfiguration = databaseConfiguration;
-            return this;
+            return self();
         }
 
         protected RabbitMQEndpoint getRabbitConfiguration() {
@@ -132,9 +134,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
+        public BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
             this.rabbitConfiguration = rabbitConfiguration;
-            return this;
+            return self();
         }
         
         protected boolean isOutboundReplicationExchangeNameSet() {
@@ -167,9 +169,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration) {
+        public BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration) {
             this.outboundReplicationConfiguration = outboundReplicationConfiguration;
-            return this;
+            return self();
         }
         
         protected Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
@@ -187,14 +189,14 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Hos
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
+        public BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
             this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
-            return this;
+            return self();
         }
     }
     
     protected StartAwsApplicationHost(
-            BuilderImpl<? extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+            BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
         super(builder);
         builder.getRelease().ifPresent(this::addUserData);
         addUserData(builder.getDatabaseConfiguration());

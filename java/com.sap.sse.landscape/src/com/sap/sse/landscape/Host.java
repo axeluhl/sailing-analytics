@@ -26,10 +26,10 @@ public interface Host {
      * Obtains the public IP address of this host, waiting for one to become available for the duration of
      * {@code timeout}, or forever in case {@code timeout} is {@code null}
      * 
-     * @param timeoutNullMeaningForever
+     * @param timeoutEmptyMeaningForever
      *            if {@code null}, waits forever
      */
-    InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever);
+    InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever);
     
     /**
      * Obtains the private IP address of this host. Note that during the boot phase and after shutdown/termination a host
@@ -43,10 +43,10 @@ public interface Host {
      * Obtains the private IP address of this host, waiting for one to become available for the duration of
      * {@code timeout}, or forever in case {@code timeout} is {@code null}
      * 
-     * @param timeoutNullMeaningForever
+     * @param timeoutEmptyMeaningForever
      *            if {@code null}, waits forever
      */
-    InetAddress getPrivateAddress(Optional<Duration> timeoutNullMeaningForever);
+    InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever);
 
     /**
      * Connects to an SSH session for the username specified, using the SSH key pair used to launch the instance, and

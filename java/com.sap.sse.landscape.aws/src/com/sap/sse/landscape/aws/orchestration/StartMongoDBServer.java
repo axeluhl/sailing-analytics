@@ -42,7 +42,9 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * 
  * To start a primary, only specify the desired replica set name and leave the primary specification empty {@code null}.
  * In this case no other node tagged for the desired replica set will be found, and the new instance will become the
- * first primary of the new replica set.
+ * first primary of the new replica set.<p>
+ * 
+ * TODO Why is the MetricsT parameter necessary when there is MongoMetrics?
  * 
  * @author Axel Uhl (D043530)
  */
@@ -83,31 +85,33 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartAwsHost.Builder<StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
+    extends StartAwsHost.Builder<BuilderT, StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
         /**
          * The default {@link #setImageType(String) image type} used for launching a MongoDB server.
          */
         String MONGODB_SERVER_IMAGE_TYPE = "mongodb-server";
         
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetName(String replicaSetName);
+        BuilderT setReplicaSetName(String replicaSetName);
         
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetPrimary(String replicaSetPrimary);
+        BuilderT setReplicaSetPrimary(String replicaSetPrimary);
         
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetPriority(int replicaSetPriority);
+        BuilderT setReplicaSetPriority(int replicaSetPriority);
         
-        Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetVotes(int replicaSetVotes);
+        BuilderT setReplicaSetVotes(int replicaSetVotes);
         
         StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException;
     }
     
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartAwsHost.BuilderImpl<StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    extends StartAwsHost.BuilderImpl<BuilderT, StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
+    implements Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         private String replicaSetName = AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME;
         private String replicaSetPrimary;
         private boolean replicaSetPrimaryWasSetExplicitly = false;
@@ -124,28 +128,28 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetName(String replicaSetName) {
+        public BuilderT setReplicaSetName(String replicaSetName) {
             this.replicaSetName = replicaSetName;
-            return this;
+            return self();
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetPrimary(String replicaSetPrimary) {
+        public BuilderT setReplicaSetPrimary(String replicaSetPrimary) {
             this.replicaSetPrimary = replicaSetPrimary;
             this.replicaSetPrimaryWasSetExplicitly = true;
-            return this;
+            return self();
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetPriority(int replicaSetPriority) {
+        public BuilderT setReplicaSetPriority(int replicaSetPriority) {
             this.replicaSetPriority = replicaSetPriority;
-            return this;
+            return self();
         }
 
         @Override
-        public Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> setReplicaSetVotes(int replicaSetVotes) {
+        public BuilderT setReplicaSetVotes(int replicaSetVotes) {
             this.replicaSetVotes = replicaSetVotes;
-            return this;
+            return self();
         }
 
         protected String getReplicaSetName() {
@@ -220,14 +224,14 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         }
     }
     
-    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
+    Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
         return new BuilderImpl<>();
     }
     
-    protected StartMongoDBServer(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) throws URISyntaxException, JSchException, IOException, InterruptedException {
+    protected StartMongoDBServer(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) throws URISyntaxException, JSchException, IOException, InterruptedException {
         super(builder);
         this.replicaSetName = builder.getReplicaSetName();
         if (builder.getReplicaSetName() != null) {

@@ -57,20 +57,22 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.Builder<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
-        Builder<T, ShardingKey, ProcessT> setPort(int port);
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
+    T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
+    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
+        BuilderT setPort(int port);
 
-        Builder<T, ShardingKey, ProcessT> setTelnetPort(int telnetPort);
+        BuilderT setTelnetPort(int telnetPort);
 
-        Builder<T, ShardingKey, ProcessT> setExpeditionPort(int expeditionPort);
+        BuilderT setExpeditionPort(int expeditionPort);
         
-        Builder<T, ShardingKey, ProcessT> setDefaultServerDirectory(String serverDirectory);
+        BuilderT setDefaultServerDirectory(String serverDirectory);
     }
     
-    protected abstract static class BuilderImpl<T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.BuilderImpl<T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
-    implements Builder<T, ShardingKey, ProcessT> {
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
+    T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
+    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<BuilderT, T, ShardingKey, ProcessT> {
         private Integer port;
         private Integer telnetPort;
         private Integer expeditionPort;
@@ -101,9 +103,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
         
         @Override
-        public Builder<T, ShardingKey, ProcessT> setPort(int port) {
+        public BuilderT setPort(int port) {
             this.port = port;
-            return this;
+            return self();
         }
         
         public Integer getTelnetPort() {
@@ -111,9 +113,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
         
         @Override
-        public Builder<T, ShardingKey, ProcessT> setTelnetPort(int telnetPort) {
+        public BuilderT setTelnetPort(int telnetPort) {
             this.telnetPort = telnetPort;
-            return this;
+            return self();
         }
 
         public Integer getExpeditionPort() {
@@ -121,9 +123,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
         
         @Override
-        public Builder<T, ShardingKey, ProcessT> setExpeditionPort(int expeditionPort) {
+        public BuilderT setExpeditionPort(int expeditionPort) {
             this.expeditionPort = expeditionPort;
-            return this;
+            return self();
         }
 
         // TODO the host start-up should ideally be separated from the process installation/startup
@@ -132,13 +134,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
 
         @Override
-        public Builder<T, ShardingKey, ProcessT> setDefaultServerDirectory(String defaultServerDirectory) {
+        public BuilderT setDefaultServerDirectory(String defaultServerDirectory) {
             this.defaultServerDirectory = defaultServerDirectory;
-            return this;
+            return self();
         }
     }
     
-    protected StartSailingAnalyticsHost(BuilderImpl<? extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT> builder) {
+    protected StartSailingAnalyticsHost(BuilderImpl<?, ? extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT> builder) {
         super(builder);
         // remember the port we need in order to hand out the process
         this.port = builder.getPort();

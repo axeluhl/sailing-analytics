@@ -24,18 +24,18 @@ public class StartSailingAnalyticsMaster<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsMaster<ShardingKey>> {
     private static final String DEFAULT_MASTER_INSTANCE_NAME_SUFFIX = " (Master)";
     
-    public static interface Builder<ShardingKey>
-    extends StartSailingAnalyticsHost.Builder<StartSailingAnalyticsMaster<ShardingKey>, ShardingKey, SailingAnalyticsMaster<ShardingKey>> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey, SailingAnalyticsMaster<ShardingKey>> {
     }
     
     // TODO model an AwsLandscape subclass describing the specifics of the Sailing landscape, with a central security service that a master replicates by default
     
-    protected static class BuilderImpl<ShardingKey>
-    extends StartSailingAnalyticsHost.BuilderImpl<StartSailingAnalyticsMaster<ShardingKey>, ShardingKey, SailingAnalyticsMaster<ShardingKey>>
-    implements Builder<ShardingKey> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey, SailingAnalyticsMaster<ShardingKey>>
+    implements Builder<BuilderT, ShardingKey> {
         @Override
         public StartSailingAnalyticsMaster<ShardingKey> build() {
-            return new StartSailingAnalyticsMaster<ShardingKey>(this);
+            return new StartSailingAnalyticsMaster<>(this);
         }
 
         @Override
@@ -44,11 +44,11 @@ public class StartSailingAnalyticsMaster<ShardingKey>
         }
     }
     
-    public static <ShardingKey> Builder<ShardingKey> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
         return new BuilderImpl<>();
     }
 
-    protected StartSailingAnalyticsMaster(BuilderImpl<ShardingKey> builder) {
+    protected StartSailingAnalyticsMaster(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
         addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }

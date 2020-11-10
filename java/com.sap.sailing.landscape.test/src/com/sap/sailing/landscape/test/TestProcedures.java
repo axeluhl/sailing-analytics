@@ -35,7 +35,9 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -82,7 +84,7 @@ public class TestProcedures {
     public void testStartupEmptyMultiServer() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartMultiServer.Builder<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMultiServer.builder();
+        final StartMultiServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMultiServer.builder();
         final StartMultiServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
@@ -114,7 +116,7 @@ public class TestProcedures {
     public void testAddMongoReplica() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartMongoDBServer.Builder<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMongoDBServer.builder();
+        final StartMongoDBServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMongoDBServer.builder();
         final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startMongoDBServerProcedure = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
@@ -161,7 +163,7 @@ public class TestProcedures {
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
+        final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
         final UpgradeAmi<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
@@ -185,33 +187,11 @@ public class TestProcedures {
     }
     
     @Test
-    public void testMongoReplica() throws Exception {
-        final Builder<String, ApplicationProcessMetrics, ?, ?> startMongoDBServerProcedureBuilder = StartMongoDBServer.builder();
-        final StartMongoDBServer<String, ApplicationProcessMetrics, ?, ?> startMongoDBServerProcedure = startMongoDBServerProcedureBuilder.build();
-        // by default this should add a replica to the only "live" server in the test landscape
-        try {
-            startMongoDBServerProcedure.run();
-            final AwsInstance<String, ApplicationProcessMetrics> host = startMongoDBServerProcedure.getHost();
-            final String internalDNSName = landscape.getInstance(host.getInstanceId(), region).privateDnsName();
-            // now configure a MongoEndpoint against the replica just launched and try to connect (with a timeout)
-            final MongoEndpoint mongoEndpoint = landscape.getDatabaseConfigurationForDefaultReplicaSet(region);
-            final MongoClient mongoClient = mongoEndpoint.getClient();
-            final MongoDatabase database = mongoClient.getDatabase("admin");
-            final Document replicaSetStatus = database.runCommand(new Document("replSetGetStatus", 1));
-            @SuppressWarnings("unchecked")
-            final List<Document> members = (List<Document>) replicaSetStatus.get("members");
-            assertTrue(members.stream().filter(member->member.get("name").equals(internalDNSName+":27017")).findAny().isPresent());
-        } finally {
-            startMongoDBServerProcedure.getHost().terminate();
-        }
-    }
-    
-    @Test
     public void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartSailingAnalyticsMaster.Builder<String> builder = StartSailingAnalyticsMaster.builder();
+        final StartSailingAnalyticsMaster.Builder<?, String> builder = StartSailingAnalyticsMaster.builder();
         final StartSailingAnalyticsMaster<String> startSailingAnalyticsMaster = builder
                 .setServerName(serverName)
                 .setLandscape(landscape)

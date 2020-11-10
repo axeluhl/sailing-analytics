@@ -38,22 +38,30 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends Host> {
-        Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType);
+        BuilderT setImageType(String imageType);
 
         T build() throws UnknownHostException, URISyntaxException, JSchException, IOException, InterruptedException;
+        
+        default BuilderT self() {
+            @SuppressWarnings("unchecked")
+            final BuilderT self = (BuilderT) this;
+            return self;
+        }
     }
     
-    protected abstract static class BuilderImpl<T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends Host>
-    implements Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         private MachineImage machineImage;
         private Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
         private Region region;
@@ -67,14 +75,14 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             return region;
         }
 
-        protected Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setRegion(Region region) {
+        protected BuilderT setRegion(Region region) {
             this.region = region;
-            return this;
+            return self();
         }
 
-        protected Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setMachineImage(MachineImage machineImage) {
+        protected BuilderT setMachineImage(MachineImage machineImage) {
             this.machineImage = machineImage;
-            return this;
+            return self();
         }
         
         protected String getImageType() {
@@ -82,22 +90,22 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         }
 
         @Override
-        public Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setImageType(String imageType) {
+        public BuilderT setImageType(String imageType) {
             this.imageType = imageType;
-            return this;
+            return self();
         }
 
         protected Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
             return landscape;
         }
 
-        protected Builder<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> setLandscape(Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+        protected BuilderT setLandscape(Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
             this.landscape = landscape;
-            return this;
+            return self();
         }
     }
     
-    protected StartHost(BuilderImpl<? extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+    protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
         super(builder.getLandscape());
         this.machineImage = builder.getMachineImage();
     }

@@ -78,17 +78,17 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
      * </ul>
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey,
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.Builder<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
 
-        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setUpgradedImageName(String upgradedImageName);
+        BuilderT setUpgradedImageName(String upgradedImageName);
 
-        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement);
+        BuilderT setVersionPartToIncrement(VersionPart versionPartToIncrement);
         
         /**
          * It is possible to assign base names for snapshots based on their device name in the AMI. For example, "/dev/sdc" may
@@ -97,14 +97,14 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
          * a block device mapping to a snapshot exists, the snapshot will only be named after the AMI's name, so when multiple snapshots
          * are connected to the AMI then their names will not be discernible.
          */
-        Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setSnapshotBaseName(String deviceName, String snapshotBaseName);
+        BuilderT setSnapshotBaseName(String deviceName, String snapshotBaseName);
     }
 
-    protected static class BuilderImpl<ShardingKey,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
-    implements Builder<ShardingKey, MasterProcessT, ReplicaProcessT> {
+    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
         private final Map<String, String> deviceNamesToSnapshotBaseNames;
@@ -126,9 +126,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
-        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setVersionPartToIncrement(VersionPart versionPartToIncrement) {
+        public BuilderT setVersionPartToIncrement(VersionPart versionPartToIncrement) {
             this.versionPartToIncrement = versionPartToIncrement;
-            return this;
+            return self();
         }
 
         private String increaseVersionNumber(String imageName) {
@@ -168,15 +168,15 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
-        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setUpgradedImageName(String upgradedImageName) {
+        public BuilderT setUpgradedImageName(String upgradedImageName) {
             this.upgradedImageName = upgradedImageName;
-            return this;
+            return self();
         }
 
         @Override
-        public Builder<ShardingKey, MasterProcessT, ReplicaProcessT> setSnapshotBaseName(String deviceName, String snapshotBaseName) {
+        public BuilderT setSnapshotBaseName(String deviceName, String snapshotBaseName) {
             deviceNamesToSnapshotBaseNames.put(deviceName, snapshotBaseName);
-            return this;
+            return self();
         }
 
         @Override
@@ -201,14 +201,14 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
     }
     
-    public static <ShardingKey,
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<ShardingKey, MasterProcessT, ReplicaProcessT> builder() {
+    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT> builder() {
         return new BuilderImpl<>();
     }
     
-    protected UpgradeAmi(BuilderImpl<ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
+    protected UpgradeAmi(BuilderImpl<?, ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         upgradedImageName = builder.getUpgradedImageName();
         timeout = builder.getOptionalTimeout().orElse(null);

@@ -7,19 +7,19 @@ import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
-    public static interface Builder<ShardingKey>
-    extends StartSailingAnalyticsHost.Builder<StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
     }
     
-    protected static class BuilderImpl<ShardingKey>
-    extends StartSailingAnalyticsHost.BuilderImpl<StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>>
-    implements Builder<ShardingKey> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>>
+    implements Builder<BuilderT, ShardingKey> {
         private static final String DEFAULT_REPLICA_INSTANCE_NAME_SUFFIX = " (Replica)";
         private static final String DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX = "-replica";
 
         @Override
         public StartSailingAnalyticsReplica<ShardingKey> build() {
-            return new StartSailingAnalyticsReplica<ShardingKey>(this);
+            return new StartSailingAnalyticsReplica<>(this);
         }
 
         @Override
@@ -43,11 +43,11 @@ public class StartSailingAnalyticsReplica<ShardingKey>
         }
     }
     
-    public static <ShardingKey> Builder<ShardingKey> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
         return new BuilderImpl<>();
     }
     
-    protected StartSailingAnalyticsReplica(BuilderImpl<ShardingKey> builder) {
+    protected StartSailingAnalyticsReplica(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
         addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }

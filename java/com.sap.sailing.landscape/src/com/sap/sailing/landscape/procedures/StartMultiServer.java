@@ -48,18 +48,20 @@ implements StartFromSailingAnalyticsImage {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.Builder<StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
+    extends StartEmptyServer.Builder<BuilderT, StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
     }
     
-    protected static class BuilderImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    extends StartEmptyServer.BuilderImpl<BuilderT, StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    implements Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         @Override
         public StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() {
             return new StartMultiServer<>(this);
@@ -109,14 +111,15 @@ implements StartFromSailingAnalyticsImage {
         }
     }
     
-    public static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ShardingKey, MetricsT extends ApplicationProcessMetrics,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    Builder<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
+    Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
         return new BuilderImpl<>();
     }
 
-    protected StartMultiServer(BuilderImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) {
+    protected StartMultiServer(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) {
         super(builder);
         this.optionalTimeout = builder.getOptionalTimeout();
     }

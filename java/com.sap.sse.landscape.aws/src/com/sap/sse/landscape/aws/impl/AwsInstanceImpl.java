@@ -75,13 +75,18 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     }
     
     @Override
-    public InetAddress getPrivateAddress(Optional<Duration> timeoutNullMeaningForever) {
-        return getAddressWithTimeout(timeoutNullMeaningForever, this::getPrivateAddress);
+    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPublicAddress);
     }
-
+    
     @Override
     public InetAddress getPrivateAddress() {
         return getIpAddress(Instance::privateIpAddress);
+    }
+    
+    @Override
+    public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
     }
 
     private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
@@ -115,11 +120,6 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         return result;
     }
     
-    @Override
-    public InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever) {
-        return getAddressWithTimeout(timeoutNullMeaningForever, this::getPublicAddress);
-    }
-
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
@@ -230,5 +230,10 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public void terminate() {
         landscape.terminate(this);
+    }
+    
+    @Override
+    public String toString() {
+        return getInstanceId();
     }
 }
