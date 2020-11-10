@@ -2,35 +2,42 @@ package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 
 public class TrackingConnectorInfoDTO implements IsSerializable {
-    private TrackingConnectorType trackingConnectorType;
+    private String trackingConnectorName;
+    private String trackingConnectorDefaultUrl;
     private String webUrl;
 
-    TrackingConnectorInfoDTO() {
-    } // GWT serialization
+    @Deprecated
+    TrackingConnectorInfoDTO() {} // GWT serialization
 
     @GwtIncompatible
     public TrackingConnectorInfoDTO(TrackingConnectorInfo trackingConnectorInfo) {
-        this.trackingConnectorType = trackingConnectorInfo.getTrackingConnectorType();
+        this.trackingConnectorName = trackingConnectorInfo.getTrackingConnectorName();
+        this.trackingConnectorDefaultUrl = trackingConnectorInfo.getTrackingConnectorDefaultUrl() == null ? null
+                : trackingConnectorInfo.getTrackingConnectorDefaultUrl().toString();
         this.webUrl = trackingConnectorInfo.getWebUrl() == null ? null : trackingConnectorInfo.getWebUrl().toString();
-    }
-
-    public TrackingConnectorType getTrackingConnectorType() {
-        return trackingConnectorType;
     }
 
     public String getWebUrl() {
         return webUrl;
+    }
+    
+    public String getTrackingConnectorName() {
+        return trackingConnectorName;
+    }
+    
+    public String getTrackingConnectorDefaultUrl() {
+        return trackingConnectorDefaultUrl;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((trackingConnectorType == null) ? 0 : trackingConnectorType.hashCode());
+        result = prime * result + ((trackingConnectorDefaultUrl == null) ? 0 : trackingConnectorDefaultUrl.hashCode());
+        result = prime * result + ((trackingConnectorName == null) ? 0 : trackingConnectorName.hashCode());
         result = prime * result + ((webUrl == null) ? 0 : webUrl.hashCode());
         return result;
     }
@@ -44,7 +51,15 @@ public class TrackingConnectorInfoDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         TrackingConnectorInfoDTO other = (TrackingConnectorInfoDTO) obj;
-        if (trackingConnectorType != other.trackingConnectorType)
+        if (trackingConnectorDefaultUrl == null) {
+            if (other.trackingConnectorDefaultUrl != null)
+                return false;
+        } else if (!trackingConnectorDefaultUrl.equals(other.trackingConnectorDefaultUrl))
+            return false;
+        if (trackingConnectorName == null) {
+            if (other.trackingConnectorName != null)
+                return false;
+        } else if (!trackingConnectorName.equals(other.trackingConnectorName))
             return false;
         if (webUrl == null) {
             if (other.webUrl != null)

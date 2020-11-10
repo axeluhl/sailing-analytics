@@ -80,14 +80,15 @@ public class StoredDataMiningQueryPanel extends Composite {
     @UiHandler("saveQueryButtonUi")
     void onSaveClick(ClickEvent e) {
         String value = suggestBoxUi.getValue().trim();
-        if (dataProvider.addOrUpdateQuery(value, dataProvider.getCurrentQuery())) {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryUpdateSuccessful(value),
-                    NotificationType.SUCCESS);
-        } else {
-            Notification.notify(
-                    StringMessages.INSTANCE.dataMiningStoredQueryCreationSuccessful(value),
-                    NotificationType.SUCCESS);
-        }
+        dataProvider.addOrUpdateQuery(value, dataProvider.getCurrentQuery(), isUpdate -> {
+            if (isUpdate) {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryUpdateSuccessful(value),
+                        NotificationType.SUCCESS);
+            } else {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryCreationSuccessful(value),
+                        NotificationType.SUCCESS);
+            }
+        });
     }
 
     @UiHandler("loadQueryButtonUi")
@@ -103,14 +104,17 @@ public class StoredDataMiningQueryPanel extends Composite {
 
     @UiHandler("removeQueryButtonUi")
     void onRemoveClick(ClickEvent e) {
-        if (dataProvider.removeQuery(suggestBoxUi.getValue())) {
-            suggestBoxUi.setValue("");
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryRemovedSuccessful(suggestBoxUi.getValue()),
-                    NotificationType.SUCCESS);
-        } else {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryRemovedFailed(suggestBoxUi.getValue()),
-                    NotificationType.ERROR);
-        }
+        dataProvider.removeQuery(suggestBoxUi.getValue(), isQueryPresent -> {
+            if (isQueryPresent) {
+                suggestBoxUi.setValue("");
+                Notification.notify(
+                        StringMessages.INSTANCE.dataMiningStoredQueryRemovedSuccessful(suggestBoxUi.getValue()),
+                        NotificationType.SUCCESS);
+            } else {
+                Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryRemovedFailed(suggestBoxUi.getValue()),
+                        NotificationType.ERROR);
+            }
+        });
     }
 
     /** Updates the oracle of the suggest box with the names of the stored queries. */

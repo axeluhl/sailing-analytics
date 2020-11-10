@@ -258,7 +258,7 @@ public class RaceSummaryFragment extends BaseFragment {
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
             showData();
         }
 

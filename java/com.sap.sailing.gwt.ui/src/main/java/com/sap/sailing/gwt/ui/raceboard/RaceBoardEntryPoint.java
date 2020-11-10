@@ -2,8 +2,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import static com.sap.sailing.gwt.ui.client.SailingServiceHelper.createSailingServiceWriteInstance;
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_REPLICA;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import java.util.Collections;
 
@@ -61,7 +61,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
-                RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
+                RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
         if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()

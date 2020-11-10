@@ -60,10 +60,17 @@ public interface RankingMetric extends Serializable {
          * until {@link #competitor} has actually started.
          */
         Distance getWindwardDistanceSailed();
+        
+        /**
+         * Keeps counting, even after the competitor has finished or the entire race has finished.
+         */
+        Duration getDurationSinceStartOfRaceUntilTimePoint();
     
         /**
          * Usually the difference between {@link #timePoint} and the start of the race; <code>null</code> if the
-         * race start time is not known.
+         * race start time is not known. If the {@link #getCompetitor() competitor} has finished the race before the
+         * {@link #getTimePoint() time point}, the difference between race start time and the competitor's finish
+         * mark passing time point is used to make the time elapsed stop counting after finishing the race.
          */
         Duration getTimeElapsed();
     
@@ -82,7 +89,7 @@ public interface RankingMetric extends Serializable {
         
         default Duration getEstimatedActualDurationFromRaceStartToCompetitorFarthestAhead() {
             final Duration estimatedActualDurationFromTimePointToCompetitorFarthestAhead = getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
-            final Duration actualTime = getTimeElapsed();
+            final Duration actualTime = getDurationSinceStartOfRaceUntilTimePoint();
             return actualTime == null ? null :
                 estimatedActualDurationFromTimePointToCompetitorFarthestAhead == null ? null :
                     actualTime.plus(estimatedActualDurationFromTimePointToCompetitorFarthestAhead);

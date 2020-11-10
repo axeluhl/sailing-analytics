@@ -25,7 +25,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.mongodb.mongo-java-driver.source"
+         download-size="0"
+         install-size="0"
+         version="3.6.4"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.osgi.boot"
+         download-size="0"
+         install-size="0"
+         version="9.4.8.v20171121"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.warurl"
          download-size="0"
          install-size="0"
          version="9.4.8.v20171121"
@@ -194,27 +208,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.fasterxml.jackson.core.jackson-annotations"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-core"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-databind"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.commons.io"
          download-size="0"
          install-size="0"
@@ -248,6 +241,12 @@
          install-size="0"
          version="2.6.0.v201404270220"
          unpack="false"/>
+         
+   <plugin
+         id="org.apache.commons.logging"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v20180409-1502"/>
 
    <plugin
          id="jackson-jaxrs"
@@ -299,6 +298,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.shiro.core.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.shiro.ehcache"
          download-size="0"
          install-size="0"
@@ -306,7 +312,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.shiro.ehcache.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.shiro.web"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.shiro.web.source"
          download-size="0"
          install-size="0"
          version="1.2.2"

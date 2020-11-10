@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -19,7 +18,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -32,7 +30,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LoginTask;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -50,8 +47,6 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.services.BoardingService;
-import com.sap.sailing.racecommittee.app.ui.fragments.LoginBackdrop;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
@@ -72,8 +67,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import io.branch.referral.Branch;
-
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
@@ -82,6 +75,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private final static String TAG = LoginActivity.class.getName();
 
+    private final PositionListFragment positionFragment;
     private View backdrop;
     private LoginListViews loginListViews = null;
 
@@ -99,109 +93,56 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
 
-    private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
+    private ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
 
-        public void itemSelected(Fragment sender, EventBase event, boolean toggleView) {
+        final Serializable eventId = selectEvent(event);
 
-            final Serializable eventId = selectEvent(event);
+        // FIXME: its weird to have this button setup in here
+        setupSignInButton();
 
-            // FIXME: its weird to have this button setup in here
-            setupSignInButton();
+        // prepare views after the event selection
 
-            // prepare views after the event selection
-
-            // close all currently open list views
-            if (loginListViews != null) {
-                loginListViews.closeAll();
-            }
-            addCourseAreaListFragment(eventId);
-            if (toggleView) {
-                // send intent to open the course area selection list
-                Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
-                intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
-                BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
-            }
+        // close all currently open list views
+        if (loginListViews != null) {
+            loginListViews.closeAll();
         }
+        addCourseAreaListFragment(eventId);
+
+        // send intent to open the course area selection list
+        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
+        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
     };
-    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
+    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea) -> {
+        ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
+        ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
 
-        public void itemSelected(Fragment sender, CourseArea courseArea, boolean toggleView) {
-            ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
-            ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
+        selectCourseArea(courseArea);
 
-            selectCourseArea(courseArea);
+        // prepare views after area selection
 
-            // prepare views after area selection
-
-            // close all currently open list views
-            if (loginListViews != null) {
-                loginListViews.closeAll();
-            }
-            addAreaPositionListFragment();
-            // send intent to open the position selection list
-            if (toggleView) {
-                Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
-                intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
-                BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
-            }
+        // close all currently open list views
+        if (loginListViews != null) {
+            loginListViews.closeAll();
         }
+        addAreaPositionListFragment();
+        // send intent to open the position selection list
+        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
+        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
     };
-    private String branchEventId;
-    private String branchCourceId;
-    private String branchPosition;
 
     public LoginActivity() {
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Branch.sessionBuilder(this).withCallback((referringParams, error) -> {
-            if (referringParams != null) {
-                final LoginBackdrop loginBackdrop = (LoginBackdrop) getSupportFragmentManager().findFragmentById(R.id.login_view_backdrop);
-                final String url = referringParams.optString("url");
-                final String username = referringParams.optString("username");
-                final String password = referringParams.optString("password");
-                branchEventId = referringParams.optString("eventId");
-                branchCourceId = referringParams.optString("courseId");
-                branchPosition = referringParams.optString("positionId");
-                if (!TextUtils.isEmpty(url)) {
-                    BoardingService.get().saveBackendUrl(LoginActivity.this, url);
-                    if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
-                        BoardingService.get().login(LoginActivity.this, username, password, new LoginTask.LoginTaskListener() {
-                            @Override
-                            public void onResultReceived(String accessToken) {
-                                AppPreferences.on(LoginActivity.this).setAccessToken(accessToken);
-                                gotAccessToken();
-                            }
-
-                            @Override
-                            public void onException(Exception exception) {
-                                loginBackdrop.checkLogin();
-                            }
-                        });
-                        return;
-                    } else {
-                        loginBackdrop.setUsername(username);
-                        loginBackdrop.setPassword(password);
-                    }
-                }
-                loginBackdrop.checkLogin();
-            }
-        }).withData(getIntent() != null ? getIntent().getData() : null).init();
+        positionFragment = PositionListFragment.newInstance();
     }
 
     private void setupSignInButton() {
-        sign_in = (Button) findViewById(R.id.login_submit);
+        sign_in = findViewById(R.id.login_submit);
         if (sign_in != null) {
-            sign_in.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG,
-                            "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
-                    login();
-                }
+            sign_in.setOnClickListener(v -> {
+                ExLog.i(LoginActivity.this, TAG,
+                        "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                login();
             });
         }
     }
@@ -215,8 +156,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void switchToRacingActivity() {
         Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
-        intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
-        intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
+        intent.putExtra(AppConstants.EXTRA_COURSE_UUID, mSelectedCourseAreaUUID);
+        intent.putExtra(AppConstants.EXTRA_EVENT_ID, mSelectedEventId);
         startActivity(intent);
         finish();
     }
@@ -267,7 +208,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void selectPosition(LoginType type) {
         preferences.setLoginType(type);
-        final PositionListFragment positionFragment = (PositionListFragment) getSupportFragmentManager().findFragmentByTag(AreaPositionListFragmentTag);
         positionName = positionFragment.getAuthor().getName();
         String header = StringHelper.on(this).getAuthor(positionName);
         loginListViews.getPositionContainer().setHeaderText(header);
@@ -287,7 +227,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         updateSignInButtonState();
         if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.position_fragment, PositionListFragment.newInstance(branchPosition), AreaPositionListFragmentTag);
+            transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
             transaction.commitAllowingStateLoss();
         }
     }
@@ -296,14 +236,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         resetCourseArea();
         updateSignInButtonState();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId, branchCourceId), CourseAreaListFragmentTag);
+        transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
     }
 
     private void addEventListFragment() {
         resetEvent();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.event_fragment, EventListFragment.newInstance(branchEventId));
+        transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
     }
 
@@ -343,16 +283,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         String action = getIntent().getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
-            final Uri data = getIntent().getData();
-            if (data != null && data.toString().startsWith("http")) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.app_name);
-                if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
-                    builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
-                }
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.app_name);
+            if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
+                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
             }
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
         }
 
         // This is required to reactivate the loader manager after configuration change (screen rotation)
@@ -421,14 +358,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_RESET);
-        filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
+        filter.addAction(AppConstants.ACTION_RESET);
+        filter.addAction(AppConstants.ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        final LoginBackdrop loginBackdrop = (LoginBackdrop) getSupportFragmentManager().findFragmentById(R.id.login_view_backdrop);
-        if (loginBackdrop != null) {
-            loginBackdrop.checkLogin();
-        }
+        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
 
         int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
         if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
@@ -522,12 +456,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void slideUpBackdropDelayed() {
         Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                slideUpBackdrop();
-            }
-        };
+        Runnable runnable = () -> slideUpBackdrop();
         handler.postDelayed(runnable, 1000);
     }
 
@@ -546,14 +475,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
-        heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                int val = (Integer) valueAnimator.getAnimatedValue();
-                ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
-                lpLogin.height = val;
-                loginView.setLayoutParams(lpLogin);
-            }
+        heightAnimation.addUpdateListener(valueAnimator -> {
+            int val = (Integer) valueAnimator.getAnimatedValue();
+            ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
+            lpLogin.height = val;
+            loginView.setLayoutParams(lpLogin);
         });
 
         Collection<Animator> animators = new ArrayList<>();
@@ -605,20 +531,16 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.ACTION_RESET.equals(action)) {
                 resetData(true);
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
-                gotAccessToken();
+            } else if (AppConstants.ACTION_VALID_DATA.equals(action)) {
+                if (preferences.needConfigRefresh()) {
+                    resetData(true);
+                    preferences.setNeedConfigRefresh(false);
+                } else {
+                    resetData(false);
+                }
             }
-        }
-    }
-
-    private void gotAccessToken() {
-        if (preferences.needConfigRefresh()) {
-            resetData(true);
-            preferences.setNeedConfigRefresh(false);
-        } else {
-            resetData(false);
         }
     }
 

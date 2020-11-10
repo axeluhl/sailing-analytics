@@ -1,14 +1,25 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -21,20 +32,14 @@ import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
-import android.view.View;
-import android.widget.ImageView;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
-public abstract class RaceFragment extends LoggableFragment implements TickListener {
+public abstract class RaceFragment extends LoggableFragment {
 
-    @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
+    @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
     @Retention(RetentionPolicy.SOURCE)
     protected @interface MOVE_VALUES {
     }
@@ -52,18 +57,35 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     protected final static int MOVE_NONE = 0;
     protected final static int MOVE_UP = 1;
 
+    private final TickListener currentTimeListener = getCurrentTimeTickListener();
+    private final TickListener startTimeListener = getStartTimeTickListener();
+
+    private final RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
+        @Override
+        public void onStartTimeChanged(ReadonlyRaceState state) {
+            unregisterTickListeners();
+            registerTickListeners();
+        }
+    };
+
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
-        arguments.putString(AppConstants.INTENT_EXTRA_RACE_ID, race.getId());
+        arguments.putString(AppConstants.EXTRA_RACE_ID, race.getId());
         return arguments;
     }
 
+    @NonNull
     public ManagedRace getRace() {
         return managedRace;
     }
 
+    @NonNull
     public RaceState getRaceState() {
-        return getRace().getState();
+        return managedRace.getState();
+    }
+
+    public TimePoint getStartTime() {
+        return managedRace.getState().getStartTime();
     }
 
     /**
@@ -73,13 +95,46 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
      */
     protected Bundle getRecentArguments() {
         Bundle args = new Bundle();
-        args.putString(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
+        args.putString(AppConstants.EXTRA_RACE_ID, managedRace.getId());
         return args;
     }
 
-    @Override
-    public void notifyTick(TimePoint now) {
-        // see subclasses.
+    @Nullable
+    public TickListener getCurrentTimeTickListener() {
+        //See subclassess
+        return null;
+    }
+
+    @Nullable
+    public TickListener getStartTimeTickListener() {
+        //See subclassess
+        return null;
+    }
+
+    /**
+     * Registers a {@link TickListener} for the start time.
+     */
+    public void registerTickListeners() {
+        //Register the {@link TickListener} for the current time without millis
+        if (currentTimeListener != null) {
+            TickSingleton.INSTANCE.registerListener(currentTimeListener);
+        }
+        if (startTimeListener != null) {
+            final TimePoint startTime = getStartTime();
+            if (startTime != null) {
+                //Register the {@link TickListener} for the start time
+                TickSingleton.INSTANCE.registerListener(startTimeListener, startTime);
+            }
+        }
+    }
+
+    public void unregisterTickListeners() {
+        if (currentTimeListener != null) {
+            TickSingleton.INSTANCE.unregisterListener(currentTimeListener);
+        }
+        if (startTimeListener != null) {
+            TickSingleton.INSTANCE.unregisterListener(startTimeListener);
+        }
     }
 
     public boolean isFragmentUIActive() {
@@ -90,7 +145,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (getArguments() != null) {
-            String raceId = getArguments().getString(AppConstants.INTENT_EXTRA_RACE_ID);
+            String raceId = getArguments().getString(AppConstants.EXTRA_RACE_ID);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
                 throw new IllegalStateException("Unable to obtain ManagedRace " + raceId
@@ -102,30 +157,26 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        BaseActivity baseActivity = (BaseActivity) activity;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        BaseActivity baseActivity = (BaseActivity) context;
         if (baseActivity != null) {
             preferences = baseActivity.getPreferences();
-        } else {
-            preferences = AppPreferences.on(activity);
         }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        TickSingleton.INSTANCE.registerListener(this);
-        notifyTick(MillisecondsTimePoint.now());
+        registerTickListeners();
+        getRaceState().addChangedListener(stateChangedListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        TickSingleton.INSTANCE.unregisterListener(this);
+        unregisterTickListeners();
+        getRaceState().removeChangedListener(stateChangedListener);
     }
 
     protected void sendIntent(String action) {
@@ -147,25 +198,21 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     protected String getCourseName() {
-        String courseName = "";
-        if (getRace() != null && getRaceState() != null) {
-            CourseBase courseDesign = getRaceState().getCourseDesign();
-            if (courseDesign != null) {
-                if (Util.isEmpty(courseDesign.getWaypoints())) {
-                    courseName = courseDesign.getName();
-                } else {
-                    courseName = String.format(getString(R.string.course_design_number_waypoints),
-                            Util.size(courseDesign.getWaypoints()));
-                }
+        CourseBase courseDesign = getRaceState().getCourseDesign();
+        if (courseDesign != null) {
+            if (Util.isEmpty(courseDesign.getWaypoints())) {
+                return courseDesign.getName();
             } else {
-                courseName = getString(R.string.no_course_active);
+                return String.format(getString(R.string.course_design_number_waypoints),
+                        Util.size(courseDesign.getWaypoints()));
             }
+        } else {
+            return getString(R.string.no_course_active);
         }
-        return courseName;
     }
 
-    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame,
-            boolean changeVisibility) {
+    @IdRes
+    protected static int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame, boolean changeVisibility) {
         int frame = 0;
         View view = activity.findViewById(defaultFrame);
         if (view != null) {
@@ -200,13 +247,13 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
         // tint all dots gray
         for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            int tint = ThemeHelper.getColor(requireContext(), R.attr.sap_light_gray);
             Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
         // tint current dot black
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        int tint = ThemeHelper.getColor(requireContext(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(mActivePage).setImageDrawable(drawable);
 

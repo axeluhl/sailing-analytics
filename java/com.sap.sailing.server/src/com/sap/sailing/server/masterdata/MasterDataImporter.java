@@ -53,7 +53,7 @@ public class MasterDataImporter {
                     public void onNewObject(Object result) {
                         if (result instanceof Boat || result instanceof Competitor) {
                             QualifiedObjectIdentifier id = ((WithQualifiedObjectIdentifier) result).getIdentifier();
-                            logger.info("Adopting " + id + " from Masterdataimport  to " + user.getName() + " and group "
+                            logger.info("Adopting " + id + " from Masterdataimport to " + user.getName() + " and group "
                                     + (tenant==null ? "null" : tenant.getName()));
                             racingEventService.getSecurityService().setOwnershipIfNotSet(id, user, tenant);
                         }

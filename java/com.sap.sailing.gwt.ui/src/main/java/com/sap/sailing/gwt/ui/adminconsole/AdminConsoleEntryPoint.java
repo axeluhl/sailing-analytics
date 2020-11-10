@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
 
 import java.util.HashSet;
 import java.util.List;
@@ -77,7 +77,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceWriteRemotePath, HEADER_FORWARD_TO_MASTER);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(this::createUI);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
     }

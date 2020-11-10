@@ -1,0 +1,381 @@
+#
+# Spectator $IP $PORT $HOSTNAME $GROUPNAME
+#
+# Spectator-WithParam $IP $PORT $HOSTNAME $GROUPNAME $EXTRA
+#
+# Leaderboard $IP $PORT $HOSTNAME $GROUPNAME $NAME
+#
+# Leaderboard-WithParam $IP $PORT $HOSTNAME $GROUPNAME $NAME $EXTRA
+#
+# Make sure to always use "" as delimiters for strings containing spaces
+# After a change please perform a service httpd reload
+#
+# ATT: There is a special macro called Spectator-ARCHIVE that contains
+# the fixed IP adress and port for the archive server. You can find it
+# in /etc/httpd/conf.d/000-macros.conf at the end of the file. Feel free
+# to add other macros there.
+
+###################################
+############ DEDICATED  ###########
+
+## Finnish Sailing League 2017
+Use Plain-SSL-Redirect finnishleague2017-master.sapsailing.com 172.31.30.80 8888
+
+## Danish Sailing League 2017
+Use Plain-SSL-Redirect danishleague2017-master.sapsailing.com 172.31.23.126 8888
+
+## Swedish Sailing League 2017
+Use Plain-SSL-Redirect swedishleague2017-master.sapsailing.com 172.31.18.186 8888
+
+## German Sailing League 2017
+Use Plain-SSL-Redirect bundesliga1-2017-master.sapsailing.com 172.31.18.63 8888
+Use Plain-SSL-Redirect bundesliga2-2017-master.sapsailing.com 172.31.26.48 8888
+
+## Norwegian Sailing Server NOR
+Use Event-SSL-Redirect nor.sapsailing.com "33324b88-da0c-4c8f-a4e5-aa036da12da3" 172.31.21.60 8888
+
+## Austrian Sailing League 2017
+Use Event-SSL-Redirect austrianleague2017.sapsailing.com "94d23c5e-4cef-47d7-92c7-f8ed77ec486c" 172.31.21.61 8888
+
+## French Sailing League 2017
+Use Event-SSL-Redirect frenchleague2017.sapsailing.com "d366af4f-246d-4369-945a-f26505f9d77a" 172.31.22.171 8888
+
+## Polish Sailing League 2017
+Use Event-SSL-Redirect polishleague2017.sapsailing.com "2899b154-41c7-4bb4-bc23-2bf83e927ea3" 172.31.30.38 8888
+
+## Dutch Sailing League 2017
+Use Plain-SSL-Redirect dutchleague2017-master.sapsailing.com 172.31.24.29 8888
+
+## Norwegian Sailing League 2017
+Use Plain-SSL-Redirect norwegianleague2017-master.sapsailing.com 172.31.27.133 8888
+
+## ESS 2017
+Use Series-SSL-Redirect ess2017.sapsailing.com "d6ffa3c7-946b-4bef-9c22-2faf0fef429a" 172.31.11.96 8888
+
+## Test ESS 
+Use Plain-SSL-Redirect test-ess.sapsailing.com 172.31.47.179 8888
+
+## Dutch Federation, first event probably North See Regatta
+Use Plain-SSL-Redirect dutch-federation.sapsailing.com 172.31.23.151 8888
+Use Event-SSL-Redirect nsr2017.sapsailing.com "b519045d-368f-4071-80e0-c6bdd47a3944" 172.31.23.151 8888
+
+###################################
+######### SHARED INSTANCE #########
+
+# 49er Analytics Instance
+Use Plain-SSL-Redirect 49er.sapsailing.com 172.31.30.84 8897
+
+# Abeam (Japanese Partner) training system
+Use Plain-SSL-Redirect abeam-training.sapsailing.com 172.31.30.84 8890
+
+# SAP Extreme Sailing Team Training Server
+Use Home-SSL-Redirect extreme-team.sapsailing.com 172.31.30.84 8892
+
+# Luebecker Yacht-Club (LYC)
+Use Home-SSL-Redirect lyc.sapsailing.com 172.31.30.84 8898
+
+# Bayerischer Yacht-Club (BYC)
+Use Home-SSL-Redirect byc.sapsailing.com 172.31.30.84 8894
+
+# TracTrac Test
+Use Plain-SSL-Redirect tractractest.sapsailing.com 172.31.30.84 8891
+
+# Ubilabs-Testserver
+Use Plain-SSL-Redirect ubilabstest.sapsailing.com 172.31.30.84 8895
+
+# USSailing
+Use Home-SSL-Redirect ussailing.sapsailing.com 172.31.30.84 8889
+
+# VSaW
+Use Home-SSL-Redirect vsaw.sapsailing.com 172.31.30.84 8893
+
+# IRISHDBSCDW3
+Use Home-SSL-Redirect irishdbscdw3.sapsailing.com 172.31.30.84 8896
+
+# Keppel Bay Sailing Club (KBSC)
+Use Home-SSL-Redirect kbsc.sapsailing.com 172.31.30.84 8899
+
+# Seebrucker Regattaverein am Chiemsee (SRV)
+Use Home-SSL-Redirect srv.sapsailing.com 172.31.30.84 8900
+
+# Heinz Nixdorf Verein zur Foerderung des Segelsports e.V. (HNV)
+Use Home-SSL-Redirect hnv.sapsailing.com 172.31.30.84 8901
+
+# Israeli Sailing Association / Carmel Sailing Society
+Use Home-SSL-Redirect isr.sapsailing.com 172.31.30.84 8902
+Use Home-SSL-Redirect cyc.sapsailing.com 172.31.30.84 8902
+
+# Sailtracks Test Server
+Use Home-SSL-Redirect sailtracks.sapsailing.com 172.31.30.84 8903
+
+## Norwegian Sailing Federation
+## Use Home-SSL-Redirect nor.sapsailing.com 172.31.30.84 8904
+
+# Segelvereinigung Rhein-Neckar
+Use Home-SSL-Redirect srn.sapsailing.com 172.31.30.84 8906
+
+# Yacht-Club Luzern (Arnet, Ivo [mailto:ivo.arnet@itready.net])
+Use Home-SSL-Redirect ycl.sapsailing.com 172.31.30.84 8907
+
+# Segelzentrum der Unviversität Kiel (Hamann, Jan [mailto:jan.hamann@email.uni-kiel.de])
+Use Home-SSL-Redirect segelzentrum.sapsailing.com 172.31.30.84 8908
+
+###################################
+############# ARCHIVE #############
+
+## Kieler Woche 2017
+Use Event-ARCHIVE-SSL-Redirect kw2017.sapsailing.com "4d3df446-43bc-46a1-9146-3e1caf6ed757"
+
+## Sailing World Cup Santander 2017
+Use Event-ARCHIVE-SSL-Redirect swc2017-santander.sapsailing.com "3b79f093-d52f-440b-9fc4-2fb9e0cc70c9"
+
+## SWC 2017 Hyeres
+Use Event-ARCHIVE-SSL-Redirect swc2017-hyeres.sapsailing.com "8962f211-6e79-422a-85c5-397aaff8d050"
+
+# SWC Worldcup Miami 2017
+Use Event-ARCHIVE-SSL-Redirect swc2017-miami.sapsailing.com "b82f9012-47d8-4e9e-b3b2-a690c1db0fe3"
+
+## ESS 2016
+Use Series-ARCHIVE-SSL-Redirect ess2016.sapsailing.com "7f7ea575-261a-4bde-9d32-0d867e02fe20"
+
+## SWC Worldcup Finale Melbourne 2016
+Use Event-ARCHIVE-SSL-Redirect swc2016-melbourne.sapsailing.com "dd2edeed-b9eb-483e-b3e9-d4761d0d58d2"
+
+## Swedish Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect swedishleague2016.sapsailing.com "396bccc4-b72e-4edf-a1d2-80f8cfdb259f"
+
+## Danish Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect danishleague2016.sapsailing.com "ba493472-a1bd-49cc-ba4d-52eb723f0a71"
+Use Series-ARCHIVE-SSL-Redirect danishleague2-2016.sapsailing.com "8140b59e-3202-41b9-90d2-c75e85ef2ace"
+## VIP Racing Denmark Skovshoved 2016
+Use Event-ARCHIVE-SSL-Redirect vipsailingleaguedenmark2016.sapsailing.com "819c71d3-dd74-44fa-a397-24a38d2d76c5"
+
+## Norwegian Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect norwegianleague2016.sapsailing.com "2cb0eb1d-1a3c-45c6-8d73-caf907086b8a"
+
+## Dutch Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect dutchleague2016.sapsailing.com "6d2fb3c9-de3a-4aa5-b893-1634e50710a0"
+
+## Austrian Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect austrianleague2016.sapsailing.com "137fbbc3-7b42-4d3c-a85a-0f5e94f55375" 
+
+## Finish Sailing League 2016
+Use Series-ARCHIVE-SSL-Redirect finnishleague2016.sapsailing.com "86b0afe6-0675-4525-8701-7da02971f4f9"
+
+## SWC Qingdao
+Use Event-ARCHIVE-SSL-Redirect swc2016-qingdao.sapsailing.com "ea0caed8-3182-424e-91a7-6add65e1357d"
+
+## Norwegian Grundig Cup (on norwegian league server)
+Use Event-ARCHIVE-SSL-Redirect grundigcup2016-norway.sapsailing.com "6caf564b-f2b4-4b51-8667-50049ecb8581"
+
+## Sailing Championsleague 2016 (Petersburg / Porto Cervo)
+Use Event-ARCHIVE-SSL-Redirect scl2016.sapsailing.com "810a5132-849f-49e0-828c-ace23289f0ac"
+
+## USODA 2016
+Use Event-ARCHIVE-SSL-Redirect usoda2016.sapsailing.com "46c85236-087e-418f-84f9-aee24dac948f"
+
+## BAR Test Oman
+USE Event-ARCHIVE-SSL-Redirect bar-test.sapsailing.com "ec3dd898-9f02-472c-a783-06907cb9ef03"
+USE Event-ARCHIVE-SSL-Redirect ACWS-test.sapsailing.com "ec3dd898-9f02-472c-a783-06907cb9ef03"
+
+## Test new archive in Availability zone A
+USE Event-SSL-Redirect bar-test-test.sapsailing.com "ec3dd898-9f02-472c-a783-06907cb9ef03" 172.31.40.107 8888
+
+## SCGN Test 2016
+USE Event-ARCHIVE-SSL-Redirect scgn-test.sapsailing.com "5ca2b18a-0a55-4591-910c-1f1f35be51f2"
+
+# SCGN Training
+Use Event-ARCHIVE-SSL-Redirect scgn-training.sapsailing.com "004147c6-3991-4a02-bc50-72b8e5b8027c"
+
+## TW 2016
+Use Event-ARCHIVE-SSL-Redirect tw2016.sapsailing.com "86e9e60c-0b16-4941-b14a-166ed4dcabff"
+Use Event-ARCHIVE-SSL-Redirect TWguestsailing2016.sapsailing.com "bd4e1319-f431-423a-a922-3215ea0e6fe9"
+
+## VANPro
+Use Event-ARCHIVE-SSL-Redirect VANpro2016.sapsailing.com "2316ce7d-be93-4ffc-8613-cb6ffa475153"
+
+## Eastern Economic Forum 2016 (on multievent instance)
+Use Event-ARCHIVE-SSL-Redirect forumvostok2016.sapsailing.com "5093220d-875f-4909-9ad0-46476639ee97"
+
+## IDM Star
+Use Event-ARCHIVE-SSL-Redirect idmstar2016.sapsailing.com "5a05f9b9-2f70-46f7-99e1-c069b418bc20"
+
+# 505 Worlds 2016
+Use Event-ARCHIVE-SSL-Redirect 505worlds2016.sapsailing.com "8f5daf0f-210f-435f-97bd-c6aff11af3d2"
+
+# 29er Worlds 2016
+Use Event-ARCHIVE-SSL-Redirect 29erWorlds2016.sapsailing.com "4b381745-1d29-4bda-b388-4a0b7e94dc98"
+
+## WMRT 2016
+Use Event-ARCHIVE-SSL-Redirect wmrt2016.sapsailing.com "cfbe9100-75d6-474a-8d58-3ef8b19cdf25"
+
+## French Sailing League 2016
+Use Event-ARCHIVE-SSL-Redirect frenchleague2016.sapsailing.com "6755bbe9-b761-42a2-9f85-a23dea926a3b"
+
+## RosAtom 2016
+Use Event-ARCHIVE-SSL-Redirect rsc2016.sapsailing.com "3aab9f92-0d83-411c-bfc9-c9032079a749"
+
+## CRW 2016
+Use Event-ARCHIVE-SSL-Redirect crw2016.sapsailing.com "56f62045-de57-4c5e-be6c-a2339d9c9ece"
+
+# Kieler Woche 2016
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2016.sapsailing.com "cc12361a-236b-4ddf-b68d-42ca785cd4d6"
+Use Event-ARCHIVE-SSL-Redirect audiultracup2016.sapsailing.com "c4f9793f-c492-46a0-8af2-a543d5dab588"
+
+## 49erEuros 2016
+Use Event-Archive-SSL-Redirect 49erEuros2016.sapsailing.com "ccb1b062-fe59-4a1c-a15e-f30795ac3c7f"
+
+# 49er / FX Princess Sofia Trophy 2016
+Use Event-ARCHIVE-SSL-Redirect trofeoprincesasofia2016.sapsailing.com "445d072c-fe95-4cc3-ba49-874d4cd43325"
+
+# 49er Worlds 2016
+Use Event-ARCHIVE-SSL-Redirect 49erworlds2016.sapsailing.com "98e52dd5-2765-4f71-8ebc-82284be07fbc"
+
+# 2.4mR IDM 2015
+Use Event-ARCHIVE-SSL-Redirect idm24mR2015.sapsailing.com "c51c9915-a8f0-4a31-a0e2-127d557b7ea0"
+
+# Surfing World Cup Sylt 2015
+Use Event-ARCHIVE-SSL-Redirect worldcupsylt2015.sapsailing.com "9eb910b8-bb61-4113-8263-1667cd37ac76"
+
+# Norwegian League 2015
+Use Event-ARCHIVE-SSL-Redirect norwegianleague2015.sapsailing.com "29c81874-4e3f-4970-9ae3-1c65eca8889b"
+Use Event-ARCHIVE-SSL-Redirect mesternes-mester-2015.sapsailing.com "8a5a7dcd-3c19-464f-a828-d0c3898b38d5"
+
+# Dutch League 2015
+Use Event-ARCHIVE-SSL-Redirect dutchleague2015.sapsailing.com "4f863d14-1025-44ec-853b-7ef5d45fb19d"
+
+# Championsleague 2015
+Use Event-ARCHIVE-SSL-Redirect championsleague2015.sapsailing.com "f40d9162-9008-4516-9110-33ab0f17d6a0"
+
+# Bart's Bash
+Use Event-ARCHIVE-SSL-Redirect bartsbash2015.sapsailing.com "905457f5-5ccb-4fea-8219-8300eed637ad"
+
+# 49er JWC 2015
+Use Event-ARCHIVE-SSL-Redirect 49erJWC2015.sapsailing.com "9605d85c-867e-438c-a74b-47da896f476e"
+
+# Travemuender Woche 2015
+Use Event-ARCHIVE-SSL-Redirect tw2015.sapsailing.com "82c5adb5-2dac-40fb-aa18-3b8057365e57"
+Use Event-ARCHIVE-SSL-Redirect saptw2015.sapsailing.com "eb58ae5d-0460-4574-a1b8-2e4ef8cf8e15"
+
+# Audi Business Cup
+Use Event-ARCHIVE-SSL-Redirect audibusinesscup2015.sapsailing.com "080b6c09-0110-4b51-a209-dc3cf8b9f669"
+
+# 49er Euros 2015
+Use Event-ARCHIVE-SSL-Redirect 49ereuros2015.sapsailing.com "2b684db8-683d-4479-925b-5962085b7ae1"
+
+# KW 2015
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2015.sapsailing.com "a9d6c5d5-cac3-47f2-9b5c-506e441819a1"
+Use LiveCenterWithLanguageSubstitution-ARCHIVE livecenter.kieler-woche.de "a9d6c5d5-cac3-47f2-9b5c-506e441819a1"
+
+# YES 2015
+Use Event-ARCHIVE-SSL-Redirect yes2015.sapsailing.com "fb44d803-15d3-4fe1-852d-28346346ebc3"
+
+# SAP Opti Cup SCGN 2015
+Use Event-ARCHIVE-SSL-Redirect sapopticup2015.sapsailing.com "dff7d969-9858-4dff-b2f2-a45018a2f755"
+
+# RCApp Test Server
+Use Plain rcapptest.sapsailing.com 172.31.31.114 8888
+
+# ESS 2015
+Use Event-ARCHIVE-SSL-Redirect ess40-2015.sapsailing.com "70054aa2-b381-4e77-8e17-840ee1b6190d"
+
+# Danish League 2015
+Use Series-ARCHIVE-SSL-Redirect danishleague2015.sapsailing.com "270696d1-d7cc-49c4-a022-bb6bce0f2dcc"
+Use Series-ARCHIVE-SSL-Redirect danishleague2-2015.sapsailing.com "5e7d5183-bdb1-425e-b144-a8322ea49c98"
+
+# Swedish League 2015
+Use Series-ARCHIVE-SSL-Redirect allsvenskan2015.sapsailing.com "9627bbdf-1e8e-4a5a-8641-afc2218699b9"
+Use Series-ARCHIVE-SSL-Redirect mastarnas-mastare-2015.sapsailing.com "f27b8b88-a7a3-4694-9374-7e5caebb0328"
+
+# Finnish League 2015
+Use Series-ARCHIVE-SSL-Redirect finnishleague2015.sapsailing.com "51168037-06d1-4907-bbfe-3d7bd0b23304"
+
+# Austrian League 2015
+Use Series-ARCHIVE-SSL-Redirect austrianleague2015.sapsailing.com "85e8bd66-299a-4f5c-929e-746dbd081f13"
+
+# Bodenseewoche 2015
+Use Event-ARCHIVE-SSL-Redirect bodenseewoche2015.sapsailing.com "fef6c510-eefe-470f-a9a9-dcf6293ec116"
+
+# RosAtom Cup 2015
+Use Event-ARCHIVE-SSL-Redirect rosatomcup2015.sapsailing.com "f3a8c574-d23d-44d8-9316-3afb7ee0d39c"
+
+# 505 Worlds 2015
+Use Event-ARCHIVE-SSL-Redirect 505worlds2015.sapsailing.com "b1e78f52-ce52-4b71-ac30-452599faf4a1"
+
+# ATC on Archive:
+Use Event-ARCHIVE-SSL-Redirect atcregatta2015.sapsailing.com "9c1d57bf-29c8-440f-becd-4862bc0f43fe"
+
+# DEV Server
+Use Plain-SSL dev.sapsailing.com 172.31.28.17 8888
+Use Plain-SSL dualstack-dev.sapsailing.com 172.31.28.17 8888
+
+# WWW
+Use Home-ARCHIVE-SSL-Redirect sapsailing.com
+Use Home-ARCHIVE-SSL-Redirect www.sapsailing.com
+
+# DEMO Server on DEV
+Use Plain-SSL-Redirect demo.sapsailing.com 172.31.28.17 8889
+
+# Bundesliga 2014 2015 2016
+Use Series-ARCHIVE-SSL-Redirect bundesliga2014.sapsailing.com "2b2659c9-6c3b-46fb-a83d-9c9f1d2eabca"
+Use Series-ARCHIVE-SSL-Redirect bundesliga2-2014.sapsailing.com "e455a068-06e5-410a-aea5-d1295f66f61e"
+Use Series-ARCHIVE-SSL-Redirect businesscup2014-hamburg.sapsailing.com "fd2e442b-6e79-4cc7-af23-01eb8eeb061e"
+Use Event-ARCHIVE-SSL-Redirect bundesliga2015-relegation.sapsailing.com "0fb650c5-51c8-44c9-8b4f-cb5d3e2def9a" 
+Use Series-ARCHIVE-SSL-Redirect bundesliga2015.sapsailing.com "95932bc5-5762-4951-b597-61f0f615734e" 
+Use Series-ARCHIVE-SSL-Redirect bundesliga2-2015.sapsailing.com "ba09f02f-98e7-4a8f-8e90-1f6c72459e82"
+Use Event-ARCHIVE-SSL-Redirect bundesliga2016-relegation.sapsailing.com "3b54a7ce-7585-4935-8564-522988484fb2"
+Use Series-ARCHIVE-SSL-Redirect bundesliga2016.sapsailing.com "880c3122-8c63-4485-84cb-7115c58d35ea"
+Use Series-ARCHIVE-SSL-Redirect bundesliga2-2016.sapsailing.com "e7cfefaf-8942-4341-a314-368c2a2d0437"
+Use Event-ARCHIVE-SSL-Redirect juniorenliga2016.sapsailing.com "71ef7523-b900-4ea5-bb48-b83e1db98a8e"
+Use Event-ARCHIVE-SSL-Redirect audisailingexperience2016.sapsailing.com "2744dfa0-e833-475e-afe3-a70807fa75f4"
+
+# Danish events 2014: League 2014, Dansish sailing school event, qualification league 2015 
+Use Series-ARCHIVE-SSL-Redirect danishleague2014.sapsailing.com "abab896f-f49f-46f2-9908-c4d6ede79e1e" 
+Use Series-ARCHIVE-SSL-Redirect sejlsportsligaen2015.sapsailing.com "bad1d47c-9bf3-4d31-ac07-f0391cc117da"
+Use Event-ARCHIVE-SSL-Redirect sejlerskolecup-2014.sapsailing.com "d75063dd-f579-4a46-836c-5cc017a71e44"
+
+Use Event-ARCHIVE-SSL-Redirect championsleague2014.sapsailing.com "eb326f1b-81e8-468b-89cb-10131a8d8459"
+Use Event-ARCHIVE-SSL-Redirect ess40-2014.sapsailing.com "8e5bef73-7d55-45ed-951a-72ef375ae1b6"
+Use Event-ARCHIVE-SSL-Redirect bartsbash2014.sapsailing.com "b2e2b264-134c-4ef2-b592-53562fd0f835"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2014.sapsailing.com "94e1e240-8a3d-466b-9f39-419f311eaace"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2014-guests.sapsailing.com "001a5d8f-9704-4400-b5df-6c78e8037b8b"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2014-guests2.sapsailing.com "6c8231c3-cd1e-4535-a021-2fed1fc30471"
+Use Event-ARCHIVE-SSL-Redirect vulcaintrophy2014.sapsailing.com "09f39909-5d72-40d2-b6e9-4ea7c908a0dc"
+Use Event-ARCHIVE-SSL-Redirect vulcaintrophy2014-proam.sapsailing.com "ca9daa7d-c966-4e89-bc50-ce598e2f2a56"
+Use Event-ARCHIVE-SSL-Redirect tw2014.sapsailing.com "5133df37-0092-42c8-a9cb-7a087ae00219"
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2014.sapsailing.com "3713fbd7-a62b-439b-bec1-bea732c5d895"
+Use Event-ARCHIVE-SSL-Redirect yes2014.sapsailing.com "6b3dfa41-8553-4abc-8b02-7e3423a59041"
+Use Event-ARCHIVE-SSL-Redirect olympics2012.sapsailing.com "901963ed-743d-41db-9727-1c3b73e78ddd"
+Use Event-ARCHIVE-SSL-Redirect bundesliga2013.sapsailing.com "a6abca6e-9711-44dc-9c64-929bc869aa12"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2010.sapsailing.com "ba1f5e28-7552-4277-ac32-e440a3432fb7"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2011.sapsailing.com "a10c4fad-c07c-44f5-8241-614a165daae1"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2012.sapsailing.com "64e2b631-1a97-4270-9383-14481c8e960f"
+Use Event-ARCHIVE-SSL-Redirect 505worlds2013.sapsailing.com "35dc9389-b59d-4ebd-8f6b-432065642f40"
+Use Event-ARCHIVE-SSL-Redirect drachenidm2012.sapsailing.com "a42beb95-4885-45f1-9ed7-91159a6e4f6a"
+Use Event-ARCHIVE-SSL-Redirect ess40-2012.sapsailing.com "863a5c30-cbea-4f1c-8fb1-54fffa6b7319"
+Use Event-ARCHIVE-SSL-Redirect 49er-euros2012.sapsailing.com "22c7942e-eb3d-462a-9d59-600468044bb2" 
+Use Event-ARCHIVE-SSL-Redirect 49er-euros2013.sapsailing.com "232ce9c3-ac84-47c8-b77d-eec782400877"
+Use Event-ARCHIVE-SSL-Redirect idm2011.sapsailing.com "9577d5ae-b27f-4e76-bf26-580950baf904"
+Use Event-ARCHIVE-SSL-Redirect staridm2013.sapsailing.com "a43b8f96-1e77-448a-9b8a-0f586f1bb18f"
+Use Event-ARCHIVE-SSL-Redirect tw2013.sapsailing.com "b0a721cf-89c3-486c-9a84-25e1aaeb3225"
+Use Event-ARCHIVE-SSL-Redirect 505idm2013.sapsailing.com "9130f36f-d1c3-4080-ac5b-a2104b8fbfd0"
+Use Event-ARCHIVE-SSL-Redirect ess40-2013.sapsailing.com "1487bc65-be3b-4dbc-951d-a1390e9619e0"
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2012.sapsailing.com "0c0db838-b199-4309-a2a4-90bebe85ffe8"
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2013.sapsailing.com "3e4145a7-5473-4670-83e6-fd5ee364f7eb"
+Use Event-ARCHIVE-SSL-Redirect mdm2011.sapsailing.com "b06d2e5c-0a35-4205-910f-d8387bbdd350"
+Use Event-ARCHIVE-SSL-Redirect obmr2012.sapsailing.com "2dd8de86-6564-4189-9aa0-8666f26dbb5b"
+Use Event-ARCHIVE-SSL-Redirect kielerwoche2011.sapsailing.com "8be013de-d49d-49ea-9e73-4e7c7970aec0"
+Use Event-ARCHIVE-SSL-Redirect yes2012.sapsailing.com "7732cfba-23ff-44a7-9b5d-733d1d92e467"
+
+Use Spectator-ARCHIVE-SSL-Redirect captainsdinner2013.sapsailing.com "Captain's Dinner 2013"
+Use Spectator-ARCHIVE-SSL-Redirect winners.sapsailing.com "SAP Winners Circle"
+Use Spectator-ARCHIVE-SSL-Redirect winners2013.sapsailing.com "SAP Winners Circle 2013"
+Use Spectator-ARCHIVE-SSL-Redirect 505guestsailing2013.sapsailing.com "505 Worlds 2013 Guest Program"
+Use Spectator-ARCHIVE-SSL-Redirect 505worlds2012-guests.sapsailing.com "505 Worlds 2012 Guests"
+Use Spectator-ARCHIVE-SSL-Redirect arenal2012.sapsailing.com "Arenal 2012"
+Use Spectator-ARCHIVE-SSL-Redirect mini650pc2013.sapsailing.com "Mini 650 Pacific Challenge 2013"
+Use Spectator-ARCHIVE-SSL-Redirect 505.sapsailing.com "505"
+Use Spectator-ARCHIVE-SSL-Redirect isafwc2014.sapsailing.com "ISAF World Cup Hyeres 2014"
+
+############# ARCHIVE #############
+###################################

@@ -55,8 +55,6 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
         // because otherwise the competitor would not be considered in this leg anymore. In this case, the mark passing
         // times for finishing the leg are compared between competitor and leader.
         final Duration result;
-        final TrackedLegOfCompetitor currentLegWho = getCurrentLegOrLastLegIfAlreadyFinished(competitor,
-                rankingInfo.getTimePoint());
         final Competitor to = rankingInfo.getCompetitorFarthestAhead();
         final TrackedLegOfCompetitor currentLegTo = getCurrentLegOrLastLegIfAlreadyFinished(to, rankingInfo.getTimePoint());
         if (currentLegTo == null) {
@@ -68,45 +66,18 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
             // not work properly because it considers both on the same leg and therefore doesn't restrict the time to when to finished
             // the leg and looks at the excess time.
             final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
-            if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint()) &&
-                    currentLegTo.getTrackedLeg().getLeg().getTo() == lastWaypoint) {
-                // to has finished the race
-                if (currentLegWho == null) {
-                    result = null;
-                } else {
-                    final TimePoint whosLegFinishingTime = currentLegWho.getFinishTime();
-                    if (whosLegFinishingTime != null && !whosLegFinishingTime.after(rankingInfo.getTimePoint())) {
-                        // both have finished their leg; this means both have finished the race because otherwise this wouldn't be
-                        // who's current leg
-                        result = tosLegFinishingTime.until(whosLegFinishingTime);
-                    } else {
-                        final Duration etaNextMark = currentLegWho.getEstimatedTimeToNextMark(rankingInfo.getTimePoint(), WindPositionMode.EXACT);
-                        if (etaNextMark == null) {
-                            result = null;
-                        } else {
-                            final Duration timeToTookToFinishRaceStartingAtNextMark;
-                            final Waypoint whosNextMark = currentLegWho.getTrackedLeg().getLeg().getTo();
-                            if (whosNextMark == lastWaypoint) {
-                                // who is in the last leg; the ETA to who's next mark is the solution
-                                timeToTookToFinishRaceStartingAtNextMark = Duration.NULL;
-                            } else {
-                                // after passing the next mark, who still needs to travel about the same time that to
-                                // traveled after passing the next mark until finishing the race
-                                final MarkPassing tosMarkPassingForWhosNextMark = getTrackedRace().getMarkPassing(to, whosNextMark);
-                                timeToTookToFinishRaceStartingAtNextMark = tosMarkPassingForWhosNextMark == null ? null :
-                                    tosMarkPassingForWhosNextMark.getTimePoint().until(tosLegFinishingTime);
-                            }
-                            if (timeToTookToFinishRaceStartingAtNextMark == null) {
-                                result = null;
-                            } else {
-                                final TimePoint etaAtFinish = rankingInfo.getTimePoint().plus(etaNextMark.plus(timeToTookToFinishRaceStartingAtNextMark));
-                                result = tosLegFinishingTime.until(etaAtFinish);
-                            }
-                        }
-                    }
-                }
+            
+            final Duration howLongWhoNedsToReachTosPosition = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+            if (howLongWhoNedsToReachTosPosition == null) {
+                result = null;
             } else {
-                result = rankingInfo.getCompetitorRankingInfo().apply(competitor).getEstimatedActualDurationFromTimePointToCompetitorFarthestAhead();
+                if (tosLegFinishingTime != null && !tosLegFinishingTime.after(rankingInfo.getTimePoint()) &&
+                        currentLegTo.getTrackedLeg().getLeg().getTo() == lastWaypoint) {
+                    final Duration howLongAgoToPassedTheFinishLine = tosLegFinishingTime.until(rankingInfo.getTimePoint());
+                    result = howLongWhoNedsToReachTosPosition.plus(howLongAgoToPassedTheFinishLine);
+                } else {
+                    result = howLongWhoNedsToReachTosPosition;
+                }
             }
         }
         return result;
@@ -167,6 +138,12 @@ public class OneDesignRankingMetric extends NonPerformanceCurveRankingMetric {
                     @Override
                     public Distance getWindwardDistanceSailed() {
                         return getWindwardDistanceTraveled(competitor, timePoint, cache);
+                    }
+
+                    @Override
+                    public Duration getDurationSinceStartOfRaceUntilTimePoint() {
+                        final TimePoint startOfRace = getTrackedRace().getStartOfRace();
+                        return startOfRace==null?null:startOfRace.until(getTimePoint());
                     }
 
                     @Override

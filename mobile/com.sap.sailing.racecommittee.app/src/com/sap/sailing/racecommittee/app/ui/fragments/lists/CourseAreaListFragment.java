@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -13,20 +13,18 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
-    private static final String PARAM_SELECTED_ID = "SELECTED_ID";
+
     private Serializable parentEventId;
 
-    public static CourseAreaListFragment newInstance(Serializable eventId, @Nullable final String selectedId) {
+    public static CourseAreaListFragment newInstance(Serializable eventId) {
         CourseAreaListFragment fragment = new CourseAreaListFragment();
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.EventIdTag, eventId);
-        args.putSerializable(PARAM_SELECTED_ID, selectedId);
+        args.putSerializable(AppConstants.EXTRA_EVENT_ID, eventId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -34,7 +32,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
+        parentEventId = getArguments().getSerializable(AppConstants.EXTRA_EVENT_ID);
     }
 
     @Override
@@ -67,15 +65,6 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             for (String allowedCourse : courses) {
                 if ("*".equals(allowedCourse) || allowedCourse.equals(item.getText())) {
                     item.setDisabled(false);
-                }
-            }
-        }
-        final Bundle arguments = getArguments();
-        if (arguments != null && mSelectedIndex == -1) {
-            final String eventId = arguments.getString(PARAM_SELECTED_ID);
-            for (CourseArea area : data) {
-                if (area.getId().toString().equals(eventId)) {
-                    selectEvent(area);
                 }
             }
         }

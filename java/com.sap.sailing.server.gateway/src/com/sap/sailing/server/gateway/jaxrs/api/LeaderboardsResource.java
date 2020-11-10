@@ -718,16 +718,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
             @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination,
-            @QueryParam(RaceLogServletConstants.PARAMS_TRACKED_RACE_NAME) String optionalTrackedRaceName,
-            @QueryParam("secret") String secret)
+            @QueryParam(RaceLogServletConstants.PARAMS_TRACKED_RACE_NAME) String optionalTrackedRaceName)
                     throws NotDenotedForRaceLogTrackingException, Exception {
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(
                 leaderboardName, raceColumnName, fleetName);
-        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
-        if (!skip) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                    DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
-        }
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         final Callable<Response> innerAction = () -> {
             final Response result;
             if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {

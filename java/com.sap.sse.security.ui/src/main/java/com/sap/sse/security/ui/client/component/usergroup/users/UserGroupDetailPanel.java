@@ -127,6 +127,7 @@ public class UserGroupDetailPanel extends Composite
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
         initWidget(addUserToGroupPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
@@ -138,10 +139,11 @@ public class UserGroupDetailPanel extends Composite
         final SuggestBox suggestUser = new SuggestBox(oracle);
         suggestUser.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
         suggestUser.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
+        suggestUser.ensureDebugId("UserSuggestion");
         // add suggest
         buttonPanel.insertWidgetAtPosition(suggestUser, 0);
         // add add button
-        buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
+        final Button addButton = buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
             final String selectedUsername = suggestUser.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
                 final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
@@ -164,6 +166,7 @@ public class UserGroupDetailPanel extends Composite
                 }
             }
         });
+        addButton.ensureDebugId("AddUserButton");
         // add remove button
         final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
             final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();

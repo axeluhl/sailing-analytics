@@ -220,7 +220,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                             jsonRaceColumn.put("regattaName",
                                                     trackedRace.getTrackedRegatta().getRegatta().getName());
                                             jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
-                                            jsonRaceColumn.put("trackedRaceUuid", trackedRace.getTrackingConnectorInfo().getUuid());
+                                            jsonRaceColumn.put("trackingProviderType", trackedRace.getTrackingConnectorInfo().getTrackingConnectorName());
+                                            jsonRaceColumn.put("raceId", trackedRace.getRace().getId().toString());
                                             final JSONObject raceBoardURLsByEventID = new JSONObject();
                                             for (Event event : eventsReferencingLeaderboardGroup) {
                                                 if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
@@ -234,6 +235,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                         } else {
                                             jsonRaceColumn.put("isTracked", false);
                                             jsonRaceColumn.put("trackedRaceName", null);
+                                            jsonRaceColumn.put("trackingProviderType", null);
+                                            jsonRaceColumn.put("raceId", null);
                                             jsonRaceColumn.put("hasGpsData", false);
                                             jsonRaceColumn.put("hasWindData", false);
                                         }

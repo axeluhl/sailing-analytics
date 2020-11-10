@@ -2,7 +2,7 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
-public class UserManagementException extends Exception implements Serializable {
+public class UserManagementException extends UserStoreManagementException implements Serializable {
 
     private static final long serialVersionUID = 7555799541580565866L;
     

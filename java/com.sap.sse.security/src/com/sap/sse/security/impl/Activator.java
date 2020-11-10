@@ -25,6 +25,7 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -239,7 +240,7 @@ public class Activator implements BundleActivator {
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
-                } catch (InterruptedException | UserGroupManagementException | UserManagementException | ExecutionException e) {
+                } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
             }
