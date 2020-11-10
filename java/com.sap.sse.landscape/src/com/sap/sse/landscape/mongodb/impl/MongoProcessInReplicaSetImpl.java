@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.mongodb.impl;
 
+import java.net.URISyntaxException;
+
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
@@ -20,5 +22,10 @@ public class MongoProcessInReplicaSetImpl extends MongoProcessImpl implements Mo
     @Override
     public MongoReplicaSet getReplicaSet() {
         return replicaSet;
+    }
+    
+    @Override
+    public boolean isInReplicaSet() throws URISyntaxException {
+        return getReplicaSet().getClient().getReplicaSetStatus() != null;
     }
 }
