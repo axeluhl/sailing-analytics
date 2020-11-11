@@ -6,7 +6,7 @@
 3. How to enhance events created with Sail Insight
 	* Adding Marks
         * Setting Mark Positions (e.g., [https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/SettingFirstPositionForAMarkOnTheMap.mp4](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/SettingFirstPositionForAMarkOnTheMap.mp4)
-	* Moving Marks
+	* Moving Marks (e.g., [https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/AdjustingMarkPositionByCreatingNewFix.mp4](https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/AdjustingMarkPositionByCreatingNewFix.mp4)
 	* Managing Media (enhance event website)
 	* Editing competitors - what can be changed, what can not be changed (Name, Sailnumber, 		Boatclass)
 	* How to correct results
