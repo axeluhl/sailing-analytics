@@ -22,11 +22,14 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -77,20 +80,50 @@ public class ConnectivityTest {
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
     }
     
+    @Ignore("Fill in key details for the key used to launch the central reverse proxy in the test landscape")
+    @Test
+    public void readAndStoreSSHKey() throws JSchException, IOException, InterruptedException {
+        final String AXELS_KEY_NAME = "The key name goes here";
+        final String KEY_PASSPHRASE = "your passphrase goes here";
+        final String PATH_TO_YOUR_PRIVATE_KEY = "the path to your id_rsa file";
+        landscape.deleteKeyPair(region, AXELS_KEY_NAME);
+        final KeyPair keyPair = KeyPair.load(new JSch(), PATH_TO_YOUR_PRIVATE_KEY, PATH_TO_YOUR_PRIVATE_KEY+".pub");
+        assertTrue(keyPair.decrypt(KEY_PASSPHRASE));
+        landscape.addSSHKeyPair(region, "Me", AXELS_KEY_NAME, keyPair);
+        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next().createRootSshChannel(optionalTimeout);
+        sshChannel.sendCommandLineSynchronously("ls -al", stderr);
+        final String stdout = sshChannel.getStreamContentsAsString();
+        assertFalse(stdout.isEmpty());
+    }
+
+    /**
+     * Requires the key that was used for launching the central reverse proxy for the test landscape to be known in the {@link #landscape}.
+     */
     @Test
     public <MasterProcessT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>,
             ReplicaProcessT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>>
-    void testApacheProxyBasics() throws InterruptedException, JSchException, IOException {
-        // FIXME we need the key used to launch the reverse proxy host in our Landscape...
+    void testApacheProxyBasics() throws InterruptedException, JSchException, IOException, SftpException {
         @SuppressWarnings("unchecked")
         final ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> proxy =
                 (ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>) landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
-        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>(8888, proxy.getHosts().iterator().next(),
+        final AwsInstance<String, ApplicationProcessMetrics> proxyHost = proxy.getHosts().iterator().next();
+        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>(8888, proxyHost,
                 "/home/sailing/servers/server"), UUID.randomUUID());
-        // TODO check that a .conf file was created
+        final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
+        final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout);
+        sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis());
+        final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
+        sftpChannel.get(configFileName, configFileContents);
+        assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
+        sftpChannel.disconnect();
         proxy.removeRedirect(hostname);
-        // TODO check that the .conf file was removed
+        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout);
+        lsSshChannel.sendCommandLineSynchronously("ls "+configFileName, stderr);
+        final String lsOutput = lsSshChannel.getStreamContentsAsString();
+        assertTrue(lsOutput.isEmpty());
     }
     
     @Test
@@ -168,6 +201,19 @@ public class ConnectivityTest {
         assertEquals(publicKeyComment, keyPairReadFromFile.getPublicKeyComment());
         new File(keyFileBaseName).delete();
         new File(keyFileBaseName+".pub").delete();
+    }
+    
+    @Test
+    public void generateSshKeyPairWithArrays() throws JSchException, FileNotFoundException, IOException {
+        final String publicKeyComment = "Test Key";
+        final JSch jsch = new JSch();
+        final KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 4096);
+        final ByteArrayOutputStream privateKey = new ByteArrayOutputStream();
+        keyPair.writePrivateKey(privateKey, keyPass);
+        final ByteArrayOutputStream publicKey = new ByteArrayOutputStream();
+        keyPair.writePublicKey(publicKey, publicKeyComment);
+        final KeyPair keyPairReadFromFile = KeyPair.load(jsch, privateKey.toByteArray(), publicKey.toByteArray());
+        assertEquals(publicKeyComment, keyPairReadFromFile.getPublicKeyComment());
     }
     
     @Test

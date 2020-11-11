@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -181,7 +182,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     
     byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
 
-    void addSSHKeyPair(SSHKeyPair keyPair);
+    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey);
 
     /**
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -197,8 +198,20 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
         sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
     }
     
+    
+    private static byte[] getPrivateKeyBytes(KeyPair unencryptedKeyPair) {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        unencryptedKeyPair.writePrivateKey(bos);
+        return bos.toByteArray();
+    }
+    
     @Override
-    public void addSSHKeyPair(SSHKeyPair keyPair) {
+    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) {
+        addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
+                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey)));
+    }
+    
+    private void addSSHKeyPair(SSHKeyPair keyPair) {
         internalAddKeyPair(keyPair);
         mongoObjectFactory.storeSSHKeyPair(keyPair);
     }

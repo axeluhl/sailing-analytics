@@ -112,7 +112,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, host, ""+port, eventId.toString());
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, eventId.toString(), host, ""+port);
     }
 
     @Override
@@ -121,7 +121,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, host, ""+port, leaderboardGroupId.toString());
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, leaderboardGroupId.toString(), host, ""+port);
     }
 
     @Override
