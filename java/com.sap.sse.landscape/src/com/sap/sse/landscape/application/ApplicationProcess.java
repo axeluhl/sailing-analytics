@@ -16,7 +16,7 @@ import com.sap.sse.landscape.mongodb.Database;
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-        extends Process<RotatingFileBasedLog, MetricsT> {
+extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * @return the replica set to which this process belongs<p>
      * 

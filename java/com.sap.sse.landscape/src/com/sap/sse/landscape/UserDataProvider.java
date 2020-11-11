@@ -14,5 +14,9 @@ import java.util.Map;
  */
 @FunctionalInterface
 public interface UserDataProvider {
+    /**
+     * Values are unquoted strings that will be enclosed in double quotes and will have their double-quotes quoted using
+     * backslash characters to precede them.
+     */
     Map<ProcessConfigurationVariable, String> getUserData();
 }
