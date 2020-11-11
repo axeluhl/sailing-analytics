@@ -20,7 +20,7 @@ public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationPr
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 LogT extends Log>
-        extends ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, LogT> {
+extends ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, LogT> {
     /**
      * A reverse proxy may scale out by adding more hosts.
      * 
@@ -31,8 +31,7 @@ LogT extends Log>
     /**
      * Add one host of the instance type specified to the availability zone {@code az}.
      * 
-     * @return the hosts that were added by this request; they will also be part of the response of {@link #getHosts()}
-     *         now
+     * @return the host that was added by this request; it will also be part of the response of {@link #getHosts()} now
      */
     AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
     

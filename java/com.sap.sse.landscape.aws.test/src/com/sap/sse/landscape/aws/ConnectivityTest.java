@@ -31,6 +31,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -74,6 +75,22 @@ public class ConnectivityTest {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
+    }
+    
+    @Test
+    public <MasterProcessT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>,
+            ReplicaProcessT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>>
+    void testApacheProxyBasics() throws InterruptedException, JSchException, IOException {
+        // FIXME we need the key used to launch the reverse proxy host in our Landscape...
+        @SuppressWarnings("unchecked")
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> proxy =
+                (ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>) landscape.getCentralReverseProxy(region);
+        final String hostname = "kw2021.sapsailing.com";
+        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>(8888, proxy.getHosts().iterator().next(),
+                "/home/sailing/servers/server"), UUID.randomUUID());
+        // TODO check that a .conf file was created
+        proxy.removeRedirect(hostname);
+        // TODO check that the .conf file was removed
     }
     
     @Test

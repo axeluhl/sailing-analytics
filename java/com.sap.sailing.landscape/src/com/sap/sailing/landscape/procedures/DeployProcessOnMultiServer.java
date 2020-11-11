@@ -19,7 +19,13 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * script there, run {@code ./refreshInstance.sh install-release}, then {@code ./refreshInstance.sh install-env environment-name},
  * then append specific variable values to the end of the {@code env.sh} file. In both cases, a set of variable assignments
  * needs to be generated which becomes the "user data" for {@link StartSailingAnalyticsHost} and becomes an appendix to
- * {@code env.sh} in this case.
+ * {@code env.sh} in this case.<p>
+ * 
+ * TODO Port assignments: this procedure needs to be able to scan the {@link #hostToDeployTo} for available ports in case
+ * no ports are fixed upon construction of the procedure. The {@link #process} resulting from the deployment will tell which
+ * ports were used eventually. The health check should be switched to using /gwt/status (which also tests the availability
+ * of the Apache reverse proxy on the instance), hence all target groups can always use port 80/443 for traffic and health
+ * check. The UDP and telnet ports do not need to be the same for master and replicas.<p>
  * 
  * @author Axel Uhl (D043530)
  *

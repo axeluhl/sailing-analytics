@@ -1,10 +1,13 @@
 package com.sap.sse.landscape.aws;
 
+import java.io.IOException;
 import java.util.UUID;
 
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -54,14 +57,14 @@ LogT extends Log> {
      * {@code /index.html} landing page for the application replica set provided.
      */
     void setPlainRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
+            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /gwt/Home.html} landing page for the application replica set provided.
      */
     void setHomeRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
+            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
@@ -69,7 +72,7 @@ LogT extends Log> {
      * application replica set provided.
      */
     void setEventRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet, UUID eventId);
+            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the event series page for the
@@ -77,20 +80,22 @@ LogT extends Log> {
      * be hosted by the application replica set provided.
      */
     void setEventSeriesRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet,
-            UUID leaderboardGroupId);
+            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess,
+            UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests
      * are sent to the {@code applicationReplicaSet}.
      */
-    void setScopeRedirect(Scope<ShardingKey> scope, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet);
+    void setScopeRedirect(Scope<ShardingKey> scope, ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationProcess) throws InterruptedException, JSchException, IOException;
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping
      * exists, the method does nothing.
      */
-    void removeRedirect(String hostname);
+    void removeRedirect(String hostname) throws InterruptedException, JSchException, IOException;
+    
+    void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException;
     
     /**
      * {@link AwsLandscape#terminate(AwsInstance) Terminates} all {@link #getHosts() hosts} that form this reverse
