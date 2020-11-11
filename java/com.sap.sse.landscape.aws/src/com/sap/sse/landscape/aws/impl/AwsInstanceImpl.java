@@ -7,6 +7,8 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
@@ -33,6 +35,7 @@ import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 
 public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AwsInstance<ShardingKey, MetricsT> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
@@ -47,6 +50,18 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         this.landscape = landscape;
     }
     
+    @Override
+    public boolean equals(Object other) {
+        @SuppressWarnings("unchecked")
+        AwsInstance<?, ? extends ApplicationProcessMetrics> otherCast = (AwsInstance<?, ? extends ApplicationProcessMetrics>) other;
+        return otherCast.getInstanceId().equals(getInstanceId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getInstance().hashCode();
+    }
+    
     /**
      * Obtains a fresh copy of the instance by looking it up in the {@link #getRegion() region} by its {@link #instanceId ID}.
      */
@@ -56,24 +71,55 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
 
     @Override
     public InetAddress getPublicAddress() {
+        return getIpAddress(Instance::publicIpAddress);
+    }
+    
+    @Override
+    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPublicAddress);
+    }
+    
+    @Override
+    public InetAddress getPrivateAddress() {
+        return getIpAddress(Instance::privateIpAddress);
+    }
+    
+    @Override
+    public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
+    }
+
+    private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
         try {
-            final String publicIpAddress = getInstance().publicIpAddress();
-            return publicIpAddress==null?null:InetAddress.getByName(publicIpAddress);
+            final Instance instance = getInstance();
+            final InetAddress result;
+            if (instance.state().name() == InstanceStateName.RUNNING) {
+                final String privateIpAddress = addressAsStringSupplier.apply(instance);
+                result = privateIpAddress==null?null:InetAddress.getByName(privateIpAddress);
+            } else {
+                result = null; // not RUNNING
+            }
+            return result;
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public InetAddress getPublicAddress(Optional<Duration> timeoutNullMeaningForever) {
+    private InetAddress getAddressWithTimeout(Optional<Duration> timeoutNullMeaningForever, Supplier<InetAddress> addressSupplierMethod) {
+        final Instance instance = getInstance();
         InetAddress result;
-        final TimePoint started = TimePoint.now();
-        while ((result = getPublicAddress()) == null &&
-                (!timeoutNullMeaningForever.isPresent() ||
-                 started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
+        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+            final TimePoint started = TimePoint.now();
+            while ((result = addressSupplierMethod.get()) == null &&
+                    (!timeoutNullMeaningForever.isPresent() ||
+                     started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
+        } else {
+            result = null;
+        }
         return result;
     }
-
+    
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
@@ -184,5 +230,10 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public void terminate() {
         landscape.terminate(this);
+    }
+    
+    @Override
+    public String toString() {
+        return getInstanceId();
     }
 }

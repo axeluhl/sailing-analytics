@@ -1,5 +1,5 @@
 #!/bin/bash
-# Call like this:    analyzeProduct.sh <my.product> <path-to-java/com.sap.sailing.selenium.test/pom.xml>
+# Call like this:    updateSeleniumPom.sh <my.product> <path-to-java/com.sap.sailing.selenium.test/pom.xml>
 # Will patch the bundleStartLevel section in the pom.xml file so that all auto-start bundles
 # configured in the product specification are also launched properly and with the correct start level
 # for the Selenium tests.
