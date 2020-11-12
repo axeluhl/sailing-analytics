@@ -79,7 +79,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
-    private final ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
+    private final ApplicationProcess<ShardingKey, MetricsT> process;
     private final String hostname;
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
@@ -100,7 +100,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        BuilderT setProcess(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process);
+        BuilderT setProcess(ApplicationProcess<ShardingKey, MetricsT> process);
         BuilderT setHostname(String hostname);
         BuilderT setTimeout(Duration timeout);
     }
@@ -114,12 +114,12 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         private String hostname;
-        private ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
+        private ApplicationProcess<ShardingKey, MetricsT> process;
         private Optional<Duration> optionalTimeout = Optional.empty();
 
         @Override
         public BuilderT setProcess(
-                ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
+                ApplicationProcess<ShardingKey, MetricsT> process) {
             this.process = process;
             return self();
         }
@@ -134,7 +134,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
             return hostname;
         }
 
-        public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
+        public ApplicationProcess<ShardingKey, MetricsT> getProcess() {
             return process;
         }
 
@@ -237,7 +237,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
         return rulesAdded;
     }
 
-    public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
+    public ApplicationProcess<ShardingKey, MetricsT> getProcess() {
         return process;
     }
 

@@ -109,7 +109,7 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProc
     }
     
     protected TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName,
-            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
+            ApplicationProcess<ShardingKey, MetricsT> process) {
         return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
                 process.getPort(), process.getHealthCheckPath(),
                 /* use traffic port as health check port, too */ process.getPort());

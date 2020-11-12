@@ -232,6 +232,10 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         landscape.terminate(this);
     }
     
+    protected AwsLandscape<ShardingKey, MetricsT, ?, ?> getLandscape() {
+        return landscape;
+    }
+    
     @Override
     public String toString() {
         return getInstanceId();

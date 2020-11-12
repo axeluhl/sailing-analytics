@@ -18,7 +18,7 @@ public interface SailingAnalyticsHost<ShardingKey> extends AwsInstance<ShardingK
      * expand base URLs to, e.g., the URL of a specific event in that scope or an overview page of an event series or
      * simply the home/landing page. It furthermore handles logging in a consistent way.
      */
-    ReverseProxy<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, RotatingFileBasedLog> getReverseProxy();
+    ReverseProxy<ShardingKey, SailingAnalyticsMetrics, RotatingFileBasedLog> getReverseProxy();
     
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.

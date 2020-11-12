@@ -13,19 +13,8 @@ import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 
-public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics>
 extends Process<RotatingFileBasedLog, MetricsT> {
-    /**
-     * @return the replica set to which this process belongs<p>
-     * 
-     *         TODO define this more precisely; an instance can be replica with regards to the SecurityService and
-     *         SharedSailingData replicables and at the same time be master for RacingEventService and all the other
-     *         replicables. What then is "the" replica set of the process?
-     */
-    ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
-    
     /**
      * @param releaseRepository
      *            mandatory parameter required to enable resolving the release and enabling the download of its

@@ -10,7 +10,7 @@ import com.sap.sse.landscape.aws.ReverseProxy;
 public abstract class AbstractApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> {
+implements ReverseProxy<ShardingKey, MetricsT, RotatingFileBasedLog> {
     private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
     
     public AbstractApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {

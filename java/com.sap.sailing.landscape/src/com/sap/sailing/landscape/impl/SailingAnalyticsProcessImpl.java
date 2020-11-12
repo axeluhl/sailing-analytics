@@ -9,17 +9,15 @@ import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
-import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 
-public class SailingAnalyticsProcessImpl<ShardingKey> extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics,
-SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> implements SailingAnalyticsProcess<ShardingKey> {
+public class SailingAnalyticsProcessImpl<ShardingKey> extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics>
+implements SailingAnalyticsProcess<ShardingKey> {
     private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());
     private static final String HEALTH_CHECK_PATH = "/gwt/status";
 
@@ -49,6 +47,6 @@ SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> imple
 
     @Override
     public int getExpeditionUdpPort(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException, SftpException {
-        return Integer.parseInt(getEnvShValueFor(getEnvSh(optionalTimeout), SailingAnalyticsProcessConfigurationVariable.EXPEDITION_PORT.name(), optionalTimeout));
+        return Integer.parseInt(getEnvShValueFor(SailingAnalyticsProcessConfigurationVariable.EXPEDITION_PORT.name(), optionalTimeout));
     }
 }

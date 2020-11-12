@@ -9,6 +9,6 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationProcess;
 
 public interface SailingAnalyticsProcess<ShardingKey> extends
-        ApplicationProcess<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
+ApplicationProcess<ShardingKey, SailingAnalyticsMetrics> {
     int getExpeditionUdpPort(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException, SftpException;
 }

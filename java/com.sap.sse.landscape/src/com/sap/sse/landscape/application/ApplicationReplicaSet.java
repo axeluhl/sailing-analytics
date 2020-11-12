@@ -93,7 +93,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     boolean isReadFromMaster();
 
-    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>> getShardingInfo();
+    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT>>> getShardingInfo();
     
     /**
      * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
@@ -105,7 +105,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #removeSharding
      */
-    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> processesToPrimarilyHandleShard);
+    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT>> processesToPrimarilyHandleShard);
     
     /**
      * Re-configures this replica set such that requests for {@code shard} will be spread across all processes

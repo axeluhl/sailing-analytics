@@ -104,12 +104,10 @@ public class ConnectivityTest {
     public <MasterProcessT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>,
             ReplicaProcessT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>>
     void testApacheProxyBasics() throws InterruptedException, JSchException, IOException, SftpException {
-        @SuppressWarnings("unchecked")
-        final ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> proxy =
-                (ReverseProxyCluster<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>) landscape.getCentralReverseProxy(region);
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
         final AwsInstance<String, ApplicationProcessMetrics> proxyHost = proxy.getHosts().iterator().next();
-        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>(8888, proxyHost,
+        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics>(8888, proxyHost,
                 "/home/sailing/servers/server"), UUID.randomUUID());
         final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
         final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout);
@@ -153,7 +151,7 @@ public class ConnectivityTest {
             assertTrue(foundName);
             assertTrue(foundHello);
             // check env.sh access
-            final ApplicationProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
+            final ApplicationProcess<String, ApplicationProcessMetrics> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
@@ -365,7 +363,7 @@ public class ConnectivityTest {
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, ApplicationProcessMetrics, ?, ?, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());

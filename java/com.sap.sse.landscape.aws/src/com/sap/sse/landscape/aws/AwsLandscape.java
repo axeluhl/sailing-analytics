@@ -337,7 +337,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
      * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
      */
-    ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
+    ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
     
     /**
      * Each region can have a single load balancer per {@code wildcardDomain} that is the target for any sub-domain of
