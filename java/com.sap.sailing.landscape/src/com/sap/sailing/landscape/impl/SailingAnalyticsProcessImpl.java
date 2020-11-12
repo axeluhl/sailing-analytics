@@ -16,6 +16,11 @@ implements SailingAnalyticsProcess<ShardingKey> {
         super(host, serverDirectory);
     }
 
+    @Override
+    public String getHealthCheckPath() {
+        return HEALTH_CHECK_PATH;
+    }
+    
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host, serverDirectory);
     }

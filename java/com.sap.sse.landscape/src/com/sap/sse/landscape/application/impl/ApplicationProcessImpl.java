@@ -2,7 +2,6 @@ package com.sap.sse.landscape.application.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -159,14 +158,6 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return null;
     }
 
-    /**
-     * Without knowledge about how to do an availability check, we report {@code true} as the default result.
-     */
-    @Override
-    public boolean isReady(Optional<Duration> optionalTimeout) throws MalformedURLException, IOException {
-        return true;
-    }
-    
     @Override
     public ProcessT getMaster() {
         // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties

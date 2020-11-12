@@ -1,7 +1,10 @@
 package com.sap.sse.landscape.application;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -17,6 +20,8 @@ import com.sap.sse.landscape.mongodb.Database;
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
+    static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
+    
     /**
      * @param releaseRepository
      *            mandatory parameter required to enable resolving the release and enabling the download of its
@@ -84,4 +89,20 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout)
             throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Tells whether this process is ready to accept requests. Use this for a health check in a target group
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
+     */
+    default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http",
+                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
+    }
 }
