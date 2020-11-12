@@ -1,5 +1,5 @@
 #!/bin/bash
-# Call like this:    analyzeProduct.sh <my.product> [<my.launch> ...]
+# Call like this:    updateEclipseLaunchers.sh <my.product> [<my.launch> ...]
 # Updates Eclipse .launch files with the bundles needed for starting an SAP Sailing server based on the current feature.xml.
 # The .launch files must be in the workspace format that was introduced with Eclipse 2019-12. The script prints an error when no matching
 # replacement section could be found.
@@ -82,7 +82,7 @@ while [ "$2" != "" ]; do
     else
         echo "Patching $2 ..."
         if echo "$2" | grep -q winddbTest; then
-          patched_workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"com.sap.sailing.server.gateway.test.support@default:default\"\/>${NL}"
+          patched_workspace_bundles="${workspace_bundles}${NL}<setEntry value=\"com.sap.sailing.server.gateway.test.support\@default:default\"\/>${NL}"
         else
           patched_workspace_bundles="${workspace_bundles}"
         fi

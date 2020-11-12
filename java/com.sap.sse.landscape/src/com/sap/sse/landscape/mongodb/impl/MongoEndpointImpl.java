@@ -10,6 +10,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
@@ -43,8 +44,18 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     }
     
     @Override
+    public MongoClientURI getMongoClientURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
+        return new MongoClientURI(getURI(optionalDb, timeoutEmptyMeaningForever).toString());
+    }
+    
+    @Override
     public MongoClient getClient() throws URISyntaxException {
         return new MongoClient(getMongoClientURI(Optional.empty()));
+    }
+    
+    @Override
+    public MongoClient getClient(Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
+        return new MongoClient(getMongoClientURI(Optional.empty(), timeoutEmptyMeaningForever));
     }
     
     @Override

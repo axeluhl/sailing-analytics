@@ -8,6 +8,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
+import com.sap.sse.common.Duration;
 
 /**
  * A MongoDB endpoint that an application can connect to. It can produce a {@link URI} the client can use to connect to,
@@ -18,8 +19,15 @@ import com.mongodb.session.ClientSession;
  *
  */
 public interface MongoEndpoint {
+    /**
+     * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a
+     * {@link NullPointerException} will result. Consider using {@link #getURI(Optional, Optional)} to wait for
+     * a public IP address to become available if the instance is still booting up.
+     */
     URI getURI(Optional<Database> optionalDb) throws URISyntaxException;
-
+    
+    URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
+    
     Iterable<MongoDatabase> getMongoDatabases() throws URISyntaxException;
 
     MongoDatabase getMongoDatabase(String dbName) throws URISyntaxException;
@@ -34,9 +42,23 @@ public interface MongoEndpoint {
 
     boolean isInReplicaSet() throws URISyntaxException;
 
+    /**
+     * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a
+     * {@link NullPointerException} will result. Consider using {@link #getMongoClientURI(Optional, Optional)} to wait for
+     * a public IP address to become available if the instance is still booting up.
+     */
     MongoClientURI getMongoClientURI(Optional<Database> optionalDb) throws URISyntaxException;
 
+    MongoClientURI getMongoClientURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
+
+    /**
+     * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a
+     * {@link NullPointerException} will result. Consider using {@link #getClient(Optional)} to wait for
+     * a public IP address to become available if the instance is still booting up.
+     */
     MongoClient getClient() throws URISyntaxException;
+
+    MongoClient getClient(Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
 
     ClientSession getClientSession() throws URISyntaxException;
     
