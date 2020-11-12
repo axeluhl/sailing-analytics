@@ -1,15 +1,15 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.impl.SailingAnalyticsMasterImpl;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 /**
- * This procedure does two things: it {@link StartSailingAnalyticsHost starts} a {@link SailingAnalyticsHost}, and
+ * This procedure does two things: it {@link StartSailingAnalyticsHost starts} a {@link ApplicationProcessHost}, and
  * (currently implicitly, based on the way the /etc/init.d/sailing script works) also starts a "master" process that is
  * expected to have the default working directory {@code /home/sailing/servers/server} (see
- * {@link SailingAnalyticsHost#DEFAULT_SERVER_PATH}).
+ * {@link ApplicationProcessHost#DEFAULT_SERVER_PATH}).
  * <p>
  * 
  * TODO What we should probably be doing instead is harmonize the way the set-up / launching of a regular default master

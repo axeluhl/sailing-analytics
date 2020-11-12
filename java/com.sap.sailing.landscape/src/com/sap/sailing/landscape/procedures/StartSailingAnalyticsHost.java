@@ -3,13 +3,13 @@ package com.sap.sailing.landscape.procedures;
 import java.util.Collections;
 import java.util.Optional;
 
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
+import com.sap.sailing.landscape.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -29,7 +29,7 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  */
 public abstract class StartSailingAnalyticsHost<ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>>,
     StartFromSailingAnalyticsImage {
     private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
@@ -52,14 +52,14 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
      * getLatestMasterRelease()} will be used instead.</li>
      * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {code /home/sailing/servers/server}
-     * (see {@link SailingAnalyticsHost#DEFAULT_SERVER_PATH})</li>
+     * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
     T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
+    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>> {
         BuilderT setPort(int port);
 
         BuilderT setTelnetPort(int telnetPort);
@@ -71,7 +71,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
     T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>>
     implements Builder<BuilderT, T, ShardingKey, ProcessT> {
         private Integer port;
         private Integer telnetPort;
@@ -94,8 +94,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
         }
 
         @Override
-        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
-            return SailingAnalyticsHostImpl::new;
+        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>> getHostSupplier() {
+            return ApplicationProcessHostImpl::new;
         }
         
         protected Integer getPort() {
@@ -130,7 +130,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
 
         // TODO the host start-up should ideally be separated from the process installation/startup
         public String getDefaultServerDirectory() {
-            return defaultServerDirectory == null ? SailingAnalyticsHost.DEFAULT_SERVER_PATH : defaultServerDirectory;
+            return defaultServerDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : defaultServerDirectory;
         }
 
         @Override

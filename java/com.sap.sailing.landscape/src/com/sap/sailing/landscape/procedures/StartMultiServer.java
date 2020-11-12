@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -130,9 +130,9 @@ implements StartFromSailingAnalyticsImage {
         final String instanceId = getHost().getInstanceId();
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout);
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        sshCommandChannel.sendCommandLineSynchronously("rm -rf "+SailingAnalyticsHost.DEFAULT_SERVER_PATH+"; service httpd start", stderr);
-        logger.info("stdout for removing "+SailingAnalyticsHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+sshCommandChannel.getStreamContentsAsString());
-        logger.info("stderr for removing "+SailingAnalyticsHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+stderr.toString());
-        logger.info("exit status for removing "+SailingAnalyticsHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+sshCommandChannel.getExitStatus());
+        sshCommandChannel.sendCommandLineSynchronously("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start", stderr);
+        logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+sshCommandChannel.getStreamContentsAsString());
+        logger.info("stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+stderr.toString());
+        logger.info("exit status for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+sshCommandChannel.getExitStatus());
     }
 }

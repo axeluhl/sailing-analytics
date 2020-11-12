@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsReplica;
@@ -86,7 +86,7 @@ public class TestProcedures {
             startEmptyMultiServer.run();
             final AwsInstance<String, SailingAnalyticsMetrics> host = startEmptyMultiServer.getHost();
             final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
-            sshChannel.sendCommandLineSynchronously("ls "+SailingAnalyticsHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
+            sshChannel.sendCommandLineSynchronously("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
             final String result = sshChannel.getStreamContentsAsString();
             assertTrue(result.isEmpty());
             final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
@@ -197,7 +197,7 @@ public class TestProcedures {
                         .build())
                 .build();
         startSailingAnalyticsMaster.run();
-        final SailingAnalyticsHost<String> host = startSailingAnalyticsMaster.getHost();
+        final ApplicationProcessHost<String, SailingAnalyticsMetrics> host = startSailingAnalyticsMaster.getHost();
         try {
             assertNotNull(host);
             final Instance instance = landscape.getInstance(host.getInstanceId(), region);

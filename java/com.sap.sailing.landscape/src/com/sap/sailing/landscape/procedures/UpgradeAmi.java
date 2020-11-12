@@ -7,9 +7,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
+import com.sap.sailing.landscape.impl.ApplicationProcessHostImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationMasterProcess;
@@ -49,7 +49,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 public class UpgradeAmi<ShardingKey,
 MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
 ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-extends StartEmptyServer<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+extends StartEmptyServer<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
@@ -81,7 +81,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
@@ -103,7 +103,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
     MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
     ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
+    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>>
     implements Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
@@ -180,8 +180,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
-        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
-            return SailingAnalyticsHostImpl::new;
+        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>> getHostSupplier() {
+            return ApplicationProcessHostImpl::new;
         }
 
         protected String getUpgradedImageName() {
