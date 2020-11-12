@@ -1,7 +1,0 @@
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-  xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <g:HTMLPanel tag="footer" ui:field="footerPanel">
-    <!-- Website footer-->
-     <g:Anchor text="Switch to desktop view" ui:field="desktopViewAnchor" />
-  </g:HTMLPanel>
-</ui:UiBinder>
