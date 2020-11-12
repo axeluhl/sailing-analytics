@@ -14,10 +14,8 @@ import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
@@ -28,14 +26,12 @@ import com.sap.sse.landscape.aws.Tags;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-LogT extends Log>
-        extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
-implements ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
+extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
+implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey, MetricsT>> hosts;
 
-    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
+    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
     }
@@ -45,7 +41,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> {
         return Collections.unmodifiableCollection(hosts);
     }
     
-    private Iterable<ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getReverseProxies() {
+    private Iterable<ApacheReverseProxy<ShardingKey, MetricsT, ProcessT>> getReverseProxies() {
         return Util.map(hosts, host->new ApacheReverseProxy<>(getLandscape(), host));
     }
 
@@ -93,57 +89,52 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> {
     }
 
     @Override
-    public void setPlainRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setPlainRedirect(hostname, applicationProcess);
         }
     }
 
     @Override
-    public void setHomeRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setHomeRedirect(hostname, applicationProcess);
         }
     }
 
     @Override
-    public void setEventRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess,
+    public void setEventRedirect(String hostname, ProcessT applicationProcess,
             UUID eventId) throws InterruptedException, JSchException, IOException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setEventRedirect(hostname, applicationProcess, eventId);
         }
     }
 
     @Override
-    public void setEventSeriesRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess,
+    public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
             UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId);
         }
     }
 
     @Override
-    public void setScopeRedirect(Scope<ShardingKey> scope,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+    public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setScopeRedirect(scope, applicationProcess);
         }
     }
 
     @Override
     public void removeRedirect(String hostname) throws IOException, InterruptedException, JSchException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.removeRedirect(hostname);
         }
     }
 
     @Override
     public void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException {
-        for (final ApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> proxy : getReverseProxies()) {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.removeRedirect(scope);
         }
     }

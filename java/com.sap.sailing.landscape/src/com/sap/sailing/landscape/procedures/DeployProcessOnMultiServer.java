@@ -1,11 +1,9 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sailing.landscape.ApplicationProcessHost;
-import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
 import com.sap.sse.landscape.Landscape;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
@@ -32,10 +30,10 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics>> implements
-        Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> {
-    private final Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape;
-    private final ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo;
+public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
+    private final Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape;
+    private final HostT hostToDeployTo;
     private final String serverName;
     
     /**
@@ -44,8 +42,8 @@ public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationPr
      */
     private SailingAnalyticsProcess<ShardingKey> process;
     
-    public DeployProcessOnMultiServer(Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> landscape,
-            ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo, String serverName) {
+    public DeployProcessOnMultiServer(Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape,
+            HostT hostToDeployTo, String serverName) {
         super();
         this.landscape = landscape;
         this.hostToDeployTo = hostToDeployTo;
@@ -66,7 +64,7 @@ public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationPr
         this.process = process;
     }
 
-    public ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics> getHostToDeployTo() {
+    public HostT getHostToDeployTo() {
         return hostToDeployTo;
     }
 
@@ -75,7 +73,7 @@ public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationPr
     }
 
     @Override
-    public Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>> getLandscape() {
+    public Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
         return landscape;
     }
 }

@@ -42,9 +42,9 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
-    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey, MetricsT, ?> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey, MetricsT, ?> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
         this.landscape = landscape;
@@ -232,7 +232,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
         landscape.terminate(this);
     }
     
-    protected AwsLandscape<ShardingKey, MetricsT, ?, ?> getLandscape() {
+    protected AwsLandscape<ShardingKey, MetricsT, ?> getLandscape() {
         return landscape;
     }
     

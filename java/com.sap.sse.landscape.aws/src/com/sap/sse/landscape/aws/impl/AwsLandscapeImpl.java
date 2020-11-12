@@ -27,9 +27,8 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -132,9 +131,8 @@ import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private static final String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
@@ -153,7 +151,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog>> centralReverseProxyByRegion;
+    private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
     private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
     
     /**
@@ -185,7 +183,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
         // TODO automate handling of central reverse proxy instances across regions and AZs, e.g., based on tags
         final AwsRegion euWest2 = new AwsRegion("eu-west-2");
         final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
-        final ApacheReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
+        final ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
                 this);
         euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
         centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
@@ -204,7 +202,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
         unencryptedKeyPair.writePrivateKey(bos);
         return bos.toByteArray();
     }
-    
+
     @Override
     public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) {
         addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
@@ -270,7 +268,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     
     private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
-        final ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
                 port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
@@ -589,13 +587,13 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     }
 
     @Override
-    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getScopes() {
+    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
         return null;
     }
     
     @Override
-    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier,
+    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier,
             int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
@@ -727,7 +725,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     }
 
     @Override
-    public ReverseProxyCluster<ShardingKey, MetricsT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+    public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         return centralReverseProxyByRegion.get(region);
     }
 

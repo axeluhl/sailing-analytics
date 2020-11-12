@@ -19,12 +19,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
-import com.sap.sailing.landscape.ApplicationProcessHost;
-import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
@@ -32,6 +31,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
@@ -59,7 +59,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
 public class TestProcedures {
     private static final Logger logger = Logger.getLogger(TestProcedures.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
-    private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> landscape;
+    private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape;
     private AwsRegion region;
     private final static String SECURITY_SERVICE_REPLICATION_BEARER_TOKEN = "security.service.replication.bearer.token";
     private String securityServiceReplicationBearerToken;
@@ -75,8 +75,8 @@ public class TestProcedures {
     public void testStartupEmptyMultiServer() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartMultiServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMultiServer.builder();
-        final StartMultiServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startEmptyMultiServer = builder
+        final StartMultiServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> builder = StartMultiServer.builder();
+        final StartMultiServer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
               .setOptionalTimeout(optionalTimeout)
@@ -107,8 +107,8 @@ public class TestProcedures {
     public void testAddMongoReplica() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartMongoDBServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> builder = StartMongoDBServer.builder();
-        final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> startMongoDBServerProcedure = builder
+        final StartMongoDBServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> builder = StartMongoDBServer.builder();
+        final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> startMongoDBServerProcedure = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
               .setOptionalTimeout(optionalTimeout)
@@ -154,8 +154,8 @@ public class TestProcedures {
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
-        final UpgradeAmi<String, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>> imageUpgradeProcedure =
+        final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
+        final UpgradeAmi<String> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
                     .setInstanceType(InstanceType.T2_MEDIUM)
@@ -183,7 +183,7 @@ public class TestProcedures {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
         final StartSailingAnalyticsMaster.Builder<?, String> builder = StartSailingAnalyticsMaster.builder();
-        final StartSailingAnalyticsMaster<String> startSailingAnalyticsMaster = builder
+        final StartSailingAnalyticsHost<String> startSailingAnalyticsMaster = builder
                 .setServerName(serverName)
                 .setLandscape(landscape)
                 .setRegion(region)
@@ -197,7 +197,7 @@ public class TestProcedures {
                         .build())
                 .build();
         startSailingAnalyticsMaster.run();
-        final ApplicationProcessHost<String, SailingAnalyticsMetrics> host = startSailingAnalyticsMaster.getHost();
+        final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startSailingAnalyticsMaster.getHost();
         try {
             assertNotNull(host);
             final Instance instance = landscape.getInstance(host.getInstanceId(), region);
@@ -214,7 +214,7 @@ public class TestProcedures {
             assertTrue(foundName);
             assertTrue(foundHello);
             // check env.sh access
-            final SailingAnalyticsMaster<String> process = startSailingAnalyticsMaster.getSailingAnalyticsProcess();
+            final SailingAnalyticsProcess<String> process = startSailingAnalyticsMaster.getSailingAnalyticsProcess();
             // TODO The problem here: the /etc/init.d/sailing script takes a while to do its job with downloading, installing
             // the release, updating git, and running the httpd reverse proxy server. Only then will the env.sh be patched, just before
             // the instance is launched. We may want to wait for the process to become available on port 8888 before continuing...
@@ -231,14 +231,14 @@ public class TestProcedures {
             final String domain = "wiesen-weg.de";
             final String hostname = serverName+"."+domain;
             CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics,
-            SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
+                    SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
             createAlbProcedureBuilder
                 .setProcess(process)
                 .setHostname(hostname)
                 .setTargetGroupNamePrefix("S-ded-") // TODO when we combine procedures for launching dedicated hosts (StartSailingAnlayticsHost and specializations) then "S-ded-" should be the default; for DeployProcessOnMultiServer, "S-shared-" should be the default
                 .setLandscape(landscape);
             optionalTimeout.ifPresent(createAlbProcedureBuilder::setTimeout);
-            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsMaster<String>, SailingAnalyticsReplica<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedure =
+            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedure =
                     createAlbProcedureBuilder.build();
             try {
                 createAlbProcedure.run();

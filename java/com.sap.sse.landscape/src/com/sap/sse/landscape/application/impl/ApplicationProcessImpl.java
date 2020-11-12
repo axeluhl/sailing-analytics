@@ -22,9 +22,10 @@ import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
-public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics>
+public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ProcessImpl<RotatingFileBasedLog, MetricsT>
-implements ApplicationProcess<ShardingKey, MetricsT> {
+implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     /**
      * The timeout for typical network-based operations
      */
@@ -96,7 +97,8 @@ implements ApplicationProcess<ShardingKey, MetricsT> {
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
      */
-    protected String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+    @Override
+    public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout);
     }
     
@@ -111,7 +113,8 @@ implements ApplicationProcess<ShardingKey, MetricsT> {
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
      */
-    protected String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+    @Override
+    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         return getEnvShValueFor(variable.name(), optionalTimeout);
     }
 
@@ -162,5 +165,19 @@ implements ApplicationProcess<ShardingKey, MetricsT> {
     @Override
     public boolean isReady(Optional<Duration> optionalTimeout) throws MalformedURLException, IOException {
         return true;
+    }
+    
+    @Override
+    public ProcessT getMaster() {
+        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
+        // TODO Implement ApplicationReplicaProcess<ShardingKey,SailingAnalyticsMetrics,SailingAnalyticsMaster<ShardingKey>,SailingAnalyticsReplica<ShardingKey>>.getMaster(...)
+        return null;
+    }
+
+    @Override
+    public Iterable<ProcessT> getReplicas() {
+        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
+        // TODO Implement ApplicationProcessImpl.getReplicas(...)
+        return null;
     }
 }

@@ -1,18 +1,16 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
-import com.sap.sailing.landscape.impl.SailingAnalyticsReplicaImpl;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
-        extends StartSailingAnalyticsHost<ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
+        extends StartSailingAnalyticsHost<ShardingKey> {
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
-    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>> {
+    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey> {
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
-    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey, SailingAnalyticsReplica<ShardingKey>>
+    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
         private static final String DEFAULT_REPLICA_INSTANCE_NAME_SUFFIX = " (Replica)";
         private static final String DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX = "-replica";
@@ -50,10 +48,5 @@ public class StartSailingAnalyticsReplica<ShardingKey>
     protected StartSailingAnalyticsReplica(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
         addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
-    }
-
-    @Override
-    public SailingAnalyticsReplica<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsReplicaImpl<>(getPort(), getHost(), getDefaultServerDirectory());
     }
 }

@@ -10,8 +10,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
      * The application version that the nodes in this replica set are currently running. During an
      * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
@@ -25,11 +24,11 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     void upgrade(ApplicationVersion newVersion);
     
-    MasterProcessT getMaster();
+    ProcessT getMaster();
     
-    Iterable<ReplicaProcessT> getReplicas();
+    Iterable<ProcessT> getReplicas();
     
-    default Iterable<ReplicaProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
+    default Iterable<ProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
         return Util.filter(getReplicas(), r->{
             try {
                 return r.isReady(optionalTimeout);
@@ -55,7 +54,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #setRemoteReference
      */
-    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> source, Scope<ShardingKey> scopeToImport,
+    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> source, Scope<ShardingKey> scopeToImport,
             boolean failUponDiff, boolean removeFromSourceUponSuccess, boolean setRemoveReferenceInSourceUponSuccess);
     
     void removeScope(Scope<ShardingKey> scope);
@@ -66,7 +65,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * whether the reference shall only <em>include</em> those scopes ({@code true}) or it should list all scopes
      * <em>except those listed in {@code scopes}</em> ({@code false}) instead.
      */
-    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> to,
+    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> to,
             Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
     
     void removeRemoteReference(String name);
@@ -93,7 +92,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     boolean isReadFromMaster();
 
-    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT>>> getShardingInfo();
+    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>>> getShardingInfo();
     
     /**
      * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
@@ -105,7 +104,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #removeSharding
      */
-    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT>> processesToPrimarilyHandleShard);
+    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>> processesToPrimarilyHandleShard);
     
     /**
      * Re-configures this replica set such that requests for {@code shard} will be spread across all processes

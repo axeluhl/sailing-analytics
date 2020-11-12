@@ -4,11 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.sap.sailing.landscape.ApplicationProcessHost;
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
@@ -32,9 +31,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @param <SailingAnalyticsHost<ShardingKey>>
  */
 public class StartMultiServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends StartEmptyServer<StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends StartEmptyServer<StartMultiServer<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>>
 implements StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
@@ -48,22 +46,20 @@ implements StartFromSailingAnalyticsImage {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends StartEmptyServer.Builder<BuilderT, StartMultiServer<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> {
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<BuilderT, StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends StartEmptyServer.BuilderImpl<BuilderT, StartMultiServer<ShardingKey, MetricsT, ProcessT>,
+    ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>>
+    implements Builder<BuilderT, ShardingKey, MetricsT, ProcessT> {
         @Override
-        public StartMultiServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() {
+        public StartMultiServer<ShardingKey, MetricsT, ProcessT> build() {
             return new StartMultiServer<>(this);
         }
 
@@ -89,8 +85,8 @@ implements StartFromSailingAnalyticsImage {
         }
         
         @Override
-        protected HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> getHostSupplier() {
-            final HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> result;
+        protected HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> getHostSupplier() {
+            final HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> result;
             if (super.getHostSupplier() == null) {
                 result = AwsInstanceImpl::new;
             } else {
@@ -111,15 +107,14 @@ implements StartFromSailingAnalyticsImage {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Builder<BuilderT, ShardingKey, MetricsT, ProcessT> builder() {
         return new BuilderImpl<>();
     }
 
-    protected StartMultiServer(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) {
+    protected StartMultiServer(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) {
         super(builder);
         this.optionalTimeout = builder.getOptionalTimeout();
     }

@@ -35,10 +35,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
@@ -66,10 +64,10 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @author Axel Uhl (D043530)
  *
  */
-public class ConnectivityTest {
+public class ConnectivityTest<ProcessT extends ApplicationProcess<String, ApplicationProcessMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
-    private AwsLandscape<String, ApplicationProcessMetrics, ?, ?> landscape;
+    private AwsLandscape<String, ApplicationProcessMetrics, ProcessT> landscape;
     private AwsRegion region;
     private byte[] keyPass;
     
@@ -88,8 +86,9 @@ public class ConnectivityTest {
         final String PATH_TO_YOUR_PRIVATE_KEY = "the path to your id_rsa file";
         landscape.deleteKeyPair(region, AXELS_KEY_NAME);
         final KeyPair keyPair = KeyPair.load(new JSch(), PATH_TO_YOUR_PRIVATE_KEY, PATH_TO_YOUR_PRIVATE_KEY+".pub");
-        assertTrue(keyPair.decrypt(KEY_PASSPHRASE));
-        landscape.addSSHKeyPair(region, "Me", AXELS_KEY_NAME, keyPair);
+        final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
+        final byte[] privKeyBytes = getPrivateKeyBytes(keyPair, KEY_PASSPHRASE.getBytes());
+        landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, AXELS_KEY_NAME);
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next().createRootSshChannel(optionalTimeout);
         sshChannel.sendCommandLineSynchronously("ls -al", stderr);
@@ -101,14 +100,12 @@ public class ConnectivityTest {
      * Requires the key that was used for launching the central reverse proxy for the test landscape to be known in the {@link #landscape}.
      */
     @Test
-    public <MasterProcessT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>,
-            ReplicaProcessT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterProcessT, ReplicaProcessT>>
-    void testApacheProxyBasics() throws InterruptedException, JSchException, IOException, SftpException {
-        final ReverseProxyCluster<String, ApplicationProcessMetrics, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
+    public void testApacheProxyBasics() throws InterruptedException, JSchException, IOException, SftpException {
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, ProcessT, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
         final AwsInstance<String, ApplicationProcessMetrics> proxyHost = proxy.getHosts().iterator().next();
-        proxy.setEventRedirect(hostname, new ApplicationProcessImpl<String, ApplicationProcessMetrics>(8888, proxyHost,
-                "/home/sailing/servers/server"), UUID.randomUUID());
+        final ProcessT process = createApplicationProcess(proxyHost);
+        proxy.setEventRedirect(hostname, process, UUID.randomUUID());
         final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
         final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout);
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis());
@@ -123,10 +120,16 @@ public class ConnectivityTest {
         final String lsOutput = lsSshChannel.getStreamContentsAsString();
         assertTrue(lsOutput.isEmpty());
     }
+
+    protected ProcessT createApplicationProcess(final AwsInstance<String, ApplicationProcessMetrics> host) {
+        @SuppressWarnings("unchecked")
+        final ProcessT process = (ProcessT) new ApplicationProcessImpl<String, ApplicationProcessMetrics, ProcessT>(8888, host,
+                "/home/sailing/servers/server");
+        return process;
+    }
     
     @Test
-    public <MasterT extends ApplicationMasterProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>, ReplicaT extends ApplicationReplicaProcess<String, ApplicationProcessMetrics, MasterT, ReplicaT>>
-    void testConnectivity() throws Exception {
+    public void testConnectivity() throws Exception {
         final String TARGET_GROUP_NAME_PREFIX = "S-test-";
         final String hostedZoneName = "wiesen-weg.de";
         final String hostname = "test-"+new Random().nextInt()+"."+hostedZoneName;
@@ -151,23 +154,22 @@ public class ConnectivityTest {
             assertTrue(foundName);
             assertTrue(foundHello);
             // check env.sh access
-            final ApplicationProcess<String, ApplicationProcessMetrics> process = new ApplicationProcessImpl<>(8888, host, "/home/sailing/servers/server");
+            final ProcessT process = createApplicationProcess(host);
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
             final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout);
             assertNotNull(release);
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
-            @SuppressWarnings("unchecked")
-            final AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT> castLandscape = (AwsLandscape<String, ApplicationProcessMetrics, MasterT, ReplicaT>) landscape;
-            final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
+            final AwsLandscape<String, ApplicationProcessMetrics, ProcessT> castLandscape = (AwsLandscape<String, ApplicationProcessMetrics, ProcessT>) landscape;
+            final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, ApplicationProcessMetrics, ProcessT, AwsInstance<String, ApplicationProcessMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
             builder
                 .setProcess(process)
                 .setHostname(hostname)
                 .setTargetGroupNamePrefix(TARGET_GROUP_NAME_PREFIX)
                 .setLandscape(castLandscape);
             optionalTimeout.ifPresent(builder::setTimeout);
-            final CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, MasterT, ReplicaT, AwsInstance<String, ApplicationProcessMetrics>> createDNSBasedLoadBalancerMappingProcedure =
+            final CreateDNSBasedLoadBalancerMapping<String, ApplicationProcessMetrics, ProcessT, AwsInstance<String, ApplicationProcessMetrics>> createDNSBasedLoadBalancerMappingProcedure =
                     builder.build();
             final String wiesenWegId = landscape.getDNSHostedZoneId(hostedZoneName);
             try {
@@ -363,7 +365,7 @@ public class ConnectivityTest {
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, ApplicationProcessMetrics, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
+        final ReverseProxyCluster<String, ApplicationProcessMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2"));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());

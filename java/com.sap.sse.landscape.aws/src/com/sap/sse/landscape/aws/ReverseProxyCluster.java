@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import com.sap.sse.landscape.Log;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -14,8 +15,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics, LogT extends Log>
-extends ReverseProxy<ShardingKey, MetricsT, LogT> {
+public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
+extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
     /**
      * A reverse proxy may scale out by adding more hosts.
      * 

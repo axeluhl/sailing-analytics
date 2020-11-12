@@ -42,7 +42,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics, LogT extends Log> {
+public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log> {
     default InstanceType getDefaultInstanceType() {
         return InstanceType.T3_SMALL;
     }
@@ -51,38 +51,34 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /index.html} landing page for the application replica set provided.
      */
-    void setPlainRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException;
+    void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /gwt/Home.html} landing page for the application replica set provided.
      */
-    void setHomeRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException;
+    void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * event page for the event with ID {@code eventId} that is expected to be hosted by the
      * application replica set provided.
      */
-    void setEventRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException;
+    void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the event series page for the
      * event series identified by the UUID of the leaderboard group that represents the series and which is expected to
      * be hosted by the application replica set provided.
      */
-    void setEventSeriesRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess,
+    void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
             UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests
      * are sent to the {@code applicationReplicaSet}.
      */
-    void setScopeRedirect(Scope<ShardingKey> scope, ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException;
+    void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException;
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping

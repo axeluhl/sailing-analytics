@@ -4,9 +4,8 @@ import java.util.Arrays;
 
 import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
 
 /**
@@ -42,16 +41,15 @@ import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
  */
 public interface Procedure<ShardingKey, 
                            MetricsT extends ApplicationProcessMetrics,
-                           MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+                           ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends RunnableWithException<Exception> {
-    Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
+    Landscape<ShardingKey, MetricsT, ProcessT> getLandscape();
     
-    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> andThen(Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> nextStep) {
+    default Procedure<ShardingKey, MetricsT, ProcessT> andThen(Procedure<ShardingKey, MetricsT, ProcessT> nextStep) {
         return new ProcedureSequence<>(getLandscape(), Arrays.asList(this, nextStep));
     }
     
-    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> fromSteps(Iterable<Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> steps) {
+    default Procedure<ShardingKey, MetricsT, ProcessT> fromSteps(Iterable<Procedure<ShardingKey, MetricsT, ProcessT>> steps) {
         return new ProcedureSequence<>(getLandscape(), steps);
     }
 }

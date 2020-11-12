@@ -11,10 +11,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -37,9 +35,8 @@ import com.sap.sse.landscape.ssh.SshCommandChannel;
  *
  */
 public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends AbstractApacheReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final Logger logger = Logger.getLogger(ApacheReverseProxy.class.getName());
     
@@ -67,7 +64,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     private final AwsInstance<ShardingKey, MetricsT> host;
     
-    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
         super(landscape);
         this.host = host;
     }
@@ -101,38 +98,33 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     @Override
-    public void setScopeRedirect(Scope<ShardingKey> scope,
-            ApplicationProcess<ShardingKey, MetricsT> applicationReplicaSet) {
+    public void setScopeRedirect(Scope<ShardingKey> scope,ProcessT applicationReplicaSet) {
         // TODO Implement ApacheReverseProxy.setScopeRedirect(...)
     }
 
     @Override
-    public void setPlainRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, host, ""+port);
     }
 
     @Override
-    public void setHomeRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, host, ""+port);
     }
 
     @Override
-    public void setEventRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException {
+    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, eventId.toString(), host, ""+port);
     }
 
     @Override
-    public void setEventSeriesRedirect(String hostname,
-            ApplicationProcess<ShardingKey, MetricsT> applicationProcess,
+    public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
             UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();

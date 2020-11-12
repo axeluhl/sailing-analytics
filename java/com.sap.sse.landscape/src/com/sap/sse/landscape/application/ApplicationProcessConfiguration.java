@@ -14,8 +14,7 @@ import com.sap.sse.landscape.mongodb.Database;
  *
  */
 public interface ApplicationProcessConfiguration<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     ApplicationVersion getVersion();
     
     /**
@@ -46,5 +45,5 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * this configuration will be an {@link ApplicationReplicaProcess} whereas otherwise it will produce an
      * {@link ApplicationMasterProcess}.
      */
-    Map<Serializable, ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getMasterToReplicateServiceFrom();
+    Map<Serializable, ProcessT> getMasterToReplicateServiceFrom();
 }

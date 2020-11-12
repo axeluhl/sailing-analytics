@@ -1,13 +1,16 @@
-package com.sap.sailing.landscape;
+package com.sap.sse.landscape.aws;
 
+import java.io.IOException;
+
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.Scope;
-import com.sap.sse.landscape.aws.AwsInstance;
-import com.sap.sse.landscape.aws.ReverseProxy;
 
-public interface ApplicationProcessHost<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends AwsInstance<ShardingKey, MetricsT> {
+public interface ApplicationProcessHost<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends AwsInstance<ShardingKey, MetricsT> {
     String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
     
     String DEFAULT_SERVER_DIRECTORY_NAME = "server";
@@ -20,10 +23,10 @@ public interface ApplicationProcessHost<ShardingKey, MetricsT extends Applicatio
      * expand base URLs to, e.g., the URL of a specific event in that scope or an overview page of an event series or
      * simply the home/landing page. It furthermore handles logging in a consistent way.
      */
-    ReverseProxy<ShardingKey, MetricsT, RotatingFileBasedLog> getReverseProxy();
+    ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getReverseProxy();
     
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
      */
-    Iterable<ApplicationProcess<ShardingKey, MetricsT>> getApplicationProcesses();
+    Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException;
 }

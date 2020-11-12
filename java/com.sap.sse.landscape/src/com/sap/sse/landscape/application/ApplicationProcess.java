@@ -8,12 +8,14 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 
-public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics>
+public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * @param releaseRepository
@@ -64,4 +66,22 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * else in case it's not.
      */
     String getHealthCheckPath();
+
+    ProcessT getMaster();
+
+    Iterable<ProcessT> getReplicas();
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * in the evaluated {@code env.sh} file.
+     */
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     */
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
 }
