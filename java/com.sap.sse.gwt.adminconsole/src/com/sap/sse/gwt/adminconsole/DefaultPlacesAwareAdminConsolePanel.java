@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.adminconsole;
 
-import java.util.Map;
-
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.ui.Widget;
 
