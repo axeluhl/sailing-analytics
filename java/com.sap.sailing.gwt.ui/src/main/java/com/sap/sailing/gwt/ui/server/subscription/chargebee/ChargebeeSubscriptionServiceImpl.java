@@ -11,7 +11,6 @@ import javax.servlet.ServletConfig;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.chargebee.Environment;
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
@@ -31,6 +30,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -166,7 +166,6 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
 
     @Override
     protected void initService(ServletConfig config) {
-        Environment.configure(SubscriptionConfiguration.getInstance().getSite(),
-                SubscriptionConfiguration.getInstance().getApiKey());
+        ChargebeeSubscriptionProvider.initialize();
     }
 }

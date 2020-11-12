@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server.subscription.chargebee;
+package com.sap.sse.security.shared.subscription.chargebee;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,28 +9,28 @@ import java.util.logging.Logger;
  * 
  * @author Tu Tran
  */
-public class SubscriptionConfiguration {
-    private static final Logger logger = Logger.getLogger(SubscriptionConfiguration.class.getName());
+public class ChargebeeConfiguration {
+    private static final Logger logger = Logger.getLogger(ChargebeeConfiguration.class.getName());
 
     private static final String CHARGEBEE_SITE = "chargebee.site";
     private static final String CHARGEBEE_APIKEY = "chargebee.apikey";
 
-    private static SubscriptionConfiguration instance;
+    private static ChargebeeConfiguration instance;
 
     private String site;
     private String apiKey;
 
-    protected SubscriptionConfiguration(String site, String apiKey) {
+    protected ChargebeeConfiguration(String site, String apiKey) {
         this.site = site;
         this.apiKey = apiKey;
     }
 
-    public static SubscriptionConfiguration getInstance() {
+    public static ChargebeeConfiguration getInstance() {
         if (instance == null) {
             String site = System.getProperty(CHARGEBEE_SITE);
             String apiKey = System.getProperty(CHARGEBEE_APIKEY);
             logger.log(Level.INFO, "Chargebee site: " + site);
-            instance = new SubscriptionConfiguration(site, apiKey);
+            instance = new ChargebeeConfiguration(site, apiKey);
         }
         return instance;
     }

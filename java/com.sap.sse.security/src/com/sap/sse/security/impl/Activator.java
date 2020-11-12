@@ -36,6 +36,7 @@ import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.subscription.SubscriptionBackgroundUpdate;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -92,6 +93,12 @@ public class Activator implements BundleActivator {
      * {@link #sharedAcrossSubdomainsOf} then a non-{@code null} value should be provided here, too.
      */
     private final String baseUrlForCrossDomainStorage;
+    
+    /**
+     * Handling fetching and update user subscriptions from providers. Call
+     * {@code SubscriptionBackgroundUpdate#start(CompletableFuture)} to schedule a task to run in background thread
+     */
+    private SubscriptionBackgroundUpdate subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate();
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -240,6 +247,7 @@ public class Activator implements BundleActivator {
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
+                    startSubscriptionDataUpdateTask();
                 } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
@@ -311,5 +319,12 @@ public class Activator implements BundleActivator {
             registration.unregister();
         }
         Activator.context = null;
+    }
+    
+    /**
+     * Schedule background task to fetch and update user subscriptions from provider
+     */
+    private void startSubscriptionDataUpdateTask() {
+        subscriptionBackgroundUpdate.start(securityService);
     }
 }

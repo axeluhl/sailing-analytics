@@ -7,10 +7,15 @@ public interface SubscriptionProvider {
     /**
      * Return the provider's name
      */
-    public String getProviderName();
+    String getProviderName();
 
     /**
      * Get subscription data handler {@code SubscriptionDataHandler} for this provider
      */
-    public SubscriptionDataHandler getDataHandler();
+    SubscriptionDataHandler getDataHandler();
+    
+    /**
+     * Return implementation of {@code SubscriptionApiService} for this provider
+     */
+    SubscriptionApiService getApiService();
 }

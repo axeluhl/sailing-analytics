@@ -178,7 +178,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             Pair<String, String> invoice = getInvoiceData(currentSubscription, event);
             invoiceId = invoice.getA();
             invoiceStatus = invoice.getB();
-            paymentStatus = getEventPaymentStatus(event);
+            paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
+                    invoiceStatus);
             if (paymentStatus == null && currentSubscription != null) {
                 paymentStatus = currentSubscription.getPaymentStatus();
             }
@@ -203,7 +204,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             Pair<String, String> invoice = getInvoiceData(null, event);
             String invoiceId = invoice.getA();
             String invoiceStatus = invoice.getB();
-            String paymentStatus = determinePaymentStatusFromInvoiceStatus(invoiceStatus);
+            String paymentStatus = ChargebeeSubscription.determinePaymentStatusFromInvoiceStatus(invoiceStatus);
             Subscription newSubscription = new ChargebeeSubscription(currentSubscription.getSubscriptionId(),
                     currentSubscription.getPlanId(), currentSubscription.getCustomerId(),
                     currentSubscription.getTrialStart(), currentSubscription.getTrialEnd(),
@@ -232,44 +233,5 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             invoiceStatus = currentSubscription.getInvoiceStatus();
         }
         return new Pair<String, String>(invoiceId, invoiceStatus);
-    }
-
-    /**
-     * Determine payment status value for {@code Subscription}
-     */
-    private String getEventPaymentStatus(SubscriptionWebHookEvent event) {
-        String paymentStatus = null;
-        String transactionStatus = event.getTransactionStatus();
-        if (transactionStatus == null) {
-            String invoiceStatus = event.getInvoiceStatus();
-            if (invoiceStatus != null) {
-                paymentStatus = determinePaymentStatusFromInvoiceStatus(invoiceStatus);
-            }
-        } else {
-            String transactionType = event.getTransactionType();
-            if (transactionType != null && transactionType.equals(ChargebeeSubscription.TRANSACTION_TYPE_PAYMENT)) {
-                paymentStatus = determinePaymentStatusFromTransactionStatus(transactionStatus);
-            }
-        }
-        return paymentStatus;
-    }
-
-    /**
-     * If invoice is paid then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
-     * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
-     */
-    private String determinePaymentStatusFromInvoiceStatus(String invoiceStatus) {
-        return invoiceStatus.equals(SubscriptionWebHookEvent.INVOICE_STATUS_PAID) ? Subscription.PAYMENT_STATUS_SUCCESS
-                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
-    }
-
-    /**
-     * If transaction is success then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
-     * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
-     */
-    private String determinePaymentStatusFromTransactionStatus(String transactionStatus) {
-        return transactionStatus.equals(ChargebeeSubscription.TRANSACTION_STATUS_SUCCESS)
-                ? Subscription.PAYMENT_STATUS_SUCCESS
-                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
     }
 }

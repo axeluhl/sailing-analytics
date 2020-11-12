@@ -3,7 +3,7 @@ package com.sap.sse.security.shared.subscription;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.security.shared.subscription.chargebee.ChargeeSubscriptionProvider;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 
 /**
  * Provide access to concrete subscription provider implementation
@@ -21,7 +21,11 @@ public class SubscriptionFactory {
     private Map<String, SubscriptionProvider> subscriptionProviders = new HashMap<String, SubscriptionProvider>();
 
     private SubscriptionFactory() {
-        registerSubscriptionProvider(ChargeeSubscriptionProvider.getInstance());
+        registerSubscriptionProvider(ChargebeeSubscriptionProvider.getInstance());
+    }
+
+    public Iterable<SubscriptionProvider> getProviders() {
+        return subscriptionProviders.values();
     }
 
     public SubscriptionProvider getSubscriptionProvider(String providerName)
