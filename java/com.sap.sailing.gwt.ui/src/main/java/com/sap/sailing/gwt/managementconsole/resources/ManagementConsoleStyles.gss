@@ -5,7 +5,11 @@ html, body {
 }
 
 html {
-    background: resourceUrl("backdropGeneralSized") no-repeat center center fixed;
+    background:  no-repeat center center fixed;
+    background-image: resourceUrl("backdropGeneralSized");
+    background-position: center center ;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -118,6 +122,6 @@ input::-ms-input-placeholder { /* Microsoft Edge */
 
 @media (min-width: 45em) {
     html {
-       background: resourceUrl("backdropGeneral") center/cover no-repeat fixed;
+       background-image: resourceUrl("backdropGeneral");
     }
 }

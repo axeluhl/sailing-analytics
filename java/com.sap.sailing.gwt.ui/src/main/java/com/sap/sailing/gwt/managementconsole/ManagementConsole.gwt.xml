@@ -55,5 +55,6 @@
 	<source path="app"/>
 	<source path="places"/>
 	<source path="resources"/>
+    <source path="events"/>
 
 </module>
