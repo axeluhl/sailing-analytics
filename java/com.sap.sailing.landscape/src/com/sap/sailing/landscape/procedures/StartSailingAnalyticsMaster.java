@@ -26,7 +26,7 @@ public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyt
     }
     
     // TODO model an AwsLandscape subclass describing the specifics of the Sailing landscape, with a central security service that a master replicates by default
-    
+    // TODO or is this a property for this procedure (with/without central security/shared sailing data) which then knows about security-service.sapsailing.com?
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {

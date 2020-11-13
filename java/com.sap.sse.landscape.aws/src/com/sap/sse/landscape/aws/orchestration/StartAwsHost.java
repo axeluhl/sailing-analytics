@@ -12,12 +12,9 @@ import java.util.Set;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
-import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -29,9 +26,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
-import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.orchestration.StartHost;
-import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -86,8 +81,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
-        BuilderT setRelease(Optional<Release> release);
-
         BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
 
         BuilderT setInstanceType(InstanceType instanceType);
@@ -106,18 +99,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setInstanceName(String name);
         
-        BuilderT setServerName(String serverName);
-        
-        BuilderT setDatabaseName(String databaseName);
-        
-        BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
-
-        BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
-
-        BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
-
-        BuilderT setDatabaseConfiguration(Database databaseConfiguration);
-        
         BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup);
         
         BuilderT setOptionalTimeout(Optional<Duration> optionalTimeout);
@@ -132,7 +113,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
-        private Optional<Release> release = Optional.empty();
         private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
         private InstanceType instanceType;
         private AwsAvailabilityZone availabilityZone;
@@ -142,30 +122,10 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private List<String> userData = new ArrayList<>();
         private AwsRegion region;
         private String instanceName;
-        private String serverName;
-        private String databaseName;
-        private Database databaseConfiguration;
-        private RabbitMQEndpoint rabbitConfiguration;
-        private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
-        private OutboundReplicationConfiguration outboundReplicationConfiguration;
         private String commaSeparatedEmailAddressesToNotifyOfStartup;
         private Optional<Duration> optionalTimeout;
         private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
         
-        /**
-         * By default, the release pre-deployed in the image will be used, represented by an empty {@link Optional}
-         * returned by this default method implementation.
-         */
-        protected Optional<Release> getRelease() {
-            return release;
-        }
-
-        @Override
-        public BuilderT setRelease(Optional<Release> release) {
-            this.release = release;
-            return self();
-        }
-
         protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
             return landscape;
         }
@@ -276,101 +236,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        protected String getServerName() {
-            return serverName;
-        }
-        
-        @Override
-        public BuilderT setServerName(String serverName) {
-            this.serverName = serverName;
-            return self();
-        }
-
-        protected String getDatabaseName() {
-            return databaseName == null ? getServerName() : databaseName;
-        }
-        
-        @Override
-        public BuilderT setDatabaseName(String databaseName) {
-            this.databaseName = databaseName;
-            return self();
-        }
-
-        protected Database getDatabaseConfiguration() {
-            return databaseConfiguration == null ? getLandscape().getDatabase(getRegion(), getDatabaseName()) : databaseConfiguration;
-        }
-
-        @Override
-        public BuilderT setDatabaseConfiguration(Database databaseConfiguration) {
-            this.databaseConfiguration = databaseConfiguration;
-            return self();
-        }
-
-        protected RabbitMQEndpoint getRabbitConfiguration() {
-            return rabbitConfiguration;
-        }
-
-        @Override
-        public BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
-            this.rabbitConfiguration = rabbitConfiguration;
-            return self();
-        }
-        
-        protected boolean isOutboundReplicationExchangeNameSet() {
-            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundReplicationExchangeName() != null;
-        }
-        
-        protected boolean isInboundReplicationRabbitMQEndpointSet() {
-            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
-                    && inboundReplicationConfiguration.get().getInboundRabbitMQEndpoint() != null;
-        }
-        
-        protected boolean isOutboundReplicationRabbitMQEndpointSet() {
-            return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
-        }
-        
-        protected OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
-            final OutboundReplicationConfiguration.Builder resultBuilder;
-            if (outboundReplicationConfiguration != null) {
-                resultBuilder = OutboundReplicationConfiguration.copy(outboundReplicationConfiguration);
-            } else {
-                resultBuilder = OutboundReplicationConfiguration.builder();
-            }
-            if (!isOutboundReplicationExchangeNameSet()) {
-                resultBuilder.setOutboundReplicationExchangeName(getServerName());
-            }
-            if (!isOutboundReplicationRabbitMQEndpointSet()) {
-                getInboundReplicationConfiguration().ifPresent(irc->resultBuilder.setOutboundRabbitMQEndpoint(irc.getInboundRabbitMQEndpoint()));
-            }
-            return resultBuilder.build();
-        }
-
-        @Override
-        public BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration) {
-            this.outboundReplicationConfiguration = outboundReplicationConfiguration;
-            return self();
-        }
-        
-        protected Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
-            final InboundReplicationConfiguration.Builder resultBuilder;
-            if (inboundReplicationConfiguration == null || !inboundReplicationConfiguration.isPresent()) {
-                resultBuilder = InboundReplicationConfiguration.builder();
-            } else {
-                resultBuilder = InboundReplicationConfiguration.copy(inboundReplicationConfiguration.get());
-            }
-            return !isInboundReplicationRabbitMQEndpointSet()
-                    ? Optional.of(resultBuilder
-                            .setInboundRabbitMQEndpoint(getLandscape().getDefaultRabbitConfiguration(getRegion()))
-                            .build())
-                    : inboundReplicationConfiguration;
-        }
-
-        @Override
-        public BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
-            this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
-            return self();
-        }
-        
         protected String getCommaSeparatedEmailAddressesToNotifyOfStartup() {
             return commaSeparatedEmailAddressesToNotifyOfStartup;
         }

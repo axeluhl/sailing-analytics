@@ -10,7 +10,6 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.mongodb.Database;
-import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 /**
  * In addition to launching a host, this procedure launches an initial application server process on that host.
@@ -61,8 +60,6 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
 
         BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
-        BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration);
-
         BuilderT setDatabaseConfiguration(Database databaseConfiguration);
     }
     
@@ -77,7 +74,6 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private String serverName;
         private String databaseName;
         private Database databaseConfiguration;
-        private RabbitMQEndpoint rabbitConfiguration;
         private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
         private OutboundReplicationConfiguration outboundReplicationConfiguration;
         
@@ -125,16 +121,6 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        protected RabbitMQEndpoint getRabbitConfiguration() {
-            return rabbitConfiguration;
-        }
-
-        @Override
-        public BuilderT setRabbitConfiguration(RabbitMQEndpoint rabbitConfiguration) {
-            this.rabbitConfiguration = rabbitConfiguration;
-            return self();
-        }
-        
         protected boolean isOutboundReplicationExchangeNameSet() {
             return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundReplicationExchangeName() != null;
         }
