@@ -82,14 +82,12 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             @QueryParam("events") @DefaultValue("") String strEvents,
             @QueryParam("pred") @DefaultValue("excl") String predicate) {
         final boolean includeRemotes = transitive != null && Boolean.TRUE.equals(transitive);
-
-        Set<UUID> eventUUIDs = Arrays.asList(strEvents.split(","))
+        final Set<UUID> eventUUIDs = Arrays.asList(strEvents.split(","))
                 .stream()
                 .filter(StringUtils::isNotBlank)
                 .map(UUID::fromString)
                 .collect(Collectors.toSet());
-
-        Predicate<UUID> eventFilter;
+        final Predicate<UUID> eventFilter;
         if ("incl".equals(predicate)) {
             eventFilter = (uuid)->eventUUIDs.contains(uuid);
         } else if ("excl".equals(predicate)) {
@@ -97,7 +95,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         }else {
             throw new IllegalArgumentException("unrecognized predicate " + predicate + " only \"excl\" and \"incl\" are possible");
         }
-
         final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getDistinctRaces(includeRemotes,
                 eventFilter);
         final HashMap<String, List<SimpleRaceInfo>> raceData = new HashMap<>();
