@@ -10,6 +10,8 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -22,7 +24,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Frank Mittag (c5163874)
  * 
  */
-public class BoatPanel extends SimplePanel {
+public class BoatPanel extends SimplePanel implements FilterablePanel, SelectablePanel {
     private final BoatTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private Button allowReloadButton;
@@ -78,5 +80,16 @@ public class BoatPanel extends SimplePanel {
 
     public void refreshBoatList() {
         boatTable.refreshBoatList(/* loadOnlyStandaloneBoats */ false, /* callback */ null);
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        refreshableBoatSelectionModel.clear();
+        boatTable.getFilterField().search(searchString);  
+    }
+    
+    @Override
+    public void select(String searchString) {
+        boatTable.setSearchStringForSelection(searchString); 
     }
 }

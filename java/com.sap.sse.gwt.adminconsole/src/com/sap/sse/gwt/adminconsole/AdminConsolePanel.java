@@ -259,16 +259,15 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * this method, but then this method needs to be invoked again to ensure that all all tabs are properly displayed
      * for the current panel's state.
      */
-    public void initUI() {
+   public void initUI(final AdminConsolePlace place) {
         updateTabDisplayForCurrentUser(getUserService().getCurrentUser(), false);
-        if (topLevelTabPanel.getWidgetCount() > 0) {
-            topLevelTabPanel.selectTab(0);
+        if (place == null) {
+            if (topLevelTabPanel.getWidgetCount() > 0) {
+                topLevelTabPanel.selectTab(0);
+            }
+        } else {
+            selectTabByPlace(place, false);
         }
-    }
-    
-    public void initUI(final AdminConsolePlace place) {
-        updateTabDisplayForCurrentUser(getUserService().getCurrentUser(), false);
-        selectTabByPlace(place, false);
     }
 
     private UserService getUserService() {
@@ -581,7 +580,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         if (widget instanceof FilterablePanel && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilter() != null) {
             ((FilterablePanel)widget).filter(((FilterableAdminConsolePlace)place).getFilter());
         } else if (widget instanceof SelectablePanel && place instanceof SelectableAdminConsolePlace && ((SelectableAdminConsolePlace)place).getSelect() != null) {
-            ((SelectablePanel)widget).setSearchStringForSelection(((SelectableAdminConsolePlace)place).getSelect());
+            ((SelectablePanel)widget).select(((SelectableAdminConsolePlace)place).getSelect());
         }
     }
     

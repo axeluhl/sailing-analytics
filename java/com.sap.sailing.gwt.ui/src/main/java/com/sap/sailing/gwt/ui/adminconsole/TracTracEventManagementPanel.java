@@ -41,6 +41,8 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -65,7 +67,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
+public class TracTracEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanel, SelectablePanel {
     private final ErrorReporter errorReporter;
     
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
@@ -549,5 +551,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     public void refreshTracTracConnectors() {
         connectionsTable.refreshTracTracConnectionList();
         raceList.getList().clear();
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        connectionsTable.getSelectionModel().clear();
+        connectionsTable.getFilterField().search(searchString);  
+    }
+    
+    @Override
+    public void select(String searchString) {
+        connectionsTable.setSearchStringForSelection(searchString); 
     }
 }

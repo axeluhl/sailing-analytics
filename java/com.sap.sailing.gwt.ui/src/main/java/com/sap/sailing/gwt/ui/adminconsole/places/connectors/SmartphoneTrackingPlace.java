@@ -19,5 +19,4 @@ public class SmartphoneTrackingPlace extends AbstractFilterablePlace {
             return SmartphoneTrackingPlace::new;
         }
     }
-    
 }

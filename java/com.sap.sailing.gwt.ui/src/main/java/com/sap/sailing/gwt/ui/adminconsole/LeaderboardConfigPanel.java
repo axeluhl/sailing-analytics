@@ -1157,4 +1157,5 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         String link = EntryPointLinkFactory.createPairingListLink(result);
         Window.open(link, "", "");
     }
+    
 }

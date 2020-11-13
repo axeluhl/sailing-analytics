@@ -15,7 +15,9 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
 import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.security.ui.client.UserService;
@@ -26,7 +28,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer {
+public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer, FilterablePanel, SelectablePanel {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -83,5 +85,15 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     @Override
     public void setupLeaderboardGroups(Map<String, String> params) {
         eventListComposite.setupLeaderboardGroups(params);
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        eventListComposite.search(searchString);
+    }
+    
+    @Override
+    public void select(String searchString) {
+        eventListComposite.setSearchStringForSelection(searchString); 
     }
 }

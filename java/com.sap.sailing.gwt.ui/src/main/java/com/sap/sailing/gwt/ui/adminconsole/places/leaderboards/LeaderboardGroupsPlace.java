@@ -1,23 +1,25 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.leaderboards;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class LeaderboardGroupsPlace extends AbstractLeaderboardsPlace {
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
+public class LeaderboardGroupsPlace extends AbstractFilterablePlace {
+
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.LEADERBOARDS;
+    }
     
     public LeaderboardGroupsPlace() {
     }
 
-    public static class Tokenizer implements PlaceTokenizer<LeaderboardGroupsPlace> {
-        @Override
-        public String getToken(final LeaderboardGroupsPlace place) {
-            return "";
-        }
+    public static class Tokenizer extends TablePlaceTokenizer<LeaderboardGroupsPlace> {      
 
         @Override
-        public LeaderboardGroupsPlace getPlace(final String token) {
-            return new LeaderboardGroupsPlace();
+        protected Supplier<LeaderboardGroupsPlace> getPlaceFactory() {
+            return LeaderboardGroupsPlace::new;
         }
     }
-    
 }

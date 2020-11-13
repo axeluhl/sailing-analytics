@@ -279,6 +279,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     private boolean selectExactlyMatchingFilteredItems() {
         boolean foundExactMatch = false;
+        selectionFilter.setKeywords(Arrays.asList(getTextBox().getText()));
         for (T t : all.getList()) {
             boolean matches = matchesExactly(t);
             select(t, matches);
@@ -290,7 +291,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     private boolean matchesExactly(T t) {       
-        selectionFilter.setKeywords(Arrays.asList(getTextBox().getText()));
         if (!selectionFilter.matchesExactly(t)) {
             return false;
         }

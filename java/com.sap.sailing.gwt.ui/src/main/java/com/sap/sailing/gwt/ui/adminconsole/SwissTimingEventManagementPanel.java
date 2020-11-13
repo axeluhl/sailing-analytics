@@ -35,6 +35,8 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -54,7 +56,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
+public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanel, SelectablePanel {
     private static final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
@@ -454,5 +456,16 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         }
                     });
         }
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        connectionsTable.getSelectionModel().clear();
+        connectionsTable.getFilterField().search(searchString);  
+    }
+    
+    @Override
+    public void select(String searchString) {
+        connectionsTable.getFilterField().searchAndSelect(searchString);
     }
 }

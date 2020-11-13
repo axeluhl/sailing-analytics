@@ -172,24 +172,18 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
     
     @Override
-    public HeaderPanel createUI(final ServerInfoDTO serverInfo) {   
-        
+    public HeaderPanel createUI(final ServerInfoDTO serverInfo) {           
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
-          
+        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {         
             @Override
             public Widget get() {
-                AdminConsolePanel panel = createAdminConsolePanel(serverInfo);
-              
-                return panel;
+                return createAdminConsolePanel(serverInfo);
             }
-        });
-        
+        });       
         headerPanel.setHeaderWidget(header);
-        headerPanel.setContentWidget(authorizedContentDecorator);
-        
+        headerPanel.setContentWidget(authorizedContentDecorator);        
         return headerPanel;
     }
     
@@ -557,12 +551,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, getStringMessages().markRoles(), new MarkRolesPlace(), 
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
+
+        adminConsolePanel.initUI(defaultPlace);
         
-        if (defaultPlace == null) {
-            adminConsolePanel.initUI();
-        } else {
-            adminConsolePanel.initUI(defaultPlace);
-        }
         presenter.fillRegattas();
         presenter.fillLeaderboardGroups();
         presenter.fillLeaderboards();

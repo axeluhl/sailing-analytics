@@ -1,22 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class ExpeditionDeviceConfigurationsPlace extends AbstractConnectorsPlace {
-    
-    public ExpeditionDeviceConfigurationsPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
-    public static class Tokenizer implements PlaceTokenizer<ExpeditionDeviceConfigurationsPlace> {
-        @Override
-        public String getToken(final ExpeditionDeviceConfigurationsPlace place) {
-            return "";
-        }
+public class ExpeditionDeviceConfigurationsPlace extends AbstractFilterablePlace {
 
-        @Override
-        public ExpeditionDeviceConfigurationsPlace getPlace(final String token) {
-            return new ExpeditionDeviceConfigurationsPlace();
-        }
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.CONNECTORS;
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<ExpeditionDeviceConfigurationsPlace> {      
+
+        @Override
+        protected Supplier<ExpeditionDeviceConfigurationsPlace> getPlaceFactory() {
+            return ExpeditionDeviceConfigurationsPlace::new;
+        }
+    }
 }

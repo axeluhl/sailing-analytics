@@ -38,6 +38,8 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurity
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -56,7 +58,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Jens Rommel (D047974)
  * 
  */
-public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel {
+public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel implements FilterablePanel, SelectablePanel {
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
@@ -398,5 +400,16 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                     }
                 });
         }
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        connectionsTable.getSelectionModel().clear();
+        connectionsTable.getFilterField().search(searchString);  
+    }
+    
+    @Override
+    public void select(String searchString) {
+        connectionsTable.getFilterField().searchAndSelect(searchString); 
     }
 }

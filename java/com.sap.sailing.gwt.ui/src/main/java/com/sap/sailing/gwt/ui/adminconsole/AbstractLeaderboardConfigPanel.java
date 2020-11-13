@@ -916,7 +916,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     @Override
-    public void setSearchStringForSelection(String searchString) {
+    public void select(String searchString) {
         this.searchString = searchString; 
     }
     

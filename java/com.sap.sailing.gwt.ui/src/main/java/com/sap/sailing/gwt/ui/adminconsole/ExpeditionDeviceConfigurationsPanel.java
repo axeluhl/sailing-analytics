@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,6 +42,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -58,7 +61,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
+public class ExpeditionDeviceConfigurationsPanel extends FlowPanel implements SelectablePanel, FilterablePanel  {
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -66,6 +69,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel;
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
     private final UserService userService;
+    private String searchString;
 
     public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
@@ -165,7 +169,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 stringMessages);
         allDeviceConfigurations.addColumn(actionsColumn, stringMessages.actions());
         allDeviceConfigurations.addColumnSortHandler(deviceConfigurationColumnListHandler);
-        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
+        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter, null);
         Button addAccountButton = new Button(stringMessages.add());
         addAccountButton.ensureDebugId("addExpeditionDeviceConfiguration");
         addAccountButton.addClickHandler(new ClickHandler() {
@@ -186,7 +190,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     }
     
     public void refresh() {
-        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter);
+        updateAllAccounts(sailingServiceWrite, filterDeviceConfigurationsPanel, stringMessages, errorReporter, result -> searchAndSelect());
     }
 
     private abstract class AbstractDeviceConfigurationDialog extends DataEntryDialog<ExpeditionDeviceConfiguration> {
@@ -321,11 +325,14 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     }
 
     private static void updateAllAccounts(SailingServiceAsync sailingService, final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-            final StringMessages stringMessages, final ErrorReporter errorReporter) {
+            final StringMessages stringMessages, final ErrorReporter errorReporter, Consumer<List<ExpeditionDeviceConfiguration>> resultConsumer) {
         sailingService.getExpeditionDeviceConfigurations(new AsyncCallback<List<ExpeditionDeviceConfiguration>>() {
             @Override
             public void onSuccess(List<ExpeditionDeviceConfiguration> result) {
                 filterAccountsPanel.updateAll(result);
+                if (resultConsumer != null) {
+                    resultConsumer.accept(result);
+                }
             }
             
             @Override
@@ -352,5 +359,21 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 filterDeviceConfigurationsPanel.remove(expeditionDeviceConfiguration);
             }
         });
+    }
+    
+    @Override
+    public void filter(String searchString) {
+        refreshableDeviceConfigurationsSelectionModel.clear();
+        filterDeviceConfigurationsPanel.search(searchString);  
+    }
+    
+    @Override
+    public void select(String searchString) {
+        this.searchString = searchString; 
+    }
+    
+    private void searchAndSelect() {
+        filterDeviceConfigurationsPanel.searchAndSelect(searchString); 
+        this.searchString = null;
     }
 }

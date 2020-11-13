@@ -1,22 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class IgtimiAccountsPlace extends AbstractConnectorsPlace {
-    
-    public IgtimiAccountsPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
-    public static class Tokenizer implements PlaceTokenizer<IgtimiAccountsPlace> {
-        @Override
-        public String getToken(final IgtimiAccountsPlace place) {
-            return "";
-        }
+public class IgtimiAccountsPlace extends AbstractFilterablePlace {
 
-        @Override
-        public IgtimiAccountsPlace getPlace(final String token) {
-            return new IgtimiAccountsPlace();
-        }
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.CONNECTORS;
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<IgtimiAccountsPlace> {      
+
+        @Override
+        protected Supplier<IgtimiAccountsPlace> getPlaceFactory() {
+            return IgtimiAccountsPlace::new;
+        }
+    }
 }

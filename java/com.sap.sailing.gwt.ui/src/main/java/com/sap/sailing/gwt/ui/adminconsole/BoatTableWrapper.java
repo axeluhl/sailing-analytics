@@ -45,6 +45,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     private final SailingServiceWriteAsync sailingServiceWrite;
+    private String searchString;
     
     public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
@@ -230,6 +231,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                     if (callback != null) {
                         callback.onSuccess(result);
                     }
+                    searchAndSelect();
                 }
             });
         } else {
@@ -249,6 +251,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                     if (callback != null) {
                         callback.onSuccess(result);
                     }
+                    searchAndSelect();
                 }
             });
         }
@@ -314,5 +317,14 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
 
     private void allowUpdate(final BoatDTO boat) {
         allowUpdate(Collections.singleton(boat));
+    }
+    
+    protected void setSearchStringForSelection(String searchString) {
+        this.searchString = searchString; 
+    }
+    
+    protected void searchAndSelect() {
+        filterField.searchAndSelect(searchString);
+        searchString = null;
     }
 }

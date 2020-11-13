@@ -1,22 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class SwissTimingArchivedEventsPlace extends AbstractConnectorsPlace {
-    
-    public SwissTimingArchivedEventsPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
-    public static class Tokenizer implements PlaceTokenizer<SwissTimingArchivedEventsPlace> {
-        @Override
-        public String getToken(final SwissTimingArchivedEventsPlace place) {
-            return "";
-        }
+public class SwissTimingArchivedEventsPlace extends AbstractFilterablePlace {
 
-        @Override
-        public SwissTimingArchivedEventsPlace getPlace(final String token) {
-            return new SwissTimingArchivedEventsPlace();
-        }
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.CONNECTORS;
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<SwissTimingArchivedEventsPlace> {      
+
+        @Override
+        protected Supplier<SwissTimingArchivedEventsPlace> getPlaceFactory() {
+            return SwissTimingArchivedEventsPlace::new;
+        }
+    }
 }
