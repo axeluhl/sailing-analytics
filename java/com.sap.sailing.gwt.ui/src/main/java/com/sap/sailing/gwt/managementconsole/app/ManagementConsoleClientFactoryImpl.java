@@ -8,6 +8,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.managementconsole.mvp.ViewFactory;
+import com.sap.sailing.gwt.managementconsole.services.EventService;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -32,6 +34,8 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     private final PlaceController placeController;;
     private final SailingServiceWriteAsync sailingService;
+    private final EventService eventService;
+    private final ViewFactory viewFactory;
 
     public ManagementConsoleClientFactoryImpl(final EventBus eventBus, final SailingServiceWriteAsync sailingService) {
         this.placeController = new PlaceController(eventBus);
@@ -39,6 +43,8 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
+        eventService = new EventService(sailingService, errorReporter, eventBus);
+        this.viewFactory = new ViewFactory();
     }
 
     @Override
@@ -74,6 +80,16 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
     @Override
     public MediaServiceWriteAsync getMediaServiceWrite() {
         return mediaServiceWrite;
+    }
+    
+    @Override
+    public EventService getEventService() {
+        return eventService;
+    }
+    
+    @Override
+    public ViewFactory getViewFactory() {
+        return viewFactory;
     }
 
     protected void checkPublicServerNonPublicUserWarning() {

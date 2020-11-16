@@ -56,5 +56,7 @@
 	<source path="places"/>
 	<source path="resources"/>
     <source path="events"/>
+    <source path="services"/>
+    <source path="mvp"/>
 
 </module>

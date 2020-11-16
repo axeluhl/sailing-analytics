@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.managementconsole.app;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.managementconsole.mvp.ViewFactory;
+import com.sap.sailing.gwt.managementconsole.services.EventService;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -15,5 +17,9 @@ public interface ManagementConsoleClientFactory extends WithSecurity {
     public SailingServiceWriteAsync getSailingService();
 
     public MediaServiceWriteAsync getMediaServiceWrite();
+    
+    public EventService getEventService();
+    
+    public ViewFactory getViewFactory();
 
 }

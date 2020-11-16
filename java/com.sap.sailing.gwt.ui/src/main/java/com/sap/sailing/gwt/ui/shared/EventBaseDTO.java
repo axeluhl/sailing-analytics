@@ -89,9 +89,17 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     }
     
     public ImageDTO getLogoImage() {
+        return getImageByTag(MediaTagConstants.LOGO);
+    }
+    
+    public ImageDTO getTeaserImage() {
+        return getImageByTag(MediaTagConstants.TEASER);
+    }
+    
+    public ImageDTO getImageByTag(MediaTagConstants mediaTag) {
         ImageDTO result = null;
         for (ImageDTO image : images) {
-            if (image.hasTag(MediaTagConstants.LOGO.getName())) {
+            if (image.hasTag(mediaTag.getName())) {
                 result = image;
                 break;
             }
