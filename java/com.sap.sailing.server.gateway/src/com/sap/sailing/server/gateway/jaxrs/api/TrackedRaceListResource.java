@@ -155,22 +155,22 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     }
 
     private Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>>  getDistinctRaces(boolean includeRemotes, Predicate<UUID> eventListFilter) {
-        final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = new HashMap<>();
+        final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getService().getLocalRaceList(eventListFilter);
+        
         if (includeRemotes) {
-            distinctRaces.putAll(getService().getRemoteRaceList(eventListFilter));
+            getService().getRemoteRaceList(eventListFilter).forEach((identifier, simpleRaceInfoSet) -> distinctRaces.compute(identifier, (key, valueSet) -> {
+                Set<SimpleRaceInfo> mergedSet;
+                if (valueSet != null) {
+                    // will be only added when not already in the set, look at the equals method!
+                    valueSet.addAll(simpleRaceInfoSet);
+                    mergedSet = valueSet;
+                } else {
+                    mergedSet = simpleRaceInfoSet;
+                }
+                return mergedSet;
+            }));
         }
 
-        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> localRaces = getService().getLocalRaceList(eventListFilter);
-        localRaces.forEach((identifier, simpleRaceInfoSet) -> distinctRaces.compute(identifier, (key, valueSet) -> {
-            Set<SimpleRaceInfo> mergedSet;
-            if (valueSet != null) {
-                valueSet.addAll(simpleRaceInfoSet);
-                mergedSet = valueSet;
-            } else {
-                mergedSet = simpleRaceInfoSet;
-            }
-            return mergedSet;
-        }));
         return distinctRaces;
     }
 
