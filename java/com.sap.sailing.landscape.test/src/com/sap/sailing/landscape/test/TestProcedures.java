@@ -192,7 +192,7 @@ public class TestProcedures {
                 .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
                 .setTags(Optional.of(Tags.with("Hello", "World")))
                 .setOptionalTimeout(optionalTimeout)
-                .setReplicationConfiguration(InboundReplicationConfiguration.builder()
+                .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                         .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
                         .build())
                 .build();

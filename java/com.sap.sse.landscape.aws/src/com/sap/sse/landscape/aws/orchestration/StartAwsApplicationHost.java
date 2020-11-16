@@ -9,6 +9,7 @@ import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.mongodb.Database;
 
 /**
@@ -26,17 +27,22 @@ HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
     /**
      * A builder that helps building an instance of type {@link StartAwsApplicationHost} or any subclass thereof (then
-     * using specialized builders). The following default rules apply, in addition to the defaults rules of the
-     * builders that this builder interface {@link StartAwsHost.Builder extends}.
+     * using specialized builders). The following default rules apply, in addition to the defaults rules of the builders
+     * that this builder interface {@link StartAwsHost.Builder extends}.
      * <ul>
      * <li>If no {@link #setRelease(Release) release is set}, an empty {@link Optional} will be returned by
      * {@link #getRelease()}, indicating to use the default release pre-deployed in the image launched.</li>
      * <li>If no {@link #setDatabaseName(String) database name is set explicitly}, it defaults to the
      * {@link #getServerName() server name}.</li>
-     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * <li>The {@link #setInboundReplicationConfiguration(InboundReplicationConfiguration) inbound replication}
+     * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the region's
+     * {@link AwsLandscape#getDefaultRabbitConfiguration(com.sap.sse.landscape.aws.impl.AwsRegion) default RabbitMQ
+     * configuration}. Note that this setting will take effect only if auto-replication is activated for one or more
+     * replicables (see {@link InboundReplicationConfiguration#getReplicableIds()}).</li>
+     * <li>The {@link #setOutboundReplicationConfiguration() outbound replication}
      * {@link OutboundReplicationConfiguration#getOutboundReplicationExchangeName() exchange name} defaults to the
      * {@link #getServerName() server name}.</li>
-     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * <li>The {@link #setOutboundReplicationConfiguration() outbound replication}
      * {@link OutboundReplicationConfiguration#getOutboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the
      * {@link #getInboundReplicationConfiguration() inbound}
      * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint}.</li>
@@ -56,7 +62,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setDatabaseName(String databaseName);
         
-        BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
+        BuilderT setInboundReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration);
 
         BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
@@ -130,6 +136,11 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
                     && inboundReplicationConfiguration.get().getInboundRabbitMQEndpoint() != null;
         }
         
+        protected boolean isInboundReplicationExchangeNameSet() {
+            return inboundReplicationConfiguration != null && inboundReplicationConfiguration.isPresent()
+                    && inboundReplicationConfiguration.get().getInboundMasterExchangeName() != null;
+        }
+        
         protected boolean isOutboundReplicationRabbitMQEndpointSet() {
             return outboundReplicationConfiguration != null && outboundReplicationConfiguration.getOutboundRabbitMQEndpoint() != null;
         }
@@ -171,7 +182,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
 
         @Override
-        public BuilderT setReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
+        public BuilderT setInboundReplicationConfiguration(InboundReplicationConfiguration replicationConfiguration) {
             this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
             return self();
         }

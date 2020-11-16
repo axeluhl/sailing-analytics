@@ -1,11 +1,31 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.Optional;
+
+import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey> {
-    // TODO the inbound replication configuration should be based on the SERVER_NAME property
+    /**
+     * Additional defaults for starting a Sailing Analytics replica server:
+     * <ul>
+     * <li>The {@link #getOutboundReplicationConfiguration() output replication}
+     * {@link OutboundReplicationConfiguration#getOutboundReplicationExchangeName() exchange name} defaults to the
+     * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
+     * <li>The instance name defaults to the superclass's default ("SL {servername}") with the string
+     * {@code " (Replica)"} appended to it.</li>
+     * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
+     * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
+     * {@link #setServerName(String) server name} property</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     * @param <BuilderT>
+     * @param <ShardingKey>
+     */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey> {
     }
@@ -42,7 +62,21 @@ public class StartSailingAnalyticsReplica<ShardingKey>
             }
             return resultBuilder.build();
         }
-    }
+
+        @Override
+        public Optional<InboundReplicationConfiguration> getInboundReplicationConfiguration() {
+            final InboundReplicationConfiguration.Builder resultBuilder;
+            if (super.getInboundReplicationConfiguration() != null && super.getInboundReplicationConfiguration().isPresent()) {
+                resultBuilder = InboundReplicationConfiguration.copy(super.getInboundReplicationConfiguration().get());
+            } else {
+                resultBuilder = InboundReplicationConfiguration.builder();
+            }
+            if (!isInboundReplicationExchangeNameSet()) {
+                resultBuilder.setInboundMasterExchangeName(getServerName());
+            }
+            return Optional.of(resultBuilder.build());
+        }
+}
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
         return new BuilderImpl<>();
