@@ -53,6 +53,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateCompatibilityChecker;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.MarkRoleCreationRequest;
@@ -75,6 +76,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CourseConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkConfigurationImpl;
+import com.sap.sailing.domain.coursetemplate.impl.FreestyleMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPairWithConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigurationImpl;
@@ -213,16 +215,30 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                 final Positioning positioningOrNull = markConfiguration.getAnnotationInfo().getOptionalPositioning();
                 // create or update the non position-related aspects of the MarkProperties object in the "inventory":
                 if (markPropertiesOrNull == null) {
+                    CommonMarkProperties effectiveProperties = markConfiguration.getEffectiveProperties();
+                    Iterable<String> tags = Collections.emptySet();
+                    if (effectiveProperties instanceof FreestyleMarkProperties) {
+                        tags = ((FreestyleMarkProperties) effectiveProperties).getTags();
+                    }else {
+                        tags = Collections.emptySet();
+                    }
                     // If no mark properties exist yet, a new one is created
-                    markPropertiesInInventory = getSharedSailingData().createMarkProperties(markConfiguration.getEffectiveProperties(),
-                            /* tags */ Collections.emptySet(), optionalNonDefaultGroupOwnership);
+                    markPropertiesInInventory = getSharedSailingData().createMarkProperties(effectiveProperties, tags,
+                            optionalNonDefaultGroupOwnership);
                 } else {
+                    CommonMarkProperties effectiveProperties = markConfiguration.getEffectiveProperties();
+                    final Iterable<String> tags;
+                    if (effectiveProperties instanceof FreestyleMarkProperties) {
+                        tags = ((FreestyleMarkProperties) effectiveProperties).getTags();
+                    }else {
+                        tags = Collections.emptySet();
+                    }
                     // in the case of a MarkPropertiesBasedMarkConfiguration, the following call is expected to notice
                     // the identity between the mark properties object to update and the mark properties that constitute
                     // the effective properties and then skip the update.
                     markPropertiesInInventory = markPropertiesOrNull;
-                    getSharedSailingData().updateMarkProperties(markPropertiesInInventory.getId(), markConfiguration.getEffectiveProperties(),
-                            positioningOrNull, /* TODO tags */ Collections.emptySet());
+                    getSharedSailingData().updateMarkProperties(markPropertiesInInventory.getId(), effectiveProperties,
+                            positioningOrNull, tags);
                 }
                 if (positioningOrNull != null) {
                     positioningOrNull.accept(new PositioningVisitor<Void>() {
@@ -316,11 +332,14 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                         if (markPropertiesOrNull.hasEqualAppeareanceWith(effectiveMarkTemplate)) {
                             effectiveConfiguration = new MarkPropertiesBasedMarkConfigurationImpl<>(markPropertiesOrNull,
                                     effectiveMarkTemplate, markConfiguration.getAnnotationInfo());
-                        } else {
-                            effectiveConfiguration = new FreestyleMarkConfigurationImpl<>(effectiveMarkTemplate,
-                                    markPropertiesOrNull, effectiveMarkTemplate, markConfiguration.getAnnotationInfo());
-                        }
-                    } else {
+                                } else {
+                                    effectiveConfiguration = new FreestyleMarkConfigurationImpl<>(effectiveMarkTemplate,
+                                            markPropertiesOrNull,
+                                            new FreestyleMarkPropertiesImpl(effectiveMarkTemplate,
+                                                    /* tags */ null),
+                                            markConfiguration.getAnnotationInfo());
+                                }
+                            } else {
                         effectiveConfiguration = new MarkTemplateBasedMarkConfigurationImpl<>(effectiveMarkTemplate,
                                 markConfiguration.getAnnotationInfo());
                     }
