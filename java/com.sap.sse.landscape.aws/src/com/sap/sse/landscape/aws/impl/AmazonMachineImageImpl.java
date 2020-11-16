@@ -1,30 +1,40 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.AwsLandscape;
 
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Image;
+import software.amazon.awssdk.services.ec2.model.ImageState;
 
-public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements MachineImage {
+public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AmazonMachineImage<ShardingKey, MetricsT> {
+    private static final long serialVersionUID = 1615200981492476022L;
     private final Image image;
     private final Region region;
+    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
     
-    public AmazonMachineImage(Image image, Region region) {
+    public AmazonMachineImageImpl(Image image, Region region, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
         this.image = image;
         this.region = region;
+        this.landscape = landscape;
     }
 
     @Override
-    public Serializable getId() {
+    public String getId() {
         return image.imageId();
+    }
+
+    @Override
+    public String getName() {
+        return image.name();
     }
 
     @Override
@@ -54,7 +64,21 @@ public class AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcess
 
     @Override
     public void delete() {
-        // TODO Implement MachineImage<AwsInstance>.delete(...)
-        
+        landscape.deleteImage(getRegion(), getId());
+        for (final BlockDeviceMapping blockDeviceMapping : getBlockDeviceMappings()) {
+            if (blockDeviceMapping.ebs() != null) {
+                landscape.deleteSnapshot(getRegion(), blockDeviceMapping.ebs().snapshotId());
+            }
+        }
+    }
+    
+    @Override
+    public Iterable<BlockDeviceMapping> getBlockDeviceMappings() {
+        return image.blockDeviceMappings();
+    }
+
+    @Override
+    public ImageState getState() {
+        return image.state();
     }
 }
