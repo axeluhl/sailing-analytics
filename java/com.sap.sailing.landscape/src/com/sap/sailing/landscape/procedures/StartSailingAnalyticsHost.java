@@ -58,6 +58,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
      * </ul>
      * 
+     * TODO the outbound replication configuration here or in the StartSailingAnalyticsMaster subclass should be based on the SERVER_NAME property
+     * 
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey>,

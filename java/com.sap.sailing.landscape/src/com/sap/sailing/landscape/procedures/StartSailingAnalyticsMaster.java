@@ -21,6 +21,8 @@ import com.sap.sse.landscape.aws.ApplicationProcessHost;
 public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyticsHost<ShardingKey> {
     private static final String DEFAULT_MASTER_INSTANCE_NAME_SUFFIX = " (Master)";
     
+    // TODO the default for the outbound replication configuration here or in the StartSailingAnalyticsHost superclass should be based on the SERVER_NAME property
+    // TODO the default for the inbound replication configuration should be based on security-service.sapsailing.com and the default RabbitMQ node in the landscape/region
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey> {
     }

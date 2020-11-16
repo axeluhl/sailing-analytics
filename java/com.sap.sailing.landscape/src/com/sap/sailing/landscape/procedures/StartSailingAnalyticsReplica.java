@@ -5,6 +5,7 @@ import com.sap.sse.landscape.ProcessConfigurationVariable;
 
 public class StartSailingAnalyticsReplica<ShardingKey>
         extends StartSailingAnalyticsHost<ShardingKey> {
+    // TODO the inbound replication configuration should be based on the SERVER_NAME property
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsReplica<ShardingKey>, ShardingKey> {
     }
@@ -35,7 +36,9 @@ public class StartSailingAnalyticsReplica<ShardingKey>
             }
             if (!isOutboundReplicationExchangeNameSet()) {
                 // We assume here that the superclass implementation will default the exchange name to the server name
-                resultBuilder.setOutboundReplicationExchangeName(super.getOutboundReplicationConfiguration() + DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
+                resultBuilder.setOutboundReplicationExchangeName(
+                        super.getOutboundReplicationConfiguration().getOutboundReplicationExchangeName() +
+                        DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX);
             }
             return resultBuilder.build();
         }
