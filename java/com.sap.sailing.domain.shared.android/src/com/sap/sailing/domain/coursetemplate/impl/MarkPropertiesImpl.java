@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
@@ -14,10 +13,9 @@ import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 
-public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements MarkProperties {
+public class MarkPropertiesImpl extends FreestyleMarkPropertiesImpl implements MarkProperties {
     private static final long serialVersionUID = -5588202720707030502L;
     private Positioning positioningInformation;
-    private Iterable<String> tags;
     private UUID id;
 
     private final ConcurrentHashMap<MarkTemplate, TimePoint> lastUsedMarkTemplate = new ConcurrentHashMap<>();
@@ -29,12 +27,7 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
 
     public MarkPropertiesImpl(UUID id, String name, String shortName, Color color, String shape, String pattern,
             MarkType type) {
-        super(name, shortName, color, shape, pattern, type);
-        this.id = id;
-    }
-
-    public MarkPropertiesImpl(UUID id, final CommonMarkProperties commonMarkProperties) {
-        super(commonMarkProperties);
+        super(name, shortName, color, shape, pattern, type, /* tags */ null);
         this.id = id;
     }
     
@@ -76,15 +69,6 @@ public class MarkPropertiesImpl extends CommonMarkPropertiesImpl implements Mark
     @Override
     public void setPositioningInformation(Positioning positioningInformation) {
         this.positioningInformation = positioningInformation;
-    }
-
-    @Override
-    public Iterable<String> getTags() {
-        return this.tags;
-    }
-
-    public void setTags(Iterable<String> tags) {
-        this.tags = tags;
     }
 
     @Override
