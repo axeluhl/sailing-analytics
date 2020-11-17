@@ -1,6 +1,8 @@
 package com.sap.sse.gwt.adminconsole;
 
-public interface FilterableAdminConsolePlace {
+import com.sap.sse.gwt.client.panels.FilterParameter;
 
-    public String getFilter();
+public interface FilterableAdminConsolePlace {
+    
+    public FilterParameter getFilterParameter();
 }

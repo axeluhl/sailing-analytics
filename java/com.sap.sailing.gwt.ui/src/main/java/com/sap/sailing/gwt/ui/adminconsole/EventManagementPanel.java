@@ -15,11 +15,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -28,7 +28,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer, FilterablePanel, SelectablePanel {
+public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -88,12 +88,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     }
     
     @Override
-    public void filter(String searchString) {
-        eventListComposite.search(searchString);
-    }
-    
-    @Override
-    public void select(String searchString) {
-        eventListComposite.setSearchStringForSelection(searchString); 
+    public AbstractFilterablePanel<EventDTO> getFilterablePanel() {
+        return eventListComposite.filterTextbox;
     }
 }

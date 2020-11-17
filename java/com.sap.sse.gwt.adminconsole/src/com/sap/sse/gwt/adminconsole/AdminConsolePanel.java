@@ -551,7 +551,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 int index = panel.getWidgetIndex(currentWidget);
                 currentPlace = place;
                 panel.selectTab(index, fireEvent);
-                filterOrSelect(place, unwrapScrollPanel(currentWidget));
+                filterAndSelect(place, unwrapScrollPanel(currentWidget));
                 refreshDataFor(currentWidget);                    
             }
         }
@@ -576,11 +576,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return isVerticalTab;
     }
     
-    private void filterOrSelect(AdminConsolePlace place, Widget widget) {
-        if (widget instanceof FilterablePanel && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilter() != null) {
-            ((FilterablePanel)widget).filter(((FilterableAdminConsolePlace)place).getFilter());
-        } else if (widget instanceof SelectablePanel && place instanceof SelectableAdminConsolePlace && ((SelectableAdminConsolePlace)place).getSelect() != null) {
-            ((SelectablePanel)widget).select(((SelectableAdminConsolePlace)place).getSelect());
+    private void filterAndSelect(final AdminConsolePlace place, final Widget widget) {
+        if (widget instanceof FilterablePanelProvider && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilterParameter() != null) {
+            FilterablePanelProvider<?> filterablePanelProvider = (FilterablePanelProvider<?>) widget;
+            FilterableAdminConsolePlace filterablePlace = (FilterableAdminConsolePlace) place;
+            filterablePanelProvider.getFilterablePanel().filter(filterablePlace.getFilterParameter());       
         }
     }
     

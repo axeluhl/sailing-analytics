@@ -52,8 +52,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -65,6 +64,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
@@ -73,7 +73,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> , FilterablePanel, SelectablePanel {
+        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> , FilterablePanelProvider<StrippedLeaderboardDTOWithSecurity> {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -111,8 +111,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     private final Button reloadAllRaceLogs;
 
     protected UserService userService;
-
-    private String searchString;
 
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality
             extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTOWithSecurity> {
@@ -393,8 +391,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
-        
-        searchAndSelect();
     }
 
     /**
@@ -910,18 +906,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     @Override
-    public void filter(String searchString) {
-        leaderboardSelectionModel.clear();
-        filterLeaderboardPanel.search(searchString);
-    }
-    
-    @Override
-    public void select(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterLeaderboardPanel.searchAndSelect(searchString);
-        this.searchString = null;
+    public AbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> getFilterablePanel() {
+        return filterLeaderboardPanel;
     }
 }

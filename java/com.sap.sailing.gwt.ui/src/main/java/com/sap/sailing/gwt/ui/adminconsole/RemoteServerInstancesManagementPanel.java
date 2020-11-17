@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -40,13 +41,14 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
-public class RemoteServerInstancesManagementPanel extends SimplePanel {
+public class RemoteServerInstancesManagementPanel extends SimplePanel implements FilterablePanelProvider<RemoteSailingServerReferenceDTO>{
     private final SailingServiceWriteAsync sailingService;
     private final UserService userService;
     private final ErrorReporter errorReporter;
@@ -269,5 +271,10 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 }
             }
         };
+    }
+
+    @Override
+    public AbstractFilterablePanel<RemoteSailingServerReferenceDTO> getFilterablePanel() {
+        return filteredServerTablePanel;
     }
 }

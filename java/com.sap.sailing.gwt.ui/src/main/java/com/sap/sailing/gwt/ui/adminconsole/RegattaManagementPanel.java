@@ -23,10 +23,10 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, FilterablePanel, SelectablePanel {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, FilterablePanelProvider<RegattaDTO> {
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -170,12 +170,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
     
     @Override
-    public void filter(String searchString) {
-        regattaListComposite.search(searchString);
-    }
-    
-    @Override
-    public void select(String searchString) {
-        regattaListComposite.setSearchStringForSelection(searchString); 
+    public AbstractFilterablePanel<RegattaDTO> getFilterablePanel() {
+        return regattaListComposite.filterablePanelRegattas;
     }
 }

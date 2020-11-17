@@ -90,8 +90,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     private final ListDataProvider<EventDTO> eventListDataProvider;
     private final List<EventDTO> allEvents;
-    private final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
     private final Label noEventsLabel;
+    protected final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
 
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
 
@@ -113,7 +113,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventsRefresher;
     private final HandleTabSelectable handleTabSelectable;
-    private String searchString;
     
     public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable,
@@ -741,8 +740,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 allEvents.addAll(events);
                 filterTextbox.updateAll(allEvents);
                 eventTable.redraw();
-                
-                searchAndSelect();
             }
         });
     }
@@ -757,19 +754,5 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     @Override
     public void setupLeaderboardGroups(Map<String, String> params) {
-    }
-    
-    public void search(String searchString) {
-        refreshableEventSelectionModel.clear();
-        filterTextbox.search(searchString);  
-    }
-    
-    public void setSearchStringForSelection(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterTextbox.searchAndSelect(searchString);
-        searchString = null;
     }
 }

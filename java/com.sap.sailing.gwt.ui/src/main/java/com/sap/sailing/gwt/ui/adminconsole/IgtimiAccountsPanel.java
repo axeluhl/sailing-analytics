@@ -40,8 +40,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -54,6 +53,7 @@ import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -66,14 +66,13 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class IgtimiAccountsPanel extends FlowPanel implements SelectablePanel, FilterablePanel {
+public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelProvider<AccountWithSecurityDTO> {
 
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel;
     private final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel;
-    private String searchString;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -263,7 +262,6 @@ public class IgtimiAccountsPanel extends FlowPanel implements SelectablePanel, F
             @Override
             public void onSuccess(Iterable<AccountWithSecurityDTO> result) {
                 filterAccountsPanel.updateAll(result);
-                searchAndSelect();
             }
 
             @Override
@@ -391,18 +389,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements SelectablePanel, F
     }
     
     @Override
-    public void filter(String searchString) {
-        refreshableAccountsSelectionModel.clear();
-        filterAccountsPanel.search(searchString);  
-    }
-    
-    @Override
-    public void select(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterAccountsPanel.searchAndSelect(searchString); 
-        this.searchString = null;
+    public AbstractFilterablePanel<AccountWithSecurityDTO> getFilterablePanel() {
+        return filterAccountsPanel;
     }
 }

@@ -35,8 +35,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -44,6 +43,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -56,7 +56,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanel, SelectablePanel {
+public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<SwissTimingConfigurationWithSecurityDTO> {
     private static final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
@@ -459,13 +459,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
     
     @Override
-    public void filter(String searchString) {
-        connectionsTable.getSelectionModel().clear();
-        connectionsTable.getFilterField().search(searchString);  
-    }
-    
-    @Override
-    public void select(String searchString) {
-        connectionsTable.getFilterField().searchAndSelect(searchString);
+    public AbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }

@@ -47,7 +47,6 @@ public class TracTracConnectionTableWrapper extends
     private final LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> filterField;
     private final SailingServiceAsync sailingServiceWriteAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
-    private String searchString;
 
     public TracTracConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceWriteAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
@@ -205,17 +204,7 @@ public class TracTracConnectionTableWrapper extends
                                 }
                             });
                         }
-                        searchAndSelect();
                     }
                 });
-    }
-    
-    public void setSearchStringForSelection(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterField.searchAndSelect(searchString);
-        searchString = null;
     }
 }

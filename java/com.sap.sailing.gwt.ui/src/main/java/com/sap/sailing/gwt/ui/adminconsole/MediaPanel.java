@@ -65,8 +65,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -76,6 +75,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -93,7 +93,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel implements MediaTracksRefresher, FilterablePanel, SelectablePanel {
+public class MediaPanel extends FlowPanel implements MediaTracksRefresher, FilterablePanelProvider<MediaTrackWithSecurityDTO> {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -110,8 +110,6 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
     private Date latestDate;
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
-
-    private String searchString;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceWriteAsync sailingServiceWrite,
             RegattaRefresher regattaRefresher, MediaServiceWriteAsync mediaServiceWrite,
@@ -178,8 +176,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
 
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
-                allMediaTracks,
-                mediaTrackListDataProvider, stringMessages) {
+                allMediaTracks, mediaTrackListDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(MediaTrackWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -234,7 +231,6 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
                 Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
                 mediaTrackListDataProvider.refresh();
-                searchAndSelect();
             }
         });
     }
@@ -734,20 +730,9 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
         dialog.ensureDebugId("AssignedRacesDialog");
         dialog.show();
     }
-    
+
     @Override
-    public void filter(String searchString) {
-        refreshableSelectionModel.clear();
-        filterableMediaTracks.search(searchString);  
-    }
-    
-    @Override
-    public void select(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterableMediaTracks.searchAndSelect(searchString);
-        searchString = null;
+    public AbstractFilterablePanel<MediaTrackWithSecurityDTO> getFilterablePanel() {
+        return filterableMediaTracks;
     }
 }

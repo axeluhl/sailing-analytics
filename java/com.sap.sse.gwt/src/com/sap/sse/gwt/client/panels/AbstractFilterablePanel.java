@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
@@ -59,6 +60,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     private final CheckboxEnablableFilter<T> checkboxFilterForUpdatableObjectsOnly;
 
     private boolean added = false;
+    
+    private List<String> select;
+    private String selectExact;
+    private boolean executeSelectOnRefresh;
+    private boolean executeSelect;
 
     static class CheckboxEnablableFilter<T> implements Filter<T> {
 
@@ -119,6 +125,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             boolean drawTextBox, final StringMessages stringMessages) {
+        this(all, filtered, drawTextBox, stringMessages, true);
+    }
+    
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            boolean drawTextBox, final StringMessages stringMessages, boolean executeSelectOnRefresh) {
+        this.executeSelectOnRefresh = executeSelectOnRefresh;
         filters.add(filterer);
         setSpacing(5);
         this.all = new ListDataProvider<>();
@@ -133,12 +145,17 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         setAll(all);
         if (drawTextBox) {
             addDefaultTextBox();
-        }
+        }       
     }
 
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             final StringMessages stringMessages) {
-        this(all, filtered, /* show default filter text box */ true, stringMessages);
+        this(all, filtered, stringMessages, true);
+    }
+    
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            final StringMessages stringMessages, boolean selectOnRefresh) {
+        this(all, filtered, /* show default filter text box */ true, stringMessages, selectOnRefresh);
     }
 
     private void setAll(Iterable<? extends T> all) {
@@ -154,6 +171,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         filters.add(filterToAdd);
     }
 
+    private void setKeywordsFilterSplitValue(String value) {
+        filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(value));
+    }
+    
+    private void resetKeywordsFilterSplitValue() {
+        setKeywordsFilterSplitValue(getTextBox().getValue());
+    }
+    
     /**
      * Subclasses must implement this to extract the strings from an object of type <code>T</code> based on which the
      * filter performs its filtering
@@ -170,8 +195,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void updateAll(Iterable<? extends T> all) {
         setAll(all);
         filter();
+        if (executeSelectOnRefresh && executeSelect) {
+            select();
+        }
     }
-
+    
     /**
      * Adds an object and applies the search filter.
      */
@@ -232,7 +260,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
             sort();
         });
     }
-    
+
+    public void filter(FilterParameter filterParameter) {
+        if (filterParameter.getFilterString() != null) {
+            search(filterParameter.getFilterString());
+        } 
+        if (!executeSelectOnRefresh) {
+            select(filterParameter.getSelectList(), filterParameter.getSelectExact());
+        } else {
+            this.selectExact = filterParameter.getSelectExact();
+            this.select = filterParameter.getSelectList();
+            this.executeSelect = true;
+        }
+    }
 
     public abstract AbstractCellTable<T> getCellTable();
    
@@ -245,57 +285,103 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
         Util.addAll(filteredElements, filtered.getList());
     }
-
-    public void searchAndSelect(String searchString) {
-        if (searchString != null) {
-            search(searchString);  
-            selectExactMatchesOrAllFiltered();
-        } 
+    
+    private void select() {
+        select(select, selectExact);       
     }
     
-    private void selectExactMatchesOrAllFiltered() {
-        if (!selectExactlyMatchingFilteredItems()) {
-            selectAllFiltered();
+    private void select(List<String> selections, String selectExact) {
+        if (isSingleSelect()) {
+            selectSingle(selections, selectExact);
+        } else {
+            selectMultiple(selections, selectExact);
         }
+        
+        if (select != null) {
+            select.clear();
+        }
+        selectExact = null;
+        executeSelect = false;
     }
     
-    private void selectAllFiltered() {
-        select(filtered.getList());
+    private boolean isSingleSelect() {
+        return filtered.getDataDisplays().stream().allMatch(dataDisplay -> 
+        dataDisplay.getSelectionModel() instanceof SingleSelectionModel);
+    }
+    
+    private void selectMultiple(List<String> selections, String selectExact) {          
+        for (T t : all.getList()) {
+            boolean matchesAtLeastOneSelection = false;
+            for (String selection : selections) {
+                setKeywordsFilterSplitValue(selection);
+                if (matches(t)) {
+                    matchesAtLeastOneSelection = true;
+                    break;
+                }
+            }
+            select(t, matchesAtLeastOneSelection);           
+        } 
+        resetKeywordsFilterSplitValue();
+        
+        selectExact(selectExact);  
+    }  
+    
+    private void selectSingle(List<String> selections, String selectExact) {    
+        boolean selected = singleSelectExact(selectExact);  
+        
+        if (!selected) {
+            try {
+                for (T t : all.getList()) {
+                    for (String selection : selections) {
+                        setKeywordsFilterSplitValue(selection);
+                        if (matches(t)) {
+                            select(t);
+                            return;
+                        }
+                    }
+                } 
+            } finally {
+                resetKeywordsFilterSplitValue();
+            }
+        } 
+    }  
+    
+    private void select(T item) {
+        select(item, true);
     }
     
     private void select(T item, boolean select) {
         getCellTable().getSelectionModel().setSelected(item, select);
     }
     
-    private void select(T item) {
-        select(item, true);
-    }
-    
-    private void select(List<T> items) {
-        for (T item : items) {
-            select(item);
+    private void selectExact(String selection) {
+        if (selection == null) {
+            return;
         }
-    }
-    
-    private boolean selectExactlyMatchingFilteredItems() {
-        boolean foundExactMatch = false;
-        selectionFilter.setKeywords(Arrays.asList(getTextBox().getText()));
+        selectionFilter.setKeywords(Arrays.asList(selection));
         for (T t : all.getList()) {
-            boolean matches = matchesExactly(t);
-            select(t, matches);
-            if (matches) {
-                foundExactMatch = true;
+            if (matchesExactly(t)) {
+                select(t);
             }
         }
-        return foundExactMatch;
+    }
+    
+    private boolean singleSelectExact(String selection) {
+        if (selection == null) {
+            return false;
+        }
+        selectionFilter.setKeywords(Arrays.asList(selection));
+        for (T t : all.getList()) {
+            if (matchesExactly(t)) {
+                select(t);
+                return true;
+            }
+        }    
+        return false;
     }
     
     private boolean matchesExactly(T t) {       
-        if (!selectionFilter.matchesExactly(t)) {
-            return false;
-        }
-        
-        return matches(t);
+       return selectionFilter.matchesExactly(t);
     }
     
     private boolean matches(T t) {
@@ -318,7 +404,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(getTextBox().getText()));
+                resetKeywordsFilterSplitValue();
                 filter();
             }
         });
@@ -334,7 +420,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public void search(String searchString) {
         getTextBox().setText(searchString);
-        filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchString));
+        setKeywordsFilterSplitValue(searchString);
         filter();
     }
 

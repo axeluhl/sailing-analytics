@@ -93,7 +93,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Button btnRefresh;
 
-    private CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
+    protected CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
 

@@ -65,8 +65,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -78,6 +77,7 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -90,7 +90,7 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
-        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>, FilterablePanel, SelectablePanel {
+        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>, FilterablePanelProvider<LeaderboardGroupDTO> {
 
     /**
      * The key to put into a params map passed into {@link #setupLeaderboardGroups(Map)} used to identify
@@ -148,8 +148,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
     private final Set<Widget> permissionRestrictedComponent = new HashSet<>();
     private final Label idLabel = new Label();
-
-    private String searchString;
 
     public LeaderboardGroupConfigPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
@@ -645,8 +643,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             Util.addAll(groups, availableLeaderboardGroups);
         }
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-        
-        searchAndSelect();
     }
 
     @Override
@@ -1013,19 +1009,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
     
     @Override
-    public void filter(String searchString) {
-        refreshableGroupsSelectionModel.clear();
-        groupsFilterablePanel.search(searchString);  
+    public AbstractFilterablePanel<LeaderboardGroupDTO> getFilterablePanel() {
+        return groupsFilterablePanel;
     }
-    
-    @Override
-    public void select(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        groupsFilterablePanel.searchAndSelect(searchString);
-        searchString = null;
-    }
-
 }

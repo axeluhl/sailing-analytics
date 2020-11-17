@@ -77,12 +77,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
-    private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
-
-    private final UserService userService;
-    
+    protected final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
+    private final UserService userService;   
     private List<RegattaDTO> allRegattas;
-    private String searchString;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -140,20 +137,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         panel.add(regattaTable);
         initWidget(panel);
-    }
-
-    public void search(String searchString) {
-        refreshableRegattaMultiSelectionModel.clear();
-        filterablePanelRegattas.search(searchString);  
-    }
-    
-    public void setSearchStringForSelection(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    private void searchAndSelect() {
-        filterablePanelRegattas.searchAndSelect(searchString);
-        searchString = null;
     }
     
     /**
@@ -422,9 +405,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
-        filterablePanelRegattas.updateAll(allRegattas); 
-        
-        searchAndSelect();
+        filterablePanelRegattas.updateAll(allRegattas);    
     }
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {

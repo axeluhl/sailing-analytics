@@ -34,5 +34,4 @@ public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterab
         super(all, filtered, stringMessages);
         insert(label, 0);
     }
-    
 }

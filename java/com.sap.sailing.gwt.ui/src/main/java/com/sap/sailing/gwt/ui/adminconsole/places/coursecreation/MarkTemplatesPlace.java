@@ -1,21 +1,14 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.coursecreation;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
 public class MarkTemplatesPlace extends AbstractCourseCreationPlace {
     
-    public MarkTemplatesPlace() { 
-    }
-
-    public static class Tokenizer implements PlaceTokenizer<MarkTemplatesPlace> {
-        @Override
-        public String getToken(final MarkTemplatesPlace place) {
-            return "";
-        }
+    public static class Tokenizer extends TablePlaceTokenizer<MarkTemplatesPlace> {      
 
         @Override
-        public MarkTemplatesPlace getPlace(final String token) {
-            return new MarkTemplatesPlace();
+        protected Supplier<MarkTemplatesPlace> getPlaceFactory() {
+            return MarkTemplatesPlace::new;
         }
     }
     

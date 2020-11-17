@@ -38,8 +38,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurity
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.FilterablePanel;
-import com.sap.sse.gwt.adminconsole.SelectablePanel;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -47,6 +46,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -58,7 +58,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Jens Rommel (D047974)
  * 
  */
-public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel implements FilterablePanel, SelectablePanel {
+public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<SwissTimingArchiveConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
@@ -401,15 +401,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 });
         }
     }
-    
+
     @Override
-    public void filter(String searchString) {
-        connectionsTable.getSelectionModel().clear();
-        connectionsTable.getFilterField().search(searchString);  
-    }
-    
-    @Override
-    public void select(String searchString) {
-        connectionsTable.getFilterField().searchAndSelect(searchString); 
+    public AbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }

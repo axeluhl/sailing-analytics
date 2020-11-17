@@ -69,7 +69,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final boolean filterCompetitorsWithBoat;
     private final boolean filterCompetitorsWithoutBoat;
-    private String searchString;
     
     /**
      * @param filterCompetitorsWithBoat
@@ -398,7 +397,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 if (callback != null) {
                     callback.onSuccess(result);
                 }
-                searchAndSelect();
             }
         };
         if (leaderboardName != null) {
@@ -571,15 +569,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 getDataProvider().refresh();
             }
         };
-    }
-    
-    protected void setSearchStringForSelection(String searchString) {
-        this.searchString = searchString; 
-    }
-    
-    protected void searchAndSelect() {
-        filterField.searchAndSelect(searchString);
-        searchString = null;
     }
 
 }
