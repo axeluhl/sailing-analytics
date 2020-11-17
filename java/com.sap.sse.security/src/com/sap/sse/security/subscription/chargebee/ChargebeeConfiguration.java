@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared.subscription.chargebee;
+package com.sap.sse.security.subscription.chargebee;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

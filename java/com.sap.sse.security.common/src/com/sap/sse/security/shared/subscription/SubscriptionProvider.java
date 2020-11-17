@@ -13,9 +13,4 @@ public interface SubscriptionProvider {
      * Get subscription data handler {@code SubscriptionDataHandler} for this provider
      */
     SubscriptionDataHandler getDataHandler();
-    
-    /**
-     * Return implementation of {@code SubscriptionApiService} for this provider
-     */
-    SubscriptionApiService getApiService();
 }

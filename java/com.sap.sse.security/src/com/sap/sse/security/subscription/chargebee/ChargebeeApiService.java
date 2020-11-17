@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared.subscription.chargebee;
+package com.sap.sse.security.subscription.chargebee;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chargebee.APIException;
+import com.chargebee.Environment;
 import com.chargebee.ListResult;
 import com.chargebee.ListResult.Entry;
 import com.chargebee.filters.enums.SortOrder;
@@ -20,10 +21,14 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionApiService;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionApiService;
 
 public class ChargebeeApiService implements SubscriptionApiService {
     private static final Logger logger = Logger.getLogger(ChargebeeApiService.class.getName());
+
+    private static ChargebeeApiService instance;
+    private static boolean inited;
 
     // Chargebee has API rate limits
     // Threshold value for test site: ~750 API calls in 5 minutes.
@@ -31,6 +36,24 @@ public class ChargebeeApiService implements SubscriptionApiService {
     // So to prevent the limit would be reached, a request has a frame of ~400ms, and a next request should be made
     // after 400ms from previous request
     private static final long TIME_FOR_API_REQUEST_MS = 400;
+
+    public static ChargebeeApiService getInstance() {
+        if (instance == null) {
+            initialize();
+            instance = new ChargebeeApiService();
+        }
+        return instance;
+    }
+
+    public static void initialize() {
+        if (!inited) {
+            Environment.configure(ChargebeeConfiguration.getInstance().getSite(),
+                    ChargebeeConfiguration.getInstance().getApiKey());
+        }
+    }
+
+    private ChargebeeApiService() {
+    }
 
     @Override
     public Iterable<Subscription> getUserSubscriptions(User user) throws Exception {

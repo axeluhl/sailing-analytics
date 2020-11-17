@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionApiService;
 import com.sap.sse.security.shared.subscription.SubscriptionFactory;
 import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 
@@ -36,7 +35,8 @@ public class SubscriptionUpdateTask implements Runnable {
 
     private void fetchAndUserSubscriptions(User user, Iterable<SubscriptionProvider> subscriptionProviders) {
         for (SubscriptionProvider provider : subscriptionProviders) {
-            SubscriptionApiService apiService = provider.getApiService();
+            SubscriptionApiService apiService = SubscriptionServiceFactory.getInstance()
+                    .getApiService(provider.getProviderName());
             if (apiService != null) {
                 try {
                     Iterable<Subscription> userSubscriptions = apiService.getUserSubscriptions(user);

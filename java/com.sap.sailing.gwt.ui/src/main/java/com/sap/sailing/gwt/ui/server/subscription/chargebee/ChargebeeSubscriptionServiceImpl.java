@@ -31,6 +31,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
+import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -166,6 +167,6 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
 
     @Override
     protected void initService(ServletConfig config) {
-        ChargebeeSubscriptionProvider.initialize();
+        ChargebeeApiService.initialize();
     }
 }
