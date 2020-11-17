@@ -18,7 +18,6 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
-import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
@@ -39,11 +38,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     private final static String EXPEDITION_PORT_USER_DATA_NAME = "EXPEDITION_PORT";
     private final int DEFAULT_PORT = 8888;
     private final Integer port;
-    private final String defaultServerDirectory;
+    private final String serverDirectory;
     
     /**
-     * The following defaults, in addition to the defaults implemented by the more general {@link StartAwsHost.Builder},
-     * are:
+     * The following defaults, in addition to the defaults implemented by the more general
+     * {@link StartAwsApplicationHost.Builder}, are:
      * <ul>
      * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the
      * {@link #getServerName() server name} by pre-pending the prefix "SL ".</li>
@@ -53,12 +52,10 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * is set} of which the latest version would be used otherwise.</li>
      * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
      * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
-     * getLatestMasterRelease()} will be used instead.</li>
-     * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {code /home/sailing/servers/server}
+     * .getLatestMasterRelease()} will be used instead.</li>
+     * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/server}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
      * </ul>
-     * 
-     * TODO the outbound replication configuration here or in the StartSailingAnalyticsMaster subclass should be based on the SERVER_NAME property
      * 
      * @author Axel Uhl (D043530)
      */
@@ -71,7 +68,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
 
         BuilderT setExpeditionPort(int expeditionPort);
         
-        BuilderT setDefaultServerDirectory(String serverDirectory);
+        BuilderT setServerDirectory(String serverDirectory);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
@@ -81,7 +78,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         private Integer port;
         private Integer telnetPort;
         private Integer expeditionPort;
-        private String defaultServerDirectory;
+        private String serverDirectory;
         
         @Override
         protected String getImageType() {
@@ -121,7 +118,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             return self();
         }
         
-        public Integer getTelnetPort() {
+        protected Integer getTelnetPort() {
             return this.telnetPort;
         }
         
@@ -131,7 +128,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             return self();
         }
 
-        public Integer getExpeditionPort() {
+        protected Integer getExpeditionPort() {
             return expeditionPort;
         }
         
@@ -141,14 +138,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             return self();
         }
 
-        // TODO the host start-up should ideally be separated from the process installation/startup
-        public String getDefaultServerDirectory() {
-            return defaultServerDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : defaultServerDirectory;
+        protected String getServerDirectory() {
+            return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : serverDirectory;
         }
 
         @Override
-        public BuilderT setDefaultServerDirectory(String defaultServerDirectory) {
-            this.defaultServerDirectory = defaultServerDirectory;
+        public BuilderT setServerDirectory(String serverDirectory) {
+            this.serverDirectory = serverDirectory;
             return self();
         }
     }
@@ -157,7 +153,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         super(builder);
         // remember the port we need in order to hand out the process
         this.port = builder.getPort();
-        this.defaultServerDirectory = builder.getDefaultServerDirectory();
+        this.serverDirectory = builder.getServerDirectory();
+        // TODO how to handle defaulting here? Should 8888/14888/2010 be provided by the builder already, making the environment and default env.sh settings obsolete?
         if (builder.getPort() != null) {
             addUserData(ProcessConfigurationVariable.SERVER_PORT, builder.getPort().toString());
         }
@@ -173,11 +170,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         return port == null ? DEFAULT_PORT : port;
     }
     
-    protected String getDefaultServerDirectory() {
-        return defaultServerDirectory;
+    protected String getServerDirectory() {
+        return serverDirectory;
     }
     
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsProcessImpl<>(getPort(), getHost(), getDefaultServerDirectory());
+        return new SailingAnalyticsProcessImpl<>(getPort(), getHost(), getServerDirectory());
     }
 }

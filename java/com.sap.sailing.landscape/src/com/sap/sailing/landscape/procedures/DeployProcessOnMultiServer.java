@@ -25,6 +25,8 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * of the Apache reverse proxy on the instance), hence all target groups can always use port 80/443 for traffic and health
  * check. The UDP and telnet ports do not need to be the same for master and replicas.<p>
  * 
+ * TODO default the server directory to the SERVER_NAME property</p>
+ * 
  * @author Axel Uhl (D043530)
  *
  * @param <ShardingKey>

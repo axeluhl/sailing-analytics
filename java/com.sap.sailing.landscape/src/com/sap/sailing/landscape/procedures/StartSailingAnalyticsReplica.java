@@ -21,6 +21,8 @@ public class StartSailingAnalyticsReplica<ShardingKey>
      * {@link #setServerName(String) server name} property</li>
      * </ul>
      * 
+     * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment contents
+     * 
      * @author Axel Uhl (D043530)
      *
      * @param <BuilderT>
