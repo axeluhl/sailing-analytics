@@ -34,8 +34,8 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>,
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
             String competitorIdAsString = competitorDTO.getIdAsString();
-
-            competitorPreferences.add(new CompetitorNotificationPreference(competitorIdAsString, favorites.isNotifyAboutResults()));
+            String competitorName = competitorDTO.getName();
+            competitorPreferences.add(new CompetitorNotificationPreference(competitorIdAsString, competitorName, favorites.isNotifyAboutResults()));
         }
         prefs.setCompetitors(competitorPreferences);
         ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, prefs);

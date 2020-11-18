@@ -51,19 +51,43 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
                 .getPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME);
         TreeSet<SimpleCompetitorWithIdDTO> selected = new TreeSet<>();
         boolean notifyAboutResults = false;
+        // FIXME: This is a migration effort to enrich the existing saved preferences of users by including the
+        // competitor names in the mongoDB.
+        boolean missingCompetitorNameInSavedPreferences = false;
         if (preferences != null) {
+            final RacingEventService racingEventService = ctx.getRacingEventService();
+            final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
             for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
                 final String competitorId = pref.getCompetitorIdAsString();
-                final RacingEventService racingEventService = ctx.getRacingEventService();
-                final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
                 DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
-                selected.add(competitor == null ?
-                        new SimpleCompetitorWithIdDTO(competitorId,"Not found","ID:" + competitorId, null, null) 
-                        : new SimpleCompetitorWithIdDTO(competitor));
+                SimpleCompetitorWithIdDTO competitorDTO;
+                if (competitor == null) {
+                    final String competitorName = pref.getCompetitorName();
+                    // FIXME: migration effort. If an id cannot be resolved and the competitor preference 
+                    // had not been migrated before, an alternative message is provided instead of the name.
+                    final String conveyedCompetitorName = competitorName == null
+                            ? "Unknown to this server."
+                            : competitorName;
+                    competitorDTO = new SimpleCompetitorWithIdDTO(competitorId, conveyedCompetitorName, "Unknown", null,
+                            null);
+                } else {
+                    if(pref.getCompetitorName() == null) {
+                        // FIXME: migration effort. Competitor name not found.
+                        missingCompetitorNameInSavedPreferences = true;
+                        pref.setCompetitorName(competitor.getName());
+                    }
+                    competitorDTO = new SimpleCompetitorWithIdDTO(competitor);
+                }
+                selected.add(competitorDTO);
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }
         }
-        return new FavoriteCompetitorsDTO(selected, notifyAboutResults);
+        FavoriteCompetitorsDTO favoriteCompetitorsDTO = new FavoriteCompetitorsDTO(selected, notifyAboutResults);
+        if (missingCompetitorNameInSavedPreferences) {
+            // FIXME: migration effort. Excecute a safe operation to migrate all preference objects to include the competitor names.
+            ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, preferences);
+        }
+        return favoriteCompetitorsDTO;
     }
 
 }
