@@ -24,7 +24,7 @@ public class MarkProperties extends JsonWrapper {
     private static final String FIELD_POSITIONING_DEVICE_IDENTIFIER = "device_identifier";
     private static final String FIELD_POSITIONING_FIXED_POSITION_LATDEG = "latitude_deg";
     private static final String FIELD_POSITIONING_FIXED_POSITION_LONDEG = "longitude_deg";
-    private static final String FIELD_TAGS = "tag";
+    private static final String FIELD_TAGS = "tags";
     
 
     public MarkProperties(JSONObject json) {
