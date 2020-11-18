@@ -58,6 +58,10 @@ start_servers() {
 	      echo "Starting Java server \"$conf\"" >>/var/log/sailing.out
 	      su - sailing -c "cd $SERVERS_DIR/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
 	      server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
+              # The following Plain-SSL macro is important for Application Load Balancer / Target Group health checks
+              # going to https://{local-address}/gwt/status. It will furthermore let Apache/httpd forward to the
+              # default application server instance for all other addresses not recognized by any other ServerName directive,
+              # thus creating the "default route" for this Apache/httpd configuration
 	      echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.out
 	      echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
 	      echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out

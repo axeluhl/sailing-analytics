@@ -106,7 +106,7 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT> {
     protected TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
         return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
                 process.getPort(), process.getHealthCheckPath(),
-                /* use traffic port as health check port, too */ process.getPort());
+                /* use traffic port as health check port, too */ process.getPort()); // TODO this doesn't health-check the reverse proxy running on the instance for default set-ups with only one process running on the instance; but how do we know?
     }
     
     @Override
