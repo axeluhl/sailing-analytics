@@ -25,6 +25,7 @@ clean_logrotate_target() {
 
 clean_httpd_logs() {
   echo "Clearing httpd logs" >>/var/log/sailing.err
+  service httpd stop
   rm -rf /var/log/httpd/*
 }
 
