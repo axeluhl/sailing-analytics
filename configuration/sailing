@@ -43,7 +43,7 @@ start_servers() {
           echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupgrade.sh
         else
-          echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceding with regular server launch..." >>/var/log/sailing.err
+          echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
 	  echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
           FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
@@ -86,7 +86,11 @@ configure_and_start_server() {
   MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
   MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
   echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
-  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>$SERVERS_DIR/$conf/env.sh
+  local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
+  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>"${ENV_SH}"
+  # ensure that if this *created* env.sh that it's owned by the correct user:
+  chown sailing "${ENV_SH}"
+  chgrp sailing "${ENV_SH}"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.err
   (
     # execute env.sh in a subshell which now has the same set of variables that the server will see
@@ -117,7 +121,7 @@ configure_and_start_server() {
       for i in ${!SERIES_ID[*]}; do
 	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${SERIES_HOSTNAME[$i]} to event with ID ${SERIES_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.err
 	echo "## SERIES ${SERIES_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
-	echo "Use Event-SSL ${SERIES_HOSTNAME[$i]} \"${SERIES_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
+	echo "Use Series-SSL ${SERIES_HOSTNAME[$i]} \"${SERIES_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
       done
     fi
     # terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
@@ -175,8 +179,8 @@ stop_httpd() {
 # See how we were called.
 case "$1" in
   start)
-	/usr/sbin/update-motd
 	start_servers
+	/usr/sbin/update-motd
 	touch /var/lock/subsys/sailing
     ;;
   stop)

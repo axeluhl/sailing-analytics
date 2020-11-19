@@ -1,6 +1,10 @@
 #!/bin/bash
-
-source `pwd`/env.sh
+ENV_SH="`pwd`/env.sh"
+if [ -f "${ENV_SH}" ]; then
+  chmod a+x "${ENV_SH}"
+  source "${ENV_SH}"
+fi
+ON_AMAZON=`command -v ec2-metadata`
 DATE_OF_EXECUTION=`date`
 
 # The following temporary file may be used by this script to dump EC2-provided user data
@@ -93,6 +97,7 @@ activate_user_data ()
 
 append_user_data_to_envsh ()
 {
+    mkdir -p $SERVER_HOME/environment 2>/dev/null >/dev/null
     # make backup of original file
     cp $SERVER_HOME/env.sh $SERVER_HOME/environment/env.sh.backup
 
@@ -250,13 +255,8 @@ if [[ $OPERATION == "auto-install" ]]; then
 	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
 	append_user_data_to_envsh
 
-        # make sure to reload data
+        # make sure to reload data, this time including environment settings
         source `pwd`/env.sh
-
-        if [[ $INSTALL_FROM_RELEASE == "" ]] && [[ $BUILD_BEFORE_START != "True" ]]; then
-            echo "I could not find any option telling me to download a release or to build! Possible cause: Your environment contains empty values for these variables!"
-            exit 1
-        fi
 
         echo ""
         echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
@@ -265,12 +265,12 @@ if [[ $OPERATION == "auto-install" ]]; then
         echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
         echo ""
 
-        if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-            load_from_release_file
-        else
+        if [[ $BUILD_BEFORE_START = "True" ]]; then
             checkout_code
             build
             deploy
+        else
+            load_from_release_file
         fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
