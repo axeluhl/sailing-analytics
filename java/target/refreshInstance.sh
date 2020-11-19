@@ -142,7 +142,7 @@ load_from_release_file ()
     if [[ $INSTALL_FROM_RELEASE != "" ]]; then
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
         cd $SERVER_HOME
-        rm -f $SERVER_HOME/$INSTALL_FROM_RELEASE.tar.gz*
+        rm -f $SERVER_HOME/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
         echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
         wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
@@ -250,12 +250,20 @@ if [[ $OPERATION == "auto-install" ]]; then
         # first check and activate everything found in user data
 	copy_user_data_to_tmp_file
         activate_user_data
+        # Now build or fetch the correct release, based on activated user data:
+        if [[ $BUILD_BEFORE_START = "True" ]]; then
+            checkout_code
+            build
+            deploy
+        else
+            load_from_release_file
+        fi
         # then download and install environment and append to env.sh
         install_environment
 	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
 	append_user_data_to_envsh
 
-        # make sure to reload data, this time including environment settings
+        # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
         source `pwd`/env.sh
 
         echo ""
@@ -264,14 +272,6 @@ if [[ $OPERATION == "auto-install" ]]; then
         echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
         echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
         echo ""
-
-        if [[ $BUILD_BEFORE_START = "True" ]]; then
-            checkout_code
-            build
-            deploy
-        else
-            load_from_release_file
-        fi
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
         exit 1
@@ -341,12 +341,19 @@ elif [[ $OPERATION == "install-env" ]]; then
         echo ""
         echo "ATTENTION: This new configuration is not active yet. Make sure to restart the server if it is running!"
     fi
+elif [[ $OPERATION == "install-user-data" ]]; then
+    if [ -f $SERVER_HOME/no-overwrite ]; then
+        echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
+    else
+        append_user_data_to_envsh
+    fi
 else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-local-release <release-file>: Installs the release file specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
+    echo "install-user-data: appends the user data set for the EC2 instance to the env.sh file"
     exit 0
 fi
 

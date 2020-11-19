@@ -87,14 +87,16 @@ configure_and_start_server() {
   MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
   echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
   local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
-  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>"${ENV_SH}"
   # ensure that if this *created* env.sh that it's owned by the correct user:
   chown sailing "${ENV_SH}"
   chgrp sailing "${ENV_SH}"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.err
   (
     # execute env.sh in a subshell which now has the same set of variables that the server will see
-    source $SERVERS_DIR/$conf/env.sh
+    source "${ENV_SH}"
+    if [ -z $MEMORY ]; then
+      echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>"${ENV_SH}"
+    fi
     start_server "${conf}"
     server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
     if [ ${#EVENT_HOSTNAME[*]} = 0 ]; then
