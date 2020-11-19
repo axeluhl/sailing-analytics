@@ -113,7 +113,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
         BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
     };
-    private ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea) -> {
+    private final ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea, expanded) -> {
         ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
         ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
 
@@ -155,7 +155,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     }
 
     private void switchToRacingActivity() {
-        Intent intent = new Intent(LoginActivity.this, RacingActivity.class);
+        final Intent intent = new Intent(this, RacingActivity.class);
         intent.putExtra(AppConstants.EXTRA_COURSE_UUID, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EXTRA_EVENT_ID, mSelectedEventId);
         startActivity(intent);

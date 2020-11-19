@@ -70,10 +70,9 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     private LoginTaskListener loginTaskListener;
 
     public static LoginBackdrop newInstance() {
-
-        Bundle args = new Bundle();
+        final LoginBackdrop fragment = new LoginBackdrop();
+        final Bundle args = new Bundle();
         args.putBoolean(SHOW_BACKDROP_TEXT, false);
-        LoginBackdrop fragment = new LoginBackdrop();
         fragment.setArguments(args);
         return fragment;
     }
