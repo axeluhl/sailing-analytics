@@ -166,7 +166,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     
     public AdminConsolePanel(UserService userService,
             ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
-            String releaseNotesURL, Anchor pwaAnchor, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
+            String releaseNotesURL, Anchor footerAnchor, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
             StringMessages stringMessages, PlaceController placeController) {
         this.placeController = placeController;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
@@ -242,7 +242,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             informationPanel.add(releaseNotesLink, DockPanel.EAST);
         }
         
-        informationPanel.add(pwaAnchor, DockPanel.EAST);
+        if (footerAnchor != null) {
+            informationPanel.add(footerAnchor, DockPanel.EAST);
+        }
         
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
