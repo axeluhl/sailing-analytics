@@ -97,7 +97,6 @@ dependencies {
     /* JVM tests */
     testImplementation "junit:junit:${rootProject.ext.junit}"
     testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
-    implementation 'io.branch.sdk.android:library:5.0.3'
 }
 
 // Custom tasks
