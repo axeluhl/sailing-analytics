@@ -313,6 +313,8 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             return;
         }
 
+        //TODO Distinguish between Branch and device configuration
+
         if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
             Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
             QRHelper.with(getActivity()).saveData(barcode.displayValue);

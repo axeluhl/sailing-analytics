@@ -8,11 +8,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -36,6 +39,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
@@ -61,11 +65,18 @@ import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
+
+import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
 
 public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
         PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -75,7 +86,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private final static String TAG = LoginActivity.class.getName();
 
-    private final PositionListFragment positionFragment;
     private View backdrop;
     private LoginListViews loginListViews = null;
 
@@ -93,8 +103,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
 
-    private ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
+    private String branchEventId;
+    private String branchCourseAreaUuid;
+    private int branchPriority = 0;
 
+    private final ItemSelectedListener<EventBase> eventSelectionListener = (sender, event, expanded) -> {
         final Serializable eventId = selectEvent(event);
 
         // FIXME: its weird to have this button setup in here
@@ -108,10 +121,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
         addCourseAreaListFragment(eventId);
 
-        // send intent to open the course area selection list
-        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
-        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
-        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        if (mSelectedCourseAreaUUID == null && branchCourseAreaUuid == null) {
+            // send intent to open the course area selection list
+            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        }
     };
     private final ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea, expanded) -> {
         ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
@@ -126,15 +141,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             loginListViews.closeAll();
         }
         addAreaPositionListFragment();
-        // send intent to open the position selection list
-        Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
-        intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
-        BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
-    };
 
-    public LoginActivity() {
-        positionFragment = PositionListFragment.newInstance();
-    }
+        if (positionName == null && branchPriority == 0) {
+            // send intent to open the position selection list
+            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        }
+    };
 
     private void setupSignInButton() {
         sign_in = findViewById(R.id.login_submit);
@@ -208,6 +222,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void selectPosition(LoginType type) {
         preferences.setLoginType(type);
+        final PositionListFragment positionFragment = (PositionListFragment) getSupportFragmentManager()
+                .findFragmentByTag(AreaPositionListFragmentTag);
         positionName = positionFragment.getAuthor().getName();
         String header = StringHelper.on(this).getAuthor(positionName);
         loginListViews.getPositionContainer().setHeaderText(header);
@@ -222,37 +238,38 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         loginListViews.getPositionContainer().setHeaderText("");
     }
 
-    private void addAreaPositionListFragment() {
-        resetPosition();
-        updateSignInButtonState();
-        if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.position_fragment, positionFragment, AreaPositionListFragmentTag);
-            transaction.commitAllowingStateLoss();
-        }
+    private void addEventListFragment(boolean force) {
+        ExLog.i(this, TAG, "addEventListFragment(" + force + ")");
+        resetEvent();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.event_fragment, EventListFragment.newInstance(force, branchEventId));
+        transaction.commitAllowingStateLoss();
     }
 
     private void addCourseAreaListFragment(Serializable eventId) {
         resetCourseArea();
         updateSignInButtonState();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId), CourseAreaListFragmentTag);
+        transaction.replace(R.id.area_fragment, CourseAreaListFragment.newInstance(eventId, branchCourseAreaUuid), CourseAreaListFragmentTag);
         transaction.commitAllowingStateLoss();
     }
 
-    private void addEventListFragment() {
-        resetEvent();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
-        transaction.commitAllowingStateLoss();
-    }
-
-    public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
-        return courseAreaSelectionListener;
+    private void addAreaPositionListFragment() {
+        resetPosition();
+        updateSignInButtonState();
+        if (getFragmentManager().findFragmentByTag(AreaPositionListFragmentTag) == null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.position_fragment, PositionListFragment.newInstance(branchPriority), AreaPositionListFragmentTag);
+            transaction.commitAllowingStateLoss();
+        }
     }
 
     public ItemSelectedListener<EventBase> getEventSelectionListener() {
         return eventSelectionListener;
+    }
+
+    public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
+        return courseAreaSelectionListener;
     }
 
     private void updateSignInButtonState() {
@@ -279,17 +296,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             for (String address : addresses) {
                 ExLog.i(this, TAG, "IP-Addresses: " + address);
             }
-        }
-
-        String action = getIntent().getAction();
-        if (Intent.ACTION_VIEW.equals(action)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.app_name);
-            if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
-                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
-            }
-            builder.setPositiveButton(android.R.string.ok, null);
-            builder.show();
         }
 
         // This is required to reactivate the loader manager after configuration change (screen rotation)
@@ -324,14 +330,109 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
         backdrop = findViewById(R.id.login_view_backdrop);
 
-        if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(null);
-        }
-
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         int smallIcon = R.drawable.ic_boat_white_24dp;
         CharSequence title = getText(R.string.app_name);
         NotificationHelper.prepareNotificationWith(title, largeIcon, smallIcon);
+
+        onNewIntent(getIntent());
+    }
+
+    private final Branch.BranchReferralInitListener branchReferralInitListener = new Branch.BranchReferralInitListener() {
+        @Override
+        public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
+            branchEventId = null;
+            branchCourseAreaUuid = null;
+            branchPriority = 0;
+
+            if (error != null) {
+                ExLog.i(LoginActivity.this, "BRANCH SDK", error.getMessage());
+                handleLegacyStart();
+                return;
+            }
+            if (referringParams == null || referringParams.length() == 0) {
+                handleLegacyStart();
+                return;
+            }
+            if (!referringParams.optBoolean(Clicked_Branch_Link.getKey())) {
+                handleLegacyStart();
+                return;
+            }
+            ExLog.i(LoginActivity.this, "BRANCH SDK", referringParams.toString());
+
+            final String serverUrl = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_SERVER_URL, null);
+
+            final String identifier = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_DEVICE_CONFIG_IDENTIFIER, null);
+            final String configUuid = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_DEVICE_CONFIG_UUID, null);
+
+            final String token = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_TOKEN, null);
+
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+            final SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+            editor.putString(getString(R.string.preference_identifier_key), identifier);
+            editor.putString(getString(R.string.preference_config_uuid_key), configUuid);
+            editor.putString(getString(R.string.preference_access_token_key), token);
+            editor.apply();
+
+            branchEventId = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_EVENT_ID, null);
+            branchCourseAreaUuid = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_COURSE_AREA_UUID, null);
+            branchPriority = referringParams.optInt(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_PRIORITY);
+
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
+        }
+    };
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        EulaHelper.with(this).showEulaDialogIfNotAccepted(() ->
+                Branch.getInstance().initSession(branchReferralInitListener, getIntent().getData(), LoginActivity.this)
+        );
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstants.ACTION_RESET);
+        filter.addAction(AppConstants.ACTION_VALID_DATA);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
+
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
+        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
+            GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, 1).show();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        dismissProgressSpinner();
+    }
+
+    private void handleLegacyStart() {
+        String action = getIntent().getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.app_name);
+            if (QRHelper.with(this).saveData(getIntent().getDataString())) {
+                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
+            } else {
+                builder.setMessage(getText(R.string.error_invalid_qr_code));
+            }
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        }
+        BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
     }
 
     @Override
@@ -351,35 +452,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             loginListViews.closeAll();
         }
         updateSignInButtonState();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.ACTION_RESET);
-        filter.addAction(AppConstants.ACTION_VALID_DATA);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
-
-        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
-
-        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
-        if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
-            GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, 1).show();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        dismissProgressSpinner();
     }
 
     private void setupDataManager() {
@@ -518,7 +590,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             slideUpBackdropDelayed();
         }
 
-        addEventListFragment();
+        addEventListFragment(force);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.area_fragment, new Fragment());

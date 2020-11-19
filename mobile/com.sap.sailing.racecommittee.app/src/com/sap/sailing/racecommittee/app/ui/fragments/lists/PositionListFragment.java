@@ -22,23 +22,21 @@ import java.util.List;
 
 public class PositionListFragment extends LoggableListFragment {
 
+    private static final int PRIORITY_OFFICER_VESSEL = 1;
+    private static final int PRIORITY_SHORE_CONTROL = 2;
+    private static final int PRIORITY_VIEWER = 3;
+
     private LogEventAuthorImpl author;
     private AppPreferences preferences;
-    private List<LoginTypeItem> values;
+    private final List<LoginTypeItem> values = new ArrayList<>();
 
     private PositionSelectedListenerHost host;
 
-    public PositionListFragment() {
-        values = new ArrayList<>();
-    }
-
-    public static final String PARAM_POSITION = "POSITION";
-
-    public static PositionListFragment newInstance(String branchPosition) {
+    public static PositionListFragment newInstance(int priority) {
         final PositionListFragment positionListFragment = new PositionListFragment();
-        final Bundle params = new Bundle();
-        params.putString(PARAM_POSITION, branchPosition);
-        positionListFragment.setArguments(params);
+        final Bundle args = new Bundle();
+        args.putInt(AppConstants.EXTRA_PRIORITY, priority);
+        positionListFragment.setArguments(args);
         return positionListFragment;
     }
 
@@ -49,22 +47,22 @@ public class PositionListFragment extends LoggableListFragment {
         preferences = AppPreferences.on(getActivity());
 
         values.clear();
-        values.add(new LoginTypeItem(1, getString(R.string.login_type_officer_on_vessel),
+        values.add(new LoginTypeItem(PRIORITY_OFFICER_VESSEL, getString(R.string.login_type_officer_on_vessel),
                 AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
-        values.add(new LoginTypeItem(2, getString(R.string.login_type_shore_control),
+        values.add(new LoginTypeItem(PRIORITY_SHORE_CONTROL, getString(R.string.login_type_shore_control),
                 AppConstants.AUTHOR_TYPE_SHORE_CONTROL, LoginType.OFFICER));
         // TODO define configuration to activate super user
         // values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER,
         // LoginType.OFFICER));
         if (preferences.isDemoAllowed()) {
-            values.add(new LoginTypeItem(3, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER,
+            values.add(new LoginTypeItem(PRIORITY_VIEWER, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER,
                     LoginType.VIEWER));
         }
 
         final List<CheckedItem> items = new ArrayList<>();
         for (LoginTypeItem loginType : values) {
             CheckedItem item = new CheckedItem();
-            item.setText(loginType.mLabel);
+            item.setText(loginType.label);
             items.add(item);
         }
 
@@ -75,20 +73,13 @@ public class PositionListFragment extends LoggableListFragment {
 
         final Bundle args = getArguments();
         if (args != null) {
-            String position = args.getString(PARAM_POSITION);
-            try {
-                LoginType loginType = LoginType.valueOf(position);
-                int index = 0;
-                int pos = -1;
-                for (LoginTypeItem loginTypeItem : values) {
-                    if (loginTypeItem.mType == loginType) {
-                        pos = index;
-                    }
-                    index += 1;
+            final int priority = args.getInt(AppConstants.EXTRA_PRIORITY);
+            for (int i = 0; i < values.size(); i++) {
+                final LoginTypeItem item = values.get(i);
+                if (item.priority == priority) {
+                    positionSelected(i, adapter);
+                    break;
                 }
-                positionSelected(pos, adapter);
-            } catch (Throwable e) {
-                e.printStackTrace();
             }
         }
         return view;
@@ -107,9 +98,9 @@ public class PositionListFragment extends LoggableListFragment {
             checkedItemAdapter.notifyDataSetChanged();
         }
         LoginTypeItem item = values.get(position);
-        LoginType selectedLoginType = item.mType;
-        author = new LogEventAuthorImpl(item.mName, item.mPrio);
-        preferences.setSendingActive(item.mType == LoginType.OFFICER);
+        LoginType selectedLoginType = item.type;
+        author = new LogEventAuthorImpl(item.name, item.priority);
+        preferences.setSendingActive(item.type == LoginType.OFFICER);
         preferences.setAuthor(author);
         ExLog.i(getActivity(), PositionListFragment.class.getName(),
                 "Logging in as: " + selectedLoginType + "->" + author);
@@ -124,17 +115,16 @@ public class PositionListFragment extends LoggableListFragment {
 
     private static class LoginTypeItem {
 
-        private int mPrio;
-        private String mLabel;
-        private String mName;
-        private LoginType mType;
+        private final int priority;
+        private final String label;
+        private final String name;
+        private final LoginType type;
 
-        LoginTypeItem(int prio, String label, String name, LoginType type) {
-            mPrio = prio;
-            mLabel = label;
-            mName = name;
-            mType = type;
+        LoginTypeItem(int priority, String label, String name, LoginType type) {
+            this.priority = priority;
+            this.label = label;
+            this.name = name;
+            this.type = type;
         }
     }
-
 }

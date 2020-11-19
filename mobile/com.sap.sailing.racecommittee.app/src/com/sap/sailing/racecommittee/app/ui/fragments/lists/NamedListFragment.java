@@ -2,8 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,6 +16,7 @@ import android.widget.ListView;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -46,11 +50,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
-            ReadonlyDataManager manager);
-
-    private void loadItems() {
-        setupLoader();
-    }
+            ReadonlyDataManager manager
+    );
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -67,8 +68,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         }
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(listAdapter);
-
-        showProgressBar(true);
     }
 
     @Override
@@ -80,6 +79,13 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        showProgressBar(true);
+        loadItems();
     }
 
     @Override
@@ -119,7 +125,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
-        listAdapter.setCheckedPosition(-1);
+        if (isForceLoad() && !isCached) {
+            listAdapter.setCheckedPosition(-1);
+        }
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
@@ -133,7 +141,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             listAdapter.notifyDataSetChanged();
         }
 
-        showProgressBar(false);
+        if (!isForceLoad() || !isCached) {
+            showProgressBar(false);
+        }
     }
 
     private String getEventSubText(Named named) {
@@ -142,7 +152,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             EventBase eventBase = (EventBase) named;
             String dateString;
             if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
-                Locale locale = getActivity().getResources().getConfiguration().locale;
+                Locale locale = getResources().getConfiguration().locale;
                 Calendar startDate = Calendar.getInstance();
                 startDate.setTime(eventBase.getStartDate().asDate());
                 Calendar endDate = Calendar.getInstance();
@@ -167,21 +177,26 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        loadItems();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt("position", mSelectedIndex);
 
         super.onSaveInstanceState(outState);
     }
 
-    public void setupLoader() {
-        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())))
-                .forceLoad();
+    public Loader<DataLoaderResult<Collection<T>>> getLoader() {
+        return getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+    }
+
+    private void loadItems() {
+        if (isForceLoad()) {
+            getLoader().forceLoad();
+        } else {
+            getLoader().startLoading();
+        }
+    }
+
+    private boolean isForceLoad() {
+        return getArguments() != null && getArguments().getBoolean(AppConstants.ACTION_EXTRA_FORCED);
     }
 
     private void showLoadFailedDialog(String message) {
@@ -201,7 +216,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         }
     }
 
-    protected void selectEvent(T eventBase) {
+    protected void selectItem(T eventBase) {
         final int position = namedList.indexOf(eventBase);
         listAdapter.setCheckedPosition(position);
 

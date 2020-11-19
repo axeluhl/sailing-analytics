@@ -1,26 +1,29 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.Collection;
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.text.TextUtils;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import java.util.Collection;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
-    private static final String PARAM_EVENT_ID = "EVENT_ID";
-
-    public static EventListFragment newInstance(@Nullable final String eventId) {
+    public static EventListFragment newInstance(boolean forceLoad, @Nullable final String id) {
         final EventListFragment fragment = new EventListFragment();
         final Bundle args = new Bundle();
-        args.putString(PARAM_EVENT_ID, eventId);
+        args.putBoolean(AppConstants.ACTION_EXTRA_FORCED, forceLoad);
+        if (!TextUtils.isEmpty(id)) {
+            args.putString(AppConstants.EXTRA_EVENT_ID, id);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -52,10 +55,11 @@ public class EventListFragment extends NamedListFragment<EventBase> {
         super.onLoadSucceeded(data, isCached);
         final Bundle arguments = getArguments();
         if (arguments != null && mSelectedIndex == -1) {
-            final String eventId = arguments.getString(PARAM_EVENT_ID);
-            for (EventBase eventBase : data) {
-                if (eventBase.getId().toString().equals(eventId)) {
-                    selectEvent(eventBase);
+            final String id = arguments.getString(AppConstants.EXTRA_EVENT_ID);
+            for (EventBase event : data) {
+                if (event.getId().toString().equals(id)) {
+                    selectItem(event);
+                    break;
                 }
             }
         }

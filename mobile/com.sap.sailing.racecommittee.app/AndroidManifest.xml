@@ -36,7 +36,10 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDH-Dwy5yFlyBa2-VUgiZ3qGGUO8M_0MPY" />
 
-        <activity android:name=".ui.activities.LoginActivity">
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
