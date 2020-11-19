@@ -3,6 +3,8 @@
 # Upgrades the AWS EC2 instance that this script is assumed to be executed on.
 # The steps are as follows:
 
+REBOOT_INDICATOR=/var/run/is-rebooted
+
 run_yum_update() {
   echo "Updating packages using yum" >>/var/log/sailing.err
   yum -y update
@@ -37,6 +39,8 @@ clean_sailing_logs() {
 clean_startup_logs() {
   echo "Clearing bootstrap logs" >>/var/log/sailing.err
   rm /var/log/sailing*
+  # Ensure that upon the next boot the reboot indicator is not present, indicating that it's the first boot
+  rm "${REBOOT_INDICATOR}"
 }
 
 run_yum_update

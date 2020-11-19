@@ -22,11 +22,13 @@
 
 RETVAL=0
 
-JAVA_START_INSTANCES="server"
+JAVA_START_INSTANCES="$(find \"${SERVERS_DIR}/*\" -type d -prune)"
 SERVERS_DIR=/home/sailing/servers
 GIT_REPOSITORY=/home/sailing/code
 APACHE_CONFIG_DIR=/etc/httpd/conf.d
+APACHE_INTERNALS_CONFIG_FILE="$APACHE_CONFIG_DIR/001-internals.conf"
 EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
+REBOOT_INDICATOR=/var/run/is-rebooted
 
 echo "Executing with $1" >>/var/log/sailing.out
 
@@ -36,13 +38,14 @@ start_tmux() {
 }
 
 start_servers() {
-	su - sailing -c "cd $GIT_REPOSITORY && git fetch && git merge origin/master" 2>>/var/log/sailing.err >>/var/log/sailing.out
         if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
-          echo "Found image-upgrade in EC2 user data; upgrading image, then shutting down for AMI creation..." >>/var/log/sailing.err
+          echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupgrade.sh
         else
           echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceding with regular server launch..." >>/var/log/sailing.err
+	  echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
 	  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+<<<<<<< Updated upstream
           MINIMUM_MEMORY_IN_MB=2000
           MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
           MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
@@ -87,9 +90,86 @@ start_servers() {
 	    )
 	    RETVAL=$?
 	    [ $RETVAL -eq 0 ] && success || failure
+=======
+          FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
+          if [ -f "${REBOOT_INDICATOR}" ]; then
+	    echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
+	    for conf in ${JAVA_START_INSTANCES}; do
+	      start_server ${conf}
+	    done
+	  else
+	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
+	    if [ ${NUMBER_OF_INSTANCES} -gt 1 ]; then
+	      echo "More than one server cannot be configured from user data; only configuring ${FIRST_SERVER}" >>/var/log/sailing.err
+	    fi
+	    create_basic_httpd_config
+	    configure_and_start_server "${FIRST_SERVER}"
+	    reload_httpd
+	  fi
+>>>>>>> Stashed changes
 	  done
-	  launch_httpd
 	fi
+}
+
+# Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
+# Example:        start_server server
+start_server() {
+  local conf="$1"
+  echo "Starting server ${conf}" >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
+}
+
+# Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
+# Example:        configure_and_start_server server
+# This is expected to be called only in case there is only one server to configure; otherwise, the same EC2 user data
+# would get applied to all application configurations which would not be a good idea.
+configure_and_start_server() {
+  conf="$1"
+  mkdir -p "${SERVERS_DIR}/${conf}" >/dev/null 2>/dev/null
+  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+  MINIMUM_MEMORY_IN_MB=2000
+  MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
+  MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
+  MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
+  echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
+  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>$SERVERS_DIR/$conf/env.sh
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.out
+  (
+    # execute env.sh in a subshell which now has the same set of variables that the server will see
+    source $SERVERS_DIR/$conf/env.sh
+    start_server "${conf}"
+    server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
+    if [ ${#EVENT_HOSTNAME[*]} = 0 ]; then
+      echo "No dedicated hostname provided for reverse proxy mapping for event. Defaulting to server name ${server_name}" >>/var/log/sailing.err
+      EVENT_HOSTNAME="${server_name}.sapsailing.com"
+    fi
+    if [ ${#SERIES_HOSTNAME[*]} = 0 ]; then
+      echo "No dedicated hostname provided for reverse proxy mapping for series. Defaulting to server name ${server_name}" >>/var/log/sailing.err
+      SERIES_HOSTNAME="${server_name}.sapsailing.com"
+    fi
+    reverse_proxy_config_file="$APACHE_CONFIG_DIR/${server_name}.conf"
+    if [ $(( ${#EVENT_ID[*]} + ${#SERIES_ID[*]} )) = 0 ]; then
+      # neither an EVENT_ID nor a SERIES_ID were provided; default to Home-SSL macro invocation:
+      echo "## No event / series ID provided; forwarding domain to /gwt/Home.html" >>"${reverse_proxy_config_file}"
+      echo "Use Home-SSL ${EVENT_HOSTNAME} 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
+    else
+      # Now loop over all EVENT_ID specification keys and produce an "Event-SSL" macro invocation for each:
+      for i in ${!EVENT_ID[*]}; do
+	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${EVENT_HOSTNAME[$i]} to event with ID ${EVENT_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
+	echo "## EVENT ${EVENT_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
+	echo "Use Event-SSL ${EVENT_HOSTNAME[$i]} \"${EVENT_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
+      fi
+      # Now loop over all SERIES_ID specification keys and produce an "Series-SSL" macro invocation for each:
+      for i in ${!SERIES_ID[*]}; do
+	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${SERIES_HOSTNAME[$i]} to event with ID ${SERIES_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
+	echo "## SERIES ${SERIES_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
+	echo "Use Event-SSL ${SERIES_HOSTNAME[$i]} \"${SERIES_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
+      fi
+    fi
+    # terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
+  )
+  RETVAL=$?
+  [ $RETVAL -eq 0 ] && success || failure
 }
 
 stop_servers() {
@@ -109,21 +189,26 @@ sync_logs() {
 	sync
 }
 
-# launch_httpd(server_name, port, event_id)
-launch_httpd() {
+reload_httpd() {
 	echo "Will try to launch httpd so this replica can work with an ELB easily." >>/var/log/sailing.out
 	if [ -x /etc/init.d/httpd ]; then
-		FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
-		source $SERVERS_DIR/$FIRST_SERVER/env.sh
-		# Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to $APACHE_CONFIG_DIR/001-events.conf
-		echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to $APACHE_CONFIG_DIR/001-events.conf" >>/var/log/sailing.out
-		echo "## SERVER STATUS" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Use Status $INSTANCE_DNS internal-server-status" >>$APACHE_CONFIG_DIR/001-events.conf
-		echo "Launching httpd..." >>/var/log/sailing.out
-		service httpd start
+	  echo "Reloading httpd configuration..." >>/var/log/sailing.out
+	  service httpd reload
 	else
-		echo "Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd"
+	  echo "Can't launch httpd; start script doesn't seem to be installed at /etc/init.d/httpd"
 	fi
+}
+
+# Adds a Plain-SSL mapping to the first server's port and a mapping for /internal-server-status, both to 001-internals.conf
+create_basic_httpd_config() {
+    FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
+    source $SERVERS_DIR/$FIRST_SERVER/env.sh
+    echo "Appending macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.out
+    echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>"${APACHE_INTERNALS_CONFIG_FILE}"
+    # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"
+    echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to "${APACHE_INTERNALS_CONFIG_FILE}" >>/var/log/sailing.out
+    echo "## SERVER STATUS" >>"${APACHE_INTERNALS_CONFIG_FILE}"
+    echo "Use Status $INSTANCE_DNS internal-server-status" >>"${APACHE_INTERNALS_CONFIG_FILE}"
 }
 
 stop_httpd() {
@@ -136,10 +221,10 @@ stop_httpd() {
 # See how we were called.
 case "$1" in
   start)
-	/usr/local/bin/mountnvmeswap
 	/usr/sbin/update-motd
 	start_servers
 	touch /var/lock/subsys/sailing
+	echo 1 >"${REBOOT_INDICATOR}"
     ;;
   stop)
 	stop_servers

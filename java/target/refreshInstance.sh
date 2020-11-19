@@ -130,6 +130,10 @@ install_environment ()
 
 load_from_release_file ()
 {
+    if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
+        INSTALL_FROM_RELEASE="$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
+        echo "You didn't provide a release. Defaulting to latest master build http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
+    fi
     if [[ $INSTALL_FROM_RELEASE != "" ]]; then
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
         cd $SERVER_HOME
@@ -275,10 +279,6 @@ if [[ $OPERATION == "auto-install" ]]; then
 
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
-    if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-	INSTALL_FROM_RELEASE=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
-        echo "You didn't provide a release. Picking latest master build from http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
-    fi
 
     # Honor the no-overrite setting if there is one
     if [ -f $SERVER_HOME/no-overwrite ]; then
