@@ -46,6 +46,8 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
  * This way, when the filter reduces the elements displayed in the table the selection will still refer to all elements
  * and will not be modified solely by the act of filtering.
  * 
+ * Provides methods for filtering and selection of table items.
+ * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
  * 
@@ -104,6 +106,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     };
 
+    /**
+     * This filter is used to find exact matches. 
+     * It is used when the parameter selectExact is given in an {@link #select(List, String) select} statement.
+     */
     protected final AbstractKeywordFilter<T> selectionFilter = new AbstractKeywordFilter<T>() {
         @Override
         public Iterable<String> getStrings(T t) {
@@ -122,12 +128,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            This way, subclasses may choose to add other filter elements before the default text filter box.
      *            Filtering will still use the text box contents, even if the box is ultimately not shown; but under
      *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
+     * @param executeSelectionOnRefresh 
+     *            Used for table items selection by URL-parameters. If true, the table items will wait to be selected 
+     *            until the table list items have been refreshed.
      */
-    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
-            boolean drawTextBox, final StringMessages stringMessages) {
-        this(all, filtered, drawTextBox, stringMessages, true);
-    }
-    
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             boolean drawTextBox, final StringMessages stringMessages, boolean executeSelectOnRefresh) {
         this.executeSelectOnRefresh = executeSelectOnRefresh;
@@ -148,6 +152,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }       
     }
 
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            boolean drawTextBox, final StringMessages stringMessages) {
+        this(all, filtered, drawTextBox, stringMessages, true);
+    }
+    
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             final StringMessages stringMessages) {
         this(all, filtered, stringMessages, true);
@@ -261,6 +270,13 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
+    /**
+     * Filters and / or selects table items. Used for URL-parameter filtering.
+     * If field {@link #executeSelectOnRefresh executeSelectOnRefresh} is set to true, selection will be executed immediately.
+     * otherwise, selection will be postponed to be called the next time the table items are refreshed. 
+     * 
+     * @param filterParameter defines the parameters for filtering and selection
+     */
     public void filter(FilterParameter filterParameter) {
         if (filterParameter.getFilterString() != null) {
             search(filterParameter.getFilterString());
@@ -290,6 +306,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         select(select, selectExact);       
     }
     
+    /**
+     * Executes table item selection.
+     * Distinguishes between singleSelection tables and multiselection tables.
+     * 
+     * @param selections list of selection parameters. Will use same logic as the filter mechanism to find items for selection
+     * @param selectExact parameter that is used to select only exact matches in the table.
+     * 
+     */
     private void select(List<String> selections, String selectExact) {
         if (isSingleSelect()) {
             selectSingle(selections, selectExact);
@@ -304,11 +328,21 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         executeSelect = false;
     }
     
+    /**
+     * @return true if select logic for single-selection tables should be used.
+     */
     private boolean isSingleSelect() {
         return filtered.getDataDisplays().stream().allMatch(dataDisplay -> 
         dataDisplay.getSelectionModel() instanceof SingleSelectionModel);
     }
     
+    /**
+     * Selection logic for multi-selection tables.
+     * Selects all matches for the given selection parameters.
+     * 
+     * @param selections list of selection parameters. Will use same logic as the filter mechanism to select items
+     * @param selectExact parameter that will be used to find and select exactly matching items in the table
+     */
     private void selectMultiple(List<String> selections, String selectExact) {          
         for (T t : all.getList()) {
             boolean matchesAtLeastOneSelection = false;
@@ -326,6 +360,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         selectExact(selectExact);  
     }  
     
+    /**
+     * Selection logic for single-selection tables.
+     * Will not select more than one item in the table. First, it will select an exactly matching table item.
+     * If none can be found, the first item matching one of the strings in the selections-list will be selected.
+     * 
+     * @param selections list of selection parameters. Will use same logic as the filter mechanism to select items
+     * @param selectExact parameter that will be used to find and select exactly matching items in the table
+     */
     private void selectSingle(List<String> selections, String selectExact) {    
         boolean selected = singleSelectExact(selectExact);  
         
@@ -354,11 +396,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         getCellTable().getSelectionModel().setSelected(item, select);
     }
     
-    private void selectExact(String selection) {
-        if (selection == null) {
+    /**
+     * Selects exactly matching items
+     * @param selectExact parameter that will be used to find and select exactly matching items in the table
+     */
+    private void selectExact(String selectExact) {
+        if (selectExact == null) {
             return;
         }
-        selectionFilter.setKeywords(Arrays.asList(selection));
+        selectionFilter.setKeywords(Arrays.asList(selectExact));
         for (T t : all.getList()) {
             if (matchesExactly(t)) {
                 select(t);
@@ -366,11 +412,16 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
     
-    private boolean singleSelectExact(String selection) {
-        if (selection == null) {
+    /**
+     * Selects exactly matching items 
+     * @param selectExact parameter that will be used to find and select exactly matching items in the table
+     * @return true if an exactly matching item has been found and selected.
+     */
+    private boolean singleSelectExact(String selectExact) {
+        if (selectExact == null) {
             return false;
         }
-        selectionFilter.setKeywords(Arrays.asList(selection));
+        selectionFilter.setKeywords(Arrays.asList(selectExact));
         for (T t : all.getList()) {
             if (matchesExactly(t)) {
                 select(t);
