@@ -29,6 +29,7 @@ clean_httpd_logs() {
   echo "Clearing httpd logs" >>/var/log/sailing.err
   service httpd stop
   rm -rf /var/log/httpd/*
+  rm /etc/httpd/conf.d/001-internals.conf
 }
 
 clean_sailing_logs() {
