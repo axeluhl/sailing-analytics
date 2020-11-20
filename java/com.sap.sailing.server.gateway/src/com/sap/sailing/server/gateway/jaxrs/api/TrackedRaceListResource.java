@@ -13,7 +13,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -59,6 +61,21 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
         return getJsonResponse(streamingOutput(detailedRaceListJsonSerializer.serialize(detailedRaceInfo)));
     }
 
+    /**
+     * <p>POST variant of the {@link #raceList(Boolean, String, String)} interface. Just uses HTTP post to circumvent HTTP 418 
+     * issues with large number of events.</p> 
+     * <p>Parameters must be provided within a form body.</p>
+     * @see {@link #raceList(Boolean, String, String)}
+     */
+    @POST
+    @Produces(CONTENT_TYPE_JSON_UTF8)
+    @Path("getRaces")
+    public Response raceListPost(@FormParam("transitive") @DefaultValue("false") Boolean transitive,
+            @FormParam("events") @DefaultValue("") String strEvents,
+            @FormParam("pred") @DefaultValue("excl") String predicate) {
+        return raceList(transitive, strEvents, predicate);
+    }
+    
     /**
      * Returns a list of tracked races. By default, only TrackedRaces from the local instance are returned. The entries
      * are grouped by the remote URL from where they originated. Local entries have a {@code null} value for the

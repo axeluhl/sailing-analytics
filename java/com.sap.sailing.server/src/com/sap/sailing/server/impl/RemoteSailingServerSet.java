@@ -3,7 +3,9 @@ package com.sap.sailing.server.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -15,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +51,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfo
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedRaceInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SimpleRaceInfoJsonSerializer;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
@@ -188,11 +192,13 @@ public class RemoteSailingServerSet {
     private void updateRemoteServerTrackedRacesCacheSynchronously(RemoteSailingServerReference ref) {
         Util.Pair<Iterable<SimpleRaceInfo>, Exception> result;
         try {
-            final URL raceListURL = getRaceListURL(ref);
-            logger.fine("Updating racelist for remote server " + ref + " from URL " + raceListURL);
+            
+            logger.fine("Updating racelist for remote server " + ref + " from URL " + ref.getURL());
+            
             final SimpleRaceInfoJsonSerializer deserializer = new SimpleRaceInfoJsonSerializer();
             final Set<SimpleRaceInfo> races = new HashSet<>();
-            for (Object remoteWithRaces : getJsonFromRemoteServerSynchronously(ref, raceListURL)) {
+            
+            for (Object remoteWithRaces : getJSONFromRemoteRacesListSynchronously(ref)) {
                 JSONObject remoteWithRacesAsJson = (JSONObject) remoteWithRaces;
                 String remoteUrlAsString = (String) remoteWithRacesAsJson
                         .get(DetailedRaceInfoJsonSerializer.FIELD_REMOTEURL);
@@ -235,7 +241,7 @@ public class RemoteSailingServerSet {
     }
 
     /**
-     * Build the URL for retrieving the remote servers race list. This is complemented by the endpoint here:
+     * Build the URL for retrieving the remote servers race list. This is complemented by the end point here:
      * {@link com.sap.sailing.server.gateway.jaxrs.api.TrackedRaceListResource#raceList(Boolean, String, String)}
      * @param ref the remote reference
      * @return the URL for retrieving the remote races.
@@ -244,18 +250,6 @@ public class RemoteSailingServerSet {
     private URL getRaceListURL(RemoteSailingServerReference ref) throws MalformedURLException {
         URL remoteServerBaseURL = ref.getURL();
         String endpoint = "/trackedRaces/getRaces?transitive=true";
-        if (!ref.getSelectedEventIds().isEmpty()) {
-            endpoint += "&events=";
-
-            Iterator<UUID> iter = ref.getSelectedEventIds().iterator();
-            while (iter.hasNext()) {
-                endpoint += iter.next().toString();
-                if (iter.hasNext()) {
-                    endpoint += ",";
-                }
-            }
-            endpoint += "&pred=" + (ref.isInclude() ? "incl" : "excl");
-        }
         return getEndpointUrl(remoteServerBaseURL, endpoint);
     }
 
@@ -346,6 +340,45 @@ public class RemoteSailingServerSet {
         updateCache(ref, result, cachedStatisticsByYearForRemoteSailingServers::put);
     }
 
+    private JSONArray getJSONFromRemoteRacesListSynchronously(final RemoteSailingServerReference ref)
+            throws MalformedURLException, IOException, ParseException {
+        JSONArray data;
+        final URL url = getRaceListURL(ref);
+        final StringBuffer formParams = new StringBuffer("transitive=true");
+        if (!ref.getSelectedEventIds().isEmpty()) {
+            formParams.append("&events=");
+            Iterator<UUID> iter = ref.getSelectedEventIds().iterator();
+            while (iter.hasNext()) {
+                formParams.append(URLEncoder.encode(iter.next().toString(), "utf-8"));
+                if (iter.hasNext()) {
+                    formParams.append(URLEncoder.encode(",", "utf-8"));
+                }
+            }
+            formParams.append("&pred=" + (ref.isInclude() ? "incl" : "excl"));
+        }
+        HttpURLConnection urlConnection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(url,
+                Duration.ONE_SECOND.times(1000), "POST", (connection) -> connection
+                        .setRequestProperty("Content-Type", "application/x-www-form-urlencoded"),
+                Optional.of(outputStream -> {
+                    try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, "utf-8")) {
+                        writer.write(formParams.toString());
+                    }
+                }));
+        final int responseCode = urlConnection.getResponseCode();
+        if (responseCode == 200) {
+            try (BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(urlConnection.getInputStream(), "utf-8"))) {
+                JSONParser parser = new JSONParser();
+                data = (JSONArray) parser.parse(bufferedReader);
+            }
+        } else {
+            // fallback to old interface when new interface was not found.
+            // can be removed when all servers are upgraded
+            data = getJsonFromRemoteServerSynchronously(ref, url);
+        }
+        return data;
+    }
+    
     private JSONArray getJsonFromRemoteServerSynchronously(RemoteSailingServerReference ref,
             final URL url) throws IOException, ParseException {
         logger.fine("Updating data for remote server " + ref + " from URL " + url);
