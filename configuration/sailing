@@ -116,11 +116,17 @@ configure_and_start_server() {
       # Now loop over all EVENT_ID specification keys and produce an "Event-SSL" macro invocation for each:
       for i in ${!EVENT_ID[*]}; do
 	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${EVENT_HOSTNAME[$i]} to event with ID ${EVENT_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.err
+	if [ -z "${EVENT_HOSTNAME[$i]}" ]; then
+	  EVENT_HOSTNAME[$i]="${SERVER_NAME}.sapsailing.com"
+	fi
 	echo "## EVENT ${EVENT_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
 	echo "Use Event-SSL ${EVENT_HOSTNAME[$i]} \"${EVENT_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
       done
       # Now loop over all SERIES_ID specification keys and produce an "Series-SSL" macro invocation for each:
       for i in ${!SERIES_ID[*]}; do
+	if [ -z "${SERIES_HOSTNAME[$i]}" ]; then
+	  SERIES_HOSTNAME[$i]="${SERVER_NAME}.sapsailing.com"
+	fi
 	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${SERIES_HOSTNAME[$i]} to event with ID ${SERIES_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.err
 	echo "## SERIES ${SERIES_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
 	echo "Use Series-SSL ${SERIES_HOSTNAME[$i]} \"${SERIES_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
