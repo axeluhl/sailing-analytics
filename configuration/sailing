@@ -69,8 +69,8 @@ start_servers() {
 # Example:        start_server server
 start_server() {
   local conf="$1"
-  echo "Starting server ${conf}" >>/var/log/sailing.err
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  echo "Starting server ${conf} with SERVER_NAME=${SERVER_NAME}" >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && SERVER_NAME=${SERVER_NAME} ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
 }
 
 # Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter

@@ -17,18 +17,15 @@ find_project_home ()
         echo ""
         return 0
     fi
-
     if [ ! -d "$1/.git" ]; then
         PARENT_DIR=`cd $1/..;pwd`
         OUTPUT=$(find_project_home $PARENT_DIR)
-
         if [ "$OUTPUT" = "" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY" ] && [ -d "$PARENT_DIR/$CODE_DIRECTORY/.git" ]; then
             OUTPUT="$PARENT_DIR/$CODE_DIRECTORY"
         fi
         echo $OUTPUT
         return 0
     fi
-
     echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
 }
 
@@ -95,6 +92,21 @@ activate_user_data ()
     INSTANCE_ID="$INSTANCE_NAME ($INSTANCE_IP4)"
 }
 
+append_default_envsh_rules()
+{
+    echo "# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    # Append EC2 user data to env.sh file:
+    cat "$ec2EnvVars_tmpFile" >>$SERVER_HOME/env.sh
+
+    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
+    echo "# User-Data: END" >> $SERVER_HOME/env.sh
+    echo "Updated env.sh with data from user-data field!"
+}
+
 append_user_data_to_envsh ()
 {
     mkdir -p $SERVER_HOME/environment 2>/dev/null >/dev/null
@@ -126,7 +138,6 @@ install_environment ()
         echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> $SERVER_HOME/env.sh
-
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
@@ -260,8 +271,10 @@ if [[ $OPERATION == "auto-install" ]]; then
         fi
         # then download and install environment and append to env.sh
         install_environment
-	# finally, append user data to env.sh as it shall take precedence over the installed environment's defaults
+	# then append user data to env.sh as it shall take precedence over the installed environment's defaults
 	append_user_data_to_envsh
+	# then append the rules that compute defaults for variables not set elsewhere; this has to come last:
+	append_default_envsh_rules
 
         # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
         source `pwd`/env.sh

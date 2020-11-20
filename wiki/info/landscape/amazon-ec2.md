@@ -24,6 +24,8 @@ You may need to select "All generations" instead of "Current generation" to see 
 
 Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar. Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
+TODO describe all variable names that may be used here, as well as the defaults that apply if a variable is not specified
+
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
