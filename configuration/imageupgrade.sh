@@ -11,8 +11,8 @@ run_yum_update() {
 }
 
 run_git_pull() {
-  echo "Pulling git master to /home/sailing/code" >>/var/log/sailing.err
-  su - sailing -c "cd code; git fetch; git merge origin/master"
+  echo "Pulling git to /home/sailing/code" >>/var/log/sailing.err
+  su - sailing -c "cd code; git pull"
 }
 
 run_refresh_instance_install_release() {
