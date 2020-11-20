@@ -163,7 +163,7 @@ reload_httpd() {
 create_basic_httpd_config() {
     FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
     source $SERVERS_DIR/$FIRST_SERVER/env.sh
-    echo "Appending macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.err
+    echo "Writing macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >/var/log/sailing.err
     echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >>"${APACHE_INTERNALS_CONFIG_FILE}"
     # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"
     echo "Appending macro usage for $INSTANCE_DNS/internal-server-status URL for mod_status based Apache monitoring to ${APACHE_INTERNALS_CONFIG_FILE}" >>/var/log/sailing.err
