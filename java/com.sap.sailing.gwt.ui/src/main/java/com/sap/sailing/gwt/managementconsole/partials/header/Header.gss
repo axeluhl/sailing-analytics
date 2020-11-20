@@ -1,0 +1,44 @@
+.header .logo,
+.header .menu,
+.header .account {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.header .logo,
+.header .logo:hover,
+.header .logo:visited {
+    display: inline-block;
+    gwt-sprite: "sapLogo";
+    background-size: cover;
+    width: 80px;
+    height: 40px;
+    text-decoration: none;
+}
+
+.header .menu {
+	margin: 0 6rem;
+}
+
+.header .account,
+.header .navigation {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 4rem;
+    height: 3rem;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+}
+
+.header .account {
+    background-image: resourceUrl('loggedout');
+    width: 4rem;
+    height: 3rem;
+}
+
+.header .navigation {
+    width: 2rem;
+    height: 1.5rem;
+}

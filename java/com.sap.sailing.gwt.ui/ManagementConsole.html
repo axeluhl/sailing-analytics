@@ -7,6 +7,8 @@
 
 <html>
   <head>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta property="og:type" content="website" />
     <meta property="og:title" content="SAP Sailing" />
@@ -19,18 +21,15 @@
     <!--                                                               -->
     <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
 
-
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>${SAP}Sailing Analytics Administration Console</title>
+    <title>${SAP}Sailing Analytics Management Console</title>
     
     <!-- AdminConsole is not prepared to work with nomalize. -->
     <!-- <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css"> -->
     <link rel="stylesheet" type="text/css" href="/clean/sailing-clean-1.0.cache.css">
     <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
-    <link rel="stylesheet" type="text/css" href="SettingsDialog.css">
-    <link rel="stylesheet" type="text/css" href="AdminConsole.css">
     
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 
@@ -50,8 +49,9 @@
     <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.managementconsole.ManagementConsole/com.sap.sailing.gwt.managementconsole.ManagementConsole.nocache.js"></script>
 
     <!-- Loading Indicator -->
-        <style type="text/css">
+    <style type="text/css">
     .loading {
+        font-family: 'Open Sans',sans-serif;
         position: absolute;
         top: 80px;
         bottom: 0;
@@ -135,7 +135,7 @@
       </div>
     </noscript>
 
-        <div id="loading" class="loading">
+    <div id="loading" class="loading">
         <p class="sapsailing">${SAP}Sailing Analytics</p>
         <p class="waitmessage">Loading, please wait...</p>
         <div class="signal"></div>

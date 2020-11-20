@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:p="urn:import:com.sap.sailing.gwt.managementconsole.partials">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.mainframe.MainFrameResources" />
+    
+    <g:HeaderPanel>
+        <p:header.Header ui:field="header" addStyleNames="{local_res.style.header}"/>
+        <g:ScrollPanel ui:field="contentContainer" addStyleNames="{local_res.style.content}"/>
+    </g:HeaderPanel>
+</ui:UiBinder>

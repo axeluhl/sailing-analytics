@@ -6,13 +6,7 @@
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:style>
-	    .mainContent {
-	        height: 100%;
-	    }
-    </ui:style>
-
-    <g:HTMLPanel addStyleNames="{style.mainContent}">
+    <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <h1>

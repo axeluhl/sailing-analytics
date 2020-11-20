@@ -46,3 +46,7 @@
 .icon-previous {
     background-image: resourceUrl("iconPrevious");
 }
+
+.icon-navigation {
+    background-image: resourceUrl("iconNavigation");
+}

@@ -21,10 +21,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @Source(ICONS)
     Icons icons();
 
-    @Source("Image-BackdropGeneral.png")
+    @Source("images/Image-BackdropGeneral.png")
     ImageResource backdropGeneral();
 
-    @Source("Image-BackdropGeneralSized.png")
+    @Source("images/Image-BackdropGeneralSized.png")
     ImageResource backdropGeneralSized();
 
     @Source("icons/Icon-EventListLocation.svg")
@@ -62,6 +62,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @Source("icons/Icon-SearchPrevious.svg")
     @MimeType("image/svg+xml")
     DataResource iconPrevious();
+
+    @Source("icons/Icon-NavGlobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconNavigation();
 
     interface Style extends CssResource {
 
@@ -108,6 +112,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-previous")
         String iconPrevious();
+        
+        @ClassName("icon-navigation")
+        String iconNavigation();
 
     }
 }

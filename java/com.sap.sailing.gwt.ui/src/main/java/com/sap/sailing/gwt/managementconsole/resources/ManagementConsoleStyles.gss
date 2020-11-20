@@ -2,6 +2,7 @@
 
 html, body {
     height: 100%;
+    margin: 0;
 }
 
 html {
@@ -20,7 +21,6 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     color: TEXT_COLOR_SECONDARY;
-    font-size: 12px;
 }
 
 h1 {
