@@ -170,8 +170,13 @@ More variables are available, and some variables---if not set in the environment
     Used to specify one or more UUIDs of events for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``EVENT_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${EVENT_HOSTNAME}` is used as the hostname, or if `EVENT_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Event-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``EVENT_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``EVENT_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``EVENT_ID[1]=...`` and then optionally ``EVENT_HOSTNAME[1]=...``, and so on.
 
 * `EVENT_HOSTNAME`
+    If specified, overrides the `${SERVER_NAME}.sapsailing.com` default for reverse proxy mappings requested by providing event IDs in the `EVENT_ID` variable. If array notation is used for `EVENT_ID` then so should it for `EVENT_HOSTNAME`.
 
-* `SERIES_ID`...
+* `SERIES_ID`
+    Used to specify one or more UUIDs of event series (league seasons) for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``SERIES_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${SERIES_HOSTNAME}` is used as the hostname, or if `SERIES_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Series-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``SERIES_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``SERIES_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``SERIES_ID[1]=...`` and then optionally ``SERIES_HOSTNAME[1]=...``, and so on.
+
+* `SERIES_HOSTNAME`
+    If specified, overrides the `${SERVER_NAME}.sapsailing.com` default for reverse proxy mappings requested by providing event IDs in the `SERIES_ID` variable. If array notation is used for `SERIES_ID` then so should it for `SERIES_HOSTNAME`.
 
 * `image-upgrade`
     If provided in a line of its own, the `httpd` server on the instance will be stopped, no application server release will be installed, the operating system packages will be updated, the git repository under `/home/sailing/code` will be pulled for the branch that the workspace is checked out on for the image launched (usually `master`) which will update various scripts relevant for the bootstrapping process, all log directories for `httpd` and the application server will be cleared, and by default the instance will then be shut down for a new AMI to be created for it. See also the `no-shutdown` user data option.
