@@ -20,7 +20,7 @@ fi
 # file with a MEMORY assignment which is then used in conjunction with refreshInstance.sh
 # or by setting the MEMORY variable in the EC2 Instance Details section which will be appended
 # at the end of the file.
-if [ -z $SERVER_NAME ]; then
+if [ -z $MEMORY ]; then
   MEMORY="6000m"
 fi
 
@@ -64,6 +64,9 @@ fi
 if [ -z $EXPEDITION_PORT ]; then
   EXPEDITION_PORT=2010
 fi
+if [ -z $REPLICATE_MASTER_SERVLET_HOST ]; then
+  REPLICATE_MASTER_SERVLET_HOST=${SERVER_NAME}.sapsailing.com
+fi
 if [ -z $REPLICATE_MASTER_SERVLET_PORT ]; then
   REPLICATE_MASTER_SERVLET_PORT=443
 fi
@@ -82,4 +85,3 @@ fi
 if [ -z $REPLICATE_MASTER_EXCHANGE_NAME ]; then
   REPLICATE_MASTER_EXCHANGE_NAME=${SERVER_NAME}
 fi
-# **** Overwritten environment variables ****

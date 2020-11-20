@@ -4,11 +4,15 @@
 
 ## Quickstart
 
-#### Servers
+Our default region in AWS EC2 is eu-west-1 (Ireland).
+
+#### Servers, Hostnames
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
 - Database Server: dbserver.internal.sapsailing.com
-- Database and Queue Server: rabbit.internal.sapsailing.com
+- RabbitMQ Server: rabbit.internal.sapsailing.com
+- Standalone MongoDB Server: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203)
+- MongoDB Servers for "live" replica set: mongo0.internal.sapsailing.com and mongo1.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -24,14 +28,12 @@ You may need to select "All generations" instead of "Current generation" to see 
 
 Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar. Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
-TODO describe all variable names that may be used here, as well as the defaults that apply if a variable is not specified
+A typical set-up for a master node could look like this:
 
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
 SERVER_NAME=myspecificevent
-REPLICATION_CHANNEL=myspecificevent
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true&readPreference=nearest"
 # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
@@ -43,6 +45,138 @@ REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate 
 EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
+
+This will use the default "live" MongoDB replica set with a database named after the `SERVER_NAME` variable, and with an outbound RabbitMQ exchange also named after the `SERVER_NAME` variable, using the default RabbitMQ instance in the landscape for replication purposes, and replicating the SecurityService as well as the SharedSailingData service from the central `security-service.sapsailing.com` instance. Furthermore, a reverse proxy setting for your `EVENT_ID` will be created, using `${SERVER_NAME}.sapsailing.com` as the hostname for the mapping.
+
+More variables are available, and some variables---if not set in the environment specified by `USE_ENVIRONMENT` nor in the user data provided when launching the instance---have default values which may be constants or may be computed based on values of other variables, most notably the `SERVER_NAME` variable. Here is the list:
+
+* `SERVER_NAME`
+    used to define the server's name. This is relevant in particular for the user group
+    created/used for all new server-specific objects such as the `SERVER` object itself. The group's
+    name is constructed by appending "-server" to the server name. This variable furthermore provides the default value for a few other settings, including the default hostname mapping `${SERVER_NAME}.sapsailing.com` for any series or event specified, the database name in the default `MONGODB_URI`, as well as the default name for the outbound RabbitMQ replication exchange `REPLICATION_CHANNEL`.
+
+* `INSTALL_FROM_RELEASE` The user data variable to use to specify the release to install and run on the host. Typical values are `live-master-server` and `live-replica-server`, used to start a master or a replica server, respectively, or `archive-server` for launching an "ARCHIVE" server.
+ 
+* `MONGODB_URI`
+    used to specify the MongoDB connection URI; if neither this variable nor `MONGODB_HOST` are specified, a default MongoDB URI will be constructed as `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest`.
+
+* `REPLICATION_CHANNEL`
+    used to define the name of the RabbitMQ exchange to which this master node
+    will send its operations bound for its replica nodes. The replica-side counterpart for this is
+    `REPLICATE_MASTER_EXCHANGE_NAME`. Defaults to `${SERVER_NAME}` if no automatic replication is
+    requested using the `AUTO_REPLICATE` variable,  otherwise to `${SERVER_NAME}-${INSTANCE_NAME}` which
+    provides a separate "transitive" replication channel for each replica.
+
+* `REPLICATION_HOST`
+    hostname or IP address of the RabbitMQ node that this master process will use for outbound replication. Defaults to `rabbit.internal.sapsailing.com`.
+
+* `REPLICATION_PORT`
+    the port used by this master process to connect to RabbitMQ for outbound replication. Using 0 (the default)
+    will use the default port as encoded in the RabbitMQ driver. 
+
+* `SERVER_PORT`
+    The port on which the built-in web server of an application server process can be reached using HTTP. Defaults to 8888.
+
+* `TELNET_PORT`
+    The port on which the OSGi console of a server process can be reached. Defaults to 14888.
+
+* `EXPEDITION_PORT`
+    The port on which the application server will listen for incoming UDP packets, usually then forwarded to the Expedition receiver for wind and other Expedition-based sensor data. Defaults to 2010.
+    
+* `SERVER_STARTUP_NOTIFY`
+    defines one or more comma-separated e-mail addresses to which a notification will
+    be sent after the server has started successfully.
+
+* `USE_ENVIRONMENT`
+    defines the environment file (stored at `http://releases.sapsailing.com/environments`)
+    which provides default combinations of variables
+
+* `REPLICATE_MASTER_SERVLET_HOST`
+    the host name or IP address where a replica can reach the master node in order to
+    request the initial load, register, un-register, and send operations for reverse replication to.
+    The value is always combined with that of the `REPLICATE_MASTER_SERVLET_PORT` variable which
+    provides the port for this communication. Defaults to `${SERVER_NAME}.sapsailing.com`, assuming that
+    this maps to a load balancer that identifies requests bound for the master instance of an
+    application server replica set and routes them to the master accordingly. Note in this context how with `EVENT_HOSTNAME`
+    and `SERIES_HOSTNAME` the reverse proxy mappings may be adjusted to use alternative or additional
+    hostname mappings.
+
+* `REPLICATE_MASTER_SERVLET_PORT`
+    the port number where a replica can reach the master node in order to
+    request the initial load, register, un-register, and send operations for reverse replication to.
+    The value is always combined with that of the `REPLICATE_MASTER_SERVLET_HOST` variable which
+    provides the host name / IP address for this communication. Defaults to 443.
+
+* `REPLICATE_MASTER_EXCHANGE_NAME`
+    the name of the RabbitMQ exchange to which the master sends operations for fan-out
+    distribution to all replicas, and that therefore a replica has to attach a queue to in order to receive
+    those operations. Specified on a replica. The master-side counterpart is `REPLICATION_CHANNEL`. Defaults
+    to `${SERVER_NAME}` which has been the default for the corresponding master based on its `${SERVER_NAME}`
+    which is assumed to be equal to the `${SERVER_NAME}` setting used to launch this replica.
+
+* `REPLICATE_MASTER_QUEUE_HOST`
+    the RabbitMQ host name that this replica will connect to in order to connect a queue to the
+    fan-out exchange whose name is provided by the `REPLICATE_MASTER_EXCHANGE_NAME` variable. Used
+    in conjunction with the `REPLICATE_MASTER_QUEUE_PORT` variable. Defaults to `rabbit.internal.sapsailing.com`.
+
+* `REPLICATE_MASTER_QUEUE_PORT`
+    the RabbitMQ port that this replica will connect to in order to connect a queue to the fan-out
+    exchange whose name is provided by the `REPLICATE_MASTER_EXCHANGE_NAME` variable. Defaults to 0 which
+    instructs the driver to use the Rabbit default port (usually 5672) for connecting. Used in conjunction with the
+    `REPLICATE_MASTER_QUEUE_HOST` variable.
+
+* `REPLICATE_ON_START`
+    specifies the IDs (basically the fully-qualified class names) of those Replicables to
+    start replicating when the server process starts. The process using this will become a replica for those
+    replicables specified with this variable, and it will replicate the master node described by
+    `REPLICATE_MASTER_SERVLET_HOST` and `REPLICATE_MASTER_SERVLET_PORT` and receive the operation
+    feed through the RabbitMQ exchange configured by `REPLICATE_MASTER_EXCHANGE_NAME`.
+
+* `AUTO_REPLICATE`
+    If this variable has a non-empty value (e.g., "true"), `REPLICATE_ON_START` will default to the set of replicable IDs required by an SAP Sailing Analytics replica instance. Any value provided for `REPLICATE_ON_START` in the environment selected by `USE_ENVIRONMENT` or in the user data provided at instance start-up will take precedence, though.
+
+* `REPLICATE_MASTER_BEARER_TOKEN`
+    used to specify which bearer token to use to authenticate at the master
+    in case this is to become a replica of some sort, e.g., replicating the SecurityService
+    and the SharedSailingData service. Use alternatively to `REPLICATE_MASTER_USERNAME/REPLICATE_MASTER_PASSWORD`.
+
+* `REPLICATE_MASTER_USERNAME, REPLICATE_MASTER_PASSWORD`
+    used to specify the user name and password for authenticating at the master
+    in case this is to become a replica of some sort, e.g., replicating the SecurityService
+    and the SharedSailingData service. Use alternatively to `REPLICATE_MASTER_BEARER_TOKEN`.
+
+* `MEMORY`
+    Specifies the value to which both, minimum and maximum heap size for the Java VM used to run the application will be set. As of this writing it defaults to "6000m" (6GB). During instance boot-up, a default value is calculated based on the instance's physical memory available, not considering swap space, and appended to the env.sh file. Therefore, auto-installed application processes will never use this "6000m" default. Specifying `MEMORY` in the user data will override the default size computed by the boot script.
+
+* `MAIL_FROM`
+    The address to use in the "From:" header field when the application sends e-mail.
+
+* `MAIL_SMTP_HOST`
+    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    
+* `MAIL_SMTP_PORT`
+    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `MAIL_SMTP_AUTH`
+    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`.
+
+* `MAIL_SMTP_USER`
+    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `MAIL_SMTP_PASSWORD`
+    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `EVENT_ID`...
+
+* `SERIES_ID`...
+
+* `image-upgrade`
+    If provided in a line of its own, the `httpd` server on the instance will be stopped, no application server release will be installed, the operating system packages will be updated, the git repository under `/home/sailing/code` will be pulled for the branch that the workspace is checked out on for the image launched (usually `master`) which will update various scripts relevant for the bootstrapping process, all log directories for `httpd` and the application server will be cleared, and by default the instance will then be shut down for a new AMI to be created for it. See also the `no-shutdown` user data option.
+
+* `no-shutdown`
+    If provided in conjunction with the `image-upgrade` option, also on a line of its own, after performing the `image-upgrade` actions the instance will be kept running. This way, you may still log on using SSH and make further adjustments if needed before you create the new image.
+     
+TODO describe all variable names that may be used here, as well as the defaults that apply if a variable is not specified
 
 Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
 
