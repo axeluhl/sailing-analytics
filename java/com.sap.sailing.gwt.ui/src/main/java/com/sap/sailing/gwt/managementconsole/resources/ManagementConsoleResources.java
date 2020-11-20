@@ -31,6 +31,38 @@ public interface ManagementConsoleResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource iconLocation();
 
+    @Source("icons/Icon-BackGLobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconBack();
+
+    @Source("icons/Icon-CloseGLobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconClose();
+
+    @Source("icons/Icon-DropdownChev.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconDropdownChev();
+
+    @Source("icons/Icon-EventAdd.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconAdd();
+
+    @Source("icons/Icon-EventFilter.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconFilter();
+
+    @Source("icons/Icon-Search.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconSearch();
+
+    @Source("icons/Icon-SearchApply.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconApply();
+
+    @Source("icons/Icon-SearchPrevious.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconPrevious();
+
     interface Style extends CssResource {
 
         String primaryButton();
@@ -38,6 +70,11 @@ public interface ManagementConsoleResources extends ClientBundle {
         String secondaryButton();
 
         String secondaryCtaButton();
+
+        @ClassName("header-line")
+        String headerLine();
+        
+        String right();
 
     }
 
@@ -47,6 +84,30 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-location")
         String iconLocation();
+
+        @ClassName("icon-back")
+        String iconBack();
+
+        @ClassName("icon-close")
+        String iconClose();
+
+        @ClassName("icon-dropdown-chev")
+        String iconDropdownChev();
+
+        @ClassName("icon-add")
+        String iconAdd();
+
+        @ClassName("icon-filter")
+        String iconFilter();
+
+        @ClassName("icon-search")
+        String iconSearch();
+
+        @ClassName("icon-apply")
+        String iconApply();
+
+        @ClassName("icon-previous")
+        String iconPrevious();
 
     }
 }

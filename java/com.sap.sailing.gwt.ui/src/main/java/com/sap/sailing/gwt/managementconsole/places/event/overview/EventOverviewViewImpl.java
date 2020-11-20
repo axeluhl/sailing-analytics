@@ -6,10 +6,12 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.partials.EventCard;
+import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventOverviewViewImpl extends Composite implements EventOverviewView {
@@ -27,11 +29,24 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
     EventOverviewResources local_res;
 
     @UiField
+    ManagementConsoleResources app_res;
+
+    @UiField
     FlowPanel cards;
+    
+    @UiField
+    Anchor addEventAnchor;
+    
+    @UiField
+    Anchor filterEventAnchor;
+    
+    @UiField
+    Anchor searchEventAnchor;
 
     public EventOverviewViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.style().ensureInjected();
+        app_res.icons().ensureInjected();
     }
 
     @Override

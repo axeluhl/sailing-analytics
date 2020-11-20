@@ -2,8 +2,47 @@
 
 .icon {
     background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: inline-block;
+    margin: 6px;
 }
 
 .icon-location {
-    background: resourceUrl("iconLocation") no-repeat;
+    background-image: resourceUrl("iconLocation");
+}
+
+.icon-back {
+    background-image: resourceUrl("iconBack");
+}
+
+.icon-close {
+    background-image: resourceUrl("iconClose");
+}
+
+.icon-dropdown-chev {
+    background-image: resourceUrl("iconLocation");
+}
+
+.icon-add {
+    background-image: resourceUrl("iconAdd");
+    min-width: 19px;
+}
+
+.icon-filter {
+    background-image: resourceUrl("iconFilter");
+    min-width: 19px;
+}
+
+.icon-search {
+    background-image: resourceUrl("iconSearch");
+    min-width: 19px;
+}
+
+.icon-apply {
+    background-image: resourceUrl("iconApply");
+}
+
+.icon-previous {
+    background-image: resourceUrl("iconPrevious");
 }
