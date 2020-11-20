@@ -201,7 +201,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private AdminConsolePanel createAdminConsolePanel(final ServerInfoDTO serverInfo) {
         
         final Anchor pwaAnchor = new Anchor(
-                new SafeHtmlBuilder().appendEscaped(getStringMessages().pwaAnchor()).toSafeHtml(), "AdminConsolePwa.html");
+                new SafeHtmlBuilder().appendEscaped(getStringMessages().pwaAnchor()).toSafeHtml(), "ManagementConsole.html");
         pwaAnchor.addStyleName("releaseNotesAnchor");
         
         adminConsolePanel = new AdminConsolePanel(userService, 

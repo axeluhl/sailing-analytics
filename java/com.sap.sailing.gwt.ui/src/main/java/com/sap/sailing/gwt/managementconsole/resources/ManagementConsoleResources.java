@@ -21,15 +21,19 @@ public interface ManagementConsoleResources extends ClientBundle {
     @Source(ICONS)
     Icons icons();
 
-    @Source("Image-BackdropGeneral.png")
+    @Source("images/Image-BackdropGeneral.png")
     ImageResource backdropGeneral();
 
-    @Source("Image-BackdropGeneralSized.png")
+    @Source("images/Image-BackdropGeneralSized.png")
     ImageResource backdropGeneralSized();
 
     @Source("icons/Icon-EventListLocation.svg")
     @MimeType("image/svg+xml")
     DataResource iconLocation();
+
+    @Source("icons/Icon-NavGlobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconNavigation();
 
     interface Style extends CssResource {
 
@@ -47,6 +51,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-location")
         String iconLocation();
+
+        @ClassName("icon-navigation")
+        String iconNavigation();
 
     }
 }

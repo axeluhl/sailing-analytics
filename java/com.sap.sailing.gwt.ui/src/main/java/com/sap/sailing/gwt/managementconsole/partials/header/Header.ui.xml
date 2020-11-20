@@ -1,0 +1,17 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.header.HeaderResources" />
+    
+    <g:HTMLPanel>
+        <header class="{local_res.style.header}">
+            <a class="{res.mediaCss.hideonsmall} {local_res.style.logo}" ui:field="logoAnchor" target="_blank"></a>
+            <g:FlowPanel addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
+            <a class="{res.mediaCss.hideonsmall} {local_res.style.account}" ui:field="accountAnchor"></a>
+            <a class="{res.mediaCss.showonsmall} {app_res.icons.iconNavigation} {local_res.style.navigation}" ui:field="navigationAnchor"></a>
+        </header>
+    </g:HTMLPanel>
+</ui:UiBinder>

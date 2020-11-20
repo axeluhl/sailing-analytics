@@ -7,3 +7,7 @@
 .icon-location {
     background: resourceUrl("iconLocation") no-repeat;
 }
+
+.icon-navigation {
+    background: resourceUrl("iconNavigation") no-repeat;
+}
