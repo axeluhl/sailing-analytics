@@ -15,7 +15,7 @@ public class FreestyleProperties extends JsonWrapper {
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARK_TYPE = "markType";
-    private static final String FIELD_TAG = "tag";
+    private static final String FIELD_TAG = "tags";
 
     public FreestyleProperties(final JSONObject json) {
         super(json);

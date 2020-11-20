@@ -8,7 +8,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class FreestyleMarkPropertiesJsonSerializer implements JsonSerializer<FreestyleMarkProperties> {
 
-    public static final String FIELD_TAGS = "tag";
+    public static final String FIELD_TAGS = "tags";
     
     private final CommonMarkPropertiesJsonSerializer commonMarkPropertiesJsonSerializer;
 
