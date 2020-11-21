@@ -88,7 +88,7 @@ public class ChargebeeApiService implements SubscriptionApiService {
      */
     private Pair<Iterable<SubscriptionItem>, String> fetchSubscriptions(User user, String offset) throws Exception {
         SubscriptionListRequest request = com.chargebee.models.Subscription.list().limit(100).customerId()
-                .is(user.getName()).includeDeleted(false);
+                .is(user.getName()).includeDeleted(false).sortByCreatedAt(SortOrder.DESC);
         if (offset != null && !offset.isEmpty()) {
             request.offset(offset);
         }

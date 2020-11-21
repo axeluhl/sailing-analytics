@@ -123,6 +123,7 @@ import com.sap.sse.security.operations.DeleteUserOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveAccessTokenOperation;
 import com.sap.sse.security.operations.RemovePermissionForUserOperation;
+import com.sap.sse.security.operations.RemoveProviderSubscriptionsOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
@@ -2509,23 +2510,87 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (user != null) {
             String newSubscriptionPlanId = newSubscription.getPlanId();
             Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
-            logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
-            logger.info(() -> "Current user plan subscription: "
-                    + (currentSubscription != null ? currentSubscription.toString() : "null"));
-            logger.info(
-                    () -> "New plan subscription: " + (newSubscription != null ? newSubscription.toString() : "null"));
-            if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
-                updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+            if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
+                logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
+                logger.info(() -> "Current user plan subscription: "
+                        + (currentSubscription != null ? currentSubscription.toString() : "null"));
+                logger.info(() -> "New plan subscription: "
+                        + (newSubscription != null ? newSubscription.toString() : "null"));
+                if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
+                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+                }
+                Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                if (newSubscriptions != null) {
+                    user.setSubscriptions(newSubscriptions);
+                }
+                store.updateUser(user);
+            } else {
+                logger.info(() -> "New subscription has been ignored: " + newSubscription);
             }
-            Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
-            if (newSubscriptions != null) {
-                user.setSubscriptions(newSubscriptions);
+            return null;
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+    
+    @Override
+    public void removeProviderUserSubscriptions(String username, String providerName) throws UserManagementException {
+        final User user = getUserByName(username);
+        if (user != null) {
+            apply(new RemoveProviderSubscriptionsOperation(username, providerName));
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Void internalRemoveProviderSubscriptions(String username, String providerName)
+            throws UserManagementException {
+        User user = getUserByName(username);
+        if (user != null) {
+            Iterable<Subscription> subscriptions = user.getSubscriptions();
+            List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+            for (Subscription subscription : subscriptions) {
+                if (!subscription.getProvider().equals(providerName)) {
+                    newSubscriptionList.add(subscription);
+                }
             }
+            user.setSubscriptions(newSubscriptionList.toArray(new Subscription[] {}));
             store.updateUser(user);
             return null;
         } else {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+    }
+
+    /**
+     * Check if new subscription should be processed, such as if it has a valid plan, or it's the most recent
+     * subscription of a plan
+     */
+    private boolean shouldProcessNewSubscription(Subscription currentSubscription, Subscription newSubscription) {
+        final boolean shouldProcess;
+        if (!newSubscription.hasPlan()) {
+            // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
+            // clearing all user subscriptions
+            shouldProcess = true;
+        } else if (SubscriptionPlan.getPlan(newSubscription.getPlanId()) != null) {
+            if (currentSubscription == null) {
+                // New subscription plan is valid, but current subscription of the plan is empty
+                shouldProcess = true;
+            } else if (!newSubscription.hasSubscriptionId()) {
+                // New subscription has plan id but doesn't have subscription id, this is an empty subscription for the
+                // plan that holds updated dates data for the plan's subscription
+                shouldProcess = newSubscription.isUpdatedMoreRecently(currentSubscription);
+            } else {
+                // Only process new subscription if it is the most recently created subscription
+                shouldProcess = newSubscription.getSubscriptionCreatedAt().asMillis() >= currentSubscription
+                        .getSubscriptionCreatedAt().asMillis();
+            }
+        } else {
+            // New subscription doesn't have a valid plan
+            shouldProcess = false;
+        }
+        return shouldProcess;
     }
 
     /**
@@ -2536,13 +2601,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         Subscription[] newUserSubscriptions = null;
         Iterable<Subscription> subscriptions = user.getSubscriptions();
         if (newSubscription != null) {
-            if (subscriptions == null || !subscriptions.iterator().hasNext() || !newSubscription.hasPlan()) {
+            if (subscriptions == null || !subscriptions.iterator().hasNext()) {
                 newUserSubscriptions = new Subscription[] { newSubscription };
+            } else if (!newSubscription.hasPlan()) {
+                // New subscription has no plan, that means new subscription is just an empty one with some meta data
+                // for updated dates, and user has been deleted from provider. In this case we need to remove all
+                // current subscriptions of the user for this provider
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                for (Subscription subscription : subscriptions) {
+                    if (!subscription.getProvider().equals(newSubscription.getProvider())) {
+                        newSubscriptionList.add(subscription);
+                    }
+                }
+                newSubscriptionList.add(newSubscription);
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
             } else {
                 List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
                 boolean foundCurrentSubscription = false;
                 for (Subscription subscription : subscriptions) {
-                    if (!subscription.hasPlan() || subscription.getPlanId().equals(newSubscription.getPlanId())) {
+                    if (!foundCurrentSubscription && ((!subscription.hasPlan()
+                            && subscription.getProvider().equals(newSubscription.getProvider()))
+                            || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
                         newSubscriptionList.add(newSubscription);
                         foundCurrentSubscription = true;
                     } else {

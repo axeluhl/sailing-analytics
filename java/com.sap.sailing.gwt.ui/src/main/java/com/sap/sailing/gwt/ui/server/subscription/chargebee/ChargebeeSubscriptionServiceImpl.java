@@ -9,8 +9,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
@@ -30,7 +28,6 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
-import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 
 /**
@@ -59,8 +56,8 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
                             .billingAddressLastName(usernames.getB()).billingAddressCountry("US").request();
                     response.setHostedPageJSONString(result.hostedPage().toJson());
                 } else {
-                    response.setError("User has already subscribed to "
-                            + SubscriptionPlan.getPlan(planId).getName() + " plan");
+                    response.setError(
+                            "User has already subscribed to " + SubscriptionPlan.getPlan(planId).getName() + " plan");
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
@@ -118,7 +115,8 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
             if (subscriptions != null) {
                 List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
                 for (Subscription subscription : subscriptions) {
-                    if (StringUtils.isNotEmpty(subscription.getSubscriptionId())) {
+                    if (subscription.hasSubscriptionId() && !subscription.getSubscriptionStatus()
+                            .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                         itemList.add(
                                 new ChargebeeSubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
                                         subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
@@ -148,8 +146,14 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
                 Result resultData = cancel(subscription.getSubscriptionId()).request();
                 if (resultData.subscription().status().name().toLowerCase()
                         .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
-                    Subscription newSubscription = ChargebeeSubscription.createEmptySubscription(
-                            subscription.getPlanId(), subscription.getLatestEventTime(), TimePoint.now());
+                    Subscription newSubscription = new ChargebeeSubscription(subscription.getSubscriptionId(),
+                            subscription.getPlanId(), subscription.getCustomerId(), subscription.getTrialStart(),
+                            subscription.getTrialEnd(), ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED,
+                            subscription.getPaymentStatus(), subscription.getTransactionType(),
+                            subscription.getTransactionStatus(), subscription.getInvoiceId(),
+                            subscription.getInvoiceStatus(), subscription.getSubscriptionCreatedAt(),
+                            TimePoint.of(resultData.subscription().updatedAt()), subscription.getLatestEventTime(),
+                            TimePoint.now());
                     updateUserSubscription(user, newSubscription);
                     result = true;
                 } else {

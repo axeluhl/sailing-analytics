@@ -526,7 +526,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 try {
                     final SubscriptionProvider subscriptionProvider = SubscriptionFactory.getInstance()
                             .getSubscriptionProvider(subscriptionData.getProvider());
-                    subscriptions[i++] = subscriptionProvider.getDataHandler().restore(subscriptionData);
+                    subscriptions[i++] = subscriptionProvider.getDataHandler().toSubscription(subscriptionData);
                 } catch (InvalidSubscriptionProviderException e) {
                     logger.log(Level.SEVERE, "Failed to load subscription for user " + subscriptionData.getCustomerId(),
                             e);

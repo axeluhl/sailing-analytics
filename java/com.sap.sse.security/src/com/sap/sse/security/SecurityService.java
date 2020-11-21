@@ -661,5 +661,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Persist user subscription data
      */
     void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
+    
+    /**
+     * Remove all user subscriptions of a payment service provider
+     */
+    void removeProviderUserSubscriptions(String username, String providerName) throws UserManagementException;
 
 }

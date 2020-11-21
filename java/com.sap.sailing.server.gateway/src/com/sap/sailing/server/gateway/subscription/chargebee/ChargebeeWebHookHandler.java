@@ -103,7 +103,6 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             case CUSTOMER_DELETED:
                 updateUserSubscription(user, buildEmptySubscription(userSubscription, event));
                 break;
-            case SUBSCRIPTION_CANCELLED:
             case SUBSCRIPTION_DELETED:
                 if (userSubscription != null && userSubscription.getSubscriptionId() != null
                         && userSubscription.getSubscriptionId().equals(event.getSubscriptionId())) {
@@ -117,6 +116,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
             case PAYMENT_FAILED:
             case SUBSCRIPTION_PAUSED:
             case SUBSCRIPTION_RESUMED:
+            case SUBSCRIPTION_CANCELLED:
                 updateUserSubscription(user, buildSubscription(userSubscription, event));
                 break;
             case PAYMENT_REFUNDED:

@@ -201,12 +201,24 @@ public abstract class Subscription implements Serializable {
         return planId != null && !planId.isEmpty();
     }
 
+    public boolean hasSubscriptionId() {
+        return subscriptionId != null && !subscriptionId.isEmpty();
+    }
+
     /**
      * Check if subscription is active, base on this user will gain roles for the subscription
      * 
      * @return true if status subscription is in trial or status is active and user has success payment
      */
     public abstract boolean isActiveSubscription();
+    
+    /**
+     * Check if subscription is updated more recently than other subscription
+     */
+    public boolean isUpdatedMoreRecently(Subscription otherSubscription) {
+        return getManualUpdatedAt().asMillis() > otherSubscription.getManualUpdatedAt().asMillis()
+                || getLatestEventTime().asMillis() > otherSubscription.getLatestEventTime().asMillis();
+    }
 
     @Override
     public String toString() {

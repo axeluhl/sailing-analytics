@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.subscription;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.common.TimePoint;
@@ -25,7 +26,21 @@ public class SubscriptionData {
         MANUAL_UPDATED_AT,
         PROVIDER;
     }
-    
+
+    /**
+     * Create empty subscription data instance that only holds plan id, latest webhook event update time, and manuall
+     * updated time. This subscription is used for keeping updated time of subscription for a user, then it would
+     * prevent issue of outdated data be persisted
+     */
+    public static SubscriptionData createEmptySubscriptionDataWithUpdateTimes(String planId, TimePoint latestEventTime,
+            TimePoint manualUpdatedTime) {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put(DataAttribute.PLAN_ID.name(), planId);
+        data.put(DataAttribute.LATEST_EVENT_TIME.name(), latestEventTime.asMillis());
+        data.put(DataAttribute.MANUAL_UPDATED_AT.name(), manualUpdatedTime.asMillis());
+        return new SubscriptionData(data);
+    }
+
     private Map<String, Object> data;
 
     public SubscriptionData(Map<String, Object> data) {

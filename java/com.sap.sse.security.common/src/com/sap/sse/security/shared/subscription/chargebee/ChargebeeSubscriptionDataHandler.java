@@ -7,7 +7,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionData;
 public class ChargebeeSubscriptionDataHandler extends AbstractSubscriptionDataHandler {
 
     @Override
-    public Subscription restore(SubscriptionData data) {
+    public Subscription toSubscription(SubscriptionData data) {
         return new ChargebeeSubscription(data.getSubscriptionId(), data.getPlanId(), data.getCustomerId(),
                 data.getTrialStart(), data.getTrialEnd(), data.getSubscriptionStatus(), data.getPaymentStatus(),
                 data.getTransactionType(), data.getTransactionStatus(), data.getInvoiceId(), data.getInvoiceStatus(),

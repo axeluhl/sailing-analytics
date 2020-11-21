@@ -15,5 +15,5 @@ public interface SubscriptionDataHandler {
     /**
      * Restore subscription from data
      */
-    Subscription restore(SubscriptionData data);
+    Subscription toSubscription(SubscriptionData data);
 }
