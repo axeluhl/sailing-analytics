@@ -21,6 +21,14 @@ public abstract class AbstractBasePlace extends Place {
     private Map<String, String> params = new HashMap<String, String>();
 
     public AbstractBasePlace(String... paramKeysAndValues) {
+        extractKeysAndValues(paramKeysAndValues);
+    }
+    
+    public AbstractBasePlace(String url) {
+        extractUrlParams(url);
+    }
+    
+    protected void extractKeysAndValues(String... paramKeysAndValues) {
         if (paramKeysAndValues.length % 2 == 0) {
             StringBuilder stringBuilder = new StringBuilder();
     
@@ -43,7 +51,7 @@ public abstract class AbstractBasePlace extends Place {
         }
     }
 
-    public AbstractBasePlace(String url) {
+    protected void extractUrlParams(String url) {
         if (url != null && !url.isEmpty()) {
             this.placeParametersAsToken = url;
             List<String> list = Arrays.asList(placeParametersAsToken.split("&"));

@@ -43,7 +43,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     private static AdminConsoleActivity instance;
     
-    private AdminConsolePlace defaultPlace;
+    private AbstractAdminConsolePlace defaultPlace;
     
     public static boolean instantiated() {
         return instance != null;
@@ -56,7 +56,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         return instance;
     }
     
-    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory, AdminConsolePlace defaultPlace) {
+    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory, AbstractAdminConsolePlace defaultPlace) {
         if(instance == null) {
             instance = new AdminConsoleActivity(clientFactory);
             instance.setRedirectToPlace(defaultPlace);
@@ -84,11 +84,11 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         containerWidget.setWidget(adminConsoleView.asWidget());    
     }
     
-    public void setRedirectToPlace(AdminConsolePlace place) {
+    public void setRedirectToPlace(AbstractAdminConsolePlace place) {
         this.defaultPlace = place;
     }
     
-    public void goToMenuAndTab(AdminConsolePlace place) {
+    public void goToMenuAndTab(AbstractAdminConsolePlace place) {
         adminConsoleView.selectTabByPlace(place);       
     }
     

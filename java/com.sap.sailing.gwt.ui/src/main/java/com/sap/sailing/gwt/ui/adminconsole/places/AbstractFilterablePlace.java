@@ -1,15 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.FilterableAdminConsolePlace;
 import com.sap.sse.gwt.client.panels.FilterParameter;
 
-public abstract class AbstractFilterablePlace extends AdminConsolePlace implements FilterableAdminConsolePlace {
+public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace implements FilterableAdminConsolePlace {
+    
+    private static final String FILTER_KEY = "filter";
+    private static final String SELECT_KEY = "select";
+    private static final String FILTER_AND_SELECT_KEY = "filterAndSelect";
+    private static final String SELECT_EXACT_KEY = "selectExact";
     
     private FilterParameter filterParameter = new FilterParameter();
     
@@ -21,16 +24,20 @@ public abstract class AbstractFilterablePlace extends AdminConsolePlace implemen
         return filterParameter.getSelect();
     }  
 
-    void setFilter(String filter) {
-        this.filterParameter.setFilter(filter);
+    void loadFilterParam() {
+        this.filterParameter.setFilter(getParameter(FILTER_KEY));
     }
     
-    void setSelect(String select) {
-        this.filterParameter.setSelect(select);
+    void loadSelectParam() {
+        this.filterParameter.setSelect(getParameter(SELECT_KEY));
     }
     
-    void setSelectExact(String selectExact) {
-        this.filterParameter.setSelectExact(selectExact);
+    void loadSelectExactParam() {
+        this.filterParameter.setSelectExact(getParameter(SELECT_EXACT_KEY));
+    }
+    
+    public void loadFilterAndSelectParam() {
+        this.filterParameter.setFilterAndSelect(getParameter(FILTER_AND_SELECT_KEY));
     }
     
     public String getSelectExact() {
@@ -39,10 +46,6 @@ public abstract class AbstractFilterablePlace extends AdminConsolePlace implemen
     
     public String getFilterAndSelect() {
         return this.filterParameter.getFilterAndSelect();
-    }
-    
-    public void setFilterAndSelect(String filterAndSelect) {
-        this.filterParameter.setFilterAndSelect(filterAndSelect);
     }
     
     public FilterParameter getFilterParameter() {
@@ -55,60 +58,22 @@ public abstract class AbstractFilterablePlace extends AdminConsolePlace implemen
     }
     
     protected static abstract class TablePlaceTokenizer<P extends AbstractFilterablePlace> implements PlaceTokenizer<P> {
-
-        private static final String IS = "=";
-        private static final String PARAMETER_SEPARATOR = "&";     
-        private static final String FILTER_KEY = "filter";
-        private static final String SELECT_KEY = "select";
-        private static final String FILTER_AND_SELECT_KEY = "filterAndSelect";
-        private static final String SELECT_EXACT_KEY = "selectExact";
-
-        @Override
-        public P getPlace(final String token) {
-            P place = getPlaceFactory().get();
-            
-            if (token == null || !token.contains(IS)) {
-                return place;
-           }
-            
-            final String[] parameters = token.split(PARAMETER_SEPARATOR);
-            for (String parameter : parameters) {
-                final String[] split = parameter.split(IS, 2);
-                String key = split[0];
-                String value = split[1];
-                if (isParameter(key, FILTER_KEY)) {
-                    place.setFilter(value);
-                } else if (isParameter(key, SELECT_KEY)) {
-                    place.setSelect(value);
-                } else if (isParameter(key, FILTER_AND_SELECT_KEY)) {
-                    place.setFilterAndSelect(value);
-                } else if (isParameter(key, SELECT_EXACT_KEY)) {
-                    place.setSelectExact(value);
-                } 
-            }
-            return place;
-        }
-
-        private boolean isParameter(final String key, final String parameter) {
-            return key != null && key.equalsIgnoreCase(parameter);
-        }
         
         @Override
-        public String getToken(final P place) {
-            StringJoiner tokenJoiner = new StringJoiner(PARAMETER_SEPARATOR);
-            if (place.getFilter() != null) {
-                tokenJoiner.add(FILTER_KEY + IS + place.getFilter());
-            }
-            if (place.getSelect() != null) {
-                tokenJoiner.add(SELECT_KEY + IS + place.getSelect()); 
-            }
-            if (place.getSelectExact() != null) {
-                tokenJoiner.add(SELECT_EXACT_KEY + IS + place.getSelectExact()); 
-            }
-            if (place.getFilterAndSelect() != null) {
-                tokenJoiner.add(FILTER_AND_SELECT_KEY + IS + place.getFilterAndSelect()); 
-            }
-            return tokenJoiner.toString();
+        public String getToken(P place) {
+            return place.getParametersAsToken();
+        }
+
+        @Override
+        public P getPlace(String token) {
+            P place = getPlaceFactory().get();   
+            place.extractUrlParams(token);
+            
+            place.loadFilterParam();
+            place.loadSelectParam();
+            place.loadSelectExactParam();
+            place.loadFilterAndSelectParam();    
+            return place;
         }
 
         /**

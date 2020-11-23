@@ -83,7 +83,6 @@ import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
-import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
@@ -128,9 +127,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private MediaServiceWriteAsync mediaServiceWrite;   
     private ErrorReporter errorReporter;
    
-    private AdminConsolePanel adminConsolePanel;    
+    private AdminConsolePanel<AbstractAdminConsolePlace> adminConsolePanel;    
     private PlaceController placeController;
-    private AdminConsolePlace defaultPlace;
+    private AbstractAdminConsolePlace defaultPlace;
     
     private Set<RegattasDisplayer> regattasDisplayers;
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
@@ -178,13 +177,13 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
     
     @Override
-    public void selectTabByPlace(AdminConsolePlace place) {
+    public void selectTabByPlace(AbstractAdminConsolePlace place) {
         adminConsolePanel.selectTabByPlace(place);
     }
     
-    private AdminConsolePanel createAdminConsolePanel(final ServerInfoDTO serverInfo) {
+    private AdminConsolePanel<AbstractAdminConsolePlace> createAdminConsolePanel(final ServerInfoDTO serverInfo) {
         
-        adminConsolePanel = new AdminConsolePanel(userService, 
+        adminConsolePanel = new AdminConsolePanel<>(userService, 
                 serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", null, errorReporter,
                 SecurityStylesheetResources.INSTANCE.css(), stringMessages, placeController);
         adminConsolePanel.addStyleName("adminConsolePanel");
@@ -552,7 +551,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
 
     @Override
-    public void setRedirectToPlace(AdminConsolePlace redirectoPlace) {
+    public void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace) {
         this.defaultPlace = redirectoPlace;
     }
 
