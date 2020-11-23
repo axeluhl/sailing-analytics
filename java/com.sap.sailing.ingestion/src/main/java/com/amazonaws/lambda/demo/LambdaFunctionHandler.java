@@ -55,6 +55,7 @@ public class LambdaFunctionHandler implements RequestHandler<Map<String, Object>
 
     private void dispatchToSubscribers(String body) throws IOException {
         final MemcachedClient memcachedClient = new MemcachedClient((InetSocketAddress) null); // TODO
+        @SuppressWarnings("unused")
         final Object subscriptions = memcachedClient.get(getDeviceIdentifier(body));
         // TODO Implement LambdaFunctionHandler.dispatchToSubscribers(...)
     }
