@@ -66,8 +66,8 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
             checkers.add(toAdd);
         }
         raceChangedListener = this::update;
-        start();
         enabled = Boolean.parseBoolean(System.getProperty(ANNIVERSARY_FLAG, "false"));
+        start();
     }
 
     void update() {
