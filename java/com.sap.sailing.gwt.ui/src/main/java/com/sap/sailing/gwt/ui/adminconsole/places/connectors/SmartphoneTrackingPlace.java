@@ -1,22 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class SmartphoneTrackingPlace extends AbstractConnectorsPlace {
-    
-    public SmartphoneTrackingPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
-    public static class Tokenizer implements PlaceTokenizer<SmartphoneTrackingPlace> {
-        @Override
-        public String getToken(final SmartphoneTrackingPlace place) {
-            return "";
-        }
+public class SmartphoneTrackingPlace extends AbstractFilterablePlace {
 
-        @Override
-        public SmartphoneTrackingPlace getPlace(final String token) {
-            return new SmartphoneTrackingPlace();
-        }
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.CONNECTORS;
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<SmartphoneTrackingPlace> {      
+
+        @Override
+        protected Supplier<SmartphoneTrackingPlace> getPlaceFactory() {
+            return SmartphoneTrackingPlace::new;
+        }
+    }
 }

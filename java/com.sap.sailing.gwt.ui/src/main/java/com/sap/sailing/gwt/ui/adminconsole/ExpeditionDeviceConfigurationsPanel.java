@@ -42,11 +42,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -59,7 +61,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
+public class ExpeditionDeviceConfigurationsPanel extends FlowPanel implements FilterablePanelProvider<ExpeditionDeviceConfiguration>  {
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -160,7 +162,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         final EditACLDialog.DialogConfig<ExpeditionDeviceConfiguration> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                deviceConfiguration -> configACL.openACLDialog(deviceConfiguration));
+                deviceConfiguration -> configACL.openDialog(deviceConfiguration));
         SecuredDTOOwnerColumn.configureOwnerColumns(allDeviceConfigurations, deviceConfigurationColumnListHandler,
                 stringMessages);
         allDeviceConfigurations.addColumn(actionsColumn, stringMessages.actions());
@@ -352,5 +354,10 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 filterDeviceConfigurationsPanel.remove(expeditionDeviceConfiguration);
             }
         });
+    }
+    
+    @Override
+    public AbstractFilterablePanel<ExpeditionDeviceConfiguration> getFilterablePanel() {
+        return filterDeviceConfigurationsPanel;
     }
 }

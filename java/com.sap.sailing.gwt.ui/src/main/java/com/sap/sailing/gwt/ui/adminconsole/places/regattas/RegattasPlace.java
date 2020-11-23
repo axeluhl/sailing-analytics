@@ -1,28 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.regattas;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
+import java.util.function.Supplier;
 
-public class RegattasPlace extends AbstractAdminConsolePlace {
-    
-    public RegattasPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 
-    public static class Tokenizer implements PlaceTokenizer<RegattasPlace> {
-        @Override
-        public String getToken(final RegattasPlace place) {
-            return "";
-        }
+public class RegattasPlace extends AbstractFilterablePlace {
+
+    public static class Tokenizer extends TablePlaceTokenizer<RegattasPlace> {      
 
         @Override
-        public RegattasPlace getPlace(final String token) {
-            return new RegattasPlace();
+        protected Supplier<RegattasPlace> getPlaceFactory() {
+            return RegattasPlace::new;
         }
-    }
-
-    @Override
-    public String getVerticalTabName() {
-        return "";
     }
     
 }

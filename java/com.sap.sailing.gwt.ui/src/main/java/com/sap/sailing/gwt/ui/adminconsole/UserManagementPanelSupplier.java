@@ -24,9 +24,9 @@ public class UserManagementPanelSupplier
     @Override
     public UserManagementPanel<AdminConsoleTableResources> init() {
         logger.info("Create UserManagementPanel");
-        final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(
-                presenter.getUserService(), StringMessages.INSTANCE, SecuredDomainType.getAllInstances(),
-                presenter.getErrorReporter(), tableResources);
+        final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanelWrapper(
+                presenter.getUserService(), StringMessages.INSTANCE,
+                SecuredDomainType.getAllInstances(), presenter.getErrorReporter(), tableResources);
         userManagementPanel.ensureDebugId("UserManagementPanel");
         return userManagementPanel;
     }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -106,6 +107,8 @@ public interface SharedDomainFactory<RLR extends RaceLogResolver> extends Compet
      */
     CourseArea getExistingCourseAreaById(Serializable courseAreaId);
     
+    Collection<Mark> getAllMarks();
+
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     
     Mark getExistingMarkById(Serializable id);

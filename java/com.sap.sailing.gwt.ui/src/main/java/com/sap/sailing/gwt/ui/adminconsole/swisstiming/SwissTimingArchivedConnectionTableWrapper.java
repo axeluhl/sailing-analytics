@@ -121,7 +121,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {
@@ -169,7 +169,6 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                     @Override
                     public void onSuccess(List<SwissTimingArchiveConfigurationWithSecurityDTO> result) {
                         filterField.updateAll(result);
-
                     }
                 });
     }

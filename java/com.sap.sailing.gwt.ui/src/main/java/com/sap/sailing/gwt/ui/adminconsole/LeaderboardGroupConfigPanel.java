@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,6 +64,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.URLEncoder;
@@ -75,6 +75,7 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -87,7 +88,7 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
-        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>, FilterablePanelProvider<LeaderboardGroupDTO> {
 
     /**
      * The key to put into a params map passed into {@link #setupLeaderboardGroups(Map)} used to identify
@@ -552,24 +553,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 userService.getUserManagementWriteService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<LeaderboardGroupDTO>() {
-                    @Override
-                    public void accept(LeaderboardGroupDTO e) {
-                        config.openOwnershipDialog(e);
-                    }
-                });
+                e -> config.openOwnershipDialog(e));
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<LeaderboardGroupDTO>() {
-                    @Override
-                    public void accept(LeaderboardGroupDTO e) {
-                        configACL.openACLDialog(e);
-                    }
-                });
+                e -> configACL.openDialog(e));
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingServiceWrite.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
@@ -586,13 +575,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<LeaderboardGroupDTO>() {
-                    @Override
-                    public void accept(LeaderboardGroupDTO e) {
-                        migrateDialogConfig.openDialog(e);
-                    }
-                });
+                e -> migrateDialogConfig.openDialog(e));
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
@@ -1018,5 +1001,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 }
             }
         }
+    }
+
+    @Override
+    public AbstractFilterablePanel<LeaderboardGroupDTO> getFilterablePanel() {
+        return groupsFilterablePanel;
     }
 }

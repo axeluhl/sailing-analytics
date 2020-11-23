@@ -1,15 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
+import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 
-public abstract class AbstractAdminConsolePlace extends AdminConsolePlace {
-    
-    @Override
-    public boolean equals(Object obj) {
+public abstract class AbstractAdminConsolePlace extends AbstractBasePlace implements AdminConsolePlace  {
+
+    public boolean isSamePlace(Object obj) {
         return obj != null && obj.getClass() == this.getClass();
     }
-    
-    public boolean isSameMenuItem(String menuItemName) {
-        return getVerticalTabName().equals(menuItemName);
-    }
+
 }

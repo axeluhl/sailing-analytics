@@ -93,7 +93,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Button btnRefresh;
 
-    private CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
+    protected CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
 
@@ -427,7 +427,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
 
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DefaultActions.DELETE,
                 this::removeAndUntrackRace);

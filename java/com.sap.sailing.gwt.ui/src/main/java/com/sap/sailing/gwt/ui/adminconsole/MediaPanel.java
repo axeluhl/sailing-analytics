@@ -66,6 +66,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -75,6 +76,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -92,7 +94,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
+public class MediaPanel extends FlowPanel implements MediaTracksRefresher, FilterablePanelProvider<MediaTrackWithSecurityDTO> {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -173,8 +175,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
 
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO>(lblFilterRaces,
-                allMediaTracks,
-                mediaTrackListDataProvider, stringMessages) {
+                allMediaTracks, mediaTrackListDataProvider, stringMessages) {
             @Override
             public List<String> getSearchableStrings(MediaTrackWithSecurityDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -586,7 +587,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                mediaTrack -> configACL.openACLDialog(mediaTrack));
+                mediaTrack -> configACL.openDialog(mediaTrack));
         mediaTracksTable.addColumn(actionsColumn, stringMessages.actions());
     }
 
@@ -729,4 +730,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
         dialog.show();
     }
 
+    @Override
+    public AbstractFilterablePanel<MediaTrackWithSecurityDTO> getFilterablePanel() {
+        return filterableMediaTracks;
+    }
 }

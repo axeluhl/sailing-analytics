@@ -337,7 +337,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, getStringMessages().name());
@@ -570,4 +570,5 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
     }
+
 }

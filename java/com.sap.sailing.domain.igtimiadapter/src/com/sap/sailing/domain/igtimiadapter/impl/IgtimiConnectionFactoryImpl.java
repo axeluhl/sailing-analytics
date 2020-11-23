@@ -25,15 +25,13 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -115,7 +113,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     private Account getAccount(String creatorName, String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpGet getAccount = new HttpGet(getApiV1BaseUrl()+"account?access_token="+accessToken);
         HttpResponse accountResponse = client.execute(getAccount);
         JSONObject accountJson = ConnectivityUtils.getJsonFromResponse(accountResponse);
@@ -375,7 +373,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @throws RuntimeException in case there was an error while retrieving the token
      */
     public Account obtainAccessTokenFromAuthorizationCode(String creatorName, String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpPost post = new HttpPost(getOauthTokenUrl());
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
@@ -402,42 +400,23 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return the authorization code which can then be used to obtain a permanent access token to be used by our client
      *         to access data owned by the user identified by e-mail and password.
      */
-    public String authorizeAndReturnAuthorizedCode(String userEmail, String userPassword)
+    public String authorizeAndReturnAuthorizedCode(final String userEmail, final String userPassword)
             throws ClientProtocolException, IOException, IllegalStateException, ParserConfigurationException,
             SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
         logger.info("Trying to authorize application client " + getClient().getId() + " for user " + userEmail);
-        DefaultHttpClient client = new SystemDefaultHttpClient();
-        CookieStore cookieStore = new BasicCookieStore();
-        client.setCookieStore(cookieStore);
-        client.setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes());
+        final RedirectStrategyExtractingAuthorizationCode codeExtractor =
+                new RedirectStrategyExtractingAuthorizationCode(new LaxRedirectStrategyForAllRedirectResponseCodes());
+        CloseableHttpClient client = HttpClientBuilder.create()
+                .setDefaultCookieStore(new BasicCookieStore())
+                .setRedirectStrategy(codeExtractor)
+                .build();
         HttpGet get = new HttpGet(getOauthAuthorizeUrl());
         HttpResponse responseForAuthorize = client.execute(get);
-        return signInAndReturnAuthorizationForm(client, responseForAuthorize, userEmail, userPassword);
-    }
-    
-    @Override
-    public Account createAccountToAccessUserData(String creatorName, String userEmail, String userPassword) throws ClientProtocolException,
-            IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException, ClassCastException, ParseException {
-        final Account result;
-        String code = authorizeAndReturnAuthorizedCode(userEmail, userPassword);
-        if (code != null) {
-            result = obtainAccessTokenFromAuthorizationCode(creatorName, code);
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
-    private String signInAndReturnAuthorizationForm(DefaultHttpClient client, HttpResponse response,
-            final String userEmail, final String userPassword) throws ParserConfigurationException, SAXException,
-            IOException, UnsupportedEncodingException, ClientProtocolException, IllegalStateException,
-            ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
         SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
         final String[] action = new String[1];
         final Map<String, String> inputFieldsToSubmit = new HashMap<>();
         try {
-            String pageContent = ConnectivityUtils.getContent(response).replaceAll("<link (.*[^/])>", "<link $1 />");
+            String pageContent = ConnectivityUtils.getContent(responseForAuthorize).replaceAll("<link (.*[^/])>", "<link $1 />");
             parser.parse(new ByteArrayInputStream(pageContent.getBytes("UTF-8")), new DefaultHandler() {
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes)
@@ -462,10 +441,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             // swallow; we try to grab what we can; let's hope it was enough...
             logger.log(Level.FINE, "Exception trying to parse Igtimi authorization document", e);
         }
-        response.getEntity().getContent().close();
-        final RedirectStrategy oldRedirectStrategy = client.getRedirectStrategy();
-        final RedirectStrategyExtractingAuthorizationCode codeExtractor = new RedirectStrategyExtractingAuthorizationCode(oldRedirectStrategy);
-        client.setRedirectStrategy(codeExtractor);
+        responseForAuthorize.getEntity().getContent().close();
         logger.info("Posting sign-in form for user "+userEmail);
         HttpResponse authorizationForm = ConnectivityUtils.postForm(getBaseUrl(), action[0], inputFieldsToSubmit, client, getSignInUrl());
         if (codeExtractor.getCode() == null) {
@@ -477,12 +453,26 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return codeExtractor.getCode();
     }
     
+    @Override
+    public Account createAccountToAccessUserData(String creatorName, String userEmail, String userPassword) throws ClientProtocolException,
+            IOException, IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
+            InstantiationException, IllegalAccessException, ClassCastException, ParseException {
+        final Account result;
+        String code = authorizeAndReturnAuthorizedCode(userEmail, userPassword);
+        if (code != null) {
+            result = obtainAccessTokenFromAuthorizationCode(creatorName, code);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     /**
      * Parses the form in the <code>autorizationForm</code> response and posts it by submitting the form that contains
      * the commit button with the value "Authorize". If a redirect strategy is set on the <code>client</code> it will
      * see the redirect URL in the <code>Location</code> header. The redirection target is closed immediately.
      */
-    private void authorizeAndGetCode(HttpResponse authorizationForm, DefaultHttpClient client)
+    private void authorizeAndGetCode(HttpResponse authorizationForm, CloseableHttpClient client)
             throws IllegalStateException, SAXException, IOException, ParserConfigurationException,
             ClassNotFoundException, InstantiationException, IllegalAccessException, ClassCastException {
         // If the user already authorized the app, an empty document will be returned
@@ -528,7 +518,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     public HttpClient getHttpClient() {
-        HttpClient client = new SystemDefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         return client;
     }
     

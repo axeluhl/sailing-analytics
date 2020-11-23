@@ -1,6 +1,5 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-	xmlns:dp="urn:import:com.sap.sailing.gwt.ui.pwa.desktop"
 	xmlns:sse="urn:import:com.sap.sse.gwt.client">
 
 	<g:HeaderPanel ui:field="headerPanel">

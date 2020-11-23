@@ -1,29 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.events;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
+import java.util.function.Supplier;
+
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 
 
-public class EventsPlace extends AbstractAdminConsolePlace {
-    
-    public EventsPlace() {
-    }
-    
-    public static class Tokenizer implements PlaceTokenizer<EventsPlace> {
-        @Override
-        public String getToken(final EventsPlace place) {
-            return "";
-        }
+public class EventsPlace extends AbstractFilterablePlace {
+
+    public static class Tokenizer extends TablePlaceTokenizer<EventsPlace> {      
 
         @Override
-        public EventsPlace getPlace(final String token) {
-            return new EventsPlace();
+        protected Supplier<EventsPlace> getPlaceFactory() {
+            return EventsPlace::new;
         }
-    }
-
-    @Override
-    public String getVerticalTabName() {
-        return "";
     }
     
 }

@@ -1,22 +1,22 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Supplier;
 
-public class TracTracEventsPlace extends AbstractConnectorsPlace {
-    
-    public TracTracEventsPlace() { 
-    }
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
-    public static class Tokenizer implements PlaceTokenizer<TracTracEventsPlace> {
-        @Override
-        public String getToken(final TracTracEventsPlace place) {
-            return "";
-        }
+public class TracTracEventsPlace extends AbstractFilterablePlace {
 
-        @Override
-        public TracTracEventsPlace getPlace(final String token) {
-            return new TracTracEventsPlace();
-        }
+    @Override
+    public String getVerticalTabName() {
+        return AdminConsoleViewImpl.CONNECTORS;
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<TracTracEventsPlace> {      
+
+        @Override
+        protected Supplier<TracTracEventsPlace> getPlaceFactory() {
+            return TracTracEventsPlace::new;
+        }
+    }
 }

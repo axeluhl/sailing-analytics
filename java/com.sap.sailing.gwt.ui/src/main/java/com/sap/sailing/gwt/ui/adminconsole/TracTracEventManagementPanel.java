@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
@@ -48,6 +49,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -65,7 +67,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
+public class TracTracEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<TracTracConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
@@ -545,9 +547,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }));
         }
     }
-
+    
     public void refreshTracTracConnectors() {
         connectionsTable.refreshTracTracConnectionList();
         raceList.getList().clear();
+    }
+    
+    @Override
+    public AbstractFilterablePanel<TracTracConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }

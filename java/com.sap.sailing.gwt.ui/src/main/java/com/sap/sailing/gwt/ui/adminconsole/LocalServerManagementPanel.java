@@ -96,7 +96,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         buttonPanel.addAction(stringMessages.actionChangeOwnership(), () -> permissionCheck.test(CHANGE_OWNERSHIP),
                 () -> configOwner.openOwnershipDialog(currentServerInfo));
         buttonPanel.addAction(stringMessages.actionChangeACL(), () -> permissionCheck.test(CHANGE_ACL),
-                () -> configACL.openACLDialog(currentServerInfo));
+                () -> configACL.openDialog(currentServerInfo));
         return buttonPanel;
     }
 

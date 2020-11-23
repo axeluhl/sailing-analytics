@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
-import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 
@@ -18,13 +18,13 @@ public class AdminConsoleActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place place) {
         AdminConsoleActivity activity = null;
-        if (place instanceof AdminConsolePlace) {
+        if (place instanceof AbstractAdminConsolePlace) {
             if (AdminConsoleActivity.instantiated()) {
                 activity = AdminConsoleActivity.getInstance(clientFactory); 
-                activity.goToMenuAndTab((AdminConsolePlace)place);
+                activity.goToMenuAndTab((AbstractAdminConsolePlace)place);
             }
             else {
-                activity = AdminConsoleActivity.getInstance(clientFactory, (AdminConsolePlace)place); 
+                activity = AdminConsoleActivity.getInstance(clientFactory, (AbstractAdminConsolePlace)place); 
             }
         }
       
