@@ -209,6 +209,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
     
+    private boolean isSelectParameterSet() {
+        return selectExact != null || (select != null && !select.isEmpty());
+    }
+    
     /**
      * Adds an object and applies the search filter.
      */
@@ -303,7 +307,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     private void select() {
-        select(select, selectExact);       
+        if (isSelectParameterSet()) {
+            select(select, selectExact);       
+        }
     }
     
     /**

@@ -39,7 +39,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
 
     private static final String ROLE_DEFINITIONS_TAB_LABEL = "Roles";
-    private static final String ROLE_DEFINITIONS_TAB_IDENTIFIER = "RoleDefinitionsPanel";
+    private static final String ROLE_DEFINITIONS_TAB_IDENTIFIER = "RoleDefinitionsPanelWrapper";
     
     private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
     private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
@@ -63,7 +63,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
     
     private static final String ADVANCED_USER_GROUP_MANAGEMENT_LABEL = "User Group Management";
-    private static final String ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER = "UserGroupManagementPanel";
+    private static final String ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER = "UserGroupManagementPanelWrapper";
     
     private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
     private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
