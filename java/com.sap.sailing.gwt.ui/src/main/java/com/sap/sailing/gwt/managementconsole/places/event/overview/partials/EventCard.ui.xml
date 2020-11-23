@@ -6,22 +6,24 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
-    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4}">
+    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.cardPanel}">
         <div class="{local_res.style.eventCard}" ui:field="card">
-            <div class="{res.mediaCss.grid} {local_res.style.eventCardContainer}">
-                <div class="{res.mediaCss.column} {res.mediaCss.hideonsmall} {res.mediaCss.medium4}">
-                    <div class="{local_res.style.featuredMarker}" ui:field="eventState1">
-                        <ui:text from='{i18n.live}' />
+            <div class="{local_res.style.eventCardContainer}">
+                <div class="{app_res.style.oneLineContainer}">
+                    <div class="{app_res.style.oneLineAutoWidthItem}">
+                        <h1>
+                            <span ui:field="title"></span>
+                        </h1>
+                        <div class="{app_res.style.oneLineContainer}">
+                            <div class="{app_res.style.oneLineItem} {app_res.icons.icon} {app_res.icons.iconLocation}">&#160;</div>
+                            <h2 ui:field="subTitle" class="{app_res.style.oneLineAutoWidthItem}"/>
+                        </div>
                     </div>
+                    <div>
+                        <g:Anchor href="javascript:;" ui:field="advancedSettingsEventAnchor" 
+                            styleName="{app_res.style.oneLineItem} {app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
+                    </div>                
                 </div>
-                <h1 class="{res.mediaCss.column} {res.mediaCss.small8} {res.mediaCss.medium12}" ui:field="title"/>
-                <div class="{res.mediaCss.column} {res.mediaCss.small4} {res.mediaCss.showonsmall}">
-                    <div class="{local_res.style.featuredMarker}" ui:field="eventState2">
-                        <ui:text from='{i18n.live}' />
-                    </div>
-                </div>
-                <h2 class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.icons.icon} {app_res.icons.iconLocation} {local_res.style.location}"
-                    ui:field="subTitle"/>
             </div>
         </div>
     </g:HTMLPanel>

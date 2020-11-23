@@ -67,6 +67,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource iconNavigation();
 
+    @Source("icons/Icon-ElipseGLobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconElipse();
+
     interface Style extends CssResource {
 
         String primaryButton();
@@ -79,6 +83,17 @@ public interface ManagementConsoleResources extends ClientBundle {
         String headerLine();
         
         String right();
+
+        @ClassName("one-line-container")
+        String oneLineContainer();
+
+        @ClassName("one-line-item")
+        String oneLineItem();
+
+        @ClassName("one-line-auto-width-item")
+        String oneLineAutoWidthItem();
+        
+        String ellipsis();
 
     }
 
@@ -115,6 +130,9 @@ public interface ManagementConsoleResources extends ClientBundle {
         
         @ClassName("icon-navigation")
         String iconNavigation();
-
+        
+        @ClassName("icon-elipse")
+        String iconElipse();
+        
     }
 }

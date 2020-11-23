@@ -1,31 +1,42 @@
 @charset "UTF-8";
 @def EVENT_CARD_BACKGROUND_COLOR #1e2d39;
 
-.eventCard {
+.cards {
+    padding: 0 6px;
+}
+
+.cards .card-panel {
+    padding: 0 7px;
+}
+
+.event-card {
     border-style: solid;
     border-radius: 10px;
-    padding: 10px;
+    padding: 0px;
     border-width: 1px;
     outline: none;
     background-color: EVENT_CARD_BACKGROUND_COLOR;
     border-color: EVENT_CARD_BACKGROUND_COLOR;
-    margin-bottom: 1em;
+    margin-bottom: 13px;
+    position: relative;
 }
 
-.eventCard h1 {
-    margin: .5rem 0;
+.event-card h1 {
+    margin: 0;
+    padding: 0;
     font-weight: 600;
     font-size: 16px;
     color: TEXT_COLOR_PRIMARY;
 }
 
-.eventCard h2 {
+.event-card h2 {
     font-weight: normal;
     font-size: 11px;
     color: TEXT_COLOR_SECONDARY;
+    margin-left: 0.5em;
 }
 
-.eventCard .featuredMarker {
+.event-card .featured-marker {
     font-size: 12px;
     text-align: center;
     border-radius: 5px;
@@ -37,24 +48,31 @@
     color: TEXT_COLOR_PRIMARY;
 }
 
-.eventCard .details {
+.event-card .details {
 }
 
-.eventCard .location {
+.event-card .location {
     padding-left: 2rem;
     background-position: 1rem 0;
 }
 
+.event-card-container {
+    width: 100%;
+    margin: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 0 13px 13px
+}
 
-@media (max-width: 45em) {
-    .eventCard {
+@media (max-width: 44.99em) {
+    .event-card {
         background-image: none!important;
     }
 }
 
 @media (min-width: 45em) {
     
-    .eventCard {
+    .event-card {
         height: 250px;
         background-image: resourceUrl("eventBackdrop");
         background-position: center center;
@@ -63,22 +81,23 @@
         -moz-background-size: cover;
         -o-background-size: cover;
         background-size: cover;
+        position: relative;
     }
 
-    .eventCard.customTeaser:before {
+    .event-card.custom-teaser:before {
         content: '';
         position: absolute;
         top: 0;
-        left: 15px;
-        right: 15px;
-        bottom: 1em;
+        left: 0;
+        right: 0;
+        bottom: 0;
         border-radius: 10px;
         background: linear-gradient(to bottom, transparent 60%, black 120%);
     }
     
 
-    .eventCard .eventCardContainer {
+    .event-card .event-card-container {
         position: absolute;
-        bottom: 2em;
+        bottom: 0;
     }
 }

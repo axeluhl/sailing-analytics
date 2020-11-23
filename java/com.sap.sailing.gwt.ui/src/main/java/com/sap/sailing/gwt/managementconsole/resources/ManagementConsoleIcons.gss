@@ -2,7 +2,7 @@
 
 .icon {
     background-size: contain;
-    background-position: center;
+    background-position: left;
     background-repeat: no-repeat;
     display: inline-block;
     margin: 6px;
@@ -10,6 +10,9 @@
 
 .icon-location {
     background-image: resourceUrl("iconLocation");
+    min-width: 10px;
+    margin: 0;
+    max-height: 15px;
 }
 
 .icon-back {
@@ -27,6 +30,7 @@
 .icon-add {
     background-image: resourceUrl("iconAdd");
     min-width: 19px;
+    height: 22px;
 }
 
 .icon-filter {
@@ -49,4 +53,10 @@
 
 .icon-navigation {
     background-image: resourceUrl("iconNavigation");
+}
+
+.icon-elipse {
+    background-image: resourceUrl("iconElipse");
+    min-width: 19px;
+    height: 16px;
 }

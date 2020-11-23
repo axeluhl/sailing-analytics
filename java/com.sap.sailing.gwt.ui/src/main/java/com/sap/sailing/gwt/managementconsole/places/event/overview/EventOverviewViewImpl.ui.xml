@@ -14,17 +14,20 @@
 
     <g:HTMLPanel addStyleNames="{style.mainContent}">
         <div class="{res.mediaCss.grid}">
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.headerLine}">
-                <h1>
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.headerLine} {app_res.style.oneLineContainer}">
+                <h1 class="{app_res.style.ellipsis}">
                     <ui:text from='{i18n.events}' />
                 </h1>
-                <g:Anchor href="javascript:;" ui:field="addEventAnchor" styleName="{app_res.icons.iconAdd} {app_res.icons.icon}">&#160;</g:Anchor>
-                <g:Anchor href="javascript:;" ui:field="searchEventAnchor" styleName="{app_res.icons.iconSearch} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
-                <g:Anchor href="javascript:;" ui:field="filterEventAnchor" styleName="{app_res.icons.iconFilter} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
+                <g:Anchor href="javascript:;" ui:field="addEventAnchor" 
+                    styleName="{app_res.icons.iconAdd} {app_res.icons.icon} {app_res.style.oneLineAutoWidthItem}">&#160;</g:Anchor>
+                <g:Anchor href="javascript:;" ui:field="searchEventAnchor" 
+                    styleName="{app_res.icons.iconSearch} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
+                <g:Anchor href="javascript:;" ui:field="filterEventAnchor" 
+                    styleName="{app_res.icons.iconFilter} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
             </div>
         </div>
-        <div class="{res.mediaCss.grid}">
-            <g:FlowPanel ui:field="cards"/>
+        <div class="{res.mediaCss.grid} ">
+            <g:FlowPanel ui:field="cards" styleName="{local_res.style.cards}"/>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>

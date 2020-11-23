@@ -23,7 +23,7 @@
 .header .account,
 .header .navigation {
     position: absolute;
-    top: 1rem;
+    top: 20px;
     right: 1rem;
     width: 4rem;
     height: 3rem;

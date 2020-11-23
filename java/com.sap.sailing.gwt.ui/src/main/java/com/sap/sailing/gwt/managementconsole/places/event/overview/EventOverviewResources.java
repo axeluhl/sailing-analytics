@@ -19,16 +19,26 @@ public interface EventOverviewResources  extends ClientBundle {
 
     interface Style extends CssResource {
 
+        @ClassName("featured-marker")
         String featuredMarker();
+        
+        String cards();
 
+        @ClassName("card-panel")
+        String cardPanel();
+
+        @ClassName("event-card")
         String eventCard();
 
         String details();
 
+        @ClassName("event-card-container")
         String eventCardContainer();
 
         String location();
-        
+
+        @ClassName("custom-teaser")
         String customTeaser();
+
     }
 }
