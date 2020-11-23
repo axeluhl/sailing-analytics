@@ -589,6 +589,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                 panel.selectTab(index, fireEvent);
                 filterAndSelect(place, unwrapScrollPanel(currentWidget));
                 refreshDataFor(currentWidget);
+                if (currentWidget instanceof PanelSupplierScollPanel) {
+                    PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentWidget;
+                    supplierScollPanel.activate();
+                }
             }
         }
     }

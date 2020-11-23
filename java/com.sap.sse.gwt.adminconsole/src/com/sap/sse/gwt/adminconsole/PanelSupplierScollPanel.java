@@ -29,7 +29,7 @@ public class PanelSupplierScollPanel extends ScrollPanel {
                     Widget widget = supplier.get();
                     widget.setTitle(supplier.getTitle());
                     widget.setSize("100%", "100%");
-                    add(widget);
+                    setWidget(widget);
                 }
                 
                 @Override
