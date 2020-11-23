@@ -95,6 +95,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
     @GET
     @Produces(CONTENT_TYPE_JSON_UTF8)
     @Path("getRaces")
+    @Deprecated
     public Response raceList(@QueryParam("transitive") @DefaultValue("false") Boolean transitive,
             @QueryParam("events") @DefaultValue("") String strEvents,
             @QueryParam("pred") @DefaultValue("excl") String predicate) {
