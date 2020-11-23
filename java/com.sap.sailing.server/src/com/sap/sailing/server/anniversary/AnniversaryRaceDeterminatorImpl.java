@@ -34,7 +34,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDeterminator {
     private static final Logger logger = Logger.getLogger(AnniversaryRaceDeterminatorImpl.class.getName());
-
     private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
     private final RacingEventService racingEventService;
@@ -44,6 +43,7 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
 
     private volatile Pair<Integer, AnniversaryType> nextAnniversary;
     private volatile int currentRaceCount;
+    private final boolean enabled;
 
     /**
      * Interface for checker classes which are passed to the {@link AnniversaryRaceDeterminatorImpl}'s constructor in order to
@@ -67,6 +67,7 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
         }
         raceChangedListener = this::update;
         start();
+        enabled = Boolean.parseBoolean(System.getProperty(ANNIVERSARY_FLAG, "false"));
     }
 
     void update() {
@@ -203,8 +204,11 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
     
     @Override
     public void start() {
-        isStarted.set(true);
-        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(raceChangedListener);
+        logger.config("system property " + ANNIVERSARY_FLAG + " is " + enabled);
+        isStarted.set(enabled);
+        if (enabled) {
+            remoteSailingServerSet.addRemoteRaceResultReceivedCallback(raceChangedListener);
+        }
     }
     
     @Override
@@ -219,5 +223,10 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
         knownAnniversaries.clear();
         nextAnniversary = null;
         currentRaceCount = 0;
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }
