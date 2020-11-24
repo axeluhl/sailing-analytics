@@ -67,6 +67,8 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         BuilderT setOutboundReplicationConfiguration(OutboundReplicationConfiguration outboundReplicationConfiguration);
 
         BuilderT setDatabaseConfiguration(Database databaseConfiguration);
+        
+        BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
@@ -82,7 +84,8 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private Database databaseConfiguration;
         private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
         private OutboundReplicationConfiguration outboundReplicationConfiguration;
-        
+        private String commaSeparatedEmailAddressesToNotifyOfStartup;
+
         /**
          * By default, the release pre-deployed in the image will be used, represented by an empty {@link Optional}
          * returned by this default method implementation.
@@ -186,6 +189,16 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
             this.inboundReplicationConfiguration = Optional.of(replicationConfiguration);
             return self();
         }
+        
+        protected String getCommaSeparatedEmailAddressesToNotifyOfStartup() {
+            return commaSeparatedEmailAddressesToNotifyOfStartup;
+        }
+
+        @Override
+        public BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup) {
+            this.commaSeparatedEmailAddressesToNotifyOfStartup = commaSeparatedEmailAddressesToNotifyOfStartup;
+            return self();
+        }
     }
     
     protected StartAwsApplicationHost(
@@ -198,5 +211,8 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
             addUserData(ProcessConfigurationVariable.SERVER_NAME, builder.getServerName());
         }
         builder.getInboundReplicationConfiguration().ifPresent(this::addUserData);
+        if (builder.getCommaSeparatedEmailAddressesToNotifyOfStartup() != null) {
+            addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
+        }
     }
 }

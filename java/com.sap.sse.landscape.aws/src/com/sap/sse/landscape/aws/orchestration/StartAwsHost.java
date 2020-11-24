@@ -99,8 +99,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setInstanceName(String name);
         
-        BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup);
-        
         BuilderT setOptionalTimeout(Optional<Duration> optionalTimeout);
         
         BuilderT setHostSupplier(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier);
@@ -122,7 +120,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private List<String> userData = new ArrayList<>();
         private AwsRegion region;
         private String instanceName;
-        private String commaSeparatedEmailAddressesToNotifyOfStartup;
         private Optional<Duration> optionalTimeout;
         private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
         
@@ -236,16 +233,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        protected String getCommaSeparatedEmailAddressesToNotifyOfStartup() {
-            return commaSeparatedEmailAddressesToNotifyOfStartup;
-        }
-
-        @Override
-        public BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup) {
-            this.commaSeparatedEmailAddressesToNotifyOfStartup = commaSeparatedEmailAddressesToNotifyOfStartup;
-            return self();
-        }
-
         /**
          * A timeout for interacting with the instance, such as when creating an SSH / SFTP connection or waiting for its
          * public IP address.
@@ -284,9 +271,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         this.tags = Optional.of(builder.getTags().orElse(Tags.empty()).and(NAME_TAG_NAME, builder.getInstanceName()));
         this.securityGroups = builder.getSecurityGroups();
         this.hostSupplier = builder.getHostSupplier();
-        if (builder.getCommaSeparatedEmailAddressesToNotifyOfStartup() != null) {
-            addUserData(ProcessConfigurationVariable.SERVER_STARTUP_NOTIFY, builder.getCommaSeparatedEmailAddressesToNotifyOfStartup());
-        }
     }
     
     protected static <ShardingKey,
