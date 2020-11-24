@@ -124,13 +124,13 @@ install_environment ()
 {
     if [[ $USE_ENVIRONMENT != "" ]]; then
         # clean up directory to really make sure that there are no files left
-        rm -rf $SERVER_HOME/environment
-        mkdir $SERVER_HOME/environment
+        rm -rf ${SERVER_HOME}/environment
+        mkdir ${SERVER_HOME}/environment
         echo "Using environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
         wget -P environment http://releases.sapsailing.com/environments/$USE_ENVIRONMENT
         echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
-        cat $SERVER_HOME/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
-        echo "# Environment: END" >> $SERVER_HOME/env.sh
+        cat ${SERVER_HOME}/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
+        echo "# Environment: END" >> ${SERVER_HOME}/env.sh
         echo "Updated env.sh with data from environment file!"
     else
         echo "No environment file specified!"
@@ -143,10 +143,10 @@ load_from_release_file ()
         INSTALL_FROM_RELEASE="$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
         echo "You didn't provide a release. Defaulting to latest master build http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
+    if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
-        cd $SERVER_HOME
-        rm -f $SERVER_HOME/${INSTALL_FROM_RELEASE}.tar.gz*
+        cd ${SERVER_HOME}
+        rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf *.tar.gz
         echo "Loading from release file http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz"
         wget http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz
@@ -158,17 +158,19 @@ load_from_release_file ()
 
 load_from_local_release_file ()
 {
-    if [[ $INSTALL_FROM_RELEASE != "" ]]; then
-        cd $SERVER_HOME
+    if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
+        cd ${SERVER_HOME}
         rm -rf plugins start stop status native-libraries org.eclipse.osgi
-        echo "Loading from release file $INSTALL_FROM_RELEASE"
+        echo "Loading from release file ${INSTALL_FROM_RELEASE}"
         mv env.sh env.sh.preserved
 	mv configuration/mail.properties configuration/mail.properties.preserved
 	mv configuration/debug.properties configuration/debug.properties.preserved
-        tar xvzf $INSTALL_FROM_RELEASE
+        tar xvzf ${INSTALL_FROM_RELEASE}
         mv env.sh.preserved env.sh
 	mv configuration/mail.properties.preserved configuration/mail.properties
 	mv configuration/debug.properties.preserved configuration/debug.properties
+	# Try to create the symbolic links to the /home/scores directories where uploaded results are mounted through NFS if in the right region
+	find /home/scores/* -type d -prune -exec ln -s {} \; 2>/dev/null >/dev/null
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
         echo "The variable INSTALL_FROM_RELEASE has not been set, therefore no release file will be installed!"
