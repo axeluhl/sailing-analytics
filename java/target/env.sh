@@ -7,6 +7,12 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
+# Set the heap size here if you want to override the default which
+# will compute a MEMORY assignment from the total
+# memory installed in the machine and the number of server instances to
+# start on that machine.
+# MEMORY="6000m"
+
 # To start replication upon startup provide the fully-qualified names of the Replicable service classes
 # for which to trigger replication. If you activate this make sure to
 # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
