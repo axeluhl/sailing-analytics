@@ -81,8 +81,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
-        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
-
         BuilderT setInstanceType(InstanceType instanceType);
         
         BuilderT setAvailabilityZone(AwsAvailabilityZone availabilityZone);
@@ -111,7 +109,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
-        private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
         private InstanceType instanceType;
         private AwsAvailabilityZone availabilityZone;
         private String keyName;
@@ -124,14 +121,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
         
         protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-            return landscape;
-        }
-
-        @Override
-        public BuilderT setLandscape(
-                AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
-            this.landscape = landscape;
-            return self();
+            return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
         }
 
         protected InstanceType getInstanceType() {

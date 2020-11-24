@@ -23,6 +23,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
+import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
@@ -123,6 +124,14 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         @Override
         protected String getImageType() {
             return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+        }
+
+        /**
+         * Re-expose to this class's package
+         */
+        @Override
+        protected boolean isNoShutdown() {
+            return super.isNoShutdown();
         }
 
         @Override

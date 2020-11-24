@@ -68,24 +68,24 @@ public interface InboundReplicationConfiguration extends UserDataProvider {
     default Map<ProcessConfigurationVariable, String> getUserData() {
         final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
         if (getMasterHostname() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATE_MASTER_SERVLET_HOST, getMasterHostname());
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_SERVLET_HOST, getMasterHostname());
         }
         if (getMasterHttpPort() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATE_MASTER_SERVLET_PORT, "" + getMasterHttpPort());
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_SERVLET_PORT, "" + getMasterHttpPort());
         }
         if (getInboundMasterExchangeName() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATE_MASTER_EXCHANGE_NAME, getInboundMasterExchangeName());
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_EXCHANGE_NAME, getInboundMasterExchangeName());
         }
         if (getReplicableIds() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATE_ON_START, String.join(",", getReplicableIds()));
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_ON_START, String.join(",", getReplicableIds()));
         }
         if (getReplicationCredentials() != null) {
             result.putAll(getReplicationCredentials().getUserData());
         }
         if (getInboundRabbitMQEndpoint() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATE_MASTER_QUEUE_PORT, Integer.toString(getInboundRabbitMQEndpoint().getPort()));
+            result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_QUEUE_PORT, Integer.toString(getInboundRabbitMQEndpoint().getPort()));
             if (getInboundRabbitMQEndpoint().getNodeName() != null) {
-                result.put(ProcessConfigurationVariable.REPLICATE_MASTER_QUEUE_HOST, getInboundRabbitMQEndpoint().getNodeName());
+                result.put(DefaultProcessConfigurationVariables.REPLICATE_MASTER_QUEUE_HOST, getInboundRabbitMQEndpoint().getNodeName());
             }
         }
         return result;

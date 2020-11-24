@@ -10,6 +10,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -54,7 +55,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     private static int readPortFromDirectory(Host host, String serverDirectory2, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(host, serverDirectory2, ProcessConfigurationVariable.SERVER_PORT.name(), optionalTimeout));
+        return Integer.parseInt(getEnvShValueFor(host, serverDirectory2, DefaultProcessConfigurationVariables.SERVER_PORT.name(), optionalTimeout));
     }
     
     @Override
@@ -89,7 +90,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(ProcessConfigurationVariable.TELNET_PORT, optionalTimeout));
+        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout));
     }
     
     /**
@@ -132,7 +133,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        return getEnvShValueFor(ProcessConfigurationVariable.SERVER_NAME, optionalTimeout);
+        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout);
     }
 
     @Override
@@ -151,11 +152,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     
     /**
-     * No health check path known for arbitrary process; returning {@code null} as a default value.
+     * No good health check path known for arbitrary process; returning {@code "/"} as a default value.
      */
     @Override
     public String getHealthCheckPath() {
-        return null;
+        return "/";
     }
 
     @Override

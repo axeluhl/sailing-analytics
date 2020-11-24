@@ -1,11 +1,10 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sse.landscape.aws.orchestration;
 
 import java.util.Collections;
 
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
-import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**

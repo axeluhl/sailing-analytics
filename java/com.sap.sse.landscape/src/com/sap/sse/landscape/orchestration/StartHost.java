@@ -1,7 +1,6 @@
 package com.sap.sse.landscape.orchestration;
 
 import com.sap.sse.landscape.Host;
-import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -36,7 +35,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends Host>
-    extends com.sap.sse.common.Builder<BuilderT, T> {
+    extends Procedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         BuilderT setImageType(String imageType);
     }
     
@@ -45,9 +44,9 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends Host>
+    extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private MachineImage machineImage;
-        private Landscape<ShardingKey, MetricsT, ProcessT> landscape;
         private Region region;
         private String imageType;
         
@@ -78,19 +77,10 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
             this.imageType = imageType;
             return self();
         }
-
-        protected Landscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-            return landscape;
-        }
-
-        protected BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape) {
-            this.landscape = landscape;
-            return self();
-        }
     }
     
     protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) {
-        super(builder.getLandscape());
+        super(builder);
         this.machineImage = builder.getMachineImage();
     }
 

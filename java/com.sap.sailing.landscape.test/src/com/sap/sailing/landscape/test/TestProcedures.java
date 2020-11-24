@@ -22,9 +22,11 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
-import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMaster;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -178,23 +180,28 @@ public class TestProcedures {
     }
     
     @Test
-    public void testConnectivity() throws Exception {
+    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<
+        AppConfigBuilderT, String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>>>
+    void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartSailingAnalyticsMaster.Builder<?, String> builder = StartSailingAnalyticsMaster.builder();
+        Builder<AppConfigBuilderT, String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> applicationConfigurationBuilder =
+                SailingAnalyticsMasterConfiguration.builder();
+        applicationConfigurationBuilder
+            .setServerName(serverName)
+            .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
+                    .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
+                    .build());
+        final StartSailingAnalyticsMasterHost.Builder<?, String> builder = StartSailingAnalyticsMasterHost.builder(applicationConfigurationBuilder);
         final StartSailingAnalyticsHost<String> startSailingAnalyticsMaster = builder
-                .setServerName(serverName)
                 .setLandscape(landscape)
                 .setRegion(region)
                 .setInstanceType(InstanceType.T3_LARGE)
                 .setKeyName(keyName)
-                .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
                 .setTags(Optional.of(Tags.with("Hello", "World")))
                 .setOptionalTimeout(optionalTimeout)
-                .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                        .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
-                        .build())
                 .build();
         startSailingAnalyticsMaster.run();
         final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startSailingAnalyticsMaster.getHost();
@@ -215,14 +222,7 @@ public class TestProcedures {
             assertTrue(foundHello);
             // check env.sh access
             final SailingAnalyticsProcess<String> process = startSailingAnalyticsMaster.getSailingAnalyticsProcess();
-            // TODO The problem here: the /etc/init.d/sailing script takes a while to do its job with downloading, installing
-            // the release, updating git, and running the httpd reverse proxy server. Only then will the env.sh be patched, just before
-            // the instance is launched. We may want to wait for the process to become available on port 8888 before continuing...
-            final TimePoint startingToPollForReady = TimePoint.now();
-            while (!process.isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
-                Thread.sleep(5000);
-            }
-            assertTrue(process.isReady(optionalTimeout));
+            assertTrue(process.waitUntilReady(optionalTimeout));
             final String envSh = process.getEnvSh(optionalTimeout);
             assertFalse(envSh.isEmpty());
             assertTrue("Couldn't find SERVER_NAME=\""+serverName+"\" in env.sh:\n"+envSh, envSh.contains("SERVER_NAME=\""+serverName+"\""));
@@ -260,4 +260,5 @@ public class TestProcedures {
             landscape.deleteKeyPair(region, keyName);
         }
     }
+
 }

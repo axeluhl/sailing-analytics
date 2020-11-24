@@ -1,6 +1,8 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 
 /**
@@ -18,22 +20,27 @@ import com.sap.sse.landscape.aws.ApplicationProcessHost;
  *
  * @author Axel Uhl (D043530)
  */
-public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyticsHost<ShardingKey> {
+public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAnalyticsHost<ShardingKey> {
     private static final String DEFAULT_MASTER_INSTANCE_NAME_SUFFIX = " (Master)";
     
     // TODO the default for the inbound replication configuration should be based on security-service.sapsailing.com and SecurityService/SharedSailingData, making live-master-server environment irrelevant
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
-    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey> {
+    extends StartSailingAnalyticsHost.Builder<BuilderT, StartSailingAnalyticsMasterHost<ShardingKey>, ShardingKey> {
     }
     
     // TODO model an AwsLandscape subclass describing the specifics of the Sailing landscape, with a central security service that a master replicates by default
     // TODO or is this a property for this procedure (with/without central security/shared sailing data) which then knows about security-service.sapsailing.com?
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
-    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMaster<ShardingKey>, ShardingKey>
+    extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMasterHost<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
+        protected BuilderImpl(com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey,
+                ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+            super(applicationConfigurationBuilder);
+        }
+
         @Override
-        public StartSailingAnalyticsMaster<ShardingKey> build() {
-            return new StartSailingAnalyticsMaster<>(this);
+        public StartSailingAnalyticsMasterHost<ShardingKey> build() throws Exception {
+            return new StartSailingAnalyticsMasterHost<>(this);
         }
 
         @Override
@@ -42,12 +49,13 @@ public class StartSailingAnalyticsMaster<ShardingKey> extends StartSailingAnalyt
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
-        return new BuilderImpl<>();
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
+            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+        return new BuilderImpl<>(applicationConfigurationBuilder);
     }
 
-    protected StartSailingAnalyticsMaster(BuilderImpl<?, ShardingKey> builder) {
+    protected StartSailingAnalyticsMasterHost(BuilderImpl<?, ShardingKey> builder) throws Exception {
         super(builder);
-        addUserData(ProcessConfigurationVariable.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
+        addUserData(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }
 }

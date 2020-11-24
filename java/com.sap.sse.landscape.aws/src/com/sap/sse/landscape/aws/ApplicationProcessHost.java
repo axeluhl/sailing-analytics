@@ -9,7 +9,9 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.Scope;
 
-public interface ApplicationProcessHost<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+public interface ApplicationProcessHost<ShardingKey,
+MetricsT extends ApplicationProcessMetrics,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AwsInstance<ShardingKey, MetricsT> {
     String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
     

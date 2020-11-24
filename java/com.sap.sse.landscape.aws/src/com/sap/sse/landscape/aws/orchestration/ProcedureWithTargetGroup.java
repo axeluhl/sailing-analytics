@@ -11,7 +11,6 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
@@ -24,7 +23,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  */
 public abstract class ProcedureWithTargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT> {
+extends AbstractAwsProcedureImpl<ShardingKey, MetricsT, ProcessT> {
     private static final String MASTER_TARGET_GROUP_SUFFIX = "-m";
     private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
     private final String targetGroupNamePrefix;
@@ -35,22 +34,21 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT> {
     T extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends com.sap.sse.common.Builder<BuilderT, T> {
+    extends AbstractAwsProcedureImpl.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         BuilderT setLoadBalancerUsed(ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed);
         BuilderT setTargetGroupNamePrefix(String targetGroupNamePrefix);
         BuilderT setServerName(String serverName);
-        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
     T extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends AbstractAwsProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
         private String targetGroupNamePrefix;
         private String serverName;
-        private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
         
         @Override
         public BuilderT setLoadBalancerUsed(
@@ -84,20 +82,13 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT> {
             return serverName;
         }
 
-        @Override
-        public BuilderT setLandscape(
-                AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
-            this.landscape = landscape;
-            return self();
-        }
-
         public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-            return landscape;
+            return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
         }
     }
 
     protected ProcedureWithTargetGroup(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
-        super(builder.getLandscape());
+        super(builder);
         this.loadBalancerUsed = builder.getLoadBalancerUsed();
         this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();
         this.serverName = builder.getServerName();

@@ -1,12 +1,9 @@
 package com.sap.sse.landscape.orchestration;
 
-import java.util.Arrays;
-
 import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
 
 /**
  * Encodes a potentially compound sequence of actions that transform the landscape from one state to another, trying to
@@ -43,13 +40,13 @@ public interface Procedure<ShardingKey,
                            MetricsT extends ApplicationProcessMetrics,
                            ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends RunnableWithException<Exception> {
+    public static interface Builder<BuilderT extends com.sap.sse.common.Builder<BuilderT, T>,
+    T extends Procedure<ShardingKey, MetricsT, ProcessT>, ShardingKey, 
+    MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends com.sap.sse.common.Builder<BuilderT, T> {
+        BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape);
+    }
+    
     Landscape<ShardingKey, MetricsT, ProcessT> getLandscape();
-    
-    default Procedure<ShardingKey, MetricsT, ProcessT> andThen(Procedure<ShardingKey, MetricsT, ProcessT> nextStep) {
-        return new ProcedureSequence<>(getLandscape(), Arrays.asList(this, nextStep));
-    }
-    
-    default Procedure<ShardingKey, MetricsT, ProcessT> fromSteps(Iterable<Procedure<ShardingKey, MetricsT, ProcessT>> steps) {
-        return new ProcedureSequence<>(getLandscape(), steps);
-    }
 }

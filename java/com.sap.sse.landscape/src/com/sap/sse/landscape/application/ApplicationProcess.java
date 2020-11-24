@@ -10,6 +10,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -104,5 +105,13 @@ extends Process<RotatingFileBasedLog, MetricsT> {
             logger.info("Ready-check failed for "+this+": "+e.getMessage());
             return false;
         }
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
+        final TimePoint startingToPollForReady = TimePoint.now();
+        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+            Thread.sleep(5000);
+        }
+        return isReady(optionalTimeout);
     }
 }
