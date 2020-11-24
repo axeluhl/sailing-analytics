@@ -28,7 +28,7 @@ public abstract class KeywordMatcher<T> {
     }
 
     public boolean matchesExactly(Iterable<String> keywords, T t) {
-        return keywords != null && matches(t, keywords, true);
+        return keywords != null && matches(t, keywords, /* exactMatch */ true);
     }
     
     private boolean containsText(T obj, Iterable<String> keywords) {
@@ -65,10 +65,6 @@ public abstract class KeywordMatcher<T> {
     }
     
     private boolean matches(String s, String keyword, boolean exactMatch) {
-        if (s == null) {
-            return false;
-        }
-        
-        return exactMatch ? s.equalsIgnoreCase(keyword) : s.toUpperCase().contains(keyword);
+        return s != null && (exactMatch ? s.equalsIgnoreCase(keyword) : s.toUpperCase().contains(keyword));
     }
 }
