@@ -154,17 +154,10 @@ load_from_release_file ()
         echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
         cd $SERVER_HOME
         rm -f $SERVER_HOME/${INSTALL_FROM_RELEASE}.tar.gz*
-        rm -rf plugins start stop status native-libraries org.eclipse.osgi *.tar.gz
-        echo "Loading from release file http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz"
-        wget http://releases.sapsailing.com/$INSTALL_FROM_RELEASE/$INSTALL_FROM_RELEASE.tar.gz
-        mv env.sh env.sh.preserved
-	mv configuration/mail.properties configuration/mail.properties.preserved
-	mv configuration/debug.properties configuration/debug.properties.preserved
-        tar xvzf $INSTALL_FROM_RELEASE.tar.gz
-        mv env.sh.preserved env.sh
-	mv configuration/mail.properties.preserved configuration/mail.properties
-	mv configuration/debug.properties.preserved configuration/debug.properties
-        echo "Configuration for this server is unchanged - just binaries have been changed."
+        rm -rf *.tar.gz
+        echo "Loading from release file http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz"
+        wget http://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz
+        load_from_local_release_file
     else
         echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
     fi
@@ -185,7 +178,7 @@ load_from_local_release_file ()
 	mv configuration/debug.properties.preserved configuration/debug.properties
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
-        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
+        echo "The variable INSTALL_FROM_RELEASE has not been set, therefore no release file will be installed!"
     fi
 }
 
@@ -304,7 +297,7 @@ elif [[ $OPERATION == "install-release" ]]; then
 elif [[ $OPERATION == "install-local-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
     if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-        echo "You need to provide the file of a release without tar.gz"
+        echo "You need to provide the file of a tar.gz release file"
         exit 1
     fi
 
