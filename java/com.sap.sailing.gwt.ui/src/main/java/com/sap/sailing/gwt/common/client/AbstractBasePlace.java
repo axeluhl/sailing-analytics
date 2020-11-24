@@ -37,12 +37,14 @@ public abstract class AbstractBasePlace extends Place {
     
     protected String getTokenStringFromParameters(Map<String, String> paramKeysAndValues) {
         final StringJoiner stringJoiner = new StringJoiner("&");
-        for (final Entry<String, String> e : paramKeysAndValues.entrySet()) {
-            String paramName = e.getKey();
-            String paramValue = e.getValue();
-            // for now we don't add 'null' parameters
-            if (paramValue != null) {
-                stringJoiner.add(paramName + "=" + paramValue);
+        if (paramKeysAndValues != null) {
+            for (final Entry<String, String> e : paramKeysAndValues.entrySet()) {
+                String paramName = e.getKey();
+                String paramValue = e.getValue();
+                // for now we don't add 'null' parameters
+                if (paramValue != null) {
+                    stringJoiner.add(paramName + "=" + paramValue);
+                }
             }
         }
         return stringJoiner.toString();
