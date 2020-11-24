@@ -330,7 +330,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         if (select != null) {
             select.clear();
         }
-        selectExact = null;
         executeSelect = false;
     }
     
