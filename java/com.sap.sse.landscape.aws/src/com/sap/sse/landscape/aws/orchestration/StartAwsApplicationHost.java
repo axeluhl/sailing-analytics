@@ -1,8 +1,11 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 
 /**
  * In addition to launching a host, this procedure launches an initial application server process on that host.
@@ -17,6 +20,12 @@ MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
 HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
+    /**
+     * When setting the {@link #setLandscape(Landscape) landscape} or the {@link #setRegion(AwsRegion) region}, these
+     * settings are also copied to the {@link AwsApplicationConfiguration.Builder application configuration builder}.
+     * 
+     * @author Axel Uhl (D043530)
+     */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
     T extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
@@ -41,6 +50,18 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         protected AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT, HostT> getApplicationConfigurationBuilder() {
             return applicationConfigurationBuilder;
+        }
+
+        @Override
+        public BuilderT setRegion(AwsRegion region) {
+            getApplicationConfigurationBuilder().setRegion(region);
+            return super.setRegion(region);
+        }
+
+        @Override
+        public BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape) {
+            getApplicationConfigurationBuilder().setLandscape((AwsLandscape<ShardingKey, MetricsT, ProcessT>) landscape);
+            return super.setLandscape(landscape);
         }
     }
     

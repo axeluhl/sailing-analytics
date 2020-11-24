@@ -63,6 +63,10 @@ HostT extends AwsInstance<ShardingKey, MetricsT>> {
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends com.sap.sse.common.Builder<BuilderT, T> {
+        BuilderT setRegion(AwsRegion region);
+        
+        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
+        
         BuilderT setRelease(Optional<Release> release);
 
         BuilderT setServerName(String serverName);
@@ -98,8 +102,20 @@ HostT extends AwsInstance<ShardingKey, MetricsT>> {
         private OutboundReplicationConfiguration outboundReplicationConfiguration;
         private String commaSeparatedEmailAddressesToNotifyOfStartup;
 
+        @Override
+        public BuilderT setRegion(AwsRegion region) {
+            this.region = region;
+            return self();
+        }
+        
         protected AwsRegion getRegion() {
             return region;
+        }
+        
+        @Override
+        public BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+            this.landscape = landscape;
+            return self();
         }
         
         protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
