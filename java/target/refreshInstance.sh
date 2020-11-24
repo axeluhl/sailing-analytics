@@ -49,13 +49,6 @@ checks ()
         JAVA_BINARY=`which java`
         echo "Using Java from $JAVA_BINARY"
     fi
-    # make sure to set email adresses
-    if [[ $BUILD_COMPLETE_NOTIFY == "" ]]; then
-        export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-    fi
-    if [[ $SERVER_STARTUP_NOTIFY == "" ]]; then
-        export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-    fi
     if [[ $DEPLOY_TO == "" ]]; then
         SERVER_HOME=.
     else
