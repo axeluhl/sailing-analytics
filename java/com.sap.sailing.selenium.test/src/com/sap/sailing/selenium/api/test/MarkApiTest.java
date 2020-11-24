@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -153,11 +154,11 @@ public class MarkApiTest extends AbstractSeleniumTest {
 
         final String pinEndName = "Start/Finish Pin";
         final MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null, null,
-                null, MarkType.BUOY.name());
+                null, MarkType.BUOY.name(), Collections.emptySet());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
         final MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB",
-                null, null, null, MarkType.STARTBOAT.name());
+                null, null, null, MarkType.STARTBOAT.name(), Collections.emptySet());
         sfp.setStoreToInventory(true);
         final MarkConfiguration sft = MarkConfiguration.createMarkBased(mark.getMarkId(), null);
         sft.setFixedPosition(47.159776, 37.5891346);
