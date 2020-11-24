@@ -10,8 +10,8 @@ import com.google.gwt.place.shared.Place;
 
 /**
  * An abstract Place which is able to manage and parse place parameters.
+ * 
  * @author Frank
- *
  */
 public abstract class AbstractBasePlace extends Place {
     private static final Logger logger = Logger.getLogger(AbstractBasePlace.class.getName());
@@ -30,8 +30,7 @@ public abstract class AbstractBasePlace extends Place {
     
     protected void extractKeysAndValues(String... paramKeysAndValues) {
         if (paramKeysAndValues.length % 2 == 0) {
-            StringBuilder stringBuilder = new StringBuilder();
-    
+            final StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < paramKeysAndValues.length; i++) {
                 String paramName = paramKeysAndValues[i++];
                 String paramValue = paramKeysAndValues[i];
@@ -44,7 +43,6 @@ public abstract class AbstractBasePlace extends Place {
                     stringBuilder.append(paramName + "=" + paramValue);
                 }
             }
-    
             placeParametersAsToken = stringBuilder.toString();
         } else {
             logger.warning("Invalid number of arguments received! Must be key,value,key,value ... ignoring arguments");
@@ -54,30 +52,29 @@ public abstract class AbstractBasePlace extends Place {
     protected void extractUrlParams(String url) {
         if (url != null && !url.isEmpty()) {
             this.placeParametersAsToken = url;
-            List<String> list = Arrays.asList(placeParametersAsToken.split("&"));
+            final List<String> list = Arrays.asList(placeParametersAsToken.split("&"));
             if (list == null || list.size() < 1) {
                 logger.warning("Token empty, no-op");
-                return;
-            }
-            for (String listItem : list) {
-                List<String> nvPair = Arrays.asList(listItem.split("="));
-                if (nvPair == null || nvPair.size() != 2) {
-                    logger.warning("Invalid parameters");
-                    continue;
+            } else {
+                for (String listItem : list) {
+                    final List<String> nvPair = Arrays.asList(listItem.split("="));
+                    if (nvPair == null || nvPair.size() != 2) {
+                        logger.warning("Invalid parameters");
+                    } else {
+                        params.put(nvPair.get(0), nvPair.get(1));
+                    }
                 }
-                params.put(nvPair.get(0), nvPair.get(1));
             }
         }
     }
 
     protected void validate(String... paramNames) {
-        StringBuffer message = new StringBuffer(VALIDATE_TOKENS_MESSAGE_PREFIX);
-
+        final StringBuffer message = new StringBuffer(VALIDATE_TOKENS_MESSAGE_PREFIX);
         for (String name : paramNames) {
-            if (!params.containsKey(name))
+            if (!params.containsKey(name)) {
                 message.append(name + " ");
+            }
         }
-
         if (!message.toString().equals(VALIDATE_TOKENS_MESSAGE_PREFIX)) {
             logger.warning(message.toString());
         }
