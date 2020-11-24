@@ -19,6 +19,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
     }
 
     public PasswordResetPlace(String name, String email, String resetSecret) {
+        super((String) null); // TODO bug5288: can the generic token parsing that AbstractBasePlace offers be used here to tokenize the place params?
         this.name = name;
         this.email = email;
         this.resetSecret = resetSecret;
@@ -74,7 +75,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
 
         @Override
         public String getToken(PasswordResetPlace place) {
-            return "";
+            return ""; // TODO bug5288: why not the tokenized parameters as they were parsed by getPlace(token)?
         }
     }
 }

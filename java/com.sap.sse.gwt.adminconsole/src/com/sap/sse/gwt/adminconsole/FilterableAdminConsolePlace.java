@@ -1,6 +1,6 @@
 package com.sap.sse.gwt.adminconsole;
 
-import com.sap.sse.gwt.client.panels.FilterParameter;
+import com.sap.sse.gwt.client.panels.FilterAndSelectParameters;
 
 /**
  * Places that have filterable tables and should be filterable by URL parameters must implement this interface. The
@@ -10,5 +10,5 @@ import com.sap.sse.gwt.client.panels.FilterParameter;
  * @see com.sap.sse.gwt.adminconsole.FilterablePanelProvider
  */
 public interface FilterableAdminConsolePlace {
-    FilterParameter getFilterParameter();
+    FilterAndSelectParameters getFilterParameter();
 }

@@ -1,13 +1,15 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.leaderboards;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class LeaderboardsPlace extends AbstractLeaderboardsPlace {
-    
-    public static class Tokenizer extends TablePlaceTokenizer<LeaderboardsPlace> {      
+    public LeaderboardsPlace(String token) {
+        super(token);
+    }
 
+    public static class Tokenizer extends TablePlaceTokenizer<LeaderboardsPlace> {      
         @Override
-        protected Supplier<LeaderboardsPlace> getPlaceFactory() {
+        protected Function<String, LeaderboardsPlace> getPlaceFactory() {
             return LeaderboardsPlace::new;
         }
     }    

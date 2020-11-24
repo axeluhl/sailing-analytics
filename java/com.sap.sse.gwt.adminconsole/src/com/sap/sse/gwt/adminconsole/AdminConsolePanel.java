@@ -469,8 +469,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
             permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
         }
         permissionsForTabPanel.add(permissionCheck);
-        
-        if (place != null) { //for horizontal tabs
+        if (place != null) { // for horizontal tabs
             widgetPlacesMap.put(widgetToAdd, place);
         }
     }

@@ -1,18 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.coursecreation;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class MarkPropertiesPlace extends AbstractCourseCreationPlace {
-    
-    public MarkPropertiesPlace() { 
+    public MarkPropertiesPlace(String token) {
+        super(token);
     }
 
     public static class Tokenizer extends TablePlaceTokenizer<MarkPropertiesPlace> {      
-
         @Override
-        protected Supplier<MarkPropertiesPlace> getPlaceFactory() {
+        protected Function<String, MarkPropertiesPlace> getPlaceFactory() {
             return MarkPropertiesPlace::new;
         }
     }
-    
 }

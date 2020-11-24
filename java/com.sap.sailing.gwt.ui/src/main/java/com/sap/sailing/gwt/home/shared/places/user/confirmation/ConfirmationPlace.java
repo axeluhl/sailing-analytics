@@ -27,6 +27,7 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
     }
 
     public ConfirmationPlace(Action action, String name, String validationSecret) {
+        super((String) null); // TODO bug5288 the AbstractBasePlace logic is 
         this.action = action;
         this.name = name;
         this.validationSecret = validationSecret;

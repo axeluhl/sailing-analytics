@@ -281,7 +281,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * 
      * @param filterParameter defines the parameters for filtering and selection
      */
-    public void filter(FilterParameter filterParameter) {
+    public void filter(FilterAndSelectParameters filterParameter) {
         if (filterParameter.getFilterString() != null) {
             search(filterParameter.getFilterString());
         } 

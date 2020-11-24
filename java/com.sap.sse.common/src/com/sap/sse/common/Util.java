@@ -996,8 +996,9 @@ public class Util {
         return asSet(a).equals(asSet(b));
     }
     
-    public static interface MapBuilder<K, V> extends Builder<MapBuilder<K, V>, Map<K, V>> {
+    public static interface MapBuilder<K, V> {
         MapBuilder<K, V> put(K key, V value);
+        Map<K, V> build();
     }
     
     public static <K, V> MapBuilder<K, V> mapBuilder() {
@@ -1005,14 +1006,14 @@ public class Util {
             final Map<K, V> result = new HashMap<>();
             
             @Override
-            public Map<K, V> build() throws Exception {
+            public Map<K, V> build() {
                 return result;
             }
 
             @Override
             public MapBuilder<K, V> put(K key, V value) {
                 result.put(key, value);
-                return self();
+                return this;
             }
         };
     }
