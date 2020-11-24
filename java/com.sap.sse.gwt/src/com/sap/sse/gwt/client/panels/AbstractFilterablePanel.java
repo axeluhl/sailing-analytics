@@ -374,12 +374,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * @param selectExact parameter that will be used to find and select exactly matching items in the table
      */
     private void selectSingle(List<String> selections, String selectExact) {    
-        boolean selected = singleSelectExact(selectExact);  
-        
+        final boolean selected = singleSelectExact(selectExact);  
         if (!selected) {
             try {
-                for (T t : all.getList()) {
-                    for (String selection : selections) {
+                for (final T t : all.getList()) {
+                    for (final String selection : selections) {
                         setKeywordsFilterSplitValue(selection);
                         if (matches(t)) {
                             select(t);
@@ -423,17 +422,22 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * @return true if an exactly matching item has been found and selected.
      */
     private boolean singleSelectExact(String selectExact) {
+        final boolean result;
         if (selectExact == null) {
-            return false;
+            result = false;
+        } else {
+            selectionFilter.setKeywords(Arrays.asList(selectExact));
+            boolean found = false;
+            for (T t : all.getList()) {
+                if (matchesExactly(t)) {
+                    select(t);
+                    found = true;
+                    break;
+                }
+            }    
+            result = found;
         }
-        selectionFilter.setKeywords(Arrays.asList(selectExact));
-        for (T t : all.getList()) {
-            if (matchesExactly(t)) {
-                select(t);
-                return true;
-            }
-        }    
-        return false;
+        return result;
     }
     
     private boolean matchesExactly(T t) {       
