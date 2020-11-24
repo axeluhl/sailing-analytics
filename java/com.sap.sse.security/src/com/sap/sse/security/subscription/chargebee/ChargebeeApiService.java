@@ -1,5 +1,7 @@
 package com.sap.sse.security.subscription.chargebee;
 
+import static com.chargebee.models.Subscription.cancel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,11 +11,13 @@ import java.util.logging.Logger;
 import com.chargebee.APIException;
 import com.chargebee.Environment;
 import com.chargebee.ListResult;
+import com.chargebee.Result;
 import com.chargebee.ListResult.Entry;
 import com.chargebee.filters.enums.SortOrder;
 import com.chargebee.internal.ListRequest;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Invoice.InvoiceListRequest;
+import com.chargebee.models.Subscription.CancelRequest;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
 import com.chargebee.models.Transaction;
 import com.chargebee.models.Transaction.TransactionListRequest;
@@ -81,45 +85,95 @@ public class ChargebeeApiService implements SubscriptionApiService {
         logger.info(() -> "Finish fetching user subscription list");
         return subscriptions;
     }
+    
+    @Override
+    public Subscription cancelSubscription(String subscriptionId) throws Exception {
+        final Subscription result;
+        Subscription subscription=fetchSubscription(subscriptionId);
+        if (subscription!=null) {
+            if (subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                result= subscription;
+            }else {
+                Result resultData = cancel(subscriptionId).request();
+                if (resultData.subscription().status().name().toLowerCase()
+                        .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                    result = new ChargebeeSubscription(subscription.getSubscriptionId(),
+                            subscription.getPlanId(), subscription.getCustomerId(), subscription.getTrialStart(),
+                            subscription.getTrialEnd(), ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED,
+                            subscription.getPaymentStatus(), subscription.getTransactionType(),
+                            subscription.getTransactionStatus(), subscription.getInvoiceId(),
+                            subscription.getInvoiceStatus(), subscription.getSubscriptionCreatedAt(),
+                            TimePoint.of(resultData.subscription().updatedAt()), subscription.getLatestEventTime(),
+                            TimePoint.now());
+                }
+            }
+        }else {
+            result=null;
+        }
+        return result;
+    }
+    
+    /**
+     * Fetch and return subscription from provider api
+     */
+    private Subscription fetchSubscription(String subscriptionId) throws Exception {
+        final Subscription result;
+        SubscriptionListRequest request = com.chargebee.models.Subscription.list().limit(1).id().is(subscriptionId).includeDeleted(false);
+        RequestListResult apiResponse = requestApiList(request);
+        if (apiResponse.isRateLimitReached()) {
+            result= fetchSubscription(subscriptionId);
+        }else {
+            if (apiResponse.hasResult()) {
+                ListResult.Entry entry=apiResponse.getResult().get(0);
+                com.chargebee.models.Subscription subscription = entry.subscription();
+                result=(new SubscriptionItem(subscription, null, null)).toSubscription();
+            }else {
+                result=null;
+            }
+        }
+        return result;
+    }
 
     /**
      * Fetch user subscriptions with current offset. Return subscription list result, and next offset for continue
      * fetching
      */
     private Pair<Iterable<SubscriptionItem>, String> fetchSubscriptions(User user, String offset) throws Exception {
+        final Pair<Iterable<SubscriptionItem>, String> result;
         SubscriptionListRequest request = com.chargebee.models.Subscription.list().limit(100).customerId()
                 .is(user.getName()).includeDeleted(false).sortByCreatedAt(SortOrder.DESC);
         if (offset != null && !offset.isEmpty()) {
             request.offset(offset);
         }
-
-        RequestListResult result = requestApiList(request);
-        if (result.isRateLimitReached()) {
-            fetchSubscriptions(user, offset);
-        }
-
-        final List<SubscriptionItem> subscriptions;
-        if (result.hasResult()) {
-            subscriptions = new ArrayList<ChargebeeApiService.SubscriptionItem>();
-            for (ListResult.Entry entry : result.getResult()) {
-                com.chargebee.models.Subscription subscription = entry.subscription();
-                if (subscription != null) {
-                    Invoice invoice = null;
-                    Transaction transaction = null;
-                    if (!subscription.deleted()) {
-                        invoice = fetchInvoice(user, subscription.id());
-                        transaction = fetchTransaction(user, subscription.id());
+        RequestListResult apiResponse = requestApiList(request);
+        if (apiResponse.isRateLimitReached()) {
+            result= fetchSubscriptions(user, offset);
+        }else {
+            final List<SubscriptionItem> subscriptions;
+            if (apiResponse.hasResult()) {
+                subscriptions = new ArrayList<ChargebeeApiService.SubscriptionItem>();
+                for (ListResult.Entry entry : apiResponse.getResult()) {
+                    com.chargebee.models.Subscription subscription = entry.subscription();
+                    if (subscription != null) {
+                        Invoice invoice = null;
+                        Transaction transaction = null;
+                        if (!subscription.deleted()) {
+                            invoice = fetchInvoice(user, subscription.id());
+                            transaction = fetchTransaction(user, subscription.id());
+                        }
+                        subscriptions.add(new SubscriptionItem(subscription, invoice, transaction));
                     }
-                    subscriptions.add(new SubscriptionItem(subscription, invoice, transaction));
-                }
 
+                }
+            } else {
+                subscriptions = null;
             }
-        } else {
-            subscriptions = null;
+
+            String nextOffset = apiResponse.getResult() != null ? apiResponse.getResult().nextOffset() : null;
+            result= new Pair<Iterable<SubscriptionItem>, String>(subscriptions, nextOffset);
         }
 
-        String nextOffset = result.getResult() != null ? result.getResult().nextOffset() : null;
-        return new Pair<Iterable<SubscriptionItem>, String>(subscriptions, nextOffset);
+        return result;
     }
 
     /**
@@ -166,20 +220,31 @@ public class ChargebeeApiService implements SubscriptionApiService {
     private RequestListResult requestApiList(ListRequest<?> request) throws Exception {
         long startTime = TimePoint.now().asMillis();
         ListResult result = request.request();
-        final boolean isRateLimitReached = checkForRateLimitReached(result);
+        final boolean isRateLimitReached = checkAndProcessRateLimit(startTime, result.httpCode);
+        return new RequestListResult(isRateLimitReached, result);
+    }
+    
+    private void requestCancel(CancelRequest request) throws Exception {
+        long startTime = TimePoint.now().asMillis();
+        Result result= request.request();
+        checkAndProcessRateLimit(startTime, result.httpCode);
+    }
+    
+    private boolean checkAndProcessRateLimit(long requestStartTime, int httpCode) throws InterruptedException {
+        final boolean isRateLimitReached = checkForRateLimitReached(httpCode);
         if (!isRateLimitReached) {
-            long comsumedTime = TimePoint.now().asMillis() - startTime;
+            long comsumedTime = TimePoint.now().asMillis() - requestStartTime;
             if (comsumedTime < TIME_FOR_API_REQUEST_MS) {
                 TimeUnit.MILLISECONDS.sleep(TIME_FOR_API_REQUEST_MS - comsumedTime);
             }
         }
-        return new RequestListResult(isRateLimitReached, result);
+        return isRateLimitReached;
     }
 
-    private boolean checkForRateLimitReached(ListResult result) throws InterruptedException {
+    private boolean checkForRateLimitReached(int httpCode) throws InterruptedException {
         final boolean isLimitReached;
         // Check for request rate limit error
-        if (result.httpCode == 429) {
+        if (httpCode == 429) {
             logger.warning(() -> "API rate limit has been reached");
             // Threshold value for test site: ~750 API calls in 5 minutes.
             // Threshold value for live site: ~150 API calls per site per minute.

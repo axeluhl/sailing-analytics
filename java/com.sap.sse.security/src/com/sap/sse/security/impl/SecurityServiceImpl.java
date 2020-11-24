@@ -123,7 +123,6 @@ import com.sap.sse.security.operations.DeleteUserOperation;
 import com.sap.sse.security.operations.PutRoleDefinitionToUserGroupOperation;
 import com.sap.sse.security.operations.RemoveAccessTokenOperation;
 import com.sap.sse.security.operations.RemovePermissionForUserOperation;
-import com.sap.sse.security.operations.RemoveProviderSubscriptionsOperation;
 import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperation;
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
@@ -2533,36 +2532,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
     
-    @Override
-    public void removeProviderUserSubscriptions(String username, String providerName) throws UserManagementException {
-        final User user = getUserByName(username);
-        if (user != null) {
-            apply(new RemoveProviderSubscriptionsOperation(username, providerName));
-        } else {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-    }
-
-    @Override
-    public Void internalRemoveProviderSubscriptions(String username, String providerName)
-            throws UserManagementException {
-        User user = getUserByName(username);
-        if (user != null) {
-            Iterable<Subscription> subscriptions = user.getSubscriptions();
-            List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
-            for (Subscription subscription : subscriptions) {
-                if (!subscription.getProvider().equals(providerName)) {
-                    newSubscriptionList.add(subscription);
-                }
-            }
-            user.setSubscriptions(newSubscriptionList.toArray(new Subscription[] {}));
-            store.updateUser(user);
-            return null;
-        } else {
-            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
-        }
-    }
-
     /**
      * Check if new subscription should be processed, such as if it has a valid plan, or it's the most recent
      * subscription of a plan

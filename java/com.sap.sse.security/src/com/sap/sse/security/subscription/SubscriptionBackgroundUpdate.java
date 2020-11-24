@@ -26,7 +26,7 @@ public class SubscriptionBackgroundUpdate {
     public void start(CompletableFuture<SecurityService> securityService) {
         if (!started) {
             logger.info(() -> "Start subscription background update task");
-            executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService), 0, 12, TimeUnit.HOURS);
+//            executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService), 0, 12, TimeUnit.HOURS);
         }
     }
 }

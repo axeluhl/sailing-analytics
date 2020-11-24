@@ -112,7 +112,5 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalResetPassword(String username, String passwordResetSecret);
 
     Void internalUpdateSubscription(String username, Subscription newSubscription) throws UserManagementException;
-    
-    Void internalRemoveProviderSubscriptions(String username, String provider) throws UserManagementException;
 
 }
