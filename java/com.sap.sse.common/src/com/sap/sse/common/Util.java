@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -810,7 +811,7 @@ public class Util {
     
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
-     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * Collections of the resulting Map are created using the given {@link Supplier} instance.
      * <br>
      * Can be replaced with Java 8 Stream API in the future.
      * 
@@ -993,5 +994,26 @@ public class Util {
      */
     public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
         return asSet(a).equals(asSet(b));
+    }
+    
+    public static interface MapBuilder<K, V> extends Builder<MapBuilder<K, V>, Map<K, V>> {
+        MapBuilder<K, V> put(K key, V value);
+    }
+    
+    public static <K, V> MapBuilder<K, V> mapBuilder() {
+        return new MapBuilder<K, V>() {
+            final Map<K, V> result = new HashMap<>();
+            
+            @Override
+            public Map<K, V> build() throws Exception {
+                return result;
+            }
+
+            @Override
+            public MapBuilder<K, V> put(K key, V value) {
+                result.put(key, value);
+                return self();
+            }
+        };
     }
 }

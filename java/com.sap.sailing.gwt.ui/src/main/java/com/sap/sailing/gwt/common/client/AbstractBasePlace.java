@@ -35,7 +35,7 @@ public abstract class AbstractBasePlace extends Place {
                 String paramName = paramKeysAndValues[i++];
                 String paramValue = paramKeysAndValues[i];
                 // for now we don't add 'null' parameters
-                if(paramValue != null) {
+                if (paramValue != null) {
                     params.put(paramName, paramValue);
                     if(stringBuilder.length() > 0) {
                         stringBuilder.append("&");
