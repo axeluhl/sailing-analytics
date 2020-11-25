@@ -72,7 +72,7 @@ fi
 if [ -z "${REPLICATE_MASTER_EXCHANGE_NAME}" ]; then
   REPLICATE_MASTER_EXCHANGE_NAME=${SERVER_NAME}
 fi
-if [-z "${BUILD_COMPLETE_NOTIFY}" ]; then
+if [ -z "${BUILD_COMPLETE_NOTIFY}" ]; then
   export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 fi
 if [ -z "${SERVER_STARTUP_NOTIFY}" ]; then
