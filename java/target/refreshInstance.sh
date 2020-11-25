@@ -170,7 +170,7 @@ load_from_local_release_file ()
         mv env.sh env.sh.preserved
 	mv configuration/mail.properties configuration/mail.properties.preserved
 	mv configuration/debug.properties configuration/debug.properties.preserved
-        tar xvzf ${INSTALL_FROM_RELEASE}
+        tar xvzf ${INSTALL_FROM_RELEASE}.tar.gz
         mv env.sh.preserved env.sh
 	mv configuration/mail.properties.preserved configuration/mail.properties
 	mv configuration/debug.properties.preserved configuration/debug.properties
@@ -297,7 +297,7 @@ elif [[ $OPERATION == "install-release" ]]; then
 elif [[ $OPERATION == "install-local-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
     if [[ $INSTALL_FROM_RELEASE == "" ]]; then
-        echo "You need to provide the file of a tar.gz release file"
+        echo "You need to provide the file of a tar.gz release file, without the .tar.gz suffix"
         exit 1
     fi
 
