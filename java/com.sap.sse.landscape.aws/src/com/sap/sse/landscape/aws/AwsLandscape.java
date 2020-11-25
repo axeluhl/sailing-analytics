@@ -144,7 +144,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
 
-    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName);
+    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName, Optional<Tags> tags);
 
     void deleteImage(Region region, String imageId);
 

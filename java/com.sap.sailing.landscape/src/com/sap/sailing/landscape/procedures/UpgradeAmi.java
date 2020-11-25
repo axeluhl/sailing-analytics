@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,7 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
@@ -59,6 +61,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
     private final String upgradedImageName;
+    private final String imageType;
     private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
@@ -225,6 +228,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     
     protected UpgradeAmi(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
+        imageType = builder.getImageType();
         upgradedImageName = builder.getUpgradedImageName();
         timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
@@ -248,7 +252,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                     instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
                 }
             }
-            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
+            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(IMAGE_TYPE_TAG_NAME, imageType)));
             final TimePoint startedWaiting = TimePoint.now();
             while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                 logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
