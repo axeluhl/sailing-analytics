@@ -64,7 +64,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
         
         BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
         
-        BuilderT setRelease(Optional<Release> release);
+        BuilderT setRelease(Release release);
 
         BuilderT setServerName(String serverName);
         
@@ -127,8 +127,8 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
         }
 
         @Override
-        public BuilderT setRelease(Optional<Release> release) {
-            this.release = release;
+        public BuilderT setRelease(Release release) {
+            this.release = release == null ? Optional.empty() : Optional.of(release);
             return self();
         }
 

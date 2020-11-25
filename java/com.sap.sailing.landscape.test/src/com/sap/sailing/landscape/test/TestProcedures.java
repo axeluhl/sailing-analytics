@@ -21,6 +21,7 @@ import org.junit.Test;
 import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder;
@@ -188,6 +189,7 @@ public class TestProcedures {
         Builder<AppConfigBuilderT, String> applicationConfigurationBuilder = SailingAnalyticsMasterConfiguration.builder();
         applicationConfigurationBuilder
             .setServerName(serverName)
+            .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")) // TODO this is the debug config for the current branch bug4811 and its releases
             .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))

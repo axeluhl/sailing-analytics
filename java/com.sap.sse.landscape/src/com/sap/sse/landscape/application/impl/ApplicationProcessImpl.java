@@ -32,6 +32,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private static final Optional<Duration> TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5));
     
     private static final String ENV_SH = "env.sh";
+    private static final String ENV_SH_DEFAULTS = "env-default-rules.sh";
     private static final String VERSION_TXT = "configuration/jetty/version.txt";
     
     /**
@@ -104,7 +105,9 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
-        sshChannel.sendCommandLineSynchronously(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; echo \"${"+variableName+"}\"", /* stderr */ new ByteArrayOutputStream());
+        sshChannel.sendCommandLineSynchronously(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
+                                                ". "+getEnvShDefaultsPath(serverDirectory)+">/dev/null 2>/dev/null; "+
+                                                "echo \"${"+variableName+"}\"", /* stderr */ new ByteArrayOutputStream());
         final String variableValue = sshChannel.getStreamContentsAsString();
         return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
     }
@@ -131,6 +134,14 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return getEnvShPath(getServerDirectory());
     }
 
+    private static String getEnvShDefaultsPath(String serverDirectory) {
+        return serverDirectory+"/"+ENV_SH_DEFAULTS;
+        
+    }
+    private String getEnvShDefaultsPath() {
+        return getEnvShDefaultsPath(getServerDirectory());
+    }
+
     @Override
     public String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
         return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout);
@@ -138,7 +149,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
-        return getFileContents(getEnvShPath(), optionalTimeout);
+        return getFileContents(getEnvShPath(), optionalTimeout) + "\n" + getFileContents(getEnvShDefaultsPath(), optionalTimeout);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout)

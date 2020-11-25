@@ -1,8 +1,13 @@
 #!/bin/bash
 ENV_SH="`pwd`/env.sh"
+ENV_SH_DEFAULTS="`pwd`/env-default-rules.sh"
 if [ -f "${ENV_SH}" ]; then
   chmod a+x "${ENV_SH}"
   source "${ENV_SH}"
+fi
+if [ -f "${ENV_SH_DEFAULTS}" ]; then
+  chmod a+x "${ENV_SH_DEFAULTS}"
+  source "${ENV_SH_DEFAULTS}"
 fi
 ON_AMAZON=`command -v ec2-metadata`
 DATE_OF_EXECUTION=`date`
