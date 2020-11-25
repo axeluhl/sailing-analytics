@@ -6,9 +6,6 @@ if [ "$TMP" = "" ]; then
 fi
 PWD=`pwd`
 . "$PWD/env.sh"
-# Then set those variables not yet set explicitly, based on variables set so far
-# as well as other reasonable defaults:
-. "$PWD/env-default-rules.sh"
 
 PARAM=$@
 

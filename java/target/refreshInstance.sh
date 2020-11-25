@@ -93,16 +93,9 @@ activate_user_data ()
 append_default_envsh_rules()
 {
     echo "# Default rules: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
-    echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-    echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-    echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-    echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
-    # Append EC2 user data to env.sh file:
-    cat "$ec2EnvVars_tmpFile" >>$SERVER_HOME/env.sh
-
-    echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
-    echo "# User-Data: END" >> $SERVER_HOME/env.sh
-    echo "Updated env.sh with data from user-data field!"
+    cat "${SERVER_HOME}/env-default-rules.sh" >>$SERVER_HOME/env.sh
+    echo "# Default rules: END" >> $SERVER_HOME/env.sh
+    echo "Updated env.sh with data from env-default-rules.sh file!"
 }
 
 append_user_data_to_envsh ()
