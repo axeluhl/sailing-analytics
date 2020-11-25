@@ -87,16 +87,18 @@ configure_and_start_server() {
   MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
   echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
   local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
-  # ensure that if this *created* env.sh that it's owned by the correct user:
-  chown sailing "${ENV_SH}"
-  chgrp sailing "${ENV_SH}"
+  local ENV_SH_DEFAULTS="${SERVERS_DIR}/$conf/env-default-rules.sh"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.err
   (
-    # execute env.sh in a subshell which now has the same set of variables that the server will see
+    # execute env.sh and env-default-rules.sh in a subshell which now has the same set of variables that the server will see
     source "${ENV_SH}"
+    source "${ENV_SH_DEFAULTS}"
     if [ -z $MEMORY ]; then
       echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>"${ENV_SH}"
     fi
+    # ensure that if this *created* env.sh that it's owned by the correct user:
+    chown sailing "${ENV_SH}"
+    chgrp sailing "${ENV_SH}"
     start_server "${conf}"
     server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
     if [ ${#EVENT_HOSTNAME[*]} = 0 ]; then
@@ -169,6 +171,7 @@ reload_httpd() {
 create_basic_httpd_config() {
     FIRST_SERVER=`echo $JAVA_START_INSTANCES | awk '{print $1;}'`
     source $SERVERS_DIR/$FIRST_SERVER/env.sh
+    source $SERVERS_DIR/$FIRST_SERVER/env-default-rules.sh
     echo "Writing macro invocation to ${APACHE_INTERNALS_CONFIG_FILE} to map internal IP $INSTANCE_INTERNAL_IP4 to plain server running $SERVER_PORT..." >>/var/log/sailing.err
     echo "Use Plain-SSL ${INSTANCE_INTERNAL_IP4} 127.0.0.1 $SERVER_PORT" >"${APACHE_INTERNALS_CONFIG_FILE}"
     # Append Apache macro invocation for /internal-server-status based on mod_status and INSTANCE_DNS to "${APACHE_INTERNALS_CONFIG_FILE}"
