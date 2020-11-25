@@ -277,6 +277,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
 
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
