@@ -115,7 +115,6 @@ append_user_data_to_envsh ()
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
     echo "Updated env.sh with data from user-data field!"
-    echo ""
 }
 
 install_environment ()
