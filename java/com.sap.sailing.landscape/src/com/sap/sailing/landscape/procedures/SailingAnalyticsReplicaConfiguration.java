@@ -7,9 +7,8 @@ import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.aws.AwsInstance;
 
-public class SailingAnalyticsReplicaConfiguration<ShardingKey,
-HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-extends SailingAnalyticsApplicationConfiguration<ShardingKey, HostT> {
+public class SailingAnalyticsReplicaConfiguration<ShardingKey>
+extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     /**
      * Additional defaults for starting a Sailing Analytics replica server:
      * <ul>
@@ -25,18 +24,14 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey, HostT> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, HostT>,
-    ShardingKey,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-    extends SailingAnalyticsApplicationConfiguration.Builder<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey, HostT>, ShardingKey, HostT> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends SailingAnalyticsApplicationConfiguration.Builder<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey> {
         String DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX = "-replica";
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, HostT>,
-    ShardingKey,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-    extends SailingAnalyticsApplicationConfiguration.BuilderImpl<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey, HostT>, ShardingKey, HostT>
-    implements Builder<BuilderT, ShardingKey, HostT> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends SailingAnalyticsApplicationConfiguration.BuilderImpl<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey>
+    implements Builder<BuilderT, ShardingKey> {
         @Override
         public OutboundReplicationConfiguration getOutboundReplicationConfiguration() {
             final OutboundReplicationConfiguration.Builder resultBuilder;
@@ -69,17 +64,17 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey, HostT> {
         }
 
         @Override
-        public SailingAnalyticsReplicaConfiguration<ShardingKey, HostT> build() throws Exception {
-            return new SailingAnalyticsReplicaConfiguration<ShardingKey, HostT>(this);
+        public SailingAnalyticsReplicaConfiguration<ShardingKey> build() throws Exception {
+            return new SailingAnalyticsReplicaConfiguration<ShardingKey>(this);
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey, HostT>,
-    ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey, HostT> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>,
+    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey> builder() {
         return new BuilderImpl<>();
     }
 
-    protected SailingAnalyticsReplicaConfiguration(BuilderImpl<?, ShardingKey, HostT> builder) {
+    protected SailingAnalyticsReplicaConfiguration(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
     }
 }

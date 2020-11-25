@@ -180,14 +180,12 @@ public class TestProcedures {
     }
     
     @Test
-    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<
-        AppConfigBuilderT, String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>>>
+    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>>
     void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        Builder<AppConfigBuilderT, String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> applicationConfigurationBuilder =
-                SailingAnalyticsMasterConfiguration.builder();
+        Builder<AppConfigBuilderT, String> applicationConfigurationBuilder = SailingAnalyticsMasterConfiguration.builder();
         applicationConfigurationBuilder
             .setServerName(serverName)
             .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")

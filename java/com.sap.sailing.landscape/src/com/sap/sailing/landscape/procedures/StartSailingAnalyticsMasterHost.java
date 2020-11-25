@@ -1,7 +1,5 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 
@@ -33,8 +31,7 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMasterHost<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
-        protected BuilderImpl(com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey,
-                ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+        protected BuilderImpl(com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
         }
 
@@ -50,7 +47,7 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
-            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
         return new BuilderImpl<>(applicationConfigurationBuilder);
     }
 

@@ -62,15 +62,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
     extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
     implements Builder<BuilderT, T, ShardingKey> {
-        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey,
-                ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
         }
 
         @Override
-        protected SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getApplicationConfigurationBuilder() {
-            return (com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics,
-                    SailingAnalyticsProcess<ShardingKey>>>) super.getApplicationConfigurationBuilder();
+        protected SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey> getApplicationConfigurationBuilder() {
+            return (com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey>) super.getApplicationConfigurationBuilder();
         }
 
         @Override
@@ -103,9 +101,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     }
     
     @Override
-    protected SailingAnalyticsApplicationConfiguration<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    protected SailingAnalyticsApplicationConfiguration<ShardingKey>
     getApplicationConfiguration() {
-        return (SailingAnalyticsApplicationConfiguration<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>) super.getApplicationConfiguration();
+        return (SailingAnalyticsApplicationConfiguration<ShardingKey>) super.getApplicationConfiguration();
     }
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {

@@ -1,9 +1,6 @@
 package com.sap.sailing.landscape.procedures;
 
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 
 public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingAnalyticsHost<ShardingKey> {
     /**
@@ -24,8 +21,7 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
     implements Builder<BuilderT, ShardingKey> {
         private static final String DEFAULT_REPLICA_INSTANCE_NAME_SUFFIX = " (Replica)";
 
-        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey,
-                ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
         }
         
@@ -41,7 +37,7 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
-            SailingAnalyticsReplicaConfiguration.Builder<?, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> applicationConfigurationBuilder) {
+            SailingAnalyticsReplicaConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
         return new BuilderImpl<>(applicationConfigurationBuilder);
     }
     

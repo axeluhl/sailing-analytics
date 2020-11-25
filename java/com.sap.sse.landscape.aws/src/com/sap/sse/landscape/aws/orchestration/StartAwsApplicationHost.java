@@ -10,7 +10,7 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 /**
  * In addition to launching a host, this procedure launches an initial application server process on that host.
  * Therefore, it offers the configuration of release, server name, as well as replication properties for the application
- * server process.
+ * server process through a dedicated {@link AwsApplicationConfiguration.Builder application configuration builder}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -41,14 +41,14 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
     HostT extends AwsInstance<ShardingKey, MetricsT>>
     extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
-        private final AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT, HostT> applicationConfigurationBuilder;
+        private final AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT> applicationConfigurationBuilder;
 
-        protected BuilderImpl(AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT, HostT> applicationConfigurationBuilder) {
+        protected BuilderImpl(AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT> applicationConfigurationBuilder) {
             super();
             this.applicationConfigurationBuilder = applicationConfigurationBuilder;
         }
         
-        protected AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT, HostT> getApplicationConfigurationBuilder() {
+        protected AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT> getApplicationConfigurationBuilder() {
             return applicationConfigurationBuilder;
         }
 
@@ -65,7 +65,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
     
-    private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT, HostT> applicationConfiguration;
+    private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration;
     
     protected StartAwsApplicationHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
@@ -73,7 +73,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         addUserData(applicationConfiguration::getUserData);
     }
 
-    protected AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT, HostT> getApplicationConfiguration() {
+    protected AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> getApplicationConfiguration() {
         return applicationConfiguration;
     }
 }

@@ -12,7 +12,6 @@ import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.mongodb.Database;
@@ -30,8 +29,7 @@ import com.sap.sse.landscape.mongodb.Database;
  */
 public abstract class AwsApplicationConfiguration<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-HostT extends AwsInstance<ShardingKey, MetricsT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
      * A builder that helps building an instance of type {@link AwsApplicationConfiguration} or any subclass thereof (then
      * using specialized builders). The following default rules apply, in addition to the defaults rules of the builders
@@ -57,11 +55,10 @@ HostT extends AwsInstance<ShardingKey, MetricsT>> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+    T extends AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     extends com.sap.sse.common.Builder<BuilderT, T> {
         BuilderT setRegion(AwsRegion region);
         
@@ -86,12 +83,11 @@ HostT extends AwsInstance<ShardingKey, MetricsT>> {
      * The builder needs to know the {@link AwsRegion} in which the application will be run. In this region, discovery
      * of default database and messaging endpoints is performed.
      */
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+    T extends AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
         private AwsRegion region;
         private Optional<Release> release = Optional.empty();
@@ -254,7 +250,7 @@ HostT extends AwsInstance<ShardingKey, MetricsT>> {
 
     private final Map<ProcessConfigurationVariable, String> userData;
     
-    protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) {
+    protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
     }
 

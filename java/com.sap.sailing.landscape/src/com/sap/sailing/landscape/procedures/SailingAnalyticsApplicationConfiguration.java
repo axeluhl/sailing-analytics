@@ -7,14 +7,12 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 
-public class SailingAnalyticsApplicationConfiguration<ShardingKey,
-HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT> {
+public class SailingAnalyticsApplicationConfiguration<ShardingKey>
+extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
     /**
      * A builder that helps building an instance of type {@link SailingAnalyticsApplicationConfiguration} or any subclass thereof (then
      * using specialized builders). The following default rules apply, in addition to the defaults rules of the builders
@@ -28,10 +26,9 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
-    T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT>, ShardingKey,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-    extends AwsApplicationConfiguration.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
+    extends AwsApplicationConfiguration.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
         int DEFAULT_PORT = 8888;
         int DEFAULT_TELNET_PORT = 14888;
         int DEFAULT_EXPEDITION_PORT = 2010;
@@ -49,11 +46,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * The builder needs to know the {@link AwsRegion} in which the application will be run. In this region, discovery
      * of default database and messaging endpoints is performed.
      */
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
-    T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT>, ShardingKey,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>>
-    extends AwsApplicationConfiguration.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT>
-    implements Builder<BuilderT, T, ShardingKey, HostT> {
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
+    extends AwsApplicationConfiguration.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
+    implements Builder<BuilderT, T, ShardingKey> {
         private Integer port;
         private Integer telnetPort;
         private Integer expeditionPort;
@@ -118,7 +114,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
     private final Integer expeditionPort;
     private final String serverDirectory;
 
-    protected SailingAnalyticsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, HostT> builder) {
+    protected SailingAnalyticsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey> builder) {
         super(builder);
         this.port = builder.getPort();
         this.telnetPort = builder.getTelnetPort();
