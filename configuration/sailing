@@ -50,7 +50,7 @@ start_servers() {
           if [ -f "${REBOOT_INDICATOR}" ]; then
 	    echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
 	    for conf in ${JAVA_START_INSTANCES}; do
-	      start_server ${conf}
+	      su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
 	    done
 	  else
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
