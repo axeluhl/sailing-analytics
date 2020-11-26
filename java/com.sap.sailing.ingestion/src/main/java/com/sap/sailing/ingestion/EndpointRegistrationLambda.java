@@ -15,8 +15,8 @@ import net.spy.memcached.MemcachedClient;
 /**
  * <p>
  * This lambda handles the registration of HTTP endpoints that need to receive GPS fixes for one or more device UUIDs.
- * Once registered an endpoint will receive fixes that are being transmitted in almost real-time. The transmission will
- * have a timeout of 2 seconds in order to not unneccessarily block the lambda execution.
+ * Once registered, an endpoint will receive fixes that are being transmitted in almost real-time. The transmission will
+ * have a timeout of 2 seconds in order to not unnecessarily block the lambda execution.
  * </p>
  * 
  * <p>

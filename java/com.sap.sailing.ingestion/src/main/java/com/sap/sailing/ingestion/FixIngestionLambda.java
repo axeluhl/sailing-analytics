@@ -30,22 +30,22 @@ public class FixIngestionLambda implements RequestHandler<GpsFixDTO, String> {
             final MemcachedClient memcachedClient = new MemcachedClient(new InetSocketAddress(
                     Configuration.MEMCACHED_ENDPOINT_HOST, Configuration.MEMCACHED_ENDPOINT_PORT));
             context.getLogger().log("Getting data for device uuid " + input.getDeviceUuid());
-            Object listOfEndpointsToTrigger = memcachedClient.get(input.getDeviceUuid());
+            final Object listOfEndpointsToTrigger = memcachedClient.get(input.getDeviceUuid());
             if (listOfEndpointsToTrigger != null) {
                 context.getLogger().log("Connecting to endpoints");
                 @SuppressWarnings("unchecked")
-                List<EndpointDTO> endpointsToTrigger = (List<EndpointDTO>) listOfEndpointsToTrigger;
-                for (EndpointDTO endpoint : endpointsToTrigger) {
+                final List<EndpointDTO> endpointsToTrigger = (List<EndpointDTO>) listOfEndpointsToTrigger;
+                for (final EndpointDTO endpoint : endpointsToTrigger) {
                     context.getLogger().log("Connecting to endpoint " + endpoint.getEndpointCallbackUrl());
-                    URL endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
-                    HttpURLConnection connectionToEndpoint = (HttpURLConnection) endpointUrl.openConnection();
+                    final URL endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
+                    final HttpURLConnection connectionToEndpoint = (HttpURLConnection) endpointUrl.openConnection();
                     connectionToEndpoint.setRequestMethod("POST");
                     connectionToEndpoint.setRequestProperty("Content-Type", "application/json; utf-8");
                     connectionToEndpoint.setRequestProperty("Accept", "application/json");
                     connectionToEndpoint.setDoOutput(true);
                     connectionToEndpoint.setConnectTimeout((int) Duration.ofSeconds(2).toMillis());
                     final byte[] jsonAsBytes = new Gson().toJson(input).getBytes();
-                    try (OutputStream os = connectionToEndpoint.getOutputStream()) {
+                    try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                         os.write(jsonAsBytes);
                     }
                 }
@@ -57,7 +57,7 @@ public class FixIngestionLambda implements RequestHandler<GpsFixDTO, String> {
     }
 
     private void storeFixFileToS3(GpsFixDTO input, LambdaLogger logger) {
-        try (S3Client s3Client = S3Client.builder().region(Configuration.S3_REGION).build()) {
+        try (final S3Client s3Client = S3Client.builder().region(Configuration.S3_REGION).build()) {
             final String destinationKey = getDestinationKey(input);
             final PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(Configuration.S3_BUCKET_NAME)
                     .key(destinationKey).contentType("application/json").build();
