@@ -141,7 +141,9 @@ load_from_release_file ()
         echo "You didn't provide a release. Defaulting to latest master build http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
     if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
-        echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+        fi
         cd ${SERVER_HOME}
         rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf *.tar.gz
@@ -193,7 +195,9 @@ build ()
     MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
     if [ $MEM_TOTAL -lt 924 ]; then
         echo "Could not start build process with less than 1GB of RAM!"
-        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        fi
     else
         if [[ $BUILD_BEFORE_START == "True" ]]; then
             cd $PROJECT_HOME
@@ -230,10 +234,14 @@ deploy ()
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
+        fi
     else
         echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+          echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
+        fi
     fi 
 }
 
@@ -257,6 +265,16 @@ auto_install ()
 	append_default_envsh_rules
 	# make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
 	source `pwd`/env.sh
+        if [ -z $MEMORY ]; then
+          # Compute a default amount of memory based on available physical RAM and the number of applications, with a minimum of 2GB:
+          NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
+          MINIMUM_MEMORY_IN_MB=2000
+          MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
+          MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
+          MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
+          echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
+	  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
+	fi
 	echo ""
 	echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
 	echo "DEPLOY_TO: $DEPLOY_TO"
@@ -278,12 +296,14 @@ if [[ $OPERATION == "auto-install" ]]; then
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
         exit 1
     fi
+    rm "${ec2EnvVars_tmpFile}"
 
 elif [[ $OPERATION == "auto-install-from-stdin" ]]; then
     # copy stdin to user data tmp file,
     cat >"${ec2EnvVars_tmpFile}"
     # then auto-install
     auto_install
+    rm "${ec2EnvVars_tmpFile}"
 
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM

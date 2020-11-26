@@ -1,7 +1,5 @@
-#!/bin/bash
-
-# This file contains default rules for variable values that configure the Java server.
-# It is intended to be executed after env.sh, hence after the settings from an environment file
+# Default rules for variable values that configure the Java server.
+# It is intended to be executed at the end of env.sh, hence after the settings from an environment file
 # and the user data have been applied. It checks various variables for their
 # presence, and if no value is set for a variable after evaluating the base env.sh,
 # the optional environment appended from http://releases.sapsailing.com/environments,

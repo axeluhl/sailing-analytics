@@ -161,7 +161,6 @@ public class TestProcedures {
         final UpgradeAmi<String> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
-                    .setInstanceType(InstanceType.T2_MEDIUM)
                     .setKeyName(keyName)
                     .setOptionalTimeout(optionalTimeout)
                     .build();

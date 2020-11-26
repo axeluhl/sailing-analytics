@@ -32,6 +32,7 @@ import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ImageState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
  * Upgrades an existing Amazon Machine Image that is expected to be prepared for such an upgrade, by
@@ -71,8 +72,10 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * Additional default rules in addition to what the {@link StartAwsHost.Builder parent builder} defines:
      * 
      * <ul>
-     * <li>If no {@link #getInstanceName() instance name} is set, the default instance name will be constructed as
+     * <li>If no {@link #setInstanceName(String) instance name} is set, the default instance name will be constructed as
      * {@code IMAGE_UPGRADE+" for "+machineImage.getId()}</li>
+     * <li>If no {@link #setInstanceType(software.amazon.awssdk.services.ec2.model.InstanceType) instance type} is
+     * specified, it defaults to {@link InstanceType#T2_MEDIUM}.</li>
      * <li>The user data are set to the string defined by {@link UpgradeAmi#IMAGE_UPGRADE_USER_DATA}, forcing the image to
      * boot without trying to launch a process instance.</li>
      * <li>The {@link #isNoShutdown()} property default is changed to {@code false} because when upgrading an image the
@@ -127,6 +130,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         @Override
         protected String getImageType() {
             return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+        }
+
+        @Override
+        protected InstanceType getInstanceType() {
+            return super.getInstanceType() == null ? InstanceType.T2_MEDIUM : super.getInstanceType();
         }
 
         /**

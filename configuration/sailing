@@ -66,74 +66,14 @@ start_servers() {
 }
 
 # Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
-# Example:        start_server server
-start_server() {
-  local conf="$1"
-  echo "Starting server ${conf} with SERVER_NAME=${SERVER_NAME}" >>/var/log/sailing.err
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && SERVER_NAME=${SERVER_NAME} ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
-}
-
-# Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
 # Example:        configure_and_start_server server
 # This is expected to be called only in case there is only one server to configure; otherwise, the same EC2 user data
 # would get applied to all application configurations which would not be a good idea.
 configure_and_start_server() {
   conf="$1"
   mkdir -p "${SERVERS_DIR}/${conf}" >/dev/null 2>/dev/null
-  NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
-  MINIMUM_MEMORY_IN_MB=2000
-  MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
-  MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
-  MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
-  echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
   local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.err
-  (
-    # execute env.sh in a subshell which now has the same set of variables that the server will see
-    source "${ENV_SH}"
-    if [ -z $MEMORY ]; then
-      echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>"${ENV_SH}"
-    fi
-    # ensure that if this *created* env.sh that it's owned by the correct user:
-    chown sailing "${ENV_SH}"
-    chgrp sailing "${ENV_SH}"
-    start_server "${conf}"
-    server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
-    if [ ${#EVENT_HOSTNAME[*]} = 0 ]; then
-      echo "No dedicated hostname provided for reverse proxy mapping for event. Defaulting to server name ${server_name}" >>/var/log/sailing.err
-      EVENT_HOSTNAME="${server_name}.sapsailing.com"
-    fi
-    if [ ${#SERIES_HOSTNAME[*]} = 0 ]; then
-      echo "No dedicated hostname provided for reverse proxy mapping for series. Defaulting to server name ${server_name}" >>/var/log/sailing.err
-      SERIES_HOSTNAME="${server_name}.sapsailing.com"
-    fi
-    reverse_proxy_config_file="$APACHE_CONFIG_DIR/${server_name}.conf"
-    if [ $(( ${#EVENT_ID[*]} + ${#SERIES_ID[*]} )) = 0 ]; then
-      # neither an EVENT_ID nor a SERIES_ID were provided; default to Home-SSL macro invocation:
-      echo "## No event / series ID provided; forwarding domain to /gwt/Home.html" >>"${reverse_proxy_config_file}"
-      echo "Use Home-SSL ${EVENT_HOSTNAME} 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
-    else
-      # Now loop over all EVENT_ID specification keys and produce an "Event-SSL" macro invocation for each:
-      for i in ${!EVENT_ID[*]}; do
-	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${EVENT_HOSTNAME[$i]} to event with ID ${EVENT_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.err
-	if [ -z "${EVENT_HOSTNAME[$i]}" ]; then
-	  EVENT_HOSTNAME[$i]="${SERVER_NAME}.sapsailing.com"
-	fi
-	echo "## EVENT ${EVENT_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
-	echo "Use Event-SSL ${EVENT_HOSTNAME[$i]} \"${EVENT_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
-      done
-      # Now loop over all SERIES_ID specification keys and produce an "Series-SSL" macro invocation for each:
-      for i in ${!SERIES_ID[*]}; do
-	if [ -z "${SERIES_HOSTNAME[$i]}" ]; then
-	  SERIES_HOSTNAME[$i]="${SERVER_NAME}.sapsailing.com"
-	fi
-	echo "Appending macro invocation to ${reverse_proxy_config_file} to map ${SERIES_HOSTNAME[$i]} to event with ID ${SERIES_ID[$i]} with server running on local port $SERVER_PORT..." >>/var/log/sailing.err
-	echo "## SERIES ${SERIES_HOSTNAME[$i]}" >>"${reverse_proxy_config_file}"
-	echo "Use Series-SSL ${SERIES_HOSTNAME[$i]} \"${SERIES_ID[$i]}\" 127.0.0.1 $SERVER_PORT" >>"${reverse_proxy_config_file}"
-      done
-    fi
-    # terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
-  )
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
 }
