@@ -2,7 +2,6 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
 
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
-
     <!-- =========================================================== -->
     <!-- Configure the deployment manager                            -->
     <!--                                                             -->
@@ -10,8 +9,7 @@
     <!-- to behave in a similaraly to the legacy ContextDeployer     -->
     <!-- and WebAppDeployer from previous versions of Jetty.         -->
     <!-- =========================================================== -->
-
-	<Call name="addBean">
+    <Call name="addBean">
       <Arg>
         <New id="DeploymentManager" class="org.eclipse.jetty.deploy.DeploymentManager">
           <Set name="contexts">
@@ -44,5 +42,4 @@
         </New>
       </Arg>
     </Call>
-    
 </Configure>
