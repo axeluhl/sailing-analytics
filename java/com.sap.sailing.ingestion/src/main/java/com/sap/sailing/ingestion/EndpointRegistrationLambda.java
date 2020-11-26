@@ -51,13 +51,11 @@ public class EndpointRegistrationLambda implements RequestHandler<EndpointDTO, S
             try {
                 final MemcachedClient memcachedClient = new MemcachedClient(new InetSocketAddress(
                         Configuration.MEMCACHED_ENDPOINT_HOST, Configuration.MEMCACHED_ENDPOINT_PORT));
-                for (String deviceUuid : input.getDevicesUuid()) {
-                    Object memObject = memcachedClient.get(deviceUuid);
-                    if (memObject == null) {
-                        memObject = new ArrayList<EndpointDTO>();
-                    }
-                    ((List<EndpointDTO>) memObject).add(input);
-                    memcachedClient.set(deviceUuid, (int) Duration.ofDays(1).toMinutes() * 60, memObject);
+                for (final String deviceUuid : input.getDevicesUuid()) {
+                    final Object memObject = memcachedClient.get(deviceUuid);
+                    final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>() : (List<EndpointDTO>) memObject;
+                    endpoints.add(input);
+                    memcachedClient.set(deviceUuid, (int) Duration.ofDays(1).toMinutes() * 60, endpoints);
                     context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
                             + input.getEndpointCallbackUrl());
                 }
