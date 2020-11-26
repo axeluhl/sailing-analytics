@@ -200,9 +200,6 @@ Make sure to use the preconfigured environment from `http://releases.sapsailing.
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
-REPLICATE_MASTER_SERVLET_HOST=(IP of your master server or external -master hostname)
-REPLICATE_MASTER_SERVLET_PORT=(port your master is listening on for HTTP/HTTPS requests; defaults to 8888; use 443 for -master hostname)
-REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
@@ -211,11 +208,12 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # or by logging in to the master server using your web browser and then navigating to
 #     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
-SERVER_NAME=MYSPECIFICEVENT
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
+SERVER_NAME=myspecificevent
 EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
+
+This will automatically start replication from your master which is assumed to be reachable at `${SERVER_NAME}.sapsailing.com`. Adjust `REPLICATE_MASTER_SERVLET_HOST` and `REPLICATE_MASTER_SERVLET_PORT` accordingly if this is not the case. The RabbitMQ exchange to subscribe to is also defaulted with the `${SERVER_NAME}`, just like is the case for the outbound side on the master, defining this exchange. Each replica gets its own outbound RabbitMQ exchange by default, using the `${SERVER_NAME}` to which the replica's Amazon instance ID is appended, in case transitive replication should become a need. The database connection string (`MONGODB_URI`) defaults to master's DB with the database name extended by the suffix `-replica`.
 
 #### Setting up a new image (AMI) from scratch (more or less)
 

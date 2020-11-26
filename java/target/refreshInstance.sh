@@ -70,10 +70,10 @@ checks ()
 
 copy_user_data_to_tmp_file ()
 {
-    echo "Reading user-data provided by Amazon instance data to $ec2EnvVars_tmpFile"
+    echo "Reading user-data provided by Amazon instance data to ${ec2EnvVars_tmpFile}"
     VARS=$(ec2-metadata -d | sed "s/user-data\: //g")
     if [[ "$VARS" != "not available" ]]; then
-        ec2-metadata -d | sed "s/user-data\: //g" >>"$ec2EnvVars_tmpFile"
+        ec2-metadata -d | sed "s/user-data\: //g" >>"${ec2EnvVars_tmpFile}"
     else
         echo "No user data has been provided."
     fi
@@ -83,7 +83,7 @@ copy_user_data_to_tmp_file ()
 activate_user_data ()
 {
     # make sure to reload data
-    source "$ec2EnvVars_tmpFile"
+    source "${ec2EnvVars_tmpFile}"
     INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d " "`
     INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d " "`
     INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d " "`
@@ -110,7 +110,7 @@ append_user_data_to_envsh ()
     echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     # Append EC2 user data to env.sh file:
-    cat "$ec2EnvVars_tmpFile" >>$SERVER_HOME/env.sh
+    cat "${ec2EnvVars_tmpFile}" >>$SERVER_HOME/env.sh
 
     echo "INSTANCE_ID=\"$INSTANCE_NAME ($INSTANCE_IP4)\"" >> $SERVER_HOME/env.sh
     echo "# User-Data: END" >> $SERVER_HOME/env.sh
@@ -237,6 +237,34 @@ deploy ()
     fi 
 }
 
+auto_install ()
+{
+	# activate everything found in user data
+	activate_user_data
+	# Now build or fetch the correct release, based on activated user data:
+	if [[ $BUILD_BEFORE_START = "True" ]]; then
+	    checkout_code
+	    build
+	    deploy
+	else
+	    load_from_release_file
+	fi
+	# then download and install environment and append to env.sh
+	install_environment
+	# then append user data to env.sh as it shall take precedence over the installed environment's defaults
+	append_user_data_to_envsh
+	# then append the rules that compute defaults for variables not set elsewhere; this has to come last:
+	append_default_envsh_rules
+	# make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
+	source `pwd`/env.sh
+	echo ""
+	echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+	echo "DEPLOY_TO: $DEPLOY_TO"
+	echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+	echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+	echo ""
+}
+
 OPERATION=$1
 PARAM=$2
 
@@ -245,39 +273,20 @@ if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
 	copy_user_data_to_tmp_file
-        activate_user_data
-        # Now build or fetch the correct release, based on activated user data:
-        if [[ $BUILD_BEFORE_START = "True" ]]; then
-            checkout_code
-            build
-            deploy
-        else
-            load_from_release_file
-        fi
-        # then download and install environment and append to env.sh
-        install_environment
-	# then append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
-	# then append the rules that compute defaults for variables not set elsewhere; this has to come last:
-	append_default_envsh_rules
-
-        # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
-        source `pwd`/env.sh
-
-        echo ""
-        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
-        echo "DEPLOY_TO: $DEPLOY_TO"
-        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
-        echo ""
+        auto_install
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."
         exit 1
     fi
 
+elif [[ $OPERATION == "auto-install-from-stdin" ]]; then
+    # copy stdin to user data tmp file,
+    cat >"${ec2EnvVars_tmpFile}"
+    # then auto-install
+    auto_install
+
 elif [[ $OPERATION == "install-release" ]]; then
     INSTALL_FROM_RELEASE=$PARAM
-
     # Honor the no-overrite setting if there is one
     if [ -f $SERVER_HOME/no-overwrite ]; then
         echo "Found a no-overwrite file in the servers directory. Please remove it to complete this operation!"
@@ -348,6 +357,8 @@ elif [[ $OPERATION == "install-user-data" ]]; then
 else
     echo "Script to prepare a Java instance running on Amazon."
     echo ""
+    echo "auto-install: downloads, builds, or takes from a local file a release, unpacks it in the current directory and applies the environment, user data, and environment defaults to the env.sh file"
+    echo "auto-install-from-stdin: like auto-install, only that the additional configuration data is sourced from standard input (stdin), not the AWS EC2 instance's user data."
     echo "install-release <release>: Downloads the release specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-local-release <release-file>: Installs the release file specified by the second option and overwrites all code for this server. Preserves env.sh."
     echo "install-env <environment>: Downloads and updates the environment with the one specified as a second option. Does NOT take into account Amazon user-data!"
