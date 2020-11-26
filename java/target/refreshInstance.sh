@@ -272,7 +272,7 @@ auto_install ()
           MEM_TOTAL=`cat /proc/meminfo  | grep MemTotal | awk '{print $2;}'`
           MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
           MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
-          echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance." >>/var/log/sailing.err
+          echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
 	fi
 	echo ""
