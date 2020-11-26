@@ -16,8 +16,6 @@ public interface SubscriptionApiService {
 
     /**
      * Cancel user subscription by its id
-     * 
-     * @return New subscription model that would be used for updating user's subscriptions
      */
-    Subscription cancelSubscription(String subscriptionId) throws Exception;
+    SubscriptionCancelResult cancelSubscription(String subscriptionId) throws Exception;
 }

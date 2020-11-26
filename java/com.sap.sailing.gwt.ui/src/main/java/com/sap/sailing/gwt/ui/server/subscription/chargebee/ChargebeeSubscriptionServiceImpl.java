@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
-import static com.chargebee.models.Subscription.cancel;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,6 +26,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionCancelResult;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 
 /**
@@ -47,7 +46,8 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
         if (isValidPlan(planId)) {
             try {
                 User user = getCurrentUser();
-                if (!isUserSubscribedToPlan(user, planId)) {
+                if (!isUserSubscribedToPlan(user, planId)
+                        || isSubscriptionCancelled(user.getSubscriptionByPlan(planId))) {
                     Pair<String, String> usernames = getUserFirstAndLastName(user);
                     String locale = user.getLocaleOrDefault().getLanguage();
                     Result result = HostedPage.checkoutNew().customerId(user.getName()).customerEmail(user.getEmail())
@@ -115,8 +115,7 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
             if (subscriptions != null) {
                 List<SubscriptionItem> itemList = new ArrayList<SubscriptionItem>();
                 for (Subscription subscription : subscriptions) {
-                    if (subscription.hasSubscriptionId() && !subscription.getSubscriptionStatus()
-                            .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
+                    if (subscription.hasSubscriptionId() && !isSubscriptionCancelled(subscription)) {
                         itemList.add(
                                 new ChargebeeSubscriptionItem(subscription.getPlanId(), subscription.getTrialStart(),
                                         subscription.getTrialEnd(), subscription.getSubscriptionStatus(),
@@ -143,23 +142,27 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (isValidSubscription(subscription)) {
                 logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
-                Result resultData = cancel(subscription.getSubscriptionId()).request();
-                if (resultData.subscription().status().name().toLowerCase()
-                        .equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
-                    Subscription newSubscription = new ChargebeeSubscription(subscription.getSubscriptionId(),
-                            subscription.getPlanId(), subscription.getCustomerId(), subscription.getTrialStart(),
-                            subscription.getTrialEnd(), ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED,
-                            subscription.getPaymentStatus(), subscription.getTransactionType(),
-                            subscription.getTransactionStatus(), subscription.getInvoiceId(),
-                            subscription.getInvoiceStatus(), subscription.getSubscriptionCreatedAt(),
-                            TimePoint.of(resultData.subscription().updatedAt()), subscription.getLatestEventTime(),
-                            TimePoint.now());
-                    updateUserSubscription(user, newSubscription);
+                SubscriptionCancelResult cancelResult = ChargebeeApiService.getInstance()
+                        .cancelSubscription(subscription.getSubscriptionId());
+                if (cancelResult.isSuccess()) {
+                    logger.info(() -> "Cancel subscription successful");
                     result = true;
+                    if (cancelResult.getSubscription() != null) {
+                        updateUserSubscription(user, cancelResult.getSubscription());
+                    }
                 } else {
                     result = false;
+                    if (cancelResult.isDeleted()) {
+                        logger.info(() -> "Subscription for plan was deleted");
+                        Subscription emptySubscription = ChargebeeSubscription.createEmptySubscription(planId,
+                                subscription.getLatestEventTime(), TimePoint.now());
+                        updateUserSubscription(user, emptySubscription);
+                    } else {
+                        logger.info(() -> "Cancel subscription failed");
+                    }
                 }
             } else {
+                logger.info(() -> "Invalid subscription");
                 result = false;
             }
         } catch (Exception e) {
@@ -172,5 +175,10 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
     @Override
     protected void initService(ServletConfig config) {
         ChargebeeApiService.initialize();
+    }
+
+    private boolean isSubscriptionCancelled(Subscription subscription) {
+        return subscription != null
+                && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
     }
 }
