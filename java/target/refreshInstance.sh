@@ -141,7 +141,7 @@ load_from_release_file ()
         echo "You didn't provide a release. Defaulting to latest master build http://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
     fi
     if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
-        echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" $BUILD_COMPLETE_NOTIFY
+        echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
         cd ${SERVER_HOME}
         rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf *.tar.gz
@@ -193,7 +193,7 @@ build ()
     MEM_TOTAL=`free -mt | grep Total | awk '{print $2}'`
     if [ $MEM_TOTAL -lt 924 ]; then
         echo "Could not start build process with less than 1GB of RAM!"
-        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        echo "Not enough RAM for completing the build process! You need at least 1GB. Instance NOT started!" | mail -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
     else
         if [[ $BUILD_BEFORE_START == "True" ]]; then
             cd $PROJECT_HOME
@@ -230,10 +230,10 @@ deploy ()
     STATUS=$?
     if [ $STATUS -eq 0 ]; then
         echo "Deployment Successful"
-        echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" $BUILD_COMPLETE_NOTIFY
+        echo "OK - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID complete" ${BUILD_COMPLETE_NOTIFY}
     else
         echo "Deployment Failed"
-        echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" $BUILD_COMPLETE_NOTIFY
+        echo "ERROR - check the attachment for more information." | mail -a $SERVER_HOME/last_automatic_build.txt -r simon.marcel.pamies@sap.com -s "Build of $INSTANCE_ID failed" ${BUILD_COMPLETE_NOTIFY}
     fi 
 }
 

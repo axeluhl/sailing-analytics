@@ -178,6 +178,12 @@ More variables are available, and some variables---if not set in the environment
 * `SERIES_HOSTNAME`
     If specified, overrides the `${SERVER_NAME}.sapsailing.com` default for reverse proxy mappings requested by providing event IDs in the `SERIES_ID` variable. If array notation is used for `SERIES_ID` then so should it for `SERIES_HOSTNAME`.
 
+* `BUILD_COMPLETE_NOTIFY`
+    The comma-separated list of e-mail addresses to send a notification message to after a release has been installed or built from sources.
+
+* `SERVER_STARTUP_NOTIFY`
+    The comma-separated list of e-mail addresses to send a notification message to after a server process has been launched.
+
 * `image-upgrade`
     If provided in a line of its own, the `httpd` server on the instance will be stopped, no application server release will be installed, the operating system packages will be updated, the git repository under `/home/sailing/code` will be pulled for the branch that the workspace is checked out on for the image launched (usually `master`) which will update various scripts relevant for the bootstrapping process, all log directories for `httpd` and the application server will be cleared, and by default the instance will then be shut down for a new AMI to be created for it. See also the `no-shutdown` user data option.
 
