@@ -10,5 +10,5 @@ import com.sap.sse.gwt.client.panels.FilterAndSelectParameters;
  * @see com.sap.sse.gwt.adminconsole.FilterablePanelProvider
  */
 public interface FilterableAdminConsolePlace {
-    FilterAndSelectParameters getFilterParameter();
+    FilterAndSelectParameters getFilterAndSelectParameters();
 }

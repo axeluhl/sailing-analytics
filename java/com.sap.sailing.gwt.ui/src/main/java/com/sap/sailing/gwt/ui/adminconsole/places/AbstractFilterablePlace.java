@@ -44,8 +44,8 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
     }
 
     private FilterAndSelectParameters getFilterAndSelectParametersFromPlaceParams() {
-        return new FilterAndSelectParameters(getParameter(FILTER_KEY), getParameter(SELECT_KEY),
-                getParameter(SELECT_EXACT_KEY), getParameter(FILTER_AND_SELECT_KEY));
+        return new FilterAndSelectParameters(getParameterDecoded(FILTER_KEY), getParameterDecoded(SELECT_KEY),
+                getParameterDecoded(SELECT_EXACT_KEY), getParameterDecoded(FILTER_AND_SELECT_KEY));
     }
     
     public String getFilter() {
@@ -64,7 +64,7 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
         return this.filterAndSelectParameters.getFilterAndSelect();
     }
     
-    public FilterAndSelectParameters getFilterParameter() {
+    public FilterAndSelectParameters getFilterAndSelectParameters() {
         return this.filterAndSelectParameters;
     }
     

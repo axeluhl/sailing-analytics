@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.place.shared.Place;
 
 /**
@@ -90,6 +91,11 @@ public abstract class AbstractBasePlace extends Place {
         return params.get(name);
     }
 
+    public String getParameterDecoded(String name) {
+        String paramValue = params.get(name);
+        return paramValue == null ? null : URL.decodeQueryString(paramValue);
+    }
+    
     public boolean hasParameter(String name) {
         return params.containsKey(name);
     }

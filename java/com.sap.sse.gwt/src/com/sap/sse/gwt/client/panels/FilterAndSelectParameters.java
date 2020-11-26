@@ -43,7 +43,7 @@ public class FilterAndSelectParameters implements Serializable {
         if (filterAndSelect != null) {
             filterString.add(filterAndSelect);
         }
-        return filterString.length() <= 0 ? null : filterString.toString();
+        return filterString.length() <= 0 && !isSelectParameterSet() ? null : filterString.toString();
     }
     
     public List<String> getSelectList() {
@@ -55,6 +55,14 @@ public class FilterAndSelectParameters implements Serializable {
             selects.add(filterAndSelect);
         }
         return selects;
+    }
+    
+    private boolean isSelectParameterSet() {
+        return select != null || selectExact != null || filterAndSelect != null;
+    }
+    
+    public boolean isAnyParameterSet() {
+        return isSelectParameterSet() || getFilterString() != null;
     }
     
     @Override

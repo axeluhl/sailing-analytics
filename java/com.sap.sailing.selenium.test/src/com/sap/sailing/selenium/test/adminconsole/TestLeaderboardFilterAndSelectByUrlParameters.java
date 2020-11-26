@@ -45,7 +45,7 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         assertEquals("505 World 2017", availableLeaderboards.get(0));
         assertEquals("505 Pre-World 2017", availableLeaderboards.get(1));
         
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "");
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "\"\"");
         assertEquals(4, availableLeaderboards.size());        
     }
     
@@ -64,12 +64,6 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         assertEquals(2, selectedEntries.size());
         assertEquals("505 World 2017", selectedEntries.get(0).getName());
         assertEquals("505 Pre-World 2017", selectedEntries.get(1).getName());
-        
-        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT, "");        
-        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();      
-        assertEquals(4, availableLeaderboards.size()); 
-        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
-        assertEquals(0, selectedEntries.size());
     }
     
     @Test
@@ -103,18 +97,12 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
         assertEquals(1, selectedEntries.size());
         assertEquals("505 World 2017", selectedEntries.get(0).getName());
-        
-        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "");        
-        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();      
-        assertEquals(4, availableLeaderboards.size()); 
-        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
-        assertEquals(0, selectedEntries.size());
     }
     
     @Test
-    public void testUrlParameterSelectExactAndSelect() {
-        
-        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", PARAM_SELECT, "2017");        
+    public void testUrlParametersSelectExactAndSelect() {     
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, 
+                "505 World 2017", PARAM_SELECT, "2017");        
         List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
         assertEquals(4, availableLeaderboards.size());
         List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
@@ -129,19 +117,203 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
     }
     
     @Test
-    public void testUrlParameterSelectExactAndFilterAndSelect() {
-        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505", PARAM_FILTER_AND_SELECT, "2017");        
+    public void testUrlParametersSelectExactAndFilterAndSelect() {
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, 
+                "505", PARAM_FILTER_AND_SELECT, "2017");        
         List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();      
         assertEquals(2, availableLeaderboards.size()); 
         List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
         assertEquals(0, selectedEntries.size());
         
-        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", PARAM_FILTER_AND_SELECT, "2017");        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2017");        
         availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
         assertEquals(2, availableLeaderboards.size());
         selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
         assertEquals(1, selectedEntries.size());
         assertEquals("505 World 2017", selectedEntries.get(0).getName());     
+    }
+    
+    @Test
+    public void testAllSelectionUrlParameters() {
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "2015");        
+        List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();      
+        assertEquals(2, availableLeaderboards.size()); 
+        List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size());
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "World");        
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(1, selectedEntries.size());
+        assertEquals("505 World 2017", selectedEntries.get(0).getName());     
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "2015");        
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size()); 
+    }
+    
+    @Test
+    public void testAllSelectionAndFilterUrlParameters() {
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "2015", PARAM_FILTER, "2017");        
+        List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();      
+        assertEquals(2, availableLeaderboards.size()); 
+        List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size());
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "World", PARAM_FILTER, "505");           
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(1, selectedEntries.size());
+        assertEquals("505 World 2017", selectedEntries.get(0).getName());    
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2015", PARAM_SELECT, "World", PARAM_FILTER, "2017");           
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(0, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size());
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2015", PARAM_SELECT, "World", PARAM_FILTER, "2015");           
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(1, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size());  
+        
+        leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017", 
+                PARAM_FILTER_AND_SELECT, "2017", PARAM_SELECT, "2015", PARAM_FILTER, "505");          
+        availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(0, selectedEntries.size()); 
+    }
+    
+    @Test
+    public void testUrlParameterDecoding() {
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams();                    
+        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "Sailing & 2011");
+        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "Sailing&2015");
+        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "&");
+        
+        List<String> availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "2017 %26");
+        assertEquals(0, availableLeaderboards.size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "2011 %26", PARAM_SELECT, "505");
+        assertEquals(1, availableLeaderboards.size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "Sailing %26 2011");
+        assertEquals(1, availableLeaderboards.size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "%26", PARAM_SELECT, "%26");
+        assertEquals(3, availableLeaderboards.size());
+        List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(3, selectedEntries.size()); 
+        assertEquals("&", selectedEntries.get(0).getName());
+        assertEquals("Sailing & 2011", selectedEntries.get(1).getName());
+        assertEquals("Sailing&2015", selectedEntries.get(2).getName());
+
+
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "%26", PARAM_SELECT_EXACT, "%26");
+        assertEquals(3, availableLeaderboards.size());
+        selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
+        assertEquals(1, selectedEntries.size()); 
+        assertEquals("&", selectedEntries.get(0).getName());
+    }
+    
+    @Test
+    public void testResetFilterWhenSelectionUrlParametersOnly() {  
+        List<String> availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "2017");
+        assertEquals(2, availableLeaderboards.size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT, "505");
+        assertEquals(4, availableLeaderboards.size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "2017");
+        assertEquals(2, availableLeaderboards.size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT_EXACT, "505");
+        assertEquals(4, availableLeaderboards.size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "x");
+        assertEquals(0, availableLeaderboards.size());        
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017");
+        assertEquals(4, availableLeaderboards.size()); 
+    }
+    
+    /** TODO bug5288 
+    @Test
+    public void testResetFilterAndSelectWhenParametersMissing() {  
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "2017");             
+        List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size()); 
+        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT, "2017");     
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017");     
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(1, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "505 World 2017");     
+        assertEquals(1, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+    } **/
+    
+    @Test
+    public void testResetSelectWhenFilterUrlParametersOnly() {  
+        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "2017");             
+        List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
+        assertEquals(2, availableLeaderboards.size()); 
+        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "505");
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT, "2017");     
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "505");
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017");     
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(1, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
+        
+        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "505");
+        assertEquals(4, availableLeaderboards.size());
+        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
     }
     
     private void createTestLeaderboards() {
