@@ -24,7 +24,7 @@ public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<Role
         logger.info("Create RoleDefinitionsPanel");
         final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanelWrapper(StringMessages.INSTANCE,
                 presenter.getUserService(), tableResources, presenter.getErrorReporter());
-        roleManagementPanel.ensureDebugId("roleManagementPanel");
+        roleManagementPanel.ensureDebugId("RoleDefinitionsPanelWrapper");
         return roleManagementPanel;
     }
 

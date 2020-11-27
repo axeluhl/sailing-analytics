@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.adminconsole;
 
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,8 +18,9 @@ public class PanelSupplierScollPanel extends ScrollPanel {
         this.supplier = supplier;
     }
     
-    public void activate(RunAsyncCallback callback) {
+    public void activate(Consumer<PanelSupplierScollPanel> consumer) {
         logger.info("Activate");
+        final PanelSupplierScollPanel that = this;
         if (getWidget() == null) {
             logger.info("init widget from supplier " + supplier.getClass());
             supplier.getAsync(new RunAsyncCallback() {
@@ -30,7 +32,7 @@ public class PanelSupplierScollPanel extends ScrollPanel {
                     widget.setTitle(supplier.getTitle());
                     widget.setSize("100%", "100%");
                     setWidget(widget);
-                    callback.onSuccess();
+                    consumer.accept(that);
                 }
                 
                 @Override
@@ -39,7 +41,7 @@ public class PanelSupplierScollPanel extends ScrollPanel {
                 }
             });
         } else {
-            callback.onSuccess();
+            consumer.accept(this);
         }
     }
 }

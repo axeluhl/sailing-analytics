@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -124,16 +123,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
                     if (selectedPanel instanceof PanelSupplierScollPanel) {
                         PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) selectedPanel;
-                        supplierScollPanel.activate(new RunAsyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                refreshDataFor(selectedPanel);
-                                goToWidgetsPlace(selectedPanel);
-                            }
-                            @Override
-                            public void onFailure(Throwable reason) {
-                            }
-                        });
+                        supplierScollPanel.activate(panelSupplierScollPanel -> {
+                                refreshDataFor(panelSupplierScollPanel);
+                                goToWidgetsPlace(panelSupplierScollPanel);
+                            });
                     } else {
                         refreshDataFor(selectedPanel);
                         goToWidgetsPlace(selectedPanel);
@@ -151,16 +144,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                     }
                     if (widgetAssociatedToVerticalTab instanceof PanelSupplierScollPanel) {
                         PanelSupplierScollPanel dummyScrollPanel = (PanelSupplierScollPanel) widgetAssociatedToVerticalTab;
-                        final Widget widgetAssociatedToVerticalTabCallback = widgetAssociatedToVerticalTab;
-                        dummyScrollPanel.activate(new RunAsyncCallback() {
-                            @Override
-                            public void onSuccess() {
-                                refreshDataFor(widgetAssociatedToVerticalTabCallback);
-                                goToWidgetsPlace(widgetAssociatedToVerticalTabCallback);
-                            }
-                            @Override
-                            public void onFailure(Throwable reason) {
-                            }
+                        dummyScrollPanel.activate(panelSupplierScollPanel -> 
+                        {
+                            refreshDataFor(panelSupplierScollPanel);
+                            goToWidgetsPlace(panelSupplierScollPanel);
                         });
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
@@ -299,14 +286,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                 Widget currentSelectedWidget = topLevelTabPanel.getWidget(0);
                 if (currentSelectedWidget instanceof PanelSupplierScollPanel) {
                     PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentSelectedWidget;
-                    supplierScollPanel.activate(new RunAsyncCallback() {
-                        @Override
-                        public void onSuccess() {
-                        }
-                        @Override
-                        public void onFailure(Throwable reason) {
-                        }
-                    });
+                    supplierScollPanel.activate(t -> {});
                 }
             }
         } else {
@@ -609,14 +589,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                 refreshDataFor(currentWidget);
                 if (currentWidget instanceof PanelSupplierScollPanel) {
                     PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentWidget;
-                    supplierScollPanel.activate(new RunAsyncCallback() {
-                        @Override
-                        public void onSuccess() {
-                        }
-                        @Override
-                        public void onFailure(Throwable reason) {
-                        }
-                    });
+                    supplierScollPanel.activate(t -> {});
                 }
             }
         }

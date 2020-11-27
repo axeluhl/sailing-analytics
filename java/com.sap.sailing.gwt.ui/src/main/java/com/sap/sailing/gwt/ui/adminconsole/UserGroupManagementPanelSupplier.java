@@ -26,7 +26,7 @@ public class UserGroupManagementPanelSupplier extends AdminConsolePanelSupplier<
         logger.info("Create UserGroupManagementPanel");
         final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanelWrapper(presenter.getUserService(),
                 StringMessages.INSTANCE, SecuredDomainType.getAllInstances(), presenter.getErrorReporter(), tableResources);
-        userGroupManagementPanel.ensureDebugId("userGroupManagementPanel");
+        userGroupManagementPanel.ensureDebugId("UserGroupManagementPanelWrapper");
         return userGroupManagementPanel;
     }
 
