@@ -278,6 +278,7 @@ if [[ "$@" == "release" ]]; then
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
 
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
@@ -818,6 +819,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
+        cp -v $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/mail.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
@@ -905,6 +907,7 @@ if [[ "$@" == "remote-deploy" ]]; then
 
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/env-default-rules.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
