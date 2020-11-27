@@ -570,7 +570,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regattaOwnershipAnnotation == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
-        final boolean skipPermissionChecksBasedOnCorrectRegattaSecretProvided = regatta.getRegistrationLinkSecret().equals(registrationLinkSecret);
+        final boolean skipPermissionChecksBasedOnCorrectRegattaSecretProvided = Util.equalsWithNull(regatta.getRegistrationLinkSecret(), registrationLinkSecret);
         // users must at least have REGATTA:UPDATE or must provide a valid secret where then the regatta must be a "OPEN" regatta:
         if (!getSecurityService().hasCurrentUserUpdatePermission(regatta) && (!skipPermissionChecksBasedOnCorrectRegattaSecretProvided || !regatta.getCompetitorRegistrationType().isOpen())) {
             return getBadRegattaRegistrationTypeErrorResponse(regattaName);

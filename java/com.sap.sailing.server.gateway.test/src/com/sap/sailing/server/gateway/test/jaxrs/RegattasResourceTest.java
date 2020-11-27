@@ -84,7 +84,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true,
-                fleets, raceColumnNames, /* trackedRegattaRegistry */null);
+                fleets, raceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(testSeries);
         final UUID closedRegattaUuid = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
@@ -117,7 +117,6 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                 });
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
-
         Course course = new CourseImpl("emptyCourse", Collections.emptySet());
         // get the same instance! of the boat class object, as else addRace will fail
         BoatClass boatClass = racingEventService.getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
