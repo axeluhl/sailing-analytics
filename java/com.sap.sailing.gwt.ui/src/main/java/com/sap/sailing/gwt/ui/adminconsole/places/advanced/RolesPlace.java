@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
 
 public class RolesPlace extends AbstractFilterablePlace {
+    public RolesPlace(String token) {
+        super(token);
+    }
 
     @Override
     public String getVerticalTabName() {
@@ -13,9 +16,8 @@ public class RolesPlace extends AbstractFilterablePlace {
     }
     
     public static class Tokenizer extends TablePlaceTokenizer<RolesPlace> {      
-
         @Override
-        protected Supplier<RolesPlace> getPlaceFactory() {
+        protected Function<String, RolesPlace> getPlaceFactory() {
             return RolesPlace::new;
         }
     }

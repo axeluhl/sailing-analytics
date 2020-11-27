@@ -1,64 +1,80 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
+import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sse.gwt.adminconsole.FilterableAdminConsolePlace;
-import com.sap.sse.gwt.client.panels.FilterParameter;
+import com.sap.sse.gwt.client.panels.FilterAndSelectParameters;
 
 public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace implements FilterableAdminConsolePlace {
-    
+    /**
+     * Name of the place parameter that adds the parameter's value into the place's main table's filter box unchanged.
+     */
     private static final String FILTER_KEY = "filter";
+    
+    /**
+     * Name of the place parameter that can be used to make a selection in the place's main table. The logic for
+     * identifying the rows based on the parameter value is the same as implemented by the filter box.
+     */
     private static final String SELECT_KEY = "select";
+    
+    /**
+     * Name of the place parameter that combines {@link #FILTER_KEY} and {@link #SELECT_KEY}, filtering and selecting
+     * based on the same search string.
+     */
     private static final String FILTER_AND_SELECT_KEY = "filterAndSelect";
+    
+    /**
+     * Name of the place parameter that requests an exact and complete match for the parameter value with at least one
+     * searchable column value of the place's main table's rows.
+     */
     private static final String SELECT_EXACT_KEY = "selectExact";
     
-    private FilterParameter filterParameter = new FilterParameter();
+    private final FilterAndSelectParameters filterAndSelectParameters;
+    
+    protected AbstractFilterablePlace(String token) {
+        super(token);
+        filterAndSelectParameters = getFilterAndSelectParametersFromPlaceParams();
+    }
+
+    protected AbstractFilterablePlace(Map<String, String> paramKeysAndValues) {
+        super(paramKeysAndValues);
+        filterAndSelectParameters = getFilterAndSelectParametersFromPlaceParams();
+    }
+
+    private FilterAndSelectParameters getFilterAndSelectParametersFromPlaceParams() {
+        return new FilterAndSelectParameters(getParameterDecoded(FILTER_KEY), getParameterDecoded(SELECT_KEY),
+                getParameterDecoded(SELECT_EXACT_KEY), getParameterDecoded(FILTER_AND_SELECT_KEY));
+    }
     
     public String getFilter() {
-        return filterParameter.getFilter();
+        return filterAndSelectParameters.getFilter();
     }
     
     public String getSelect() {
-        return filterParameter.getSelect();
+        return filterAndSelectParameters.getSelect();
     }  
 
-    void loadFilterParam() {
-        this.filterParameter.setFilter(getParameter(FILTER_KEY));
-    }
-    
-    void loadSelectParam() {
-        this.filterParameter.setSelect(getParameter(SELECT_KEY));
-    }
-    
-    void loadSelectExactParam() {
-        this.filterParameter.setSelectExact(getParameter(SELECT_EXACT_KEY));
-    }
-    
-    public void loadFilterAndSelectParam() {
-        this.filterParameter.setFilterAndSelect(getParameter(FILTER_AND_SELECT_KEY));
-    }
-    
     public String getSelectExact() {
-        return filterParameter.getSelectExact();
+        return filterAndSelectParameters.getSelectExact();
     } 
     
     public String getFilterAndSelect() {
-        return this.filterParameter.getFilterAndSelect();
+        return this.filterAndSelectParameters.getFilterAndSelect();
     }
     
-    public FilterParameter getFilterParameter() {
-        return this.filterParameter;
+    public FilterAndSelectParameters getFilterAndSelectParameters() {
+        return this.filterAndSelectParameters;
     }
     
+    // TODO bug5288: this method should not have to exist, and subclasses should not maintain information redundant with how the panels are assembled in the AdminConsole tabs
     @Override
     public String getVerticalTabName() {
         return "";
     }
     
     protected static abstract class TablePlaceTokenizer<P extends AbstractFilterablePlace> implements PlaceTokenizer<P> {
-        
         @Override
         public String getToken(P place) {
             return place.getParametersAsToken();
@@ -66,29 +82,24 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
 
         @Override
         public P getPlace(String token) {
-            P place = getPlaceFactory().get();   
+            P place = getPlaceFactory().apply(token);   
             place.extractUrlParams(token);
-            
-            place.loadFilterParam();
-            place.loadSelectParam();
-            place.loadSelectExactParam();
-            place.loadFilterAndSelectParam();    
             return place;
         }
 
         /**
-         * Provides a {@link Function factory} to create a new place from parsed {@link Long token} on deserialization.
+         * Provides a {@link Function factory} to create a new place from parsed {@link String token} on deserialization.
          *
          * @return the {@link Function} to get the place instance from
          */
-        protected abstract Supplier<P> getPlaceFactory();
+        protected abstract Function<String, P> getPlaceFactory();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((filterParameter == null) ? 0 : filterParameter.hashCode());
+        result = prime * result + ((filterAndSelectParameters == null) ? 0 : filterAndSelectParameters.hashCode());
         return result;
     }
 
@@ -101,10 +112,10 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
         if (getClass() != obj.getClass())
             return false;
         AbstractFilterablePlace other = (AbstractFilterablePlace) obj;
-        if (filterParameter == null) {
-            if (other.filterParameter != null)
+        if (filterAndSelectParameters == null) {
+            if (other.filterAndSelectParameters != null)
                 return false;
-        } else if (!filterParameter.equals(other.filterParameter))
+        } else if (!filterAndSelectParameters.equals(other.filterAndSelectParameters))
             return false;
         return true;
     }

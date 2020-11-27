@@ -132,7 +132,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
 
                     refreshDataFor(selectedPanel);
                     goToWidgetsPlace(selectedPanel);
-                    
+
                } else if (source instanceof VerticalTabLayoutPanel) {
                    logger.info("onSelection vertical tab layout");
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
@@ -508,8 +508,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
             permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
         }
         permissionsForTabPanel.add(permissionCheck);
-        
-        if (place != null) { //for horizontal tabs
+        if (place != null) { // for horizontal tabs
             widgetPlacesMap.put(widgetToAdd, place);
         }
     }
@@ -617,10 +616,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
     }
 
     private void filterAndSelect(final T place, final Widget widget) {
-        if (widget instanceof FilterablePanelProvider && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilterParameter() != null) {
+        if (widget instanceof FilterablePanelProvider && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilterAndSelectParameters() != null) {
             FilterablePanelProvider<?> filterablePanelProvider = (FilterablePanelProvider<?>) widget;
             FilterableAdminConsolePlace filterablePlace = (FilterableAdminConsolePlace) place;
-            filterablePanelProvider.getFilterablePanel().filter(filterablePlace.getFilterParameter());
+            filterablePanelProvider.getFilterablePanel().filterAndSelect(filterablePlace.getFilterAndSelectParameters());
         }
     }
     

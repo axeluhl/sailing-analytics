@@ -5,8 +5,10 @@ import java.util.logging.Logger;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
@@ -107,6 +109,23 @@ public class AdminConsolePage extends HostPageWithAuthentication {
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
         return HostPage.goToUrl(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html");
+    }
+    
+    public static AdminConsolePage goToLeaderboardConfigurationPlace(WebDriver driver, String root, String ...urlParameterKeysAndValues) {
+        return HostPage.goToPlace(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html", "LeaderboardsPlace", urlParameterKeysAndValues);
+    }
+    
+    public LeaderboardConfigurationPanelPO getLeaderboardConfigurationPanelPO () {
+        // Wait for the tab to become visible due to the used animations.
+        FluentWait<WebElement> wait = createFluentWait(administrationTabPanel);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER)));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "internal error sleeping for 500ms", e);
+        } // wait for a bit to make sure the UI had a change to trigger any asynchronous background update/refresh
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
+        return new LeaderboardConfigurationPanelPO(driver, content);
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")

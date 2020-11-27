@@ -5,12 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class FilterParameter implements Serializable {
+public class FilterAndSelectParameters implements Serializable {
 
     private static final long serialVersionUID = 8498346319001912273L;
     
-    private String filter, select, selectExact, filterAndSelect;
+    private final String filter, select, selectExact, filterAndSelect;
     
+    public FilterAndSelectParameters(String filter, String select, String selectExact, String filterAndSelect) {
+        super();
+        this.filter = filter;
+        this.select = select;
+        this.selectExact = selectExact;
+        this.filterAndSelect = filterAndSelect;
+    }
+
     public String getFilter() {
         return filter;
     }
@@ -19,28 +27,12 @@ public class FilterParameter implements Serializable {
         return select;
     }  
 
-    public void setFilter(String filter) {
-        this.filter = filter;
-    }
-    
-    public void setSelect(String select) {
-        this.select = select;
-    }
-    
-    public void setSelectExact(String selectExact) {
-        this.selectExact = selectExact;
-    }
-    
     public String getSelectExact() {
         return selectExact;
     }
     
     public String getFilterAndSelect() {
         return filterAndSelect;
-    }
-    
-    public void setFilterAndSelect (String filterAndSelect) {
-        this.filterAndSelect = filterAndSelect;
     }
     
     public String getFilterString() {
@@ -51,7 +43,7 @@ public class FilterParameter implements Serializable {
         if (filterAndSelect != null) {
             filterString.add(filterAndSelect);
         }
-        return filterString.length() <= 0 ? null : filterString.toString();
+        return filterString.length() <= 0 && !isSelectParameterSet() ? null : filterString.toString();
     }
     
     public List<String> getSelectList() {
@@ -65,11 +57,12 @@ public class FilterParameter implements Serializable {
         return selects;
     }
     
-    public void clear() {
-        this.filter = null;
-        this.filterAndSelect = null;
-        this.selectExact = null;
-        this.filterAndSelect = null;
+    private boolean isSelectParameterSet() {
+        return select != null || selectExact != null || filterAndSelect != null;
+    }
+    
+    public boolean isAnyParameterSet() {
+        return isSelectParameterSet() || getFilterString() != null;
     }
     
     @Override
@@ -91,7 +84,7 @@ public class FilterParameter implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        FilterParameter other = (FilterParameter) obj;
+        FilterAndSelectParameters other = (FilterAndSelectParameters) obj;
         if (filter == null) {
             if (other.filter != null)
                 return false;
