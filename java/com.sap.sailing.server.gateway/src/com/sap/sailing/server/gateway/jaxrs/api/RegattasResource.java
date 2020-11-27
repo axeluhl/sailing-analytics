@@ -575,7 +575,6 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (!getSecurityService().hasCurrentUserUpdatePermission(regatta) && (!skipPermissionChecksBasedOnCorrectRegattaSecretProvided || !regatta.getCompetitorRegistrationType().isOpen())) {
             return getBadRegattaRegistrationTypeErrorResponse(regattaName);
         }
-        boolean checkInCompetitor = false; // whether to create a RegattaLogDeviceCompetitorMappingEvent in the RegattaLog; requires non-null deviceUuid to be provided
         String eCompetitorName = null, eCompetitorShortName = null, eCompetitorEmail = null;
         if (competitorName == null && user == null) {
             return getBadRegattaRegistrationValidationErrorResponse("No competitor name specified and no user authenticated; can't derive competitor name");
@@ -586,7 +585,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         eCompetitorEmail = competitorEmail == null ? user != null ? user.getEmail() : null : competitorEmail;
         // Check regattalog if device has been already registered to this regatta
         boolean duplicateDeviceId = false;
-        if (checkInCompetitor) {
+        if (deviceUuid != null) {
             final RegattaLog regattaLog = regatta.getRegattaLog();
             regattaLog.lockForRead();
             try {
@@ -673,7 +672,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             regatta.registerCompetitor(competitor);
             response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor)))
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-            if (checkInCompetitor) {
+            if (deviceUuid != null) {
                 final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
                 final TimePoint now = MillisecondsTimePoint.now();
                 RegattaLogDeviceMappingEventImpl<Competitor> event = new RegattaLogDeviceCompetitorMappingEventImpl(now,
