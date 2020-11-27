@@ -7,8 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.logging.Logger;
 
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -72,7 +72,6 @@ import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
  *
  */
 public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends HeaderPanel implements HandleTabSelectable {
-    private Logger logger = Logger.getLogger(this.getClass().getName());
     private final UserService userService;
     
     /**
@@ -121,20 +120,26 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
             Object source = event.getSource();
             if (source != null) {
                 if (source instanceof HorizontalTabLayoutPanel) {
-                    logger.info("onSelection horizontal tab layout");
                     final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    logger.info("onSelection widget: " + selectedPanel.getClass().getName());
                     if (selectedPanel instanceof PanelSupplierScollPanel) {
                         PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) selectedPanel;
-                        supplierScollPanel.activate();
+                        supplierScollPanel.activate(new RunAsyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                refreshDataFor(selectedPanel);
+                                goToWidgetsPlace(selectedPanel);
+                            }
+                            @Override
+                            public void onFailure(Throwable reason) {
+                            }
+                        });
+                    } else {
+                        refreshDataFor(selectedPanel);
+                        goToWidgetsPlace(selectedPanel);
                     }
 
-                    refreshDataFor(selectedPanel);
-                    goToWidgetsPlace(selectedPanel);
-
                } else if (source instanceof VerticalTabLayoutPanel) {
-                   logger.info("onSelection vertical tab layout");
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
                     if (widgetAssociatedToVerticalTab instanceof HorizontalTabLayoutPanel) {
@@ -144,10 +149,19 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
                     }
-                    logger.info("onSelection widget: " + widgetAssociatedToVerticalTab.getClass().getName());
                     if (widgetAssociatedToVerticalTab instanceof PanelSupplierScollPanel) {
                         PanelSupplierScollPanel dummyScrollPanel = (PanelSupplierScollPanel) widgetAssociatedToVerticalTab;
-                        dummyScrollPanel.activate();
+                        final Widget widgetAssociatedToVerticalTabCallback = widgetAssociatedToVerticalTab;
+                        dummyScrollPanel.activate(new RunAsyncCallback() {
+                            @Override
+                            public void onSuccess() {
+                                refreshDataFor(widgetAssociatedToVerticalTabCallback);
+                                goToWidgetsPlace(widgetAssociatedToVerticalTabCallback);
+                            }
+                            @Override
+                            public void onFailure(Throwable reason) {
+                            }
+                        });
                     }
                     refreshDataFor(widgetAssociatedToVerticalTab);
                     goToWidgetsPlace(widgetAssociatedToVerticalTab);
@@ -285,7 +299,14 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                 Widget currentSelectedWidget = topLevelTabPanel.getWidget(0);
                 if (currentSelectedWidget instanceof PanelSupplierScollPanel) {
                     PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentSelectedWidget;
-                    supplierScollPanel.activate();
+                    supplierScollPanel.activate(new RunAsyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                        }
+                        @Override
+                        public void onFailure(Throwable reason) {
+                        }
+                    });
                 }
             }
         } else {
@@ -472,13 +493,11 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget>
     panelToAdd, String tabTitle, BooleanSupplier permissionCheck, T place) {
         if (panelToAdd.getAdminConsolePanelSupplier() != null) {
-            logger.info("addToTabPanel supplier with title: " + tabTitle);
             panelToAdd.getAdminConsolePanelSupplier().setTitle(tabTitle);
             ScrollPanel wrapped = wrapInDummyScrollPanel(panelToAdd.getAdminConsolePanelSupplier());
             rememberWidgetLocationAndPermissions(tabPanel, wrapped, tabTitle, permissionCheck, place);
             panelsByWidget.put(wrapped, panelToAdd);
         } else {
-            logger.info("addToTabPanel normal widget with title: " + tabTitle);
             panelToAdd.getWidget().setTitle(tabTitle);
             ScrollPanel wrapped = wrapInScrollPanel(panelToAdd.getWidget());
             rememberWidgetLocationAndPermissions(tabPanel, wrapped, tabTitle, permissionCheck, place);
@@ -590,14 +609,26 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                 refreshDataFor(currentWidget);
                 if (currentWidget instanceof PanelSupplierScollPanel) {
                     PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentWidget;
-                    supplierScollPanel.activate();
+                    supplierScollPanel.activate(new RunAsyncCallback() {
+                        @Override
+                        public void onSuccess() {
+                        }
+                        @Override
+                        public void onFailure(Throwable reason) {
+                        }
+                    });
                 }
             }
         }
     }
-    
-    private void refreshDataFor(Widget target) {
-        RefreshableAdminConsolePanel<? extends Widget> refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
+
+    private void refreshDataFor(final Widget target) {
+        final RefreshableAdminConsolePanel<? extends Widget> refreshTarget;
+        if (target instanceof PanelSupplierScollPanel) {
+            refreshTarget = panelsByWidget.get(target);
+        } else {
+            refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
+        }
         if (refreshTarget != null) {
             refreshTarget.refreshAfterBecomingVisible();
         }

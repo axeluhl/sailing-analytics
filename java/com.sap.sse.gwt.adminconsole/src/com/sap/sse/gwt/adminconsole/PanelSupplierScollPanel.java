@@ -17,10 +17,10 @@ public class PanelSupplierScollPanel extends ScrollPanel {
         this.supplier = supplier;
     }
     
-    public void activate() {
+    public void activate(RunAsyncCallback callback) {
         logger.info("Activate");
         if (getWidget() == null) {
-            logger.info("init widget from supplier");
+            logger.info("init widget from supplier " + supplier.getClass());
             supplier.getAsync(new RunAsyncCallback() {
                 
                 @Override
@@ -30,6 +30,7 @@ public class PanelSupplierScollPanel extends ScrollPanel {
                     widget.setTitle(supplier.getTitle());
                     widget.setSize("100%", "100%");
                     setWidget(widget);
+                    callback.onSuccess();
                 }
                 
                 @Override
@@ -37,6 +38,8 @@ public class PanelSupplierScollPanel extends ScrollPanel {
                     logger.log(Level.SEVERE, "Error while init widget asynchronous.", reason);
                 }
             });
+        } else {
+            callback.onSuccess();
         }
     }
 }

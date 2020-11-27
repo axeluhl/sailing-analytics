@@ -124,7 +124,7 @@ import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleViewImpl extends Composite implements AdminConsoleView {
-
+    
     interface AdminConsoleViewUiBinder extends UiBinder<Widget, AdminConsoleViewImpl> {
     }
     private static AdminConsoleViewUiBinder uiBinder = GWT.create(AdminConsoleViewUiBinder.class);
@@ -197,7 +197,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().fillEvents();
+                if (getWidget() != null) {
+                    getWidget().fillEvents();
+                }
                 presenter.fillLeaderboardGroups();
             }
         }, stringMessages.events(), new EventsPlace((String) null /* no place token */), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -259,7 +261,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().refreshCompetitorList();
+                if (getWidget() != null) {
+                    getWidget().refreshCompetitorList();
+                }
             }
         }, stringMessages.competitors(), new CompetitorsPlace(null),
                 SecuredDomainType.COMPETITOR.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
@@ -269,7 +273,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().refreshBoatList();
+                if (getWidget() != null) {
+                    getWidget().refreshBoatList();
+                }
             }
         }, stringMessages.boats(), new BoatsPlace((String) null /* no place token */),
                 SecuredDomainType.BOAT.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
@@ -300,7 +306,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().onShow();
+                if (getWidget() != null) {
+                    getWidget().onShow();
+                }
             }
         }, stringMessages.mediaPanel(), new AudioAndVideoPlace((String) null /* no place token */),
                 SecuredDomainType.MEDIA_TRACK.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -325,7 +333,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<TracTracEventManagementPanel>(tracTracEventManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().refreshTracTracConnectors();
+                        if (getWidget() != null) {
+                            getWidget().refreshTracTracConnectors();
+                        }
                     }
                 },
                 stringMessages.tracTracEvents(), new TracTracEventsPlace((String) null /* no place token */),
@@ -356,6 +366,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     @Override
                     public void refreshAfterBecomingVisible() {
                         presenter.fillLeaderboards();
+                        presenter.fillRegattas();
                     }
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
@@ -366,7 +377,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(accountsPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().refresh();
+                        if (getWidget() != null) {
+                            getWidget().refresh();
+                        }
                     }
                 }, stringMessages.igtimiAccounts(), new IgtimiAccountsPlace((String) null /* no place token */),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
@@ -378,7 +391,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<ExpeditionDeviceConfigurationsPanel>(expeditionDeviceConfigurationsPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().refresh();
+                if (getWidget() != null) {
+                    getWidget().refresh();
+                }
             }
         }, stringMessages.expeditionDeviceConfigurations(), new ExpeditionDeviceConfigurationsPlace((String) null /* no place token */),
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
@@ -410,7 +425,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                getWidget().updateReplicaList();
+                if (getWidget() != null) {
+                    getWidget().updateReplicaList();
+                }
             }
                 }, stringMessages.replication(), new ReplicationPlace((String) null /* no place token */),
                 () -> userService.hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
@@ -438,7 +455,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         localServerInstancesManagementPanelSupplier) {
                             @Override
                             public void refreshAfterBecomingVisible() {
-                                getWidget().refreshServerConfiguration();
+                                if (getWidget() != null) {
+                                    getWidget().refreshServerConfiguration();
+                                }
                             }
         }, stringMessages.localServer(), new LocalServerPlace((String) null /* no place token */),
                 // We explicitly use a different permission check here.
@@ -455,8 +474,10 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().updateUsers();
-                        getWidget().refreshSuggests();
+                        if (getWidget() != null) {
+                            getWidget().updateUsers();
+                            getWidget().refreshSuggests();
+                        }
                     }
                 }, stringMessages.userManagement(), new UserManagementPlace((String) null /* no place token */), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
@@ -466,7 +487,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<RoleDefinitionsPanel>(roleDefinitionsPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().updateRoleDefinitions();
+                        if (getWidget() != null) {
+                            getWidget().updateRoleDefinitions();
+                        }
                     }
                 }, stringMessages.roles(), new RolesPlace((String) null /* no place token */),
                 SecuredSecurityTypes.ROLE_DEFINITION.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -477,8 +500,10 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<UserGroupManagementPanel>(userGroupManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().updateUserGroups();
-                        getWidget().refreshSuggests();
+                        if (getWidget() != null) {
+                            getWidget().updateUserGroups();
+                            getWidget().refreshSuggests();
+                        }
                     }
                 }, stringMessages.userGroupManagement(), new UserGroupManagementPlace((String) null /* no place token */), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
 
@@ -499,7 +524,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<MarkTemplatePanel>(markTemplatePanelSupplier) {
                 @Override
                 public void refreshAfterBecomingVisible() {
-                            getWidget().refreshMarkTemplates();
+                    if (getWidget() != null) {
+                        getWidget().refreshMarkTemplates();
+                    }
                 }
             }, stringMessages.markTemplates(), new MarkTemplatesPlace((String) null /* no place token */),
             SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -510,7 +537,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<MarkPropertiesPanel>(markPropertiesPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().refreshMarkProperties();
+                        if (getWidget() != null) {
+                            getWidget().refreshMarkProperties();
+                        }
                     }
                 }, stringMessages.markProperties(), new MarkPropertiesPlace((String) null /* no place token */),
                 SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -521,7 +550,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<CourseTemplatePanel>(courseTemplatePanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().refreshCourseTemplates();
+                        if (getWidget() != null) {
+                            getWidget().refreshCourseTemplates();
+                        }
                     }
                 }, stringMessages.courseTemplates(), new CourseTemplatesPlace((String) null /* no place token */),
                 SecuredDomainType.COURSE_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -532,7 +563,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<MarkRolePanel>(markRolePanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        getWidget().refreshMarkRoles();
+                        if (getWidget() != null) {
+                            getWidget().refreshMarkRoles();
+                        }
                     }
                 }, stringMessages.markRoles(), new MarkRolesPlace((String) null /* no place token */),
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
