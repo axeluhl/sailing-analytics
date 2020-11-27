@@ -1,5 +1,7 @@
 package com.sap.sailing.server.impl;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -357,9 +359,10 @@ public class RemoteSailingServerSet {
             formParams.append("&pred=" + (ref.isInclude() ? "incl" : "excl"));
         }
         HttpURLConnection urlConnection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(url,
-                Duration.ONE_SECOND.times(1000), "POST", (connection) -> connection
-                        .setRequestProperty("Content-Type", "application/x-www-form-urlencoded"),
-                Optional.of(outputStream -> {
+                Duration.ONE_SECOND.times(1000), "POST", (connection) -> {
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    connection.setRequestProperty(HEADER_FORWARD_TO_REPLICA.getA(), HEADER_FORWARD_TO_REPLICA.getB());
+                }, Optional.of(outputStream -> {
                     try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, "utf-8")) {
                         writer.write(formParams.toString());
                     }
