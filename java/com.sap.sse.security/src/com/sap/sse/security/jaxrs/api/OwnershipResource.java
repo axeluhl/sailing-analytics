@@ -33,6 +33,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -164,11 +165,6 @@ public class OwnershipResource extends AbstractSecurityResource {
         final JSONArray actionsByUserGroupJson = (JSONArray) json.get(KEY_ACL);
         QualifiedObjectIdentifier identifier = new QualifiedObjectIdentifierImpl(objectType,
                 new TypeRelativeObjectIdentifier(typeRelativeObjectId));
-        try {
-            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CHANGE_ACL));
-        } catch (Exception ex) {
-            throw new OwnershipException("Not permitted to change ownership.", Status.FORBIDDEN);
-        }
         final Map<UserGroup, Set<String>> actionsByUserGroup = new HashMap<>();
         for (final Object o : actionsByUserGroupJson) {
             final JSONObject permissionsForGroup = (JSONObject) o;
