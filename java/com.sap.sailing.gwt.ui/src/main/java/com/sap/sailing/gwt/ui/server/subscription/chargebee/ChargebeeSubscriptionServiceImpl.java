@@ -26,8 +26,10 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
+import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
-import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
+import com.sap.sse.security.subscription.SubscriptionServiceFactory;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -142,7 +144,7 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (isValidSubscription(subscription)) {
                 logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
-                SubscriptionCancelResult cancelResult = ChargebeeApiService.getInstance()
+                SubscriptionCancelResult cancelResult = getApiService()
                         .cancelSubscription(subscription.getSubscriptionId());
                 if (cancelResult.isSuccess()) {
                     logger.info(() -> "Cancel subscription successful");
@@ -174,11 +176,16 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
 
     @Override
     protected void initService(ServletConfig config) {
-        ChargebeeApiService.initialize();
+        getApiService().initialize();
     }
 
     private boolean isSubscriptionCancelled(Subscription subscription) {
         return subscription != null
                 && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
+    }
+
+    private SubscriptionApiService getApiService() {
+        return SubscriptionServiceFactory.getInstance()
+                .getApiService(ChargebeeSubscriptionProvider.getInstance().getProviderName());
     }
 }

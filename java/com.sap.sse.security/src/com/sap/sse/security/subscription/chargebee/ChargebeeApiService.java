@@ -43,20 +43,21 @@ public class ChargebeeApiService implements SubscriptionApiService {
 
     public static ChargebeeApiService getInstance() {
         if (instance == null) {
-            initialize();
             instance = new ChargebeeApiService();
+            instance.initialize();
         }
         return instance;
     }
 
-    public static void initialize() {
+    private ChargebeeApiService() {
+    }
+
+    @Override
+    public void initialize() {
         if (!inited) {
             Environment.configure(ChargebeeConfiguration.getInstance().getSite(),
                     ChargebeeConfiguration.getInstance().getApiKey());
         }
-    }
-
-    private ChargebeeApiService() {
     }
 
     @Override

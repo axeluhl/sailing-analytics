@@ -8,6 +8,11 @@ import com.sap.sse.security.shared.subscription.Subscription;
  */
 public interface SubscriptionApiService {
     /**
+     * Initialize API service, such as do some SDK configurations
+     */
+    void initialize();
+
+    /**
      * Return all subscriptions of user from payment service provider
      * 
      * @throws Exception
