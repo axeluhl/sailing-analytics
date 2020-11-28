@@ -62,6 +62,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String closedRegattaName = RegattaImpl.getDefaultName(closedRegattaNamePart, boatClassName);
     private final String openRegattaName = RegattaImpl.getDefaultName(openRegattaNamePart, boatClassName);
     private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
+    private final String deviceUuid2 = "00000000-1111-2222-3333-444444444445";
     private final String secret = "ABCDEF";
     private final String competitorName1 = "Max Mustermann";
     private final String competitorShortName1 = "MM";
@@ -168,7 +169,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
         response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", "#0F0",
-                flagImageUri, teamImageUri, null, null, null, competitorName2, competitorShortName2, null, deviceUuid,
+                flagImageUri, teamImageUri, null, null, null, competitorName2, competitorShortName2, null, deviceUuid2,
                 null);
         assertTrue(response.getStatus() + ": " + StreamingOutputUtil.getEntityAsString(response.getEntity()),
                 response.getStatus() == Status.OK.getStatusCode());
