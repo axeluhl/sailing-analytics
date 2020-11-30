@@ -70,7 +70,7 @@ public class ChargebeeSubscription extends Subscription {
         super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
                 transactionType, transactionStatus, invoiceId, invoiceStatus, subscriptionCreatedAt,
                 subscriptionUpdatedAt, latestEventTime, manualUpdatedAt,
-                ChargebeeSubscriptionProvider.getInstance().getProviderName());
+                ChargebeeSubscriptionProvider.PROVIDER_NAME);
     }
 
     public boolean isActiveSubscription() {

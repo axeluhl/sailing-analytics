@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 /**
  * Subscription configuration. The system will get these information from server application startup arguments:
- * chargebee.site, chargebee.apikey
+ * {@code chargebee.site}, {@code chargebee.apikey}
  * 
  * @author Tu Tran
  */

@@ -7,14 +7,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionData;
-import com.sap.sse.security.shared.subscription.SubscriptionFactory;
-import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 
 /**
  * Task to perform fetching, checking and updating user subscriptions from payment service providers. See
@@ -23,30 +24,31 @@ import com.sap.sse.security.shared.subscription.SubscriptionProvider;
 public class SubscriptionUpdateTask implements Runnable {
     private static final Logger logger = Logger.getLogger(SubscriptionUpdateTask.class.getName());
 
-    private CompletableFuture<SecurityService> securityService;
+    private final CompletableFuture<SecurityService> securityService;
 
-    public SubscriptionUpdateTask(CompletableFuture<SecurityService> securityService) {
+    private final ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
+
+    public SubscriptionUpdateTask(CompletableFuture<SecurityService> securityService, ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker) {
         this.securityService = securityService;
+        this.subscriptionApiServiceTracker = subscriptionApiServiceTracker;
     }
 
     @Override
     public void run() {
         Iterable<User> users = getSecurityService().getUserList();
-        Iterable<SubscriptionProvider> subscriptionProviders = SubscriptionFactory.getInstance().getProviders();
         for (User user : users) {
-            fetchAndUserSubscriptions(user, subscriptionProviders);
+            fetchAndUpdateUserSubscriptions(user);
         }
     }
 
-    private void fetchAndUserSubscriptions(User user, Iterable<SubscriptionProvider> subscriptionProviders) {
+    private void fetchAndUpdateUserSubscriptions(User user) {
         logger.info(() -> "Start checking and updating subscriptions for user: " + user.getName());
-        for (SubscriptionProvider provider : subscriptionProviders) {
-            SubscriptionApiService apiService = SubscriptionServiceFactory.getInstance()
-                    .getApiService(provider.getProviderName());
+        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker.getServiceReferences()) {
+            final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
             if (apiService != null) {
                 try {
                     Iterable<Subscription> userSubscriptions = apiService.getUserSubscriptions(user);
-                    checkAndUpdateSubscriptions(user, userSubscriptions, provider);
+                    checkAndUpdateSubscriptions(user, userSubscriptions, apiService);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Failed to fetch and update subscriptions for user " + user.getName(), e);
                 }
@@ -55,7 +57,7 @@ public class SubscriptionUpdateTask implements Runnable {
     }
 
     private void checkAndUpdateSubscriptions(User user, Iterable<Subscription> userSubscriptions,
-            SubscriptionProvider provider) throws UserManagementException {
+            SubscriptionApiService provider) throws UserManagementException {
         logger.info(() -> "Subscriptions from provider " + provider.getProviderName() + " for user " + user.getName()
                 + ": " + userSubscriptions);
         Iterable<Subscription> currentSubscriptions = user.getSubscriptions();
@@ -85,7 +87,7 @@ public class SubscriptionUpdateTask implements Runnable {
         }
     }
 
-    private Subscription createEmptySubscription(SubscriptionProvider provider, String planId) {
+    private Subscription createEmptySubscription(SubscriptionApiService provider, String planId) {
         return provider.getDataHandler().toSubscription(
                 SubscriptionData.createEmptySubscriptionDataWithUpdateTimes(planId, TimePoint.now(), TimePoint.now()));
     }

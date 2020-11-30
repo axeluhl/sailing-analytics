@@ -24,7 +24,7 @@ public class SubscriptionData {
         SUBSCRIPTION_UPDATED_AT,
         LATEST_EVENT_TIME,
         MANUAL_UPDATED_AT,
-        PROVIDER;
+        PROVIDER_NAME;
     }
 
     /**
@@ -111,8 +111,8 @@ public class SubscriptionData {
         return getMapTimePointValue(DataAttribute.MANUAL_UPDATED_AT.name());
     }
 
-    public String getProvider() {
-        return getMapStringValue(DataAttribute.PROVIDER.name());
+    public String getProviderName() {
+        return getMapStringValue(DataAttribute.PROVIDER_NAME.name());
     }
 
     private String getMapStringValue(String key) {

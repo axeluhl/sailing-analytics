@@ -2578,7 +2578,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 // current subscriptions of the user for this provider
                 List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
                 for (Subscription subscription : subscriptions) {
-                    if (!subscription.getProvider().equals(newSubscription.getProvider())) {
+                    if (!subscription.getProviderName().equals(newSubscription.getProviderName())) {
                         newSubscriptionList.add(subscription);
                     }
                 }
@@ -2589,7 +2589,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 boolean foundCurrentSubscription = false;
                 for (Subscription subscription : subscriptions) {
                     if (!foundCurrentSubscription && ((!subscription.hasPlan()
-                            && subscription.getProvider().equals(newSubscription.getProvider()))
+                            && subscription.getProviderName().equals(newSubscription.getProviderName()))
                             || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
                         newSubscriptionList.add(newSubscription);
                         foundCurrentSubscription = true;

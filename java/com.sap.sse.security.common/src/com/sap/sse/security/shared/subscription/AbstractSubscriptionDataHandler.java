@@ -11,11 +11,9 @@ import com.sap.sse.security.shared.subscription.SubscriptionData.DataAttribute;
  * change the implementation
  */
 abstract public class AbstractSubscriptionDataHandler implements SubscriptionDataHandler {
-
     @Override
     public Map<String, Object> toMap(Subscription subscription) {
         Map<String, Object> data = new HashMap<String, Object>();
-
         data.put(DataAttribute.SUBSCRIPTION_ID.name(), subscription.getSubscriptionId());
         data.put(DataAttribute.CUSTOMER_ID.name(), subscription.getCustomerId());
         data.put(DataAttribute.PLAN_ID.name(), subscription.getPlanId());
@@ -31,8 +29,7 @@ abstract public class AbstractSubscriptionDataHandler implements SubscriptionDat
         data.put(DataAttribute.SUBSCRIPTION_UPDATED_AT.name(), subscription.getSubscriptionUpdatedAt().asMillis());
         data.put(DataAttribute.LATEST_EVENT_TIME.name(), subscription.getLatestEventTime().asMillis());
         data.put(DataAttribute.MANUAL_UPDATED_AT.name(), subscription.getManualUpdatedAt().asMillis());
-        data.put(DataAttribute.PROVIDER.name(), subscription.getProvider());
-
+        data.put(DataAttribute.PROVIDER_NAME.name(), subscription.getProviderName());
         return data;
     }
 }

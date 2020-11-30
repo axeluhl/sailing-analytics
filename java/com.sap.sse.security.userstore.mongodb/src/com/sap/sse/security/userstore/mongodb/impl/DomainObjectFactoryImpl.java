@@ -41,11 +41,9 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
-import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionData;
-import com.sap.sse.security.shared.subscription.SubscriptionFactory;
-import com.sap.sse.security.shared.subscription.SubscriptionProvider;
+import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
@@ -523,14 +521,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     data.put(entry.getKey(), entry.getValue());
                 }
                 SubscriptionData subscriptionData = new SubscriptionData(data);
-                try {
-                    final SubscriptionProvider subscriptionProvider = SubscriptionFactory.getInstance()
-                            .getSubscriptionProvider(subscriptionData.getProvider());
-                    subscriptions[i++] = subscriptionProvider.getDataHandler().toSubscription(subscriptionData);
-                } catch (InvalidSubscriptionProviderException e) {
-                    logger.log(Level.SEVERE, "Failed to load subscription for user " + subscriptionData.getCustomerId(),
-                            e);
-                }
+                final SubscriptionDataHandler subscriptionDataHandler = Activator.getSubscriptionDataHandler(subscriptionData.getProviderName());
+                subscriptions[i++] = subscriptionDataHandler.toSubscription(subscriptionData);
             }
         } else {
             subscriptions = null;

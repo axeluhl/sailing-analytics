@@ -24,15 +24,15 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionDataHandler;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
 
 public class ChargebeeApiService implements SubscriptionApiService {
     private static final Logger logger = Logger.getLogger(ChargebeeApiService.class.getName());
-
-    private static ChargebeeApiService instance;
-    private static boolean inited;
 
     // Chargebee has API rate limits
     // Threshold value for test site: ~750 API calls in 5 minutes.
@@ -41,23 +41,13 @@ public class ChargebeeApiService implements SubscriptionApiService {
     // after 400ms from previous request
     private static final long TIME_FOR_API_REQUEST_MS = 400;
 
-    public static ChargebeeApiService getInstance() {
-        if (instance == null) {
-            instance = new ChargebeeApiService();
-            instance.initialize();
-        }
-        return instance;
-    }
-
-    private ChargebeeApiService() {
+    public ChargebeeApiService(ChargebeeConfiguration configuration) {
+        Environment.configure(configuration.getSite(), configuration.getApiKey());
     }
 
     @Override
-    public void initialize() {
-        if (!inited) {
-            Environment.configure(ChargebeeConfiguration.getInstance().getSite(),
-                    ChargebeeConfiguration.getInstance().getApiKey());
-        }
+    public String getProviderName() {
+        return ChargebeeSubscriptionProvider.PROVIDER_NAME;
     }
 
     @Override
@@ -165,11 +155,9 @@ public class ChargebeeApiService implements SubscriptionApiService {
             } else {
                 subscriptions = null;
             }
-
             String nextOffset = apiResponse.getResult() != null ? apiResponse.getResult().nextOffset() : null;
             result = new Pair<Iterable<SubscriptionItem>, String>(subscriptions, nextOffset);
         }
-
         return result;
     }
 
@@ -298,6 +286,11 @@ public class ChargebeeApiService implements SubscriptionApiService {
         public Entry getFirstItem() {
             return result.get(0);
         }
+    }
+
+    @Override
+    public SubscriptionDataHandler getDataHandler() {
+        return new ChargebeeSubscriptionDataHandler();
     }
 
     private class SubscriptionItem {

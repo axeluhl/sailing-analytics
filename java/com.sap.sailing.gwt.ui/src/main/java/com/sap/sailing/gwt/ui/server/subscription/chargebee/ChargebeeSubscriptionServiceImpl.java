@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletConfig;
-
 import com.chargebee.Result;
 import com.chargebee.models.HostedPage;
 import com.chargebee.models.HostedPage.Content;
@@ -27,20 +25,22 @@ import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
-import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
-import com.sap.sse.security.subscription.SubscriptionServiceFactory;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
  * 
  * @author Tu Tran
  */
-public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImpl
-        implements ChargebeeSubscriptionService {
+public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImpl implements ChargebeeSubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
+
+    @Override
+    protected String getProviderName() {
+        return ChargebeeSubscriptionProvider.PROVIDER_NAME;
+    }
 
     @Override
     public PrepareCheckoutDTO prepareCheckout(String planId) {
@@ -174,18 +174,8 @@ public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImp
         return result;
     }
 
-    @Override
-    protected void initService(ServletConfig config) {
-        getApiService().initialize();
-    }
-
     private boolean isSubscriptionCancelled(Subscription subscription) {
         return subscription != null
                 && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
-    }
-
-    private SubscriptionApiService getApiService() {
-        return SubscriptionServiceFactory.getInstance()
-                .getApiService(ChargebeeSubscriptionProvider.getInstance().getProviderName());
     }
 }

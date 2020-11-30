@@ -12,8 +12,11 @@ import javax.servlet.ServletException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
@@ -21,37 +24,34 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.ui.server.Activator;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
  * Base class with some util methods for backend subscription remote service implementation. To setup service provider
  * regarding logic, or initialize any custom service logics, particular child implementation should override
  * {@code initService} method
  */
-public class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
+public abstract class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
     private static final long serialVersionUID = -2953209842119970755L;
     private static final Logger logger = Logger.getLogger(BaseSubscriptionServiceImpl.class.getName());
 
     private BundleContext context;
     private CompletableFuture<SecurityService> securityService;
+    private ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        initService(config);
-        initSecurityService();
-    }
-
-    /**
-     * Initialize, setup this subscription service
-     */
-    protected void initService(ServletConfig config) {
-    }
-
-    private void initSecurityService() {
         context = Activator.getContext();
+        securityService = initSecurityService();
+        subscriptionApiServiceTracker = ServiceTrackerFactory.createAndOpen(context, SubscriptionApiService.class);
+    }
+
+    private CompletableFuture<SecurityService> initSecurityService() {
         final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        securityService = CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             SecurityService result = null;
             try {
                 logger.info("Waiting for SecurityService...");
@@ -134,4 +134,16 @@ public class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
 
         return user;
     }
+
+    protected SubscriptionApiService getApiService() {
+        ServiceReference<SubscriptionApiService>[] serviceReferences = subscriptionApiServiceTracker.getServiceReferences();
+        for (final ServiceReference<SubscriptionApiService> serviceReference : serviceReferences) {
+            if (Util.equalsWithNull(serviceReference.getProperty(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY), getProviderName())) {
+                return context.getService(serviceReference);
+            }
+        }
+        return null;
+    }
+
+    protected abstract String getProviderName();
 }

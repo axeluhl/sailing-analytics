@@ -109,12 +109,12 @@ public abstract class Subscription implements Serializable {
     /**
      * Subscription provider name
      */
-    private final String provider;
+    private final String providerName;
 
     public Subscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
             TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
             String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
-            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt, String provider) {
+            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt, String providerName) {
         this.subscriptionId = subscriptionId;
         this.planId = planId;
         this.customerId = customerId;
@@ -130,7 +130,7 @@ public abstract class Subscription implements Serializable {
         this.subscriptionUpdatedAt = subscriptionUpdatedAt;
         this.latestEventTime = latestEventTime;
         this.manualUpdatedAt = manualUpdatedAt;
-        this.provider = provider;
+        this.providerName = providerName;
     }
 
     public String getSubscriptionId() {
@@ -193,8 +193,8 @@ public abstract class Subscription implements Serializable {
         return manualUpdatedAt;
     }
 
-    public String getProvider() {
-        return provider;
+    public String getProviderName() {
+        return providerName;
     }
 
     public boolean hasPlan() {
@@ -224,7 +224,7 @@ public abstract class Subscription implements Serializable {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         final String separator = ", ";
-        builder.append("provider: ").append(provider).append(separator).append("subscriptionId: ")
+        builder.append("provider: ").append(providerName).append(separator).append("subscriptionId: ")
                 .append(getStringFieldValue(subscriptionId)).append(separator).append("planId: ")
                 .append(getStringFieldValue(planId)).append(separator).append("customerId: ")
                 .append(getStringFieldValue(customerId)).append(separator).append("subscriptionStatus: ")
