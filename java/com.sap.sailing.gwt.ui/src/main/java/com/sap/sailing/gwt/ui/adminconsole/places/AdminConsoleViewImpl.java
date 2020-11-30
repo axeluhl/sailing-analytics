@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
-import java.util.Map;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -124,7 +122,7 @@ import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
 public class AdminConsoleViewImpl extends Composite implements AdminConsoleView {
-    
+
     interface AdminConsoleViewUiBinder extends UiBinder<Widget, AdminConsoleViewImpl> {
     }
     private static AdminConsoleViewUiBinder uiBinder = GWT.create(AdminConsoleViewUiBinder.class);
@@ -182,7 +180,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     
     @Override
     public void selectTabByPlace(AbstractAdminConsolePlace place) {
-        adminConsolePanel.selectTabByPlace(place);
+        adminConsolePanel.selectTabByPlace(place, true);
     }
     
     private AdminConsolePanel<AbstractAdminConsolePlace> createAdminConsolePanel(final ServerInfoDTO serverInfo) {
@@ -193,7 +191,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addStyleName("adminConsolePanel");
         
         /* EVENTS */
-        final EventManagementPanelSupplier eventManagementPanelSupplier = new EventManagementPanelSupplier(stringMessages, presenter, adminConsolePanel);
+        final EventManagementPanelSupplier eventManagementPanelSupplier = new EventManagementPanelSupplier(stringMessages, presenter, placeController);
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
@@ -203,6 +201,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 presenter.fillLeaderboardGroups();
             }
         }, stringMessages.events(), new EventsPlace((String) null /* no place token */), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
+        
         /* REGATTAS */
         final RegattaManagementPanelSupplier regattaManagementPanelSupplier = new RegattaManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
@@ -234,14 +233,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 presenter.fillLeaderboards();
                 presenter.fillLeaderboardGroups();
             }
-
-            @Override
-            public void setupWidgetByParams(Map<String, String> params) {
-                refreshAfterBecomingVisible(); //Refresh to sure that actual data is provided
-                presenter.setupLeaderboardGroups(getWidget(), params);
-            }
         }, stringMessages.leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-        
+
         /* RACES */
         final HorizontalTabLayoutPanel racesTabPanel = adminConsolePanel.addVerticalTab(stringMessages.trackedRaces(), RACES);
 

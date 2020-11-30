@@ -70,7 +70,7 @@ import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends HeaderPanel implements HandleTabSelectable {
+public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends HeaderPanel {
     private final UserService userService;
     
     /**
@@ -624,30 +624,6 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
             FilterablePanelProvider<?> filterablePanelProvider = (FilterablePanelProvider<?>) widget;
             FilterableAdminConsolePlace filterablePlace = (FilterableAdminConsolePlace) place;
             filterablePanelProvider.getFilterablePanel().filterAndSelect(filterablePlace.getFilterAndSelectParameters());
-        }
-    }
-    
-    @Override
-    public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
-        if (verticalTabName != null) {
-            Widget widgetForSetup = null; // Remember widget for set up
-            for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
-                VerticalOrHorizontalTabLayoutPanel panel = e.getA();
-                Widget currentWidget = e.getB();
-                String verticalPanelName = e.getC(); 
-                if (panel == topLevelTabPanelWrapper && verticalTabName.equals(verticalPanelName)) { // for vertical panel
-                    int index = panel.getWidgetIndex(currentWidget);
-                    panel.selectTab(index);
-                    if (horizontalTabName == null || horizontalTabName.isEmpty()) { // If we don't have horizontal tab will setup vertical tab.
-                        widgetForSetup = currentWidget;
-                    }
-                } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
-                    int index = panel.getWidgetIndex(currentWidget);
-                    panel.selectTab(index);
-                    widgetForSetup = currentWidget;
-                }
-            }
-            panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);
         }
     }
 

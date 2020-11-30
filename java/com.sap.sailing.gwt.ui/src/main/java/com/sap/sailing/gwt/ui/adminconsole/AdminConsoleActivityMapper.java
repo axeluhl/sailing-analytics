@@ -5,6 +5,8 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
+import com.sap.sailing.gwt.ui.adminconsole.places.DefaultPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 
@@ -26,9 +28,9 @@ public class AdminConsoleActivityMapper implements ActivityMapper {
             else {
                 activity = AdminConsoleActivity.getInstance(clientFactory, (AbstractAdminConsolePlace)place); 
             }
-        }
-      
+        } else if (place instanceof DefaultPlace) {
+            activity = AdminConsoleActivity.getInstance(clientFactory, new EventsPlace(((String) null /* no place token */))); 
+        }     
         return activity;
-
     }
 }
