@@ -11,7 +11,7 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
     /**
      * Name of the place parameter that adds the parameter's value into the place's main table's filter box unchanged.
      */
-    private static final String FILTER_KEY = "filter";
+    public static final String FILTER_KEY = "filter";
     
     /**
      * Name of the place parameter that can be used to make a selection in the place's main table. The logic for
@@ -29,7 +29,7 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
      * Name of the place parameter that requests an exact and complete match for the parameter value with at least one
      * searchable column value of the place's main table's rows.
      */
-    private static final String SELECT_EXACT_KEY = "selectExact";
+    public static final String SELECT_EXACT_KEY = "selectExact";
     
     private final FilterAndSelectParameters filterAndSelectParameters;
     

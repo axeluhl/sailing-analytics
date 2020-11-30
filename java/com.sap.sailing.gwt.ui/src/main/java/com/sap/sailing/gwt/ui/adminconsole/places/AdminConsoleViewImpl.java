@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -178,7 +177,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     
     @Override
     public void selectTabByPlace(AbstractAdminConsolePlace place) {
-        adminConsolePanel.selectTabByPlace(place);
+        adminConsolePanel.selectTabByPlace(place, true);
     }
     
     private AdminConsolePanel<AbstractAdminConsolePlace> createAdminConsolePanel(final ServerInfoDTO serverInfo) {
@@ -190,7 +189,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         
         /* EVENTS */
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService,
-                userService, errorReporter, presenter, getStringMessages(), adminConsolePanel);
+                userService, errorReporter, presenter, getStringMessages(), placeController);
         eventManagementPanel.ensureDebugId("EventManagement");
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
@@ -240,12 +239,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             public void refreshAfterBecomingVisible() {
                 presenter.fillLeaderboards();
                 presenter.fillLeaderboardGroups();
-            }
-
-            @Override
-            public void setupWidgetByParams(Map<String, String> params) {
-                refreshAfterBecomingVisible(); //Refresh to sure that actual data is provided
-                presenter.setupLeaderboardGroups(leaderboardGroupConfigPanel, params);
             }
         }, getStringMessages().leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(leaderboardGroupConfigPanel);

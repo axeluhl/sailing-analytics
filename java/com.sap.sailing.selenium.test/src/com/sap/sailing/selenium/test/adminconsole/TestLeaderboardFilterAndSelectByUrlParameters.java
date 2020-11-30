@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -9,16 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.FlexibleLeaderboardCreateDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO.LeaderboardEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
- * <p>Tests for creation of leader boards.</p>
- * 
- * @author
- *   D049941
+ * <p>Tests for filtering and selection by Url-Parameters in leaderboards panel.</p>
  */
 public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSeleniumTest {
     
@@ -201,9 +196,9 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
     @Test
     public void testUrlParameterDecoding() {
         LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams();                    
-        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "Sailing & 2011");
-        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "Sailing&2015");
-        createFlexibleLeaderboard(leaderboardConfigurationPanelPO, "&");
+        leaderboardConfigurationPanelPO.createFlexibleLeaderboard("Sailing & 2011");
+        leaderboardConfigurationPanelPO.createFlexibleLeaderboard("Sailing&2015");
+        leaderboardConfigurationPanelPO.createFlexibleLeaderboard("&");
         
         List<String> availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "2017 %26");
         assertEquals(0, availableLeaderboards.size());
@@ -251,43 +246,6 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         assertEquals(4, availableLeaderboards.size()); 
     }
     
-    /** TODO bug5288 
-    @Test
-    public void testResetFilterAndSelectWhenParametersMissing() {  
-        LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "2017");             
-        List<String> availableLeaderboards = leaderboardConfigurationPanelPO.getAvailableLeaderboards();
-        assertEquals(2, availableLeaderboards.size()); 
-        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT, "2017");     
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(2, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_SELECT_EXACT, "505 World 2017");     
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(1, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "505 World 2017");     
-        assertEquals(1, availableLeaderboards.size());
-        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size()); 
-        
-        availableLeaderboards = getLeaderboardsOfPageWithUrlParams();
-        assertEquals(4, availableLeaderboards.size());
-        assertEquals(0, leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries().size());
-    } **/
-    
     @Test
     public void testResetSelectWhenFilterUrlParametersOnly() {  
         LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = getLeaderboardConfigurationPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "2017");             
@@ -320,17 +278,10 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         
-        createFlexibleLeaderboard(leaderboardConfiguration, "505 World 2017");
-        createFlexibleLeaderboard(leaderboardConfiguration, "505 Pre-World 2017");
-        createFlexibleLeaderboard(leaderboardConfiguration, "505 World 2015");
-        createFlexibleLeaderboard(leaderboardConfiguration, "505 World 2011");
-    }
-    
-    private void createFlexibleLeaderboard(LeaderboardConfigurationPanelPO leaderboardConfiguration, String name) {
-        FlexibleLeaderboardCreateDialogPO dialog = leaderboardConfiguration.startCreatingFlexibleLeaderboard();
-        dialog.setName(name);
-        assertTrue(dialog.isOkButtonEnabled());
-        dialog.pressOk();  
+        leaderboardConfiguration.createFlexibleLeaderboard("505 World 2017");
+        leaderboardConfiguration.createFlexibleLeaderboard("505 Pre-World 2017");
+        leaderboardConfiguration.createFlexibleLeaderboard("505 World 2015");
+        leaderboardConfiguration.createFlexibleLeaderboard("505 World 2011");
     }
     
     private List<String> getLeaderboardsOfPageWithUrlParams(String ...keysValues) {

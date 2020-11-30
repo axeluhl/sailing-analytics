@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.ui.adminconsole.places.DefaultPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
@@ -41,8 +42,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         activityManager.setDisplay(appWidget);
         AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(placeController, eventBus, new EventsPlace((String) null /* no place token */));
+        historyHandler.register(placeController, eventBus, new DefaultPlace());
         RootLayoutPanel.get().add(appWidget);    
-        historyHandler.handleCurrentHistory();
+        placeController.goTo(new EventsPlace((String) null /* no place token */));
     }
 }

@@ -16,10 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -40,6 +43,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
+import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
@@ -56,7 +61,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.HandleTabSelectable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
@@ -112,10 +116,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventsRefresher;
-    private final HandleTabSelectable handleTabSelectable;
+    private final PlaceController placeController;
     
     public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final HandleTabSelectable handleTabSelectable,
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final PlaceController placeController,
             final StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
@@ -123,7 +127,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.eventsRefresher = eventsRefresher;
-        this.handleTabSelectable = handleTabSelectable;
+        this.placeController = placeController;
         this.availableLeaderboardGroups = Collections.emptyList();
         this.allEvents = new ArrayList<EventDTO>();
         final VerticalPanel panel = new VerticalPanel();
@@ -276,8 +280,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void update(String value) {
                 Map<String, String> params = new HashMap<>();
-                params.put(LeaderboardGroupConfigPanel.LEADERBOARD_GROUP_ID, value);
-                handleTabSelectable.selectTabByNames(stringMessages.leaderboards(), stringMessages.leaderboardGroups(), params);
+                params.put(AbstractFilterablePlace.FILTER_KEY, URL.encodeQueryString(value));
+                params.put(AbstractFilterablePlace.SELECT_EXACT_KEY,  URL.encodeQueryString(value));
+                placeController.goTo(new LeaderboardGroupsPlace(params));
             }
         });
         TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {

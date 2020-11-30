@@ -108,6 +108,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel implements Fi
                 return t.getDeviceUuid().hashCode();
             }
         }, filterDeviceConfigurationsPanel.getAllListDataProvider());
+        allDeviceConfigurations.ensureDebugId("ExpeditionDeviceConfigurationsTable");
         allDeviceConfigurations.setSelectionModel(refreshableDeviceConfigurationsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
         controlsPanel.add(filterDeviceConfigurationsPanel);
