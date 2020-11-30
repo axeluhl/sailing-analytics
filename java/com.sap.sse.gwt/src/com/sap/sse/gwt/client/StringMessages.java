@@ -45,7 +45,6 @@ public interface StringMessages extends Messages {
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
     String yes();
     String no();
-    
     String details();
     String filterBy();
     String noDataFound();
@@ -104,4 +103,6 @@ public interface StringMessages extends Messages {
     String showChangelog();
     String hideElementsWithoutUpdateRights();
     String temporarilyUnavailable();
+    String sapAnalytics();
+    String sapAnalyticsURL();
 }

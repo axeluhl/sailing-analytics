@@ -93,7 +93,7 @@ public class Header extends Composite implements HeaderConstants {
         Event.setEventListener(searchUi, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                if(LinkUtil.handleLinkClick(event)) {
+                if (LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
                     placeNavigator.getSearchResultNavigation("").goToPlace();
                 }

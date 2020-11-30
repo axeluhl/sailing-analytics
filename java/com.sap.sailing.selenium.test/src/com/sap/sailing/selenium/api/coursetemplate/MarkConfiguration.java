@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class MarkConfiguration extends JsonWrapper {
 
     public static MarkConfiguration createFreestyle(final UUID markTemplateId, final UUID markPropertiesId,
             final UUID associatedRoleId, final String name, final String shortName, final String color,
-            final String shape, final String pattern, final String markType) {
+            final String shape, final String pattern, final String markType, Set<String> tags) {
         MarkConfiguration markConfiguration = new MarkConfiguration(new JSONObject());
         markConfiguration.getJson().put(FIELD_ID, UUID.randomUUID().toString());
         if (markTemplateId != null) {
@@ -51,7 +52,7 @@ public class MarkConfiguration extends JsonWrapper {
             markConfiguration.getJson().put(FIELD_ASSOCIATED_ROLE_ID, associatedRoleId.toString());
         }
         markConfiguration.getJson().put(FIELD_FREESTYLE_PROPERTIES,
-                new MarkAppearance(name, shortName, color, shape, pattern, markType).getJson());
+                new FreestyleProperties(name, shortName, color, shape, pattern, markType, tags).getJson());
         return markConfiguration;
     }
 
@@ -137,14 +138,14 @@ public class MarkConfiguration extends JsonWrapper {
         return markTemplateId != null ? UUID.fromString((String) markTemplateId) : null;
     }
 
-    public MarkAppearance getEffectiveProperties() {
+    public FreestyleProperties getEffectiveProperties() {
         final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_EFFECTIVE_PROPERTIES);
-        return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
+        return effectivePropertiesJson != null ? new FreestyleProperties(effectivePropertiesJson) : null;
     }
 
-    public MarkAppearance getFreestyleProperties() {
+    public FreestyleProperties getFreestyleProperties() {
         final JSONObject effectivePropertiesJson = (JSONObject) get(FIELD_FREESTYLE_PROPERTIES);
-        return effectivePropertiesJson != null ? new MarkAppearance(effectivePropertiesJson) : null;
+        return effectivePropertiesJson != null ? new FreestyleProperties(effectivePropertiesJson) : null;
     }
 
     public boolean isStoreToInventory() {
