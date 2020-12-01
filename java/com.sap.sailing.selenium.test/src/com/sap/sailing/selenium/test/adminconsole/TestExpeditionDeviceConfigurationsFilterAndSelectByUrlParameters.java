@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Before;
@@ -61,6 +61,7 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
         assertEquals(2, availableConfigurations.size());
         assertEquals(1, configurationPanelPO.getSelectedEntries().size());
+        assertTrue(configurationPanelPO.getSelectedEntries().get(0).getName().contains("Configuration"));
         
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_SELECT, "Configuration", PARAM_SELECT_EXACT, "Expedition Device Configuration");
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
@@ -90,7 +91,7 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
         assertEquals(2, availableConfigurations.size());
         assertEquals(1, configurationPanelPO.getSelectedEntries().size());
-        assertEquals("Expedition Device Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
+        assertTrue(configurationPanelPO.getSelectedEntries().get(0).getName().contains("Configuration"));
         
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Configurations", PARAM_SELECT, "abc");
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
