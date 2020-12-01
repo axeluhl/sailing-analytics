@@ -124,11 +124,9 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                     if (selectedPanel instanceof PanelSupplierScollPanel) {
                         PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) selectedPanel;
                         supplierScollPanel.activate(panelSupplierScollPanel -> {
-                                refreshDataFor(panelSupplierScollPanel);
                                 goToWidgetsPlace(panelSupplierScollPanel);
                             });
                     } else {
-                        refreshDataFor(selectedPanel);
                         goToWidgetsPlace(selectedPanel);
                     }
 
@@ -146,12 +144,11 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
                         PanelSupplierScollPanel dummyScrollPanel = (PanelSupplierScollPanel) widgetAssociatedToVerticalTab;
                         dummyScrollPanel.activate(panelSupplierScollPanel -> 
                         {
-                            refreshDataFor(panelSupplierScollPanel);
                             goToWidgetsPlace(panelSupplierScollPanel);
                         });
+                    } else {
+                        goToWidgetsPlace(widgetAssociatedToVerticalTab);
                     }
-                    refreshDataFor(widgetAssociatedToVerticalTab);
-                    goToWidgetsPlace(widgetAssociatedToVerticalTab);
                 }
             }
         }

@@ -368,15 +368,18 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     private void selectMultiple(List<String> selections, String selectExact) {        
         selectionFilter.setKeywords(selectExact == null ? new ArrayList<>() : Arrays.asList(selectExact));        
         for (T t : all.getList()) {
-            boolean isMatchingItem = true;
+            boolean matchFound = false;
             for (String selection : selections) {
                 setKeywordsFilterSplitValue(selection);
-                if (!matches(t)) {
-                    isMatchingItem = false;
+                matchFound = matches(t);
+                if (matchFound) {
                     break;
                 }
             }
-            select(t, isMatchingItem && matchesExactly(t));           
+            if (selectExact != null) {
+                matchFound = matchFound || matchesExactly(t);
+            }
+            select(t, matchFound);
         } 
         resetKeywordsFilterSplitValue();
     } 

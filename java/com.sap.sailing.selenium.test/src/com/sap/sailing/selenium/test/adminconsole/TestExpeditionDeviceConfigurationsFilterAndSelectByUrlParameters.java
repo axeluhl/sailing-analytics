@@ -59,6 +59,11 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         assertEquals(1, configurationPanelPO.getSelectedEntries().size());
         assertEquals("Test Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
         
+        configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Configuration", PARAM_SELECT, "Configuration", PARAM_SELECT_EXACT, "Test");
+        availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
+        assertEquals(2, availableConfigurations.size());
+        assertEquals(1, configurationPanelPO.getSelectedEntries().size());
+        
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_SELECT, "Configuration", PARAM_SELECT_EXACT, "Expedition Device Configuration");
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
         assertEquals(3, availableConfigurations.size());
@@ -66,12 +71,6 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         assertEquals("Expedition Device Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
         
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Configuration", PARAM_SELECT, "Configuration", PARAM_SELECT_EXACT, "Expedition Device Configuration");
-        availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
-        assertEquals(2, availableConfigurations.size());
-        assertEquals(1, configurationPanelPO.getSelectedEntries().size());
-        assertEquals("Expedition Device Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
-        
-        configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Configuration", PARAM_SELECT, "Configuration", PARAM_SELECT_EXACT, "Test");
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
         assertEquals(2, availableConfigurations.size());
         assertEquals(1, configurationPanelPO.getSelectedEntries().size());
@@ -94,6 +93,11 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         assertEquals(2, availableConfigurations.size());
         assertEquals(1, configurationPanelPO.getSelectedEntries().size());
         assertEquals("Expedition Device Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
+        
+        configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Configurations", PARAM_SELECT, "abc");
+        availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
+        assertEquals(0, availableConfigurations.size());
+        assertEquals(0, configurationPanelPO.getSelectedEntries().size());      
     }    
     
     private void createTestExpeditionDeviceConfigurations() {
