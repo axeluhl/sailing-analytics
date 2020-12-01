@@ -61,8 +61,8 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
-        super.onLoadSucceeded(data, isCached);
+    public void onLoadSucceeded(int loaderId, Collection<CourseArea> data, boolean isCached) {
+        super.onLoadSucceeded(loaderId, data, isCached);
 
         for (CheckedItem item : checkedItems) {
             item.setDisabled(true);

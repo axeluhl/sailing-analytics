@@ -46,6 +46,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected ItemSelectedListener<T> listener;
     protected CheckedItemAdapter listAdapter;
     protected int mSelectedIndex = -1;
+    private View footerView;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
@@ -84,6 +85,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        footerView = View.inflate(requireContext(), R.layout.footer_progress, null);
+        getListView().addFooterView(footerView);
+
         showProgressBar(true);
         loadItems();
     }
@@ -100,7 +104,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadFailed(Exception reason) {
+    public void onLoadFailed(int loaderId, Exception reason) {
         namedList.clear();
         listAdapter.notifyDataSetChanged();
 
@@ -122,7 +126,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadSucceeded(Collection<T> data, boolean isCached) {
+    public void onLoadSucceeded(int loaderId, Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
         if (isForceLoad() && !isCached) {
@@ -183,8 +187,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         super.onSaveInstanceState(outState);
     }
 
-    public Loader<DataLoaderResult<Collection<T>>> getLoader() {
-        return getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+    ReadonlyDataManager getDataManager() {
+        return OnlineDataManager.create(getActivity());
+    }
+
+    Loader<DataLoaderResult<Collection<T>>> getLoader() {
+        return getLoaderManager().initLoader(0, null, createLoaderCallbacks(getDataManager()));
     }
 
     private void loadItems() {
@@ -209,11 +217,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
 
-    private void showProgressBar(boolean visible) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.setProgressBarIndeterminateVisibility(visible);
-        }
+    void showProgressBar(boolean visible) {
+        footerView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     protected void selectItem(T eventBase) {

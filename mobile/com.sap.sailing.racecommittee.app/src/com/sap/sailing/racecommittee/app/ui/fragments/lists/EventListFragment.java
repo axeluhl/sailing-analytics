@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 
 import com.sap.sailing.domain.base.EventBase;
@@ -14,6 +15,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
 
@@ -41,7 +43,12 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
     @Override
     protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(
-            ReadonlyDataManager manager) {
+            ReadonlyDataManager manager
+    ) {
+        if (getArguments() != null && getArguments().containsKey(AppConstants.EXTRA_EVENT_ID)) {
+            final UUID eventId = UUID.fromString(getArguments().getString(AppConstants.EXTRA_EVENT_ID));
+            return manager.createEventsLoader(this, eventId);
+        }
         return manager.createEventsLoader(this);
     }
 
@@ -51,8 +58,11 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     }
 
     @Override
-    public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
-        super.onLoadSucceeded(data, isCached);
+    public void onLoadSucceeded(int loaderId, Collection<EventBase> data, boolean isCached) {
+        if (loaderId == 1 && isCached) {
+            return;
+        }
+        super.onLoadSucceeded(loaderId, data, isCached);
         final Bundle arguments = getArguments();
         if (arguments != null && mSelectedIndex == -1) {
             final String id = arguments.getString(AppConstants.EXTRA_EVENT_ID);
@@ -63,5 +73,33 @@ public class EventListFragment extends NamedListFragment<EventBase> {
                 }
             }
         }
+    }
+
+    @Override
+    public void onLoadFailed(int loaderId, Exception reason) {
+        super.onLoadFailed(loaderId, reason);
+        if (loaderId == 0) {
+            showProgressBar(false);
+        }
+    }
+
+    public void onExpanded() {
+        if (getArguments() != null && getArguments().containsKey(AppConstants.EXTRA_EVENT_ID)) {
+            showProgressBar(true);
+            Loader<DataLoaderResult<Collection<EventBase>>> loader = getLoaderManager().getLoader(1);
+            if (loader == null) {
+                getLoadMoreLoader().forceLoad();
+            } else {
+                getLoadMoreLoader();
+            }
+        }
+    }
+
+    private Loader<DataLoaderResult<Collection<EventBase>>> getLoadMoreLoader() {
+        return getLoaderManager().initLoader(1, null, getDataManager().createEventsLoader(this));
+    }
+
+    public void onCollapsed() {
+        showProgressBar(false);
     }
 }

@@ -246,14 +246,14 @@ public class CourseFragmentMarks extends CourseFragment
         Loader<?> marksLoader = getLoaderManager().restartLoader(0, null,
                 mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
                     @Override
-                    public void onLoadFailed(Exception reason) {
+                    public void onLoadFailed(int loaderId, Exception reason) {
                         String toastText = getString(R.string.marks_w_placeholder);
                         Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG)
                                 .show();
                     }
 
                     @Override
-                    public void onLoadSucceeded(Collection<Mark> data, boolean isCached) {
+                    public void onLoadSucceeded(int loaderId, Collection<Mark> data, boolean isCached) {
                         onLoadMarksSucceeded(data);
                     }
                 }));

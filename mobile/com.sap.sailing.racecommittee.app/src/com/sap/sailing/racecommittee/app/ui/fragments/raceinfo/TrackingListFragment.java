@@ -457,13 +457,13 @@ public class TrackingListFragment extends BaseFragment
                 dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
 
                     @Override
-                    public void onLoadFailed(Exception reason) {
+                    public void onLoadFailed(int loaderId, Exception reason) {
                         Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()),
                                 Toast.LENGTH_LONG).show();
                     }
 
                     @Override
-                    public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
+                    public void onLoadSucceeded(int loaderId, Map<Competitor, Boat> data, boolean isCached) {
                         if (isAdded() && !isCached) {
                             onLoadCompetitorsSucceeded(data);
                         }
@@ -480,11 +480,11 @@ public class TrackingListFragment extends BaseFragment
         final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
                 dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
                     @Override
-                    public void onLoadFailed(Exception reason) {
+                    public void onLoadFailed(int loaderId, Exception reason) {
                     }
 
                     @Override
-                    public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
+                    public void onLoadSucceeded(int loaderId, LeaderboardResult data, boolean isCached) {
                         List<Util.Pair<Long, String>> sortByRank = data.getResult(getRace().getName());
                         if (isAdded() && sortByRank != null) {
                             CompetitorGoalPassingComparator comparator = (CompetitorGoalPassingComparator) mComparators

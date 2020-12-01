@@ -236,7 +236,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                         .createConfigurationLoader(deviceConfigurationName, deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
 
                             @Override
-                            public void onLoadFailed(Exception reason) {
+                            public void onLoadFailed(int loaderId, Exception reason) {
                                 if (reason instanceof FileNotFoundException) {
                                     Toast.makeText(getActivity(),
                                             getString(R.string.loading_configuration_not_found),
@@ -256,7 +256,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                             }
 
                             @Override
-                            public void onLoadSucceeded(DeviceConfiguration configuration,
+                            public void onLoadSucceeded(int loaderId, DeviceConfiguration configuration,
                                                         boolean isCached) {
                                 getLoaderManager().destroyLoader(0);
 

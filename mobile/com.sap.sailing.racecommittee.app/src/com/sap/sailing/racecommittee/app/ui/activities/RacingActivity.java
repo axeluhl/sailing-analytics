@@ -677,7 +677,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
 
         @Override
-        public void onLoadFailed(Exception ex) {
+        public void onLoadFailed(int loaderId, Exception ex) {
             setProgressSpinnerVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage()))
@@ -694,7 +694,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
 
         @Override
-        public void onLoadSucceeded(Collection<ManagedRace> data, boolean isCached) {
+        public void onLoadSucceeded(int loaderId, Collection<ManagedRace> data, boolean isCached) {
             // need to be a new instance, because of Activity restart after background kill
             // more information see bug 3741
             lastSeenRaces = new ArrayList<>(data);

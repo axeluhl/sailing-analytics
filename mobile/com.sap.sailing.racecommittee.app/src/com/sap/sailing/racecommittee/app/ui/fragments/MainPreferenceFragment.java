@@ -79,7 +79,7 @@ public class MainPreferenceFragment extends LoggableFragment {
                                     .createConfigurationLoader(deviceConfigurationName, deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
 
                                         @Override
-                                        public void onLoadFailed(Exception reason) {
+                                        public void onLoadFailed(int loaderId, Exception reason) {
                                             if (reason instanceof FileNotFoundException) {
                                                 Toast.makeText(getActivity(),
                                                         getString(R.string.loading_configuration_not_found),
@@ -96,8 +96,8 @@ public class MainPreferenceFragment extends LoggableFragment {
                                         }
 
                                         @Override
-                                        public void onLoadSucceeded(DeviceConfiguration configuration,
-                                                boolean isCached) {
+                                        public void onLoadSucceeded(int loaderId, DeviceConfiguration configuration,
+                                                                    boolean isCached) {
                                             getLoaderManager().destroyLoader(0);
 
                                             // this is our 'global' configuration, let's store it in app preferences
