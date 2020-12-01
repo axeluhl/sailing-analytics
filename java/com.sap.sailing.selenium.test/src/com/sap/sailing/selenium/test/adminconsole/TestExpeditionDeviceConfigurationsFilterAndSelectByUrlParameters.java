@@ -39,8 +39,6 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER, "Configuration");
         availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
         assertEquals(2, availableConfigurations.size());
-        assertEquals("Expedition Device Configuration", availableConfigurations.get(0));
-        assertEquals("Test Configuration", availableConfigurations.get(1)); 
         assertEquals(0, configurationPanelPO.getSelectedEntries().size());
         
         configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_FILTER_AND_SELECT, "Test");
