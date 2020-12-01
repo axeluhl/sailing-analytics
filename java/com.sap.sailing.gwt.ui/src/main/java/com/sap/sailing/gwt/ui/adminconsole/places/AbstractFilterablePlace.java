@@ -68,12 +68,6 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
         return this.filterAndSelectParameters;
     }
     
-    // TODO bug5288: this method should not have to exist, and subclasses should not maintain information redundant with how the panels are assembled in the AdminConsole tabs
-    @Override
-    public String getVerticalTabName() {
-        return "";
-    }
-    
     protected static abstract class TablePlaceTokenizer<P extends AbstractFilterablePlace> implements PlaceTokenizer<P> {
         @Override
         public String getToken(P place) {

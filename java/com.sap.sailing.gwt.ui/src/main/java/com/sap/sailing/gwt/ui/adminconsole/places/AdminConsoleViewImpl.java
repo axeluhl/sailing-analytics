@@ -128,12 +128,12 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private static AdminConsoleViewUiBinder uiBinder = GWT.create(AdminConsoleViewUiBinder.class);
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
-    public static final String ADVANCED = "AdvancedTab";
-    public static final String CONNECTORS = "TrackingProviderPanel";
-    public static final String COURSE_CREATION = "CourseCreationTab";
-    public static final String LEADERBOARDS = "LeaderboardPanel";
-    public static final String RACES = "RacesPanel";
-    public static final String RACE_COMMITEE = "RaceCommiteeAppPanel";
+    private static final String ADVANCED = "AdvancedTab";
+    private static final String CONNECTORS = "TrackingProviderPanel";
+    private static final String COURSE_CREATION = "CourseCreationTab";
+    private static final String LEADERBOARDS = "LeaderboardPanel";
+    private static final String RACES = "RacesPanel";
+    private static final String RACE_COMMITEE = "RaceCommiteeAppPanel";
 
     @UiField
     HeaderPanel headerPanel;
@@ -210,10 +210,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 presenter.fillRegattas();
             }
         }, stringMessages.regattas(), new RegattasPlace((String) null /* no place token */), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
+        
         /* LEADERBOARDS */
-        final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel
-                .addVerticalTab(stringMessages.leaderboards(), LEADERBOARDS);
-
+        final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel.addVerticalTab(stringMessages.leaderboards(), LEADERBOARDS);
         /* Leaderboard */
         final LeaderboardConfigPanelSupplier leaderboardConfigPanelSupplier = new LeaderboardConfigPanelSupplier(
                 stringMessages, presenter, true);

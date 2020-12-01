@@ -87,6 +87,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
     private final Map<Widget, T> widgetPlacesMap;
     
     private final Map<String, String> verticalTabNameToTitleMap;
+    
+    private final Map<Widget, String> panelAndDebugId;
+    
+    private final Map<Class<?>, String> placeAndDebugId;
 
     private final SelectionHandler<Integer> tabSelectionHandler;
     
@@ -189,6 +193,8 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         this.panelsByWidget = new HashMap<>();
         this.widgetPlacesMap = new HashMap<>();
         this.verticalTabNameToTitleMap = new HashMap<>();
+        this.panelAndDebugId = new HashMap<>();
+        this.placeAndDebugId = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -323,6 +329,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
+        panelAndDebugId.put(newTabPanel, tabDebugId);
         rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions), place);
         return newTabPanel;
     }
@@ -373,7 +380,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
     }
 
     public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, T place, WildcardPermission... requiresAnyOfThesePermissions) {
-        addToTabPanel(tabPanel, panelToAdd, tabTitle, place, anyPermissionCheck(requiresAnyOfThesePermissions));
+        addToTabPanel(tabPanel, panelToAdd, tabTitle, place, anyPermissionCheck(requiresAnyOfThesePermissions));       
     }
     
     public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, BooleanSupplier permissionCheck, T place) {
@@ -460,6 +467,10 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
 
         };
         addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck, place);
+        String debugId = panelAndDebugId.get(tabPanel);
+        if (debugId != null) {
+            placeAndDebugId.put(place.getClass(), debugId);
+        }
     }
     
     /**
@@ -570,7 +581,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
 
     public void selectTabByPlace(T place, boolean fireEvent) {
         String verticalTabTitle = null;
-        String placeVerticalTabName = place.getVerticalTabName();
+        String placeVerticalTabName = placeAndDebugId.get(place.getClass());
         if (placeVerticalTabName != null && verticalTabNameToTitleMap.containsKey(placeVerticalTabName)) {
             verticalTabTitle = verticalTabNameToTitleMap.get(placeVerticalTabName);
         }
