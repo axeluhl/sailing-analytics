@@ -613,7 +613,8 @@ public class ImportMasterDataOperation extends
      * Starts the tracking of imported tracked races.
      */
     private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
-        if (connectivityParametersToRestore != null) {
+        // only start importing / loading tracked races content if not running on a replica
+        if (connectivityParametersToRestore != null && toState.getMasterDescriptor() == null) {
             int i = 0;
             final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {
