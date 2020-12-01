@@ -254,7 +254,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
     }
 
-    protected Map<ProcessConfigurationVariable, String> getUserData() {
+    public Map<ProcessConfigurationVariable, String> getUserData() {
         return userData;
     }
 }

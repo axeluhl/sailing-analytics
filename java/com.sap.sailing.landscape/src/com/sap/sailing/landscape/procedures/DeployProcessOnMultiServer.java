@@ -4,6 +4,9 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
+import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
@@ -32,11 +35,56 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public class DeployProcessOnMultiServer<ShardingKey, HostT extends ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+public class DeployProcessOnMultiServer<ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>,
+ApplicationConfigurationT extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
+ApplicationConfigurationBuilderT extends AwsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+extends AbstractProcedureImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
-    private final Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape;
-    private final HostT hostToDeployTo;
-    private final String serverName;
+    private final AwsInstance<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo;
+    private final ApplicationConfigurationT applicationConfiguration;
+    
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>,
+    ApplicationConfigurationT extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
+    ApplicationConfigurationBuilderT extends AwsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
+        BuilderT setHostToDeployTo(AwsInstance<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo);
+    }
+    
+    public static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>,
+    ApplicationConfigurationT extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
+    ApplicationConfigurationBuilderT extends AwsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    extends com.sap.sse.landscape.orchestration.AbstractProcedureImpl.BuilderImpl<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
+    implements Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> {
+        private ApplicationConfigurationBuilderT applicationConfigurationBuilder;
+        private AwsInstance<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo;
+
+        @Override
+        public DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> build() throws Exception {
+            return new DeployProcessOnMultiServer<>(this);
+        }
+
+        /**
+         * Expose to subclasses
+         */
+        @Override
+        protected Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
+            return super.getLandscape();
+        }
+
+        @Override
+        public BuilderT setHostToDeployTo(AwsInstance<ShardingKey, SailingAnalyticsMetrics> hostToDeployTo) {
+            this.hostToDeployTo = hostToDeployTo;
+            return self();
+        }
+        
+        protected AwsInstance<ShardingKey, SailingAnalyticsMetrics> getHostToDeployTo() {
+            return hostToDeployTo;
+        }
+
+        protected ApplicationConfigurationBuilderT getApplicationConfigurationBuilder() {
+            return applicationConfigurationBuilder;
+        }
+    }
     
     /**
      * The process launched by this procedure. {@link #hostToDeployTo} is expected to be identical to
@@ -44,16 +92,17 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      */
     private SailingAnalyticsProcess<ShardingKey> process;
     
-    public DeployProcessOnMultiServer(Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape,
-            HostT hostToDeployTo, String serverName) {
-        super();
-        this.landscape = landscape;
-        this.hostToDeployTo = hostToDeployTo;
-        this.serverName = serverName;
+    public DeployProcessOnMultiServer(BuilderImpl<?, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> builder) throws Exception {
+        super(builder);
+        this.hostToDeployTo = builder.getHostToDeployTo();
+        this.applicationConfiguration = builder.getApplicationConfigurationBuilder().build();
     }
     
     @Override
     public void run() {
+        applicationConfiguration.getUserData(); // TODO assemble the user data to pipe to refreshInstance.sh auto-install-from-stdin
+        // TODO ensure server name and directory are set
+        // TODO work on defaulting things such as the ports based on other server installations on the same host and check applicationConfiguration for compatibility with ports from parallel installs
         // TODO Implement Runnable.run(...)
         
     }
@@ -66,16 +115,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         this.process = process;
     }
 
-    public HostT getHostToDeployTo() {
+    public AwsInstance<ShardingKey, SailingAnalyticsMetrics> getHostToDeployTo() {
         return hostToDeployTo;
-    }
-
-    public String getServerName() {
-        return serverName;
-    }
-
-    @Override
-    public Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
-        return landscape;
     }
 }
