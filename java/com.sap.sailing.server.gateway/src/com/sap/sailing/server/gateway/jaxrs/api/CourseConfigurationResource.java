@@ -142,8 +142,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromCourse/{regattaName}/{raceColumn}/{fleet}")
     public Response createCourseConfigurationFromCourse(@PathParam("regattaName") String regattaName,
             @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
-            @QueryParam("tag") List<String> tags) throws Exception {
-
+            @QueryParam("tags") List<String> tags) throws Exception {
         if (regattaName == null || raceColumn == null || fleet == null) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to have a regatta name and a race name");
@@ -183,7 +182,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromCourseTemplate/{courseTemplateId}")
     public Response createCourseConfigurationFromCourseTemplate(@PathParam("courseTemplateId") String courseTemplateId,
             @QueryParam("regattaName") String regattaName,
-            @QueryParam("tag") List<String> tags,
+            @QueryParam("tags") List<String> tags,
             @QueryParam("numberOfLaps") Integer optionalNumberOfLaps) {
         final CourseTemplate courseTemplate = this.getSharedSailingData()
                 .getCourseTemplateById(UUID.fromString(courseTemplateId));
