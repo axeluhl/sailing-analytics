@@ -158,12 +158,17 @@ public class OwnershipResource extends AbstractSecurityResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response getAccessControlLists(@PathParam("objectType") String objectType,
+    public Response setAccessControlLists(@PathParam("objectType") String objectType,
             @PathParam("typeRelativeObjectId") String typeRelativeObjectId, String jsonBody) throws OwnershipException {
         final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
         final JSONArray actionsByUserGroupJson = (JSONArray) json.get(KEY_ACL);
         QualifiedObjectIdentifier identifier = new QualifiedObjectIdentifierImpl(objectType,
                 new TypeRelativeObjectIdentifier(typeRelativeObjectId));
+        try {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CHANGE_ACL));
+        } catch (Exception ex) {
+            throw new OwnershipException("Not permitted to change ownership.", Status.FORBIDDEN);
+        }
         final Map<UserGroup, Set<String>> actionsByUserGroup = new HashMap<>();
         for (final Object o : actionsByUserGroupJson) {
             final JSONObject permissionsForGroup = (JSONObject) o;
