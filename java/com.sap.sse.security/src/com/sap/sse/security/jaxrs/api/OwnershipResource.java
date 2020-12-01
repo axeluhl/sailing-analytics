@@ -158,7 +158,7 @@ public class OwnershipResource extends AbstractSecurityResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
-    public Response getAccessControlLists(@PathParam("objectType") String objectType,
+    public Response setAccessControlLists(@PathParam("objectType") String objectType,
             @PathParam("typeRelativeObjectId") String typeRelativeObjectId, String jsonBody) throws OwnershipException {
         final JSONObject json = (JSONObject) JSONValue.parse(jsonBody);
         final JSONArray actionsByUserGroupJson = (JSONArray) json.get(KEY_ACL);
