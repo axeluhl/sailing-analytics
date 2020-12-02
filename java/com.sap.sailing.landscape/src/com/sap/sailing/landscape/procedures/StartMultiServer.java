@@ -106,6 +106,14 @@ implements StartFromSailingAnalyticsImage {
             }
             return result;
         }
+        
+        /**
+         * Make visible in package
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,

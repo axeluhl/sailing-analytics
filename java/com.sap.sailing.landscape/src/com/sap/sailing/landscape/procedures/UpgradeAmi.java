@@ -227,6 +227,14 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             }
             return new UpgradeAmi<>(this);
         }
+
+        /**
+         * Make visible in package
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,

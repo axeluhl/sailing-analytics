@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 
 public class RegexTest {
+    private static final Logger logger = Logger.getLogger(RegexTest.class.getName());
     private final Pattern trailingVersionPattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
     @Test
@@ -34,5 +36,14 @@ public class RegexTest {
         assertEquals("5", matcher.group(3));
         assertEquals(".17", matcher.group(4));
         assertEquals("17", matcher.group(5));
+    }
+
+    @Test
+    public void testEscapingForEcho() {
+        final String value = "abc\\'\"\\\"";
+        logger.info("Unescaped value: "+value);
+        final String escaped = "\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'")+"\"";
+        logger.info("Escaped value: "+escaped);
+        assertEquals("\"abc\\\\\\'\\\"\\\\\\\"\"", escaped);
     }
 }

@@ -59,6 +59,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
             return port == null ? DEFAULT_PORT : port;
         }
         
+        protected boolean isPortSet() {
+            return port != null;
+        }
+        
         @Override
         public BuilderT setPort(int port) {
             this.port = port;
@@ -67,6 +71,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         
         protected Integer getTelnetPort() {
             return telnetPort == null ? DEFAULT_TELNET_PORT : telnetPort;
+        }
+
+        protected boolean isTelnetPortSet() {
+            return telnetPort != null;
         }
         
         @Override
@@ -77,6 +85,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
 
         protected Integer getExpeditionPort() {
             return expeditionPort == null ? DEFAULT_EXPEDITION_PORT : expeditionPort;
+        }
+        
+        protected boolean isExpeditionPortSet() {
+            return expeditionPort != null;
         }
         
         @Override

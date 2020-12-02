@@ -1,5 +1,8 @@
 package com.sap.sse.landscape.orchestration;
 
+import java.util.Optional;
+
+import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -40,12 +43,23 @@ public interface Procedure<ShardingKey,
                            MetricsT extends ApplicationProcessMetrics,
                            ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends RunnableWithException<Exception> {
+    /**
+     * The following defaults apply:
+     * <ul>
+     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
+     * meaning that waiting for the instance won't timeout by default.</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     */
     public static interface Builder<BuilderT extends com.sap.sse.common.Builder<BuilderT, T>,
     T extends Procedure<ShardingKey, MetricsT, ProcessT>, ShardingKey, 
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     extends com.sap.sse.common.Builder<BuilderT, T> {
         BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape);
+        
+        BuilderT setOptionalTimeout(Optional<Duration> optionalTimeout);
     }
     
     Landscape<ShardingKey, MetricsT, ProcessT> getLandscape();

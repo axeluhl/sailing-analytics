@@ -70,8 +70,6 @@ public interface Host {
 
     ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException;
     
-    Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
-    
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the
      * {@link Region}.

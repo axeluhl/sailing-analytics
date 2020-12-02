@@ -2,6 +2,8 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -183,7 +185,14 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public boolean isReady(Optional<Duration> optionalTimeout) {
-        // TODO Implement Process<LogT,MetricsT>.isReady(...)
-        return false;
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL(getPort() == 443 ? "https" : "http",
+                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
     }
 }

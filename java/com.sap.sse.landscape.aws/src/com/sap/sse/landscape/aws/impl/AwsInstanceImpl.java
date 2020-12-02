@@ -20,9 +20,6 @@ import com.jcraft.jsch.Session;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.Log;
-import com.sap.sse.landscape.Metrics;
-import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -203,12 +200,6 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException {
         return createSftpChannel(ROOT_USER_NAME, optionalTimeout);
-    }
-
-    @Override
-    public Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses() {
-        // TODO Implement AwsInstance.getRunningProcesses(...)
-        return null;
     }
 
     @Override

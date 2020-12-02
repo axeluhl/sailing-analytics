@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Landscape;
@@ -69,8 +68,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
      * <li>If no {@link #setSecurityGroups(Iterable) security group} has been set, the {@link #getLandscape() landscape}
      * is asked to provide its {@link AwsLandscape#getDefaultSecurityGroupForApplicationHosts(Region) default security
      * group for application hosts} in the {@link #getRegion() region} used by this builder.</li>
-     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
-     * meaning that waiting for the instance won't timeout by default.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -97,8 +94,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setInstanceName(String name);
         
-        BuilderT setOptionalTimeout(Optional<Duration> optionalTimeout);
-        
         BuilderT setHostSupplier(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier);
     }
     
@@ -117,7 +112,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private List<String> userData = new ArrayList<>();
         private AwsRegion region;
         private String instanceName;
-        private Optional<Duration> optionalTimeout;
         private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
         
         protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
@@ -223,21 +217,6 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        /**
-         * A timeout for interacting with the instance, such as when creating an SSH / SFTP connection or waiting for its
-         * public IP address.
-         */
-        public Optional<Duration> getOptionalTimeout() {
-            return optionalTimeout == null ? Optional.empty() : optionalTimeout;
-        }
-
-        @Override
-        public BuilderT setOptionalTimeout(
-                Optional<Duration> optionalTimeout) {
-            this.optionalTimeout = optionalTimeout;
-            return self();
-        }
-        
         protected HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> getHostSupplier() {
             return hostSupplier;
         }
@@ -334,23 +313,35 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     }
     
     /**
-     * Appends {@code moreUserData} to the end of {@link #userData}
+     * Appends {@code moreUserData} to the end of {@link #userData} without any quoting or escaping
      */
     protected void addUserData(Iterable<String> moreUserData) {
         Util.addAll(moreUserData, userData);
     }
     
     /**
-     * @param value an unquoted string; it will be mapped to the right hand side of a Bash variable assignment and for 
-     * that purpose will be enclosed in double-quotes ({@code "}), and double-quote characters in the {@code value} string
-     * will be escaped by preceding them with a {@code \} (backslash) character.
+     * Appends a line of user data in the form of an environment variable assignment; the {@code value} will be
+     * quoted and escaped.
+     * 
+     * @param value
+     *            an unquoted string; it will be mapped to the right hand side of a Bash variable assignment and for
+     *            that purpose will be enclosed in double-quotes ({@code "}), and double-quote and single-quote and backslash
+     *            characters in the {@code value} string will be escaped by preceding them with a {@code \} (backslash)
+     *            character.
      */
     protected void addUserData(ProcessConfigurationVariable userDataVariable, String value) {
         addUserData(userDataVariable.name(), value);
     }
     
-    protected void addUserData(String name, String value) {
-        userData.add(name+"=\""+value.replaceAll("\"", "\\\"")+"\"");
+    /**
+     * @param value
+     *            an unquoted string; it will be mapped to the right hand side of a Bash variable assignment and for
+     *            that purpose will be enclosed in double-quotes ({@code "}), and double-quote and single-quote and backslash
+     *            characters in the {@code value} string will be escaped by preceding them with a {@code \} (backslash)
+     *            character.
+     */
+    private void addUserData(String name, String value) {
+        userData.add(name+"=\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'")+"\"");
     }
 
     /**

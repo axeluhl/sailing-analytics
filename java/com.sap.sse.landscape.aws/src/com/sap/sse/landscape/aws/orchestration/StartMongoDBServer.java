@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsInstance;
@@ -50,7 +51,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class StartMongoDBServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> {
-    private static enum MongoDBReplicaSetUserData {
+    private static enum MongoDBReplicaSetUserData implements ProcessConfigurationVariable {
         REPLICA_SET_NAME, REPLICA_SET_PRIMARY, REPLICA_SET_PRIORITY, REPLICA_SET_VOTES;
     }
     
@@ -228,13 +229,13 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
         super(builder);
         this.replicaSetName = builder.getReplicaSetName();
         if (builder.getReplicaSetName() != null) {
-            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_NAME.name(), builder.getReplicaSetName());
+            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_NAME, builder.getReplicaSetName());
         }
         if (builder.getReplicaSetPrimary() != null) {
-            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIMARY.name(), builder.getReplicaSetPrimary());
+            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIMARY, builder.getReplicaSetPrimary());
         }
-        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIORITY.name(), Integer.toString(builder.getReplicaSetPriority()));
-        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_VOTES.name(), Integer.toString(builder.getReplicaSetVotes()));
+        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIORITY, Integer.toString(builder.getReplicaSetPriority()));
+        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_VOTES, Integer.toString(builder.getReplicaSetVotes()));
     }
 
     /**

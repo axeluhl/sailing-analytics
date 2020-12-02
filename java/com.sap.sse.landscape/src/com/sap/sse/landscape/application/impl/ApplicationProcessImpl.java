@@ -54,8 +54,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverDirectory = serverDirectory;
     }
 
-    private static int readPortFromDirectory(Host host, String serverDirectory2, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(host, serverDirectory2, DefaultProcessConfigurationVariables.SERVER_PORT.name(), optionalTimeout));
+    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
+        return Integer.parseInt(getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(), optionalTimeout));
     }
     
     @Override
