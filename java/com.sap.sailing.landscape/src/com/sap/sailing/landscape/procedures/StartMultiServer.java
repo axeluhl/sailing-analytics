@@ -141,7 +141,7 @@ implements StartFromSailingAnalyticsImage {
         super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
         copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout);
         final String instanceId = getHost().getInstanceId();
-        getHost().getReverseProxy().createInternalStatusRedirect();
+        getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout);
         boolean fileFound = false;
         final TimePoint startedToWaitForImageUpgradeToFinish = TimePoint.now();
         do {

@@ -62,7 +62,9 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String HOME_REDIRECT_MACRO = "Home-SSL";
     private static final String PLAIN_REDIRECT_MACRO = "Plain-SSL";
     private static final String EVENT_REDIRECT_MACRO = "Event-SSL";
-    private static final String SERIES_REDIRECT_MACRO = "Series-SSL";
+    private static final String SERIES_REDIRECT_MACRO = "Series-SSL"; 
+    private static final String STATUS = "Status";
+    private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
     
     private final AwsInstance<ShardingKey, MetricsT> host;
     
@@ -131,6 +133,11 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
         setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, leaderboardGroupId.toString(), host, ""+port);
+    }
+
+    @Override
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
+        setRedirect(CONFIG_FILE_FOR_INTERNALS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), STATUS, INTERNAL_SERVER_STATUS);
     }
 
     @Override

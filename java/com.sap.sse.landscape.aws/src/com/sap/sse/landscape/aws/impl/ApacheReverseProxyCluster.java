@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.MachineImage;
@@ -122,6 +123,13 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
             proxy.setScopeRedirect(scope, applicationProcess);
+        }
+    }
+
+    @Override
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
+        for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
+            proxy.createInternalStatusRedirect(optionalTimeout);
         }
     }
 
