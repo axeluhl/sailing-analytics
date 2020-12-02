@@ -7,6 +7,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
@@ -100,6 +101,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         protected String getServerDirectory() {
             return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : serverDirectory;
         }
+        
+        protected boolean isServerDirectorySet() {
+            return serverDirectory != null;
+        }
 
         @Override
         public BuilderT setServerDirectory(String serverDirectory) {
@@ -118,6 +123,22 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         @Override
         protected String getServerName() {
             return super.getServerName();
+        }
+
+        /**
+         * Expose for callers in same package as this class
+         */
+        @Override
+        protected AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
+            return super.getLandscape();
+        }
+
+        /**
+         * Expose for callers in same package as this class
+         */
+        @Override
+        protected AwsRegion getRegion() {
+            return super.getRegion();
         }
     }
 

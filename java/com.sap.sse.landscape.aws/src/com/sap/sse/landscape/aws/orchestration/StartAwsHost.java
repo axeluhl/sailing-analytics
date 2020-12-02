@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +10,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import com.jcraft.jsch.JSchException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Landscape;
@@ -26,6 +31,7 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.orchestration.StartHost;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -40,6 +46,7 @@ public abstract class StartAwsHost<ShardingKey,
                           ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
                           HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
+    private static final Logger logger = Logger.getLogger(StartAwsHost.class.getName());
     protected static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
@@ -352,6 +359,21 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             for (final Entry<ProcessConfigurationVariable, String> userDataEntry : userDataProvider.getUserData().entrySet()) {
                 addUserData(userDataEntry.getKey(), userDataEntry.getValue());
             }
+        }
+    }
+
+    protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException {
+        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout);
+        final String sailingUserSsh = "/home/" + username + "/.ssh";
+        final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";
+        sshChannel.sendCommandLineSynchronously("cat /root/.ssh/authorized_keys >>" + sailingUserAuthorizedKeys,
+                stderr);
+        logger.info("Appended root's authorized_keys also to " + username + "'s authorized_keys. stdout: "
+                + sshChannel.getStreamContentsAsString());
+        if (stderr.size() > 0) {
+            logger.warning("stderr: " + stderr.toString());
         }
     }
 }

@@ -1,16 +1,18 @@
 package com.sap.sailing.landscape.procedures;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.HostSupplier;
-import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
+import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -31,9 +33,10 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @param <ShardingKey>
  * @param <SailingAnalyticsHost<ShardingKey>>
  */
-public class StartMultiServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends StartEmptyServer<StartMultiServer<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>>
+public class StartMultiServer<ShardingKey>
+extends StartEmptyServer<StartMultiServer<ShardingKey>, ShardingKey, SailingAnalyticsMetrics,
+                         SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey,
+                         SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
 implements StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(StartMultiServer.class.getName());
     private Optional<Duration> optionalTimeout;
@@ -47,20 +50,17 @@ implements StartFromSailingAnalyticsImage {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, StartMultiServer<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartEmptyServer.Builder<BuilderT, StartMultiServer<ShardingKey>, ShardingKey,
+        SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    extends StartEmptyServer.BuilderImpl<BuilderT, StartMultiServer<ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<BuilderT, ShardingKey, MetricsT, ProcessT> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    extends StartEmptyServer.BuilderImpl<BuilderT, StartMultiServer<ShardingKey>,
+    ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    implements Builder<BuilderT, ShardingKey> {
         @Override
-        public StartMultiServer<ShardingKey, MetricsT, ProcessT> build() {
+        public StartMultiServer<ShardingKey> build() {
             return new StartMultiServer<>(this);
         }
 
@@ -86,10 +86,17 @@ implements StartFromSailingAnalyticsImage {
         }
         
         @Override
-        protected HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> getHostSupplier() {
-            final HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> result;
+        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+            final HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> result;
             if (super.getHostSupplier() == null) {
-                result = AwsInstanceImpl::new;
+                result = (instanceId, az, landscape)->
+                    new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, serverDirectory)->{
+                        try {
+                            return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
+                        } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
             } else {
                 result = super.getHostSupplier();
             }
@@ -116,14 +123,11 @@ implements StartFromSailingAnalyticsImage {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Builder<BuilderT, ShardingKey, MetricsT, ProcessT> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
         return new BuilderImpl<>();
     }
 
-    protected StartMultiServer(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) {
+    protected StartMultiServer(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
         this.optionalTimeout = builder.getOptionalTimeout();
     }
@@ -131,6 +135,7 @@ implements StartFromSailingAnalyticsImage {
     @Override
     public void run() throws Exception {
         super.run();
+        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout);
         final String instanceId = getHost().getInstanceId();
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout);
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();

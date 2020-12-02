@@ -41,7 +41,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
         @SuppressWarnings("unchecked")
         final AwsLandscape<ShardingKey, MetricsT, ProcessT> castLandscape =
             (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
@@ -59,13 +59,18 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
      * an {@link ApplicationProcess} object for each one.
      */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException {
+    public Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException, InterruptedException {
         final Set<ProcessT> result = new HashSet<>();
         final ChannelSftp sftpChannel = createRootSftpChannel(TIMEOUT);
+        if (TIMEOUT.isPresent()) {
+            sftpChannel.connect((int) TIMEOUT.get().asMillis());
+        } else {
+            sftpChannel.connect();
+        }
         @SuppressWarnings("unchecked")
         final Vector<LsEntry> files = sftpChannel.ls(DEFAULT_SERVERS_PATH);
         for (final LsEntry subdirCandidate : files) {
-            if (subdirCandidate.getAttrs().isDir()) {
+            if (subdirCandidate.getAttrs().isDir() && !subdirCandidate.getFilename().startsWith(".")) {
                 ProcessT process;
                 final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+subdirCandidate.getFilename();
                 try {

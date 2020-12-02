@@ -29,7 +29,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -63,7 +63,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
     
-    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -16,9 +17,11 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 import com.sap.sse.landscape.orchestration.Procedure;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 /**
  * Deploys a single {@link SailingAnalyticsProcess} to a given {@link ApplicationProcessHost} which ideally has been
@@ -35,6 +38,7 @@ ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<Shard
 ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
 extends AbstractProcedureImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
+    private static final Logger logger = Logger.getLogger(DeployProcessOnMultiServer.class.getName());
     private final ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo;
     private final ApplicationConfigurationT applicationConfiguration;
     private final Optional<Duration> optionalTimeout;
@@ -56,10 +60,23 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * 
      * The {@link SailingAnalyticsApplicationConfiguration#getServerDirectory() server directory} defaults to the
      * {@link {@link SailingAnalyticsApplicationConfiguration#getServerName() server name} appended to the
-     * {@link ApplicationProcessHost#DEFAULT_SERVER_PATH default server directory}.<p>
+     * {@link ApplicationProcessHost#DEFAULT_SERVER_PATH default server directory}.
+     * <p>
      * 
      * The {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name} must have been set
      * on the application configuration builder before invoking this builder's {@link #build()} method.
+     * <p>
+     * 
+     * If no {@link Builder#setLandscape(Landscape) landscape} is explicitly set, the
+     * {@link AwsApplicationConfiguration.Builder#setLandscape(AwsLandscape) landscape} of the application configuration
+     * is used if provided, otherwise the {@link ApplicationProcessHost#getLandscape() landscape} of the
+     * {@link #setHostToDeployTo(ApplicationProcessHost) host} is used as a default. The latter is then also used as the
+     * default for the application configuration if no landscape has been provided for it explicitly.
+     * <p>
+     * 
+     * If the application configuration does not
+     * {@link AwsApplicationConfiguration.Builder#setRegion(com.sap.sse.landscape.aws.impl.AwsRegion) specify a region},
+     * the host's region is used as the default region.
      * 
      * @author Axel Uhl (D043530)
      */
@@ -87,8 +104,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         public DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> build() throws Exception {
             assert getHostToDeployTo() != null;
             assert getApplicationConfigurationBuilder().getServerName() != null;
-            if (getApplicationConfigurationBuilder().getServerDirectory() == null) {
-                getApplicationConfigurationBuilder().setServerDirectory(ApplicationProcessHost.DEFAULT_SERVER_PATH+"/"+getApplicationConfigurationBuilder().getServerName());
+            if (!getApplicationConfigurationBuilder().isServerDirectorySet()) {
+                getApplicationConfigurationBuilder().setServerDirectory(ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+getApplicationConfigurationBuilder().getServerName());
             }
             final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHostToDeployTo().getApplicationProcesses();
             if (!getApplicationConfigurationBuilder().isPortSet()) {
@@ -120,6 +137,19 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                             }
                         }));
             }
+            if (getLandscape() == null) {
+                if (getApplicationConfigurationBuilder().getLandscape() != null) {
+                    setLandscape(getApplicationConfigurationBuilder().getLandscape());
+                } else {
+                    setLandscape(getHostToDeployTo().getLandscape());
+                }
+            }
+            if (getApplicationConfigurationBuilder().getLandscape() == null) {
+                getApplicationConfigurationBuilder().setLandscape(getLandscape());
+            }
+            if (getApplicationConfigurationBuilder().getRegion() == null) {
+                getApplicationConfigurationBuilder().setRegion(getHostToDeployTo().getRegion());
+            }
             return new DeployProcessOnMultiServer<>(this);
         }
 
@@ -139,8 +169,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
          * Expose to subclasses
          */
         @Override
-        protected Landscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
-            return super.getLandscape();
+        protected AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
+            return (AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>) super.getLandscape();
         }
 
         @Override
@@ -189,11 +219,17 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        getHostToDeployTo().createRootSshChannel(optionalTimeout).sendCommandLineSynchronously(
+        final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout);
+        sshChannel.sendCommandLineSynchronously(
                 "mkdir -p "+serverDirectory+"; "+
                 "cd "+serverDirectory+"; "+
-                "echo '"+applicationConfiguration.getUserData()+
-                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin", stderr);
+                "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
+                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; service httpd reload", stderr);
+        final String result = sshChannel.getStreamContentsAsString();
+        logger.info("stdout: "+result);
+        if (stderr.size() > 0) {
+            logger.warning("stderr: "+stderr.toString());
+        }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
     }
     

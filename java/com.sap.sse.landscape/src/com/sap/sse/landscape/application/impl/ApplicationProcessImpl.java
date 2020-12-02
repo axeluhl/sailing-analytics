@@ -26,11 +26,6 @@ public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationPro
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ProcessImpl<RotatingFileBasedLog, MetricsT>
 implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
-    /**
-     * The timeout for typical network-based operations
-     */
-    private static final Optional<Duration> TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5));
-    
     private static final String ENV_SH = "env.sh";
     private static final String VERSION_TXT = "configuration/jetty/version.txt";
     
@@ -45,8 +40,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the {@link #ENV_SH env.sh} file
      * located on the {@code host} in the {@code serverDirectory} specified.
      */
-    public ApplicationProcessImpl(Host host, String serverDirectory) throws NumberFormatException, JSchException, IOException, InterruptedException {
-        this(readPortFromDirectory(host, serverDirectory, TIMEOUT), host, serverDirectory);
+    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
+        this(readPortFromDirectory(host, serverDirectory, optionalTimeout), host, serverDirectory);
     }
     
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
@@ -59,7 +54,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
         final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout));
         final Release result;
@@ -78,7 +73,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * one running now if this process is currently running and no other release has been deployed since the process
      * has started.
      */
-    private String getVersionTxt(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    private String getVersionTxt(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout);
     }
 
@@ -138,12 +133,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         return getFileContents(getEnvShPath(), optionalTimeout);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout)
-            throws JSchException, IOException, SftpException {
+            throws JSchException, IOException, SftpException, InterruptedException {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 

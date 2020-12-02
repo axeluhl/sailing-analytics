@@ -30,5 +30,7 @@ extends AwsInstance<ShardingKey, MetricsT> {
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
      */
-    Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException;
+    Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException, InterruptedException;
+    
+    AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
 }

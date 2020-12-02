@@ -165,9 +165,10 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     @Override
     public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout));
+
     }
     
-    private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout) throws JSchException, IOException {
+    private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         final TimePoint start = TimePoint.now();
         final int connectTimeoutInMillis = 5000;
         logger.info("Creating SSH "+channelType+" channel for SSH user "+sshUserName+
@@ -182,6 +183,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
             } catch (JSchException | IllegalStateException e) {
                 logger.info(e.getMessage()
                         + " while trying to connect. Probably timeout trying early SSH connection.");
+                Thread.sleep(5000); // wait a bit for the service to become available
             }
             if (optionalTimeout.isPresent()) {
                 logger.info("Retrying until "+start.plus(optionalTimeout.get()));
@@ -193,12 +195,12 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     }
     
     @Override
-    public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException {
+    public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout);
     }
 
     @Override
-    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException {
+    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         return createSftpChannel(ROOT_USER_NAME, optionalTimeout);
     }
 

@@ -10,6 +10,7 @@ import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -29,7 +30,8 @@ import com.sap.sse.landscape.mongodb.Database;
  */
 public abstract class AwsApplicationConfiguration<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+implements UserDataProvider {
     /**
      * A builder that helps building an instance of type {@link AwsApplicationConfiguration} or any subclass thereof (then
      * using specialized builders). The following default rules apply, in addition to the defaults rules of the builders
@@ -254,6 +256,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
     }
 
+    @Override
     public Map<ProcessConfigurationVariable, String> getUserData() {
         return userData;
     }

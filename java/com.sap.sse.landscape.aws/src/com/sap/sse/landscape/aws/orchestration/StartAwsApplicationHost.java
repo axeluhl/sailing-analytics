@@ -1,5 +1,8 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.util.Optional;
+
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -63,17 +66,32 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
             getApplicationConfigurationBuilder().setLandscape((AwsLandscape<ShardingKey, MetricsT, ProcessT>) landscape);
             return super.setLandscape(landscape);
         }
+
+        /**
+         * make visible in package
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
+        
     }
     
     private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration;
+    private final Optional<Duration> optionalTimeout;
     
     protected StartAwsApplicationHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
+        this.optionalTimeout = builder.getOptionalTimeout();
         applicationConfiguration = builder.getApplicationConfigurationBuilder().build();
         addUserData(applicationConfiguration::getUserData);
     }
 
     protected AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> getApplicationConfiguration() {
         return applicationConfiguration;
+    }
+    
+    protected Optional<Duration> getOptionalTimeout() {
+        return optionalTimeout;
     }
 }

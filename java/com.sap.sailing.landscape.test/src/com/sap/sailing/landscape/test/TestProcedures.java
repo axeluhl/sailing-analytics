@@ -9,6 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -19,10 +21,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
@@ -75,11 +80,12 @@ public class TestProcedures {
     }
     
     @Test
-    public void testStartupEmptyMultiServer() throws Exception {
+    public 
+    void testStartupEmptyMultiServerAndDeployAnotherProcess() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        final StartMultiServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> builder = StartMultiServer.builder();
-        final StartMultiServer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> startEmptyMultiServer = builder
+        final StartMultiServer.Builder<?, String> builder = StartMultiServer.builder();
+        final StartMultiServer<String> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
               .setOptionalTimeout(optionalTimeout)
@@ -87,7 +93,7 @@ public class TestProcedures {
         try {
             // this is expected to have connected to the default "live" replica set.
             startEmptyMultiServer.run();
-            final AwsInstance<String, SailingAnalyticsMetrics> host = startEmptyMultiServer.getHost();
+            final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startEmptyMultiServer.getHost();
             final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
             sshChannel.sendCommandLineSynchronously("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
             final String result = sshChannel.getStreamContentsAsString();
@@ -95,6 +101,12 @@ public class TestProcedures {
             final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
             assertTrue(connection.getHeaderField("Server").startsWith("Apache"));
             connection.disconnect();
+            SailingAnalyticsProcess<String> processA = launchMasterOnMultiServer(host, "a");
+            SailingAnalyticsProcess<String> processB = launchMasterOnMultiServer(host, "b");
+            assertTrue(processA.waitUntilReady(optionalTimeout));
+            assertTrue(processB.waitUntilReady(optionalTimeout));
+            assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT+1)),
+                    new HashSet<>(Arrays.asList(processA.getPort(), processB.getPort())));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;
@@ -104,6 +116,31 @@ public class TestProcedures {
             }
             landscape.deleteKeyPair(region, keyName);
         }
+    }
+    
+    private <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+    MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
+    ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
+    SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
+        @SuppressWarnings("unchecked")
+        final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsMasterConfiguration.<AppConfigBuilderT, String>builder();
+        final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
+                ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
+                SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
+                DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String,
+                        ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
+                        SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
+        multiServerAppDeployerBuilder
+            .setHostToDeployTo(host)
+            .setOptionalTimeout(optionalTimeout);
+        multiServerAppConfigBuilder
+            .setServerName(serverName)
+            .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")); // TODO this is the debug config for the current branch bug4811 and its releases
+        final DeployProcessOnMultiServer<String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
+            SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
+        deployer.run();
+        return deployer.getProcess();
     }
     
     @Test

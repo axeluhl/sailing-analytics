@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.procedures;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
@@ -19,10 +20,14 @@ import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
- * This launches an EC2 instance with a {@link SailingAnalyticsProcess} automatically started on it. The port configurations,
- * especially for the {@link Builder#getPort() HTTP port}, the {@link Builder#getTelnetPort() telnet port for OSGi console access}
- * and the {@link Builder#getExpeditionPort() "Expedition" UDP port} for this default process can be specified. They default to
- * 8888, 14888, and 2010, respectively.
+ * This launches an EC2 instance with a {@link SailingAnalyticsProcess} automatically started on it. The port
+ * configurations, especially for the {@link Builder#getPort() HTTP port}, the {@link Builder#getTelnetPort() telnet
+ * port for OSGi console access} and the {@link Builder#getExpeditionPort() "Expedition" UDP port} for this default
+ * process can be specified. They default to 8888, 14888, and 2010, respectively.
+ * <p>
+ * 
+ * After launching the instance, the public key is also added to the {@code .ssh/authorized_keys} file of the user whose
+ * name is provided by {@link #SAILING_USER_NAME}.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -32,6 +37,7 @@ public abstract class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
     StartFromSailingAnalyticsImage {
+    public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
     private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     
     /**
@@ -87,7 +93,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory);
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
                             } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
@@ -108,5 +114,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
+    }
+
+    @Override
+    public void run() throws Exception {
+        super.run();
+        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout());
     }
 }
