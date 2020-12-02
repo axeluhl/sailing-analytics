@@ -1,8 +1,8 @@
 package com.sap.sse.gwt.client.xdstorage.impl;
 
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
@@ -16,6 +16,7 @@ import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent.Handler;
  *
  */
 public class LocalStorage implements CrossDomainStorage {
+    private static final Logger logger = Logger.getLogger(LocalStorage.class.getName());
     private final Storage storage;
     
     public LocalStorage() {
@@ -33,7 +34,7 @@ public class LocalStorage implements CrossDomainStorage {
         if (storage != null) {
             storage.setItem(key, value);
         } else {
-            GWT.log("Warning: cannot store "+key+"="+value+" in local storage; local storage not accessible");
+            logger.warning("Cannot store "+key+"="+value+" in local storage; local storage not accessible");
         }
         if (callback != null) {
             callback.accept(null);
@@ -46,7 +47,7 @@ public class LocalStorage implements CrossDomainStorage {
         if (storage != null) {
             result = storage.getItem(key);
         } else {
-            GWT.log("Warning: cannot read "+key+" from local storage; local storage not accessible");
+            logger.warning("Cannot read "+key+" from local storage; local storage not accessible");
             result = null;
         }
         if (callback != null) {
@@ -59,7 +60,7 @@ public class LocalStorage implements CrossDomainStorage {
         if (storage != null) {
             storage.removeItem(key);
         } else {
-            GWT.log("Warning: cannot remove "+key+" from local storage; local storage not accessible");
+            logger.warning("Cannot remove "+key+" from local storage; local storage not accessible");
         }
         if (callback != null) {
             callback.accept(null);
@@ -71,7 +72,7 @@ public class LocalStorage implements CrossDomainStorage {
         if (storage != null) {
             storage.clear();
         } else {
-            GWT.log("Warning: cannot clear local storage; local storage not accessible");
+            logger.warning("Cannot clear local storage; local storage not accessible");
         }
         if (callback != null) {
             callback.accept(null);
@@ -84,7 +85,7 @@ public class LocalStorage implements CrossDomainStorage {
         if (storage != null) {
             result = storage.key(index);
         } else {
-            GWT.log("Warning: cannot read key at index "+index+" from local storage; local storage not accessible");
+            logger.warning("Cannot read key at index "+index+" from local storage; local storage not accessible");
             result = null;
         }
         if (callback != null) {
@@ -99,7 +100,7 @@ public class LocalStorage implements CrossDomainStorage {
             if (storage != null) {
                 result = storage.getLength();
             } else {
-                GWT.log("Warning: cannot get local storage length; local storage not accessible");
+                logger.warning("Warning: cannot get local storage length; local storage not accessible");
                 result = null;
             }
             callback.accept(result);

@@ -15,7 +15,7 @@ public class FreestyleProperties extends JsonWrapper {
     private static final String FIELD_SHAPE = "shape";
     private static final String FIELD_PATTERN = "pattern";
     private static final String FIELD_MARK_TYPE = "markType";
-    private static final String FIELD_TAG = "tag";
+    private static final String FIELD_TAGS = "tags";
 
     public FreestyleProperties(final JSONObject json) {
         super(json);
@@ -31,7 +31,7 @@ public class FreestyleProperties extends JsonWrapper {
         getJson().put(FIELD_PATTERN, pattern);
         getJson().put(FIELD_MARK_TYPE, markType);
         JSONArray jsonTags = new JSONArray(tags);
-        getJson().put(FIELD_TAG, jsonTags);
+        getJson().put(FIELD_TAGS, jsonTags);
     }
 
     public String getName() {

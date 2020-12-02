@@ -69,7 +69,6 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
                 "Duckburg Harbour");
         final String registrationLinkSecret = event.getSecret();
         final RaceColumn race = regattaApi.addRaceColumn(ownerCtx, EVENT_NAME, null, 1)[0];
-
         final Competitor competitorOwner = regattaApi.createAndAddCompetitorWithSecret(ownerCtx, EVENT_NAME, BOAT_CLASS,
                 /* email */ null, "Competitor Owner", "USA", registrationLinkSecret, deviceUuidCompetitor1);
         assertNotNull("Competitor for Owner should not be null!", competitorOwner);
@@ -77,18 +76,16 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
                 BOAT_CLASS, /* email */ null, "Competitor Sailor", "USA", registrationLinkSecret,
                 deviceUuidCompetitor2);
         assertNotNull("Competitor for Sailor should not be null!", competitorSailor);
-
         assertEquals("Regatta should contain 2 competitors (seen by regatta owner)", 2,
                 regattaApi.getCompetitors(ownerCtx, EVENT_NAME).length);
-        assertEquals("Regatta should contain 1 competitor (seen by anonymous)", 1,
+        // see also bug 5442 / bug 5167: anonymous users registering a competitor with a secret will "donate" their competitor to the organizer:
+        assertEquals("Regatta should contain 2 competitor (seen by anonymous)", 2,
                 regattaApi.getCompetitors(sailorCtx, EVENT_NAME).length);
         assertEquals("Regatta should contain 2 competitors (seen by admin)", 2,
                 regattaApi.getCompetitors(adminCtx, EVENT_NAME).length);
-
         leaderboardApi.startRaceLogTracking(ownerCtx, EVENT_NAME, race.getRaceName(), "Default");
         leaderboardApi.setTrackingTimes(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", currentTimeMillis(),
                 currentTimeMillis() + 600_000L);
-
         for (double i = 0.0; i < 100.0; i++) {
             final Double longitude = 9.12 + i / 1000.0, latitude = .599 + i / 1000.0, speed = 10.0, course = 180.0;
             gpsFixApi.postGpsFix(ownerCtx, deviceUuidCompetitor1,
@@ -96,12 +93,9 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
             gpsFixApi.postGpsFix(sailorCtx, deviceUuidCompetitor2,
                     createFix(longitude, latitude, currentTimeMillis(), speed, course));
         }
-
         final Mark mark1 = markApi.addMarkToRegatta(ownerCtx, EVENT_NAME, "FirstMark");
-
         final Double longitude = 9.12, latitude = .599;
         markApi.addMarkFix(ownerCtx, EVENT_NAME, race.getRaceName(), "Default", mark1.getMarkId(), null, null,
                 longitude, latitude, currentTimeMillis());
     }
-
 }
