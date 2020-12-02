@@ -110,6 +110,12 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
         final TimePoint startingToPollForReady = TimePoint.now();
         while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+            if (optionalTimeout.isPresent()) {
+                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
+                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
+            } else {
+                logger.info(""+this+" not yet ready; waiting forever...");
+            }
             Thread.sleep(5000);
         }
         return isReady(optionalTimeout);

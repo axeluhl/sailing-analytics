@@ -37,7 +37,7 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
     implements Builder<BuilderT, ShardingKey> {
         private static final String DEFAULT_REPLICA_INSTANCE_NAME_SUFFIX = " (Replica)";
 
-        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+        protected BuilderImpl(SailingAnalyticsReplicaConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
         }
         
@@ -59,6 +59,5 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
     
     protected StartSailingAnalyticsReplicaHost(BuilderImpl<?, ShardingKey> builder) throws Exception {
         super(builder);
-        addUserData(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }
 }

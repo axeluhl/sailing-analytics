@@ -1,10 +1,14 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.aws.AwsInstance;
 
 public class SailingAnalyticsReplicaConfiguration<ShardingKey>
@@ -18,6 +22,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
      * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
      * {@link #setServerName(String) server name} property</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to {@code "live-replica-server"}.</li>
      * </ul>
      * 
      * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment contents
@@ -61,6 +66,13 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
                 resultBuilder.setInboundMasterExchangeName(getServerName());
             }
             return Optional.of(resultBuilder.build());
+        }
+        
+        @Override
+        protected Map<ProcessConfigurationVariable, String> getUserData() {
+            final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
+            result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
+            return result;
         }
 
         @Override

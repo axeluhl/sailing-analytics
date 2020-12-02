@@ -31,7 +31,7 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends StartSailingAnalyticsHost.BuilderImpl<BuilderT, StartSailingAnalyticsMasterHost<ShardingKey>, ShardingKey>
     implements Builder<BuilderT, ShardingKey> {
-        protected BuilderImpl(com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+        protected BuilderImpl(SailingAnalyticsMasterConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
         }
 
@@ -47,12 +47,11 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
-            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+            SailingAnalyticsMasterConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
         return new BuilderImpl<>(applicationConfigurationBuilder);
     }
 
     protected StartSailingAnalyticsMasterHost(BuilderImpl<?, ShardingKey> builder) throws Exception {
         super(builder);
-        addUserData(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-master-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
     }
 }
