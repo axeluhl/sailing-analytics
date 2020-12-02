@@ -149,15 +149,17 @@ implements StartFromSailingAnalyticsImage {
             sftpChannel.connect();
             try {
                 final SftpATTRS stat = sftpChannel.stat("/tmp/image-upgrade-finished");
-                if (stat.isReg()) {
+                if (stat.isReg()) { // regular file; see also /configuration/imageupgrade.sh which writes this file in case of no-shutdown
                     fileFound = true;
                 }
             } catch (SftpException e) {
                 fileFound = false;
+            } finally {
+                sftpChannel.disconnect();
             }
             // wait until the file indicating the finishing of the image upgrade process was found
             // or, if a timeout was provided, the timeout expired
-        } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).before(TimePoint.now())).orElse(true));
+        } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).after(TimePoint.now())).orElse(true));
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout);
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         sshCommandChannel.sendCommandLineSynchronously("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start", stderr);
