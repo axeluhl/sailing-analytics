@@ -55,6 +55,7 @@ clean_startup_logs
 # Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
 if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
   echo "Shutdown disabled by no-shutdown option in user data"
+  touch /tmp/image-upgrade-finished
 else
   shutdown -h now &
 fi

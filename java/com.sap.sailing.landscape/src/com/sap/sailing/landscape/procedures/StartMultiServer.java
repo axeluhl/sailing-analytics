@@ -5,11 +5,15 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpATTRS;
+import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
@@ -134,9 +138,26 @@ implements StartFromSailingAnalyticsImage {
     
     @Override
     public void run() throws Exception {
-        super.run();
+        super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
         copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout);
         final String instanceId = getHost().getInstanceId();
+        getHost().getReverseProxy().createInternalStatusRedirect();
+        boolean fileFound = false;
+        final TimePoint startedToWaitForImageUpgradeToFinish = TimePoint.now();
+        do {
+            final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout);
+            sftpChannel.connect();
+            try {
+                final SftpATTRS stat = sftpChannel.stat("/tmp/image-upgrade-finished");
+                if (stat.isReg()) {
+                    fileFound = true;
+                }
+            } catch (SftpException e) {
+                fileFound = false;
+            }
+            // wait until the file indicating the finishing of the image upgrade process was found
+            // or, if a timeout was provided, the timeout expired
+        } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).before(TimePoint.now())).orElse(true));
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout);
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         sshCommandChannel.sendCommandLineSynchronously("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start", stderr);

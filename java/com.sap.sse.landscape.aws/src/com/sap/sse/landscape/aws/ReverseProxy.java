@@ -95,4 +95,9 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     void terminate();
 
     String getHealthCheckPath();
+
+    /**
+     * Creates a mapping for the {@code /internal-server-status} path using the host's generic external ec2 host name 
+     */
+    void createInternalStatusRedirect();
 }

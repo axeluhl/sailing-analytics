@@ -225,7 +225,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 "mkdir -p "+serverDirectory+"; "+
                 "cd "+serverDirectory+"; "+
                 "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
-                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start", stderr);
+                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh", stderr);
         final String result = sshChannel.getStreamContentsAsString();
         logger.info("stdout: "+result);
         if (stderr.size() > 0) {
