@@ -46,7 +46,7 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> masterHostBuilder(
             SailingAnalyticsMasterConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
         return new BuilderImpl<>(applicationConfigurationBuilder);
     }

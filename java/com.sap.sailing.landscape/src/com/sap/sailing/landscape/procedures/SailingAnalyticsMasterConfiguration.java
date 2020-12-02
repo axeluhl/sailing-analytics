@@ -34,7 +34,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> masterBuilder() {
         return new BuilderImpl<>();
     }
 

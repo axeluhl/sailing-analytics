@@ -33,7 +33,7 @@ import com.sap.sse.landscape.orchestration.Procedure;
  *
  * @param <ShardingKey>
  */
-public abstract class StartSailingAnalyticsHost<ShardingKey>
+public class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
 implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
     StartFromSailingAnalyticsImage {
@@ -64,7 +64,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
     T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
     extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
     implements Builder<BuilderT, T, ShardingKey> {
@@ -99,9 +99,21 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                             }
                         });
         }
-        
+
+        @Override
+        public T build() throws Exception {
+            @SuppressWarnings("unchecked")
+            final T result = (T) new StartSailingAnalyticsHost<ShardingKey>(this);
+            return result;
+        }
     }
     
+    public static <BuilderT extends Builder<BuilderT, StartSailingAnalyticsHost<ShardingKey>, ShardingKey>, ShardingKey>
+    Builder<BuilderT, StartSailingAnalyticsHost<ShardingKey>, ShardingKey> builder(
+            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+        return new BuilderImpl<>(applicationConfigurationBuilder);
+    }
+
     protected StartSailingAnalyticsHost(BuilderImpl<?, ? extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey> builder) throws Exception {
         super(builder);
     }

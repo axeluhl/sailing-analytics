@@ -52,7 +52,7 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> builder(
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> replicaHostBuilder(
             SailingAnalyticsReplicaConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
         return new BuilderImpl<>(applicationConfigurationBuilder);
     }

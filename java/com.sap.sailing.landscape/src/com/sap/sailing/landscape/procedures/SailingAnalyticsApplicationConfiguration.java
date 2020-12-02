@@ -51,7 +51,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
      * The builder needs to know the {@link AwsRegion} in which the application will be run. In this region, discovery
      * of default database and messaging endpoints is performed.
      */
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
     T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
     extends AwsApplicationConfiguration.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
     implements Builder<BuilderT, T, ShardingKey> {
@@ -159,12 +159,25 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
                 result.put(variable, port.toString());
             }
         }
+
+        @Override
+        public T build() throws Exception {
+            @SuppressWarnings("unchecked")
+            final T result = (T) new SailingAnalyticsApplicationConfiguration<ShardingKey>(this);
+            return result;
+        }
     }
 
     private final Integer port;
     private final Integer telnetPort;
     private final Integer expeditionPort;
     private final String serverDirectory;
+    
+    public static <BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
+    Builder<BuilderT, T, ShardingKey> builder() {
+        return new BuilderImpl<>();
+    }
 
     protected SailingAnalyticsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey> builder) {
         super(builder);

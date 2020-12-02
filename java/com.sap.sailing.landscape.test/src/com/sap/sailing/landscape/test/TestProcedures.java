@@ -29,10 +29,8 @@ import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
-import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
-import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -122,19 +120,19 @@ public class TestProcedures {
         }
     }
     
-    private <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+    private <AppConfigBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>,
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-    SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
+    SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT>>
     SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
         @SuppressWarnings("unchecked")
-        final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsMasterConfiguration.<AppConfigBuilderT, String>builder();
+        final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsApplicationConfiguration.<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>builder();
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
                 ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
+                SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String,
                         ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                        SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
+                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
         multiServerAppDeployerBuilder
             .setHostToDeployTo(host)
             .setOptionalTimeout(optionalTimeout);
@@ -142,7 +140,7 @@ public class TestProcedures {
             .setServerName(serverName)
             .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")); // TODO this is the debug config for the current branch bug4811 and its releases
         final DeployProcessOnMultiServer<String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-            SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
+            SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
         deployer.run();
         return deployer.getProcess();
     }
@@ -226,7 +224,7 @@ public class TestProcedures {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        Builder<AppConfigBuilderT, String> applicationConfigurationBuilder = SailingAnalyticsMasterConfiguration.builder();
+        SailingAnalyticsApplicationConfiguration.Builder<AppConfigBuilderT, ?, String> applicationConfigurationBuilder = SailingAnalyticsApplicationConfiguration.builder();
         applicationConfigurationBuilder
             .setServerName(serverName)
             .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")) // TODO this is the debug config for the current branch bug4811 and its releases
@@ -234,7 +232,7 @@ public class TestProcedures {
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
                     .build());
-        final StartSailingAnalyticsMasterHost.Builder<?, String> builder = StartSailingAnalyticsMasterHost.builder(applicationConfigurationBuilder);
+        final StartSailingAnalyticsHost.Builder<?, ?, String> builder = StartSailingAnalyticsHost.builder(applicationConfigurationBuilder);
         final StartSailingAnalyticsHost<String> startSailingAnalyticsMaster = builder
                 .setLandscape(landscape)
                 .setRegion(region)

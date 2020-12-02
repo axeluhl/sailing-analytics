@@ -82,7 +82,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>,
-    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey> builder() {
+    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey> replicaBuilder() {
         return new BuilderImpl<>();
     }
 
