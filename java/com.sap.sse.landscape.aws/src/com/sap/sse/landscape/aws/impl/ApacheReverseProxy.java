@@ -137,7 +137,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
 
     @Override
     public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
-        setRedirect(CONFIG_FILE_FOR_INTERNALS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), STATUS, INTERNAL_SERVER_STATUS);
+        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), INTERNAL_SERVER_STATUS);
     }
 
     @Override
