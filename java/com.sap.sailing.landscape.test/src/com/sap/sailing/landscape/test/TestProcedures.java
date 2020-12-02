@@ -107,6 +107,10 @@ public class TestProcedures {
             assertTrue(processB.waitUntilReady(optionalTimeout));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT+1)),
                     new HashSet<>(Arrays.asList(processA.getPort(), processB.getPort())));
+            assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_TELNET_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_TELNET_PORT+1)),
+                    new HashSet<>(Arrays.asList(processA.getTelnetPortToOSGiConsole(optionalTimeout), processB.getTelnetPortToOSGiConsole(optionalTimeout))));
+            assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT+1)),
+                    new HashSet<>(Arrays.asList(processA.getExpeditionUdpPort(optionalTimeout), processB.getExpeditionUdpPort(optionalTimeout))));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;

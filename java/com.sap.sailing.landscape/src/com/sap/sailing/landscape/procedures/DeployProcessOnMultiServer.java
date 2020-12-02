@@ -242,7 +242,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 logger.warning("stderr: "+stderr.toString());
             }
         }
-        
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
     }
     

@@ -156,7 +156,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
 
         protected void addUserDataForPort(final Map<ProcessConfigurationVariable, String> result, ProcessConfigurationVariable variable, Integer port) {
             if (getPort() != null) {
-                result.put(variable, getPort().toString());
+                result.put(variable, port.toString());
             }
         }
     }
