@@ -337,20 +337,9 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
      *            character.
      */
     protected void addUserData(ProcessConfigurationVariable userDataVariable, String value) {
-        addUserData(userDataVariable.name(), value);
+        userData.add(UserDataProvider.getAsEnvironmentVariableAssignment(userDataVariable, value));
     }
     
-    /**
-     * @param value
-     *            an unquoted string; it will be mapped to the right hand side of a Bash variable assignment and for
-     *            that purpose will be enclosed in double-quotes ({@code "}), and double-quote and single-quote and backslash
-     *            characters in the {@code value} string will be escaped by preceding them with a {@code \} (backslash)
-     *            character.
-     */
-    private void addUserData(String name, String value) {
-        userData.add(name+"=\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'")+"\"");
-    }
-
     /**
      * Appends {@code moreUserData} to the end of {@link #userData}
      */
