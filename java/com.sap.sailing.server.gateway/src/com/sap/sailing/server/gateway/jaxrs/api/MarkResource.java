@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,11 +10,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -34,12 +39,14 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.impl.MarkFinder;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -58,12 +65,14 @@ import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceExcep
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+import com.sap.sailing.server.gateway.dto.MarkContext;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -71,11 +80,15 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkContextJsonSerializer;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/mark")
@@ -488,4 +501,88 @@ public class MarkResource extends AbstractSailingServerResource {
         return ((HasRegattaLike) l).getRegattaLike().getRegattaLog();
     }
 
+    @GET
+    @Path("/searchMarksByMarkPropertiesObject/{markPropertiesId}")
+    @Produces("application/json;charset=UTF-8")
+    public Response searchMarksByMarkPropertiesObject(@PathParam(value = "markPropertiesId") UUID markPropertiesId,
+            @QueryParam(value = "onlyCurrentlyActive") boolean onlyCurrentlyActive,
+            @QueryParam(value = "eventIds") Set<UUID> eventIds,
+            @QueryParam(value = "regattaNames") Set<String> regattaNames) {
+        final MarkProperties markPropertiesObject = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
+        if (markPropertiesObject == null) {
+            throw new IllegalArgumentException("No MarkPropertiesObject with Id: " + markPropertiesId);
+        }
+        getSecurityService().checkCurrentUserReadPermission(markPropertiesObject);
+        final Set<MarkContext> regattaMarkContexts = new HashSet<>();
+        final Set<Pair<Regatta, Leaderboard>> regattasWithLeaderBoards = getFilteredRegattasWithPermission(
+                regattaNames, onlyCurrentlyActive);
+        final Iterable<Event> events = getFilteredEventsWithPermission(eventIds,
+                onlyCurrentlyActive);
+        for (Pair<Regatta, Leaderboard> regattaWithLeaderboard : regattasWithLeaderBoards) {
+            final Regatta regatta = regattaWithLeaderboard.getA();
+            final Leaderboard leaderboard = regattaWithLeaderboard.getB();
+            final MarkFinder markFinder = new MarkFinder(regattaWithLeaderboard.getA().getRegattaLog());
+            final Set<Mark> marksOfRegatta = markFinder.analyze();
+            for (Mark mark : marksOfRegatta) {
+                UUID originatingMarkPropertiesIdOrNull = mark.getOriginatingMarkPropertiesIdOrNull();
+                if (originatingMarkPropertiesIdOrNull != null
+                        && originatingMarkPropertiesIdOrNull.equals(markPropertiesObject.getId())) {
+                    final Set<Event> regattaContextEvents = getService()
+                            .findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, events);
+                    if(Util.isEmpty(eventIds) || !Util.isEmpty(regattaContextEvents)) {
+                        regattaMarkContexts.add(new MarkContext(mark, regatta, regattaContextEvents));
+                    }
+                }
+            }
+        }
+        final JSONArray jsonContexts = new JSONArray();
+        final MarkContextJsonSerializer markContextJsonSerializer = new MarkContextJsonSerializer();
+        for (MarkContext markContext : regattaMarkContexts) {
+            jsonContexts.add(markContextJsonSerializer.serialize(markContext));
+        }
+        Response response = Response.ok(streamingOutput(jsonContexts)).build();
+        return response;
+    }
+
+    private Iterable<Event> getFilteredEventsWithPermission(Iterable<UUID> eventIds,
+            boolean onlyIncludeCurrentlyActiveEvents) {
+        final RacingEventService eventService = getService();
+        final Iterable<Event> eventsSelectively = eventIds == null | Util.isEmpty(eventIds)
+                ? eventService.getAllEvents()
+                : eventService.getEventsSelectively(true, eventIds);
+        final SecurityService securityService = getSecurityService();
+        final Set<Event> eventsWithPermission = new HashSet<Event>();
+        for (Event event : eventsSelectively) {
+            final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(event);
+            final TimePoint endDate = event.getEndDate();
+            final boolean eventIsCurrent = endDate == null || !endDate.before(TimePoint.now());
+            if (hasCurrentUserReadPermission && (!onlyIncludeCurrentlyActiveEvents || eventIsCurrent)) {
+                eventsWithPermission.add(event);
+            }
+        }
+        return eventsWithPermission;
+    }
+
+    private Set<Pair<Regatta, Leaderboard>> getFilteredRegattasWithPermission(Set<String> regattaIds,
+            boolean onlyIncludeCurrentlyActiveRegattas) {
+        final SecurityService securityService = getSecurityService();
+        final Collection<Leaderboard> allLeaderboards = getService().getLeaderboards().values();
+        final Set<RegattaLeaderboard> regattaLeaderboards = allLeaderboards.stream()
+                .filter(lb -> lb instanceof RegattaLeaderboard).map(lb -> (RegattaLeaderboard) lb)
+                .collect(Collectors.toSet());
+        final Set<Pair<Regatta, Leaderboard>> filteredRegattasWithLeaderboards = new HashSet<>();
+        for (RegattaLeaderboard leaderboard : regattaLeaderboards) {
+            Regatta regatta = leaderboard.getRegatta();
+            final boolean regattaIsInIds = regattaIds.isEmpty() || regattaIds.contains(regatta.getName());
+            final boolean hasCurrentUserReadPermission = securityService.hasCurrentUserReadPermission(regatta);
+            final TimePoint endDate = regatta.getEndDate();
+            final boolean regattaIsCurrent = endDate == null
+                    || !regatta.getEndDate().before(TimePoint.now());
+            if (regattaIsInIds && hasCurrentUserReadPermission
+                    && (!onlyIncludeCurrentlyActiveRegattas || regattaIsCurrent)) {
+                filteredRegattasWithLeaderboards.add(new Pair<>(regatta, leaderboard));
+            }
+        }
+        return filteredRegattasWithLeaderboards;
+    }
 }

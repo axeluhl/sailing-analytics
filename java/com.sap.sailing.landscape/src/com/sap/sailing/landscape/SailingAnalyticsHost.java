@@ -6,6 +6,12 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.ReverseProxy;
 
 public interface SailingAnalyticsHost<ShardingKey> extends AwsInstance<ShardingKey, SailingAnalyticsMetrics> {
+    String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
+    
+    String DEFAULT_SERVER_DIRECTORY_NAME = "server";
+    
+    String DEFAULT_SERVER_PATH = DEFAULT_SERVERS_PATH+"/"+DEFAULT_SERVER_DIRECTORY_NAME;
+    
     /**
      * Obtains an object through which an Apache reverse proxy running on this sailing analytics host can be configured.
      * It is mainly used to decide how to route based on a URL's hostname or other {@link Scope} identification, and to
