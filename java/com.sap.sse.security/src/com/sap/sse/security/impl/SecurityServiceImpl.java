@@ -1657,7 +1657,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             Callable<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
-                securityDisplayName, actionWithResult, true);
+                securityDisplayName, actionWithResult, /* check for SERVER:CREATE_OBJECT */ true);
     }
 
     /**
