@@ -84,7 +84,7 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         }
         FavoriteCompetitorsDTO favoriteCompetitorsDTO = new FavoriteCompetitorsDTO(selected, notifyAboutResults);
         if (missingCompetitorNameInSavedPreferences) {
-            // FIXME: migration effort. Excecute a safe operation to migrate all preference objects to include the competitor names.
+            // FIXME: migration effort. Excecute a save-operation to migrate all preference objects to include the competitor names.
             ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, preferences);
         }
         return favoriteCompetitorsDTO;
