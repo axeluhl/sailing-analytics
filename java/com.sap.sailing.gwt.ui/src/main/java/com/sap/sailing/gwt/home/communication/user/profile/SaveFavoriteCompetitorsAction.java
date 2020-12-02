@@ -30,7 +30,7 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>,
     @Override
     @GwtIncompatible
     public VoidResult execute(SailingDispatchContext ctx) throws DispatchException {
-        CompetitorNotificationPreferences prefs = new CompetitorNotificationPreferences(ctx.getRacingEventService());
+        CompetitorNotificationPreferences prefs = new CompetitorNotificationPreferences();
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
             String competitorIdAsString = competitorDTO.getIdAsString();
