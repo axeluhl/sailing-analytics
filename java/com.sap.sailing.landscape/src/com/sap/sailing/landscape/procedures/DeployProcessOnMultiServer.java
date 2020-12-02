@@ -218,18 +218,31 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     public void run() throws IOException, InterruptedException, JSchException, SftpException {
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
+        {
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout);
         sshChannel.sendCommandLineSynchronously(
                 "mkdir -p "+serverDirectory+"; "+
                 "cd "+serverDirectory+"; "+
                 "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
-                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; service httpd reload", stderr);
+                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start", stderr);
         final String result = sshChannel.getStreamContentsAsString();
         logger.info("stdout: "+result);
         if (stderr.size() > 0) {
             logger.warning("stderr: "+stderr.toString());
         }
+        }
+        {
+            final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout);
+            sshChannel.sendCommandLineSynchronously("service httpd reload", stderr);
+            final String result = sshChannel.getStreamContentsAsString();
+            logger.info("stdout: "+result);
+            if (stderr.size() > 0) {
+                logger.warning("stderr: "+stderr.toString());
+            }
+        }
+        
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
     }
     

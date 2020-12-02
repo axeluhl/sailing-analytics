@@ -1,10 +1,14 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -139,6 +143,21 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         @Override
         protected AwsRegion getRegion() {
             return super.getRegion();
+        }
+
+        @Override
+        protected Map<ProcessConfigurationVariable, String> getUserData() {
+            final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
+            addUserDataForPort(result, DefaultProcessConfigurationVariables.SERVER_PORT, getPort());
+            addUserDataForPort(result, DefaultProcessConfigurationVariables.TELNET_PORT, getTelnetPort());
+            addUserDataForPort(result, SailingProcessConfigurationVariables.EXPEDITION_PORT, getExpeditionPort());
+            return result;
+        }
+
+        protected void addUserDataForPort(final Map<ProcessConfigurationVariable, String> result, ProcessConfigurationVariable variable, Integer port) {
+            if (getPort() != null) {
+                result.put(variable, getPort().toString());
+            }
         }
     }
 

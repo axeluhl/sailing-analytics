@@ -62,7 +62,11 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
     /**
      * In order to launch a standalone instance, call {@link #setReplicaSetName(String)} with {@code null} as a
      * parameter. To launch a new first instance (primary) for a replica set call {@link #setReplicaSetPrimary(String)}
-     * with {@code null} as a parameter.
+     * with {@code null} as a parameter. If you use an {@link Builder#setImageType(String) image type} that supports NVMe
+     * storage (on-board fast SSDs) then your MongoDB may have plenty and fast but only ephemeral storage. This is suitable
+     * only for replicas where your data is protected by spreading it across availability zones and/or having at least one
+     * replica in the replica set that has a non-ephemeral volume as the basis for storage which can also undergo EBS
+     * snapshot backups.<p>
      * 
      * Defaults:
      * <ul>
