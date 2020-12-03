@@ -162,14 +162,14 @@ load_from_local_release_file ()
         rm -rf plugins start stop status native-libraries org.eclipse.osgi
         echo "Loading from release file ${INSTALL_FROM_RELEASE}"
         mv env.sh env.sh.preserved
-	mv configuration/mail.properties configuration/mail.properties.preserved
-	mv configuration/debug.properties configuration/debug.properties.preserved
+        mv configuration/mail.properties configuration/mail.properties.preserved
+        mv configuration/debug.properties configuration/debug.properties.preserved
         tar xvzf ${INSTALL_FROM_RELEASE}.tar.gz
         mv env.sh.preserved env.sh
-	mv configuration/mail.properties.preserved configuration/mail.properties
-	mv configuration/debug.properties.preserved configuration/debug.properties
-	# Try to create the symbolic links to the /home/scores directories where uploaded results are mounted through NFS if in the right region
-	find /home/scores/* -type d -prune -exec ln -s {} \; 2>/dev/null >/dev/null
+        mv configuration/mail.properties.preserved configuration/mail.properties
+        mv configuration/debug.properties.preserved configuration/debug.properties
+        # Try to create the symbolic links to the /home/scores directories where uploaded results are mounted through NFS if in the right region
+        find /home/scores/* -type d -prune -exec ln -s {} \; 2>/dev/null >/dev/null
         echo "Configuration for this server is unchanged - just binaries have been changed."
     else
         echo "The variable INSTALL_FROM_RELEASE has not been set, therefore no release file will be installed!"
@@ -247,24 +247,24 @@ deploy ()
 
 auto_install ()
 {
-	# activate everything found in user data
-	activate_user_data
-	# Now build or fetch the correct release, based on activated user data:
-	if [[ $BUILD_BEFORE_START = "True" ]]; then
-	    checkout_code
-	    build
-	    deploy
-	else
-	    load_from_release_file
-	fi
-	# then download and install environment and append to env.sh
-	install_environment
-	# then append user data to env.sh as it shall take precedence over the installed environment's defaults
-	append_user_data_to_envsh
-	# then append the rules that compute defaults for variables not set elsewhere; this has to come last:
-	append_default_envsh_rules
-	# make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
-	source `pwd`/env.sh
+        # activate everything found in user data
+        activate_user_data
+        # Now build or fetch the correct release, based on activated user data:
+        if [[ $BUILD_BEFORE_START = "True" ]]; then
+            checkout_code
+            build
+            deploy
+        else
+            load_from_release_file
+        fi
+        # then download and install environment and append to env.sh
+        install_environment
+        # then append user data to env.sh as it shall take precedence over the installed environment's defaults
+        append_user_data_to_envsh
+        # then append the rules that compute defaults for variables not set elsewhere; this has to come last:
+        append_default_envsh_rules
+        # make sure to reload data, this time including defaults from release's env.sh, environment settings and user data
+        source `pwd`/env.sh
         if [ -z $MEMORY ]; then
           # Compute a default amount of memory based on available physical RAM and the number of applications, with a minimum of 2GB:
           NUMBER_OF_INSTANCES=`echo "$JAVA_START_INSTANCES" | wc -w`
@@ -273,14 +273,34 @@ auto_install ()
           MEMORY_COMPUTED=$(( ${MEM_TOTAL} / 1024 * 3 / 4 - 1500 / 1 ))
           MEMORY_PER_INSTANCE_IN_MB=$(( $MEMORY_COMPUTED < $MINIMUM_MEMORY_IN_MB ? $MINIMUM_MEMORY_IN_MB : $MEMORY_COMPUTED ))
           echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
-	  echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
-	fi
-	echo ""
-	echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
-	echo "DEPLOY_TO: $DEPLOY_TO"
-	echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-	echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
-	echo ""
+          echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>`pwd`/env.sh
+        fi
+        # Append mail-related environment variables to configuration/mail.properties to override defaults
+        echo "mail.enabled = true" >>configuration/mail.properties
+        if [ -n "$MAIL_FROM" ]; then
+          echo "mail.from = $MAIL_FROM" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_HOST" ]; then
+          echo "mail.smtp.host = $MAIL_SMTP_HOST" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_PORT" ]; then
+          echo "mail.smtp.port = $MAIL_SMTP_PORT" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_AUTH" ]; then
+          echo "mail.smtp.auth = $MAIL_SMTP_AUTH" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_USER" ]; then
+          echo "mail.smtp.user = $MAIL_SMTP_USER" >>configuration/mail.properties
+        fi
+        if [ -n "$MAIL_SMTP_PASSWORD" ]; then
+          echo "mail.smtp.password = $MAIL_SMTP_PASSWORD" >>configuration/mail.properties
+        fi
+        echo ""
+        echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
+        echo "DEPLOY_TO: $DEPLOY_TO"
+        echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
+        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo ""
 }
 
 OPERATION=$1
@@ -290,7 +310,7 @@ checks
 if [[ $OPERATION == "auto-install" ]]; then
     if [[ ! -z "$ON_AMAZON" ]]; then
         # first check and activate everything found in user data
-	copy_user_data_to_tmp_file
+        copy_user_data_to_tmp_file
         auto_install
     else
         echo "This server does not seem to be running on Amazon! Automatic install only works on Amazon instances."

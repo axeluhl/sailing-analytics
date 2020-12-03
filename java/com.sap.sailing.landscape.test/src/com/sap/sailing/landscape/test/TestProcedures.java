@@ -67,14 +67,17 @@ public class TestProcedures {
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape;
     private AwsRegion region;
+    private final static String MAIL_SMTP_PASSWORD = "mail.smtp.password";
     private final static String SECURITY_SERVICE_REPLICATION_BEARER_TOKEN = "security.service.replication.bearer.token";
     private String securityServiceReplicationBearerToken;
+    private String mailSmtpPassword;
     
     @Before
     public void setUp() {
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
+        mailSmtpPassword = System.getProperty(MAIL_SMTP_PASSWORD);
     }
     
     @Test
@@ -226,7 +229,8 @@ public class TestProcedures {
             .setCommaSeparatedEmailAddressesToNotifyOfStartup("axel.uhl@sap.com")
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
-                    .build());
+                    .build())
+            .setMailSmtpPassword(mailSmtpPassword);
         final StartMasterHostBuilderT builder = StartSailingAnalyticsMasterHost.masterHostBuilder(applicationConfigurationBuilder);
         final StartSailingAnalyticsHost<String> startSailingAnalyticsMaster = builder
                 .setLandscape(landscape)
