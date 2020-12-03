@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.utils;
+package com.sap.sailing.gwt.ui.common.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
