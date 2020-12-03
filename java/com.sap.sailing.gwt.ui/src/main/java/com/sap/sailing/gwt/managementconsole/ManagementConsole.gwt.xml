@@ -54,11 +54,11 @@
 	<entry-point class='com.sap.sailing.gwt.managementconsole.app.ManagementConsoleEntryPoint' />
 	
 	<source path="app"/>
+    <source path="events"/>
+    <source path="mvp"/>
 	<source path="partials"/>
 	<source path="places"/>
 	<source path="resources"/>
-    <source path="events"/>
     <source path="services"/>
-    <source path="mvp"/>
 
 </module>

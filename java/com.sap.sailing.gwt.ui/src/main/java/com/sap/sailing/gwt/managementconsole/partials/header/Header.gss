@@ -1,8 +1,12 @@
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
 .header .logo,
-.header .menu,
-.header .account {
-    display: inline-block;
-    vertical-align: middle;
+.header .actions {
+    flex-shrink: 0;
 }
 
 .header .logo,
@@ -16,29 +20,84 @@
     text-decoration: none;
 }
 
-.header .menu {
-	margin: 0 6rem;
+.header .actions .menu-mobile {
+    background-color: BACKGROUND_COLOR_DARK;
+    padding: 1rem;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: -100%;
+    z-index: 1;
+    overflow-y: auto;
+    transition: right 500ms ease;
 }
 
-.header .account,
-.header .navigation {
-    position: absolute;
-    top: 20px;
-    right: 1rem;
-    width: 4rem;
-    height: 3rem;
+.header .actions .menu-mobile.active {
+    right: 0;
+}
+
+.header .actions .menu-mobile a,
+.header .actions .menu-mobile a:visited {
+    display: block;
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    padding: .75rem;
+    color: TEXT_COLOR_PRIMARY;
+    text-decoration: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.header .actions .menu-mobile a.highlighted,
+.header .actions .menu-mobile a.highlighted:visited {
+    color: TEXT_COLOR_HIGHLIGHT;
+}
+
+.header .actions .menu-mobile .separator {
+    height: 1px;
+    background-color: #808080;
+    margin: .75rem .75rem 1rem;
+}
+
+.header .actions .account,
+.header .actions .navigation {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
 }
 
-.header .account {
+.header .actions .account {
     background-image: resourceUrl('loggedout');
     width: 4rem;
     height: 3rem;
 }
 
-.header .navigation {
+.header .actions .navigation {
     width: 2rem;
     height: 1.5rem;
+}
+
+@media (min-width: 45em) {
+    .header {
+        justify-content: space-between;
+    }
+
+    .header .menu {
+        flex-flow: row wrap;
+        padding: 0 1rem;
+        flex-shrink: 1;
+        justify-content: center;
+    }
+
+    .header .menu > a,
+    .header .menu > a:visited {
+        font-size: 1rem;
+        padding: 0 1rem;
+        color: TEXT_COLOR_PRIMARY;
+        text-decoration: none;
+    }
+
+    .header .menu > a:hover {
+        color: TEXT_COLOR_HIGHLIGHT;
+    }
 }

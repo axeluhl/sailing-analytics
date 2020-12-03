@@ -5,13 +5,18 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.header.HeaderResources" />
-    
-    <g:HTMLPanel>
-        <header class="{local_res.style.header}">
-            <a class="{res.mediaCss.hideonsmall} {local_res.style.logo}" ui:field="logoAnchor" target="_blank"></a>
-            <g:FlowPanel addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
-            <a class="{res.mediaCss.hideonsmall} {local_res.style.account}" ui:field="accountAnchor"></a>
-            <a class="{res.mediaCss.showonsmall} {app_res.icons.iconNavigation} {local_res.style.navigation}" ui:field="navigationAnchor"></a>
-        </header>
+
+    <g:HTMLPanel tag="header" addStyleNames="{local_res.style.header}">
+        <a ui:field="logoAnchor" class="{res.mediaCss.hideonsmall} {local_res.style.logo}" target="_blank"></a>
+        <g:FlowPanel tag="nav" ui:field="desktopMenu" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
+        <div class="{local_res.style.actions}">
+            <a ui:field="accountAnchor" class="{res.mediaCss.hideonsmall} {local_res.style.account}"></a>
+            <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.iconNavigation} {local_res.style.navigation}"/>
+            <nav ui:field="mobileMenu" class="{local_res.style.menuMobile}">
+                <g:FlowPanel ui:field="mobileMenuActions" />
+                <div class="{local_res.style.separator}" />
+                <g:Anchor ui:field="logout" text="{i18n.signOut}" addStyleNames="{local_res.style.highlighted}"/>
+            </nav>
+        </div>
     </g:HTMLPanel>
 </ui:UiBinder>

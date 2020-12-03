@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.managementconsole.partials.header.Header;
 
 public class MainFrame extends ResizeComposite {
 
@@ -19,6 +20,9 @@ public class MainFrame extends ResizeComposite {
     MainFrameResources local_res;
 
     @UiField
+    Header header;
+
+    @UiField
     ScrollPanel contentContainer;
 
     public MainFrame() {
@@ -28,5 +32,9 @@ public class MainFrame extends ResizeComposite {
 
     public AcceptsOneWidget getContentContainer() {
         return contentContainer;
+    }
+
+    public Header getHeader() {
+        return header;
     }
 }
