@@ -30,6 +30,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfigura
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -123,7 +124,6 @@ public class TestProcedures {
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
     SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT>>
     SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
-        @SuppressWarnings("unchecked")
         final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsApplicationConfiguration.<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>builder();
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
                 ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
@@ -213,12 +213,13 @@ public class TestProcedures {
     }
     
     @Test
-    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>>
+    public <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
+    StartMasterHostBuilderT extends StartSailingAnalyticsMasterHost.Builder<StartMasterHostBuilderT, String>>
     void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
-        SailingAnalyticsApplicationConfiguration.Builder<AppConfigBuilderT, ?, String> applicationConfigurationBuilder = SailingAnalyticsApplicationConfiguration.builder();
+        SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String> applicationConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         applicationConfigurationBuilder
             .setServerName(serverName)
             .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")) // TODO this is the debug config for the current branch bug4811 and its releases
@@ -226,7 +227,7 @@ public class TestProcedures {
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setCredentials(new BearerTokenReplicationCredentials(securityServiceReplicationBearerToken))
                     .build());
-        final StartSailingAnalyticsHost.Builder<?, ?, String> builder = StartSailingAnalyticsHost.builder(applicationConfigurationBuilder);
+        final StartMasterHostBuilderT builder = StartSailingAnalyticsMasterHost.masterHostBuilder(applicationConfigurationBuilder);
         final StartSailingAnalyticsHost<String> startSailingAnalyticsMaster = builder
                 .setLandscape(landscape)
                 .setRegion(region)

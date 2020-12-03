@@ -175,8 +175,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
     
     public static <BuilderT extends Builder<BuilderT, T, ShardingKey>,
     T extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
-    Builder<BuilderT, T, ShardingKey> builder() {
-        return new BuilderImpl<>();
+    BuilderT builder() {
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, T, ShardingKey>();
+        return result;
     }
 
     protected SailingAnalyticsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey> builder) {

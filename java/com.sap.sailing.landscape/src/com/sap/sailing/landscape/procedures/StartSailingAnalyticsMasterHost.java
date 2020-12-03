@@ -46,9 +46,11 @@ public class StartSailingAnalyticsMasterHost<ShardingKey> extends StartSailingAn
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> masterHostBuilder(
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> BuilderT masterHostBuilder(
             SailingAnalyticsMasterConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
-        return new BuilderImpl<>(applicationConfigurationBuilder);
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>(applicationConfigurationBuilder);
+        return result;
     }
 
     protected StartSailingAnalyticsMasterHost(BuilderImpl<?, ShardingKey> builder) throws Exception {

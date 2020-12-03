@@ -131,4 +131,38 @@ public enum DefaultProcessConfigurationVariables implements ProcessConfiguration
     REPLICATE_MASTER_USERNAME,
     
     REPLICATE_MASTER_PASSWORD,
+    
+    /**
+     * User data variable specifying the "From:" address used when the server sends out e-mail notifications
+     */
+    MAIL_FROM,
+    
+    /**
+     * User data variable specifying the hostname or IP address of the host to be used for SMTP connections to
+     * send out e-mails.
+     */
+    MAIL_SMTP_HOST,
+    
+    /**
+     * User data variable used in conjunction with {@link #MAIL_SMTP_HOST}, specifying the port number for SMTP
+     * connections; usually this should be 25 for unencrypted SMTP connections.
+     */
+    MAIL_SMTP_PORT,
+    
+    /**
+     * User data variable specifying either {@code true} or {@code false}, switching SMTP authentication on or off,
+     * respectively. If {@code true} is provided for this variable's value, {@link #MAIL_SMTP_USER} and {@link #MAIL_SMTP_PASSWORD}
+     * need to be specified, too.
+     */
+    MAIL_SMTP_AUTH,
+    
+    /**
+     * User data variable specifying an SMTP user name in case {@link #MAIL_SMTP_AUTH} was set to {@code true}
+     */
+    MAIL_SMTP_USER,
+    
+    /**
+     * User data variable specifying an SMTP password in case {@link #MAIL_SMTP_AUTH} was set to {@code true}
+     */
+    MAIL_SMTP_PASSWORD
 }

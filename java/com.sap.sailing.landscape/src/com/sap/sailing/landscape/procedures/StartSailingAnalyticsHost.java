@@ -108,10 +108,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, StartSailingAnalyticsHost<ShardingKey>, ShardingKey>, ShardingKey>
-    Builder<BuilderT, StartSailingAnalyticsHost<ShardingKey>, ShardingKey> builder(
-            SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
-        return new BuilderImpl<>(applicationConfigurationBuilder);
+    public static <BuilderT extends Builder<BuilderT, T, ShardingKey>, T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
+    BuilderT builder(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, T, ShardingKey>(applicationConfigurationBuilder);
+        return result;
     }
 
     protected StartSailingAnalyticsHost(BuilderImpl<?, ? extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey> builder) throws Exception {

@@ -82,8 +82,10 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>,
-    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey> replicaBuilder() {
-        return new BuilderImpl<>();
+    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> BuilderT replicaBuilder() {
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>();
+        return result;
     }
 
     protected SailingAnalyticsReplicaConfiguration(BuilderImpl<?, ShardingKey> builder) {

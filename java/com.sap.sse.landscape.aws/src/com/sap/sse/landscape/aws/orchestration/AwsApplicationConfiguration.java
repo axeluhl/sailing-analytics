@@ -53,6 +53,13 @@ implements UserDataProvider {
      * {@link OutboundReplicationConfiguration#getOutboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the
      * {@link #getInboundReplicationConfiguration() inbound}
      * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint}.</li>
+     * <li>The {@link #setMailFrom(String) mail From: address} defaults to {@code noreply@sapsailing.com}.</li>
+     * <li>The {@link #setMailSmtpPort(int) SMTP port} defaults to 25.</li>
+     * <li>The {@link #setMailSmtpHost(String) mail SMTP host} defaults to <tt>email-smtp.${region}.amazonaws.com</tt>.</li>
+     * <li>The {@link #setMailSmtpAuth(boolean) mail SMTP authentication} is activated by default.</li>
+     * <li>The {@link #setMailSmtpUser(String) mail SMTP user} defaults to {@code AKIAIHCQEFAZDLIK7SUQ} which is the
+     * project's AWS SES (Simple e-Mail Service) username. The {@link #setMailSmtpPassword(String) password}, however,
+     * must explicitly be provided and does not default to any non-{@code null}, non-empty value.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -79,6 +86,18 @@ implements UserDataProvider {
         BuilderT setDatabaseConfiguration(Database databaseConfiguration);
         
         BuilderT setCommaSeparatedEmailAddressesToNotifyOfStartup(String commaSeparatedEmailAddressesToNotifyOfStartup);
+        
+        BuilderT setMailFrom(String mailFrom);
+        
+        BuilderT setMailSmtpHost(String mailSmtpHost);
+        
+        BuilderT setMailSmtpPort(int mailSmtpPort);
+        
+        BuilderT setMailSmtpAuth(boolean mailSmtpAuth);
+        
+        BuilderT setMailSmtpUser(String mailSmtpUser);
+        
+        BuilderT setMailSmtpPassword(String mailSmtpPassword);
     }
     
     /**
@@ -90,6 +109,12 @@ implements UserDataProvider {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
+        /**
+         * The pattern requires the region ID as {@link String} parameter and produces an AWS SES SMTP hostname for that region.
+         */
+        private static final String DEFAULT_SMTP_HOSTNAME_PATTERN = "email-smtp.%s.amazonaws.com";
+        private static final String DEFAULT_SMTP_USER = "AKIAIHCQEFAZDLIK7SUQ";
+        private static final Integer DEFAULT_SMTP_PORT = 25;
         private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
         private AwsRegion region;
         private Optional<Release> release = Optional.empty();
@@ -99,6 +124,12 @@ implements UserDataProvider {
         private Optional<InboundReplicationConfiguration> inboundReplicationConfiguration = Optional.empty();
         private OutboundReplicationConfiguration outboundReplicationConfiguration;
         private String commaSeparatedEmailAddressesToNotifyOfStartup;
+        private String mailFrom;
+        private String mailSmtpHost;
+        private Integer mailSmtpPort;
+        private Boolean mailSmtpAuth;
+        private String mailSmtpUser;
+        private String mailSmtpPassword;
 
         @Override
         public BuilderT setRegion(AwsRegion region) {
@@ -234,6 +265,42 @@ implements UserDataProvider {
             return self();
         }
         
+        @Override
+        public BuilderT setMailFrom(String mailFrom) {
+            this.mailFrom = mailFrom;
+            return self();
+        }
+
+        @Override
+        public BuilderT setMailSmtpHost(String mailSmtpHost) {
+            this.mailSmtpHost = mailSmtpHost;
+            return self();
+        }
+
+        @Override
+        public BuilderT setMailSmtpPort(int mailSmtpPort) {
+            this.mailSmtpPort = mailSmtpPort;
+            return self();
+        }
+
+        @Override
+        public BuilderT setMailSmtpAuth(boolean mailSmtpAuth) {
+            this.mailSmtpAuth = mailSmtpAuth;
+            return self();
+        }
+
+        @Override
+        public BuilderT setMailSmtpUser(String mailSmtpUser) {
+            this.mailSmtpUser = mailSmtpUser;
+            return self();
+        }
+
+        @Override
+        public BuilderT setMailSmtpPassword(String mailSmtpPassword) {
+            this.mailSmtpPassword = mailSmtpPassword;
+            return self();
+        }
+
         protected Map<ProcessConfigurationVariable, String> getUserData() {
             final Map<ProcessConfigurationVariable, String> userData = new HashMap<>();
             getRelease().ifPresent(release->userData.putAll(release.getUserData()));
@@ -246,7 +313,19 @@ implements UserDataProvider {
             if (getCommaSeparatedEmailAddressesToNotifyOfStartup() != null) {
                 userData.put(DefaultProcessConfigurationVariables.SERVER_STARTUP_NOTIFY, getCommaSeparatedEmailAddressesToNotifyOfStartup());
             }
+            userData.put(DefaultProcessConfigurationVariables.MAIL_FROM, mailFrom==null?"noreply@sapsailing.com":mailFrom);
+            userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_HOST, mailSmtpHost==null?getDefaultAwsSesMailHostForRegion():mailSmtpHost);
+            userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_PORT, mailSmtpPort==null?DEFAULT_SMTP_PORT.toString():mailSmtpPort.toString());
+            userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_AUTH, mailSmtpAuth==null?Boolean.TRUE.toString():mailSmtpAuth.toString());
+            userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_USER, mailSmtpUser==null?DEFAULT_SMTP_USER:mailSmtpUser);
+            if (mailSmtpPassword != null) {
+                userData.put(DefaultProcessConfigurationVariables.MAIL_SMTP_PASSWORD, mailSmtpPassword);
+            }
             return userData;
+        }
+
+        private String getDefaultAwsSesMailHostForRegion() {
+            return String.format(DEFAULT_SMTP_HOSTNAME_PATTERN, getRegion().getId());
         }
     }
 

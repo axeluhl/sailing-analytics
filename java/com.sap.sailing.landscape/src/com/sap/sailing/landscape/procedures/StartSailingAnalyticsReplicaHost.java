@@ -52,9 +52,11 @@ public class StartSailingAnalyticsReplicaHost<ShardingKey> extends StartSailingA
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> replicaHostBuilder(
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> BuilderT replicaHostBuilder(
             SailingAnalyticsReplicaConfiguration.Builder<?, ShardingKey> applicationConfigurationBuilder) {
-        return new BuilderImpl<>(applicationConfigurationBuilder);
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>(applicationConfigurationBuilder);
+        return result;
     }
     
     protected StartSailingAnalyticsReplicaHost(BuilderImpl<?, ShardingKey> builder) throws Exception {
