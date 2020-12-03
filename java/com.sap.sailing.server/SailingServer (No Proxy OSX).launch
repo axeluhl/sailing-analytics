@@ -69,6 +69,7 @@
 <setEntry value="org.eclipse.jetty.server@4:true"/>
 <setEntry value="org.eclipse.jetty.servlet@4:true"/>
 <setEntry value="org.eclipse.jetty.util@4:true"/>
+<setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
 <setEntry value="org.eclipse.jetty.webapp@4:true"/>
 <setEntry value="org.eclipse.jetty.websocket.api@default:default"/>
 <setEntry value="org.eclipse.jetty.websocket.client@default:default"/>
