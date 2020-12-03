@@ -1229,7 +1229,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     /**
-     * To call this method, the caller must have obtained the wrie lock of {@link #preferenceLock}.
+     * To call this method, the caller must have obtained the write lock of {@link #preferenceLock}.
      */
     private void removeAllPreferencesForUser(String username) {
         assert preferenceLock.isWriteLockedByCurrentThread();
@@ -1354,7 +1354,7 @@ public class UserStoreImpl implements UserStore {
     public <T> T getPreferenceObject(String username, String key) {
         return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
             final Object result;
-            Map<String, Object> userMap = preferenceObjects.get(username);
+            final Map<String, Object> userMap = preferenceObjects.get(username);
             if (userMap != null) {
                 result = userMap.get(key);
             } else {
@@ -1363,6 +1363,22 @@ public class UserStoreImpl implements UserStore {
             @SuppressWarnings("unchecked")
             T resultT = (T) result;
             return resultT;
+        });
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> Map<String, T> getPreferenceObjectsByKey(String key) {
+        return LockUtil.executeWithReadLockAndResult(preferenceLock, () -> {
+            final Map<String, T> result = new HashMap<>();
+            for (Entry<String, Map<String, Object>> userWithPreferences : preferenceObjects.entrySet()) {
+                final Map<String, Object> userPreferences = userWithPreferences.getValue();
+                Object userPreference = userPreferences.get(key);
+                if(userPreference != null) {
+                    result.put(userWithPreferences.getKey(), (T) userPreference);
+                }
+            }
+            return Collections.unmodifiableMap(result);
         });
     }
 

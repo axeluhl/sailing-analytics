@@ -2376,6 +2376,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T getPreferenceObject(String username, String key) {
         return store.getPreferenceObject(username, key);
     }
+    
+    @Override
+    public <T> Map<String, T> getPreferenceObjectsByKey(String key) {
+        return store.getPreferenceObjectsByKey(key);
+    }
 
     @Override
     public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
