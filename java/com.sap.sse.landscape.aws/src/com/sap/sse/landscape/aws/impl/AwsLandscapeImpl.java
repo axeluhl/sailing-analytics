@@ -134,7 +134,6 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
-    private static final String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
@@ -146,13 +145,11 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
-    private static final String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
     private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
     
     /**
@@ -171,7 +168,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
             DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, String s3BucketForAlbLogs) {
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
-        this.centralReverseProxyByRegion = new HashMap<>();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
@@ -181,13 +177,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
-        // TODO automate handling of central reverse proxy instances across regions and AZs, e.g., based on tags
-        final AwsRegion euWest2 = new AwsRegion("eu-west-2");
-        final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
-        final ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
-                this);
-        euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
-        centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
     }
     
     /**
@@ -731,7 +720,11 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        return centralReverseProxyByRegion.get(region);
+        ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
+        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+            reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        return reverseProxyCluster;
     }
 
     @Override

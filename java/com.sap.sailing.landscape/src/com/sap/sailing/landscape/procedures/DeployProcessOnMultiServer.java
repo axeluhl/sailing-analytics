@@ -31,6 +31,9 @@ import com.sap.sse.landscape.ssh.SshCommandChannel;
  * to deploy the application will be derived. If no ports are specified, the next available set of ports is determined
  * by looking at the other deployed processes and scanning for the next free port, starting from the default ports.<p>
  * 
+ * The application is started after deployment as part of this procedure, and a default "Home-SSL" reverse proxy mapping is established
+ * for a hostname <tt>${SERVER_NAME}.sapsailing.com</tt>.
+ * 
  * @author Axel Uhl (D043530)
  */
 public class DeployProcessOnMultiServer<ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>,

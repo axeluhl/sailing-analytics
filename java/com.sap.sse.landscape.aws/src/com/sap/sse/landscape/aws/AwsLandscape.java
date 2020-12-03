@@ -86,6 +86,16 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String MONGO_REPLICA_SETS_TAG_NAME = "mongo-replica-sets";
 
     String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
+    
+    String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
+    
+    /**
+     * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
+     * be the port number (usually 5672) on which the RabbitMQ endpoint can be reached.
+     */
+    String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
+    
+    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see

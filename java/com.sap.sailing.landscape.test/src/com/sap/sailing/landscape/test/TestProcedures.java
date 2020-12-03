@@ -5,9 +5,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -15,6 +21,13 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,6 +65,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.utils.IoUtils;
 
 /**
  * Tests for the AWS SDK landscape wrapper in bundle {@code com.sap.sse.landscape.aws}. To run these tests
@@ -111,6 +125,16 @@ public class TestProcedures {
                     new HashSet<>(Arrays.asList(processA.getTelnetPortToOSGiConsole(optionalTimeout), processB.getTelnetPortToOSGiConsole(optionalTimeout))));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT+1)),
                     new HashSet<>(Arrays.asList(processA.getExpeditionUdpPort(optionalTimeout), processB.getExpeditionUdpPort(optionalTimeout))));
+            disableSslCertificateChecking();
+            final HttpsURLConnection bConnection = (HttpsURLConnection) new URL("https", host.getPublicAddress().getCanonicalHostName(), 443, "").openConnection();
+            bConnection.setRequestProperty("Host", "b.sapsailing.com");
+            final InputStream bHome = (InputStream) bConnection.getContent();
+            assertEquals(302, bConnection.getResponseCode());
+            assertEquals("https://b.sapsailing.com/gwt/Home.html", bConnection.getHeaderField("Location"));
+            final ByteArrayOutputStream homeHtml = new ByteArrayOutputStream();
+            IoUtils.copy(bHome, homeHtml);
+            bConnection.disconnect();
+            assertTrue(homeHtml.toString().contains("<script src=\"com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js\"></script>"));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;
@@ -122,6 +146,43 @@ public class TestProcedures {
         }
     }
     
+    private void disableSslCertificateChecking() {
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            @Override
+            public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            }
+        } };
+        SSLContext sc = null;
+        try {
+            sc = SSLContext.getInstance("SSL");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        // Create all-trusting host name verifier
+        HostnameVerifier validHosts = new HostnameVerifier() {
+            @Override
+            public boolean verify(String arg0, SSLSession arg1) {
+                return true;
+            }
+        };
+        // All hosts will be valid
+        HttpsURLConnection.setDefaultHostnameVerifier(validHosts);
+    }
+
     private <AppConfigBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>,
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
