@@ -81,6 +81,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
                 }
             }
         }
+        sftpChannel.disconnect();
         return result;
     }
 }

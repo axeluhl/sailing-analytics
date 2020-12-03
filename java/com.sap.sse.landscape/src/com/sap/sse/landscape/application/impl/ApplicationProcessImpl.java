@@ -142,6 +142,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
         sftpChannel.get(path, bos);
+        sftpChannel.disconnect();
         return bos.toString();
     }
 
