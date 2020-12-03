@@ -1657,7 +1657,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             Callable<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
-                securityDisplayName, actionWithResult, true);
+                securityDisplayName, actionWithResult, /* check for SERVER:CREATE_OBJECT */ true);
     }
 
     /**
@@ -2375,6 +2375,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T getPreferenceObject(String username, String key) {
         return store.getPreferenceObject(username, key);
+    }
+    
+    @Override
+    public <T> Map<String, T> getPreferenceObjectsByKey(String key) {
+        return store.getPreferenceObjectsByKey(key);
     }
 
     @Override

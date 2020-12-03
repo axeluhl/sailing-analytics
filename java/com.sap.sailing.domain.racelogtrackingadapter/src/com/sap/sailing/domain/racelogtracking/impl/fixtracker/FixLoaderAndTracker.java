@@ -693,7 +693,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private TimeRange getTrackingTimeRange() {
         final TimePoint startOfTracking = trackedRace.getStartOfTracking();
-        final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+        // in case (erroneously) startOfTracking is *after* endOfTracking, return an empty interval starting and ending
+        // at startOfTracking (see also bug 5354).
+        final TimePoint endOfTracking = startOfTracking != null && trackedRace.getEndOfTracking() != null &&
+                startOfTracking.after(trackedRace.getEndOfTracking()) ? startOfTracking : trackedRace.getEndOfTracking();
         return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
                 endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }
