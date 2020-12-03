@@ -931,7 +931,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } else {
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
-        //FIXME: Migration Effort.
         this.trackedRaceStatisticsCache = trackedRaceStatisticsCache;
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
