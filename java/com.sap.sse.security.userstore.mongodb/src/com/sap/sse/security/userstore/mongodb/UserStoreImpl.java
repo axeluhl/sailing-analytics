@@ -1373,7 +1373,7 @@ public class UserStoreImpl implements UserStore {
             final Map<String, T> result = new HashMap<>();
             for (Entry<String, Map<String, Object>> userWithPreferences : preferenceObjects.entrySet()) {
                 final Map<String, Object> userPreferences = userWithPreferences.getValue();
-                Object userPreference = userPreferences.get(key);
+                final Object userPreference = userPreferences.get(key);
                 if(userPreference != null) {
                     result.put(userWithPreferences.getKey(), (T) userPreference);
                 }

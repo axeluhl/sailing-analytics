@@ -73,6 +73,7 @@ public interface UserStore extends BasicUserStore {
      * Gets all preference objects resolving to a certain key mapped by the users they belong to. Always returns a valid map. Might be empty
      */
     <T> Map<String, T> getPreferenceObjectsByKey(String key);
+    
     /**
      * Sets a preference as Object. This converts the given Object to a preference {@link String} using a
      * {@link PreferenceConverter} that was registered through
