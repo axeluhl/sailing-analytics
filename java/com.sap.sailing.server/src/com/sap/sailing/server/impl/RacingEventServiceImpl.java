@@ -5047,7 +5047,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public SecurityService getSecurityService() {
         try {
-            return securityServiceTracker.getInitializedService(50000);
+            return securityServiceTracker.getInitializedService(0);
         } catch (InterruptedException e) {
             logger.severe("Interrupted while waiting for security service; returning null");
             return null;
