@@ -99,9 +99,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
-        sshChannel.sendCommandLineSynchronously(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
-                                                "echo \"${"+variableName+"}\"", /* stderr */ new ByteArrayOutputStream());
-        final String variableValue = sshChannel.getStreamContentsAsString();
+        final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
+                                                "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
         return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
     }
     

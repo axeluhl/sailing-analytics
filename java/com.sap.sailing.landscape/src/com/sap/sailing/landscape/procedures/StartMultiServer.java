@@ -1,8 +1,8 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
@@ -161,10 +161,9 @@ implements StartFromSailingAnalyticsImage {
             // or, if a timeout was provided, the timeout expired
         } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).after(TimePoint.now())).orElse(true));
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout);
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        sshCommandChannel.sendCommandLineSynchronously("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start", stderr);
-        logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+sshCommandChannel.getStreamContentsAsString());
-        logger.info("stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+stderr.toString());
+        logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
+                sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
+                        "stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": ", Level.INFO));
         logger.info("exit status for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+sshCommandChannel.getExitStatus());
     }
 }

@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.orchestration;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -10,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
@@ -353,16 +353,10 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
 
     protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
             throws JSchException, IOException, InterruptedException {
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout);
         final String sailingUserSsh = "/home/" + username + "/.ssh";
         final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";
-        sshChannel.sendCommandLineSynchronously("cat /root/.ssh/authorized_keys >>" + sailingUserAuthorizedKeys,
-                stderr);
         logger.info("Appended root's authorized_keys also to " + username + "'s authorized_keys. stdout: "
-                + sshChannel.getStreamContentsAsString());
-        if (stderr.size() > 0) {
-            logger.warning("stderr: " + stderr.toString());
-        }
+                + sshChannel.runCommandAndReturnStdoutAndLogStderr("cat /root/.ssh/authorized_keys >>" + sailingUserAuthorizedKeys, "stderr: ", Level.WARNING));
     }
 }

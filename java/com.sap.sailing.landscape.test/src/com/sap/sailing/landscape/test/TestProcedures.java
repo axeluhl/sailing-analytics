@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -93,8 +92,7 @@ public class TestProcedures {
             startEmptyMultiServer.run();
             final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startEmptyMultiServer.getHost();
             final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
-            sshChannel.sendCommandLineSynchronously("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, new ByteArrayOutputStream());
-            final String result = sshChannel.getStreamContentsAsString();
+            final String result = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(result.isEmpty());
             final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
             assertTrue(connection.getHeaderField("Server").startsWith("Apache"));
@@ -177,13 +175,9 @@ public class TestProcedures {
         do {
             try {
                 final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout);
-                final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-                sshChannel.sendCommandLineSynchronously("i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done", stderr);
-                if (stderr.size() > 0) {
-                    logger.log(Level.WARNING, "stderr while trying to fetch replica set members", stderr.toString());
-                }
-                final String stdout = sshChannel.getStreamContentsAsString();
-                sshChannel.disconnect();
+                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                        "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
+                        "stderr while trying to fetch replica set members", Level.WARNING);
                 fine = stdout.contains("PRIMARY") && stdout.contains("SECONDARY");
             } catch (Exception e) {
                 logger.info("No success (yet) finding replica set "+mongoDefaultReplicaSetName);

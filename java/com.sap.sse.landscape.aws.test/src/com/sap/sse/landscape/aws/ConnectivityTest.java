@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -90,10 +91,8 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
         final byte[] privKeyBytes = getPrivateKeyBytes(keyPair, KEY_PASSPHRASE.getBytes());
         landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, AXELS_KEY_NAME);
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next().createRootSshChannel(optionalTimeout);
-        sshChannel.sendCommandLineSynchronously("ls -al", stderr);
-        final String stdout = sshChannel.getStreamContentsAsString();
+        final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls -al", /* stderr prefix */ null, /* stderr log level */ null);
         assertFalse(stdout.isEmpty());
     }
 
@@ -115,10 +114,8 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
         sftpChannel.disconnect();
         proxy.removeRedirect(hostname);
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
         final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout);
-        lsSshChannel.sendCommandLineSynchronously("ls "+configFileName, stderr);
-        final String lsOutput = lsSshChannel.getStreamContentsAsString();
+        final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
         assertTrue(lsOutput.isEmpty());
     }
 
@@ -283,13 +280,12 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
             SshCommandChannel shellChannel = host.createRootSshChannel(optionalTimeout);
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
-            shellChannel.sendCommandLineSynchronously("pwd", System.err);
-            assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(new String(shellChannel.getStreamContentsAsByteArray())));
+            final String stdout = shellChannel.runCommandAndReturnStdoutAndLogStderr("pwd", /* stderr prefix */ null, /* stderr log level */ Level.WARNING);
+            assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(stdout));
             // now try a simple command, checking for the "init" process to be found
             final SshCommandChannel commandChannel = host.createRootSshChannel(Optional.empty());
             final String processToLookFor = "init";
-            commandChannel.sendCommandLineSynchronously("ps axlw | grep "+processToLookFor, new ByteArrayOutputStream());
-            final String output = new String(commandChannel.getStreamContentsAsByteArray());
+            final String output = commandChannel.runCommandAndReturnStdoutAndLogStderr("ps axlw | grep "+processToLookFor, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(output.contains(processToLookFor));
             assertEquals(0, commandChannel.getExitStatus());
         } finally {

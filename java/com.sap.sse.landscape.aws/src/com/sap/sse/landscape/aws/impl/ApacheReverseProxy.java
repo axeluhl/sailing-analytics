@@ -1,16 +1,15 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -84,17 +83,14 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname, String... macroArguments) throws InterruptedException, JSchException, IOException {
         final String command = "echo \"Use "+macroName+" "+hostname+" "+String.join(" ", macroArguments)+"\" >"+getConfigFilePath(configFileNameForHostname)+
                 "; service httpd reload";
-        final Pair<String, String> stdoutAndStderr = runCommandAndReturnStdoutAndStderr(command);
-        logger.info("Standard output from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: "+stdoutAndStderr.getA());
-        logger.info("Standard error from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: "+stdoutAndStderr.getB());
+        logger.info("Standard output from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: "+
+                runCommandAndReturnStdoutAndStderr(command, "Standard error from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: ", Level.INFO));
     }
     
-    private Pair<String, String> runCommandAndReturnStdoutAndStderr(String command) throws IOException, InterruptedException, JSchException {
+    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException {
         final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT);
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        sshChannel.sendCommandLineSynchronously(command, stderr);
-        final String stdout = sshChannel.getStreamContentsAsString();
-        return new Pair<>(stdout, stderr.toString());
+        final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command, stderrLogPrefix, stderrLogLevel);
+        return stdout;
     }
     
     private String getConfigFilePath(String configFileNameForHostname) {
@@ -154,9 +150,8 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     private void removeRedirect(String configFilePath, String redirectNameForLogOutput) throws IOException, InterruptedException, JSchException {
         final String command = "rm "+configFilePath+"; service httpd reload";
-        final Pair<String, String> stdoutAndStderr = runCommandAndReturnStdoutAndStderr(command);
-        logger.info("Standard output from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: "+stdoutAndStderr.getA());
-        logger.info("Standard error from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: "+stdoutAndStderr.getB());
+        logger.info("Standard output from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: "+
+                runCommandAndReturnStdoutAndStderr(command, "Standard error from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: ", Level.INFO));
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
@@ -219,28 +219,17 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout);
-        sshChannel.sendCommandLineSynchronously(
-                "mkdir -p "+serverDirectory+"; "+
-                "cd "+serverDirectory+"; "+
-                "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
-                "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh", stderr);
-        final String result = sshChannel.getStreamContentsAsString();
-        logger.info("stdout: "+result);
-        if (stderr.size() > 0) {
-            logger.warning("stderr: "+stderr.toString());
-        }
+            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout);
+            logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                    "mkdir -p "+serverDirectory+"; "+
+                    "cd "+serverDirectory+"; "+
+                    "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
+                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh",
+                    "stderr: ", Level.WARNING));
         }
         {
-            final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout);
-            sshChannel.sendCommandLineSynchronously("service httpd reload", stderr);
-            final String result = sshChannel.getStreamContentsAsString();
-            logger.info("stdout: "+result);
-            if (stderr.size() > 0) {
-                logger.warning("stderr: "+stderr.toString());
-            }
+            logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr("service httpd reload", "stderr: ", Level.WARNING));
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
     }
