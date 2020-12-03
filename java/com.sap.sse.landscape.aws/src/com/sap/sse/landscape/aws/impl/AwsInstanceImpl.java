@@ -170,25 +170,30 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     
     private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
         final TimePoint start = TimePoint.now();
-        final int connectTimeoutInMillis = 5000;
         logger.info("Creating SSH "+channelType+" channel for SSH user "+sshUserName+
                 " to instance with ID "+getInstanceId());
         Channel channel = null;
         while (channel == null && (!optionalTimeout.isPresent() || start.until(TimePoint.now()).compareTo(optionalTimeout.get()) < 0)) {
+            Session session = null;
             try {
-                final Session session = createSshSession(sshUserName);
+                session = createSshSession(sshUserName);
                 session.setUserInfo(new YesUserInfo());
-                session.connect(/* timeout in millis */ connectTimeoutInMillis);
+                session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
                 channel = session.openChannel(channelType);
             } catch (JSchException | IllegalStateException e) {
+                if (session != null) {
+                    session.disconnect();
+                }
                 logger.info(e.getMessage()
                         + " while trying to connect. Probably timeout trying early SSH connection.");
                 Thread.sleep(5000); // wait a bit for the service to become available
             }
-            if (optionalTimeout.isPresent()) {
-                logger.info("Retrying until "+start.plus(optionalTimeout.get()));
-            } else {
-                logger.info("Retrying forever");
+            if (channel != null) {
+                if (optionalTimeout.isPresent()) {
+                    logger.info("Retrying until "+start.plus(optionalTimeout.get()));
+                } else {
+                    logger.info("Retrying forever");
+                }
             }
         }
         return channel;

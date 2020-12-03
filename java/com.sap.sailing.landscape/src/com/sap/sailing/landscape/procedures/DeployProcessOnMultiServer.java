@@ -110,7 +110,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             if (!getApplicationConfigurationBuilder().isServerDirectorySet()) {
                 getApplicationConfigurationBuilder().setServerDirectory(ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+getApplicationConfigurationBuilder().getServerName());
             }
-            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHostToDeployTo().getApplicationProcesses();
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHostToDeployTo().getApplicationProcesses(getOptionalTimeout());
             if (!getApplicationConfigurationBuilder().isPortSet()) {
                 getApplicationConfigurationBuilder().setPort(getNextAvailablePort(applicationProcesses,
                         SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT,

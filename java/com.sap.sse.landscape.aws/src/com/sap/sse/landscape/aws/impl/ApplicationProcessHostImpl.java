@@ -29,11 +29,7 @@ extends AwsInstanceImpl<ShardingKey, MetricsT>
 implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(ApplicationProcessHostImpl.class.getName());
     private final BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory;
-    /**
-     * The default timeout for network-based access
-     */
-    private static final Optional<Duration> TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5));
-    
+
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
             AwsLandscape<ShardingKey, MetricsT, ?> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
         super(instanceId, availabilityZone, landscape);
@@ -59,11 +55,11 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
      * an {@link ApplicationProcess} object for each one.
      */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException, InterruptedException {
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException {
         final Set<ProcessT> result = new HashSet<>();
-        final ChannelSftp sftpChannel = createRootSftpChannel(TIMEOUT);
-        if (TIMEOUT.isPresent()) {
-            sftpChannel.connect((int) TIMEOUT.get().asMillis());
+        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout);
+        if (optionalTimeout.isPresent()) {
+            sftpChannel.connect((int) optionalTimeout.get().asMillis());
         } else {
             sftpChannel.connect();
         }

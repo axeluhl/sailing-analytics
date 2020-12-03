@@ -1,9 +1,11 @@
 package com.sap.sse.landscape.aws;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -29,8 +31,9 @@ extends AwsInstance<ShardingKey, MetricsT> {
     
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
+     * @param optionalTimeout TODO
      */
-    Iterable<ProcessT> getApplicationProcesses() throws SftpException, JSchException, IOException, InterruptedException;
+    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException;
     
     AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
 }
