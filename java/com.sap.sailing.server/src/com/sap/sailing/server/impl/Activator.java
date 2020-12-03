@@ -331,6 +331,7 @@ public class Activator implements BundleActivator {
         // registry because this will require the SecurityService and that can only become available once the initial
         // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
+        racingEventService.migrateCompetitorNotificationPreferencesWithCompetitorNames();
     }
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
