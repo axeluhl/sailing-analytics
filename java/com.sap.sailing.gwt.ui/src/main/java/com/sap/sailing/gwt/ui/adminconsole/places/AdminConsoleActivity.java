@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private EventsRefresher eventRefresher;
     
     private MediaTracksRefresher mediaTracksRefresher;
+    
+    private List<StrippedLeaderboardDTOWithSecurity> leaderboards;
     
     public static boolean instantiated() {
         return instance != null;
@@ -105,7 +108,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             adminConsoleView.setRedirectToPlace(defaultPlace);
             clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
             clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
-        }    
+        }
     }
     
     @Override
@@ -144,30 +147,40 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
     
     @Override
-    public void fillLeaderboards() {
+    public void loadLeaderboards() {
+        if (leaderboards == null) {
+            reloadLeaderboards();
+        } else {
+            updateLeaderboardDisplayer();
+        }
+    }
+
+    @Override
+    public void reloadLeaderboards() {
         sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
                 new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                     @Override
-                    public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
-                        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
-                            leaderboardsDisplayer.fillLeaderboards(leaderboards);
-                        }
+                    public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> result) {
+                        leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(result);
+                        updateLeaderboardDisplayer();
                     }
-        
+
                     @Override
                     public void onFailure(Throwable t) {
-                        clientFactory.getErrorReporter().reportError("Error trying to obtain list of leaderboards: "+ t.getMessage());
+                        clientFactory.getErrorReporter()
+                                .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
                     }
                 }));
     }
-    
+
     @Override
-    public void updateLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards,
-            LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> origin) {
+    public void updateLeaderboards(List<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards) {
+        leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(updatedLeaderboards);
+    }
+
+    private void updateLeaderboardDisplayer() {
         for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
-            if (leaderboardsDisplayer != origin) {
-                leaderboardsDisplayer.fillLeaderboards(updatedLeaderboards);
-            }
+            leaderboardsDisplayer.fillLeaderboards(new ArrayList<StrippedLeaderboardDTOWithSecurity>(leaderboards));
         }
     }
 

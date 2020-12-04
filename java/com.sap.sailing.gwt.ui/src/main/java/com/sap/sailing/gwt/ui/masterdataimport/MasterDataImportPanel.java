@@ -240,7 +240,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             leaderboardGroupsRefresher.fillLeaderboardGroups();
         }
         if (leaderboardsCreated > 0) {
-            leaderboardsRefresher.fillLeaderboards();
+            leaderboardsRefresher.loadLeaderboards();
         }
         if (mediaTracksImported > 0) {
             mediaTracksRefresher.loadMediaTracks();

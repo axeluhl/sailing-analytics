@@ -1,6 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -220,9 +221,9 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         assertEquals(3, availableLeaderboards.size());
         List<LeaderboardEntryPO> selectedEntries = leaderboardConfigurationPanelPO.getLeaderboardTable().getSelectedEntries();
         assertEquals(3, selectedEntries.size()); 
-        assertEquals("&", selectedEntries.get(0).getName());
-        assertEquals("Sailing & 2011", selectedEntries.get(1).getName());
-        assertEquals("Sailing&2015", selectedEntries.get(2).getName());
+        assertTrue(selectedEntries.stream().anyMatch(se -> "&".equals(se.getName())));
+        assertTrue(selectedEntries.stream().anyMatch(se -> "Sailing & 2011".equals(se.getName())));
+        assertTrue(selectedEntries.stream().anyMatch(se -> "Sailing&2015".equals(se.getName())));
 
 
         availableLeaderboards = getLeaderboardsOfPageWithUrlParams(PARAM_FILTER, "%26", PARAM_SELECT_EXACT, "%26");
@@ -289,6 +290,7 @@ public class TestLeaderboardFilterAndSelectByUrlParameters extends AbstractSelen
         leaderboardConfiguration.createFlexibleLeaderboard("505 Pre-World 2017");
         leaderboardConfiguration.createFlexibleLeaderboard("505 World 2015");
         leaderboardConfiguration.createFlexibleLeaderboard("505 World 2011");
+        //leaderboardConfiguration.refreshLeaderboard();
     }
     
     private List<String> getLeaderboardsOfPageWithUrlParams(String ...keysValues) {

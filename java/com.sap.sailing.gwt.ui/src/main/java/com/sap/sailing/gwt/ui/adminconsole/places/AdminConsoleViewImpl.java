@@ -219,7 +219,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                presenter.fillLeaderboards();
+                presenter.loadLeaderboards();
             }
         }, stringMessages.leaderboards(), new LeaderboardsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
 
@@ -229,7 +229,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                presenter.fillLeaderboards();
+                presenter.loadLeaderboards();
                 presenter.fillLeaderboardGroups();
             }
         }, stringMessages.leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
@@ -357,7 +357,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         trackingEventManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        presenter.fillLeaderboards();
+                        presenter.loadLeaderboards();
                         presenter.fillRegattas();
                     }
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),

@@ -176,7 +176,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         splitPanel.add(createLeaderboardsGUI);
         //Load Data
         leaderboardGroupsRefresher.fillLeaderboardGroups();
-        leaderboardsRefresher.fillLeaderboards();
+        leaderboardsRefresher.loadLeaderboards();
     }
 
     private Widget createSwitchLeaderboardsGUI() {
@@ -470,7 +470,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 this::addNewGroup);
         createButton.ensureDebugId("CreateLeaderboardGroupButton");
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
-                leaderboardsRefresher.fillLeaderboards();
+                leaderboardsRefresher.loadLeaderboards();
                 leaderboardGroupsRefresher.fillLeaderboardGroups();
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");

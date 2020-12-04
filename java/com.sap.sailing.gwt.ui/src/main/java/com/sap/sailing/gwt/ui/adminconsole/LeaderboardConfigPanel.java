@@ -1006,6 +1006,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         availableLeaderboardList.add(result);
         leaderboardSelectionModel.clear();
         leaderboardSelectionModel.setSelected(result, true);
+        loadAndRefreshLeaderboard(result);
     }
 
     private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
@@ -1072,8 +1073,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList,
-                            LeaderboardConfigPanel.this);
+                    getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList);
                 }
             });
         }
@@ -1091,8 +1091,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList,
-                                LeaderboardConfigPanel.this);
+                        getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList);
                     }
                 }));
     }
