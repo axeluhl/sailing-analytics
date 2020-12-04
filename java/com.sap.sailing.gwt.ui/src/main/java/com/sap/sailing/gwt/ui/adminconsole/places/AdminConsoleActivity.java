@@ -35,9 +35,9 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     private AdminConsoleClientFactory clientFactory;
     
-    private HashSet<RegattasDisplayer> regattasDisplayers;
-    private HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
-    private HashSet<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
+    private final HashSet<RegattasDisplayer> regattasDisplayers;
+    private final HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
+    private final HashSet<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
     
     private AdminConsoleView adminConsoleView;
     
@@ -53,6 +53,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private MediaTracksRefresher mediaTracksRefresher;
     
     private List<StrippedLeaderboardDTOWithSecurity> leaderboards;
+    private List<RegattaDTO> regattas;
     
     public static boolean instantiated() {
         return instance != null;
@@ -148,10 +149,25 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     @Override
     public void loadLeaderboards() {
+        if (leaderboardsDisplayers.isEmpty()) {
+            return;
+        }
         if (leaderboards == null) {
             reloadLeaderboards();
         } else {
             updateLeaderboardDisplayer();
+        }
+    }
+
+    @Override
+    public void loadRegattas() {
+        if (regattasDisplayers.isEmpty()) {
+            return;
+        }
+        if (regattas == null) {
+            reloadRegattas();
+        } else {
+            updateRegattaDisplayer();
         }
     }
 
@@ -174,6 +190,23 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
 
     @Override
+    public void reloadRegattas() {
+        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+                new AsyncCallback<List<RegattaDTO>>() {
+                    @Override
+                    public void onSuccess(List<RegattaDTO> result) {
+                        regattas = new ArrayList<RegattaDTO>(result);
+                        updateRegattaDisplayer();
+                    }
+        
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        clientFactory.getErrorReporter().reportError("Remote Procedure Call getRegattas() - Failure");
+                    }
+                }));
+    }
+
+    @Override
     public void updateLeaderboards(List<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards) {
         leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(updatedLeaderboards);
     }
@@ -181,6 +214,12 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private void updateLeaderboardDisplayer() {
         for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
             leaderboardsDisplayer.fillLeaderboards(new ArrayList<StrippedLeaderboardDTOWithSecurity>(leaderboards));
+        }
+    }
+    
+    private void updateRegattaDisplayer() {
+        for (RegattasDisplayer regattaDisplayer : regattasDisplayers) {
+            regattaDisplayer.fillRegattas(new ArrayList<RegattaDTO>(regattas));
         }
     }
 
@@ -210,24 +249,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                 leaderboardGroupsDisplayer.fillLeaderboardGroups(updatedLeaderboardGroups);
             }
         }
-    }
-
-    @Override
-    public void fillRegattas() {
-        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
-                new AsyncCallback<List<RegattaDTO>>() {
-                    @Override
-                    public void onSuccess(List<RegattaDTO> result) {
-                        for (RegattasDisplayer regattaDisplayer : regattasDisplayers) {
-                            regattaDisplayer.fillRegattas(result);
-                        }
-                    }
-        
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        clientFactory.getErrorReporter().reportError("Remote Procedure Call getRegattas() - Failure");
-                    }
-                }));
     }
     
     @Override

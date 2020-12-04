@@ -23,7 +23,7 @@ public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<Re
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
         presenter.getRegattasDisplayers().add(regattaManagementPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return regattaManagementPanel;
     }
 

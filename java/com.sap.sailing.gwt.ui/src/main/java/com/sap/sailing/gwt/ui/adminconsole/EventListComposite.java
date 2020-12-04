@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroups
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -57,6 +58,7 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
@@ -116,17 +118,20 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventsRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final PlaceController placeController;
     
-    public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final PlaceController placeController,
-            final StringMessages stringMessages) {
+    public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+            final ErrorReporter errorReporter, RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
+            final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
+            final PlaceController placeController, final StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.eventsRefresher = eventsRefresher;
+        this.leaderboardsRefresher = leaderboardsRefresher;
         this.placeController = placeController;
         this.availableLeaderboardGroups = Collections.emptyList();
         this.allEvents = new ArrayList<EventDTO>();
@@ -531,7 +536,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             List<EventDTO> existingEvents, EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, sailingServiceWrite, stringMessages,
                 new CreateRegattaCallback(userService, sailingServiceWrite, stringMessages, errorReporter, regattaRefresher,
-                        eventsRefresher, existingEvents));
+                        leaderboardsRefresher, eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }

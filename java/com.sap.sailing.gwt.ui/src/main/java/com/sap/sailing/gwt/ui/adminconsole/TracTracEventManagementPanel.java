@@ -542,7 +542,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
 
                         @Override
                         public void onSuccess(Void result) {
-                            TracTracEventManagementPanel.this.regattaRefresher.fillRegattas();
+                            TracTracEventManagementPanel.this.regattaRefresher.loadRegattas();
                         }
                     }));
         }

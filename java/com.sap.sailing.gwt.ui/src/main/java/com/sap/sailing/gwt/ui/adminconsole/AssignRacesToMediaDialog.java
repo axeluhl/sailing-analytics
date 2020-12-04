@@ -65,7 +65,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
             }
         };
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
-        regattaRefresher.fillRegattas();
+        regattaRefresher.loadRegattas();
         panel = new VerticalPanel();
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);

@@ -207,7 +207,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                presenter.fillRegattas();
+                presenter.loadRegattas();
             }
         }, stringMessages.regattas(), new RegattasPlace((String) null /* no place token */), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
         
@@ -243,7 +243,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        presenter.fillRegattas();
+                        presenter.loadRegattas();
                     }
                 }, stringMessages.trackedRaces(), new TrackedRacesPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
@@ -279,7 +279,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        presenter.fillRegattas();
+                        presenter.loadRegattas();
                     }
                 }, stringMessages.courseLayout(), new CourseLayoutPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
@@ -289,7 +289,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                presenter.fillRegattas();
+                presenter.loadRegattas();
             }
         }, stringMessages.wind(), new WindPlace((String) null /* no place token */), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
 
@@ -358,7 +358,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     @Override
                     public void refreshAfterBecomingVisible() {
                         presenter.loadLeaderboards();
-                        presenter.fillRegattas();
+                        presenter.loadRegattas();
                     }
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));

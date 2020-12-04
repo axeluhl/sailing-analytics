@@ -24,7 +24,7 @@ public class TrackedRacesManagementPanelSupplier extends AdminConsolePanelSuppli
                 stringMessages);
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         presenter.getRegattasDisplayers().add(trackedRacesManagementPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return trackedRacesManagementPanel;
     }
 

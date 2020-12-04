@@ -91,7 +91,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
         try {
             Date value = startTimeBox.getValue();
             if (value != null) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.loadRegattas();
                 listOfRacesForMedia.setVisible(true);
             }
         } catch (Exception e) {

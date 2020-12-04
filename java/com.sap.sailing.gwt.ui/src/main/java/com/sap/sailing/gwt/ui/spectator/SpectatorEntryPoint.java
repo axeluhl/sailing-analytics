@@ -65,7 +65,7 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
-        fillRegattas();
+        loadRegattas();
     }
 
     private void setHeader(final String groupNameParam, final boolean embedded) {
@@ -90,7 +90,12 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
     }
 
     @Override
-    public void fillRegattas() {
+    public void loadRegattas() {
+        
+    }
+
+    @Override
+    public void reloadRegattas() {
         
     }
     

@@ -274,11 +274,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         // https://github.com/gwtproject/gwt/issues/9333
         // https://github.com/gwtproject/gwt/issues/9307
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                regatta -> regattaRefresher.fillRegattas(), stringMessages);
+                regatta -> regattaRefresher.loadRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
+                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.loadRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 regattaDTO -> configACL.openDialog(regattaDTO));
@@ -306,7 +306,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.loadRegattas();
             }
         }));
     }
@@ -357,7 +357,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.loadRegattas();
                     }
                 }));
 
@@ -379,7 +379,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                regattaRefresher.loadRegattas();
                                 run(); // update next series if iterator has next element
                             }
                         }));

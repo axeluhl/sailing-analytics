@@ -29,7 +29,7 @@ public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<Le
         presenter.getRegattasDisplayers().add(leaderboardConfigPanel);
         presenter.getLeaderboardsDisplayer().add(leaderboardConfigPanel);
         presenter.loadLeaderboards();
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return leaderboardConfigPanel;
     }
 

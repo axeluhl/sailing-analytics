@@ -30,7 +30,7 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         tractracEventManagementPanel.refreshTracTracConnectors();
         presenter.getRegattasDisplayers().add(tractracEventManagementPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return tractracEventManagementPanel;
     }
 

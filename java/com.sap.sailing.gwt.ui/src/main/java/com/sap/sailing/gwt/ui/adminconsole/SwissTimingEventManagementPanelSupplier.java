@@ -29,7 +29,7 @@ public class SwissTimingEventManagementPanelSupplier
                 stringMessages, tableResources);
         swisstimingEventManagementPanel.ensureDebugId("swisstimingEventManagementPanel");
         presenter.getRegattasDisplayers().add(swisstimingEventManagementPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return swisstimingEventManagementPanel;
     }
 

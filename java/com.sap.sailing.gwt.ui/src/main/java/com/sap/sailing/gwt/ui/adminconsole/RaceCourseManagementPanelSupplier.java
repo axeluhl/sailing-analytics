@@ -25,7 +25,7 @@ public class RaceCourseManagementPanelSupplier extends AdminConsolePanelSupplier
                 presenter.getUserService());
         raceCourseManagementPanel.ensureDebugId("raceCourseManagementPanel");
         presenter.getRegattasDisplayers().add(raceCourseManagementPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return raceCourseManagementPanel;
     }
 

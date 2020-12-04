@@ -450,7 +450,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
                         @Override
                         public void onSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
+                            regattaRefresher.loadRegattas();
                         }
                     });
         }

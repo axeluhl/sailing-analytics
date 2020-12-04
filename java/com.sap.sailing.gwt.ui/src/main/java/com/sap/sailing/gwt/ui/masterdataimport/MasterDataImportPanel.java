@@ -231,7 +231,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         int mediaTracksImported = creationCount.getMediaTrackCount();
         int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
-            regattaRefresher.fillRegattas();
+            regattaRefresher.loadRegattas();
         }
         if (eventsCreated > 0) {
             eventRefresher.fillEvents();

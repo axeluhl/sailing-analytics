@@ -29,7 +29,7 @@ public class SwissTimingReplayConnectorPanelSupplier
                 stringMessages, tableResources);
         swissTimingReplayConnectorPanel.ensureDebugId("swissTimingReplayConnectorPanel");
         presenter.getRegattasDisplayers().add(swissTimingReplayConnectorPanel);
-        presenter.fillRegattas();
+        presenter.loadRegattas();
         return swissTimingReplayConnectorPanel;
     }
 

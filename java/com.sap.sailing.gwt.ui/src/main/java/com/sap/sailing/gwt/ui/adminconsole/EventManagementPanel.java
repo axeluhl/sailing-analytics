@@ -40,7 +40,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
         eventListComposite = new EventListComposite(presenter.getSailingService(), presenter.getUserService(),
-                presenter.getErrorReporter(), presenter, this, placeController, stringMessages);
+                presenter.getErrorReporter(), presenter, this, presenter, placeController, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         eventDetailsComposite = new EventDetailsComposite(presenter.getSailingService(), presenter.getErrorReporter(), stringMessages);
