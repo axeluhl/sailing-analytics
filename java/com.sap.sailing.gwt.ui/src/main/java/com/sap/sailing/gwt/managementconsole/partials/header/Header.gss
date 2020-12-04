@@ -56,13 +56,13 @@
 .header .actions .menu-mobile .separator {
     height: 1px;
     background-color: #808080;
-    margin: .75rem .75rem 1rem;
+    margin: 1.5em .75rem .75rem;
 }
 
 .header .actions .account,
 .header .actions .navigation {
     background-repeat: no-repeat;
-    background-position: center center;
+    background-position: center;
     background-size: contain;
 }
 

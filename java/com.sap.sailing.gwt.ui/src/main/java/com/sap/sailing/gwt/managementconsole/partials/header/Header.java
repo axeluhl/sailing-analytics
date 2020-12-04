@@ -23,13 +23,16 @@ public class Header extends Composite {
     HeaderResources local_res;
 
     @UiField
-    AnchorElement navigationAnchor;
+    AnchorElement logoAnchor, navigationAnchor;
 
     @UiField
     Element mobileMenu;
 
     @UiField
     FlowPanel desktopMenu, mobileMenuActions;
+
+    @UiField
+    Anchor userDetails, userDetailsMobile, signOutMobile;
 
     private final DropdownHandler dropdownHandler;
 
@@ -45,17 +48,27 @@ public class Header extends Composite {
         };
     }
 
-    public void addMenuItem(final String text, final ClickHandler clickHandler) {
+    public void addMenuItem(final String text, final ClickHandler handler) {
         final Anchor desktopItem = new Anchor(text);
-        desktopItem.addClickHandler(clickHandler);
+        desktopItem.addClickHandler(handler);
         desktopMenu.add(desktopItem);
 
         final Anchor mobileItem = new Anchor(text);
         mobileItem.addClickHandler(event -> {
             Header.this.dropdownHandler.setVisible(false);
-            clickHandler.onClick(event);
+            handler.onClick(event);
         });
         mobileMenuActions.add(mobileItem);
     }
+
+    public void setUserDetailsHandler(final ClickHandler handler) {
+        userDetails.addClickHandler(handler);
+        userDetailsMobile.addClickHandler(handler);
+    }
+
+    public void setSignOutHandler(final ClickHandler handler) {
+        signOutMobile.addClickHandler(handler);
+    }
+
 
 }
