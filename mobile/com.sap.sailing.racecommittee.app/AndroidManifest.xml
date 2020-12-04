@@ -9,7 +9,6 @@
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
-
     <!--<uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -38,7 +37,7 @@
 
         <activity
             android:name=".ui.activities.LoginActivity"
-            android:configChanges="orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -85,10 +84,15 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity"
+            android:screenOrientation="behind"
+            tools:replace="android:screenOrientation" />
         <activity android:name=".ui.activities.RacingActivity" />
         <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
+            android:screenOrientation="behind"
             android:theme="@style/PreferenceTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />

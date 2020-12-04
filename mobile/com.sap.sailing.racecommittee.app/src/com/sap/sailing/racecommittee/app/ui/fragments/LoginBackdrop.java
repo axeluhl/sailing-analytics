@@ -30,8 +30,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
 import com.sap.sailing.android.shared.data.LoginData;
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -47,6 +45,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
 import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
@@ -58,7 +57,6 @@ import java.net.MalformedURLException;
 public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private static final String TAG = LoginBackdrop.class.getName();
-    private static final int requestCodeQR = 45392;
     private static final String SHOW_BACKDROP_TEXT = "SHOW_BACKDROP_TEXT";
 
     private IntentReceiver receiver;
@@ -205,7 +203,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
 
     private void requestQRCodeScan() {
         Intent intent = new Intent(getActivity(), BarcodeCaptureActivity.class);
-        startActivityForResult(intent, requestCodeQR);
+        getActivity().startActivityForResult(intent, LoginActivity.REQUEST_CODE_QR_CODE);
     }
 
     private void setupOnboarding(View layout) {
@@ -303,23 +301,6 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
                             "Error: Failed to perform checkin due to a MalformedURLException: " + e.getMessage());
                 }
             });
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != requestCodeQR) {
-            super.onActivityResult(requestCode, resultCode, data);
-            return;
-        }
-
-        //TODO Distinguish between Branch and device configuration
-
-        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
-            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-            QRHelper.with(getActivity()).saveData(barcode.displayValue);
-        } else {
-            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }
 

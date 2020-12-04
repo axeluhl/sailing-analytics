@@ -11,16 +11,17 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -29,7 +30,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.EulaHelper;
@@ -75,6 +79,7 @@ import java.util.UUID;
 
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.branch.referral.Defines;
 
 import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
 
@@ -85,6 +90,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
     private final static String TAG = LoginActivity.class.getName();
+
+    public final static int REQUEST_CODE_QR_CODE = 45392;
 
     private View backdrop;
     private LoginListViews loginListViews = null;
@@ -305,15 +312,19 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         DataStore dataStore = dataManager.getDataStore();
 
         // Check if the user has been logged in before and if so bring him directly to the racing activity
-        mSelectedCourseAreaUUID = dataStore.getCourseAreaId();
-        mSelectedEventId = dataStore.getEventUUID();
-        if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
-            if (preferences.getAccessToken() != null) {
-                switchToRacingActivity();
-            } else {
-                startActivity(new Intent(this, PasswordActivity.class));
-                finish();
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_CLEAR_TASK) == 0) {
+            mSelectedCourseAreaUUID = dataStore.getCourseAreaId();
+            mSelectedEventId = dataStore.getEventUUID();
+            if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
+                if (preferences.getAccessToken() != null) {
+                    switchToRacingActivity();
+                } else {
+                    startActivity(new Intent(this, PasswordActivity.class));
+                    finish();
+                }
             }
+        } else {
+            dataStore.reset();
         }
 
         setContentView(R.layout.login_view);
@@ -340,20 +351,21 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private final Branch.BranchReferralInitListener branchReferralInitListener = new Branch.BranchReferralInitListener() {
         @Override
-        public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
-            branchEventId = null;
-            branchCourseAreaUuid = null;
-            branchPriority = 0;
-
+        public void onInitFinished(JSONObject referringParams, BranchError error) {
             if (error != null) {
                 ExLog.i(LoginActivity.this, "BRANCH SDK", error.getMessage());
                 handleLegacyStart();
                 return;
             }
             if (referringParams == null || referringParams.length() == 0) {
-                handleLegacyStart();
                 return;
             }
+
+            branchEventId = null;
+            branchCourseAreaUuid = null;
+            branchPriority = 0;
+
+            //Non-branch link
             if (!referringParams.optBoolean(Clicked_Branch_Link.getKey())) {
                 handleLegacyStart();
                 return;
@@ -387,9 +399,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        EulaHelper.with(this).showEulaDialogIfNotAccepted(() ->
-                Branch.getInstance().initSession(branchReferralInitListener, getIntent().getData(), LoginActivity.this)
-        );
     }
 
     @Override
@@ -405,6 +414,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (!BuildConfig.DEBUG && resultCode != ConnectionResult.SUCCESS) {
             GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, 1).show();
         }
+
+        EulaHelper.with(this).showEulaDialogIfNotAccepted(() ->
+                Branch.getInstance().initSession(branchReferralInitListener, getIntent().getData(), LoginActivity.this)
+        );
     }
 
     @Override
@@ -419,18 +432,40 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         dismissProgressSpinner();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_CODE_QR_CODE) {
+            return;
+        }
+
+        if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
+            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            final Uri uri = Uri.parse(barcode.displayValue);
+            final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.putExtra(Defines.Jsonkey.ForceNewBranchSession.getKey(), true);
+            onNewIntent(intent);
+        } else {
+            Toast.makeText(this, getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    //TODO Can be removed in a later version
     private void handleLegacyStart() {
         String action = getIntent().getAction();
         if (Intent.ACTION_VIEW.equals(action)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.app_name);
-            if (QRHelper.with(this).saveData(getIntent().getDataString())) {
-                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
-            } else {
-                builder.setMessage(getText(R.string.error_invalid_qr_code));
+            final Uri uri = getIntent().getData();
+            if (uri != null && TextUtils.equals(uri.getPath(), "/apps/com.sap.sailing.racecommittee.app.apk")) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.app_name);
+                if (QRHelper.with(this).saveData(getIntent().getDataString())) {
+                    builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
+                } else {
+                    builder.setMessage(getText(R.string.error_invalid_qr_code));
+                }
+                builder.setPositiveButton(android.R.string.ok, null);
+                builder.show();
             }
-            builder.setPositiveButton(android.R.string.ok, null);
-            builder.show();
         }
         BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
     }
