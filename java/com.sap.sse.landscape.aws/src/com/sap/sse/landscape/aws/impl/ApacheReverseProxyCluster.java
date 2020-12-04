@@ -54,7 +54,8 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaPro
     
     @Override
     public AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
-        return getLandscape().launchHost(getAmiId(), instanceType, az, keyName, Collections.singleton(getSecurityGroup(az.getRegion())), Optional.of(Tags.with("Name", "ReverseProxy")));
+        return getLandscape().launchHost((instanceId, availabilityZone, landscape)->new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId, availabilityZone, landscape),
+                getAmiId(), instanceType, az, keyName, Collections.singleton(getSecurityGroup(az.getRegion())), Optional.of(Tags.with("Name", "ReverseProxy")));
     }
     
     @Override
