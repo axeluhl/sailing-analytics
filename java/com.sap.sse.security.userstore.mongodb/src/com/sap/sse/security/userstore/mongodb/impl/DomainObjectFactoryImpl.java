@@ -42,8 +42,8 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionData;
-import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
+import com.sap.sse.security.subscription.SubscriptionData;
+import com.sap.sse.security.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 

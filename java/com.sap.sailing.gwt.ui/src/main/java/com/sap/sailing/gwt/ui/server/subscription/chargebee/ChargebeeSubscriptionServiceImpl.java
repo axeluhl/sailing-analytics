@@ -12,7 +12,7 @@ import com.chargebee.models.Invoice;
 import com.chargebee.models.Transaction;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
 import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptionService;
-import com.sap.sailing.gwt.ui.server.subscription.BaseSubscriptionServiceImpl;
+import com.sap.sailing.gwt.ui.server.subscription.SubscriptionServiceImpl;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
@@ -32,7 +32,7 @@ import com.sap.sse.security.subscription.SubscriptionCancelResult;
  * 
  * @author Tu Tran
  */
-public class ChargebeeSubscriptionServiceImpl extends BaseSubscriptionServiceImpl implements ChargebeeSubscriptionService {
+public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl implements ChargebeeSubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());

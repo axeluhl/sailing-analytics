@@ -1,8 +1,9 @@
-package com.sap.sse.security.shared.subscription.chargebee;
+package com.sap.sse.security.subscription.chargebee;
 
-import com.sap.sse.security.shared.subscription.AbstractSubscriptionDataHandler;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionData;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.AbstractSubscriptionDataHandler;
+import com.sap.sse.security.subscription.SubscriptionData;
 
 public class ChargebeeSubscriptionDataHandler extends AbstractSubscriptionDataHandler {
     @Override

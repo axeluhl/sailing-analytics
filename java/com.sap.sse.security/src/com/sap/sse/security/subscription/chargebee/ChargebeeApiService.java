@@ -24,12 +24,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
-import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionDataHandler;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
+import com.sap.sse.security.subscription.SubscriptionDataHandler;
 
 public class ChargebeeApiService implements SubscriptionApiService {
     private static final Logger logger = Logger.getLogger(ChargebeeApiService.class.getName());
