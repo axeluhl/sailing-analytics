@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>Igtimi</title>
+<script> 
+  function loadAndReplace() { 
+        var request = new XMLHttpRequest();
+        var base64 = window.location.href.substring(window.location.href.lastIndexOf("?")+1);
+        console.log(base64);
+        var target = atob(base64);
+        request.open("POST", target); 
+        request.setRequestHeader("X-SAPSSE-Forward-Request-To","master");
+        request.addEventListener("load", function(event) {
+                if (request.status >= 200 && request.status < 300) { 
+                        document.getElementById("body").innerHTML = request.responseText; 
+                } else {
+                        document.getElementById("body").innerHTML = "<b>error reading data from server</b>"; 
+                }
+        }); 
+        request.send(); 
+  }
+ 
+  function refresh() {
+        loadAndReplace(); 
+        window.setInterval(loadAndReplace, 10000); 
+  }
+</script>
+</head>
+<body id="body" onload="refresh()" >
+</body>
+</html>
