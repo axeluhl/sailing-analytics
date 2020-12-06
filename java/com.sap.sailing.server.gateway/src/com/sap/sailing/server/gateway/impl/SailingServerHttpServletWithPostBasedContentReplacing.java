@@ -20,7 +20,7 @@ import com.sap.sse.common.HttpRequestHeaderConstants;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class SailingServerHttpServletWithPostBasedConrentReplacing extends SailingServerHttpServlet {
+public abstract class SailingServerHttpServletWithPostBasedContentReplacing extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2819428093387051473L;
 
     protected void writePostRefreshingHeadAndEmptyBody(HttpServletRequest req, HttpServletResponse resp, String title) throws IOException {
