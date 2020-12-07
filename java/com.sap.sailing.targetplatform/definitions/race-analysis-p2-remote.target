@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="158">
+<target name="Race Analysis Target" sequenceNumber="169">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -29,8 +29,8 @@
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
-<unit id="org.apache.commons.codec" version="1.6.0.v201305230611"/>
-<unit id="org.apache.commons.codec.source" version="1.6.0.v201305230611"/>
+<unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
+<unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.collections.source" version="3.2.2.v201511171945"/>
 <unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
@@ -43,10 +43,11 @@
 <unit id="org.apache.commons.math.source" version="2.1.0.v201105210652"/>
 <unit id="org.apache.commons.math3" version="3.5.0.v20160301-1110"/>
 <unit id="org.apache.commons.math3.source" version="3.5.0.v20160301-1110"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpclient.source" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore.source" version="4.2.5.v201311072007"/>
+<unit id="org.apache.commons.logging" version="1.2.0.v20180409-1502"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpclient.source" version="4.5.5.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.4.9.v20180409-1525"/>
+<unit id="org.apache.httpcomponents.httpcore.source" version="4.4.9.v20180409-1525"/>
 <unit id="org.apache.poi" version="3.9.0.v201405241750"/>
 <unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
 <unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
@@ -69,7 +70,7 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -105,13 +106,6 @@
 <unit id="org.eclipse.equinox.useradmin" version="1.1.400.v20130327-1442"/>
 <unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
 <unit id="org.eclipse.equinox.wireadmin" version="1.0.600.v20150715-1528"/>
-<unit id="org.eclipse.jetty.continuation" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
 <unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
 <unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
@@ -126,7 +120,7 @@
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.14.24"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.16"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
@@ -172,6 +166,7 @@
 <plugin id="org.apache.commons.math.source"/>
 <plugin id="org.apache.commons.math3"/>
 <plugin id="org.apache.commons.math3.source"/>
+<plugin id="org.apache.commons.logging"/>
 <plugin id="org.apache.felix.gogo.command"/>
 <plugin id="org.apache.felix.gogo.command.source"/>
 <plugin id="org.apache.felix.gogo.runtime"/>
@@ -193,6 +188,9 @@
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.apache.shiro.core.source"/>
+<plugin id="org.apache.shiro.ehcache.source"/>
+<plugin id="org.apache.shiro.web.source"/>
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
@@ -212,12 +210,13 @@
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
+<plugin id="org.eclipse.jetty.continuation" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
-<plugin id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.http.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.io.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.http" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.http.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.io" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.io.source" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.jaas"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
@@ -229,17 +228,16 @@
 <plugin id="org.eclipse.jetty.proxy"/>
 <plugin id="org.eclipse.jetty.rewrite"/>
 <plugin id="org.eclipse.jetty.rewrite.source"/>
-<plugin id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.security.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.server.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlet.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlets.source"/>
-<plugin id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.util.ajax"/>
-<plugin id="org.eclipse.jetty.util.ajax.source"/>
-<plugin id="org.eclipse.jetty.util.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.security" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.security.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.server" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.server.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.servlet" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.servlet.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.ajax" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.ajax.source" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.webapp"/>
 <plugin id="org.eclipse.jetty.webapp.source"/>
 <plugin id="org.eclipse.jetty.websocket.api"/>
@@ -269,6 +267,7 @@
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>
+<plugin id="org.mongodb.mongo-java-driver.source"/>
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>

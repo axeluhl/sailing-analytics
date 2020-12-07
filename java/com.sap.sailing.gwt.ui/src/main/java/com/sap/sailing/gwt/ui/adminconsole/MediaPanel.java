@@ -587,7 +587,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                mediaTrack -> configACL.openACLDialog(mediaTrack));
+                mediaTrack -> configACL.openDialog(mediaTrack));
         mediaTracksTable.addColumn(actionsColumn, stringMessages.actions());
     }
 

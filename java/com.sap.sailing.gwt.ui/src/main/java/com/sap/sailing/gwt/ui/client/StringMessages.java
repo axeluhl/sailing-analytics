@@ -1530,7 +1530,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
     String warningDirectCompetitorRegistration();
     String warningRegattaCompetitorRegistration();
-    String competitorRegistrationsOnRaceDisabled();
+    String competitorRegistrationsOnRaceDisabled(String nameOfCheckboxToEnable);
     String warningForDisabledCompetitors(String competitorsSet);
     String competitorToolTipMessage(String competitorName, String currentFleetName, String assignedToFleet, String raceName);
     String addMarkToRegatta();
@@ -1721,6 +1721,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String footerLegal();
     String footerPrivacy();
     String footerFeedback();
+    String footerSupport();
     String headerLogo();
     String headerSearchPlaceholder();
     String mainEventShowAll();
@@ -2397,4 +2398,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String insufficientPermissions();
     String manageEvents();
     String sharingLinkCopied();
+    String startOfTrackingMustNotBeAfterEndOfTracking();
 }

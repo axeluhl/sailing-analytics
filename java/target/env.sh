@@ -96,7 +96,6 @@ fi
 # REPLICATE_MASTER_BEARER_TOKEN=
 
 # Automatic build and test configuration
-DEPLOY_TO=server
 BUILD_BEFORE_START=False
 BUILD_FROM=master
 COMPILE_GWT=True
@@ -165,6 +164,8 @@ fi
 
 # White labeling: use -Dcom.sap.sse.debranding=true to remove branding images and text
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
+# Anniversary calculation:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -DAnniversaryRaceDeterminator.enabled=true"
 ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
 
 

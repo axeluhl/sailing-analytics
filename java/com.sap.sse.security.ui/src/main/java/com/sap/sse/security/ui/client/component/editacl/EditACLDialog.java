@@ -84,7 +84,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
-     * {@link DialogConfig#openACLDialog(Named) open} a {@link EditACLDialog dialog}.
+     * {@link DialogConfig#openDialog(Named) open} a {@link EditACLDialog dialog}.
      * 
      * @param userManagementWriteService
      *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
@@ -127,7 +127,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
          * @param securedObject
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
-        public void openACLDialog(final T securedObject) {
+        public void openDialog(final T securedObject) {
             new EditACLDialog(userManagementWriteService, identifierFactory.apply(securedObject),
                     availableActionsFactory.get(), stringMessages, new EditAclDialogCallback(securedObject)).show();
         }

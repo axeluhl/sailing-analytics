@@ -69,17 +69,15 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
                 for (final MarkDTO markToRemove : marksToRemove) {
-                    sailingServiceWrite.revokeMarkDefinitionEventInRegattaLog(leaderboardName, markToRemove,
+                    sailingServiceWrite.revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markToRemove,
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onSuccess(Void result) {
                                     refreshMarks();
                                 }
-
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Removing mark failed: "+caught.getMessage());
+                                    errorReporter.reportError("Removing mark failed: " + caught.getMessage());
                                 }
                             });
                 }
