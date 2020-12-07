@@ -29,7 +29,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
     private final SailingServiceAsync sailingService;
-    private final boolean isMobile;
+    private final boolean isLargeScreen;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
@@ -45,7 +45,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            SailingServiceAsync sailingService, boolean isMobile, StringMessages stringMessages) {
+            SailingServiceAsync sailingService, boolean isLargeScreen, StringMessages stringMessages) {
         super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
                 /* callback */ null);
         this.lifecycle = lifecycle;
@@ -56,14 +56,14 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
         this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, newRaceBoardContextDefinition);
-        this.isMobile = isMobile;
+        this.isLargeScreen = isLargeScreen;
         this.stringMessages = stringMessages;
     }
 
     void updateLink() {
         String url = assembleLink();
         linkField.setText(url);
-        if(isMobile) {
+        if(isLargeScreen) {
             createQrCode(url);
         }
     }
@@ -94,7 +94,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
         final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings
                 .getPerspectiveOwnSettings();
-        if(isMobile) {
+        if(isLargeScreen) {
             if (!competitorChartCheckBox.getValue()) {
                 patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
             }
@@ -150,7 +150,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(timeStampCheckbox);
-        if (isMobile) {
+        if (isLargeScreen) {
             leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
             leaderBoardPanelCheckBox.setValue(true);
             leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
@@ -188,7 +188,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
         });
         settingsPanel.add(competitorSelectionCheckBox);
-        if (isMobile) {
+        if (isLargeScreen) {
             windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
             windChartCheckBox.setValue(true);
             windChartCheckBox.addClickHandler(new ClickHandler() {
@@ -230,7 +230,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         linkField = createTextBox(assembleLink());
         linkContentPanel.add(linkField);
-        if(isMobile) {
+        if(isLargeScreen) {
             qrCodeImage = new Image();
             qrCodeImage.ensureDebugId("regattaSharingQrCode");
             qrCodeImage.setPixelSize(400, 400);
