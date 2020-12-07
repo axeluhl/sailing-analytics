@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,7 +38,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox tagsCheckBox;
     private CheckBox maneuverCheckBox;
     private CheckBox zoomCheckBox;
-    private Label linkFieldLabel;
     private TextBox linkField;
     private Image qrCodeImage;
 
@@ -223,7 +221,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             });
             settingsPanel.add(zoomCheckBox);
         }
-        linkFieldLabel = createLabel(stringMessages.linkSharingAnchorText());
         linkField = createTextBox(assembleLink());
         Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
         copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
