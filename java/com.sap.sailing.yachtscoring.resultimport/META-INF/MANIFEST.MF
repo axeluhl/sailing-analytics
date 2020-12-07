@@ -6,7 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.yachtscoring.resultimport.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sun.istack;version="3.0.7",
+Import-Package: com.sap.sailing.competitorimport,
+ com.sap.sse.i18n,
+ com.sap.sse.i18n.impl,
+ com.sun.istack;version="3.0.7",
  javax.xml.bind,
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker;version="1.5.1"
