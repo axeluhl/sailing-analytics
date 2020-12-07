@@ -935,7 +935,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
-        this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        if (anniversaryRaceDeterminator.isEnabled()) {
+            this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        }
     }
 
     private void populateBoatClasses(DomainFactory baseDomainFactory) {
