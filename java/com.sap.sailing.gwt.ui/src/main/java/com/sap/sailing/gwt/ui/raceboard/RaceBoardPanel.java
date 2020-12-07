@@ -833,15 +833,12 @@ public class RaceBoardPanel
         ResizableFlowPanel timeLineInnerBgPanel = new ResizableFlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
         timeLineInnerBgPanel.add(getRaceTimePanel());
-        
         ResizableFlowPanel timeLineInnerPanel = new ResizableFlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
-        
         ResizableFlowPanel timelinePanel = new ResizableFlowPanel();
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
-        
         return timelinePanel;
     }
 
