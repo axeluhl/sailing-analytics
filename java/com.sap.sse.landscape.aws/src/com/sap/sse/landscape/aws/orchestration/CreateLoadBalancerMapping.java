@@ -85,6 +85,8 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
     /**
      * Default rules implemented by this builder:
      * <ul>
+     * <li>The {@link #setServerName(String) server name} property will be obtained from the {@link #setProcess(ApplicationProcess) process}'s
+     * {@code SERVER_NAME} environment setting if not provided explicitly.</li>
      * <li>The timeout for looking up the process's server name defaults to no timeout.</li>
      * </ul>
      * 
@@ -124,11 +126,11 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        public String getHostname() {
+        protected String getHostname() {
             return hostname;
         }
 
-        public ProcessT getProcess() {
+        protected ProcessT getProcess() {
             return process;
         }
 
@@ -138,12 +140,12 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        public Optional<Duration> getOptionalTimeout() {
+        protected Optional<Duration> getOptionalTimeout() {
             return optionalTimeout;
         }
 
         @Override
-        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
             final String result;
             if (super.getServerName() != null) {
                 result = super.getServerName();

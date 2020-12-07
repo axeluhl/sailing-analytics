@@ -30,6 +30,12 @@ extends AbstractAwsProcedureImpl<ShardingKey, MetricsT, ProcessT> {
     private final String serverName;
     private Iterable<Rule> rulesAdded;
     
+    /**
+     * If no {@link #setTargetGroupNamePrefix(String) target group name prefix} is specified, the target group names are
+     * constructed from the {@link #setServerName(String) server name} property.
+     * 
+     * @author Axel Uhl (D043530)
+     */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
     T extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
@@ -70,19 +76,19 @@ extends AbstractAwsProcedureImpl<ShardingKey, MetricsT, ProcessT> {
             return self();
         }
 
-        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
+        protected ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
             return loadBalancerUsed;
         }
 
-        public String getTargetGroupNamePrefix() {
+        protected String getTargetGroupNamePrefix() {
             return targetGroupNamePrefix;
         }
 
-        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
             return serverName;
         }
 
-        public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+        protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
             return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
         }
     }
