@@ -8,7 +8,10 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 public class NavigatorUtil {
     /**
      * Note that this method will check whether the browser does support the copyToClipboard feature first 
-     * and will do nothing if it does not to prevent JS error messages in the console.
+     * and will display a warning notification if it does not, to prevent JS error messages in the console.
+     * Please use {@link clientHasNavigatorCopyToClipboardSupport} to check for browser support, 
+     * if case specific handling is required.
+     * On a successful copy an info notification is displayed.
      * @param String text: Text to share.
      */
     public static void copyToClipboard(String text) {
@@ -17,12 +20,14 @@ public class NavigatorUtil {
             Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
         }else {
             GWT.log("This browser does not support copying to clipboard");
+            Notification.notify(StringMessages.INSTANCE.browserDoesNotSupportCopyToClipboard(), NotificationType.WARNING);
         }
     }
     
     /**
      * Note that this method will check whether the browser does support the sharing feature first 
-     * and will do nothing if it does not to prevent JS error messages in the console.
+     * and will display a warning notification if it does not, to prevent JS error messages in the console.
+     * Please use {@link clientHasNavigatorShareSupport} to check for browser support, if case specific handling is required.
      * @param String url: URL to share.
      * @param String text: Text to share.
      */
@@ -31,6 +36,7 @@ public class NavigatorUtil {
             nativeShare(url, text);
         }else {
             GWT.log("This browser does not support native sharing");
+            Notification.notify(StringMessages.INSTANCE.browserDoesNotSupportNativeSharing(), NotificationType.WARNING);
         }
     }
     

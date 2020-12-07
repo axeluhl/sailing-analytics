@@ -2411,5 +2411,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String insufficientPermissions();
     String manageEvents();
     String sharingLinkCopied();
+    String browserDoesNotSupportCopyToClipboard();
+    String browserDoesNotSupportNativeSharing();
     String startOfTrackingMustNotBeAfterEndOfTracking();
 }
