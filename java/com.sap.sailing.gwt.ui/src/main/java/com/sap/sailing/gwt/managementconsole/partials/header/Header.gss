@@ -45,7 +45,6 @@
     color: TEXT_COLOR_PRIMARY;
     text-decoration: none;
     outline: none;
-    -webkit-tap-highlight-color: transparent;
 }
 
 .header .actions .menu-mobile a.highlighted,

@@ -41,6 +41,11 @@ h2, p, span {
     display: inline-block;
 }
 
+a, a:visited {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
 button {
     font-weight: bold;
     font-size: 16px;
@@ -96,10 +101,10 @@ input::-ms-input-placeholder { /* Microsoft Edge */
 }
 
 .header-line {
-    padding-top: 6px;
     font-size: 28px;
-    padding-right: 50px;
-    top: -18px;
+    position: fixed;
+    top: 3px;
+    width: calc(100% - 36px);
 }
 
 .ellipsis {
@@ -144,7 +149,6 @@ input::-ms-input-placeholder { /* Microsoft Edge */
 }
 
 .one-line-item {
-    
 }
 
 .one-line-auto-width-item {
@@ -157,7 +161,8 @@ input::-ms-input-placeholder { /* Microsoft Edge */
     }
 
     .header-line {
-        padding-right: 13px;
+        position: relative;
         top: 0;
+        width: 100%;
     }
 }

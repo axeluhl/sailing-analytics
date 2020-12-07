@@ -8,11 +8,15 @@
     margin: 6px;
 }
 
+a.icon:hover {
+    text-decoration: none;
+}
+
 .icon-location {
     background-image: resourceUrl("iconLocation");
-    min-width: 10px;
+    width: 10px;
+    height: 15px;
     margin: 0;
-    max-height: 15px;
 }
 
 .icon-back {
@@ -29,18 +33,18 @@
 
 .icon-add {
     background-image: resourceUrl("iconAdd");
-    min-width: 19px;
+    width: 20px;
     height: 22px;
 }
 
 .icon-filter {
     background-image: resourceUrl("iconFilter");
-    min-width: 19px;
+    width: 24px;
 }
 
 .icon-search {
     background-image: resourceUrl("iconSearch");
-    min-width: 19px;
+    width: 20px;
 }
 
 .icon-apply {

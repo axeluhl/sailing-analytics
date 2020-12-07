@@ -20,10 +20,10 @@
                 </h1>
                 <g:Anchor href="javascript:;" ui:field="addEventAnchor" 
                     styleName="{app_res.icons.iconAdd} {app_res.icons.icon} {app_res.style.oneLineAutoWidthItem}">&#160;</g:Anchor>
-                <g:Anchor href="javascript:;" ui:field="searchEventAnchor" 
-                    styleName="{app_res.icons.iconSearch} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
                 <g:Anchor href="javascript:;" ui:field="filterEventAnchor" 
                     styleName="{app_res.icons.iconFilter} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
+                <g:Anchor href="javascript:;" ui:field="searchEventAnchor" 
+                    styleName="{app_res.icons.iconSearch} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
             </div>
         </div>
         <div class="{res.mediaCss.grid} ">
