@@ -30,6 +30,14 @@ public class NavigatorUtil {
         }
     }
     
+    public static boolean clientHasNavigatorShareSupport(){
+        return nativeClientHasNavigatorShareSupport();
+    }
+    
+    public static boolean clientHasNavigatorCopyToClipboardSupport() {
+        return nativeClientHasNavigatorCopyToClipboardSupport();
+    }
+    
     private static native void nativeCopyToClipboard(String text) /*-{
         window.focus();
         navigator.clipboard.writeText(text);
@@ -45,7 +53,7 @@ public class NavigatorUtil {
 
     private static native boolean nativeClientHasNavigatorShareSupport() /*-{
         window.focus();
-        if (navigator.share) {
+        if (navigator && navigator.share) {
             return true;
         } else {
             return false;
