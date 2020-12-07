@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +33,6 @@ import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
-    final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
@@ -46,8 +44,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingServiceWrite, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
-        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+        super(parent, context, sailingServiceWrite, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);       
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
     }

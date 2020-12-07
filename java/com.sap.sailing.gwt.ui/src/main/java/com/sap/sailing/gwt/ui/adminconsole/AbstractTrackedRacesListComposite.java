@@ -6,6 +6,7 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -78,6 +79,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     protected RefreshableSelectionModel<RaceDTO> refreshableSelectionModel;
     
+    protected final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
+    
     protected CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
@@ -113,6 +116,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
+        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.sailingService = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -451,6 +455,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                     @Override
                     public void onSuccess(Void result) {
                         regattaRefresher.loadRegattas();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.racesRemoved(Arrays.asList(name));
+                        }
                     }
                 }));
     }
