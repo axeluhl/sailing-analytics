@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -73,6 +74,13 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         regattaListComposite.ensureDebugId("RegattaListComposite");
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, REGATTA);
+        final Button update = buttonPanel.addCreateAction(stringMessages.refresh(), new Command() {
+            @Override
+            public void execute() {
+                regattaRefresher.reloadRegattas();
+            }
+        });
+        update.ensureDebugId("UpdateRegattaButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.addRegatta(), this::openCreateRegattaDialog);
         create.ensureDebugId("AddRegattaButton");
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(),

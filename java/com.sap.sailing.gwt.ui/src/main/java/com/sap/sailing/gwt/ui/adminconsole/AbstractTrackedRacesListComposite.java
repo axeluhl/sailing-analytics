@@ -454,7 +454,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.loadRegattas();
+                        regattaRefresher.reloadRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesRemoved(Arrays.asList(name));
                         }
@@ -474,7 +474,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.loadRegattas();
+                        regattaRefresher.reloadRegattas();
                     }
                 }));
     }
@@ -512,7 +512,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    regattaRefresher.loadRegattas();
+                                    regattaRefresher.reloadRegattas();
                                 }
                             }
                     ));

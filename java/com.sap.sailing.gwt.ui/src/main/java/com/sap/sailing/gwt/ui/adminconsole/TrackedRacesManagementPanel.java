@@ -50,7 +50,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                             public void onSuccess(RaceDTO result) {
                                 selectedRaceDTO = result;
                                 refreshSelectedRaceData();
-                                TrackedRacesManagementPanel.this.regattaRefresher.loadRegattas();
+                                TrackedRacesManagementPanel.this.regattaRefresher.reloadRegattas();
                             }
                         });
                     }

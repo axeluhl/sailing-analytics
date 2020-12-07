@@ -477,7 +477,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.loadRegattas();
+                regattaRefresher.reloadRegattas();
                 Notification.notify(stringMessages.successfullyCreatedRegattas(), NotificationType.SUCCESS);
             }
         });
