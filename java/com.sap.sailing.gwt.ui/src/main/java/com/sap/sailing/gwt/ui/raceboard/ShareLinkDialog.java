@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -226,9 +227,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                linkField.setFocus(true);
-                linkField.selectAll();
-                copyToClipBoard();
+                NavigatorUtil.copyToClipboard(linkField.getText());
             }
         });
         VerticalPanel linkContentPanel = new VerticalPanel();
@@ -245,8 +244,4 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         updateLink();
         return mainPanel;
     }
-
-    private native void copyToClipBoard() /*-{
-        return $doc.execCommand('copy');
-    }-*/;
 }

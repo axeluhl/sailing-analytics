@@ -15,12 +15,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtonsResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SharingButtons extends Composite {
@@ -57,15 +55,15 @@ public class SharingButtons extends Composite {
                 .setPath(SHARING_URL_PREFIX + context.getContextAsPathParameters())
                 .setHash(null)
                 .buildString();
-        if (clientHasNavigatorShareSupport()) {
+        if (NavigatorUtil.clientHasNavigatorShareSupport()) {
             copyToClipBoard.setVisible(false);
             shareButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    share(urlToShare, provider.getShortText());
+                    NavigatorUtil.shareUrlAndText(urlToShare, provider.getShortText());
                 }
             });
-        } else if (clientHasNavigatorCopyToClipboardSupport()) {
+        } else if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
             shareButton.setVisible(false);
             copyToClipBoard.removeStyleDependentName("gwt-button");
             copyToClipBoard.removeStyleDependentName("gwt-Button:visited");
@@ -73,8 +71,7 @@ public class SharingButtons extends Composite {
             copyToClipBoard.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    copyToClipboard(urlToShare);
-                    Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
+                    NavigatorUtil.copyToClipboard(urlToShare);
                 }
             });
         } else {
@@ -99,35 +96,4 @@ public class SharingButtons extends Composite {
         });
         fadeOutSharingButtonsTimer.schedule(2000);
     }
-
-    public static native void copyToClipboard(String text) /*-{
-        window.focus();
-        navigator.clipboard.writeText(text);
-    }-*/;
-
-    public static native void share(String url, String text) /*-{
-        window.focus();
-        navigator.share({
-            url: url,
-            text: text
-        });
-    }-*/;
-
-    public static native boolean clientHasNavigatorShareSupport() /*-{
-        window.focus();
-        if (navigator.share) {
-            return true;
-        } else {
-            return false;
-        }
-    }-*/;
-
-    public static native boolean clientHasNavigatorCopyToClipboardSupport() /*-{
-        window.focus();
-        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-            return true;
-        } else {
-            return false;
-        }
-    }-*/;
 }
