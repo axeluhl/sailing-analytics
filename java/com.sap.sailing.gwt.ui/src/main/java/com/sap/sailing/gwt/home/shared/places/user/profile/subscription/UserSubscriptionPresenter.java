@@ -56,8 +56,8 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     @Override
     public void cancelSubscription(String planId, String providerName) {
         try {
-            clientFactory.getSubscriptionService().getAsyncServiceByProvider(providerName).cancelSubscription(planId,
-                    new AsyncCallback<Boolean>() {
+            clientFactory.getSubscriptionService().getWriteAsyncServiceByProvider(providerName)
+                    .cancelSubscription(planId, new AsyncCallback<Boolean>() {
                         @Override
                         public void onSuccess(Boolean result) {
                             if (!result) {
