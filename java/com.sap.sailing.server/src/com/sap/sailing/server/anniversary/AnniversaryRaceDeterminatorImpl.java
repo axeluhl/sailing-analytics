@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -81,7 +82,12 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
                     result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
                 }
             });
-            allRaces.putAll(racingEventService.getLocalRaceList());
+            racingEventService.getLocalRaceList((uuid)->true)
+                .values()
+                .stream()
+                .flatMap(Set::stream)
+                .forEach(race -> allRaces.put(race.getIdentifier(), race)); 
+            //flatten here and count every race only once even if it is in multiple events (GH 9.11.2020)
             if (allRaces.size() != currentRaceCount) {
                 checkForNewAnniversaries(allRaces);
             }
