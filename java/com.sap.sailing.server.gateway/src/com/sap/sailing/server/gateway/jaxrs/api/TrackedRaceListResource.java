@@ -159,7 +159,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             .flatMap(races->races.stream())
             .sorted((o1,o2)->o1.getStartOfRace().compareTo(o2.getStartOfRace()))
             .collect(Collectors.toList());
-
         for (int i = 0; i < sorted.size(); i++) {
             SimpleRaceInfo current = sorted.get(i);
             JSONObject raceInfo = new JSONObject();
@@ -174,7 +173,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
 
     private Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>>  getDistinctRaces(boolean includeRemotes, Predicate<UUID> eventListFilter) {
         final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getService().getLocalRaceList(eventListFilter);
-        
         if (includeRemotes) {
             getService().getRemoteRaceList(eventListFilter).forEach((identifier, simpleRaceInfoSet) -> distinctRaces.compute(identifier, (key, valueSet) -> {
                 Set<SimpleRaceInfo> mergedSet;
@@ -188,7 +186,6 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
                 return mergedSet;
             }));
         }
-
         return distinctRaces;
     }
 
