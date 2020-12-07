@@ -94,27 +94,29 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
         final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings
                 .getPerspectiveOwnSettings();
+        if(isMobile) {
+            if (!competitorChartCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
+            }
+            if (!leaderBoardPanelCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetShowLeaderBoard();
+            }
+            if (!windChartCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetShowWindChart();
+            }
+            if (!tagsCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetShowTags();
+            }
+            if (!maneuverCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetShowManeuver();
+            }
+            if (!zoomCheckBox.getValue()) {
+                patchedPerspectiveOwnSettings.resetZoomStart();
+                patchedPerspectiveOwnSettings.resetZoomEnd();
+            }
+        }
         if (!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
-        }
-        if (isMobile && !competitorChartCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
-        }
-        if (isMobile && !leaderBoardPanelCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowLeaderBoard();
-        }
-        if (isMobile && !windChartCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowWindChart();
-        }
-        if (isMobile && !tagsCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowTags();
-        }
-        if (isMobile && !maneuverCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetShowManeuver();
-        }
-        if (isMobile && !zoomCheckBox.getValue()) {
-            patchedPerspectiveOwnSettings.resetZoomStart();
-            patchedPerspectiveOwnSettings.resetZoomEnd();
         }
         if (!filterSetNameCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();
@@ -224,22 +226,24 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             });
             settingsPanel.add(zoomCheckBox);
         }
-        linkField = createTextBox(assembleLink());
-        Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
-        copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                NavigatorUtil.copyToClipboard(linkField.getText());
-            }
-        });
         VerticalPanel linkContentPanel = new VerticalPanel();
         linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        linkField = createTextBox(assembleLink());
         linkContentPanel.add(linkField);
-        linkContentPanel.add(copyToClipBoardAnchor);
         if(isMobile) {
             qrCodeImage = new Image();
             qrCodeImage.ensureDebugId("regattaSharingQrCode");
             qrCodeImage.setPixelSize(400, 400);
+            if(NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
+                Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
+                copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        NavigatorUtil.copyToClipboard(linkField.getText());
+                    }
+                });
+                linkContentPanel.add(copyToClipBoardAnchor);
+            }
             linkContentPanel.add(qrCodeImage);
         }
         mainPanel.add(linkContentPanel);
