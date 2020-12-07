@@ -38,7 +38,7 @@ public class RaceChangeObserverForAnniversaryDetection extends AbstractTrackedRe
     public RaceChangeObserverForAnniversaryDetection(AnniversaryRaceDeterminatorImpl anniversaryRaceDeterminator) {
         this.anniversaryRaceDeterminator = anniversaryRaceDeterminator;
         this.listeners = new ConcurrentHashMap<>();
-        this.stopped = new AtomicBoolean(false);
+        this.stopped = new AtomicBoolean(!anniversaryRaceDeterminator.isEnabled());
     }
 
     @Override
