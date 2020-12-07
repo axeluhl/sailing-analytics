@@ -140,7 +140,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     
     private void loadRegattas() {
         if (regattaRefresher != null){
-            regattaRefresher.loadRegattas();
+            regattaRefresher.reloadRegattas();
         }
     }
     

@@ -79,7 +79,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.loadRegattas();
+                        regattaRefresher.reloadRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesStoppedTracking(racesToStopTracking);
                         }
@@ -101,7 +101,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.loadRegattas();
+                        regattaRefresher.reloadRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesRemoved(regattaNamesAndRaceNames);
                         }

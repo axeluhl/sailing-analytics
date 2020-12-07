@@ -535,7 +535,7 @@ public class SmartphoneTrackingEventManagementPanel
         
                     @Override
                     public void onSuccess(Void result) {
-                        trackedRacesListComposite.regattaRefresher.loadRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadRegattas();
                         for (TrackedRaceChangedListener listener : trackedRacesListComposite.raceIsTrackedRaceChangeListener) {
                             listener.racesStoppedTracking(racesToStopTracking);
                         }
@@ -822,7 +822,7 @@ public class SmartphoneTrackingEventManagementPanel
                     @Override
                     public void onSuccess(Void result) {
                         loadAndRefreshLeaderboard(leaderboard.getName());
-                        trackedRacesListComposite.regattaRefresher.loadRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadRegattas();
                     }
 
                     @Override
@@ -851,7 +851,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     Notification.notify(stringMessages.failedToSetNewStartTime(),
                                             NotificationType.ERROR);
                                 } else {
-                                    trackedRacesListComposite.regattaRefresher.loadRegattas();
+                                    trackedRacesListComposite.regattaRefresher.reloadRegattas();
                                 }
                             }
                         });
@@ -881,7 +881,7 @@ public class SmartphoneTrackingEventManagementPanel
                                             Notification.notify(stringMessages.failedToSetNewFinishingAndFinishTime(),
                                                     NotificationType.ERROR);
                                         } else {
-                                            trackedRacesListComposite.regattaRefresher.loadRegattas();
+                                            trackedRacesListComposite.regattaRefresher.reloadRegattas();
                                         }
                                     }
                                 });
