@@ -281,7 +281,7 @@ if [[ "$@" == "release" ]]; then
 
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
@@ -597,6 +597,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    echo "Maven version used: `mvn --version`"
             echo "JAVA_HOME used: $JAVA_HOME"
 	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
@@ -604,7 +605,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
-	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
+	    echo "INFO: Using remote p2 repos (http://p2.sapsailing.com/p2/sailing/ and http://p2.sapsailing.com/p2/aws-sdk/)"
         fi
 
     # back to root!
@@ -810,7 +811,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $p2PluginRepository/configuration/config.ini configuration/
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
@@ -894,7 +895,7 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deploy.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/

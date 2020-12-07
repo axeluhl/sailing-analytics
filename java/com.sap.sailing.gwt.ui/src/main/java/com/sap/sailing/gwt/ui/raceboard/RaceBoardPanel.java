@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -145,6 +146,7 @@ public class RaceBoardPanel
     private final SailingServiceAsync sailingService;
     private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final UUID eventId;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -218,8 +220,8 @@ public class RaceBoardPanel
     public RaceBoardPanel(Component<?> parent,
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
             RaceBoardPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings,
-            SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, SailingServiceAsync sailingService,
+            MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
@@ -232,6 +234,7 @@ public class RaceBoardPanel
         this.sailingService = sailingService;
         this.sailingServiceWrite = sailingServiceWrite;
         this.mediaService = mediaService;
+        this.mediaServiceWrite = mediaServiceWrite;
         this.stringMessages = stringMessages;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.errorReporter = errorReporter;
@@ -295,10 +298,10 @@ public class RaceBoardPanel
             @Override
             protected String getLeftControlsIndentStyle() {
                 // Calculate style name for left control indent based on race map height an leaderboard panel visibility
-                if (raceMap.getOffsetHeight() <= 300) {
+                if (getOffsetHeight() <= 300) {
                     return INDENT_BIG_CONTROL_STYLE;
                 }
-                if (leaderboardPanel.isVisible() && raceMap.getOffsetHeight() <= 500) {
+                if (leaderboardPanel.isVisible() && getOffsetHeight() <= 500) {
                     return INDENT_SMALL_CONTROL_STYLE;
                 }
                 return super.getLeftControlsIndentStyle();
@@ -451,7 +454,7 @@ public class RaceBoardPanel
                     errorReporter, true, true, leaderboardGroupName, leaderboardGroupId, leaderboardName);
             competitorChart.setVisible(false);
             competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-            new SliceRaceHandler(sailingServiceWrite, userService, errorReporter, competitorChart, selectedRaceIdentifier,
+            new SliceRaceHandler(sailingServiceWrite, sailingService, userService, errorReporter, competitorChart, selectedRaceIdentifier,
                     leaderboardGroupName, leaderboardGroupId, leaderboardName, event, leaderboard, raceDTO, stringMessages);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(this, getComponentContext(), windChartLifecycle, sailingService,
@@ -487,8 +490,9 @@ public class RaceBoardPanel
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
-                sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService,
-                stringMessages, errorReporter, userAgent, this, mediaPlayerSettings, raceDTO);
+                sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService,
+                mediaServiceWrite, userService, stringMessages, errorReporter, userAgent, this, mediaPlayerSettings,
+                raceDTO);
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
             public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTOWithSecurity> consumer) {

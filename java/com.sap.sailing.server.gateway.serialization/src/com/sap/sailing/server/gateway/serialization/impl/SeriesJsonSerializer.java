@@ -75,7 +75,7 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
                 JSONObject raceColumnJson = new JSONObject();
                 raceColumnJson.put(FIELD_NAME, raceColumn.getName());
                 raceColumnJson.put("isMedalRace" , raceColumn.isMedalRace());
-                raceColumnJson.put("courseAreaId", courseAreaId);
+                raceColumnJson.put("courseAreaId", courseAreaId==null?null:courseAreaId.toString());
                 if (trackedRace != null) {
                     raceColumnJson.put("isLive", trackedRace.isLive(MillisecondsTimePoint.now()));
                     raceColumnJson.put("isTracked", true);

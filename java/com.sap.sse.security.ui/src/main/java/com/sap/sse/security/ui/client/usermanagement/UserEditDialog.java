@@ -28,7 +28,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccountDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.component.ChangePasswordDialog;
@@ -86,10 +86,10 @@ public class UserEditDialog extends DataEntryDialog<UserDTO> {
                 changePasswordButton.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        final ChangePasswordDialog changePasswordDialog = new ChangePasswordDialog(stringMessages, getUserManagementService(), userToEdit, new DataEntryDialog.DialogCallback<UserData>() {
+                        final ChangePasswordDialog changePasswordDialog = new ChangePasswordDialog(stringMessages, getUserManagementWriteService(), userToEdit, new DataEntryDialog.DialogCallback<UserData>() {
                             @Override
                             public void ok(UserData userData) {
-                                getUserManagementService().updateSimpleUserPassword(userToEdit.getName(), /* admin doesn't need to provide old password */ null,
+                                getUserManagementWriteService().updateSimpleUserPassword(userToEdit.getName(), /* admin doesn't need to provide old password */ null,
                                         /* resetPasswordSecret */ null, userData.getPassword(), new MarkedAsyncCallback<Void>(
                                         new AsyncCallback<Void>() {
                                             @Override
@@ -137,9 +137,9 @@ public class UserEditDialog extends DataEntryDialog<UserDTO> {
             accountPanels.add(accountPanelDecorator);
         }
     }
-    
-    private UserManagementServiceAsync getUserManagementService() {
-        return userService.getUserManagementService();
+
+    private UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userService.getUserManagementWriteService();
     }
 
     @Override

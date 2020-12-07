@@ -52,8 +52,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;   
-
-    private Map<String, String> allLeaderboardGroupsMap;
+    /**
+     * A map containing a leaderboardgroup UUID as key and the name of that leaderboard group as value.
+     */
+    private Map<String, String> allLeaderboardGroupsNameAndIdsMap;
 
     private final StringMessages stringMessages;
     private String currentHost;
@@ -145,7 +147,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] leaderboardGroupIds = createLeaderBoardGroupNamesFromListBox();
+        UUID[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -294,14 +296,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     }
 
-    private String[] createLeaderBoardGroupNamesFromListBox() {
-        List<String> names = new ArrayList<String>();
+    private UUID[] createLeaderboardGroupIdsFromListBox() {
+        List<UUID> uuids = new ArrayList<UUID>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
-                names.add(leaderboardgroupListBox.getValue(i));
+                uuids.add(UUID.fromString(leaderboardgroupListBox.getValue(i)));
             }
         }
-        return names.toArray(new String[names.size()]);
+        return uuids.toArray(new UUID[uuids.size()]);
     }
 
     protected void fireIdRequestsAndFillLists() {
@@ -325,8 +327,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                     @Override
                     public void onSuccess(Map<String, String> result) {
                         clearListBox();
-                        allLeaderboardGroupsMap = result;
-                        fillLeaderboardgroupListBox(allLeaderboardGroupsMap);
+                        allLeaderboardGroupsNameAndIdsMap = result;
+                        fillLeaderboardGroupListBox(allLeaderboardGroupsNameAndIdsMap);
                         changeButtonStateAccordingToApplicationState();
                         if (!filterBox.getValue().isEmpty()) {
                             filterLeaderboardGroupList();
@@ -414,14 +416,14 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        Map<String, String> filteredMap = allLeaderboardGroupsMap.entrySet().stream()
+        Map<String, String> filteredMap = allLeaderboardGroupsNameAndIdsMap.entrySet().stream()
                 .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        fillLeaderboardgroupListBox(filteredMap);
+        fillLeaderboardGroupListBox(filteredMap);
         changeButtonStateAccordingToApplicationState();
     }
 
-    private void fillLeaderboardgroupListBox(Map<String, String> leaderboardGroupsMap) {
+    private void fillLeaderboardGroupListBox(Map<String, String> leaderboardGroupsMap) {
         final List<Pair<String, String>> list = new ArrayList<>();
         for (final String key : leaderboardGroupsMap.keySet()) {
             list.add(new Pair<>(leaderboardGroupsMap.get(key), key));

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +21,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -269,14 +270,17 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
 
     private DynamicTrackedRace createTrackedRace(RaceDefinition race, Iterable<Sideline> sidelines,
             Consumer<DynamicTrackedRace> runAfterCreatingTrackedRace) {
-        DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, sidelines, windStore,
-                delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+        final URL webUrl = tractracRace.getEvent().getWebURL();
+        final String webUrlString = webUrl == null ? null : webUrl.toString();
+        DynamicTrackedRace trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, sidelines,
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass()
                         .getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver,
                 /* ThreadLocalTransporter not needed because the RaceTracker is not active on a replica */ Optional
                         .empty(),
-                new TrackingConnectorInfoImpl(TrackingConnectorType.TracTrac, tractracRace.getEvent().getWebURL()));
+                new TrackingConnectorInfoImpl(TracTracAdapter.NAME, TracTracAdapter.DEFAULT_URL,
+                        webUrlString));
         if (runAfterCreatingTrackedRace != null) {
             runAfterCreatingTrackedRace.accept(trackedRace);
         }

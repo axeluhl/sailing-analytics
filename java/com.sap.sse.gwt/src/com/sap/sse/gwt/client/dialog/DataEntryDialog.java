@@ -623,7 +623,7 @@ public abstract class DataEntryDialog<T> {
      * status label can be used to display status information within the dialog to the user
      */
     protected Label getStatusLabel() {
-        return (Label) statusLabel;
+        return statusLabel;
     }
 
     protected void setCursor(Style.Cursor cursor) {

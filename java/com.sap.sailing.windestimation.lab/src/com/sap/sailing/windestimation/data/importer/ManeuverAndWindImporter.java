@@ -22,11 +22,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -102,13 +101,13 @@ public class ManeuverAndWindImporter {
     }
 
     public HttpClient createNewHttpClient() {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT_MILLIS);
-        HttpClient client = new SystemDefaultHttpClient(httpParams);
-        client.getParams().setParameter("http.socket.timeout", CONNECTION_TIMEOUT_MILLIS);
-        client.getParams().setParameter("http.connection.timeout", CONNECTION_TIMEOUT_MILLIS);
-        client.getParams().setParameter("http.connection-manager.timeout", new Long(CONNECTION_TIMEOUT_MILLIS));
-        client.getParams().setParameter("http.protocol.head-body-timeout", CONNECTION_TIMEOUT_MILLIS);
+        CloseableHttpClient client = HttpClientBuilder.create()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .setConnectionRequestTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .setSocketTimeout(CONNECTION_TIMEOUT_MILLIS)
+                        .build())
+                .build();
         return client;
     }
 

@@ -195,9 +195,9 @@ public class SmartphoneTrackingEventManagementPanel
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
         final HasPermissions type = SecuredDomainType.EVENT;
         final EditOwnershipDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, leaderboard -> listDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, leaderboard -> listDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, leaderboard -> leaderboard.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, leaderboard -> leaderboard.getAccessControlList(),
                 stringMessages);
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = AccessControlledActionsColumn
                 .create(new RaceLogTrackingEventManagementImagesBarCell(stringMessages), userService);
@@ -217,7 +217,7 @@ public class SmartphoneTrackingEventManagementPanel
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.UPDATE,
                 configOwnership::openOwnershipDialog);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.UPDATE,
-                configACL::openACLDialog);
+                configACL::openDialog);
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());

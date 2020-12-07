@@ -232,14 +232,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 final User userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
                 if (userQualifierProxy != null) {
                     final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
-                    if (resolvedUserQualifier == null) {
-                        throw new UserManagementException("Unable to resolve user named "+userQualifierProxy.getName()+
-                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
-                                " for user "+user.getName());
-                    }
                     user.removeRole(roleWithUserQualifierProxy);
-                    user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
-                            roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                    if (resolvedUserQualifier == null) {
+                        logger.severe("Unable to resolve user named "+userQualifierProxy.getName()+
+                                " which serves as a role qualifier for role "+roleWithUserQualifierProxy.getName()+
+                                " for user "+user.getName()+". Removing role.");
+                    } else {
+                        user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
+                                roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                    }
                 }
             }
         }

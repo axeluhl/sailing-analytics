@@ -33,7 +33,7 @@ public class DomainFactoryImplTest {
     public void testGetDominantBoatClass_TestWithOneObject() {
         List<String> list = new ArrayList<>();
         list.add("LSR");
-        Assert.assertEquals("Laser Int.", domainFactory.getDominantBoatClass(list).getDisplayName());
+        Assert.assertEquals("Laser Int.", domainFactory.getDominantBoatClass(list).getName());
     }
     
     @Test
@@ -41,7 +41,7 @@ public class DomainFactoryImplTest {
         List<String> list = new ArrayList<>();
         list.add("LSR");
         list.add("18.Footer");
-        String result = domainFactory.getDominantBoatClass(list).getDisplayName();
+        String result = domainFactory.getDominantBoatClass(list).getName();
         if(!(result == "Laser Int." || result == "18Footer")) {
             Assert.assertEquals("Laser Int.", result);
         }
@@ -53,7 +53,7 @@ public class DomainFactoryImplTest {
         list.add("LSR");
         list.add("18.Footer");
         list.add("LSR");
-        String result = domainFactory.getDominantBoatClass(list).getDisplayName();
+        String result = domainFactory.getDominantBoatClass(list).getName();
         Assert.assertEquals("Laser Int.", result);
     }
     
@@ -65,7 +65,7 @@ public class DomainFactoryImplTest {
         list.add("18.Footer");
         list.add("Laser Int.");
         list.add("Laser");
-        String result = domainFactory.getDominantBoatClass(list).getDisplayName();
+        String result = domainFactory.getDominantBoatClass(list).getName();
         Assert.assertEquals("Laser Int.", result);
     }
 }

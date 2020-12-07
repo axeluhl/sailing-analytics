@@ -25,10 +25,24 @@
          unpack="false"/>
 
    <plugin
+         id="org.mongodb.mongo-java-driver.source"
+         download-size="0"
+         install-size="0"
+         version="3.6.4"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.warurl"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
@@ -92,91 +106,98 @@
          id="org.eclipse.jetty.deploy"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.http"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.io"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.jmx"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.security"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.server"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.servlet"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.util"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.util.ajax"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.webapp"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.api"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.client"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.common"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.xml"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
@@ -191,27 +212,6 @@
          download-size="0"
          install-size="0"
          version="3.1.0.1"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-annotations"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-core"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-databind"
-         download-size="0"
-         install-size="0"
-         version="2.9.2.v20180207-1730"
          unpack="false"/>
 
    <plugin
@@ -248,6 +248,12 @@
          install-size="0"
          version="2.6.0.v201404270220"
          unpack="false"/>
+         
+   <plugin
+         id="org.apache.commons.logging"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.v20180409-1502"/>
 
    <plugin
          id="jackson-jaxrs"
@@ -299,6 +305,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.shiro.core.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.shiro.ehcache"
          download-size="0"
          install-size="0"
@@ -306,7 +319,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.shiro.ehcache.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.shiro.web"
+         download-size="0"
+         install-size="0"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.shiro.web.source"
          download-size="0"
          install-size="0"
          version="1.2.2"
@@ -337,7 +364,7 @@
          id="org.eclipse.jetty.client"
          download-size="0"
          install-size="0"
-         version="9.4.8.v20171121"
+         version="9.4.35.v20201120"
          unpack="false"/>
 
    <plugin
@@ -442,6 +469,20 @@
          download-size="0"
          install-size="0"
          version="3.4.0.v20170111-1608"
+         unpack="false"/>
+
+   <plugin
+         id="com.jcraft.jsch"
+         download-size="0"
+         install-size="0"
+         version="0.1.54.v20170116-1932"
+         unpack="false"/>
+
+   <plugin
+         id="com.amazon.aws.aws-java-api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

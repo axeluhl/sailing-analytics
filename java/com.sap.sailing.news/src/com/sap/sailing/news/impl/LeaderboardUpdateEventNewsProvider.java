@@ -44,7 +44,7 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
                         if (leaderboard instanceof RegattaLeaderboard) {
                             BoatClass boatClass = ((RegattaLeaderboard) leaderboard).getRegatta().getBoatClass();
                             if (boatClass != null) {
-                                boatClassName = boatClass.getDisplayName();
+                                boatClassName = boatClass.getName();
                             }
                         }
                         result.add(new LeaderboardUpdateNewsItem(event.getId(), timePointOfLatestModification.asDate(), leaderboard.getName(), displayName, boatClassName));

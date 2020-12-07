@@ -15,15 +15,14 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 public class TestACLMerge extends AbstractStoreMergeTest {
     @Before
-    public void setUp() throws IOException, UserGroupManagementException, UserManagementException {
+    public void setUp() throws IOException, UserStoreManagementException {
         setUp("source_TestACLMerge", "target_TestACLMerge");
     }
     
@@ -37,7 +36,7 @@ public class TestACLMerge extends AbstractStoreMergeTest {
      * are added if the target user has no default creation group set yet for that server name.
      */
     @Test
-    public void testACLMerge() throws UserGroupManagementException, UserManagementException {
+    public void testACLMerge() throws UserStoreManagementException {
         final String NAME_OF_USER_TO_BE_DROPPED = "userWithACL";
         final String NAME_OF_NEW_GROUP_WITH_NEW_ACTIONS = "newGroup";
         // *********** assertions against unmodified target ***********

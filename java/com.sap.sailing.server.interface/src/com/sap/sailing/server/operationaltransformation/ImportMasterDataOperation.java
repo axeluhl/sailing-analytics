@@ -469,7 +469,7 @@ public class ImportMasterDataOperation extends
 
     private void storeFixes(SensorFixStore store, DeviceIdentifier device, final Collection<Timed> fixesToAddAsBatch) {
         try {
-            store.storeFixes(device, fixesToAddAsBatch);
+            store.storeFixes(device, fixesToAddAsBatch, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
             fixesToAddAsBatch.clear();
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.severe("Failed to store race log tracking fixes while importing.");
@@ -613,7 +613,8 @@ public class ImportMasterDataOperation extends
      * Starts the tracking of imported tracked races.
      */
     private void importTrackedRaces(RacingEventService toState, SecurityService securityService) throws Exception {
-        if (connectivityParametersToRestore != null) {
+        // only start importing / loading tracked races content if not running on a replica
+        if (connectivityParametersToRestore != null && toState.getMasterDescriptor() == null) {
             int i = 0;
             final int numberOfConnectivityParamsToRestore = connectivityParametersToRestore.size();
             for (RaceTrackingConnectivityParameters param : connectivityParametersToRestore) {

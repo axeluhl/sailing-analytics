@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import org.json.simple.JSONObject;
 import com.mongodb.BasicDBList;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoCommandException;
+import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -327,7 +329,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeLeaderboard(Leaderboard leaderboard) {
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withWriteConcern(WriteConcern.MAJORITY);
         try {
             leaderboardCollection.createIndex(new Document(FieldNames.LEADERBOARD_NAME.name(), 1));
         } catch (NullPointerException npe) {
@@ -500,7 +502,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         MongoCollection<Document> leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
-        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+        MongoCollection<Document> leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name()).withReadConcern(ReadConcern.MAJORITY);
 
         try {
             leaderboardGroupCollection.createIndex(new Document(FieldNames.LEADERBOARD_GROUP_NAME.name(), 1));
@@ -531,6 +533,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             Document leaderboardQuery = new Document(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
             Document dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             if (dbLeaderboard == null) {
+                // TODO use readConcern / writeConcern "majority"
                 storeLeaderboard(leaderboard);
                 dbLeaderboard = leaderboardCollection.find(leaderboardQuery).first();
             }
@@ -579,7 +582,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document serverDBObject = new Document();
         serverDBObject.put(FieldNames.SERVER_NAME.name(), server.getName());
         serverDBObject.put(FieldNames.SERVER_URL.name(), server.getURL().toExternalForm());
+        serverDBObject.put(FieldNames.INCLUDE.name(), server.isInclude());
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), server.getSelectedEventIds());
         serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject, new UpdateOptions().upsert(true));
+    }
+    
+    @Override
+    public void updateSailingServer(final String serverName, final boolean include,
+            final Set<UUID> selectedEventIds) {
+        MongoCollection<Document> serverCollection = database.getCollection(CollectionNames.SAILING_SERVERS.name());
+        Document query = new Document();
+        query.put(FieldNames.SERVER_NAME.name(), serverName);
+        Document serverDBObject = new Document();
+        serverDBObject.put(FieldNames.INCLUDE.name(), include);
+        serverDBObject.put(FieldNames.SELECTED_EVENT_IDS.name(), selectedEventIds);
+        serverCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, serverDBObject,
+                new UpdateOptions().upsert(true));
     }
 
     @Override

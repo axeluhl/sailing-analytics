@@ -18,11 +18,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -78,6 +78,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
@@ -93,6 +94,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
@@ -156,6 +158,7 @@ import com.sap.sailing.server.gateway.serialization.impl.TrackedRaceJsonSerializ
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sse.InvalidDateException;
@@ -178,6 +181,8 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.util.impl.UUIDHelper;
@@ -237,7 +242,14 @@ public class RegattasResource extends AbstractSailingServerResource {
                 .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
-    
+
+    private Response getBadCourseErrorResponse(String regattaName, String raceColumn, String fleet) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No course found for given race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
+                        + "' and fleet '" + StringEscapeUtils.escapeHtml(fleet) + "' in regatta '"
+                        + StringEscapeUtils.escapeHtml(regattaName) + "'.").build();
+    }
+
     private Response getBadRaceErrorResponse(String regattaName, String raceColumn, String fleet) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with raceColumn '" + StringEscapeUtils.escapeHtml(raceColumn)
@@ -357,6 +369,45 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.ok(streamingOutput(serializedRegatta)).build();
         }
         return response;
+    }
+
+    @DELETE
+    @Path("{regattaname}")
+    public Response delete(@PathParam("regattaname") String regattaName) {
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        // TODO this is the same code, as the one used by the SailingServiceImpl, consolidate if an additional layer is
+        // ever wrapped around the RacingEventService
+        if (regatta != null) {
+            Set<QualifiedObjectIdentifier> objectsThatWillBeImplicitlyCleanedByRemoveRegatta = new HashSet<>();
+            objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regatta.getIdentifier());
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                TypeRelativeObjectIdentifier typeRelativeObjectIdentifier = RegattaNameAndRaceName
+                        .getTypeRelativeObjectIdentifier(regatta.getName(), race.getName());
+                QualifiedObjectIdentifier identifier = SecuredDomainType.TRACKED_RACE
+                        .getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+                objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(identifier);
+            }
+            for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
+                if (leaderboard instanceof RegattaLeaderboard) {
+                    RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                    if (regattaLeaderboard.getRegatta() == regatta) {
+                        objectsThatWillBeImplicitlyCleanedByRemoveRegatta.add(regattaLeaderboard.getIdentifier());
+                    }
+                }
+            }
+            // check if we can delete everything RemoveRegatta will remove
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().checkCurrentUserDeletePermission(toRemovePermissionObjects);
+            }
+            // we have all permissions, execute
+            getService().apply(new RemoveRegatta(regatta.getRegattaIdentifier()));
+            // cleanup the Ownership and ACLs
+            for (QualifiedObjectIdentifier toRemovePermissionObjects : objectsThatWillBeImplicitlyCleanedByRemoveRegatta) {
+                getSecurityService().deleteAllDataForRemovedObject(toRemovePermissionObjects);
+            }
+
+        }
+        return Response.ok().build();
     }
 
     /**
@@ -480,70 +531,61 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
+    
+    @FunctionalInterface
+    private static interface BoatObtainer {
+        DynamicBoat getBoat(String boatName, OwnershipAnnotation regattaOwnershipAnnotation, boolean skipPermissionChecksBasedOnCorrectRegattaSecretProvided);
+    }
 
+    /**
+     * Creates a {@link CompetitorWithBoat} object; the {@link Boat} is provided by the {@code boatObtainer} which could
+     * be a construction or a look-up, depending on the variant of
+     * {@link #createAndAddCompetitor(String, String, String, String, String, String, String, Double, Long, String, String, String, String, String, String)}
+     * /
+     * {@link #createAndAddCompetitorWithBoat(String, String, String, String, String, String, String, Double, Long, String, String, String, String, String, String)}
+     * has been used. The {@link CompetitorWithBoat} object will be registered on the regatta specified by the
+     * {@code regattaName}.<p>
+     * 
+     * Additionally, if a non-{@code null} {@code deviceUuid} is provided, a device mapping is created that maps the device with
+     * the UUID provided to the competitor created and registered. If such a device mapping already exists, then that is considered an
+     * error, and the method aborts.<p>
+     * 
+     * Security-wise, in order for this to succeed, the caller either has to present the correct {@code registrationLinkSecret} for the regatta,
+     * or the calling {@link Subject} must have the {@code REGATTA:UPDATE} permission for the regatta identified by {@code regattaName} as well as the
+     * {@code SERVER:CREATE_OBJECT} permission for the server on which the request is executed, also the {@code CREATE:COMPETITOR} and, if the {@link Boat}
+     * needs to be created too, the {@code CREATE:BOAT} permission for the competitor and boat to be created, respectively.
+     */
     private Response createAndAddCompetitor(String regattaName, String nationalityThreeLetterIOCCode, String rgbColor,
             Double timeOnTimeFactor, Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag,
             String competitorName, String competitorShortName, String competitorEmail, String flagImageURIString,
-            String teamImageURIString, Function<String, DynamicBoat> boatObtainer, String deviceUuid,
+            String teamImageURIString, BoatObtainer boatObtainer, String deviceUuid,
             String registrationLinkSecret) {
-        final Subject subject = SecurityUtils.getSubject();
         final User user = getSecurityService().getCurrentUser();
         Response response;
         final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
-        OwnershipAnnotation regattaOwnerShipAnnotation = getSecurityService().getOwnership(regatta.getIdentifier());
-        if (regattaOwnerShipAnnotation == null) {
+        OwnershipAnnotation regattaOwnershipAnnotation = getSecurityService().getOwnership(regatta.getIdentifier());
+        if (regattaOwnershipAnnotation == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
-        boolean registerCompetitor = false;
-        boolean checkInCompetitor = false;
-        String eCompetitorName = null, eCompetitorShortName = null, eCompetitorEmail = null;
-        if (subject.isAuthenticated() && getSecurityService().hasCurrentUserUpdatePermission(regatta)) {
-            registerCompetitor = true;
-            if (regatta.getCompetitorRegistrationType().isOpen() && registrationLinkSecret != null && registrationLinkSecret.length() > 0) {
-                // => case 2: authenticated user is registering himself for open regatta
-                checkInCompetitor = true;
-            } else {
-                // case 1: registering any competitor
-                eCompetitorName = competitorName;
-                eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
-                eCompetitorEmail = competitorEmail;
-            }
-        }
-        if (checkInCompetitor && subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {
-            // case 2: authenticated user is registering for open regatta
-            if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
-                return getBadRegattaRegistrationTypeErrorResponse(regattaName);
-            }
-            registerCompetitor = true;
-            if (user == null) {
-                return getBadRegattaRegistrationValidationErrorResponse("invalid user (missing)");
-            }
-            eCompetitorName = competitorName != null ? competitorName : user.getFullName();
-            eCompetitorShortName = competitorShortName == null ? user.getName() : competitorShortName;
-            eCompetitorEmail = competitorEmail != null ? competitorEmail : user.getEmail();
-            // case 2.1: with device
-            checkInCompetitor = deviceUuid != null;
-        } else if (deviceUuid != null && regatta.getCompetitorRegistrationType().isOpen()) {
-            // case 3: unauthorized user is registering for open regatta
-            if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
-                return getBadRegattaRegistrationTypeErrorResponse(regattaName);
-            }
-            registerCompetitor = true;
-            checkInCompetitor = true;
-            eCompetitorName = competitorName;
-            eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
-            eCompetitorEmail = competitorEmail;
-        }
-        if (!registerCompetitor) {
+        final boolean skipPermissionChecksBasedOnCorrectRegattaSecretProvided = Util.equalsWithNull(regatta.getRegistrationLinkSecret(), registrationLinkSecret);
+        // users must at least have REGATTA:UPDATE or must provide a valid secret where then the regatta must be a "OPEN" regatta:
+        if (!getSecurityService().hasCurrentUserUpdatePermission(regatta) && (!skipPermissionChecksBasedOnCorrectRegattaSecretProvided || !regatta.getCompetitorRegistrationType().isOpen())) {
             return getBadRegattaRegistrationTypeErrorResponse(regattaName);
         }
-
+        String eCompetitorName = null, eCompetitorShortName = null, eCompetitorEmail = null;
+        if (competitorName == null && user == null) {
+            return getBadRegattaRegistrationValidationErrorResponse("No competitor name specified and no user authenticated; can't derive competitor name");
+        }
+        // defaulting competitor attributes to user attributes, and the short name / boat name to the long name
+        eCompetitorName = competitorName == null ? user.getFullName() == null ? user.getName() : user.getFullName() : competitorName;
+        eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
+        eCompetitorEmail = competitorEmail == null ? user != null ? user.getEmail() : null : competitorEmail;
         // Check regattalog if device has been already registered to this regatta
         boolean duplicateDeviceId = false;
-        if (checkInCompetitor) {
+        if (deviceUuid != null) {
             final RegattaLog regattaLog = regatta.getRegattaLog();
             regattaLog.lockForRead();
             try {
@@ -561,10 +603,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         if (duplicateDeviceId) {
             response = this.getAlreadyRegisteredDeviceErrorResponse(regattaName, deviceUuid);
-        } else if (eCompetitorName == null) {
-            return getBadRegattaRegistrationValidationErrorResponse("missing competitorName");
-        } else if (registerCompetitor) {
-            DynamicBoat boat = boatObtainer.apply(eCompetitorShortName);
+        } else {
+            DynamicBoat boat = boatObtainer.getBoat(eCompetitorShortName, regattaOwnershipAnnotation, skipPermissionChecksBasedOnCorrectRegattaSecretProvided);
             final Color color;
             if (rgbColor == null || rgbColor.length() == 0) {
                 color = null;
@@ -607,41 +647,32 @@ public class RegattasResource extends AbstractSailingServerResource {
             final String name = eCompetitorName;
             final String shortName = eCompetitorShortName;
             final String email = eCompetitorEmail;
-            final CompetitorWithBoat competitor;
-            if (subject.isAuthenticated()) {
+            CompetitorWithBoat competitor = null;
+            final Callable<CompetitorWithBoat> createCompetitorJob = ()->getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                    competitorUuid, name, shortName, color, email, flagImageURI, team,
+                    timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                            : new MillisecondsDurationImpl(
+                                    timeOnDistanceAllowancePerNauticalMileAsMillis),
+                            searchTag, boat, /* storePersistently */ true);
+            if (skipPermissionChecksBasedOnCorrectRegattaSecretProvided) {
+                try {
+                    competitor = createCompetitorJob.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                getSecurityService().setOwnership(competitor.getIdentifier(),
+                        (User) regattaOwnershipAnnotation.getAnnotation().getUserOwner(),
+                        regattaOwnershipAnnotation.getAnnotation().getTenantOwner(), name);
+            } else {
                 competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid), name,
-                        new Callable<CompetitorWithBoat>() {
-                                @Override
-                                public CompetitorWithBoat call() throws Exception {
-                                    return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
-                                        competitorUuid, name, shortName, color, email, flagImageURI, team,
-                                        timeOnTimeFactor,
-                                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
-                                                    : new MillisecondsDurationImpl(
-                                                            timeOnDistanceAllowancePerNauticalMileAsMillis),
-                                            searchTag, boat, /* storePersistently */ true);
-                                }
-                            });
-            } else {
-                competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorUuid,
-                        name, shortName, color, email, flagImageURI, team, timeOnTimeFactor,
-                        timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
-                                : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                        searchTag, boat, /* storePersistently */ true);
-                getSecurityService().setOwnership(competitor.getIdentifier(),
-                        (User) regattaOwnerShipAnnotation.getAnnotation().getUserOwner(),
-                        regattaOwnerShipAnnotation.getAnnotation().getTenantOwner(), name);
-                if (getSecurityService().getOwnership(boat.getIdentifier()) == null) {
-                    getSecurityService().setOwnership(boat.getIdentifier(),
-                        (User) regattaOwnerShipAnnotation.getAnnotation().getUserOwner(),
-                        regattaOwnerShipAnnotation.getAnnotation().getTenantOwner(), name);
-                }
+                        createCompetitorJob);
             }
             regatta.registerCompetitor(competitor);
             response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor)))
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-            if (checkInCompetitor) {
+            if (deviceUuid != null) {
                 final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
                 final TimePoint now = MillisecondsTimePoint.now();
                 RegattaLogDeviceMappingEventImpl<Competitor> event = new RegattaLogDeviceCompetitorMappingEventImpl(now,
@@ -649,8 +680,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                         /* to */ null);
                 regatta.getRegattaLog().add(event);
             }
-        } else {
-            response = getBadRegattaRegistrationTypeErrorResponse(regattaName);
         }
         return response;
     }
@@ -675,29 +704,34 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
                     competitorShortName, competitorEmail, flagImageURI, teamImageURI,
-                    shortName -> createBoat(shortName, boatClassName, sailId),
+                    (shortName, regattaOwnershipAnnotation, skipPermissionChecksBasedOnCorrectRegattaSecretProvided) ->
+                        createBoat(shortName, boatClassName, sailId, regattaOwnershipAnnotation, skipPermissionChecksBasedOnCorrectRegattaSecretProvided),
                     deviceUuid, registrationLinkSecret);
         }
         return response;
     }
 
-    private DynamicBoat createBoat(String name, String boatClassName, String sailId) {
+    private DynamicBoat createBoat(String name, String boatClassName, String sailId,
+            OwnershipAnnotation regattaOwnershipAnnotation,
+            boolean skipPermissionChecksBasedOnCorrectRegattaSecretProvided) {
         final UUID boatUUID = UUID.randomUUID();
         final DynamicBoat boat;
-        if (SecurityUtils.getSubject().isAuthenticated()) {
-            boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), name,
-                    new Callable<DynamicBoat>() {
-
-                    @Override
-                    public DynamicBoat call() throws Exception {
-                        return new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
-                                .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
-                    }
-                });
+        final Callable<DynamicBoat> job = ()->new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
+                .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
+        if (skipPermissionChecksBasedOnCorrectRegattaSecretProvided) {
+            try {
+                boat = job.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (getSecurityService().getOwnership(boat.getIdentifier()) == null) {
+                getSecurityService().setOwnership(boat.getIdentifier(),
+                        (User) regattaOwnershipAnnotation.getAnnotation().getUserOwner(),
+                        regattaOwnershipAnnotation.getAnnotation().getTenantOwner(), name);
+            }
         } else {
-            boat = new BoatImpl(boatUUID, name, getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName,
-                    /* typicallyStartsUpwind */ true), sailId);
+            boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.BOAT, BoatImpl.getTypeRelativeObjectIdentifier(boatUUID), name, job);
         }
         return boat;
     }
@@ -724,7 +758,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
-                    competitorShortName, competitorEmail, flagImageURI, teamImageURI, t -> boat, deviceUuid,
+                    competitorShortName, competitorEmail, flagImageURI, teamImageURI, (t, regattaOwnershipAnnotation, skipPermissionChecks) -> boat, deviceUuid,
                     registrationLinkSecret);
         }
         return response;
@@ -1128,7 +1162,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     course = courseDesginFinder.analyze();
                 }
                 if (course == null) {
-                    response = Response.status(Status.NOT_FOUND).entity("No course found for given race.").build();
+                    response = getBadCourseErrorResponse(regattaName, raceColumnName, fleetName);
                 } else {
                     response = getCourseResult(course, trackedRace);
                 }
@@ -2156,9 +2190,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         jsonLiveData.put("timeToStart-s", (startOfRace.asMillis() - now.asMillis()) / 1000.0);
                     }
                 }
-                JSONArray jsonCompetitors = new JSONArray();
-                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
-                Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
+                final JSONArray jsonCompetitors = new JSONArray();
+                final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint, cache);
+                final Map<Competitor, Integer> overallRankPerCompetitor = new HashMap<>();
                 if (leaderboard != null) {
                     List<Competitor> overallRanking = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
                     Integer overallRank = 1;
@@ -2173,7 +2207,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 for (Competitor competitor : competitorsFromBestToWorst) {
                     if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(competitor,
                             SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS)) {
-                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                        final JSONObject jsonCompetitorInLeg = new JSONObject();
                         if (topN != null && topN > 0 && rank > topN) {
                             break;
                         }
@@ -2216,7 +2250,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                             Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
                                     WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                             if (gapToLeader != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
+                                final double gapToLeaderAsSeconds = gapToLeader.asSeconds();
+                                jsonCompetitorInLeg.put("gapToLeader-s",
+                                        Double.isFinite(gapToLeaderAsSeconds) ? roundDouble(gapToLeaderAsSeconds, 2) : null);
                             }
                             Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
                                     .getWindwardDistanceToCompetitorFarthestAhead(timePoint,
@@ -2239,7 +2275,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-                return Response.ok(streamingOutput(jsonLiveData)).build();
+                try {
+                    return Response.ok(streamingOutput(jsonLiveData)).build();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to obtain live data", e);
+                    throw e;
+                }
             }
         }
         return response;
@@ -2591,8 +2632,16 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
-    
+
+    @Deprecated
     @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaName}/tracking_devices")
+    public Response getTrackingStatusDeprecated(@PathParam("regattaName") String regattaName) {
+        return getTrackingStatus(regattaName);
+    }
+
+    @POST
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaName}/tracking_devices")
     public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {

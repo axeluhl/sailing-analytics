@@ -45,7 +45,9 @@
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
 <setEntry value="org.mongodb.mongo-java-driver@default:default"/>
+<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
+<setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="slf4j.jdk14@default:default"/>
 <setEntry value="org.apache.felix.shell@0:true"/>
 <setEntry value="org.apache.felix.shell.remote@0:true"/>
@@ -62,6 +64,7 @@
 <setEntry value="org.eclipse.jetty.server@4:true"/>
 <setEntry value="org.eclipse.jetty.servlet@4:true"/>
 <setEntry value="org.eclipse.jetty.util@4:true"/>
+<setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
 <setEntry value="org.eclipse.jetty.webapp@4:true"/>
 <setEntry value="org.eclipse.jetty.websocket.api@default:default"/>
 <setEntry value="org.eclipse.jetty.websocket.client@default:default"/>
@@ -69,14 +72,12 @@
 <setEntry value="org.eclipse.jetty.xml@4:true"/>
 <setEntry value="slf4j.api@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
 <setEntry value="org.apache.commons.io@default:default"/>
 <setEntry value="jcl.over.slf4j@default:default"/>
 <setEntry value="com.sun.mail.javax.mail@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="org.apache.commons.lang@default:default"/>
+<setEntry value="org.apache.commons.logging@default:default"/>
 <setEntry value="jackson-jaxrs@default:default"/>
 <setEntry value="com.sun.jersey@default:default"/>
 <setEntry value="javax.ws.rs@default:default"/>
@@ -84,8 +85,11 @@
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.shiro.core@default:default"/>
+<setEntry value="org.apache.shiro.core.source@default:default"/>
 <setEntry value="org.apache.shiro.ehcache@default:default"/>
+<setEntry value="org.apache.shiro.ehcache.source@default:default"/>
 <setEntry value="org.apache.shiro.web@default:default"/>
+<setEntry value="org.apache.shiro.web.source@default:default"/>
 <setEntry value="jackson-core-asl@default:default"/>
 <setEntry value="jackson-mapper-asl@default:default"/>
 <setEntry value="org.apache.commons.collections@default:default"/>
@@ -105,6 +109,8 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="com.jcraft.jsch@default:default"/>
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
@@ -205,7 +211,9 @@
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>
-<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
+<setEntry value="com.sap.sse.landscape@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 </setAttribute>
 <booleanAttribute key="show_selected_only" value="false"/>
 <booleanAttribute key="tracing" value="false"/>
