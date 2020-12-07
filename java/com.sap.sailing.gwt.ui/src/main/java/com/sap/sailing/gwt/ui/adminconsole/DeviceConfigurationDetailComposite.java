@@ -183,7 +183,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         identifierBox.setReadOnly(true);
         grid.setWidget(row, 0, new Label("Identifier"));
         HorizontalPanel panel = new HorizontalPanel();
-        final Button qrCodeButton = getQrCodeButton();
+        final Button qrCodeButton = createQrCodeButton();
         panel.add(identifierBox);
         panel.add(qrCodeButton);
         grid.setWidget(row++, 1, panel);
@@ -305,7 +305,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     };
 
-    private Button getQrCodeButton() {
+    private Button createQrCodeButton() {
         Button qrCodeButton = new Button(stringMessages.qrSync());
         qrCodeButton.addClickHandler(new ClickHandler() {
             @Override
