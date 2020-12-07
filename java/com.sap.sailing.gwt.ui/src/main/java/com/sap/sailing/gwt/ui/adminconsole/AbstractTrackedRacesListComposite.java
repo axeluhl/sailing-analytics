@@ -230,7 +230,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                regattaRefresher.loadRegattas();
+                regattaRefresher.reloadRegattas();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
