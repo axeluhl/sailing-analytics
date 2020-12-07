@@ -140,7 +140,13 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    </pre>
    to enable white labeling.
 
-9. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
+9. Anniversary switch,  uncomment this line in env.sh
+   <pre>
+   #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -DAnniversaryRaceDeterminator.enabled=true"
+   </pre>
+   to enable anniversary calculation.
+
+10. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
 
    <pre>
    for i in /home/sailing/servers/*/env.sh; do cat $i | grep "^ *SERVER_PORT=" | tail -1 | tr -d "SERVER_PORT="; done | sort -n
@@ -150,7 +156,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 
    If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14888, EXPEDITION_PORT=2010.
 
-10. Append the following variable assignments to your env.sh file.
+11. Append the following variable assignments to your env.sh file.
    <pre>
    SERVER_NAME=SSV
    TELNET_PORT=14888
@@ -162,7 +168,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    DEPLOY_TO=ssv
    </pre>
 
-11. Append the following description to the /home/sailing/servers/README file.
+12. Append the following description to the /home/sailing/servers/README file.
 
   <pre>
   # ssv (Schwartauer Segler-Verein, www.ssv-net.de, Alexander Probst, webmaster@alexprobst.de)
@@ -173,15 +179,15 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
   EXPEDITION_PORT=2000
   </pre>
 
-12. Start the multi instance.
+13. Start the multi instance.
     <pre>
     cd /home/sailing/servers/ssv
     ./start
     </pre>
 
-13. Change the admin password now and create a new user with admin role.
+14. Change the admin password now and create a new user with admin role.
 
-14. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
+15. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
 
 
 ##### Reachability
