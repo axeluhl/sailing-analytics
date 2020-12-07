@@ -51,8 +51,6 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
                 .getPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME);
         TreeSet<SimpleCompetitorWithIdDTO> selected = new TreeSet<>();
         boolean notifyAboutResults = false;
-        // FIXME: This is a migration effort to enrich the existing saved preferences of users by including the
-        // competitor names in the mongoDB.
         if (preferences != null) {
             final RacingEventService racingEventService = ctx.getRacingEventService();
             final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
