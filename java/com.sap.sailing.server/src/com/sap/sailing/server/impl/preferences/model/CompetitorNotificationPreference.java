@@ -14,7 +14,7 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
     public CompetitorNotificationPreference() {
         competitorId = new StringSetting("competitor", this);
         competitorName = new StringSetting("competitorName", this);
-        notifyAboutResults = new BooleanSetting("notifyAboutResults", this);
+        notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
     public CompetitorNotificationPreference(String competitorIdAsString, String competitorName, boolean notifyAboutResults) {
