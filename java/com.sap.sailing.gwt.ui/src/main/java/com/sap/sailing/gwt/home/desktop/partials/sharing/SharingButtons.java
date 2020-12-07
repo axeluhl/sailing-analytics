@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -62,14 +63,14 @@ public class SharingButtons extends Composite {
         final UrlBuilder facebookLink = new UrlBuilder().setProtocol("https").setHost("www.facebook.com")
                 .setPath("sharer/sharer.php").setParameter("u", urlToShare);
         facebook.setHref(facebookLink.buildString());
-        if (clientHasNavigatorCopyToClipboardSupport()) {
+        if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
             copyToClipBoard.removeStyleDependentName("gwt-button");
             copyToClipBoard.removeStyleDependentName("gwt-Button:visited");
             copyToClipBoard.removeStyleName("button");
             copyToClipBoard.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    copyToClipboard(urlToShare);
+                    NavigatorUtil.copyToClipboard(urlToShare);
                     Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
                 }
             });
@@ -77,18 +78,4 @@ public class SharingButtons extends Composite {
             copyToClipBoard.setVisible(false);
         }
     }
-    
-    public static native void copyToClipboard(String text) /*-{
-        window.focus();
-        navigator.clipboard.writeText(text);
-    }-*/;
-    
-    public static native boolean clientHasNavigatorCopyToClipboardSupport() /*-{
-        window.focus();
-        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-            return true;
-        } else {
-            return false;
-        }
-    }-*/;
 }
