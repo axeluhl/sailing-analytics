@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.common.client;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class NavigatorUtil {
     /**
@@ -11,6 +14,7 @@ public class NavigatorUtil {
     public static void copyToClipboard(String text) {
         if(nativeClientHasNavigatorCopyToClipboardSupport()) {
             nativeCopyToClipboard(text);
+            Notification.notify(StringMessages.INSTANCE.sharingLinkCopied(), NotificationType.INFO);
         }else {
             GWT.log("This browser does not support copying to clipboard");
         }
