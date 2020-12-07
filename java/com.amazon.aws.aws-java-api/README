@@ -35,8 +35,7 @@ To download source JARs which can then be attached, add lines such as the follow
 
 This will fetch the source JAR corresponding to the s3 code JAR. To attach it, go to the project's
 build path settings, expand the code JAR's tree node in the "Libraries" tab, select the "Source Attachment"
-sub-node, click the "Edit" button and select the source JAR that got downloaded. Don't forget to add the
-source JAR to the git repository.
+sub-node, click the "Edit" button and select the source JAR that got downloaded.
 
 This project is intended to remain CLOSED in the Eclipse workspace. An exception may be if you'd like to
 do an upgrade or add a JAR and see if the workspace still builds after those changes. In this case, rename the

@@ -159,11 +159,4 @@
          version="2.6.30.f42479d481ff35a37490a2c0c269f4099c339d18"
          unpack="false"/>
 
-   <plugin
-         id="com.sap.db.jdbc.source"
-         download-size="0"
-         install-size="0"
-         version="2.6.30.f42479d481ff35a37490a2c0c269f4099c339d18"
-         unpack="false"/>
-
 </feature>
