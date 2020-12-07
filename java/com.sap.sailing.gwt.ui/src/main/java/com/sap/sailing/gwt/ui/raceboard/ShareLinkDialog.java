@@ -234,14 +234,16 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 copyToClipBoard();
             }
         });
-        qrCodeImage = new Image();
-        qrCodeImage.ensureDebugId("regattaSharingQrCode");
-        qrCodeImage.setPixelSize(400, 400);
         VerticalPanel linkContentPanel = new VerticalPanel();
         linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         linkContentPanel.add(linkField);
         linkContentPanel.add(copyToClipBoardAnchor);
-        linkContentPanel.add(qrCodeImage);
+        if(isScreenBigEnough) {
+            qrCodeImage = new Image();
+            qrCodeImage.ensureDebugId("regattaSharingQrCode");
+            qrCodeImage.setPixelSize(400, 400);
+            linkContentPanel.add(qrCodeImage);
+        }
         mainPanel.add(linkContentPanel);
         updateLink();
         return mainPanel;
