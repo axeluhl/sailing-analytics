@@ -63,7 +63,9 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     void updateLink() {
         String url = assembleLink();
         linkField.setText(url);
-        createQrCode(url);
+        if(isScreenBigEnough) {
+            createQrCode(url);
+        }
     }
 
     private void createQrCode(String url) {
