@@ -7,9 +7,10 @@ public interface Configuration {
      * This host is only reachable through VPC and therefore one needs to ensure that the Lambda has all relevant
      * permissions
      */
-    String MEMCACHED_ENDPOINT_HOST = "fixingestion.cvoblp.cfg.euw2.cache.amazonaws.com";
-    int MEMCACHED_ENDPOINT_PORT = 11211;
+    String[] REDIS_ENDPOINTS = {"redis://fixingestionrediscache.cvoblp.ng.0001.euw2.cache.amazonaws.com:6379"};
+    String REDIS_MAP_NAME = "endpoints";
 
     Region S3_REGION = Region.EU_WEST_2;
     String S3_BUCKET_NAME = "sapsailing-gps-fixes";
+
 }

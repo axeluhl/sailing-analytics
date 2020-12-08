@@ -1,16 +1,13 @@
 package com.sap.sailing.ingestion;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.redisson.api.RMap;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
-
-import net.spy.memcached.MemcachedClient;
 
 /**
  * <p>
@@ -48,19 +45,16 @@ public class EndpointRegistrationLambda implements RequestHandler<EndpointDTO, S
     @Override
     public String handleRequest(EndpointDTO input, Context context) {
         if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
-            try {
-                final MemcachedClient memcachedClient = new MemcachedClient(new InetSocketAddress(
-                        Configuration.MEMCACHED_ENDPOINT_HOST, Configuration.MEMCACHED_ENDPOINT_PORT));
-                for (final String deviceUuid : input.getDevicesUuid()) {
-                    final Object memObject = memcachedClient.get(deviceUuid);
-                    final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>() : (List<EndpointDTO>) memObject;
-                    endpoints.add(input);
-                    memcachedClient.set(deviceUuid, (int) Duration.ofDays(1).toMinutes() * 60, endpoints);
-                    context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
-                            + input.getEndpointCallbackUrl());
-                }
-            } catch (IOException e) {
-                context.getLogger().log(e.getMessage());
+            context.getLogger().log("Getting cache instance...");
+            RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
+            context.getLogger().log("Got cache instance");
+            for (final String deviceUuid : input.getDevicesUuid()) {
+                final Object memObject = cacheMap.get(deviceUuid);
+                final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>() : (List<EndpointDTO>) memObject;
+                endpoints.add(input);
+                cacheMap.put(deviceUuid, endpoints);
+                context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
+                        + input.getEndpointCallbackUrl());
             }
         }
         return input.getEndpointUuid();
