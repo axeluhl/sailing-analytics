@@ -4588,6 +4588,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        configuration.getEventId().ifPresent(eventId->dto.eventId = eventId);
+        configuration.getCourseAreaId().ifPresent(courseAreaId->dto.courseAreaId = courseAreaId);
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }

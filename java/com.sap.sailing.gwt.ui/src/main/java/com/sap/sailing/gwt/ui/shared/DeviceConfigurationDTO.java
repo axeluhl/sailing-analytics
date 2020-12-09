@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 
 public class DeviceConfigurationDTO implements IsSerializable {
-    
     public static class RegattaConfigurationDTO implements IsSerializable {
         public static class RacingProcedureWithConfigurableStartModeFlagConfigurationDTO extends RacingProcedureConfigurationDTO {
             public List<Flags> startModeFlags;
@@ -53,9 +52,33 @@ public class DeviceConfigurationDTO implements IsSerializable {
     }
 
     public String name;
+    
     public UUID id;
+
+    /**
+     * may be {@code null}
+     */
     public List<String> allowedCourseAreaNames;
+
     public String resultsMailRecipient;
+
+    /**
+     * may be {@code null}
+     */
     public List<String> byNameDesignerCourseNames;
+    
     public RegattaConfigurationDTO regattaConfiguration;
+    
+    /**
+     * An optional ID of an event to automatically select from the events list during the logon process
+     */
+    public UUID eventId;
+    
+    /**
+     * An optional ID of a course area if an {@link #eventId} has been provided; the course area ID then is expected
+     * to be chosen from one of the event venue's course areas.
+     */
+    public UUID courseAreaId;
+    
+    public int priority;
 }

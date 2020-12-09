@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.configuration.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
@@ -21,6 +22,8 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
     private String resultsMailRecipient;
     private List<String> byNameDesignerCourseNames;
     private final UUID id;
+    private UUID eventId;
+    private UUID courseAreaId;
 
     public DeviceConfigurationImpl(RegattaConfiguration regattaConfiguration, UUID id, String name) {
         super(name);
@@ -38,10 +41,36 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
     }
 
     @Override
+    public Optional<UUID> getEventId() {
+        return Optional.ofNullable(eventId);
+    }
+
+    @Override
+    public void setEventId(UUID eventId) {
+        this.eventId = eventId;
+    }
+
+    @Override
+    public Optional<UUID> getCourseAreaId() {
+        return Optional.ofNullable(courseAreaId);
+    }
+
+    @Override
+    public void setCourseAreaId(UUID courseAreaId) {
+        this.courseAreaId = courseAreaId;
+    }
+
+    /**
+     * May return {@code null}
+     */
+    @Override
     public RegattaConfiguration getRegattaConfiguration() {
         return regattaConfiguration;
     }
 
+    /**
+     * May return {@code null}
+     */
     @Override
     public List<String> getAllowedCourseAreaNames() {
         return allowedCourseAreaNames;
