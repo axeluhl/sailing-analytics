@@ -101,7 +101,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             });
         }
         BasicDBList tags = new BasicDBList();
-        markProperties.getTags().forEach(tags::add);
+        if (markProperties.getTags() != null) {
+            markProperties.getTags().forEach(tags::add);
+        }
         result.put(FieldNames.MARK_PROPERTIES_TAGS.name(), tags);
         Map<String, Long> lastUsedTemplateMap = markProperties.getLastUsedMarkTemplate().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().getId().toString(), v -> v.getValue().asMillis()));
@@ -261,7 +263,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.COURSE_TEMPLATE_WAYPOINTS.name(), waypointTemplates);
         // tags
         final BasicDBList tags = new BasicDBList();
-        courseTemplate.getTags().forEach(tags::add);
+        if (courseTemplate.getTags() != null) {
+            courseTemplate.getTags().forEach(tags::add);
+        }
         result.put(FieldNames.COURSE_TEMPLATE_TAGS.name(), tags);
         // repeatable part
         if (courseTemplate.hasRepeatablePart()) {
