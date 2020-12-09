@@ -52,7 +52,7 @@ public class CourseTemplateResource extends SharedAbstractSailingServerResource 
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getCourseTemplates(@QueryParam("tag") List<String> tags) throws Exception {
+    public Response getCourseTemplates(@QueryParam("tags") List<String> tags) throws Exception {
         Iterable<CourseTemplate> courseTemplateList = getSharedSailingData().getAllCourseTemplates(tags);
         JSONArray result = new JSONArray();
         for (CourseTemplate courseTemplate : courseTemplateList) {

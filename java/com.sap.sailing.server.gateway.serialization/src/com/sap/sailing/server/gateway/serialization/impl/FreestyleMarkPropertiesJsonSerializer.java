@@ -20,8 +20,10 @@ public class FreestyleMarkPropertiesJsonSerializer implements JsonSerializer<Fre
     public JSONObject serialize(FreestyleMarkProperties commonMarkProperties) {
         JSONObject result = commonMarkPropertiesJsonSerializer.serialize(commonMarkProperties);
         JSONArray jsonTags = new JSONArray();
-        for (String tag : commonMarkProperties.getTags()) {
-            jsonTags.add(tag);
+        if (commonMarkProperties.getTags() != null) {
+            for (String tag : commonMarkProperties.getTags()) {
+                jsonTags.add(tag);
+            }
         }
         result.put(FIELD_TAGS, jsonTags);
         return result;
