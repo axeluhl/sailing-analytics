@@ -10,6 +10,7 @@ public final class ExpeditionAllInOneConstants {
     public static final String RESPONSE_EVENT_ID = "eventId";
     public static final String RESPONSE_LEADER_BOARD_NAME = "leaderboardName";
     public static final String RESPONSE_LEADER_BOARD_GROUP_NAME = "leaderboardGroupName";
+    public static final String RESPONSE_LEADER_BOARD_GROUP_ID = "leaderboardGroupId";
     public static final String RESPONSE_REGATTA_NAME = "regattaName";
     public static final String RESPONSE_RACE_LIST = "raceNameRaceColumnNameFleetNameList";
     public static final String RESPONSE_ERRORS = "errors";

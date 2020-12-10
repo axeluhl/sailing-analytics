@@ -14,14 +14,12 @@ public class MarkDTO extends ControlPointDTO implements MappableToDevice {
     public Color color;
     public String shape;
     public String pattern;
-    public String shortName;
     public MarkType type;
 
     MarkDTO() {}
     
     public MarkDTO(String idAsString, String name, String shortName, double latDeg, double lngDeg) {
         super(idAsString, name, shortName);
-        this.shortName = shortName;
         this.position = new DegreePosition(latDeg, lngDeg);
     }
 
@@ -43,10 +41,6 @@ public class MarkDTO extends ControlPointDTO implements MappableToDevice {
         return false;
     }
     
-    public String getShortName() {
-        return shortName;
-    }
-
     @Override
     public int hashCode() {
         return getIdAsString().hashCode();

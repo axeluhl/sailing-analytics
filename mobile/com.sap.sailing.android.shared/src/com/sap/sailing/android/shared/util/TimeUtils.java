@@ -1,15 +1,5 @@
 package com.sap.sailing.android.shared.util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -18,6 +8,15 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.sap.sailing.android.shared.R;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class TimeUtils {
 
@@ -28,20 +27,30 @@ public class TimeUtils {
     /**
      * Formats your time to 'kk:mm:ss'.
      *
-     * @param timePoint
-     *            timestamp to format
+     * @param timePoint timestamp to format
+     */
+    public static String formatTime(TimePoint timePoint, boolean includeSeconds) {
+        if (includeSeconds) {
+            return formatTime(timePoint, "kk:mm:ss");
+        } else {
+            return formatTime(timePoint, "kk:mm");
+        }
+    }
+
+    /**
+     * Formats your time to 'kk:mm:ss'.
+     *
+     * @param timePoint timestamp to format
      */
     public static String formatTime(TimePoint timePoint) {
-        return formatTime(timePoint, "kk:mm:ss");
+        return formatTime(timePoint, true);
     }
 
     /**
      * Formats your time with the help of {@link DateFormat}.
      *
-     * @param timePoint
-     *            timestamp to format
-     * @param format
-     *            format as defined by {@link DateFormat}
+     * @param timePoint timestamp to format
+     * @param format    format as defined by {@link DateFormat}
      * @return timestamp formatted as {@link String}
      */
     public static String formatTime(TimePoint timePoint, String format) {
@@ -64,7 +73,7 @@ public class TimeUtils {
     }
 
     public static String formatDurationSince(long milliseconds) {
-        return formatDurationSince(milliseconds, true);
+        return formatDurationSince(milliseconds, false);
     }
 
     public static String formatDurationSince(long milliseconds, boolean emptyHours) {
@@ -85,11 +94,7 @@ public class TimeUtils {
      * Formats milliseconds to a string like: 01h 23'45"
      */
     public static String formatTimeAgo(Context context, long milliseconds) {
-        Calendar time = Calendar.getInstance();
-        time.setTimeZone(TimeZone.getTimeZone("UTC"));
-        time.setTimeInMillis(milliseconds);
-        return context.getString(R.string.time_ago, time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE),
-                time.get(Calendar.SECOND));
+        return formatDurationSince(milliseconds, false);
     }
 
     public static String calcDuration(Calendar from, Calendar to) {
@@ -150,7 +155,7 @@ public class TimeUtils {
         int minutes = (secondsTillStart % 3600) / 60;
         int seconds = (secondsTillStart % 60);
         boolean negative = (hours < 0 || minutes < 0 || seconds < 0);
-        String timePattern = ((negative) ? "-" : "") + "%s%s:%s";
+        String timePattern = ((negative) ? "-" : "") + "%s%s'%s\"";
         String secondsString = seconds < 10 ? "0" + Math.abs(seconds) : "" + Math.abs(seconds);
         String minutesString = minutes < 10 ? "0" + Math.abs(minutes) : "" + Math.abs(minutes);
         String hoursString = hours < 10 ? "0" + Math.abs(hours) : "" + Math.abs(hours);
@@ -159,12 +164,12 @@ public class TimeUtils {
     }
 
     public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
-            int futureDays) {
+                                      int futureDays) {
         initDatePicker(context, datePicker, time, pastDays, futureDays, true);
     }
 
     public static void initDatePicker(Context context, NumberPicker datePicker, Calendar time, int pastDays,
-            int futureDays, boolean useWords) {
+                                      int futureDays, boolean useWords) {
         java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
         ArrayList<String> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -232,5 +237,14 @@ public class TimeUtils {
         time.set(Calendar.SECOND, secondPicker == null ? 0 : secondPicker.getValue());
         time.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(time.getTime());
+    }
+
+    public static TimePoint getTime(final int year, final int month, final int dayOfMonth, final TimePicker timePicker,
+                                    @Nullable final NumberPicker secondPicker) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        final int second = secondPicker == null ? 0 : secondPicker.getValue();
+        calendar.set(year, month, dayOfMonth, timePicker.getCurrentHour(), timePicker.getCurrentMinute(), second);
+        return new MillisecondsTimePoint(calendar.getTime());
     }
 }

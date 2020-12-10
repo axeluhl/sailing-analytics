@@ -43,7 +43,8 @@
                     <ul>
                         <li>name: the name of the mark to create</li>
                         <li>shortName: the short name to set. If not given, the short name defaults to the name.</li>
-                        <li>tag: Multi value specifying an optional set of tags.</li>
+                        <li>tag: Multi value specifying an optional set of tags that will be used to update the MarkProperties object if
+                                 storeToInventory is set to <tt>true</tt> (see below).</li>
                         <li>markType: One of [BUOY, CAMERABOAT, STARTBOAT, UMPIREBOAT, LANDMARK, FINISHBOAT]</li>
                         <li>color: RGB color value. Either of the hex color patterns: #RRGGBB, #RGB, RRGGBB, RGB</li>
                         <li>shape: For marks with BUOY type, this may be specified as one of [CYLINDER, CONICAL]</li>
@@ -113,7 +114,8 @@
                 "color": "#00FF00",
                 "shape": "",
                 "pattern": "",
-                "markType": "BUOY"
+                "markType": "BUOY",
+                "tags":["tag1"]
             },
             "storeToInventory": true
         },
@@ -147,6 +149,7 @@
                 "shape": "",
                 "pattern": "",
                 "markType": "BUOY"
+                "tags":["tag1"]
             },
             "storeToInventory": true
         },

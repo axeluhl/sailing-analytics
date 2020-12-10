@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -20,7 +22,7 @@ import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RaceTrackingConnectivityParameters {
+public interface RaceTrackingConnectivityParameters extends Serializable {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object. As no specific
      * {@link Regatta} is provided, this will first look up a regatta for the race from

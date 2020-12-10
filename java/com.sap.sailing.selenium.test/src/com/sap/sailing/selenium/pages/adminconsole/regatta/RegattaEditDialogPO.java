@@ -25,7 +25,7 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     private WebElement canBoatsOfCompetitorsChangePerRaceCheckbox;
     
     @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
-    private WebElement courseAreaListBox;
+    private WebElement courseAreaSelection;
     
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
@@ -49,9 +49,7 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
 
     public SeriesCreateDialogPO addSeries() {
         this.addSeriesButton.click();
-        
         WebElement dialog = findElementBySeleniumId(this.driver, "SeriesCreateDialog");
-        
         return new SeriesCreateDialogPO(this.driver, dialog);
     }
     

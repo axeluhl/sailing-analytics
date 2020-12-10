@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -79,7 +78,6 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
@@ -386,15 +384,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
     }
 
     @Override
-    public List<CompetitorAndBoatDTO> getCompetitorDTOList(Map<Competitor, Boat> competitors) {
-        List<CompetitorAndBoatDTO> result = new ArrayList<>();
-        for (Entry<Competitor, Boat> competitorAndBoatEntry : competitors.entrySet()) {
-            result.add(convertToCompetitorAndBoatDTO(competitorAndBoatEntry.getKey(), competitorAndBoatEntry.getValue()));
-        }
-        return result;
-    }
-
-    @Override
     public List<CompetitorDTO> getCompetitorDTOList(Iterable<Competitor> competitors) {
         List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor competitor : competitors) {
@@ -403,15 +392,6 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
         return result;
     }
     
-    @Override
-    public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
-        List<CompetitorAndBoatDTO> result = new ArrayList<>();
-        for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
-            result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
-        }
-        return result;
-    }
-
     @Override
     public void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
             StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,

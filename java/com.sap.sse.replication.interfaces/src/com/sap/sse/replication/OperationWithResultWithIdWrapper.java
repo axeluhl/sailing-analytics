@@ -24,8 +24,7 @@ public class OperationWithResultWithIdWrapper<S, R> implements OperationWithResu
      * Creates a new UUID for this wrapper operation
      */
     public OperationWithResultWithIdWrapper(OperationWithResult<S, R> delegate) {
-        this.delegate = delegate;
-        this.id = UUID.randomUUID();
+        this(delegate, UUID.randomUUID());
     }
 
     /**
@@ -37,6 +36,14 @@ public class OperationWithResultWithIdWrapper<S, R> implements OperationWithResu
         this.delegate = delegate;
     }
 
+    /**
+     * @return the {@link #delegate}'s class for keeping statistics
+     */
+    @Override
+    public Class<?> getClassForLogging() {
+        return delegate.getClass();
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

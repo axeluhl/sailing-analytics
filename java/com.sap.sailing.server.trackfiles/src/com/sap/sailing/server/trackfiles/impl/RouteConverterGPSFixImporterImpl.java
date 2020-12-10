@@ -4,6 +4,17 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
 import slash.navigation.base.NavigationFormat;
@@ -82,17 +93,6 @@ import slash.navigation.viamichelin.ViaMichelinFormat;
 import slash.navigation.wbt.WintecWbt201Tk1Format;
 import slash.navigation.wbt.WintecWbt201Tk2Format;
 import slash.navigation.zip.ZipFormat;
-
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.DegreeBearingImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Only supports such navigation formats for which RouteConverter implements own parser.
@@ -202,18 +202,18 @@ public class RouteConverterGPSFixImporterImpl extends BaseRouteConverterGPSFixIm
         if (position instanceof Wgs84Position) {
             heading = ((Wgs84Position) position).getHeading();
         }
-        Double speed = position.getSpeed();
-
+        final Double speedInKilometersPerHour = position.getSpeed();
         Position pos = new DegreePosition(position.getLatitude(), position.getLongitude());
         TimePoint timePoint = new MillisecondsTimePoint(t);
-        
-        if (speed != null && heading != null) {
-            SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(
-                    speed, new DegreeBearingImpl(heading));
-            return new GPSFixMovingImpl(pos, timePoint, speedWithBearing);
+        final GPSFix result;
+        if (speedInKilometersPerHour != null && heading != null) {
+            SpeedWithBearing speedWithBearing = new KilometersPerHourSpeedWithBearingImpl(
+                    speedInKilometersPerHour, new DegreeBearingImpl(heading));
+            result = new GPSFixMovingImpl(pos, timePoint, speedWithBearing);
         } else {
-            return new GPSFixImpl(pos, timePoint);
+            result = new GPSFixImpl(pos, timePoint);
         }
+        return result;
     };
 
     @Override

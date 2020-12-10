@@ -32,10 +32,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertSame(user, master.getUserByName(username));
         assertTrue(master.checkPassword(username, password));
         final String emailValidationSecret = user.getValidationSecret();
-        
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        
         User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
@@ -44,7 +42,6 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(emailValidationSecret, replicatedErnie.getValidationSecret());
         assertEquals(fullName, replicatedErnie.getFullName());
         assertEquals(company, replicatedErnie.getCompany());
-        
         // check that incremental replication of access token handling works
         final String accessToken = master.createAccessToken(username);
         replicaReplicator.waitUntilQueueIsEmpty();
@@ -70,10 +67,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String emailValidationSecretAfterChangingEmail = user.getValidationSecret();
         assertFalse(emailValidationSecretAfterChangingEmail.equals(emailValidationSecretAfterCreation));
         assertEquals(newEmail, user.getEmail());
-        
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        
         User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
@@ -95,10 +90,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
                 null);
         master.updateSimpleUserPassword(username, newPassword);
         assertTrue(master.checkPassword(username, newPassword));
-        
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        
         User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertEquals(username, replicatedErnie.getName());
@@ -120,10 +113,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertTrue(user.isEmailValidated());
         master.resetPassword(username, passwordResetBaseURL);
         String passwordResetSecret = user.getPasswordResetSecret();
-        
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        
         User replicatedErnie = replica.getUserByName(username);
         assertNotNull(replicatedErnie);
         assertTrue(replicatedErnie.isEmailValidated());

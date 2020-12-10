@@ -10,7 +10,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -27,12 +27,12 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     protected final VerticalPanel selectedRaceContentPanel;
     
-    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public AbstractRaceManagementPanel(final SailingServiceWriteAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
         this(sailingService, null, errorReporter, regattaRefresher, actionButtonsEnabled, stringMessages);
     }
     
-    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService,
+    public AbstractRaceManagementPanel(final SailingServiceWriteAsync sailingService,
             UserService userService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
         super(sailingService, userService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);

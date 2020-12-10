@@ -35,7 +35,7 @@ public class CompetitorAndBoatJsonSerializer implements JsonSerializer<Pair<Comp
     @Override
     public JSONObject serialize(Pair<Competitor, Boat> competitorAndBoat) {
         final JSONObject result;
-        JSONObject serializedCompetitor = competitorJsonSerializer.serialize(competitorAndBoat.getA());
+        final JSONObject serializedCompetitor = competitorJsonSerializer.serialize(competitorAndBoat.getA());
         // for compatibility, write a CompetitorWithBoat in the same format that a Competitor use to be
         // serialized; only if the competitor has no boat, use the new format. The de-serializer will be
         // able to distinguish based on the presence of the top-level FIELD_COMPETITOR field.
@@ -56,7 +56,7 @@ public class CompetitorAndBoatJsonSerializer implements JsonSerializer<Pair<Comp
         if (compatibilityMode) {
             result = serializedCompetitor;
         } else {
-            JSONObject serializedBoat = boatJsonSerializer.serialize(competitorAndBoat.getB());
+            final JSONObject serializedBoat = competitorAndBoat.getB() == null ? null : boatJsonSerializer.serialize(competitorAndBoat.getB());
             result = new JSONObject();
             result.put(FIELD_COMPETITOR, serializedCompetitor);
             result.put(FIELD_BOAT, serializedBoat);

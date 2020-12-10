@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.pages.common;
 import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -108,5 +109,13 @@ public abstract class DataEntryDialogPO extends PageArea {
     
     public boolean isMakeDefaultButtonVisible() {
         return !driver.findElements(new BySeleniumId(ID_MAKE_DEFAULT_BUTTON)).isEmpty();
+    }
+    
+    public void clickOkButtonOrThrow() {
+        if (!okButton.isEnabled()) {
+            throw new ElementNotSelectableException("OK Button was disabled");
+        } else {
+            okButton.click();
+        }
     }
 }

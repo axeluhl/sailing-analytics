@@ -63,6 +63,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
     private static final String CIRCULAR_RANDOM = "CR";
     private static final String NON_SPINNAKER = "NS";
     private static final String WIND_SPEEDS = "WindSpeeds";
+    private static final String WIND_ANGLES = "WindAngles";
     
     /**
      * Pattern to recognize a true wind angle in the allowances section. Group 1 contains
@@ -137,7 +138,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     sailNumber = entry.getValue() == null ? null : entry.getValue().toString();
                     break;
                 case LOA:
-                    length = new MeterDistance(((Number) entry.getValue()).doubleValue());
+                    length = entry.getValue() == null ? null : new MeterDistance(((Number) entry.getValue()).doubleValue());
                     break;
                 case YACHT_NAME:
                     boatName = entry.getValue() == null ? null : entry.getValue().toString();
@@ -146,17 +147,17 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     boatclass = (String) entry.getValue();
                     break;
                 case GPH2:
-                    gph = new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
+                    gph = entry.getValue() == null ? null : new SecondsDurationImpl(((Number) entry.getValue()).doubleValue());
                     break;
                 case CDL2:
-                    cdl = ((Number) entry.getValue()).doubleValue();
+                    cdl = entry.getValue() == null ? null : ((Number) entry.getValue()).doubleValue();
                     break;
                 case ISSUE_DATE:
                     Date date = DatatypeConverter.parseDateTime((String) entry.getValue()).getTime();
                     issueDate = new MillisecondsTimePoint(date);
                     break;
                 case ALLOWANCES:
-                    final JSONObject allowances = (JSONObject) object.get(ALLOWANCES);
+                    final JSONObject allowances = (JSONObject) entry.getValue();
                     // calculating the TWA and TWS before calculating the other dependent values in allowances object
                     final Object windSpeedsObject = allowances.get(WIND_SPEEDS);
                     if (windSpeedsObject != null) {
@@ -189,27 +190,28 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
                     }
                     // Now read the various allowances, assuming we find values for the TWS "bins" identified above
                     for (final Object aKey : allowances.keySet()) {
-                        final JSONArray array = (JSONArray) allowances.get(aKey);
+                        final JSONArray twaArray = (JSONArray) allowances.get(aKey);
                         if (((String) aKey).equals(BEAT_ANGLE)) {
-                            for (int i = 0; i < array.size(); i++) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 beatAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                                        new DegreeBearingImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                             continue;
                         }
                         if (((String) aKey).equals(GYBE_ANGLE)) {
-                            for (int i = 0; i < array.size(); i++) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 gybeAngles.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new DegreeBearingImpl(((Number) array.get(i)).doubleValue()));
+                                        new DegreeBearingImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                             continue;
                         }
                         Map<Speed, Duration> twsMap = new HashMap<>();
                         // ignore true wind angles key
-                        if (!twaPattern.matcher((String) aKey).lookingAt()) {
-                            for (int i = 0; i < array.size(); i++) {
+                        if (!aKey.equals(WIND_SPEEDS) && !aKey.equals(WIND_ANGLES) &&
+                                !twaPattern.matcher((String) aKey).lookingAt()) {
+                            for (int i = 0; i < twaArray.size(); i++) {
                                 twsMap.put(new KnotSpeedImpl(trueWindSpeedArray[i]),
-                                        new SecondsDurationImpl(((Number) array.get(i)).doubleValue()));
+                                        new SecondsDurationImpl(((Number) twaArray.get(i)).doubleValue()));
                             }
                         }
                         switch ((String) aKey) {
@@ -230,7 +232,7 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             trueWindSpeedMap.values().forEach(tws -> velocityPredictionPerTrueWindSpeedAndAngle.put(tws, new HashMap<>()));
             for (final Bearing keyTWA : allowanceDurationsPerTrueWindAngleAndSpeed.keySet()) {
                 for (final Speed keyTWS : allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).keySet()) {
-                    velocityPredictionPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA, ORCCertificateImpl.NAUTICAL_MILE
+                    velocityPredictionPerTrueWindSpeedAndAngle.get(keyTWS).put(keyTWA, ORCCertificate.NAUTICAL_MILE
                             .inTime(allowanceDurationsPerTrueWindAngleAndSpeed.get(keyTWA).get(keyTWS)));
                 }
             }
@@ -243,19 +245,19 @@ public class ORCCertificatesCollectionJSON extends AbstractORCCertificatesCollec
             final Map<Speed, Speed> circularRandomSpeedPredictionPerTrueWindSpeed = new HashMap<>();
             final Map<Speed, Speed> nonSpinnakerSpeedPredictionPerTrueWindSpeed = new HashMap<>();
             for (final Speed tws : velocityPredictionPerTrueWindSpeedAndAngle.keySet()) {
-                beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                beatVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws)));
                 beatAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(BEAT).get(tws));
-                runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                runVMGPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws)));
                 runAllowancePerTrueWindSpeed.put(tws, predefinedAllowanceDurationsPerTrueWindSpeed.get(RUN).get(tws));
-                windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                windwardLeewardSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(WINDWARD_LEEWARD).get(tws)));
-                longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                longDistanceSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(LONG_DISTANCE).get(tws)));
-                circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                circularRandomSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(CIRCULAR_RANDOM).get(tws)));
-                nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificateImpl.NAUTICAL_MILE
+                nonSpinnakerSpeedPredictionPerTrueWindSpeed.put(tws, ORCCertificate.NAUTICAL_MILE
                         .inTime(predefinedAllowanceDurationsPerTrueWindSpeed.get(NON_SPINNAKER).get(tws)));
             }
             final Bearing[] dynamicAllowancesTrueWindAngles = trueWindAngleMap.values().toArray(new Bearing[trueWindAngleMap.values().size()]);

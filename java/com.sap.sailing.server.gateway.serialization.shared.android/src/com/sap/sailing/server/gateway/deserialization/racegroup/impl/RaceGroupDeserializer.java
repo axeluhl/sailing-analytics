@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -54,12 +53,7 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
         BoatClass boatClass = null;
         String displayName = null;
         Boolean canBoatsOfCompetitorsChangePerRace = false;
-        CourseArea courseArea = null;
         RegattaConfiguration configuration = null;
-        if (object.containsKey(RaceGroupJsonSerializer.FIELD_COURSE_AREA)) {
-            // TODO: deserialize CourseArea ...
-            // WHY should I?
-        }
         if (object.containsKey(RaceGroupJsonSerializer.FIELD_BOAT_CLASS)) {
             boatClass = boatClassDeserializer.deserialize(Helpers.getNestedObjectSafe(object,
                     RaceGroupJsonSerializer.FIELD_BOAT_CLASS));
@@ -81,6 +75,6 @@ public class RaceGroupDeserializer implements JsonDeserializer<RaceGroup> {
             final Object canBoatsOfCompetitorsChangePerRaceJson = object.get(RaceGroupJsonSerializer.FIELD_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE);
             canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceJson == null ? null : (Boolean) canBoatsOfCompetitorsChangePerRaceJson; 
         }
-        return new RaceGroupImpl(name, displayName, boatClass, canBoatsOfCompetitorsChangePerRace, courseArea, series, configuration);
+        return new RaceGroupImpl(name, displayName, boatClass, canBoatsOfCompetitorsChangePerRace, series, configuration);
     }
 }

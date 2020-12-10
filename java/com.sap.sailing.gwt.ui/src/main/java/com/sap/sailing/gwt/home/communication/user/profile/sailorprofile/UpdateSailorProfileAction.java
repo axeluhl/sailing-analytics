@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.dispatch.shared.commands.HasWriteAction;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
@@ -19,7 +20,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * currently logged in user. Returns an updated SailorProfileDTO to bee shown on the sailor profile details page,
  * preparing the appropriate data structure.
  */
-public abstract class UpdateSailorProfileAction implements SailingAction<SailorProfileDTO>, SailorProfileConverter {
+public abstract class UpdateSailorProfileAction implements SailingAction<SailorProfileDTO>, SailorProfileConverter, HasWriteAction {
 
     protected UUID uuid;
 

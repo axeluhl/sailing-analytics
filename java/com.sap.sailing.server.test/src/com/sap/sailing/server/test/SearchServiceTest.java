@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -33,7 +34,6 @@ import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -64,6 +64,7 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResult
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
@@ -82,7 +83,6 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
@@ -118,23 +118,18 @@ public class SearchServiceTest {
     public void setUp() {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
         User currentUser = Mockito.mock(User.class);
-
         securityService = Mockito.mock(SecurityService.class);
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
-
-
         SecurityUtils.setSecurityManager(securityManager);
         Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
         Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
         Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
-
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
-
         server = Mockito.spy(new RacingEventServiceImpl());
         Mockito.doReturn(securityService).when(server).getSecurityService();
         TaggingServiceImpl taggingServer = Mockito.spy(new TaggingServiceImpl(server));
@@ -148,9 +143,9 @@ public class SearchServiceTest {
         for (final String leaderboardName : allLeaderboards.keySet()) {
             server.apply(new RemoveLeaderboard(leaderboardName));
         }
-        Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
-        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
-            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
+        Map<UUID, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
+        for (final LeaderboardGroup leaderboardGroup : allLeaderboardGroups.values()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroup.getId()));
         }
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));
@@ -164,9 +159,9 @@ public class SearchServiceTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
-        final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
+        final CourseArea kielAlpha = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Alpha");
         kiel.addCourseArea(kielAlpha);
-        final CourseAreaImpl kielBravo = new CourseAreaImpl("Bravo", UUID.randomUUID());
+        final CourseArea kielBravo = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Bravo");
         kiel.addCourseArea(kielBravo);
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         seriesCreationParams.put("Default",
@@ -178,9 +173,9 @@ public class SearchServiceTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(kielAlpha.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
@@ -191,9 +186,9 @@ public class SearchServiceTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(kielBravo.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
@@ -213,16 +208,16 @@ public class SearchServiceTest {
                 "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /*sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
-        final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
+        final CourseArea flensburgStandard = server.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Standard");
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC",
                 /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /* registrationLinkSecret */ UUID.randomUUID().toString(), /* startDate */ null, /* endDate */ null,
                 UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId(), /* buoyZoneRadiusInHullLengths */2.0,
+                true, new LowPoint(), Collections.singleton(flensburgStandard.getId()), /* buoyZoneRadiusInHullLengths */2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
-                RankingMetrics.ONE_DESIGN));
+                /* autoRestartTrackingUponCompetitorSetChange */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
@@ -256,7 +251,6 @@ public class SearchServiceTest {
         pfingstbusch29erTrackedR3 = server.apply(new CreateTrackedRace(pfingstbusch29er.getRaceIdentifier(pfingstbusch29erR3), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch29erLeaderboard.getRaceColumnByName("R3").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R3").getFleetByName("Default"), pfingstbusch29erTrackedR3);
-
         final RaceDefinitionImpl pfingstbush470R1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
                 AbstractTracTracLiveTest.createCompetitorAndBoatsMap(philippBuhl, antonKoch));
         final RaceDefinitionImpl pfingstbush470R2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
@@ -271,7 +265,6 @@ public class SearchServiceTest {
         pfingstbusch470TrackedR2 = server.apply(new CreateTrackedRace(pfingstbusch470.getRaceIdentifier(pfingstbush470R2), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 15000, /* millisecondsOverWhichToAverageSpeed */ 15000, null));
         pfingstbusch470Leaderboard.getRaceColumnByName("R2").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R2").getFleetByName("Default"), pfingstbusch470TrackedR2);
-
         final RaceDefinitionImpl aalOrcR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
                 AbstractTracTracLiveTest.createCompetitorAndBoatsMap(hassoPlattner, dennisGehrlein, philippBuhl));
         final RaceDefinitionImpl aalOrcR2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
@@ -303,7 +296,7 @@ public class SearchServiceTest {
     
     @Test
     public void testSimpleSearchByCompetitorName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Tobi" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(pfingstbusch29er, foundRegatta);
@@ -311,7 +304,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByCompetitorName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Hasso" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -319,7 +312,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Flensburg" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -327,7 +320,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iterator.next();
@@ -342,7 +335,7 @@ public class SearchServiceTest {
 
     @Test
     public void testMultipleMatchesSortedCorrectly() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iter.next();
@@ -358,7 +351,7 @@ public class SearchServiceTest {
     @Test
     public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
         Result<LeaderboardSearchResult> searchResults = server
-                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+                .search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
                 new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),

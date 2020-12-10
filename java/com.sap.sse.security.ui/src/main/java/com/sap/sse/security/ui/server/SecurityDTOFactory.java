@@ -18,7 +18,6 @@ import com.sap.sse.security.interfaces.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -28,7 +27,6 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
-import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
@@ -373,12 +371,6 @@ public class SecurityDTOFactory {
             ownerGroup = securityService.getUserGroup(ownershipDTO.getTenantOwner().getId());
         }
         return new Ownership(ownerUser, ownerGroup);
-    }
-
-    public OwnershipAnnotationDTO createOwnerShipAnnotationDTO(OwnershipAnnotation annotation) {
-        OwnershipDTO ownerShipDTO = createOwnershipDTO(annotation.getAnnotation(), new HashMap<>(), new HashMap<>());
-        return new OwnershipAnnotationDTO(ownerShipDTO, annotation.getIdOfAnnotatedObject(),
-                annotation.getDisplayNameOfAnnotatedObject());
     }
 
     public Set<StrippedUserDTO> createStrippedUsersFromUsers(Iterable<User> users, SecurityService securityService,

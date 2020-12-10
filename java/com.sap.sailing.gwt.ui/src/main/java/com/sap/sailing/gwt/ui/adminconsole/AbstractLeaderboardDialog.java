@@ -19,12 +19,17 @@ public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor
     public AbstractLeaderboardDialog(String title, LD leaderboardDescriptor, StringMessages stringMessages,
             Validator<LD> validator,  DialogCallback<LD> callback) {
         super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        nameTextBox = createTextBox(leaderboardDescriptor.getName());
+        nameTextBox.setVisibleLength(50);
+        nameTextBox.ensureDebugId("NameTextBox");
+        nameTextBox.setEnabled(false); // name is not editable; see also bug5282
         this.stringMessages = stringMessages;
         this.leaderboardDescriptor = leaderboardDescriptor;
     }
 
     @Override
     protected LD getResult() {
+        // setting the name is relevant only for the FlexibleLeaderboard and RegattaLeaderboardWithElimination creation:
         leaderboardDescriptor.setName(nameTextBox.getValue().trim()); // avoid trailing blank issues; leaderboard names may appear in URLs
         leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboardDescriptor.setDiscardThresholds(discardThresholdBoxes==null?null:discardThresholdBoxes.getDiscardThresholds());

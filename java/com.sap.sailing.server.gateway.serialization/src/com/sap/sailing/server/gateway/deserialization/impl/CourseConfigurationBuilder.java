@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateCompatibilityChecker;
@@ -52,9 +52,9 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigura
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
@@ -98,7 +98,7 @@ public class CourseConfigurationBuilder {
     }
 
     public MarkConfiguration<MarkConfigurationRequestAnnotation> addMarkConfiguration(UUID optionalMarkTemplateID, UUID optionalMarkPropertiesID,
-            UUID optionalMarkID, CommonMarkProperties commonMarkProperties, Positioning optionalPositioning,
+            UUID optionalMarkID, FreestyleMarkProperties commonMarkProperties, Positioning optionalPositioning,
             boolean storeToInventory, MarkRoleCreationRequest optionalMarkRoleCreationRequest) {
         final MarkConfiguration<MarkConfigurationRequestAnnotation> result;
         final MarkConfigurationRequestAnnotationImpl markConfigurationRequestAnnotation = new MarkConfigurationRequestAnnotationImpl(
@@ -186,7 +186,7 @@ public class CourseConfigurationBuilder {
     }
 
     public FreestyleMarkConfiguration<MarkConfigurationRequestAnnotation> addFreestyleMarkConfiguration(UUID optionalMarkTemplateID,
-            UUID optionalMarkPropertiesID, CommonMarkProperties commonMarkProperties, MarkConfigurationRequestAnnotation markConfigurationRequestAnnotation) {
+            UUID optionalMarkPropertiesID, FreestyleMarkProperties commonMarkProperties, MarkConfigurationRequestAnnotation markConfigurationRequestAnnotation) {
         final MarkTemplate resolvedMarkTemplate = optionalMarkTemplateID == null ? null
                 : resolveMarkTemplateByID(optionalMarkTemplateID);
         final MarkProperties resolvedMarkProperties = sharedSailingData.getMarkPropertiesById(optionalMarkPropertiesID);

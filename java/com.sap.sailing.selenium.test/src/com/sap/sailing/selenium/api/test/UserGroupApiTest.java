@@ -1,23 +1,32 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
+import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
+import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
+import com.sap.sailing.selenium.api.core.HttpException;
+import com.sap.sailing.selenium.api.event.EventApi;
+import com.sap.sailing.selenium.api.event.EventApi.Event;
 import com.sap.sailing.selenium.api.event.RoleApi;
 import com.sap.sailing.selenium.api.event.RoleApi.Role;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
+import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
@@ -25,10 +34,12 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     private final UserGroupApi userGroupApi = new UserGroupApi();
     private final RoleApi roleApi = new RoleApi();
+    private final SecurityApi securityApi = new SecurityApi();
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
+        super.setUp();
     }
 
     @Test
@@ -107,6 +118,48 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
     }
 
     @Test
+    public void testGetReadableUserGroups() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final String user1Name = "user1";
+        securityApi.createUser(adminSecurityCtx, user1Name, "test", "company", "password");
+        final ApiContext user1Ctx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
+                "password");
+        final ApiContext user1SecurityCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
+                "password");
+        assertEquals(1, Util.size(userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name)));
+
+        // admin creates new group and adds user -> does not mean the user is allowed to read the group
+        final LongAdder counter = new LongAdder();
+        final UserGroup group1ToAdd = userGroupApi.createUserGroup(adminSecurityCtx, "group1ToAdd");
+        userGroupApi.addUserToGroup(adminSecurityCtx, group1ToAdd.getGroupId(), user1Name);
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group1ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(0, counter.intValue());
+
+        // user1 creates new group -> this group is readable by user1
+        counter.reset();
+        final UserGroup group2ToAdd = userGroupApi.createUserGroup(user1SecurityCtx, "group2ToAdd");
+        userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
+
+        // if passing null for the username, implying the current user, should return the same result
+        counter.reset();
+        userGroupApi.getReadableGroupsOfCurrentUser(user1Ctx).forEach(ug -> {
+            if (group2ToAdd.getGroupId().equals(ug.getGroupId())) {
+                counter.increment();
+            }
+        });
+        assertEquals(1, counter.intValue());
+    }
+
+    @Test
     public void testChangeUsersInUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -146,6 +199,77 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
                 userGroupAfterUserRemove.getGroupName());
         assertSameElements(userGroupCreated.getRoles(), userGroupAfterUserRemove.getRoles());
         assertSameElements(userGroupCreated.getUsers(), userGroupAfterUserRemove.getUsers());
+    }
+
+    @Test
+    public void setDefaultTenantForCurrentServerAndUserTest() {
+        final String defaultTenantGroup = "NewGroup";
+        final String eventName = "testevent";
+        final String eventName2 = "testevent2";
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        final ApiContext ownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "donald", "daisy0815");
+        final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
+        adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
+
+        final EventApi eventApi = new EventApi();
+        final Event eventCreatedWithDefaultTenant = eventApi.createEvent(ownerCtx, eventName, "GC 32",
+                CompetitorRegistrationType.CLOSED, "somewhere");
+        assertEquals("testevent", eventCreatedWithDefaultTenant.getName());
+
+        final UserGroup newUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, defaultTenantGroup);
+        userGroupApi.setDefaultTenantForCurrentServerAndUser(ownerSecurityCtx, newUserGroup.getGroupId());
+
+        final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, eventName2, "GC 32",
+                CompetitorRegistrationType.CLOSED, "somewhere");
+        assertEquals(eventName2, eventCreatedWithNewGroupTenant.getName());
+        final String groupOfEvent = adminConsole.goToEvents().getEventEntry(eventName2).getColumnContent("Group");
+        assertEquals(defaultTenantGroup, groupOfEvent);
+    }
+
+    @Test
+    public void addUserToOwnGroupWithoutPermissionOnUserTest() {
+        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        final String userToAdd = "usertoadd";
+        securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, "daisy0815");
+        securityApi.createUser(adminSecurityCtx, userToAdd, "", null, "daisy0815");
+
+        final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner",
+                "daisy0815");
+        // create group owned by "groupowner"
+        final UserGroup privateUserGroup = userGroupApi.createUserGroup(groupownerSecurityCtx, "mygroup");
+
+        // add user "usertoadd" to private user group
+        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", "daisy0815");
+        userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, userToAdd,
+                privateUserGroup.getGroupId());
+        final UserGroup privateUserGroupToCheck = userGroupApi.getUserGroup(adminSecurityCtx,
+                privateUserGroup.getGroupId());
+        boolean userExistsInGroup = false;
+        for (final String user : privateUserGroupToCheck.getUsers()) {
+            userExistsInGroup = userExistsInGroup || user.equals(userToAdd);
+        }
+        assertTrue("User does not exist in group", userExistsInGroup);
+
+        // create group by admin and try to add user to it
+        final UserGroup adminUserGroup = userGroupApi.createUserGroup(adminSecurityCtx, "admingroup");
+        try {
+            userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+                    adminUserGroup.getGroupId());
+            fail();
+        } catch (HttpException he) {
+            assertEquals(401, he.getHttpStatusCode());
+        }
+
+        // try to add user again to privateUserGroup
+        try {
+            userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, "usertoadd",
+                    privateUserGroup.getGroupId());
+            fail();
+        } catch (HttpException he) {
+            assertEquals(400, he.getHttpStatusCode());
+        }
     }
 
     @Test

@@ -9,7 +9,6 @@ import com.sap.sse.security.shared.dto.NamedDTO;
 public class RaceGroupDTO extends NamedDTO implements IsSerializable {
         
     private static final long serialVersionUID = 8432572954520767329L;
-    public String courseAreaIdAsString;
     public String displayName;
     public String leaderboardGroupName;
     public String boatClass;

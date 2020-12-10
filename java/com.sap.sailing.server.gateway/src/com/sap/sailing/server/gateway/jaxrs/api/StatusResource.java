@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONObject;
@@ -33,6 +32,6 @@ public class StatusResource extends AbstractSailingServerResource {
                 (replicationStatus == null || replicationStatus.isAvailable());
         result.put("available", available);
         return Response.status(available ? HttpServletResponse.SC_OK : HttpServletResponse.SC_SERVICE_UNAVAILABLE).
-                entity(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                entity(streamingOutput(result)).build();
     }
 }

@@ -210,7 +210,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.setZoomed(true);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        redrawAllMarkers(lastRaceTimesInfo);
+        if (lastRaceTimesInfo != null) {
+            redrawAllMarkers(lastRaceTimesInfo);
+        }
     }
 
     @Override
@@ -342,7 +344,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 timer.setTime(newRaceTimesInfo.startOfTracking.getTime() +
                         (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
-            
             break;
         }
     }

@@ -113,7 +113,20 @@ public interface ReplicationService {
      */
     ReplicationReceiver getReplicator();
 
+    /**
+     * An update to this attribute can be observed by registering a {@link ReplicationStartingListener} using
+     * the {@link #addReplicationStartingListener} method.
+     */
     void setReplicationStarting(boolean b);
+    
+    @FunctionalInterface
+    public static interface ReplicationStartingListener {
+        void onReplicationStartingChanged(boolean newReplicationStartingValue);
+    }
+    
+    void addReplicationStartingListener(ReplicationStartingListener listener);
+    
+    void removeReplicationStartingListener(ReplicationStartingListener listener);
 
     /**
      * @return {@code true} if replication is starting; during this phase it is clear that the replicables managed by

@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -9,7 +6,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(на курсе %s)"</string>
     <string name="course_design_number_waypoints">"Курс содержит %d путевых точек"</string>
     
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 минуты"</string>
     <string name="race_start_in_2_minutes">"2 минуты"</string>
     <string name="race_start_in_1_minute">"1 минута"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Установить время"</string>
     <string name="race_reset_course">"Сбросить курс"</string>
     <string name="no_course_active">"Нет активного курса"</string>
@@ -385,7 +380,6 @@
     <string name="finishing_started">"Первый на финише в %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"Сейчас"</string>
-
     <string name="finished_recording">"Запись"</string>
     <string name="finished_replay">"Воспроизвести голос"</string>
     <string name="finished_list">"Завершить список"</string>
@@ -566,4 +560,7 @@
 
     <string name="competitor_merge_error_message">"Этот участник был изменен с другого устройства, а вы изменили те же данные. Убедитесь, что сейчас эти данные верны."</string>
 
+    <string name="finishing_revoke">"Отозвать"</string>
+    <string name="error_revoke_finished">"Невозможно отозвать время финиширования"</string>
+    <string name="error_revoke_finishing">"Невозможно отозвать время финиширования"</string>
 </resources>

@@ -10,8 +10,7 @@ import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplic
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
-import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -33,7 +32,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
 
         @Override
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException,
-                UserManagementException, MailException, UserGroupManagementException {
+                MailException, UserStoreManagementException {
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
@@ -43,7 +42,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewReplica() throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();

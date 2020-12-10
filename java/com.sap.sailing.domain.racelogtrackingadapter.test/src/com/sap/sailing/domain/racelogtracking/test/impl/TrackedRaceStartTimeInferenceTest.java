@@ -174,7 +174,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         });
         assertNull(trackedRace.getStartOfRace());
         final TimePoint newStartOfRace = MillisecondsTimePoint.now();
-        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace));
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace, /* courseAreaId */ null));
         assertNull(oldAndNewStartTimeNotifiedByRace[0]);
         assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
         assertEquals(newStartOfRace, trackedRace.getStartOfRace());
@@ -381,7 +381,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         });
         assertNull(trackedRace.getStartOfRace());
         final TimePoint newStartOfRace = MillisecondsTimePoint.now();
-        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace));
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace, /* courseAreaId */ null));
         assertNull(oldAndNewStartTimeNotifiedByRace[0]);
         assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
         assertEquals(newStartOfRace, trackedRace.getStartOfRace());

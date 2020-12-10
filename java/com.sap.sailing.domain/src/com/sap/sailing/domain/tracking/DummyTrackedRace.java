@@ -65,7 +65,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public DummyTrackedRace(final Map<Competitor, Boat> competitors, final Regatta regatta, final TrackedRegatta trackedRegatta,
             RaceDefinition race) {
        this(competitors, regatta, trackedRegatta, race, EmptyWindStore.INSTANCE);
-        
     }
 
     public DummyTrackedRace(final String raceName, final Serializable raceId) {
@@ -750,5 +749,17 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
-    
+
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
+    }
 }

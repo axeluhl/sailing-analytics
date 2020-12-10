@@ -108,7 +108,7 @@ public class TagButtonDialog extends DialogBox {
      *            {@link TaggingPanel} which creates this {@link TagButtonDialog}.
      * @param footerPanel
      *            footer panel of {@link TaggingPanel}
-     * @param sailingService
+     * @param sailingServiceWrite
      *            Sailing Service of {@link TaggingPanel}
      * @param stringMessages
      *            string messages of {@link TaggingPanel}

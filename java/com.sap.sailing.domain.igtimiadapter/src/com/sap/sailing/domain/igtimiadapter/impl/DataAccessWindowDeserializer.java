@@ -14,8 +14,8 @@ public class DataAccessWindowDeserializer extends HasPermissionsDeserializer {
     
     public DataAccessWindow createDataAccessWindowFromJson(JSONObject resourceJson, IgtimiConnection conn) {
         return new DataAccessWindowImpl((Long) resourceJson.get("id"),
-                new MillisecondsTimePoint(((Double) resourceJson.get("start_time")).longValue()),
-                new MillisecondsTimePoint(((Double) resourceJson.get("end_time")).longValue()),
+                new MillisecondsTimePoint(((Number) resourceJson.get("start_time")).longValue()),
+                new MillisecondsTimePoint(((Number) resourceJson.get("end_time")).longValue()),
                 (String) resourceJson.get("device_serial_number"),
                 getPermissions((JSONObject) resourceJson.get("permissions")),
                 getSecurityEntity((JSONObject) resourceJson.get("recipient")));

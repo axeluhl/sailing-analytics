@@ -31,31 +31,32 @@ public class CountryCodeTest {
     public void convertHTML() throws IOException {
         InputStream is = Util.class.getResourceAsStream("countrycodes.csv");
         assertNotNull(is);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-        String line;
         List<String[]> matrix = new LinkedList<String[]>();
-        String[] row = null;
-        int column = 8;
-        Pattern p = Pattern.compile("<TD[^>]*> *(<[pP]>)?([^<]*)(</[pP]>)? *</TD>");
-        while ((line=br.readLine()) != null) {
-            if (line.contains("<TR>")) {
-                assertEquals(8, column);
-                column = 0;
-                row = new String[8];
-                matrix.add(row);
-            } else {
-                if (line.contains("<TD")) {
-                    Matcher m = p.matcher(line);
-                    if (m.find()) {
-                        String entry = m.group(2);
-                        if (entry != null) {
-                            entry = URLDecoder.decode(entry, "UTF-8").trim();
-                            if (entry.startsWith(".")) {
-                                // IANA domain name will be stripped of leading "."
-                                entry = entry.substring(1);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")))) {
+            String line;
+            String[] row = null;
+            int column = 8;
+            Pattern p = Pattern.compile("<TD[^>]*> *(<[pP]>)?([^<]*)(</[pP]>)? *</TD>");
+            while ((line = br.readLine()) != null) {
+                if (line.contains("<TR>")) {
+                    assertEquals(8, column);
+                    column = 0;
+                    row = new String[8];
+                    matrix.add(row);
+                } else {
+                    if (line.contains("<TD")) {
+                        Matcher m = p.matcher(line);
+                        if (m.find()) {
+                            String entry = m.group(2);
+                            if (entry != null) {
+                                entry = URLDecoder.decode(entry, "UTF-8").trim();
+                                if (entry.startsWith(".")) {
+                                    // IANA domain name will be stripped of leading "."
+                                    entry = entry.substring(1);
+                                }
                             }
+                            row[column++] = entry == null || entry.length() == 0 ? null : entry;
                         }
-                        row[column++] = entry == null || entry.length() == 0 ? null : entry;
                     }
                 }
             }

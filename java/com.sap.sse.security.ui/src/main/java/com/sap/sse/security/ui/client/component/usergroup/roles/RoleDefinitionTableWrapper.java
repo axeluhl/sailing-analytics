@@ -56,9 +56,7 @@ public class RoleDefinitionTableWrapper extends
                 }, tableResources);
         this.userGroupSelectionModel = userGroupSelectionModel;
         this.userGroupSelectionModel.addSelectionChangeHandler(e -> refreshRoleList());
-
         final ListHandler<Pair<StrippedRoleDefinitionDTO, Boolean>> userColumnListHandler = getColumnSortHandler();
-
         // users table
         final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 dto -> dto.getA().getName(), userColumnListHandler);
@@ -69,7 +67,7 @@ public class RoleDefinitionTableWrapper extends
             final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             final boolean value = !rolePair.getB().booleanValue();
             if (selectedObject != null) {
-                userService.getUserManagementService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
+                userService.getUserManagementWriteService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
                         rolePair.getA().getId().toString(), value, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -85,12 +83,11 @@ public class RoleDefinitionTableWrapper extends
                         });
             }
         });
-
         actionsColumn.addAction(RoleDefinitionImagesBarCell.ACTION_DELETE, UPDATE, rolePair -> {
             final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
-                    userService.getUserManagementService().removeRoleDefinitionFromUserGroup(
+                    userService.getUserManagementWriteService().removeRoleDefinitionFromUserGroup(
                             selectedObject.getId().toString(), rolePair.getA().getId().toString(),
                             new AsyncCallback<Void>() {
 
@@ -110,7 +107,6 @@ public class RoleDefinitionTableWrapper extends
                 Window.alert(stringMessages.pleaseSelect());
             }
         });
-
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>>(
                 new Label(stringMessages.filterRoles()), new ArrayList<Pair<StrippedRoleDefinitionDTO, Boolean>>(),
@@ -121,30 +117,25 @@ public class RoleDefinitionTableWrapper extends
                 string.add(t.getA().getName());
                 return string;
             }
-
             @Override
             public AbstractCellTable<Pair<StrippedRoleDefinitionDTO, Boolean>> getCellTable() {
                 return table;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
-
         // setup table
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.roleName());
-
         final TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>> forAllUsersColumn = new TextColumn<Pair<StrippedRoleDefinitionDTO, Boolean>>() {
             @Override
             public String getValue(Pair<StrippedRoleDefinitionDTO, Boolean> rolePair) {
                 return rolePair.getB() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         table.addColumn(forAllUsersColumn, stringMessages.enabledForAllUsers());
         table.addColumn(actionsColumn);
-        table.ensureDebugId("RoleDefinitionDTOTable");
+        table.ensureDebugId("GroupRoleDefinitionDTOTable");
     }
 
     public LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> getFilterField() {

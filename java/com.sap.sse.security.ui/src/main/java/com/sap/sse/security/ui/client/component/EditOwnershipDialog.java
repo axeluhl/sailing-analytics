@@ -28,6 +28,7 @@ import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -128,7 +129,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         this.securedObjectId = securedObjectId;
         final StrippedUserDTO userOwner = ownership == null ? null : ownership.getUserOwner();
         this.resolvedUserGroup = ownership == null ? null : ownership.getTenantOwner();
-
         // User Suggest
         final MultiWordSuggestOracle suggestUserOracle = new MultiWordSuggestOracle();
         this.userManagementService.getUserList(new AsyncCallback<Collection<UserDTO>>() {
@@ -144,14 +144,11 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
                 suggestUserOracle.setDefaultSuggestionsFromText(userNames);
             }
         });
-
         this.suggestUserName = createSuggestBox(suggestUserOracle);
         this.suggestUserName.setText(userOwner == null ? "" : userOwner.getName());
-
         // User Group Suggest
         final MultiWordSuggestOracle suggestUserGroupOracle = new MultiWordSuggestOracle();
         this.userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.errorObtainingUserGroup(caught.getMessage()),
@@ -168,16 +165,12 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         });
         this.suggestUserGroupName = createSuggestBox(suggestUserGroupOracle);
         this.suggestUserGroupName.setText(resolvedUserGroup == null ? "" : resolvedUserGroup.getName());
-
         this.suggestUserName.addValueChangeHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addValueChangeHandler(e -> resolveUserGroup());
-
         this.suggestUserName.addSelectionHandler(e -> checkIfUserExists());
         this.suggestUserGroupName.addSelectionHandler(e -> resolveUserGroup());
-
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserName);
         DialogUtils.addFocusUponKeyUpToggler(this.suggestUserGroupName);
-
         checkIfUserExists();
         resolveUserGroup();
     }
@@ -189,12 +182,17 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         result.setWidget(0, 1, new Label(securedObjectId));
         result.setWidget(1, 0, new Label(stringMessages.permissionType() + ": "));
         result.setWidget(1, 1, new Label(permissionType));
-
         result.setWidget(2, 0, new Label(stringMessages.user()));
         result.setWidget(2, 1, suggestUserName);
         result.setWidget(3, 0, new Label(stringMessages.group()));
         result.setWidget(3, 1, suggestUserGroupName);
         return result;
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        suggestUserName.setFocus(true);
     }
 
     private void resolveUserGroup() {
@@ -247,9 +245,9 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
-     * {@link DialogConfig#openDialog(Named) open} a {@link EditOwnershipDialog dialog}.
+     * {@link DialogConfig#openOwnershipDialog(Named) open} a {@link EditOwnershipDialog dialog}.
      * 
-     * @param userManagementService
+     * @param userManagementWriteService
      *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
      * @param type
      *            {@link SecuredDomainType} specifying the type of required permissions to modify the secured object
@@ -261,22 +259,22 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
      *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
     public static <T extends Named & SecuredDTO> DialogConfig<T> create(
-            final UserManagementServiceAsync userManagementService, final HasPermissions type,
+            final UserManagementWriteServiceAsync userManagementWriteService, final HasPermissions type,
             final Consumer<T> updateCallback,
             final StringMessages stringMessages) {
-        return new DialogConfig<>(userManagementService, type, updateCallback, stringMessages);
+        return new DialogConfig<>(userManagementWriteService, type, updateCallback, stringMessages);
     }
 
     public static class DialogConfig<T extends SecuredDTO> {
-        private final UserManagementServiceAsync userManagementService;
+        private final UserManagementWriteServiceAsync userManagementWriteService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
         private final StringMessages stringMessages;
 
-        private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
+        private DialogConfig(final UserManagementWriteServiceAsync userManagementWriteService, final HasPermissions type,
                 final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
-            this.userManagementService = userManagementService;
+            this.userManagementWriteService = userManagementWriteService;
             this.identifierFactory = SecuredDTO::getIdentifier;
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;
@@ -288,11 +286,11 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
          * @param securedObject
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
-        public void openDialog(final T securedObject) {
+        public void openOwnershipDialog(final T securedObject) {
             final QualifiedObjectIdentifier identifier = securedObject.getIdentifier();
             final String permissionType = identifier.getTypeIdentifier();
             final String id = identifier.getTypeRelativeObjectIdentifier().toString();
-            new EditOwnershipDialog(userManagementService, securedObject.getOwnership(), StringMessages.INSTANCE,
+            new EditOwnershipDialog(userManagementWriteService, securedObject.getOwnership(), StringMessages.INSTANCE,
                     new EditOwnershipDialogCallback(securedObject), permissionType, id).show();
         }
 
@@ -307,7 +305,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             @Override
             public void ok(OwnershipDialogResult editedObject) {
                 final QualifiedObjectIdentifier objectIdentifier = identifierFactory.apply(securedObject);
-                userManagementService.setOwnership(editedObject.getUsername(), editedObject.getUserGroupId(),
+                userManagementWriteService.setOwnership(editedObject.getUsername(), editedObject.getUserGroupId(),
                         objectIdentifier, securedObject.getName(), new UpdateOwnershipAsyncCallback());
             }
 

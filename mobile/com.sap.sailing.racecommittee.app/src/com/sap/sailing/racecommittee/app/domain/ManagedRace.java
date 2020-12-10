@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import java.util.Collection;
 import java.util.Map;
 
@@ -116,4 +117,8 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
      * @param factor
      */
     void setExplicitFactor(Double factor);
+
+    Result revokeFinishing(AbstractLogEventAuthor author);
+
+    Result revokeFinished(AbstractLogEventAuthor author);
 }

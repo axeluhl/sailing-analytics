@@ -433,14 +433,14 @@ public class RaceLogTest {
         UUID client1Id = UUID.randomUUID();
         UUID client2Id = UUID.randomUUID();
         final TimePoint now = MillisecondsTimePoint.now();
-        RaceLogStartTimeEvent startTimeEvent1 = new RaceLogStartTimeEventImpl(now, author, 1, now.plus(1));
+        RaceLogStartTimeEvent startTimeEvent1 = new RaceLogStartTimeEventImpl(now, author, 1, now.plus(1), /* courseAreaId */ null);
         Iterable<RaceLogEvent> empty = raceLog.add(startTimeEvent1, client1Id);
         assertTrue(Util.isEmpty(empty));
-        RaceLogStartTimeEvent startTimeEvent2 = new RaceLogStartTimeEventImpl(now.plus(2), author, 1, now.plus(3));
+        RaceLogStartTimeEvent startTimeEvent2 = new RaceLogStartTimeEventImpl(now.plus(2), author, 1, now.plus(3), /* courseAreaId */ null);
         Iterable<RaceLogEvent> nonEmpty = raceLog.add(startTimeEvent2, client2Id);
         assertEquals(1, Util.size(nonEmpty));
         assertSame(startTimeEvent1, nonEmpty.iterator().next());
-        RaceLogStartTimeEvent startTimeEvent3 = new RaceLogStartTimeEventImpl(now.plus(4), author, 1, now.plus(5));
+        RaceLogStartTimeEvent startTimeEvent3 = new RaceLogStartTimeEventImpl(now.plus(4), author, 1, now.plus(5), /* courseAreaId */ null);
         Iterable<RaceLogEvent> nonEmpty2 = raceLog.add(startTimeEvent3, client1Id);
         assertEquals(1, Util.size(nonEmpty2));
         assertSame(startTimeEvent2, nonEmpty2.iterator().next());

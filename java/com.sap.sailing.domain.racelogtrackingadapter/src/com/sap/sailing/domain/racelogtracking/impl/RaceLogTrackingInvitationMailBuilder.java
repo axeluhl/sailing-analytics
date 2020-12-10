@@ -109,17 +109,12 @@ abstract class RaceLogTrackingInvitationMailBuilder {
 
     SerializableMultipartSupplier getMultipartSupplier() throws MessagingException {
         final SerializableMultipartSupplier mixedSupplier = new SerializableMultipartSupplier("mixed");
-
         final SerializableMultipartSupplier alternativeSupplier = new SerializableMultipartSupplier("alternative");
         mixedSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(alternativeSupplier));
-
-        alternativeSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain"));
-
+        alternativeSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(text.toString(), "text/plain; charset=UTF-8"));
         final SerializableMultipartSupplier relatedSupplier = new SerializableMultipartSupplier("related");
         alternativeSupplier.addBodyPart(new SerializableMultipartMimeBodyPartSupplier(relatedSupplier));
-
-        relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html"));
-
+        relatedSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(html.toString(), "text/html; charset=UTF-8"));
         for (Entry<String, byte[]> imageEntry : pngAttachAndInline.entrySet()) {
             final String contentType = "image/png";
             final String cid = "<" + imageEntry.getKey() + ">";
@@ -128,7 +123,6 @@ abstract class RaceLogTrackingInvitationMailBuilder {
             relatedSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(img, contentType, cid, filename));
             mixedSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(img, contentType, filename));
         }
-
         return mixedSupplier;
     }
 

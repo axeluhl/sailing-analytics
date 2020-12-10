@@ -4,6 +4,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,7 +43,7 @@ public class LeaderboardDiscardingRulesTest {
     @Test
     public void testDiscardingRules() {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
-        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 4 }, new LowPoint(), null);
+        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 4 }, new LowPoint(), Collections.emptySet());
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         int[] discardingRulesNew = new int[] { 1, 5 };
@@ -61,7 +63,7 @@ public class LeaderboardDiscardingRulesTest {
     @Test
     public void testDiscardingRulesForMultipleEquallyBadRaces() throws NoWindException {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
-        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new LowPoint(), null);
+        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new LowPoint(), Collections.emptySet());
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
@@ -100,7 +102,7 @@ public class LeaderboardDiscardingRulesTest {
     @Test
     public void testDiscardingRulesForMultipleEquallyBadRacesWithHighPointScoringScheme() throws NoWindException {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
-        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new HighPoint(), null);
+        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new HighPoint(), Collections.emptySet());
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */ true);
@@ -144,7 +146,7 @@ public class LeaderboardDiscardingRulesTest {
     @Test
     public void testDiscardingRulesForMultipleEquallyBadRacesWithNonDiscardableDisqualification() throws NoWindException {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
-        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new LowPoint(), null);
+        racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, null, new int[] { 1, 2 }, new LowPoint(), Collections.emptySet());
         FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);

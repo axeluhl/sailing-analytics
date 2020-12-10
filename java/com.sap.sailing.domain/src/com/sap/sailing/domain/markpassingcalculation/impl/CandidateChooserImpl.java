@@ -481,43 +481,49 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
-        LockUtil.lockForWrite(perCompetitorLocks.get(c));
-        try {
-            Candidate fixedCan = new CandidateForFixedMarkPassingImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
-            NavigableSet<Candidate> fixed = fixedPassings.get(c);
-            if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
-                if (!fixed.add(fixedCan)) {
-                    Candidate old = fixed.ceiling(fixedCan);
-                    fixed.remove(old);
-                    removeCandidates(c, Collections.singleton(old));
-                    fixed.add(fixedCan);
+        final NamedReentrantReadWriteLock lock = perCompetitorLocks.get(c);
+        if (lock != null) { // otherwise this is a phony competitor and we aren't interested in fixed mark passings for it
+            LockUtil.lockForWrite(lock);
+            try {
+                Candidate fixedCan = new CandidateForFixedMarkPassingImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
+                NavigableSet<Candidate> fixed = fixedPassings.get(c);
+                if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
+                    if (!fixed.add(fixedCan)) {
+                        Candidate old = fixed.ceiling(fixedCan);
+                        fixed.remove(old);
+                        removeCandidates(c, Collections.singleton(old));
+                        fixed.add(fixedCan);
+                    }
+                    addCandidates(c, Collections.singleton(fixedCan));
+                    findShortestPath(c);
                 }
-                addCandidates(c, Collections.singleton(fixedCan));
-                findShortestPath(c);
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
             }
-        } finally {
-            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
     @Override
     public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
-        LockUtil.lockForWrite(perCompetitorLocks.get(c));
-        try {
-            Candidate toRemove = null;
-            for (Candidate can : fixedPassings.get(c)) {
-                if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
-                    toRemove = can;
-                    break;
+        final NamedReentrantReadWriteLock lock = perCompetitorLocks.get(c);
+        if (lock != null) { // otherwise this is a phony competitor and we aren't interested in fixed mark passings for it
+            LockUtil.lockForWrite(lock);
+            try {
+                Candidate toRemove = null;
+                for (Candidate can : fixedPassings.get(c)) {
+                    if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
+                        toRemove = can;
+                        break;
+                    }
                 }
+                if (toRemove != null) {
+                    fixedPassings.get(c).remove(toRemove);
+                    removeCandidates(c, Arrays.asList(toRemove));
+                    findShortestPath(c);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
             }
-            if (toRemove != null) {
-                fixedPassings.get(c).remove(toRemove);
-                removeCandidates(c, Arrays.asList(toRemove));
-                findShortestPath(c);
-            }
-        } finally {
-            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 

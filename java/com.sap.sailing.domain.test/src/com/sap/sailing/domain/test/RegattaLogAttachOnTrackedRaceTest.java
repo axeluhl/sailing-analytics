@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -68,7 +69,8 @@ public class RegattaLogAttachOnTrackedRaceTest {
     
     @Before
     public void setUp() {
-        leaderboard = new FlexibleLeaderboardImpl(EmptyRaceLogStore.INSTANCE, new MyMockedRegattaLogStore(), "", null, new LowPoint(), null);
+        leaderboard = new FlexibleLeaderboardImpl(EmptyRaceLogStore.INSTANCE, new MyMockedRegattaLogStore(), "", null, new LowPoint(),
+                /* no course area */ (CourseArea) null);
     }
     
     @Test

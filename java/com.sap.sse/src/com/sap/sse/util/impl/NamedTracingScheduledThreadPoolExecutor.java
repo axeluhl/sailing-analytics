@@ -1,5 +1,6 @@
 package com.sap.sse.util.impl;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -13,7 +14,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
@@ -27,8 +36,11 @@ import com.sap.sse.concurrent.ConcurrentWeakHashMap;
  * @author Axel Uhl (d043530)
  *
  */
-public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor {
+public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPoolExecutor implements Named {
+    private static final long serialVersionUID = 211715492525163730L;
+
     private static final Logger logger = Logger.getLogger(NamedTracingScheduledThreadPoolExecutor.class.getName());
+    
     private final String name;
     
     /**
@@ -52,24 +64,45 @@ public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPool
     public NamedTracingScheduledThreadPoolExecutor(String name, int corePoolSize, RejectedExecutionHandler handler) {
         super(corePoolSize, handler);
         this.name = name;
+        tryToRegisterMBeanForThreadPool();
     }
 
     public NamedTracingScheduledThreadPoolExecutor(String name, int corePoolSize, ThreadFactory threadFactory,
             RejectedExecutionHandler handler) {
         super(corePoolSize, threadFactory, handler);
         this.name = name;
+        tryToRegisterMBeanForThreadPool();
     }
 
     public NamedTracingScheduledThreadPoolExecutor(String name, int corePoolSize, ThreadFactory threadFactory) {
         super(corePoolSize, threadFactory);
         this.name = name;
+        tryToRegisterMBeanForThreadPool();
     }
 
     public NamedTracingScheduledThreadPoolExecutor(String name, int corePoolSize) {
         super(corePoolSize);
         this.name = name;
+        tryToRegisterMBeanForThreadPool();
     }
     
+    private void tryToRegisterMBeanForThreadPool() {
+        try {
+            // register an MBean for this thread pool executor for JMX support
+            ThreadPoolMXBeanImpl mbean = new ThreadPoolMXBeanImpl(this);
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            final ObjectName mBeanName = mbean.getObjectName();
+            mbs.registerMBean(mbean, mBeanName);
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+            logger.log(Level.SEVERE, "Couldn't register MBean for thread pool executor "+this.getName(), e);
+        }
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+
     @Override
     protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable, RunnableScheduledFuture<V> task) {
         return new ThreadPoolAwareRunnableScheduledFutureDelegate<>(this, task);

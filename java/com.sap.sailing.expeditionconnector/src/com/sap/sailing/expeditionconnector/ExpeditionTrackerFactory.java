@@ -211,7 +211,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     private void addOrReplaceDeviceConfigurationNoPersistence(ExpeditionDeviceConfiguration deviceConfiguration) {
         if (deviceConfiguration.getExpeditionBoatId() != null &&
                 devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
-                !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
+                !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).getDeviceUuid().equals(deviceConfiguration.getDeviceUuid())) {
             throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+
                             devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()) +
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
@@ -226,12 +226,12 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
         }
     }
 
-    public void removeDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        deviceConfigurations.remove(deviceConfiguration.getDeviceUuid());
-        if (deviceConfiguration.getExpeditionBoatId() != null) {
+    public void removeDeviceConfiguration(UUID deviceConfigurationId) {
+        final ExpeditionDeviceConfiguration deviceConfiguration = deviceConfigurations.remove(deviceConfigurationId);
+        if (deviceConfiguration != null && deviceConfiguration.getExpeditionBoatId() != null) {
             devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
         }
-        mongoObjectFactory.removeExpeditionDeviceConfiguration(deviceConfiguration);
+        mongoObjectFactory.removeExpeditionDeviceConfiguration(deviceConfigurationId);
     }
 
     @Override

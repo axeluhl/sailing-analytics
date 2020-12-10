@@ -7,8 +7,8 @@ import javax.ws.rs.core.Application;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.security.SecurityService;
 import com.sun.jersey.spi.container.servlet.ServletContainer;

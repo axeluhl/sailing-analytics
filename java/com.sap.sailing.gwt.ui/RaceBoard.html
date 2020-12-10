@@ -2,37 +2,43 @@
 
 <html>
   <head>
-	<!--[if lt IE 9]>
-	   <meta http-equiv="REFRESH" content="0; url=http://www.sapsailing.com/browser-info.html">
-	<![endif]-->
+    <!--[if lt IE 9]>
+       <meta http-equiv="REFRESH" content="0; url=http://www.sapsailing.com/browser-info.html">
+    <![endif]-->
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>SAP Sailing Analytics Race Board</title>
+    <title>${SAP}Sailing Analytics Race Board</title>
     <meta content='width = device-width, initial-scale = 1.0, user-scalable = yes' name='viewport'>
     <meta content='yes' name='apple-mobile-web-app-capable'>
     <meta content='black' name='apple-mobile-web-app-status-bar-style'>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SAP Sailing" />
+    <meta property="og:description" content="Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action
+        &#8226; Provide the media with information and insights to deliver a greater informed commentary" />
+    <meta property="og:image" content="http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg" />
     <!-- <link href='iphone-splash-screen.png' rel='apple-touch-startup-image'> -->
-    <link href='images/sap-sailing-app-icon.png' rel='apple-touch-icon'>
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap.ico" />
-	<!--<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic' rel='stylesheet' type='text/css'>-->
-	<!--  <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700,300,300italic' rel='stylesheet' type='text/css'>-->
-	
-	<link rel="stylesheet" type="text/css" href="/sailing-reset-2.0.cache.css">
-	<link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
-	<link rel="stylesheet" type="text/css" href="RaceBoard.css">
-	
-	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
+    <!--<link href='http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic' rel='stylesheet' type='text/css'>-->
+    <!--  <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:700,300,300italic' rel='stylesheet' type='text/css'>-->
 
-    <link href="js/video-js/video-js.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/sailing-reset-2.0.cache.css">
+    <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
+    <link rel="stylesheet" type="text/css" href="RaceBoard.css">
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <link  href="js/video-js/video-js.css" rel="stylesheet">
     <link href="js/video-js/video-js-sapsailing.css" rel="stylesheet">
-    <script src="js/video-js/video.min.js"></script>
-    <link rel="stylesheet" type="text/css"
-     href="js/videojs-panorama.min.css" />
+    <script src="js/video-js/video.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/videojs-panorama.min.css"/>
     <script src="js/videojs-panorama.v5.min.js"></script>
-    <script src="js/Vimeo.js"></script>
+    <script src="js/videojs-vimeo.js"></script>
     <script>
-        videojs.options.techOrder = [ 'vimeo', 'html5' ];
+         videojs.options.techOrder = [ 'vimeo', 'html5' ];
     </script>
-
+    <script>
+       document.clientConfigurationContext = {
+            debrandingActive: ${debrandingActive}
+       };
+    </script>
     <script type="text/javascript" language="javascript" src="com.sap.sailing.gwt.ui.RaceBoard/com.sap.sailing.gwt.ui.RaceBoard.nocache.js"></script>
 
   </head>

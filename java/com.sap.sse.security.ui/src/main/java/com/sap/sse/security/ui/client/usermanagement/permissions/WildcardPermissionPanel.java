@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.client.usermanagement.permissions;
 
+import java.util.function.Function;
+
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -15,6 +17,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -49,10 +52,11 @@ public class WildcardPermissionPanel extends HorizontalPanel
 
     public WildcardPermissionPanel(final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final CellTableWithCheckboxResources tableResources,
-            final MultiSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers) {
-
+            final MultiSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers,
+            Function<SuggestOracle, SuggestBox> suggestBoxConstructor) {
         // create multi to single selection adapter
         final SingleSelectionModel<UserDTO> multiToSingleSelectionModelAdapter = new SingleSelectionModel<>();
+        this.ensureDebugId(this.getClass().getSimpleName());
         userSelectionModel.addSelectionChangeHandler(event -> {
             multiToSingleSelectionModelAdapter.clear();
             if (userSelectionModel.getSelectedSet().size() != 1) {
@@ -67,7 +71,6 @@ public class WildcardPermissionPanel extends HorizontalPanel
             }
         });
         this.userSelectionModel = multiToSingleSelectionModelAdapter;
-
         // create suggest for permission
         final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
         for (HasPermissions permission : userService.getAllKnownPermissions()) {
@@ -75,25 +78,22 @@ public class WildcardPermissionPanel extends HorizontalPanel
                 oracle.add(permission.getStringPermission(action));
             }
         }
-        suggestPermission = new SuggestBox(oracle);
+        suggestPermission = suggestBoxConstructor.apply(oracle);
+        suggestPermission.ensureDebugId("suggestPermission");
         roleAndPermissionResources.css().ensureInjected();
         suggestPermission.addStyleName(roleAndPermissionResources.css().enterPermissionSuggest());
         suggestPermission.getElement().setPropertyString("placeholder", stringMessages.enterPermissionName());
         this.initPlaceholder(suggestPermission, stringMessages.enterPermissionName());
-
         // create permission input panel + add controls
         final HorizontalPanel permissionInputPanel = new HorizontalPanel();
-
         permissionInputPanel.add(suggestPermission);
-
         final Button addPermissionButton = new Button(stringMessages.add(), (ClickHandler) event -> {
             WildcardPermission selectedPermission = new WildcardPermission(suggestPermission.getText());
             if (selectedPermission != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addPermissionForUser(selectedUser.getName(),
+                    userService.getUserManagementWriteService().addPermissionForUser(selectedUser.getName(),
                             selectedPermission, new AsyncCallback<SuccessInfo>() {
-
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Window.alert(caught.getMessage());
@@ -112,12 +112,12 @@ public class WildcardPermissionPanel extends HorizontalPanel
             }
             suggestPermission.setText("");
         });
+        addPermissionButton.ensureDebugId("addPermissionButton");
         final Command addPermissionButtonUpdater = () -> addPermissionButton
                 .setEnabled(!suggestPermission.getValue().isEmpty());
         suggestPermission.addKeyUpHandler(event -> addPermissionButtonUpdater.execute());
         suggestPermission.addSelectionHandler(event -> addPermissionButtonUpdater.execute());
         permissionInputPanel.add(addPermissionButton);
-
         // create permission table
         wildcardPermissionWithSecurityDTOTableWrapper = new WildcardPermissionWithSecurityDTOTableWrapper(userService,
                 stringMessages, errorReporter, /* enablePager */ true, tableResources, this.userSelectionModel,
@@ -126,18 +126,14 @@ public class WildcardPermissionPanel extends HorizontalPanel
         final LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO> userFilterbox = wildcardPermissionWithSecurityDTOTableWrapper
                 .getFilterField();
         userFilterbox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-
         // add elements to permission panel + add caption
         final VerticalPanel permissionPanel = new VerticalPanel();
         permissionPanel.add(permissionInputPanel);
         permissionPanel.add(userFilterbox);
         permissionPanel.add(scrollPanel);
-
         final CaptionPanel captionPanel = new CaptionPanel(stringMessages.permissions());
         captionPanel.add(permissionPanel);
-
         this.setVisible(false);
-
         add(captionPanel);
     }
 

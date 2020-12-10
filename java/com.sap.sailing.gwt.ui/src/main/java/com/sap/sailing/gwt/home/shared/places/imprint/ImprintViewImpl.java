@@ -16,18 +16,18 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.ComponentData;
+import com.sap.sailing.gwt.home.shared.places.imprint.data.DisclaimerData;
 import com.sap.sailing.gwt.home.shared.places.imprint.data.LicenseData;
 
 public class ImprintViewImpl extends Composite implements ImprintView {
-    private static final String GOOGLE_LEGAL = "Google Maps Service (\"GM Service\"). If the Cloud Service accesses the GM Service through a Google Maps API, Customer's use of the GM Service is subject to Google's Terms of Service, which are set forth at http://www.google.com/intl/en/policies/terms/. If Customer does not  accept  the Google  Terms  of  Service,  including,  but  not  limited  to,  all  limitations  and  restrictions therein, Customer may not use the GM Service in the Cloud Service. Use of the GM Service in or through the Cloud Service will constitute Customer's acceptance of Google's Terms of  Service.  Customer's  usage  of  the GM  Service  in  or  through the Cloud Service  can  be  terminated  by  SAP  without  reason  at  any  time  and SAP will not be required  to  provide  an  equivalent service via another provider.";
 
-    private static SponsoringPageViewUiBinder uiBinder = GWT.create(SponsoringPageViewUiBinder.class);
+    private static ImprintViewImplUiBinder uiBinder = GWT.create(ImprintViewImplUiBinder.class);
 
-    interface SponsoringPageViewUiBinder extends UiBinder<Widget, ImprintViewImpl> {
+    interface ImprintViewImplUiBinder extends UiBinder<Widget, ImprintViewImpl> {
     }
 
     private Presenter currentPresenter;
@@ -37,15 +37,13 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     @UiField
     Element ownerUi;
     @UiField
-    Element nameUi;
-    @UiField
     AnchorElement homepageUi;
     @UiField
     DivElement acknowledgmentUi;
     @UiField
     DivElement licenseTextUi;
     @UiField 
-    Label googleLegal;
+    FlowPanel disclaimers;
 
     public ImprintViewImpl() {
         super();
@@ -78,15 +76,23 @@ public class ImprintViewImpl extends Composite implements ImprintView {
                 }
           }
         });
-        
-        googleLegal.setText(GOOGLE_LEGAL);
     }
 
     @Override
     public void registerPresenter(Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
     }
-
+    
+    @Override
+    public void addDisclaimers(final DisclaimerData[] disclaimers) {
+        if(disclaimers!= null) {
+            for(DisclaimerData disclaimer : disclaimers) {
+                DisclaimerItem disclaimerItem = new DisclaimerItem();
+                disclaimerItem.setDisclaimer(disclaimer);
+                this.disclaimers.add(disclaimerItem);
+            }
+        }
+    }
 
     @Override
     public void showComponents(final ComponentData[] components) {
@@ -95,7 +101,6 @@ public class ImprintViewImpl extends Composite implements ImprintView {
             componentListUi.setVisible(false);
             componentListUi.setAcceptableValues(new ArrayList<ComponentData>());
             ownerUi.setInnerText("");
-            nameUi.setInnerText("--");
             homepageUi.getStyle().setVisibility(Style.Visibility.HIDDEN);
             acknowledgmentUi.getStyle().setVisibility(Style.Visibility.HIDDEN);
             licenseTextUi.getStyle().setVisibility(Style.Visibility.HIDDEN);
@@ -104,7 +109,6 @@ public class ImprintViewImpl extends Composite implements ImprintView {
             componentListUi.setAcceptableValues(Arrays.asList(components));
             componentListUi.setVisible(true);
             ownerUi.setInnerText("--");
-            nameUi.setInnerText("");
             homepageUi.getStyle().setVisibility(Style.Visibility.VISIBLE);
             acknowledgmentUi.getStyle().setVisibility(Style.Visibility.VISIBLE);
             licenseTextUi.getStyle().setVisibility(Style.Visibility.VISIBLE);
@@ -114,7 +118,6 @@ public class ImprintViewImpl extends Composite implements ImprintView {
 
     @Override
     public void showComponents(ComponentData component, LicenseData license) {
-        nameUi.setInnerText(component.getName() + ", v." + component.getVersion());
         ownerUi.setInnerText(component.getOwner());
         homepageUi.setHref(component.getHomepage());
         homepageUi.setInnerText(component.getHomepage());
@@ -130,7 +133,6 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     @Override
     public void resetComponent() {
         ownerUi.setInnerText("--");
-        nameUi.setInnerText("");
         homepageUi.setInnerText("");
         acknowledgmentUi.setInnerText("");
         licenseTextUi.setInnerText("");

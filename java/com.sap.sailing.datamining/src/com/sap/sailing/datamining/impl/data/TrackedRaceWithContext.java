@@ -7,8 +7,12 @@ import java.util.stream.StreamSupport;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -59,10 +63,26 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     
     @Override
     public CourseArea getCourseArea() {
-        if(getRegatta()!=null) {
-            return getRegatta().getDefaultCourseArea();
+        final CourseArea result;
+        if (getRegatta() != null) {
+            final Fleet fleetOfTrackedRace = raceColumn.getFleetOfTrackedRace(trackedRace);
+            if (fleetOfTrackedRace != null) {
+                final RaceLog raceLog = getRegatta().getRacelog(raceColumn.getName(), fleetOfTrackedRace.getName());
+                if (raceLog != null) {
+                    final ReadonlyRaceState raceState = ReadonlyRaceStateImpl
+                            .getOrCreate(getTrackedRace().getRaceLogResolver(), raceLog);
+                    final DomainFactory baseDomainFactory = getLeaderboardContext().getLeaderboardGroupContext().getBaseDomainFactory();
+                    result = baseDomainFactory.getExistingCourseAreaById(raceState.getCourseAreaId());
+                } else {
+                    result = null; // no race log
+                }
+            } else {
+                result = null; // tracked race not found in race column
+            }
+        } else {
+            result = null; // no regatta, therefore no race log
         }
-        return null;
+        return result;
     }
     
     @Override

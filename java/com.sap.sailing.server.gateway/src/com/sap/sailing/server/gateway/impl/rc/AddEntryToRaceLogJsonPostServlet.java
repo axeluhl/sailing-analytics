@@ -2,13 +2,13 @@ package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -157,18 +157,18 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
             Iterable<RaceLogEvent> eventsToSendBackToClient) throws IOException {
         JsonSerializer<RaceLogEvent> serializer = RaceLogEventSerializer.create(new CompetitorJsonSerializer(),
                 new DeviceIdentifierJsonSerializer(deviceJsonServiceFinder));
-        ServletOutputStream outputStream = response.getOutputStream();
+        final Writer writer = response.getWriter();
         boolean first = true;
-        outputStream.write('[');
+        writer.write('[');
         for (RaceLogEvent eventToSendBackToClient : eventsToSendBackToClient) {
             if (first) {
                 first = false;
             } else {
-                outputStream.write(',');
+                writer.write(',');
             }
-            outputStream.write(serializer.serialize(eventToSendBackToClient).toJSONString().getBytes());
+            serializer.serialize(eventToSendBackToClient).writeJSONString(writer);
         }
-        outputStream.write(']');
+        writer.write(']');
     }
 
 }

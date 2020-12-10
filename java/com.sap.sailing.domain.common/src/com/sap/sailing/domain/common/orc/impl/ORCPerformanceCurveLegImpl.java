@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.orc.impl;
 
+import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sse.common.Bearing;
@@ -30,6 +31,11 @@ public class ORCPerformanceCurveLegImpl implements ORCPerformanceCurveLeg {
 
     @Override
     public Bearing getTwa() {
+        return twa;
+    }
+
+    @Override
+    public Bearing getTwa(AverageWindOnLegCache cache) {
         return twa;
     }
 

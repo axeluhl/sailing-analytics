@@ -33,11 +33,7 @@ public class RaceLogORCImpliedWindSourceEventDeserializer extends BaseRaceLogEve
             throws JsonDeserializationException {
         final ImpliedWindSource impliedWindSource = new ImpliedWindSourceDeserializer().deserialize((JSONObject) object.get(RaceLogORCImpliedWindSourceEventSerializer.ORC_IMPLIED_WIND_SOURCE));
         final RaceLogEvent result;
-        if (impliedWindSource == null) {
-            result = null;
-        } else {
-            result = new RaceLogORCImpliedWindSourceEventImpl(createdAt, timePoint, author, id, passId, impliedWindSource);
-        }
+        result = new RaceLogORCImpliedWindSourceEventImpl(createdAt, timePoint, author, id, passId, impliedWindSource);
         return result;
     }
 

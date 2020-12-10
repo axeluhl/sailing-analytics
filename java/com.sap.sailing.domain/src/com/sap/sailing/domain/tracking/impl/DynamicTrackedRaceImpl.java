@@ -803,7 +803,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final Map<Competitor, CompetitorResult> result = new HashMap<>();
         CompetitorResults results = null; 
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            results = new ConfirmedFinishPositioningListFinder(raceLog).analyze();
+            results = new ConfirmedFinishPositioningListFinder(raceLog).analyze().getCompetitorResults();
             if (results != null) {
                 for (CompetitorResult cr : results) {
                     result.put(getRace().getCompetitorById(cr.getCompetitorId()), cr);

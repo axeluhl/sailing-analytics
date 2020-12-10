@@ -53,3 +53,4 @@ Require-Bundle: com.sap.sailing.domain,
 Bundle-ClassPath: .
 Web-ContextPath: /sharedsailingserver
 Automatic-Module-Name: com.sap.sailing.shared.server.gateway
+Export-Package: com.sap.sailing.shared.server.gateway.jaxrs

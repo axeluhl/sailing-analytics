@@ -87,7 +87,7 @@ public class WindResource extends AbstractSailingServerResource {
             }
             answer.add(answerForRace);
         }
-        return Response.ok(answer.toJSONString()).build();
+        return Response.ok(streamingOutput(answer)).build();
     }
     
     private JSONObject serialize(RegattaAndRaceIdentifier raceIdentifier) {

@@ -57,6 +57,10 @@ public class BoatDTO extends NamedSecuredObjectDTO implements WithID, Serializab
         return boatClass;
     }
     
+    public void setBoatClass(BoatClassDTO boatClass) {
+        this.boatClass = boatClass;
+    }
+    
     public String getDisplayName() {
         final StringBuilder sb = new StringBuilder();
         final boolean hasSailId = sailId != null && !sailId.isEmpty();

@@ -93,7 +93,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     }
                 }, /* trackedRegattaRegistry */ null, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class),
                 /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                new DefaultRaceTrackingHandler(), ReceiverType.RACECOURSE);
+                new DefaultRaceTrackingHandler(), /* raceAndCompetitorStatusWithRaceLogReconciler */ null, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         for (final Receiver receiver : typeControllers) {
             addReceiverToStopDuringTearDown(receiver);

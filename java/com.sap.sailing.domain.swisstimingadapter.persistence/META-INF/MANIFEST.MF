@@ -14,7 +14,8 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sse,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
- com.sap.sse.security.common
+ com.sap.sse.security.common,
+ com.sap.sse.replication.interfaces
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.mongodb.test"
 Import-Package: com.sap.sse.security,

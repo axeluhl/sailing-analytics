@@ -1,0 +1,140 @@
+kind: Shoot
+apiVersion: core.gardener.cloud/v1beta1
+metadata:
+  name: kcmcvq5ku0
+  namespace: garden-sailing-1
+  selfLink: >-
+    /apis/core.gardener.cloud/v1beta1/namespaces/garden-sailing-1/shoots/kcmcvq5ku0
+  uid: b35b155a-c8c1-4227-9291-1c59c818cf6a
+  resourceVersion: '1682887255'
+  generation: 68
+  creationTimestamp: '2020-04-27T10:16:55Z'
+  labels:
+    shoot.garden.sapcloud.io/status: healthy
+    shoot.gardener.cloud/status: healthy
+  annotations:
+    dashboard.garden.sapcloud.io/no-hibernation-schedule: 'true'
+    garden.sapcloud.io/createdBy: alessandro.stoltenberg@sap.com
+    gardener.cloud/created-by: alessandro.stoltenberg@sap.com
+  finalizers:
+    - gardener
+spec:
+  addons:
+    kubernetesDashboard:
+      enabled: false
+      authenticationMode: token
+    nginxIngress:
+      enabled: false
+      externalTrafficPolicy: Cluster
+  cloudProfileName: aws
+  dns:
+    domain: kcmcvq5ku0.sailing-1.shoot.canary.k8s-hana.ondemand.com
+  hibernation:
+    enabled: false
+  kubernetes:
+    allowPrivilegedContainers: true
+    kubeAPIServer:
+      enableBasicAuthentication: false
+    kubeControllerManager:
+      nodeCIDRMaskSize: 24
+    kubeProxy:
+      mode: IPTables
+    version: 1.18.3
+  networking:
+    type: calico
+    pods: 100.96.0.0/11
+    nodes: 10.250.0.0/16
+    services: 100.64.0.0/13
+  maintenance:
+    autoUpdate:
+      kubernetesVersion: true
+      machineImageVersion: true
+    timeWindow:
+      begin: 020000+0000
+      end: 030000+0000
+  provider:
+    type: aws
+    controlPlaneConfig:
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: ControlPlaneConfig
+    infrastructureConfig:
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: InfrastructureConfig
+      networks:
+        vpc:
+          cidr: 10.250.0.0/16
+        zones:
+          - name: eu-west-3a
+            workers: 10.250.0.0/19
+            public: 10.250.32.0/20
+            internal: 10.250.48.0/20
+    workers:
+      - name: generic-worker
+        machine:
+          type: m5.xlarge
+          image:
+            name: ubuntu
+            version: 18.4.20200228
+        maximum: 3
+        minimum: 2
+        maxSurge: 1
+        maxUnavailable: 0
+        volume:
+          type: gp2
+          size: 20Gi
+        zones:
+          - eu-west-3a
+  purpose: evaluation
+  region: eu-west-3
+  secretBindingName: aws-gardener-secret
+  seedName: aws-eu3
+status:
+  conditions:
+    - type: APIServerAvailable
+      status: 'True'
+      lastTransitionTime: '2020-04-27T10:20:57Z'
+      lastUpdateTime: '2020-05-28T08:43:44Z'
+      reason: HealthzRequestSucceeded
+      message: >-
+        API server /healthz endpoint responded with success status code.
+        [response_time:82ms]
+    - type: ControlPlaneHealthy
+      status: 'True'
+      lastTransitionTime: '2020-05-28T08:06:19Z'
+      lastUpdateTime: '2020-05-28T08:43:44Z'
+      reason: ControlPlaneRunning
+      message: All control plane components are healthy.
+    - type: EveryNodeReady
+      status: 'True'
+      lastTransitionTime: '2020-05-20T15:48:40Z'
+      lastUpdateTime: '2020-05-28T08:43:44Z'
+      reason: EveryNodeReady
+      message: Every node registered to the cluster is ready.
+    - type: SystemComponentsHealthy
+      status: 'True'
+      lastTransitionTime: '2020-05-28T08:07:20Z'
+      lastUpdateTime: '2020-05-28T08:43:44Z'
+      reason: SystemComponentsRunning
+      message: All system components are healthy.
+  constraints:
+    - type: HibernationPossible
+      status: 'True'
+      lastTransitionTime: '2020-04-27T10:20:57Z'
+      lastUpdateTime: '2020-05-28T08:43:44Z'
+      reason: NoProblematicWebhooks
+      message: Shoot can be hibernated.
+  gardener:
+    id: 301dbd3461455b951c14a07676b767ffa0d47262ac8e6e4d8b4fd6e814734332
+    name: gardenlet-777b8cfd4-s4cdk
+    version: v1.5.0
+  hibernated: false
+  lastOperation:
+    description: Shoot cluster state has been successfully reconciled.
+    lastUpdateTime: '2020-05-28T08:04:26Z'
+    progress: 100
+    state: Succeeded
+    type: Reconcile
+  observedGeneration: 68
+  seedName: aws-eu3
+  technicalID: shoot--sailing-1--kcmcvq5ku0
+  uid: b35b155a-c8c1-4227-9291-1c59c818cf6a

@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sse.common.Util;
 
 public class PairingListTemplateDTO implements Serializable {
     
@@ -15,7 +19,7 @@ public class PairingListTemplateDTO implements Serializable {
     private int[][] pairingListTemplate;
     private double quality;
     private double boatAssignmentQuality;
-    private Iterable<String> selectedFlightNames;
+    private List<String> selectedFlightNames;
     
     public PairingListTemplateDTO() { }
     
@@ -50,7 +54,8 @@ public class PairingListTemplateDTO implements Serializable {
         this.boatAssignmentQuality = boatAssigmentQuality;
         this.quality = quality;
         this.pairingListTemplate = pairingListTemplate;
-        this.selectedFlightNames = selectedFlightNames;
+        this.selectedFlightNames = new ArrayList<>();
+        Util.addAll(selectedFlightNames, this.selectedFlightNames);
     }
     
     public void setFlightCount(int flightCount) {
@@ -69,7 +74,7 @@ public class PairingListTemplateDTO implements Serializable {
         this.boatChangeFactor = tolerance;
     }
     
-    public void setSelectedFlightNames(Iterable<String> selectedFlightNames) {
+    public void setSelectedFlightNames(List<String> selectedFlightNames) {
         this.selectedFlightNames = selectedFlightNames;
     }
     
@@ -109,7 +114,7 @@ public class PairingListTemplateDTO implements Serializable {
         return boatChangeFactor;
     }
     
-    public Iterable<String> getSelectedFlightNames() {
+    public List<String> getSelectedFlightNames() {
         return selectedFlightNames;
     }
     

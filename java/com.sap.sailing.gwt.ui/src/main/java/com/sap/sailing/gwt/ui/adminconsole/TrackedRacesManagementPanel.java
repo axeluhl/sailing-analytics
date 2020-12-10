@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -33,9 +33,9 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Grid raceDataGrid;
     private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+    public TrackedRacesManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+        super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
                 stringMessages);
         this.userService = userService;
         this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
@@ -44,7 +44,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                 new SetStartTimeReceivedDialog(stringMessages, new DialogCallback<Date>() {
                     @Override
                     public void ok(Date newStartTimeReceived) {
-                        sailingService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
+                        sailingServiceWrite.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 TrackedRacesManagementPanel.this.errorReporter.reportError(stringMessages.errorSettingStartTime(caught.getMessage()));

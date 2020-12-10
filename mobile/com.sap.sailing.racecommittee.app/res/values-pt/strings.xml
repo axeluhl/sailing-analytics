@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -9,7 +6,7 @@
     
     
     <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
-    <string name="urlpart_google_geocoder_sensor">"?sensor=true"</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
     <string name="running_on_course">"(no percurso %s)"</string>
     <string name="course_design_number_waypoints">"O percurso tem %d waypoints"</string>
     
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 minutos"</string>
     <string name="race_start_in_2_minutes">"2 minutos"</string>
     <string name="race_start_in_1_minute">"1 minuto"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Definir hora"</string>
     <string name="race_reset_course">"Reinicializar percurso"</string>
     <string name="no_course_active">"Nenhum percurso ativo"</string>
@@ -385,7 +380,6 @@
     <string name="finishing_started">"Primeiro a chegar às %1$s"</string>
     <string name="finishing_started_since">"(%s)"</string>
     <string name="finishing_done">"Para baixo agora"</string>
-
     <string name="finished_recording">"Gravando"</string>
     <string name="finished_replay">"Reproduzir voz"</string>
     <string name="finished_list">"Concluir lista"</string>
@@ -566,4 +560,7 @@
 
     <string name="competitor_merge_error_message">"Este competidor foi modificado a partir de outro dispositivo e você modificou os mesmos dados. Certifique-se de que estes dados estão corretos agora."</string>
 
+    <string name="finishing_revoke">"Revogar"</string>
+    <string name="error_revoke_finished">"Impossível revogar hora de chegada"</string>
+    <string name="error_revoke_finishing">"Impossível revogar hora de conclusão"</string>
 </resources>

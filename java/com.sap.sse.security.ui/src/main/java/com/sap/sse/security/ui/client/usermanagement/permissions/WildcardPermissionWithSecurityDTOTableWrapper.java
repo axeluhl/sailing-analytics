@@ -68,21 +68,17 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 }, tableResources);
         this.userSelectionModel = userSelectionModel;
         this.userSelectionModel.addSelectionChangeHandler(e -> refreshPermissionList());
-
         final ListHandler<WildcardPermissionWithSecurityDTO> userColumnListHandler = getColumnSortHandler();
-
         // users table
         final TextColumn<WildcardPermissionWithSecurityDTO> userGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<WildcardPermissionWithSecurityDTO>(
                 dto -> dto.toString(), userColumnListHandler);
-
         final AccessControlledActionsColumn<WildcardPermissionWithSecurityDTO, PermissionAndRoleImagesBarCell> userActionColumn = create(
                 new PermissionAndRoleImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_DELETE, DELETE, selectedPermission -> {
             UserDTO selectedObject = userSelectionModel.getSelectedObject();
             if (selectedObject != null) {
-                userService.getUserManagementService().removePermissionFromUser(selectedObject.getName(),
+                userService.getUserManagementWriteService().removePermissionFromUser(selectedObject.getName(),
                         selectedPermission, new AsyncCallback<SuccessInfo>() {
-
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.couldNotRemovePermissionFromUser(selectedObject.getName(),
@@ -103,19 +99,15 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 Window.alert(stringMessages.pleaseSelect());
             }
         });
-
         final HasPermissions type = SecuredSecurityTypes.PERMISSION_ASSOCIATION;
-
         final EditOwnershipDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, permission -> refreshPermissionList(),
+                .create(userService.getUserManagementWriteService(), type, permission -> refreshPermissionList(),
                         stringMessages);
-
         final EditACLDialog.DialogConfig<WildcardPermissionWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 permission -> configACL.openDialog(permission));
-
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO>(
                 new Label(stringMessages.filterPermission()), new ArrayList<WildcardPermissionWithSecurityDTO>(),
@@ -123,7 +115,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
             @Override
             public Iterable<String> getSearchableStrings(WildcardPermissionWithSecurityDTO t) {
                 List<String> string = new ArrayList<String>();
-                string.add(t.getName());
+                string.add(t.toString());
                 return string;
             }
 
@@ -135,10 +127,9 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         filterField
                 .setUpdatePermissionFilterForCheckbox(permission -> userService.hasPermission(permission, DefaultActions.UPDATE));
-
         mainPanel.insert(filterField, 0);
-
         // setup table
+        table.ensureDebugId("WildcardPermissionWithSecurityDTOTable");
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(userGroupWithSecurityDTONameColumn, stringMessages.permission());
         table.addColumn(userActionColumn, stringMessages.actions());

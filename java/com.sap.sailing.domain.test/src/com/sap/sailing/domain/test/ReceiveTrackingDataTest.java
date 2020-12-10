@@ -91,7 +91,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                         },
                         /* trackedRegattaRegistry */null, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        new DefaultRaceTrackingHandler())) {
+                        new DefaultRaceTrackingHandler(), /* raceAndCompetitorStatusWithRaceLogReconciler */ null)) {
             receiver.subscribe();
             getRaceSubscriber().start();
             addReceiverToStopDuringTearDown(receiver);
@@ -105,7 +105,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             }
                         }, /* trackedRegattaRegistry */null, mock(RaceLogAndTrackedRaceResolver.class), mock(LeaderboardGroupResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        new DefaultRaceTrackingHandler()));
+                        new DefaultRaceTrackingHandler(), /* raceAndCompetitorStatusWithRaceLogReconciler */ null));
     }
 
     @Test

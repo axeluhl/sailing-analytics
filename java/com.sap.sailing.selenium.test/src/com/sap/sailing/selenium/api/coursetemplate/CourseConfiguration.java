@@ -70,7 +70,7 @@ public class CourseConfiguration extends JsonWrapper {
     public MarkConfiguration getMarkConfigurationByEffectiveName(String name) {
         MarkConfiguration result = null;
         for (MarkConfiguration markConfiguration : getMarkConfigurations()) {
-            MarkAppearance effectiveProperties = markConfiguration.getEffectiveProperties();
+            FreestyleProperties effectiveProperties = markConfiguration.getEffectiveProperties();
             if (effectiveProperties != null && name.equals(effectiveProperties.getName())) {
                 result = markConfiguration;
                 break;

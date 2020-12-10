@@ -53,6 +53,11 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
     public static final String ORC_CERTIFICATE_R150_PREDICTION = "ORC_CERTIFICATE_R150_PREDICTION";
     public static final String ORC_CERTIFICATE_TRUE_WIND_SPEEDS_IN_KNOTS = "trueWindSpeedsInKnots";
     public static final String ORC_CERTIFICATE_TRUE_WIND_ANGLES_IN_TRUE_DEGREES = "trueWindAnglesInTrueDegrees";
+    
+    /**
+     * The separator character in TWS and TWA string constants by which we replace the decimal point
+     */
+    private static final char DECIMAL_POINT_REPLACEMENT_IN_LITERALS = 'P';
 
     @Override
     public JSONObject serialize(ORCCertificate certificate) {
@@ -65,7 +70,7 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         result.put(ORC_CERTIFICATE_BOATCLASS, certificate.getBoatClassName());
         result.put(ORC_CERTIFICATE_GPH, certificate.getGPHInSecondsToTheMile());
         result.put(ORC_CERTIFICATE_CDL, certificate.getCDL());
-        result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll().getMeters());
+        result.put(ORC_CERTIFICATE_LENGTH, certificate.getLengthOverAll()==null?null:certificate.getLengthOverAll().getMeters());
         result.put(ORC_CERTIFICATE_ISSUE_DATE,
                 certificate.getIssueDate() == null ? null : certificate.getIssueDate().asMillis());
         JSONObject beatAngles = new JSONObject();
@@ -171,9 +176,9 @@ public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertifica
         } else if (bearing.equals(ORCCertificate.ALLOWANCES_TRUE_WIND_ANGLES[7])) {
             result = ORC_CERTIFICATE_R150_PREDICTION;
         } else {
-            String angleDegress = String.valueOf(bearing.getDegrees());
-            angleDegress = angleDegress.replace(".", "P");
-            result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, String.valueOf(angleDegress));
+            String angleDegress = String.valueOf(bearing.getDegrees()).replaceFirst("\\.0+", "").
+                    replace('.', DECIMAL_POINT_REPLACEMENT_IN_LITERALS); // replace trailing post-decimal-point zeroes
+            result = MessageFormat.format(ORC_CERTIFICATE_R_PERDICTION, angleDegress);
         }
         return result;
     }

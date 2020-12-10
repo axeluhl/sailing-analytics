@@ -1,10 +1,14 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -13,10 +17,16 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracConfigurationImpl;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
+import com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
+import com.tractrac.model.lib.api.event.CreateModelException;
+import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 /**
  * Handles mapping TracTrac connectivity parameters from and to a map with {@link String} keys. The
@@ -30,6 +40,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
+    private static final String USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG = "useOfficialEventsToUpdateRaceLog";
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
     private static final String TRAC_TRAC_PASSWORD = "tracTracPassword";
     private static final String STORED_URI = "storedURI";
@@ -45,12 +56,18 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
+    private final MongoObjectFactory tractracMongoObjectFactory;
+    private final SecurityService securityService;
 
-    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
+    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            DomainFactory domainFactory, MongoObjectFactory tractracMongoObjectFactory,
+            SecurityService securityService) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.domainFactory = domainFactory;
+        this.tractracMongoObjectFactory = tractracMongoObjectFactory;
+        this.securityService = securityService;
     }
 
     @Override
@@ -70,6 +87,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(TRAC_TRAC_PASSWORD, ttParams.getTracTracPassword());
         result.put(TRAC_TRAC_USERNAME, ttParams.getTracTracUsername().toString());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, ttParams.isUseInternalMarkPassingAlgorithm());
+        result.put(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG, ttParams.isUseOfficialEventsToUpdateRaceLog());
         addWindTrackingParameters(ttParams, result);
         return result;
     }
@@ -92,7 +110,8 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
                 isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true,
-                /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
+                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : (Boolean) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG));
     }
 
     @Override
@@ -103,5 +122,33 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(TypeBasedServiceFinder.TYPE, params.getTypeIdentifier());
         result.put(PARAM_URL, TracTracRaceTrackerImpl.getParamURLStrippedOfRandomParam(new URL(ttParams.getParamURL().toString())).toString());
         return result;
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters resolve(RaceTrackingConnectivityParameters params) throws Exception {
+        assert params instanceof RaceTrackingConnectivityParametersImpl;
+        final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
+        RaceTrackingConnectivityParametersImpl result = new RaceTrackingConnectivityParametersImpl(
+                ttParams.getParamURL(), ttParams.getLiveURI(), ttParams.getStoredURI(),
+                ttParams.getCourseDesignUpdateURI(), ttParams.getStartOfTracking(), ttParams.getEndOfTracking(),
+                ttParams.getDelayToLiveInMillis(), ttParams.getOffsetToStartTimeOfSimulatedRace(),
+                ttParams.isUseInternalMarkPassingAlgorithm(), raceLogStore, regattaLogStore, domainFactory,
+                ttParams.getTracTracUsername(), ttParams.getTracTracPassword(), ttParams.getRaceStatus(),
+                ttParams.getRaceVisibility(), ttParams.isTrackWind(),
+                ttParams.isCorrectWindDirectionByMagneticDeclination(), ttParams.isPreferReplayIfAvailable(),
+                ttParams.getTimeoutInMillis(), ttParams.isUseOfficialEventsToUpdateRaceLog());
+        updatePersistentTracTracConfiguration(result);
+        return result;
+    }
+
+    private void updatePersistentTracTracConfiguration(RaceTrackingConnectivityParametersImpl params)
+            throws MalformedURLException, IOException, ParseException, CreateModelException, URISyntaxException, TimeOutException {
+        final String jsonURL = params.getTractracRace().getParameterSet().getParameter("eventJSON");
+        final String creatorName = SessionUtils.getPrincipal().toString();
+        final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, params.getTractracRace().getEvent().getName(), jsonURL,
+                /* live URI */ null, /* stored URI */ null, // we mainly want to enable the user to list the event's races again in case they are removed; live/stored stuff comes from the tracking params
+                params.getCourseDesignUpdateURI()==null?null:params.getCourseDesignUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
+        tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
+        securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());
     }
 }

@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
@@ -22,15 +22,15 @@ import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl.MarkRoleCreationRequestImpl;
-import com.sap.sailing.domain.sharedsailingdata.SharedSailingData;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
+import com.sap.sailing.shared.server.SharedSailingData;
 
 public class CourseConfigurationJsonDeserializer implements JsonDeserializer<CourseConfiguration<MarkConfigurationRequestAnnotation>> {
 
     private final SharedSailingData sharedSailingData;
-    private final CommonMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
+    private final FreestyleMarkPropertiesJsonDeserializer commonMarkPropertiesJsonDeserializer;
     private final JsonDeserializer<RepeatablePart> repeatablePartJsonDeserializer;
     private final Regatta regatta;
     private final PositioningJsonDeserializer positioningJsonDeserializer;
@@ -38,7 +38,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
     public CourseConfigurationJsonDeserializer(final SharedSailingData sharedSailingData,
             DeviceIdentifierJsonDeserializer deviceIdentifierDeserializer, final Regatta regatta) {
         this.sharedSailingData = sharedSailingData;
-        commonMarkPropertiesJsonDeserializer = new CommonMarkPropertiesJsonDeserializer();
+        commonMarkPropertiesJsonDeserializer = new FreestyleMarkPropertiesJsonDeserializer();
         repeatablePartJsonDeserializer = new RepeatablePartJsonDeserializer();
         positioningJsonDeserializer = new PositioningJsonDeserializer(deviceIdentifierDeserializer);
         this.regatta = regatta;
@@ -76,7 +76,7 @@ public class CourseConfigurationJsonDeserializer implements JsonDeserializer<Cou
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_MARK_ID);
                 final JSONObject freestylePropertiesObject = (JSONObject) markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_FREESTYLE_PROPERTIES);
-                final CommonMarkProperties optionalFreestyleProperties = freestylePropertiesObject == null ? null
+                final FreestyleMarkProperties optionalFreestyleProperties = freestylePropertiesObject == null ? null
                         : commonMarkPropertiesJsonDeserializer.deserialize(freestylePropertiesObject);
                 final Object positioningObject = markConfigurationJSON
                         .get(CourseConfigurationJsonSerializer.FIELD_MARK_CONFIGURATION_POSITIONING);

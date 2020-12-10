@@ -11,7 +11,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -32,26 +32,22 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private final CaptionPanel eventsPanel;
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     
-    public EventManagementPanel(final SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
+    public EventManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final HandleTabSelectable handleTabSelectable) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         eventsPanel = new CaptionPanel(stringMessages.events());
         mainPanel.add(eventsPanel);
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
-
-        eventListComposite = new EventListComposite(sailingService, userService, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
+        eventListComposite = new EventListComposite(sailingServiceWrite, userService, errorReporter, regattaRefresher, this, handleTabSelectable, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
-        
-        eventDetailsComposite = new EventDetailsComposite(sailingService, errorReporter, stringMessages);
+        eventDetailsComposite = new EventDetailsComposite(sailingServiceWrite, errorReporter, stringMessages);
         eventDetailsComposite.ensureDebugId("EventDetailsComposite");
         eventDetailsComposite.setVisible(false);
         mainPanel.add(eventDetailsComposite);
-        
         refreshableEventSelectionModel = eventListComposite.getRefreshableMultiSelectionModel();
         refreshableEventSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override

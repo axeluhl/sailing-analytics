@@ -45,6 +45,13 @@ public interface OperationWithResult<S, R> extends Operation<S>, Serializable {
     default boolean isRequiresExplicitTransitiveReplication() {
         return true;
     }
+    
+    /**
+     * @return the class to use for keeping statistics; this allows wrapper classes to report the actual inner class
+     */
+    default Class<?> getClassForLogging() {
+        return getClass();
+    }
 
     /**
      * Ignores the actual result of {@link #internalApplyTo(Object)} and returns <code>toState</code> which

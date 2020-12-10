@@ -1,12 +1,15 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
+import com.sap.sse.common.Util;
 
 public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<FlexibleLeaderboard> {
     private static final Logger logger = Logger.getLogger(CreateFlexibleLeaderboard.class.getName());
@@ -14,21 +17,31 @@ public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<Flex
     private final int[] discardThresholds;
     private final ScoringScheme scoringScheme;
     private final String leaderboardDisplayName;
-    private final Serializable courseAreaId;
+    private final List<Serializable> courseAreaIds;
 
-    public CreateFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId) {
+    /**
+     * @param courseAreaIds
+     *            if {@code null}, an empty set of course areas will be used instead; you don't need to worry about
+     *            the serializability as a local, serializable copy with all the elements in the iterable will
+     *            be produced here.
+     */
+    public CreateFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds,
+            ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds) {
         super(leaderboardName);
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.discardThresholds = discardThresholds;
         this.scoringScheme = scoringScheme;
-        this.courseAreaId = courseAreaId;
+        this.courseAreaIds = new ArrayList<>();
+        if (courseAreaIds != null) {
+            Util.addAll(courseAreaIds, this.courseAreaIds);
+        }
     }
 
     @Override
     public FlexibleLeaderboard internalApplyTo(RacingEventService toState) {
         FlexibleLeaderboard result = null;
         if (toState.getLeaderboardByName(getLeaderboardName()) == null) {
-            result = toState.addFlexibleLeaderboard(getLeaderboardName(), leaderboardDisplayName, discardThresholds, scoringScheme, courseAreaId);
+            result = toState.addFlexibleLeaderboard(getLeaderboardName(), leaderboardDisplayName, discardThresholds, scoringScheme, courseAreaIds);
         } else {
             logger.warning("Cannot replicate creation of flexible leaderboard "+getLeaderboardName()+" because it already exists in the replica");
         }

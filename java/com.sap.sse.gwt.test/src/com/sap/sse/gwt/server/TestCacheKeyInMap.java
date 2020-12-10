@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.CacheableRPCResult;
-import com.sap.sse.gwt.server.CacheKey;
 
 /**
  * The {@link CacheKey} class uses weak references that may be cleared. This test is to ensure that handling

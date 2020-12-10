@@ -1,7 +1,7 @@
 package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -96,8 +96,20 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         return columnSortHandler;
     }
 
-    public CellTable<T> getTable() {
+    public FlushableCellTable<T> getTable() {
         return table;
+    }
+    
+    public void addColumn(Column<T, ?> column) {
+        table.addColumn(column);
+    }
+    
+    public void addColumn(Column<T, ?> column, String header) {
+        table.addColumn(column, header);
+    }
+
+    public void setEmptyTableWidget(Widget widget) {
+        table.setEmptyTableWidget(widget);
     }
     
     public S getSelectionModel() {

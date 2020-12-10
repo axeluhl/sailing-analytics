@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -26,9 +27,16 @@ public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDes
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        long startTime = (Long) object.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME);
+        final long startTime = (Long) object.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME);
+        final String courseAreaIdAsString = (String) object.get(RaceLogStartTimeEventSerializer.FIELD_COURSE_AREA_ID_AS_STRING);
+        final UUID courseAreaId;
+        if (courseAreaIdAsString != null) {
+            courseAreaId = UUID.fromString(courseAreaIdAsString);
+        } else {
+            courseAreaId = null;
+        }
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
-        return new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), event.getPassId(), new MillisecondsTimePoint(startTime), event.getNextStatus());
+        return new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), event.getPassId(), new MillisecondsTimePoint(startTime), event.getNextStatus(), courseAreaId);
     }
 
 }

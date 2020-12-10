@@ -1,13 +1,20 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
@@ -21,26 +28,60 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private final PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle;
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
-    private VerticalPanel verticalPanel;
+    private final SailingServiceAsync sailingService;
+    private final boolean isScreenBigEnough;
     private CheckBox timeStampCheckbox;
     private CheckBox windChartCheckBox;
     private CheckBox leaderBoardPanelCheckBox;
     private CheckBox competitorChartCheckBox;
     private CheckBox filterSetNameCheckBox;
     private CheckBox competitorSelectionCheckBox;
-    private Anchor linkAnchor;
+    private CheckBox tagsCheckBox;
+    private CheckBox maneuverCheckBox;
+    private CheckBox zoomCheckBox;
+    private TextBox linkField;
+    private Image qrCodeImage;
 
     public ShareLinkDialog(String path, RaceboardContextDefinition raceboardContextDefinition,
             PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
-            StringMessages stringMessages) {
-        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
+            SailingServiceAsync sailingService, boolean isSmallScreen, StringMessages stringMessages) {
+        super(stringMessages.shareTheLink(), "", stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+                /* callback */ null);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
-        this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, raceboardContextDefinition);
+        this.sailingService = sailingService;
+        RaceboardContextDefinition newRaceBoardContextDefinition = new RaceboardContextDefinition(
+                raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
+                raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
+        this.linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(path, newRaceBoardContextDefinition);
+        this.isScreenBigEnough = isSmallScreen;
         this.stringMessages = stringMessages;
     }
-    
+
+    void updateLink() {
+        String url = assembleLink();
+        linkField.setText(url);
+        if(isScreenBigEnough) {
+            createQrCode(url);
+        }
+    }
+
+    private void createQrCode(String url) {
+        sailingService.createRaceBoardLinkQrCode(url, new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Qrcode generation failed: ", caught);
+            }
+            @Override
+            public void onSuccess(String result) {
+                GWT.log("Qrcode generated for url: " + url);
+                qrCodeImage.setUrl("data:image/png;base64, " + result);
+            }
+        });
+    }
+
     private String assembleLink() {
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = patchSettings();
         String url = this.linkWithSettingsGenerator.createUrl(patchedSettings);
@@ -48,21 +89,32 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     }
 
     private PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchSettings() {
-        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle.createDefaultSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> patchedSettings = lifecycle
+                .createDefaultSettings();
         SettingsUtil.copyValues(perspectiveCompositeSettings, patchedSettings);
         final RaceBoardPerspectiveOwnSettings patchedPerspectiveOwnSettings = patchedSettings
                 .getPerspectiveOwnSettings();
         if (!timeStampCheckbox.getValue()) {
             patchedPerspectiveOwnSettings.resetInitialDurationAfterRaceStartInReplay();
         }
-        if (!competitorChartCheckBox.getValue()) {
+        if (isScreenBigEnough && !competitorChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowCompetitorsChart();
         }
-        if (!leaderBoardPanelCheckBox.getValue()) {
+        if (isScreenBigEnough && !leaderBoardPanelCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowLeaderBoard();
         }
-        if (!windChartCheckBox.getValue()) {
+        if (isScreenBigEnough && !windChartCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetShowWindChart();
+        }
+        if (isScreenBigEnough && !tagsCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowTags();
+        }
+        if (isScreenBigEnough && !maneuverCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetShowManeuver();
+        }
+        if (isScreenBigEnough && !zoomCheckBox.getValue()) {
+            patchedPerspectiveOwnSettings.resetZoomStart();
+            patchedPerspectiveOwnSettings.resetZoomEnd();
         }
         if (!filterSetNameCheckBox.getValue()) {
             patchedPerspectiveOwnSettings.resetActiveCompetitorsFilterSetName();
@@ -81,6 +133,12 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
 
     @Override
     protected Widget getAdditionalWidget() {
+        VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(30);
+        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        VerticalPanel settingsPanel = new VerticalPanel();
+        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        mainPanel.add(settingsPanel);
         timeStampCheckbox = createCheckbox(stringMessages.timeStampCheckBoxLabel());
         timeStampCheckbox.setValue(true);
         timeStampCheckbox.addClickHandler(new ClickHandler() {
@@ -89,30 +147,27 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
-        windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
-        windChartCheckBox.setValue(true);
-        windChartCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderBoardCheckBoxLabel());
-        leaderBoardPanelCheckBox.setValue(true);
-        leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
-        competitorChartCheckBox.setValue(true);
-        competitorChartCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
+        settingsPanel.add(timeStampCheckbox);
+        if (isScreenBigEnough) {
+            leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
+            leaderBoardPanelCheckBox.setValue(true);
+            leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(leaderBoardPanelCheckBox);
+            tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
+            tagsCheckBox.setValue(true);
+            tagsCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(tagsCheckBox);
+        }
         filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
         filterSetNameCheckBox.setValue(true);
         filterSetNameCheckBox.addClickHandler(new ClickHandler() {
@@ -121,6 +176,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
+        settingsPanel.add(filterSetNameCheckBox);
         competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
         competitorSelectionCheckBox.setValue(true);
         competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
@@ -129,19 +185,65 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
                 updateLink();
             }
         });
-        linkAnchor = new Anchor(stringMessages.linkSharingAnchorText(), assembleLink());
-        verticalPanel = new VerticalPanel();
-        verticalPanel.add(timeStampCheckbox);
-        verticalPanel.add(windChartCheckBox);
-        verticalPanel.add(leaderBoardPanelCheckBox);
-        verticalPanel.add(competitorChartCheckBox);
-        verticalPanel.add(filterSetNameCheckBox);
-        verticalPanel.add(competitorSelectionCheckBox);
-        verticalPanel.add(linkAnchor);
-        return verticalPanel;
-    }
-
-    private void updateLink() {
-        linkAnchor.setHref(assembleLink());
+        settingsPanel.add(competitorSelectionCheckBox);
+        if (isScreenBigEnough) {
+            windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
+            windChartCheckBox.setValue(true);
+            windChartCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(windChartCheckBox);
+            competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
+            competitorChartCheckBox.setValue(true);
+            competitorChartCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(competitorChartCheckBox);
+            maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
+            maneuverCheckBox.setValue(true);
+            maneuverCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(maneuverCheckBox);
+            zoomCheckBox = createCheckbox(stringMessages.zoomCheckBoxLabel());
+            zoomCheckBox.setValue(true);
+            zoomCheckBox.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    updateLink();
+                }
+            });
+            settingsPanel.add(zoomCheckBox);
+        }
+        linkField = createTextBox(assembleLink());
+        Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
+        copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                NavigatorUtil.copyToClipboard(linkField.getText());
+            }
+        });
+        VerticalPanel linkContentPanel = new VerticalPanel();
+        linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        linkContentPanel.add(linkField);
+        linkContentPanel.add(copyToClipBoardAnchor);
+        if(isScreenBigEnough) {
+            qrCodeImage = new Image();
+            qrCodeImage.ensureDebugId("regattaSharingQrCode");
+            qrCodeImage.setPixelSize(400, 400);
+            linkContentPanel.add(qrCodeImage);
+        }
+        mainPanel.add(linkContentPanel);
+        updateLink();
+        return mainPanel;
     }
 }
