@@ -198,8 +198,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private final ReplicatingCacheManager cacheManager;
     
-    private UserStore store;
-    private AccessControlStore accessControlStore;
+    private final UserStore store;
+    private final AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
     private boolean isNewServer;

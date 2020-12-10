@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.net.URL;
+import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
@@ -16,6 +17,7 @@ public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceIn
     public static final String FIELD_RACE_NAME = "raceName";
     public static final String FIELD_REGATTA_NAME = "regattaName";
     public static final String FIELD_START_OF_RACE = "startOfRaceAsMillis";
+    public static final String FIELD_EVENT_UUID = "eventId";
 
     @Override
     public JSONObject serialize(SimpleRaceInfo object) {
@@ -23,6 +25,9 @@ public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceIn
         result.put(FIELD_RACE_NAME, object.getIdentifier().getRaceName());
         result.put(FIELD_REGATTA_NAME, object.getIdentifier().getRegattaName());
         result.put(FIELD_START_OF_RACE, object.getStartOfRace().asMillis());
+        if (object.getEventID() != null) {
+            result.put(FIELD_EVENT_UUID, object.getEventID().toString());
+        }
         return result;
     }
 
@@ -30,6 +35,8 @@ public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceIn
         String raceName = object.get(FIELD_RACE_NAME).toString();
         String regattaName = object.get(FIELD_REGATTA_NAME).toString();
         TimePoint startOfRace = new MillisecondsTimePoint(((Number) object.get(FIELD_START_OF_RACE)).longValue());
-        return new SimpleRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), startOfRace, remoteUrl);
+        Object objEventId = object.get(FIELD_EVENT_UUID);
+        UUID eventId = (objEventId != null) ? UUID.fromString(objEventId.toString()) : null;
+        return new SimpleRaceInfo(new RegattaNameAndRaceName(regattaName, raceName), startOfRace, remoteUrl, eventId);
     }
 }
