@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +114,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
-        final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
+        final Collection<String> tags = tagsList == null ? Collections.emptyList() : tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
         // all mandatory data are loaded -> create builder 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
         if (fixedPosition != null) {

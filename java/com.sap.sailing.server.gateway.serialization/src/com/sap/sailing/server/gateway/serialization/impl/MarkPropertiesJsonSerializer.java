@@ -1,6 +1,5 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -22,8 +21,6 @@ public class MarkPropertiesJsonSerializer implements JsonSerializer<MarkProperti
     public JSONObject serialize(MarkProperties markProperties) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ID, markProperties.getId().toString());
-        final JSONArray tags = new JSONArray();
-        markProperties.getTags().forEach(tags::add);
         result.putAll(commonMarkPropertiesWithTagsJsonSerializer.serialize(markProperties));
         result.put(FIELD_POSITIONING, markProperties.getPositioningInformation() == null ? null :
             positioningJsonSerializer.serialize(markProperties.getPositioningInformation()));

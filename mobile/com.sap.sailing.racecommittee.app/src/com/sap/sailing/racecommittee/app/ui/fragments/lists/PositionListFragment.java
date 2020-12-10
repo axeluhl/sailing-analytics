@@ -48,9 +48,9 @@ public class PositionListFragment extends LoggableListFragment {
 
         values.clear();
         values.add(new LoginTypeItem(PRIORITY_OFFICER_VESSEL, getString(R.string.login_type_officer_on_vessel),
-                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
+                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL /* TODO bug 5456: use user name instead */, LoginType.OFFICER));
         values.add(new LoginTypeItem(PRIORITY_SHORE_CONTROL, getString(R.string.login_type_shore_control),
-                AppConstants.AUTHOR_TYPE_SHORE_CONTROL, LoginType.OFFICER));
+                AppConstants.AUTHOR_TYPE_SHORE_CONTROL /* TODO bug 5456: use user name instead */, LoginType.OFFICER));
         // TODO define configuration to activate super user
         // values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER,
         // LoginType.OFFICER));
