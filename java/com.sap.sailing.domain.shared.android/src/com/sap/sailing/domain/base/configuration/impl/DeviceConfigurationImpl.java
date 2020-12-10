@@ -24,6 +24,7 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
     private final UUID id;
     private UUID eventId;
     private UUID courseAreaId;
+    private Integer priority;
 
     public DeviceConfigurationImpl(RegattaConfiguration regattaConfiguration, UUID id, String name) {
         super(name);
@@ -58,6 +59,16 @@ public class DeviceConfigurationImpl extends NamedImpl implements DeviceConfigur
     @Override
     public void setCourseAreaId(UUID courseAreaId) {
         this.courseAreaId = courseAreaId;
+    }
+    
+    @Override
+    public Optional<Integer> getPriority() {
+        return Optional.ofNullable(priority);
+    }
+    
+    @Override
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 
     /**

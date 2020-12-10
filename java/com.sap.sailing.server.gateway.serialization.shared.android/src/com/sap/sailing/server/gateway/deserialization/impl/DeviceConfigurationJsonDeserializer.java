@@ -62,6 +62,9 @@ public class DeviceConfigurationJsonDeserializer implements JsonDeserializer<Dev
         if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_ID)) {
             configuration.setCourseAreaId(UUID.fromString((String) object.get(DeviceConfigurationJsonSerializer.FIELD_COURSE_AREA_ID)));
         }
+        if (object.containsKey(DeviceConfigurationJsonSerializer.FIELD_PRIORITY)) {
+            configuration.setPriority(((Number) object.get(DeviceConfigurationJsonSerializer.FIELD_PRIORITY)).intValue());
+        }
         return configuration;
     }
 

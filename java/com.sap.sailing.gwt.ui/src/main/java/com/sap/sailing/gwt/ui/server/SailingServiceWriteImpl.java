@@ -3548,6 +3548,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
         configuration.setEventId(dto.eventId);
         configuration.setCourseAreaId(dto.courseAreaId);
+        configuration.setPriority(dto.priority);
         return configuration;
     }
     

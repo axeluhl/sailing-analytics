@@ -16,6 +16,7 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
     public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
     public static final String FIELD_EVENT_ID = "eventId";
     public static final String FIELD_COURSE_AREA_ID = "courseAreaId";
+    public static final String FIELD_PRIORITY = "priority";
     
     public static DeviceConfigurationJsonSerializer create() {
         return new DeviceConfigurationJsonSerializer(RegattaConfigurationJsonSerializer.create());
@@ -51,6 +52,7 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
         }
         object.getEventId().ifPresent(eventId->result.put(FIELD_EVENT_ID, eventId.toString()));
         object.getCourseAreaId().ifPresent(courseAreaId->result.put(FIELD_COURSE_AREA_ID, courseAreaId.toString()));
+        object.getPriority().ifPresent(priority->result.put(FIELD_PRIORITY, priority));
         return result;
     }
 

@@ -70,4 +70,19 @@ public interface DeviceConfiguration extends WithID, WithQualifiedObjectIdentifi
      * @param courseAreaId if {@code null}, an {@link Optional#empty() empty} optional will result from {@link #getCourseAreaId()}.
      */
     void setCourseAreaId(UUID courseAreaId);
+    
+    /**
+     * During the Race Manager App's login process the user is asked to choose a "role" such as "Race Officer on the
+     * Water" or "Shore Control." These map to numeric priorities, with lesser numerical values taking higher
+     * precedence. "Race Officer on the Water" would map to the number 1, "Shore Control" to 2. An exceptional priority
+     * of 3 may be translated by the app into "Demo Mode" if that is permissible. The field may not be set, then
+     * returning an empty {@link Optional}, meaning that this device configuration leaves it up for the user to choose
+     * the priority during the login process.
+     */
+    Optional<Integer> getPriority();
+
+    /**
+     * Sets the {@link #getPriority() priority}.
+     */
+    void setPriority(Integer priority);
 }

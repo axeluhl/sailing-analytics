@@ -80,5 +80,8 @@ public class DeviceConfigurationDTO implements IsSerializable {
      */
     public UUID courseAreaId;
     
-    public int priority;
+    /**
+     * The priority with which the user logs on (shore control, on water, ...).
+     */
+    public Integer priority;
 }

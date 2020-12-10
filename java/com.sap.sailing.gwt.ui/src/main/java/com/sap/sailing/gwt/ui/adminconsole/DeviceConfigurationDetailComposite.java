@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -79,6 +80,12 @@ public class DeviceConfigurationDetailComposite extends Composite {
      */
     private final ListBox courseAreaListBox;
     
+    /**
+     * Names are the internationalized descriptions of the roles, values are their corresponding integer values as
+     * String, or the empty string for the first empty "placeholder" record.
+     */
+    private final ListBox priorityListBox;
+    
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private final UserService userService;
 
@@ -94,6 +101,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
+        priorityListBox = createPriorityListBox();
         courseAreaListBox = new ListBox();
         courseAreaListBox.addChangeHandler(e->markAsDirty(true));
         eventListBox = new ListBox();
@@ -135,6 +143,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
         setConfiguration(null);
         this.userService = userService;
         fillEventListBox();
+    }
+
+    private ListBox createPriorityListBox() {
+        final ListBox result = new ListBox();
+        result.addItem(stringMessages.selectARole(), "");
+        for (final AuthorPriority priority : AuthorPriority.values()) {
+            result.addItem(AuthorPriorityFormatter.getDescription(priority, stringMessages), Integer.toString(priority.getPriority()));
+        }
+        return result;
     }
 
     /**
@@ -253,7 +270,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(7, 2);
+        Grid grid = new Grid(8, 2);
         int row = 0;
         identifierBox = new TextBox();
         identifierBox.setWidth("80%");
@@ -278,6 +295,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         grid.setWidget(row++, 1, eventListBox);
         grid.setWidget(row, 0, new Label(stringMessages.courseArea()));
         grid.setWidget(row++, 1, courseAreaListBox);
+        grid.setWidget(row, 0, new Label(stringMessages.authorPriority()));
+        grid.setWidget(row++, 1, priorityListBox);
         fillEventAndCourseAreaListBoxes();
         contentPanel.add(grid);
     }
@@ -367,6 +386,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
         if (!courseAreaListBox.getSelectedValue().isEmpty()) {
             result.courseAreaId = UUID.fromString(courseAreaListBox.getSelectedValue());
+        }
+        if (!priorityListBox.getSelectedValue().isEmpty()) {
+            result.priority = Integer.decode(priorityListBox.getSelectedValue());
         }
         return result;
     }
