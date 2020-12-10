@@ -490,7 +490,8 @@ public class UserStoreImpl implements UserStore {
                     roleDefinitions.put(roleDefinition.getId(), roleDefinition);
                 }
                 LockUtil.executeWithWriteLock(preferenceLock, () -> {
-                    for (User user : newUserStore.getUsers()) {
+                    for (final User user : newUserStore.getUsers()) {
+                        user.setUserGroupProvider(this);
                         users.put(user.getName(), user);
                         addToUsersByEmail(user);
                         for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {

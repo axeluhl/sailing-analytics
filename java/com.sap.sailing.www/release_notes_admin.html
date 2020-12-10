@@ -23,6 +23,11 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">December 2020</h2>
+                    <ul class="bulletList">
+                        <li>On replicas, user group memberships did not always update correctly, due to a reference to a stale
+                            user store received with the initial load when replication starts up. This problem has been fixed now.</li>
+                    </ul>
                     <h2 class="articleSubheadline">November 2020</h2>
                     <ul class="bulletList">
                         <li>Anniversary calculation must now be turned on explicitly. Set system property <pre>-DAnniversaryRaceDeterminator.enabled=true</pre> at startup. Otherwise no anniversary is calculated.</li>
