@@ -8,7 +8,7 @@ import org.redisson.api.RMap;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
-import com.sap.sailing.ingestion.dto.AWSIngestionWrapper;
+import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
 import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
 
@@ -42,10 +42,10 @@ import com.sap.sailing.ingestion.dto.EndpointDTO;
  * </pre>
  *
  */
-public class EndpointRegistrationLambda implements RequestHandler<AWSIngestionWrapper<EndpointDTO>, String> {
+public class EndpointRegistrationLambda implements RequestHandler<AWSRequestWrapper<EndpointDTO>, String> {
     @SuppressWarnings("unchecked")
     @Override
-    public String handleRequest(AWSIngestionWrapper<EndpointDTO> awsWrappedInput, Context context) {
+    public String handleRequest(AWSRequestWrapper<EndpointDTO> awsWrappedInput, Context context) {
         final EndpointDTO input = awsWrappedInput.getBody();
         if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
             context.getLogger().log("Getting cache instance...");

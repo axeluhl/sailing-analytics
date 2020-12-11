@@ -8,7 +8,7 @@ public class AWSResponseWrapper<T> implements Serializable {
 
     private int statusCode;
     private String statusDescription;
-    private AWSResponseHeader headers;
+    private AWSResponseHttpHeader headers;
 
     /**
      * Returns a response that signals callers that the request has been successful
@@ -17,7 +17,7 @@ public class AWSResponseWrapper<T> implements Serializable {
         final AWSResponseWrapper<C> result = new AWSResponseWrapper<C>();
         result.setStatusCode(200);
         result.setStatusDescription("200 OK");
-        result.setHeaders(AWSResponseHeader.jsonResponse());
+        result.setHeaders(AWSResponseHttpHeader.jsonResponse());
         result.setBody(input);
         return result;
     }
@@ -48,11 +48,11 @@ public class AWSResponseWrapper<T> implements Serializable {
         this.statusDescription = statusDescription;
     }
 
-    public AWSResponseHeader getHeaders() {
+    public AWSResponseHttpHeader getHeaders() {
         return headers;
     }
 
-    public void setHeaders(AWSResponseHeader headers) {
+    public void setHeaders(AWSResponseHttpHeader headers) {
         this.headers = headers;
     }
 

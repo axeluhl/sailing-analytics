@@ -2,7 +2,7 @@ package com.sap.sailing.ingestion.dto;
 
 import java.io.Serializable;
 
-public class AWSIngestionWrapper<T> implements Serializable {
+public class AWSRequestWrapper<T> implements Serializable {
 
     private static final long serialVersionUID = 6640992447269375968L;
 

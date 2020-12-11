@@ -13,4 +13,7 @@ public interface Configuration {
     Region S3_REGION = Region.EU_WEST_2;
     String S3_BUCKET_NAME = "sapsailing-gps-fixes";
 
+    int TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT = 3;
+
+
 }

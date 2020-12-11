@@ -2,12 +2,12 @@ package com.sap.sailing.ingestion.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AWSResponseHeader {
+public class AWSResponseHttpHeader {
 
     private String contentType;
 
-    public static AWSResponseHeader jsonResponse() {
-        final AWSResponseHeader result = new AWSResponseHeader();
+    public static AWSResponseHttpHeader jsonResponse() {
+        final AWSResponseHttpHeader result = new AWSResponseHttpHeader();
         result.setContentType("application/json");
         return result;
     }

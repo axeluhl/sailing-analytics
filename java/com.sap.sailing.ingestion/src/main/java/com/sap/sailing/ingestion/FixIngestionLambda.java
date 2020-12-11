@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
 import com.sap.sailing.ingestion.dto.FixHeaderDTO;
+import com.sap.sailing.ingestion.dto.GpsFixPayloadDTO;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -27,9 +28,12 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.utils.IoUtils;
 
 /**
- * 
+ * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure. In most cases clients will want to
+ * submit GPS fixes thus adhering to the {@link GpsFixPayloadDTO} structure. This structure will be recognised by most
+ * sailing servers.
  */
 public class FixIngestionLambda implements RequestStreamHandler {
+
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) {
         try {
@@ -47,7 +51,9 @@ public class FixIngestionLambda implements RequestStreamHandler {
                     });
                 }
                 // wait for tasks to complete for <number of end-points>*<timeout for connection>+<ramp-up time>
-                dispatchToSubscribersTask.awaitQuiescence((endpointsToTrigger.size() * 3) + 2, TimeUnit.SECONDS);
+                dispatchToSubscribersTask.awaitQuiescence(
+                        (endpointsToTrigger.size() * Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT) + 2,
+                        TimeUnit.SECONDS);
             } else {
                 context.getLogger().log("No endpoint has been configured for UUID " + dto.getDeviceUuid());
             }
@@ -66,7 +72,8 @@ public class FixIngestionLambda implements RequestStreamHandler {
             connectionToEndpoint.setRequestProperty("Content-Type", "application/json; utf-8");
             connectionToEndpoint.setRequestProperty("Accept", "application/json");
             connectionToEndpoint.setDoOutput(true);
-            connectionToEndpoint.setConnectTimeout((int) Duration.ofSeconds(3).toMillis());
+            connectionToEndpoint.setConnectTimeout(
+                    (int) Duration.ofSeconds(Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT).toMillis());
             try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                 os.write(jsonAsBytes);
             }
