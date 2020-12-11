@@ -166,8 +166,11 @@ fi
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
 # Anniversary calculation:
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -DAnniversaryRaceDeterminator.enabled=true"
-ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
-
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500"
+# Use the following to obtain initial polar sheet data from the archive server, without live replication:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dpolardata.source.url=https://www.sapsailing.com"
+# Use the following to obtain initial models for wind estimation from maneuvers from the archive server, without live replication:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dwindestimation.source.url=https://www.sapsailing.com"
 
 # Custom event management URL: use -Dcom.sap.sailing.eventmanagement.url  to modify hardcoded default, e.g https://dev.sapsailing.com
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.eventmanagement.url=https://dev.sapsailing.com"
