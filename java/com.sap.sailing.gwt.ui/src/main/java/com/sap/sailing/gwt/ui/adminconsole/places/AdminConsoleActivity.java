@@ -168,50 +168,46 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
 
     @Override
     public void loadLeaderboards() {
-        if (leaderboardsDisplayers.isEmpty()) {
-            return;
-        }
-        if (leaderboards == null) {
-            reloadLeaderboards();
-        } else {
-            updateLeaderboardDisplayer();
+        if (!leaderboardsDisplayers.isEmpty()) {
+            if (leaderboards == null) {
+                reloadLeaderboards();
+            } else {
+                updateLeaderboardDisplayer();
+            }
         }
     }
     
     @Override
     public void loadLeaderboardGroups() {
-        if (leaderboardGroupsDisplayers.isEmpty()) {
-            return;
-        }
-        if (leaderboardGroups == null) {
-            reloadLeaderboardGroups();
-        } else {
-            updateLeaderboardGroupDisplayer();
+        if (!leaderboardGroupsDisplayers.isEmpty()) {
+            if (leaderboardGroups == null) {
+                reloadLeaderboardGroups();
+            } else {
+                updateLeaderboardGroupDisplayer();
+            }
         }
     }
 
 
     @Override
     public void loadRegattas() {
-        if (regattasDisplayers.isEmpty()) {
-            return;
-        }
-        if (regattas == null) {
-            reloadRegattas();
-        } else {
-            updateRegattaDisplayer();
+        if (!regattasDisplayers.isEmpty()) {
+            if (regattas == null) {
+                reloadRegattas();
+            } else {
+                updateRegattaDisplayer();
+            }
         }
     }
     
     @Override
     public void loadEvents() {
-        if (eventsDisplayers == null) {
-            return;
-        }
-        if (events == null) {
-            reloadEvents();
-        } else {
-            updateEventDisplayer();
+        if (!eventsDisplayers.isEmpty()) {
+            if (events == null) {
+                reloadEvents();
+            } else {
+                updateEventDisplayer();
+            }
         }
     }
 
