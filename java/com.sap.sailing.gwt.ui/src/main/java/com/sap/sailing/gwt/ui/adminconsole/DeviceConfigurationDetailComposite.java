@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.client.EventsProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -94,8 +95,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
+    public DeviceConfigurationDetailComposite(EventsProvider eventsProvider, SailingServiceWriteAsync sailingServiceWrite,
+            UserService userService, ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
         this.eventsById = new HashMap<>();
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
@@ -142,7 +143,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         initWidget(captionPanel);
         setConfiguration(null);
         this.userService = userService;
-        fillEventListBox();
+        fillEventListBox(eventsProvider);
     }
 
     private ListBox createPriorityListBox() {
@@ -158,24 +159,14 @@ public class DeviceConfigurationDetailComposite extends Composite {
      * Obtains those events the user can UPDATE and presents them in the {@link #eventListBox} such that the visible string is
      * the event's name and the 
      */
-    private void fillEventListBox() {
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                eventListBox.clear();
-                eventsById.clear();
-                eventListBox.addItem(stringMessages.selectSailingEvent(), "");
-                for (final EventDTO event : result) {
-                    eventsById.put(event.getId(), event);
-                    eventListBox.addItem(event.getName(), event.getId().toString());
-                }
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to fetch events for selection in Device Configuration: "+caught.getMessage());
-            }
-        });
+    private void fillEventListBox(EventsProvider eventsProvider) {
+        eventListBox.clear();
+        eventsById.clear();
+        eventListBox.addItem(stringMessages.selectSailingEvent(), "");
+        for (final EventDTO event : eventsProvider.getAllEvents()) {
+            eventsById.put(event.getId(), event);
+            eventListBox.addItem(event.getName(), event.getId().toString());
+        }
     }
 
     public void setConfiguration(final DeviceConfigurationWithSecurityDTO config) {
@@ -297,19 +288,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         grid.setWidget(row++, 1, courseAreaListBox);
         grid.setWidget(row, 0, new Label(stringMessages.authorPriority()));
         grid.setWidget(row++, 1, priorityListBox);
-        fillEventAndCourseAreaListBoxes();
         contentPanel.add(grid);
-    }
-
-    /**
-     * Based on the set of {@link EventDTO} objects available and the {@link #originalConfiguration}'s values for
-     * {@link DeviceConfigurationWithSecurityDTO#eventId} and {@link DeviceConfigurationWithSecurityDTO#courseAreaId}
-     * this method fills the {@link #eventListBox and {@link #courseAreaListBox} contents, matching and resolving
-     * the respective IDs if provided.
-     */
-    private void fillEventAndCourseAreaListBoxes() {
-        
-        // TODO continue here...
     }
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
