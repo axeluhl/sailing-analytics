@@ -2,6 +2,21 @@ package com.sap.sailing.ingestion.dto;
 
 import java.io.Serializable;
 
+/**
+ * Response that lambdas need to return in order to work with ALB and API Gateway
+ * 
+ * <pre>
+ * {
+ *   "statusCode": 200,
+ *   "statusDescription": "200 OK",
+ *   "isBase64Encoded": False,
+ *   "headers": {
+ *       "Content-Type": "text/html"
+ *   },
+ *   "body": Serialized type T
+ *}
+ * </pre>
+ */
 public class AWSResponseWrapper<T> implements Serializable {
 
     private static final long serialVersionUID = -3550784751905818148L;
