@@ -27,8 +27,8 @@ public class EventManagementPanelSupplier extends AdminConsolePanelSupplier<Even
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(presenter, stringMessages,
                 placeController);
         eventManagementPanel.ensureDebugId("EventManagement");
-        presenter.getLeaderboardGroupsDisplayers().add(eventManagementPanel);
-        presenter.setEventDisplayer(eventManagementPanel);
+        presenter.addLeaderboardGroupsDisplayer(eventManagementPanel);
+        presenter.addEventsDisplayer(eventManagementPanel);
         presenter.loadEvents();
         presenter.loadLeaderboardGroups();
         return eventManagementPanel;

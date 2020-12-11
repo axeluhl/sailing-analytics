@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 
 public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<LeaderboardConfigPanel> {
-
     private final StringMessages stringMessages;
     private final Presenter presenter;
     private final boolean showRaceDetails;
@@ -26,8 +25,8 @@ public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<Le
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(presenter, stringMessages,
                 showRaceDetails);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
-        presenter.getRegattasDisplayers().add(leaderboardConfigPanel);
-        presenter.getLeaderboardsDisplayers().add(leaderboardConfigPanel);
+        presenter.addRegattasDisplayer(leaderboardConfigPanel);
+        presenter.addLeaderboardsDisplayer(leaderboardConfigPanel);
         presenter.loadLeaderboards();
         presenter.loadRegattas();
         return leaderboardConfigPanel;

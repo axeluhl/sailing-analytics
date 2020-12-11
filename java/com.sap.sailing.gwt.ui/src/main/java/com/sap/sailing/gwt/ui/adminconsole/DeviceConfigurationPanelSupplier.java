@@ -20,8 +20,7 @@ public class DeviceConfigurationPanelSupplier extends AdminConsolePanelSupplier<
     @Override
     public DeviceConfigurationPanel init() {
         logger.info("Create DeviceConfigurationPanel");
-        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(presenter,
-                stringMessages);
+        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(presenter, stringMessages);
         deviceConfigurationUserPanel.ensureDebugId("deviceConfigurationUserPanel");
         return deviceConfigurationUserPanel;
     }

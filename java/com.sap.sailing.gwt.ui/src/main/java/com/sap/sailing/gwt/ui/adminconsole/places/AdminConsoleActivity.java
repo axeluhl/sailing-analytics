@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -12,7 +13,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -33,26 +34,17 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
-    
     private AdminConsoleClientFactory clientFactory;
-    
-    private final HashSet<RegattasDisplayer> regattasDisplayers;
-    private final HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
-    private final HashSet<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
-    
+    private final Set<RegattasDisplayer> regattasDisplayers;
+    private final Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
+    private final Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
+    private Set<EventsDisplayer> eventsDisplayers;
     private AdminConsoleView adminConsoleView;
-    
     private MediaServiceWriteAsync mediaServiceWrite;
     private SailingServiceWriteAsync sailingService;
-    
     private static AdminConsoleActivity instance;
-    
     private AbstractAdminConsolePlace defaultPlace;
-    
-    private EventDisplayer eventDisplayer;
-    
     private MediaTracksRefresher mediaTracksRefresher;
-    
     private List<StrippedLeaderboardDTOWithSecurity> leaderboards;
     private List<LeaderboardGroupDTO> leaderboardGroups;
     private List<RegattaDTO> regattas;
@@ -81,7 +73,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
@@ -136,20 +127,45 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
     
     @Override
-    public HashSet<RegattasDisplayer> getRegattasDisplayers() {
+    public Iterable<RegattasDisplayer> getRegattasDisplayers() {
         return regattasDisplayers;
     }
     
     @Override
-    public HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers() {
+    public Iterable<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers() {
         return leaderboardsDisplayers;
     }
     
     @Override
-    public HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers() {
+    public Iterable<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers() {
         return leaderboardGroupsDisplayers;
     }
     
+    @Override
+    public void addLeaderboardGroupsDisplayer(LeaderboardGroupsDisplayer leaderboardGroupsDisplayer) {
+        this.leaderboardGroupsDisplayers.add(leaderboardGroupsDisplayer);
+    }
+
+    @Override
+    public void addRegattasDisplayer(RegattasDisplayer regattasDisplayer) {
+        this.regattasDisplayers.add(regattasDisplayer);
+    }
+
+    @Override
+    public void addLeaderboardsDisplayer(
+            LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer) {
+        this.leaderboardsDisplayers.add(leaderboardsDisplayer);
+    }
+
+    @Override
+    public Iterable<EventsDisplayer> getEventsDisplayers() {
+        return eventsDisplayers;
+    }
+    
+    public void addEventsDisplayer(EventsDisplayer eventsDisplayer) {
+        this.eventsDisplayers.add(eventsDisplayer);
+    }
+
     @Override
     public void loadLeaderboards() {
         if (leaderboardsDisplayers.isEmpty()) {
@@ -189,7 +205,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     @Override
     public void loadEvents() {
-        if (eventDisplayer == null) {
+        if (eventsDisplayers == null) {
             return;
         }
         if (events == null) {
@@ -260,25 +276,27 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
 
     private void updateLeaderboardDisplayer() {
-        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
+        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : getLeaderboardsDisplayers()) {
             leaderboardsDisplayer.fillLeaderboards(new ArrayList<StrippedLeaderboardDTOWithSecurity>(leaderboards));
         }
     }
     
     private void updateRegattaDisplayer() {
-        for (RegattasDisplayer regattaDisplayer : regattasDisplayers) {
+        for (RegattasDisplayer regattaDisplayer : getRegattasDisplayers()) {
             regattaDisplayer.fillRegattas(new ArrayList<RegattaDTO>(regattas));
         }
     }
     
     private void updateLeaderboardGroupDisplayer() {
-        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
+        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : getLeaderboardGroupsDisplayers()) {
             leaderboardGroupsDisplayer.fillLeaderboardGroups(leaderboardGroups);
         }
     }
     
     private void updateEventDisplayer() {
-        eventDisplayer.fillEvents(events);
+        for (final EventsDisplayer eventsDisplayer : getEventsDisplayers()) {
+            eventsDisplayer.fillEvents(events);
+        }
     }
 
     @Override
@@ -353,10 +371,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
-    }
-
-    public void setEventDisplayer(EventDisplayer eventDisplayer) {
-        this.eventDisplayer = eventDisplayer;
     }
 
     @Override

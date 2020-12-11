@@ -53,8 +53,6 @@ import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
@@ -100,12 +98,11 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO> filterableMediaTracks;
     private List<MediaTrackWithSecurityDTO> allMediaTracks;
-    private final RegattaRefresher regattaRefresher;
+    private final Presenter presenter;
     private final MediaServiceWriteAsync mediaServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final UserService userService;
-    private Set<RegattasDisplayer> regattasDisplayers;
     private CellTable<MediaTrackWithSecurityDTO> mediaTracksTable;
     private ListDataProvider<MediaTrackWithSecurityDTO> mediaTrackListDataProvider = new ListDataProvider<>();
     private Date latestDate;
@@ -113,14 +110,13 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     public MediaPanel(Presenter presenter, StringMessages stringMessages) {
-        this.regattasDisplayers = presenter.getRegattasDisplayers();
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
-        this.regattaRefresher = presenter;
+        this.presenter = presenter;
         this.mediaServiceWrite = presenter.getMediaServiceWrite();
         this.stringMessages = stringMessages;
         this.errorReporter = presenter.getErrorReporter();
-        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
+        this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(presenter.getSailingService());
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MEDIA_TRACK);
         add(buttonAndFilterPanel);
@@ -608,9 +604,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaServiceWrite,
-                getDefaultStartTime(), stringMessages, sailingServiceWrite, userService, errorReporter, regattaRefresher,
-                regattasDisplayers, storageServiceAvailable, new DialogCallback<MediaTrack>() {
-
+                getDefaultStartTime(), stringMessages, sailingServiceWrite, userService, errorReporter, presenter,
+                storageServiceAvailable, new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
                         // no op
@@ -619,7 +614,6 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
                     @Override
                     public void ok(final MediaTrack mediaTrack) {
                         mediaServiceWrite.addMediaTrack(mediaTrack, new AsyncCallback<MediaTrackWithSecurityDTO>() {
-
                             @Override
                             public void onFailure(Throwable t) {
                                 errorReporter.reportError(t.toString());
@@ -632,7 +626,6 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
                             }
                         });
-
                     }
                 });
         dialog.show();
@@ -703,8 +696,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
         final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
         final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingServiceWrite, userService, mediaTrack,
                 errorReporter,
-                regattaRefresher, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
-
+                presenter, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
                     @Override
                     public void cancel() {
                     }
@@ -724,8 +716,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
                     }
                 });
-
-        regattasDisplayers.add(dialog);
+        presenter.addRegattasDisplayer(dialog);
         dialog.ensureDebugId("AssignedRacesDialog");
         dialog.show();
     }

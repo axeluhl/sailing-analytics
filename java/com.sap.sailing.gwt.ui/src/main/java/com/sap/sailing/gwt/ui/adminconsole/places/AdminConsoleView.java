@@ -1,12 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
-import java.util.HashSet;
-
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.EventsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -36,11 +34,17 @@ public interface AdminConsoleView extends IsWidget {
 
         ErrorReporter getErrorReporter();
 
-        HashSet<RegattasDisplayer> getRegattasDisplayers();
+        Iterable<RegattasDisplayer> getRegattasDisplayers();
 
-        HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers();
+        void addRegattasDisplayer(RegattasDisplayer regattasDisplayer);
 
-        HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers();
+        Iterable<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers();
+
+        void addLeaderboardsDisplayer(LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer);
+        
+        Iterable<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers();
+        
+        void addLeaderboardGroupsDisplayer(LeaderboardGroupsDisplayer leaderboardGroupsDisplayer);
 
         SailingServiceWriteAsync getSailingService();
 
@@ -50,12 +54,13 @@ public interface AdminConsoleView extends IsWidget {
 
         PlaceController getPlaceController();
         
-        void setEventDisplayer(EventDisplayer eventDisplayer);
+        Iterable<EventsDisplayer> getEventsDisplayers();
+        
+        void addEventsDisplayer(EventsDisplayer eventsDisplayer);
         
         void loadMediaTracks();
         
         void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher);
-
     }
 
 }

@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
+public class EventManagementPanel extends SimplePanel implements EventsDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;

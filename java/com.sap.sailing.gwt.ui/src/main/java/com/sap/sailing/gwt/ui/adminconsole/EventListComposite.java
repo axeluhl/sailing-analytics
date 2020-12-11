@@ -46,7 +46,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGro
 import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventsDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -88,7 +88,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * A composite showing the list of all sailing events  
  * @author Frank Mittag (C5163974)
  */
-public class EventListComposite extends Composite implements EventDisplayer, LeaderboardGroupsDisplayer {
+public class EventListComposite extends Composite implements EventsDisplayer, LeaderboardGroupsDisplayer {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
