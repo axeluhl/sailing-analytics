@@ -2404,4 +2404,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceOfficerOnVessel();
     String shoreControl();
     String demoMode();
+    String includeAccessTokenForYourAccount();
 }

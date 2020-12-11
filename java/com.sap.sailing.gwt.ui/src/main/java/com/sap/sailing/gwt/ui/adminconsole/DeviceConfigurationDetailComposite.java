@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,7 +52,6 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DeviceConfigurationDetailComposite extends Composite {
-
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected final SailingServiceWriteAsync sailingServiceWrite;
@@ -90,6 +90,8 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private final UserService userService;
 
+    private final EventsProvider eventsProvider;
+
     public static interface DeviceConfigurationFactory {
         void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd);
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
@@ -102,6 +104,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
+        this.eventsProvider = eventsProvider;
         priorityListBox = createPriorityListBox();
         courseAreaListBox = new ListBox();
         courseAreaListBox.addChangeHandler(e->markAsDirty(true));
@@ -143,7 +146,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         initWidget(captionPanel);
         setConfiguration(null);
         this.userService = userService;
-        fillEventListBox(eventsProvider);
+        fillEventListBox();
     }
 
     private ListBox createPriorityListBox() {
@@ -159,11 +162,20 @@ public class DeviceConfigurationDetailComposite extends Composite {
      * Obtains those events the user can UPDATE and presents them in the {@link #eventListBox} such that the visible string is
      * the event's name and the 
      */
-    private void fillEventListBox(EventsProvider eventsProvider) {
+    private void fillEventListBox() {
         eventListBox.clear();
         eventsById.clear();
         eventListBox.addItem(stringMessages.selectSailingEvent(), "");
-        for (final EventDTO event : eventsProvider.getAllEvents()) {
+        final List<EventDTO> eventsSortedByName = new ArrayList<>();
+        Util.addAll(eventsProvider.getAllEvents(), eventsSortedByName);
+        Collections.sort(eventsSortedByName, (e1, e2)->{
+            int result = e1.getName().compareTo(e2.getName());
+            if (result == 0) {
+                result = e1.getId().compareTo(e2.getId());
+            }
+            return result;
+        });
+        for (final EventDTO event : eventsSortedByName) {
             eventsById.put(event.getId(), event);
             eventListBox.addItem(event.getName(), event.getId().toString());
         }
@@ -206,6 +218,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     private void setupUi(DeviceConfigurationWithSecurityDTO config) {
         clearUi();
+        fillEventListBox();
         this.originalConfiguration = config;
         this.currentRegattaConfiguration = config.regattaConfiguration;
         setupGeneral();
@@ -219,6 +232,20 @@ public class DeviceConfigurationDetailComposite extends Composite {
         courseNamesList.setEnabled(hasUpdatePermission);
         overwriteRegattaConfigurationBox.setEnabled(hasUpdatePermission);
         updateEventSelection(config.eventId);
+        updatePrioritySelection(config.priority);
+    }
+
+    private void updatePrioritySelection(Integer priority) {
+        if (priority == null) {
+            priorityListBox.setSelectedIndex(0);
+        } else {
+            for (int i=1; i<priorityListBox.getItemCount(); i++) {
+                if (new Integer(priorityListBox.getValue(i)).equals(priority)) {
+                    priorityListBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void setupRegattaConfiguration() {
@@ -438,7 +465,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void createAndShowDialogForAccessToken(String accessToken) {
-        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(), stringMessages, accessToken);
+        final DeviceConfigurationWithSecurityDTO config = getResult();
+        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(),
+                config.eventId, config.courseAreaId, config.priority, accessToken, stringMessages);
         dialog.show();
         dialog.center();
     }
