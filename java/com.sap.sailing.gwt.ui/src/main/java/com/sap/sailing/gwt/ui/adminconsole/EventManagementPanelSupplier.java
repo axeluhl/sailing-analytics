@@ -28,9 +28,9 @@ public class EventManagementPanelSupplier extends AdminConsolePanelSupplier<Even
                 placeController);
         eventManagementPanel.ensureDebugId("EventManagement");
         presenter.getLeaderboardGroupsDisplayer().add(eventManagementPanel);
-        presenter.setEventRefresher(eventManagementPanel);
-        eventManagementPanel.fillEvents();
-        presenter.fillLeaderboardGroups();
+        presenter.setEventDisplayer(eventManagementPanel);
+        presenter.loadEvents();
+        presenter.loadLeaderboardGroups();
         return eventManagementPanel;
     }
 

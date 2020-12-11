@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -34,7 +34,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
-    private final EventsRefresher eventsRefresher;
+    private final EventRefresher eventRefresher;
     private final RegattaRefresher regattaRefresher;
     private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final StringMessages stringMessages;
@@ -43,11 +43,11 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
+            EventRefresher eventRefresher, List<EventDTO> existingEvents) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+        this.eventRefresher = eventRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
@@ -145,8 +145,8 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     }
     
     private void fillEvents() {
-        if (eventsRefresher != null) {
-            eventsRefresher.fillEvents();
+        if (eventRefresher != null) {
+            eventRefresher.reloadEvents();
         }
     }
     

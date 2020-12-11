@@ -28,7 +28,7 @@ public class LeaderboardGroupConfigPanelSupplier extends AdminConsolePanelSuppli
         presenter.getLeaderboardsDisplayer().add(leaderboardGroupConfigPanel);
         presenter.loadRegattas();
         presenter.loadLeaderboards();
-        presenter.fillLeaderboardGroups();
+        presenter.loadLeaderboardGroups();
         return leaderboardGroupConfigPanel;
     }
 

@@ -5,7 +5,8 @@ import java.util.HashSet;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -31,7 +32,7 @@ public interface AdminConsoleView extends IsWidget {
     void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace);
     
     public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, EventsRefresher, MediaTracksRefresher {
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, EventRefresher, MediaTracksRefresher {
 
         ErrorReporter getErrorReporter();
 
@@ -49,7 +50,7 @@ public interface AdminConsoleView extends IsWidget {
 
         PlaceController getPlaceController();
         
-        void setEventRefresher(EventsRefresher eventRefresher);
+        void setEventDisplayer(EventDisplayer eventDisplayer);
         
         void loadMediaTracks();
         

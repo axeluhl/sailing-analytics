@@ -175,7 +175,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         this.permissionRestrictedComponent.add(createLeaderboardsGUI);
         splitPanel.add(createLeaderboardsGUI);
         //Load Data
-        leaderboardGroupsRefresher.fillLeaderboardGroups();
+        leaderboardGroupsRefresher.loadLeaderboardGroups();
         leaderboardsRefresher.loadLeaderboards();
     }
 
@@ -471,7 +471,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         createButton.ensureDebugId("CreateLeaderboardGroupButton");
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
                 leaderboardsRefresher.loadLeaderboards();
-                leaderboardGroupsRefresher.fillLeaderboardGroups();
+                leaderboardGroupsRefresher.loadLeaderboardGroups();
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
         AnchorCell anchorCell = new AnchorCell();
@@ -551,12 +551,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         });
         final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog.create(
                 userService.getUserManagementWriteService(), type,
-                group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
+                group -> leaderboardGroupsRefresher.loadLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 e -> config.openOwnershipDialog(e));
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type,
-                group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
+                group -> leaderboardGroupsRefresher.loadLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
@@ -570,7 +570,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    leaderboardGroupsRefresher.fillLeaderboardGroups();
+                                    leaderboardGroupsRefresher.reloadLeaderboardGroups();
                                 }
                             });
                 });
@@ -708,7 +708,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 refreshableGroupsSelectionModel.clear();
                                 refreshableGroupsSelectionModel.setSelected(newGroup, true);
-                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups);
                             }
                         }));
     }
@@ -756,7 +756,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                     }
                                 }
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups);
                                 groupsProvider.refresh();
                             }
                         }));
@@ -803,7 +803,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         public void onSuccess(Void result) {
                             for (LeaderboardGroupDTO group : groups) {
                                 removeGroupFromTable(group);
-                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups);
                             }
                         }
                     }));
@@ -823,7 +823,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     @Override
                     public void onSuccess(Void v) {
                         removeGroupFromTable(group);
-                        leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                        leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups);
                     }
                 }));
     }

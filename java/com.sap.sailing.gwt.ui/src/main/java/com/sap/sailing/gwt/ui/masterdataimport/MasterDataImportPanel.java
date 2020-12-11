@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
@@ -63,7 +63,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
-    private final EventsRefresher eventRefresher;
+    private final EventRefresher eventRefresher;
     private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private final MediaTracksRefresher mediaTracksRefresher;
@@ -234,10 +234,10 @@ public class MasterDataImportPanel extends VerticalPanel {
             regattaRefresher.loadRegattas();
         }
         if (eventsCreated > 0) {
-            eventRefresher.fillEvents();
+            eventRefresher.loadEvents();
         }
         if (leaderboardGroupsCreated > 0) {
-            leaderboardGroupsRefresher.fillLeaderboardGroups();
+            leaderboardGroupsRefresher.loadLeaderboardGroups();
         }
         if (leaderboardsCreated > 0) {
             leaderboardsRefresher.loadLeaderboards();

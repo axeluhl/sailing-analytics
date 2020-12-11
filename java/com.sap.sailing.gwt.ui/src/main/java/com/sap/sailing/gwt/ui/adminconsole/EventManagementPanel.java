@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +11,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -25,7 +26,7 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
+public class EventManagementPanel extends SimplePanel implements EventDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -40,7 +41,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
         eventListComposite = new EventListComposite(presenter.getSailingService(), presenter.getUserService(),
-                presenter.getErrorReporter(), presenter, this, presenter, placeController, stringMessages);
+                presenter.getErrorReporter(), presenter, presenter, presenter, placeController, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         eventDetailsComposite = new EventDetailsComposite(presenter.getSailingService(), presenter.getErrorReporter(), stringMessages);
@@ -70,8 +71,8 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     }
 
     @Override
-    public void fillEvents() {
-        eventListComposite.fillEvents();
+    public void fillEvents(List<EventDTO> events) {
+        eventListComposite.fillEvents(events);
     }
 
     @Override

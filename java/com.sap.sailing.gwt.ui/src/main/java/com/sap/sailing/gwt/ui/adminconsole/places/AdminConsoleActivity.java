@@ -12,7 +12,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
@@ -48,12 +49,14 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     
     private AbstractAdminConsolePlace defaultPlace;
     
-    private EventsRefresher eventRefresher;
+    private EventDisplayer eventDisplayer;
     
     private MediaTracksRefresher mediaTracksRefresher;
     
     private List<StrippedLeaderboardDTOWithSecurity> leaderboards;
+    private List<LeaderboardGroupDTO> leaderboardGroups;
     private List<RegattaDTO> regattas;
+    private List<EventDTO> events;
     
     public static boolean instantiated() {
         return instance != null;
@@ -158,6 +161,19 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             updateLeaderboardDisplayer();
         }
     }
+    
+    @Override
+    public void loadLeaderboardGroups() {
+        if (leaderboardGroupsDisplayers.isEmpty()) {
+            return;
+        }
+        if (leaderboardGroups == null) {
+            reloadLeaderboardGroups();
+        } else {
+            updateLeaderboardGroupDisplayer();
+        }
+    }
+
 
     @Override
     public void loadRegattas() {
@@ -168,6 +184,18 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             reloadRegattas();
         } else {
             updateRegattaDisplayer();
+        }
+    }
+    
+    @Override
+    public void loadEvents() {
+        if (eventDisplayer == null) {
+            return;
+        }
+        if (events == null) {
+            reloadEvents();
+        } else {
+            updateEventDisplayer();
         }
     }
 
@@ -205,10 +233,30 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                     }
                 }));
     }
+    
+    public void reloadEvents() {
+        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+            @Override
+            public void onSuccess(List<EventDTO> result) {
+                events = new ArrayList<EventDTO>(result);
+                updateEventDisplayer();
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                clientFactory.getErrorReporter().reportError("Remote Procedure Call getEvents() - Failure: " + caught.getMessage());
+            }
+        });
+    }
 
     @Override
     public void updateLeaderboards(List<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards) {
         leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(updatedLeaderboards);
+    }
+
+    @Override
+    public void updateLeaderboardGroups(List<LeaderboardGroupDTO> updatedLeaderboardGroups) {
+        leaderboardGroups = new ArrayList<LeaderboardGroupDTO>(updatedLeaderboardGroups);
     }
 
     private void updateLeaderboardDisplayer() {
@@ -222,33 +270,32 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             regattaDisplayer.fillRegattas(new ArrayList<RegattaDTO>(regattas));
         }
     }
-
-    @Override
-    public void fillLeaderboardGroups() {
-        sailingService.getLeaderboardGroups(false /*withGeoLocationData*/,
-                new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(
-                        new AsyncCallback<List<LeaderboardGroupDTO>>() {
-                            @Override
-                            public void onSuccess(List<LeaderboardGroupDTO> groups) {
-                                for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
-                                    leaderboardGroupsDisplayer.fillLeaderboardGroups(groups);
-                                }
-                            }
-                            @Override
-                            public void onFailure(Throwable t) {
-                                clientFactory.getErrorReporter().reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
-                            }
-                        }));
+    
+    private void updateLeaderboardGroupDisplayer() {
+        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
+            leaderboardGroupsDisplayer.fillLeaderboardGroups(leaderboardGroups);
+        }
+    }
+    
+    private void updateEventDisplayer() {
+        eventDisplayer.fillEvents(events);
     }
 
     @Override
-    public void updateLeaderboardGroups(Iterable<LeaderboardGroupDTO> updatedLeaderboardGroups,
-            LeaderboardGroupsDisplayer origin) {
-        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : leaderboardGroupsDisplayers) {
-            if (leaderboardGroupsDisplayer != origin) {
-                leaderboardGroupsDisplayer.fillLeaderboardGroups(updatedLeaderboardGroups);
-            }
-        }
+    public void reloadLeaderboardGroups() {
+        sailingService.getLeaderboardGroups(false /* withGeoLocationData */,
+                new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+                    @Override
+                    public void onSuccess(List<LeaderboardGroupDTO> result) {
+                        leaderboardGroups = new ArrayList<LeaderboardGroupDTO>(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        clientFactory.getErrorReporter()
+                                .reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
+                    }
+                }));
     }
     
     @Override
@@ -256,7 +303,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         displayer.setupLeaderboardGroups(params);
     }
 
- 
     protected void checkPublicServerNonPublicUserWarning() {
         sailingService.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
             @Override
@@ -309,15 +355,8 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         return clientFactory.getPlaceController();
     }
 
-    @Override
-    public void fillEvents() {
-        if (eventRefresher != null) {
-            eventRefresher.fillEvents();
-        }
-    }
-
-    public void setEventRefresher(EventsRefresher eventRefresher) {
-        this.eventRefresher = eventRefresher;
+    public void setEventDisplayer(EventDisplayer eventDisplayer) {
+        this.eventDisplayer = eventDisplayer;
     }
 
     @Override

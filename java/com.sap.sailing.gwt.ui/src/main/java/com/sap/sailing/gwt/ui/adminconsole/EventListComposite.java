@@ -46,7 +46,8 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGro
 import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -87,7 +88,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * A composite showing the list of all sailing events  
  * @author Frank Mittag (C5163974)
  */
-public class EventListComposite extends Composite implements EventsRefresher, LeaderboardGroupsDisplayer {
+public class EventListComposite extends Composite implements EventDisplayer, LeaderboardGroupsDisplayer {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
@@ -117,12 +118,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final RegattaRefresher regattaRefresher;
-    private final EventsRefresher eventsRefresher;
+    private final EventRefresher eventRefresher;
     private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final PlaceController placeController;
     
     public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            final ErrorReporter errorReporter, RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
+            final ErrorReporter errorReporter, RegattaRefresher regattaRefresher, EventRefresher eventRefresher,
             final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             final PlaceController placeController, final StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
@@ -130,7 +131,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+        this.eventRefresher = eventRefresher;
         this.leaderboardsRefresher = leaderboardsRefresher;
         this.placeController = placeController;
         this.availableLeaderboardGroups = Collections.emptyList();
@@ -166,7 +167,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final RefreshableMultiSelectionModel<EventDTO> selectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
-        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
+        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), eventRefresher::reloadEvents);
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
         create.ensureDebugId("CreateEventButton");
@@ -193,7 +194,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
-        fillEvents();
+        eventRefresher.loadEvents();
         initWidget(panel);
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
@@ -323,10 +324,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), EVENT,
-                event -> fillEvents(), stringMessages);
+                event -> eventRefresher.loadEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), EVENT, event -> fillEvents(), stringMessages);
+                userService.getUserManagementWriteService(), EVENT, event -> eventRefresher.loadEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
@@ -339,7 +340,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
                         @Override
                         public void onSuccess(Void result) {
-                            fillEvents();
+                            eventRefresher.reloadEvents();
                         }
                     });
                 });
@@ -447,7 +448,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 }
                 @Override
                 public void onSuccess(Void result) {
-                    fillEvents();
+                    eventRefresher.reloadEvents();
                 }
             });
         }
@@ -462,7 +463,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
             @Override
             public void onSuccess(Void result) {
-                fillEvents();
+                eventRefresher.reloadEvents();
             }
         });
     }
@@ -536,7 +537,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             List<EventDTO> existingEvents, EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, sailingServiceWrite, stringMessages,
                 new CreateRegattaCallback(userService, sailingServiceWrite, stringMessages, errorReporter, regattaRefresher,
-                        leaderboardsRefresher, eventsRefresher, existingEvents));
+                        leaderboardsRefresher, eventRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -609,72 +610,79 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
-        Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent, updatedEvent);
+        Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent,
+                updatedEvent);
         final List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
         final List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
         final List<UUID> updatedEventLeaderboardGroupIds = updatedEvent.getLeaderboardGroupIds();
         sailingServiceWrite.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.getDescription(),
-                updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
-                updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
-                updatedEvent.getOfficialWebsiteURL(),
-                updatedEvent.getBaseURL(),
-                updatedEvent.getSailorsInfoWebsiteURLs(), updatedEvent.getImages(),
-                updatedEvent.getVideos(), updatedEvent.getWindFinderReviewedSpotsCollectionIds(), new AsyncCallback<EventDTO>() {
-         @Override
-         public void onFailure(Throwable t) {
-        errorReporter.reportError("Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
-         }
-
-         @Override
-         public void onSuccess(EventDTO result) {
-        fillEvents();
-        final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
-        int i=0;
-        for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
-            namesOfCourseAreasToAdd[i++] = courseAreaToAdd.getName();
-        }
-        sailingServiceWrite.createCourseAreas(oldEvent.id, namesOfCourseAreasToAdd, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
-                        + ": " + t.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                final UUID[] idsOfCourseAreasToRemove = new UUID[courseAreasToRemove.size()];
-                int j=0;
-                for (CourseAreaDTO courseAreaToRemove : courseAreasToRemove) {
-                    idsOfCourseAreasToRemove[j++] = courseAreaToRemove.id;
-                }
-                sailingServiceWrite.removeCourseAreas(oldEvent.id, idsOfCourseAreasToRemove, new AsyncCallback<Void>() {
+                updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue, updatedEvent.isPublic,
+                updatedEventLeaderboardGroupIds, updatedEvent.getOfficialWebsiteURL(), updatedEvent.getBaseURL(),
+                updatedEvent.getSailorsInfoWebsiteURLs(), updatedEvent.getImages(), updatedEvent.getVideos(),
+                updatedEvent.getWindFinderReviewedSpotsCollectionIds(), new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
-                                + ": " + t.getMessage());
+                        errorReporter.reportError(
+                                "Error trying to update sailing event" + oldEvent.getName() + ": " + t.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(Void result) {
-                        fillEvents();
-                        if (!oldEvent.getName().equals(updatedEvent.getName())) {
-                            sailingServiceWrite.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void result) {
-                                }
-
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
-                                }
-                            });
+                    public void onSuccess(EventDTO result) {
+                        eventRefresher.loadEvents();
+                        final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
+                        int i = 0;
+                        for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
+                            namesOfCourseAreasToAdd[i++] = courseAreaToAdd.getName();
                         }
+                        sailingServiceWrite.createCourseAreas(oldEvent.id, namesOfCourseAreasToAdd,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError("Error trying to add course area to sailing event "
+                                                + oldEvent.getName() + ": " + t.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        final UUID[] idsOfCourseAreasToRemove = new UUID[courseAreasToRemove.size()];
+                                        int j = 0;
+                                        for (CourseAreaDTO courseAreaToRemove : courseAreasToRemove) {
+                                            idsOfCourseAreasToRemove[j++] = courseAreaToRemove.id;
+                                        }
+                                        sailingServiceWrite.removeCourseAreas(oldEvent.id, idsOfCourseAreasToRemove,
+                                                new AsyncCallback<Void>() {
+                                                    @Override
+                                                    public void onFailure(Throwable t) {
+                                                        errorReporter.reportError(
+                                                                "Error trying to remove course area from sailing event "
+                                                                        + oldEvent.getName() + ": " + t.getMessage());
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(Void result) {
+                                                        eventRefresher.reloadEvents();
+                                                        if (!oldEvent.getName().equals(updatedEvent.getName())) {
+                                                            sailingServiceWrite.renameEvent(oldEvent.id,
+                                                                    updatedEvent.getName(), new AsyncCallback<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void result) {
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFailure(Throwable t) {
+                                                                            errorReporter.reportError(
+                                                                                    "Error trying to rename sailing event "
+                                                                                            + oldEvent.getName() + ": "
+                                                                                            + t.getMessage());
+                                                                        }
+                                                                    });
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                });
                     }
                 });
-            }
-        });
-         }
-      });
     }
 
     private Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
@@ -701,7 +709,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
             @Override
             public void onSuccess(final EventDTO newEvent) {
-                fillEvents();
+                eventRefresher.reloadEvents();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
                     DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(
@@ -730,28 +738,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     @Override
-    public void fillEvents() {
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getEvents() - Failure: " + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<EventDTO> events) {
-                if (events.isEmpty()) {
-                    eventTable.setVisible(false);
-                    noEventsLabel.setVisible(true);
-                } else {
-                    eventTable.setVisible(true);
-                    noEventsLabel.setVisible(false);
-                }
-                allEvents.clear();
-                allEvents.addAll(events);
-                filterTextbox.updateAll(allEvents);
-                eventTable.redraw();
-            }
-        });
+    public void fillEvents(List<EventDTO> events) {
+        if (events.isEmpty()) {
+            eventTable.setVisible(false);
+            noEventsLabel.setVisible(true);
+        } else {
+            eventTable.setVisible(true);
+            noEventsLabel.setVisible(false);
+        }
+        allEvents.clear();
+        allEvents.addAll(events);
+        filterTextbox.updateAll(allEvents);
+        eventTable.redraw();
     }
 
     public List<EventDTO> getAllEvents() {

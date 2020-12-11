@@ -195,10 +195,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                if (getWidget() != null) {
-                    getWidget().fillEvents();
-                }
-                presenter.fillLeaderboardGroups();
+                presenter.loadEvents();
+                presenter.loadLeaderboardGroups();
             }
         }, stringMessages.events(), new EventsPlace((String) null /* no place token */), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
         
@@ -230,7 +228,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             @Override
             public void refreshAfterBecomingVisible() {
                 presenter.loadLeaderboards();
-                presenter.fillLeaderboardGroups();
+                presenter.loadLeaderboardGroups();
             }
         }, stringMessages.leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
 

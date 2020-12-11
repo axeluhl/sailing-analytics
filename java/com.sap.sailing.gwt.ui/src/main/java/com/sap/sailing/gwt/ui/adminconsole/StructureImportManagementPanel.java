@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -60,7 +60,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    private final EventsRefresher eventsRefresher;
+    private final EventRefresher eventRefresher;
     private final StructureImportListComposite regattaListComposite;
     private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
@@ -101,7 +101,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     public StructureImportManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
-        this.eventsRefresher = presenter;
+        this.eventRefresher = presenter;
         this.busyIndicator = new SimpleBusyIndicator();
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
@@ -452,7 +452,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
-        eventsRefresher.fillEvents();
+        eventRefresher.loadEvents();
         final List<RegattaDTO> regattaConfigurationsToCreate = new ArrayList<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
