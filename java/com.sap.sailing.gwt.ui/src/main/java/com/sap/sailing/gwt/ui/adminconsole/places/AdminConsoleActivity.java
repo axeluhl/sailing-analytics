@@ -141,12 +141,12 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     }
     
     @Override
-    public HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayer() {
+    public HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers() {
         return leaderboardsDisplayers;
     }
     
     @Override
-    public HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayer() {
+    public HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers() {
         return leaderboardGroupsDisplayers;
     }
     

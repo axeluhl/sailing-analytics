@@ -27,7 +27,7 @@ public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<Le
                 showRaceDetails);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         presenter.getRegattasDisplayers().add(leaderboardConfigPanel);
-        presenter.getLeaderboardsDisplayer().add(leaderboardConfigPanel);
+        presenter.getLeaderboardsDisplayers().add(leaderboardConfigPanel);
         presenter.loadLeaderboards();
         presenter.loadRegattas();
         return leaderboardConfigPanel;

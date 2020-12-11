@@ -184,12 +184,10 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
     
     private AdminConsolePanel<AbstractAdminConsolePlace> createAdminConsolePanel(final ServerInfoDTO serverInfo) {
-        
         adminConsolePanel = new AdminConsolePanel<>(userService,
                 serverInfo, stringMessages.releaseNotes(), "/release_notes_admin.html", null, errorReporter,
                 SecurityStylesheetResources.INSTANCE.css(), stringMessages, placeController);
         adminConsolePanel.addStyleName("adminConsolePanel");
-        
         /* EVENTS */
         final EventManagementPanelSupplier eventManagementPanelSupplier = new EventManagementPanelSupplier(stringMessages, presenter, placeController);
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {

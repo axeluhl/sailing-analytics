@@ -24,8 +24,8 @@ public class LeaderboardGroupConfigPanelSupplier extends AdminConsolePanelSuppli
                 stringMessages);
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         presenter.getRegattasDisplayers().add(leaderboardGroupConfigPanel);
-        presenter.getLeaderboardGroupsDisplayer().add(leaderboardGroupConfigPanel);
-        presenter.getLeaderboardsDisplayer().add(leaderboardGroupConfigPanel);
+        presenter.getLeaderboardGroupsDisplayers().add(leaderboardGroupConfigPanel);
+        presenter.getLeaderboardsDisplayers().add(leaderboardGroupConfigPanel);
         presenter.loadRegattas();
         presenter.loadLeaderboards();
         presenter.loadLeaderboardGroups();

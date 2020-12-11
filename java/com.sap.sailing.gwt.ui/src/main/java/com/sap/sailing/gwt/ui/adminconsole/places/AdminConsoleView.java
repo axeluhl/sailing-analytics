@@ -38,9 +38,9 @@ public interface AdminConsoleView extends IsWidget {
 
         HashSet<RegattasDisplayer> getRegattasDisplayers();
 
-        HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayer();
+        HashSet<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers();
 
-        HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayer();
+        HashSet<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers();
 
         SailingServiceWriteAsync getSailingService();
 
