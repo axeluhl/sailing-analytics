@@ -2,6 +2,8 @@ package com.sap.sailing.ingestion.dto;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
+
 /**
  * In most cases requests coming to a lambda will be serialized into JSON. That means that all fields a HTTP requets
  * normally has can be found inside the JSON. This implementation just provides the body and the method.
@@ -37,18 +39,23 @@ import java.io.Serializable;
  *}
  * </pre>
  */
-public class AWSRequestWrapper<T> implements Serializable {
+public class AWSRequestWrapper implements Serializable {
 
     private static final long serialVersionUID = 6640992447269375968L;
 
     private String httpMethod;
-    private T body;
+    private String body;
 
-    public T getBody() {
+    @SuppressWarnings("unchecked")
+    public <T> T getBodyAsType(T type) {
+        return (T) new Gson().fromJson(getBody(), type.getClass());
+    }
+
+    public String getBody() {
         return body;
     }
 
-    public void setBody(T body) {
+    public void setBody(String body) {
         this.body = body;
     }
 

@@ -1,16 +1,21 @@
 package com.sap.sailing.ingestion;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.redisson.api.RMap;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.gson.Gson;
 import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
 import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
+
+import software.amazon.awssdk.utils.IoUtils;
 
 /**
  * <p>
@@ -42,29 +47,40 @@ import com.sap.sailing.ingestion.dto.EndpointDTO;
  * </pre>
  *
  */
-public class EndpointRegistrationLambda implements RequestHandler<AWSRequestWrapper<EndpointDTO>, String> {
+public class EndpointRegistrationLambda implements RequestStreamHandler {
     @SuppressWarnings("unchecked")
     @Override
-    public String handleRequest(AWSRequestWrapper<EndpointDTO> awsWrappedInput, Context context) {
-        final EndpointDTO input = awsWrappedInput.getBody();
-        if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
-            context.getLogger().log("Getting cache instance...");
-            final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
-            context.getLogger().log("Got cache instance");
-            for (final String deviceUuid : input.getDevicesUuid()) {
-                final Object memObject = cacheMap.get(deviceUuid);
-                final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>()
-                        : (List<EndpointDTO>) memObject;
-                if (input.isRegisterAction()) {
-                    endpoints.add(input);
-                    context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
-                            + input.getEndpointCallbackUrl());
-                } else if (input.isUnRegisterAction()) {
-                    endpoints.remove(input);
+    public void handleRequest(InputStream inputAsStream, OutputStream outputAsStream, Context context) {
+        try {
+            final byte[] streamAsBytes = IoUtils.toByteArray(inputAsStream);
+            final AWSRequestWrapper requestWrapped = new Gson().fromJson(new String(streamAsBytes),
+                    AWSRequestWrapper.class);
+            final EndpointDTO input = new Gson().fromJson(requestWrapped.getBody(), EndpointDTO.class);
+            if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
+                final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
+                for (final String deviceUuid : input.getDevicesUuid()) {
+                    final Object memObject = cacheMap.get(deviceUuid);
+                    final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>()
+                            : (List<EndpointDTO>) memObject;
+                    if (input.isRegisterAction()) {
+                        if (!endpoints.contains(input)) {
+                            endpoints.add(input);
+                            context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
+                                    + input.getEndpointCallbackUrl());
+                        }
+                    } else if (input.isUnRegisterAction()) {
+                        endpoints.remove(input);
+                    }
+                    cacheMap.put(deviceUuid, endpoints);
                 }
-                cacheMap.put(deviceUuid, endpoints);
             }
+            String successResponse = new Gson()
+                    .toJson(AWSResponseWrapper.successResponseAsJson("\"" + input.getEndpointUuid() + "\""));
+            context.getLogger().log(successResponse);
+            outputAsStream.write(successResponse.getBytes());
+            outputAsStream.close();
+        } catch (IOException ex) {
+            context.getLogger().log(ex.getMessage());
         }
-        return new Gson().toJson(AWSResponseWrapper.successResponseAsJson(input.getEndpointUuid()));
     }
 }

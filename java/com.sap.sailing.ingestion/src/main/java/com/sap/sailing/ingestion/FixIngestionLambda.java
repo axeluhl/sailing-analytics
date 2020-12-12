@@ -17,6 +17,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.gson.Gson;
+import com.sap.sailing.ingestion.dto.AWSRequestWrapper;
 import com.sap.sailing.ingestion.dto.AWSResponseWrapper;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
 import com.sap.sailing.ingestion.dto.FixHeaderDTO;
@@ -28,9 +29,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.utils.IoUtils;
 
 /**
- * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure. In most cases clients will want to
- * submit GPS fixes thus adhering to the {@link GpsFixPayloadDTO} structure. This structure will be recognised by most
- * sailing servers.
+ * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure wrapped inside a
+ * {@link AWSRequestWrapper}. In most cases clients will want to submit GPS fixes thus adhering to the
+ * {@link GpsFixPayloadDTO} structure. This structure will be recognised by most sailing servers.
  */
 public class FixIngestionLambda implements RequestStreamHandler {
 
@@ -38,7 +39,9 @@ public class FixIngestionLambda implements RequestStreamHandler {
     public void handleRequest(InputStream input, OutputStream output, Context context) {
         try {
             final byte[] streamAsBytes = IoUtils.toByteArray(input);
-            FixHeaderDTO dto = new Gson().fromJson(new String(streamAsBytes), FixHeaderDTO.class);
+            context.getLogger().log(new String(streamAsBytes));
+            AWSRequestWrapper dtoWrapped = new Gson().fromJson(new String(streamAsBytes), AWSRequestWrapper.class);
+            FixHeaderDTO dto = dtoWrapped.getBodyAsType(new FixHeaderDTO());
             storeFixFileToS3(dto.getDeviceUuid(), streamAsBytes, context.getLogger());
             RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(dto.getDeviceUuid());
@@ -58,6 +61,7 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 context.getLogger().log("No endpoint has been configured for UUID " + dto.getDeviceUuid());
             }
             output.write(new Gson().toJson(AWSResponseWrapper.successResponseAsJson(dto.getDeviceUuid())).getBytes());
+            output.close();
         } catch (IOException e) {
             context.getLogger().log(e.getMessage());
         }
@@ -74,12 +78,14 @@ public class FixIngestionLambda implements RequestStreamHandler {
             connectionToEndpoint.setDoOutput(true);
             connectionToEndpoint.setConnectTimeout(
                     (int) Duration.ofSeconds(Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT).toMillis());
+            context.getLogger().log(new String(jsonAsBytes));
             try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                 os.write(jsonAsBytes);
-            }
-        } catch (IOException ex) {
+            } 
+        } catch (Exception ex) {
             context.getLogger().log(ex.getMessage());
         }
+        context.getLogger().log("Sent data to " + endpoint.getEndpointCallbackUrl());
     }
 
     private void storeFixFileToS3(final String deviceUuid, final byte[] jsonAsBytes, final LambdaLogger logger)

@@ -1,8 +1,10 @@
 package com.sap.sailing.ingestion.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
-public class AWSResponseHttpHeader {
+public class AWSResponseHttpHeader implements Serializable {
+
+    private static final long serialVersionUID = 5896178885597045708L;
 
     private String contentType;
 
@@ -12,7 +14,6 @@ public class AWSResponseHttpHeader {
         return result;
     }
 
-    @JsonProperty("Content-Type")
     public String getContentType() {
         return contentType;
     }
