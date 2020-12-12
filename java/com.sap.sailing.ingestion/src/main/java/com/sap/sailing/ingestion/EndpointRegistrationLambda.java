@@ -56,6 +56,8 @@ public class EndpointRegistrationLambda implements RequestStreamHandler {
             final AWSRequestWrapper requestWrapped = new Gson().fromJson(new String(streamAsBytes),
                     AWSRequestWrapper.class);
             final EndpointDTO input = new Gson().fromJson(requestWrapped.getBody(), EndpointDTO.class);
+            context.getLogger().log("Input: "+input);
+            context.getLogger().log("Input body: "+requestWrapped.getBody());
             if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
                 final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
                 for (final String deviceUuid : input.getDevicesUuid()) {

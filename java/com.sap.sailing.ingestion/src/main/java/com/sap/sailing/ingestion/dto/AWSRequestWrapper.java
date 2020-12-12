@@ -1,6 +1,7 @@
 package com.sap.sailing.ingestion.dto;
 
 import java.io.Serializable;
+import java.util.Base64;
 
 import com.google.gson.Gson;
 
@@ -45,17 +46,26 @@ public class AWSRequestWrapper implements Serializable {
 
     private String httpMethod;
     private String body;
+    private Boolean isBase64Encoded;
 
     public <T> T getBodyAsType(Class<T> type) {
         return (T) new Gson().fromJson(getBody(), type);
     }
 
     public String getBody() {
-        return body;
+        return getIsBase64Encoded() ? new String(Base64.getDecoder().decode(body.getBytes())) : body;
     }
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public Boolean getIsBase64Encoded() {
+        return isBase64Encoded;
+    }
+
+    public void setIsBase64Encoded(Boolean isBase64Encoded) {
+        this.isBase64Encoded = isBase64Encoded;
     }
 
     public String getHttpMethod() {
