@@ -46,9 +46,8 @@ public class AWSRequestWrapper implements Serializable {
     private String httpMethod;
     private String body;
 
-    @SuppressWarnings("unchecked")
-    public <T> T getBodyAsType(T type) {
-        return (T) new Gson().fromJson(getBody(), type.getClass());
+    public <T> T getBodyAsType(Class<T> type) {
+        return (T) new Gson().fromJson(getBody(), type);
     }
 
     public String getBody() {

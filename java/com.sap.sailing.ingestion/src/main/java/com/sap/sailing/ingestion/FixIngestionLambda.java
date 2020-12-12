@@ -40,7 +40,7 @@ public class FixIngestionLambda implements RequestStreamHandler {
             final byte[] streamAsBytes = IoUtils.toByteArray(input);
             context.getLogger().log(new String(streamAsBytes));
             AWSRequestWrapper dtoWrapped = new Gson().fromJson(new String(streamAsBytes), AWSRequestWrapper.class);
-            FixHeaderDTO dto = dtoWrapped.getBodyAsType(new FixHeaderDTO());
+            FixHeaderDTO dto = dtoWrapped.getBodyAsType(FixHeaderDTO.class);
             storeFixFileToS3(dto.getDeviceUuid(), streamAsBytes, context.getLogger());
             RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(dto.getDeviceUuid());
