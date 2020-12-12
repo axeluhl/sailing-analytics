@@ -29,12 +29,11 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.utils.IoUtils;
 
 /**
- * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure wrapped inside a
+ * This λ accepts fixes of any kind that adhere to {@link FixHeaderDTO} structure wrapped inside an
  * {@link AWSRequestWrapper}. In most cases clients will want to submit GPS fixes thus adhering to the
- * {@link GpsFixPayloadDTO} structure. This structure will be recognised by most sailing servers.
+ * {@link GpsFixPayloadDTO} structure. This structure will be recognized by most sailing servers.
  */
 public class FixIngestionLambda implements RequestStreamHandler {
-
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) {
         try {

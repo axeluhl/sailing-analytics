@@ -10,11 +10,10 @@ import org.redisson.config.Config;
 import com.sap.sailing.ingestion.dto.EndpointDTO;
 
 public class Utils {
-
     public static RMap<String, List<EndpointDTO>> getCacheMap() {
-        Config redisConfiguration = new Config();
+        final Config redisConfiguration = new Config();
         redisConfiguration.useReplicatedServers().addNodeAddress(Configuration.REDIS_ENDPOINTS);
-        RedissonClient redisClient = Redisson.create(redisConfiguration);
+        final RedissonClient redisClient = Redisson.create(redisConfiguration);
         return redisClient.getMap(Configuration.REDIS_MAP_NAME);
     }
 }
