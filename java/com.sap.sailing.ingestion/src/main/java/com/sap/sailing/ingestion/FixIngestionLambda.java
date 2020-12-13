@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -41,7 +42,8 @@ public class FixIngestionLambda implements RequestStreamHandler {
             context.getLogger().log(new String(streamAsBytes));
             final AWSRequestWrapper dtoWrapped = new Gson().fromJson(new String(streamAsBytes), AWSRequestWrapper.class);
             final FixHeaderDTO dto = dtoWrapped.getBodyAsType(FixHeaderDTO.class);
-            storeFixFileToS3(dto.getDeviceUuid(), streamAsBytes, context.getLogger());
+            final byte[] bodyAsBytes = dtoWrapped.getBody().getBytes();
+            storeFixFileToS3(dto.getDeviceUuid(), bodyAsBytes, context.getLogger());
             final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(dto.getDeviceUuid());
             if (listOfEndpointsToTrigger != null) {
@@ -49,7 +51,7 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 final ForkJoinPool dispatchToSubscribersTask = ForkJoinPool.commonPool();
                 for (final EndpointDTO endpoint : endpointsToTrigger) {
                     dispatchToSubscribersTask.submit(() -> {
-                        dispatchToSubscribers(context, endpoint, streamAsBytes);
+                        dispatchToSubscribers(context, endpoint, bodyAsBytes);
                     });
                 }
                 // wait for tasks to complete for <number of end-points>*<timeout for connection>+<ramp-up time>
@@ -68,23 +70,28 @@ public class FixIngestionLambda implements RequestStreamHandler {
 
     private void dispatchToSubscribers(final Context context, final EndpointDTO endpoint, final byte[] jsonAsBytes) {
         context.getLogger().log("Connecting to endpoint " + endpoint.getEndpointCallbackUrl());
+        URL endpointUrl;
         try {
-            final URL endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
-            final HttpURLConnection connectionToEndpoint = (HttpURLConnection) endpointUrl.openConnection();
-            connectionToEndpoint.setRequestMethod("POST");
-            connectionToEndpoint.setRequestProperty("Content-Type", "application/json; utf-8");
-            connectionToEndpoint.setRequestProperty("Accept", "application/json");
-            connectionToEndpoint.setDoOutput(true);
-            connectionToEndpoint.setConnectTimeout(
-                    (int) Duration.ofSeconds(Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT).toMillis());
-            context.getLogger().log(new String(jsonAsBytes));
-            try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
-                os.write(jsonAsBytes);
-            } 
-        } catch (Exception ex) {
-            context.getLogger().log(ex.getMessage());
+            endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
+            try {
+                final HttpURLConnection connectionToEndpoint = (HttpURLConnection) endpointUrl.openConnection();
+                connectionToEndpoint.setRequestMethod("POST");
+                connectionToEndpoint.setRequestProperty("Content-Type", "application/json; utf-8");
+                connectionToEndpoint.setRequestProperty("Accept", "application/json");
+                connectionToEndpoint.setDoOutput(true);
+                connectionToEndpoint.setConnectTimeout(
+                        (int) Duration.ofSeconds(Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT).toMillis());
+                context.getLogger().log(new String(jsonAsBytes));
+                try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
+                    os.write(jsonAsBytes);
+                    context.getLogger().log("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl());
+                } 
+            } catch (Exception ex) {
+                context.getLogger().log("Exception trying to send data to "+endpointUrl+": "+ex.getMessage());
+            }
+        } catch (MalformedURLException e) {
+            context.getLogger().log("Malformed URL for end point "+endpoint.getEndpointCallbackUrl());
         }
-        context.getLogger().log("Sent data to " + endpoint.getEndpointCallbackUrl());
     }
 
     private void storeFixFileToS3(final String deviceUuid, final byte[] jsonAsBytes, final LambdaLogger logger)
