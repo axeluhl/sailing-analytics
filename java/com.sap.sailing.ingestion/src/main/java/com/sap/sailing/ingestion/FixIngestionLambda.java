@@ -79,11 +79,13 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 connectionToEndpoint.setRequestProperty("Content-Type", "application/json; utf-8");
                 connectionToEndpoint.setRequestProperty("Accept", "application/json");
                 connectionToEndpoint.setDoOutput(true);
+                connectionToEndpoint.addRequestProperty("Content-Length", String.valueOf(jsonAsBytes.length));
                 connectionToEndpoint.setConnectTimeout(
                         (int) Duration.ofSeconds(Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT).toMillis());
-                context.getLogger().log(new String(jsonAsBytes));
                 try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                     os.write(jsonAsBytes);
+                    os.flush();
+                    os.close();
                     final int responseCode = connectionToEndpoint.getResponseCode(); // reading is important to actually issue the request
                     context.getLogger().log("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl()+" with response code "+responseCode);
                 } 
