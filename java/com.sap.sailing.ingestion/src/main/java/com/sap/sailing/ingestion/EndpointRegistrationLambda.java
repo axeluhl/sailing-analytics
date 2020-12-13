@@ -59,7 +59,7 @@ public class EndpointRegistrationLambda implements RequestStreamHandler {
             context.getLogger().log("Input: "+input);
             context.getLogger().log("Input body: "+requestWrapped.getBody());
             if (input != null && input.getDevicesUuid() != null && input.getDevicesUuid().size() > 0) {
-                final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
+                final RMap<String, List<EndpointDTO>> cacheMap = RedisUtils.getCacheMap();
                 for (final String deviceUuid : input.getDevicesUuid()) {
                     final Object memObject = cacheMap.get(deviceUuid);
                     final List<EndpointDTO> endpoints = memObject == null ? new ArrayList<>()

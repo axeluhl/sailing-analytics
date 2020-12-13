@@ -36,19 +36,25 @@ import software.amazon.awssdk.utils.IoUtils;
  */
 public class FixIngestionLambda implements RequestStreamHandler {
     @Override
-    public void handleRequest(InputStream input, OutputStream output, Context context) {
+    public void handleRequest(final InputStream input, final OutputStream output, final Context context) {
         try {
             final byte[] streamAsBytes = IoUtils.toByteArray(input);
             context.getLogger().log(new String(streamAsBytes));
             final AWSRequestWrapper dtoWrapped = new Gson().fromJson(new String(streamAsBytes), AWSRequestWrapper.class);
             final FixHeaderDTO dto = dtoWrapped.getBodyAsType(FixHeaderDTO.class);
             final byte[] bodyAsBytes = dtoWrapped.getBody().getBytes();
-            storeFixFileToS3(dto.getDeviceUuid(), bodyAsBytes, context.getLogger());
-            final RMap<String, List<EndpointDTO>> cacheMap = Utils.getCacheMap();
+            final ForkJoinPool dispatchToSubscribersTask = ForkJoinPool.commonPool();
+            dispatchToSubscribersTask.submit(() -> {
+                try {
+                    storeFixFileToS3(dto.getDeviceUuid(), bodyAsBytes, context.getLogger());
+                } catch (IOException e) {
+                    context.getLogger().log("Exception trying to store fixes to S3: "+e.getMessage());
+                }
+            });
+            final RMap<String, List<EndpointDTO>> cacheMap = RedisUtils.getCacheMap();
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(dto.getDeviceUuid());
             if (listOfEndpointsToTrigger != null) {
                 final List<EndpointDTO> endpointsToTrigger = listOfEndpointsToTrigger;
-                final ForkJoinPool dispatchToSubscribersTask = ForkJoinPool.commonPool();
                 for (final EndpointDTO endpoint : endpointsToTrigger) {
                     dispatchToSubscribersTask.submit(() -> {
                         dispatchToSubscribers(context, endpoint, bodyAsBytes);
@@ -62,9 +68,19 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 context.getLogger().log("No endpoint has been configured for UUID " + dto.getDeviceUuid());
             }
             output.write(new Gson().toJson(AWSResponseWrapper.successResponseAsJson(dto.getDeviceUuid())).getBytes());
-            output.close();
         } catch (IOException e) {
             context.getLogger().log(e.getMessage());
+        } finally {
+            try {
+                input.close();
+            } catch (IOException e) {
+                context.getLogger().log("Exception trying to close input: "+e.getMessage());
+            }
+            try {
+                output.close();
+            } catch (IOException e) {
+                context.getLogger().log("Exception trying to close output: "+e.getMessage());
+            }
         }
     }
 
@@ -85,7 +101,6 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                     os.write(jsonAsBytes);
                     os.flush();
-                    os.close();
                     final int responseCode = connectionToEndpoint.getResponseCode(); // reading is important to actually issue the request
                     context.getLogger().log("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl()+" with response code "+responseCode);
                 } 
