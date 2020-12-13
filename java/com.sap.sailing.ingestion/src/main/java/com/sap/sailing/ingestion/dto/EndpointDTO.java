@@ -71,4 +71,10 @@ public class EndpointDTO implements Serializable {
     public int hashCode() {
         return getEndpointUuid().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "EndpointDTO [endpointUuid=" + endpointUuid + ", action=" + action + ", endpointCallbackUrl="
+                + endpointCallbackUrl + ", devicesUuid=" + devicesUuid + "]";
+    }
 }

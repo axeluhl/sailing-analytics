@@ -68,10 +68,13 @@ public class EndpointRegistrationLambda implements RequestStreamHandler {
                         if (!endpoints.contains(input)) {
                             endpoints.add(input);
                             context.getLogger().log("Added endpoint for device UUID " + deviceUuid + " with url "
-                                    + input.getEndpointCallbackUrl());
+                                    + input.getEndpointCallbackUrl()+" and ID "+input.getEndpointUuid());
                         }
                     } else if (input.isUnRegisterAction()) {
                         endpoints.remove(input);
+                        context.getLogger().log("Removed endpoint for device UUID "+deviceUuid+" with url "+
+                                input.getEndpointCallbackUrl()+" and ID "+input.getEndpointUuid()+
+                                ". Remaining subscriptions for device UUID: "+endpoints);
                     }
                     cacheMap.put(deviceUuid, endpoints);
                 }

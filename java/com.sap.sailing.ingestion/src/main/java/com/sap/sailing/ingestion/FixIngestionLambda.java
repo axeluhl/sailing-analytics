@@ -69,7 +69,7 @@ public class FixIngestionLambda implements RequestStreamHandler {
     }
 
     private void dispatchToSubscribers(final Context context, final EndpointDTO endpoint, final byte[] jsonAsBytes) {
-        context.getLogger().log("Connecting to endpoint " + endpoint.getEndpointCallbackUrl());
+        context.getLogger().log("Connecting to endpoint " + endpoint.getEndpointCallbackUrl()+" with ID "+endpoint.getEndpointUuid());
         URL endpointUrl;
         try {
             endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
@@ -84,7 +84,8 @@ public class FixIngestionLambda implements RequestStreamHandler {
                 context.getLogger().log(new String(jsonAsBytes));
                 try (final OutputStream os = connectionToEndpoint.getOutputStream()) {
                     os.write(jsonAsBytes);
-                    context.getLogger().log("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl());
+                    final int responseCode = connectionToEndpoint.getResponseCode(); // reading is important to actually issue the request
+                    context.getLogger().log("Sent data "+new String(jsonAsBytes)+" to " + endpoint.getEndpointCallbackUrl()+" with response code "+responseCode);
                 } 
             } catch (Exception ex) {
                 context.getLogger().log("Exception trying to send data to "+endpointUrl+": "+ex.getMessage());
