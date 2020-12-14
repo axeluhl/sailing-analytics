@@ -58,7 +58,7 @@ More variables are available, and some variables---if not set in the environment
 * `INSTALL_FROM_RELEASE` The user data variable to use to specify the release to install and run on the host. Typical values are `live-master-server` and `live-replica-server`, used to start a master or a replica server, respectively, or `archive-server` for launching an "ARCHIVE" server.
  
 * `MONGODB_URI`
-    used to specify the MongoDB connection URI; if neither this variable nor `MONGODB_HOST` are specified, a default MongoDB URI will be constructed as `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest`.
+    used to specify the MongoDB connection URI; if neither this variable nor `MONGODB_HOST` are specified, a default MongoDB URI will be constructed as `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest` for a server that does not set the `AUTO_REPLICATE` variable, and to `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}-replica?replicaSet=live&retryWrites=true&readPreference=nearest` for a server that does set the `AUTO_REPLICATE` variable to a non-empty value such as `true`.
 
 * `REPLICATION_CHANNEL`
     used to define the name of the RabbitMQ exchange to which this master node

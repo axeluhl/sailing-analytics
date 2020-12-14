@@ -135,6 +135,5 @@ ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersis
 # getting https://security-service.sapsailing.com/security/api/restsecurity/access_token
 #REPLICATE_MASTER_BEARER_TOKEN="..."
 
-echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 ### End of Standard env.sh ###

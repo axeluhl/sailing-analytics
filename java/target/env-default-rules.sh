@@ -38,7 +38,13 @@ if [ -z "${SERVER_PORT}" ]; then
   SERVER_PORT=8888
 fi
 if [ -z "${MONGODB_NAME}" ]; then
-  MONGODB_NAME=${SERVER_NAME}
+  if [ -n "$AUTO_REPLICATE" ]; then
+    # This seems to be a replica; use a "phony" DB for all replicas:
+    MONGODB_NAME=${SERVER_NAME}-replica
+  else
+    # This seems to be a master
+    MONGODB_NAME=${SERVER_NAME}
+  fi
 fi
 if [ -z "${MONGODB_PORT}" ]; then
   MONGODB_PORT=27017
