@@ -152,6 +152,6 @@
             android:value="key_test_netW6MGq3YW5az2uCv2fwgmbttafGPdB" />
         <meta-data
             android:name="io.branch.sdk.TestMode"
-            android:value="true" /><!-- Set to true to use Branch_Test_Key (useful when simulating installs and/or switching between debug and production flavors) -->
+            android:value="false" /><!-- Set to true to use Branch_Test_Key (useful when simulating installs and/or switching between debug and production flavors) -->
     </application>
 </manifest>
