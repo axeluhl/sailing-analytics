@@ -1,29 +1,38 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
-import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
+import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
+import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ImageState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
  * Upgrades an existing Amazon Machine Image that is expected to be prepared for such an upgrade, by
@@ -46,15 +55,14 @@ import software.amazon.awssdk.services.ec2.model.InstanceStateName;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public class UpgradeAmi<ShardingKey,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-extends StartEmptyServer<UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>, StartFromSailingAnalyticsImage {
+public class UpgradeAmi<ShardingKey>
+extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
     private final String upgradedImageName;
+    private final String imageType;
     private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
@@ -64,8 +72,10 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
      * Additional default rules in addition to what the {@link StartAwsHost.Builder parent builder} defines:
      * 
      * <ul>
-     * <li>If no {@link #getInstanceName() instance name} is set, the default instance name will be constructed as
+     * <li>If no {@link #setInstanceName(String) instance name} is set, the default instance name will be constructed as
      * {@code IMAGE_UPGRADE+" for "+machineImage.getId()}</li>
+     * <li>If no {@link #setInstanceType(software.amazon.awssdk.services.ec2.model.InstanceType) instance type} is
+     * specified, it defaults to {@link InstanceType#T2_MEDIUM}.</li>
      * <li>The user data are set to the string defined by {@link UpgradeAmi#IMAGE_UPGRADE_USER_DATA}, forcing the image to
      * boot without trying to launch a process instance.</li>
      * <li>The {@link #isNoShutdown()} property default is changed to {@code false} because when upgrading an image the
@@ -78,10 +88,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
      * </ul>
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
+    ProcessT extends ApplicationProcess<ShardingKey, SailingAnalyticsMetrics, ProcessT>>
+    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
@@ -100,11 +109,9 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         BuilderT setSnapshotBaseName(String deviceName, String snapshotBaseName);
     }
 
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>>
-    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>>
-    implements Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
+    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    implements Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
         private final Map<String, String> deviceNamesToSnapshotBaseNames;
@@ -123,6 +130,19 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         @Override
         protected String getImageType() {
             return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+        }
+
+        @Override
+        protected InstanceType getInstanceType() {
+            return super.getInstanceType() == null ? InstanceType.T2_MEDIUM : super.getInstanceType();
+        }
+
+        /**
+         * Re-expose to this class's package
+         */
+        @Override
+        protected boolean isNoShutdown() {
+            return super.isNoShutdown();
         }
 
         @Override
@@ -180,8 +200,16 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
-        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
-            return SailingAnalyticsHostImpl::new;
+        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
+                        (host, serverDirectory)->{
+                            try {
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
+                            } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
         }
 
         protected String getUpgradedImageName() {
@@ -193,23 +221,30 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
         }
 
         @Override
-        public UpgradeAmi<ShardingKey, MasterProcessT, ReplicaProcessT> build() {
+        public UpgradeAmi<ShardingKey> build() {
             if (upgradedImageName == null) {
                 upgradedImageName = increaseVersionNumber(getMachineImage().getName());
             }
             return new UpgradeAmi<>(this);
         }
+
+        /**
+         * Make visible in package
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT>, ShardingKey,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey, MasterProcessT, ReplicaProcessT> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
+    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> builder() {
         return new BuilderImpl<>();
     }
     
-    protected UpgradeAmi(BuilderImpl<?, ShardingKey, MasterProcessT, ReplicaProcessT> builder) {
+    protected UpgradeAmi(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
+        imageType = builder.getImageType();
         upgradedImageName = builder.getUpgradedImageName();
         timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
@@ -233,7 +268,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, MasterProcessT, Repli
                     instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
                 }
             }
-            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName);
+            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(IMAGE_TYPE_TAG_NAME, imageType)));
             final TimePoint startedWaiting = TimePoint.now();
             while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                 logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()

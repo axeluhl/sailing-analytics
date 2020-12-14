@@ -66,11 +66,9 @@ public interface Host {
      */
     SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
     
-    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException;
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
 
-    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException;
-    
-    Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the

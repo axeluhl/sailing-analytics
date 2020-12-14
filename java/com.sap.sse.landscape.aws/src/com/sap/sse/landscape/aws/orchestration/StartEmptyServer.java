@@ -1,12 +1,10 @@
-package com.sap.sailing.landscape.procedures;
+package com.sap.sse.landscape.aws.orchestration;
 
 import java.util.Collections;
 
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.AwsInstance;
-import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
@@ -21,13 +19,12 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  * @param <HostT>
  */
-public abstract class StartEmptyServer<T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+public abstract class StartEmptyServer<T extends StartEmptyServer<T, ShardingKey, MetricsT, ProcessT, HostT>,
 ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
 HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>
+implements Procedure<ShardingKey, MetricsT, ProcessT> {
     private static final String IMAGE_UPGRADE_USER_DATA = "image-upgrade";
     private static final String NO_SHUTDOWN_USER_DATA = "no-shutdown";
     
@@ -44,24 +41,22 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * </ul>
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends StartEmptyServer<T, ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends StartAwsHost.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         BuilderT setNoShutdown(boolean noShutdown);
     }
 
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends StartEmptyServer<T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends StartEmptyServer<T, ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private boolean noShutdown = true;
         
         protected boolean isNoShutdown() {
@@ -79,7 +74,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         }
     }
     
-    public StartEmptyServer(BuilderImpl<?, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
+    public StartEmptyServer(BuilderImpl<?, T, ShardingKey, MetricsT, ProcessT, HostT> builder) {
         super(builder);
         addUserData(Collections.singleton(IMAGE_UPGRADE_USER_DATA));
         if (builder.isNoShutdown()) {
