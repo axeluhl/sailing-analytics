@@ -382,10 +382,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
             final SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+            if (serverUrl != null) {
+                editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+            }
             editor.putString(getString(R.string.preference_identifier_key), identifier);
             editor.putString(getString(R.string.preference_config_uuid_key), configUuid);
-            editor.putString(getString(R.string.preference_access_token_key), token);
+            if (token != null) {
+                editor.putString(getString(R.string.preference_access_token_key), token);
+            }
             editor.apply();
 
             branchEventId = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_EVENT_ID, null);
