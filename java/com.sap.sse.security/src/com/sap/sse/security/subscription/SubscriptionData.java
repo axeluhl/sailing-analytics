@@ -1,9 +1,10 @@
-package com.sap.sse.security.shared.subscription;
+package com.sap.sse.security.subscription;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * SubscriptionData holds subscription data map, and provides methods to retrieve common subscription data value

@@ -33,9 +33,9 @@ import com.sap.sse.util.ServiceTrackerFactory;
  * regarding logic, or initialize any custom service logics, particular child implementation should override
  * {@code initService} method
  */
-public abstract class BaseSubscriptionServiceImpl extends RemoteServiceServlet {
+public abstract class SubscriptionServiceImpl extends RemoteServiceServlet {
     private static final long serialVersionUID = -2953209842119970755L;
-    private static final Logger logger = Logger.getLogger(BaseSubscriptionServiceImpl.class.getName());
+    private static final Logger logger = Logger.getLogger(SubscriptionServiceImpl.class.getName());
 
     private BundleContext context;
     private CompletableFuture<SecurityService> securityService;

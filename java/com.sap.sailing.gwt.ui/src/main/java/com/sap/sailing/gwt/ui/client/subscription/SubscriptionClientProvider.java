@@ -15,11 +15,16 @@ public interface SubscriptionClientProvider {
      * Return unique name for this provider
      */
     String getProviderName();
-
+    
     /**
      * Return {@code SubscriptionService} for this provider
      */
-    SubscriptionServiceAsync<?, ?> getSubscriptionService();
+    SubscriptionServiceAsync<?> getSubscriptionService();
+
+    /**
+     * Return {@code SubscriptionWriteService} for this provider
+     */
+    SubscriptionWriteServiceAsync<?, ?> getSubscriptionWriteService();
 
     /**
      * Register GWT async service

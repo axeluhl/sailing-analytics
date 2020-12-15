@@ -2,7 +2,6 @@ package com.sap.sse.security.subscription;
 
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
 
 /**
  * Service interface for provider API requests

@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client.subscription.chargebee;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionClientProvider;
@@ -11,6 +14,7 @@ public class ChargebeeSubscriptionClientProvider implements SubscriptionClientPr
 
     private SubscriptionViewPresenter viewPresenter;
     private ChargebeeSubscriptionServiceAsync service;
+    private ChargebeeSubscriptionWriteServiceAsync writeService;
 
     @Override
     public void init() {
@@ -23,6 +27,14 @@ public class ChargebeeSubscriptionClientProvider implements SubscriptionClientPr
     }
 
     @Override
+    public ChargebeeSubscriptionWriteServiceAsync getSubscriptionWriteService() {
+        if (writeService == null) {
+            writeService = GWT.create(ChargebeeSubscriptionWriteService.class);
+        }
+        return writeService;
+    }
+
+    @Override
     public ChargebeeSubscriptionServiceAsync getSubscriptionService() {
         if (service == null) {
             service = GWT.create(ChargebeeSubscriptionService.class);
@@ -32,15 +44,20 @@ public class ChargebeeSubscriptionClientProvider implements SubscriptionClientPr
 
     @Override
     public void registerAsyncService(String serviceBasePath) {
-        EntryPointHelper.registerASyncService((ServiceDefTarget) getSubscriptionService(),
-                serviceBasePath + "/" + getProviderName());
+        String servicePath = serviceBasePath + "/" + getProviderName();
+        EntryPointHelper.registerASyncService((ServiceDefTarget) getSubscriptionService(), servicePath,
+                HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) getSubscriptionWriteService(), servicePath,
+                HEADER_FORWARD_TO_MASTER);
     }
 
     @Override
     public SubscriptionViewPresenter getSubscriptionViewPresenter() {
         if (viewPresenter == null) {
-            viewPresenter = new ChargebeeSubscriptionViewPresenter(getSubscriptionService());
+            viewPresenter = new ChargebeeSubscriptionViewPresenter(getSubscriptionService(),
+                    getSubscriptionWriteService());
         }
         return viewPresenter;
     }
+
 }

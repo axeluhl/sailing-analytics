@@ -1,9 +1,10 @@
-package com.sap.sse.security.shared.subscription;
+package com.sap.sse.security.subscription;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.security.shared.subscription.SubscriptionData.DataAttribute;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.subscription.SubscriptionData.DataAttribute;
 
 /**
  * AbstractSubscriptionDataHandler provides implementation of {@code SubscriptionDataHandler} for serializing commons

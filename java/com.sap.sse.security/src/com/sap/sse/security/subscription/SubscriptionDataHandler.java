@@ -1,6 +1,8 @@
-package com.sap.sse.security.shared.subscription;
+package com.sap.sse.security.subscription;
 
 import java.util.Map;
+
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * SubscriptionDataHandler is used for persisting, and restoring subscription object data.

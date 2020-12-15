@@ -15,7 +15,6 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionData;
 
 /**
  * Task to perform fetching, checking and updating user subscriptions from payment service providers. See

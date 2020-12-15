@@ -32,7 +32,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.shared.subscription.SubscriptionDataHandler;
+import com.sap.sse.security.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {

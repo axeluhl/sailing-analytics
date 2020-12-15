@@ -17,7 +17,6 @@ public class SubscriptionServiceFactory {
     private static SubscriptionServiceFactory instance;
 
     private Map<String, SubscriptionClientProvider> providers;
-    private Map<String, SubscriptionServiceAsync<?, ?>> services;
     private boolean inited;
 
     public static SubscriptionServiceFactory getInstance() {
@@ -29,7 +28,6 @@ public class SubscriptionServiceFactory {
 
     private SubscriptionServiceFactory() {
         providers = new HashMap<String, SubscriptionClientProvider>();
-        services = new HashMap<String, SubscriptionServiceAsync<?, ?>>();
         registerProviders();
     }
 
@@ -40,7 +38,6 @@ public class SubscriptionServiceFactory {
             }
             inited = true;
         }
-
     }
 
     public void registerAsyncServices(String basePath) {
@@ -49,13 +46,14 @@ public class SubscriptionServiceFactory {
         }
     }
 
-    public SubscriptionServiceAsync<?, ?> getAsyncServiceByProvider(String providerName)
+    public SubscriptionWriteServiceAsync<?, ?> getWriteAsyncServiceByProvider(String providerName)
             throws InvalidSubscriptionProviderException {
-        SubscriptionServiceAsync<?, ?> service = services.get(providerName);
-        if (service == null) {
-            throw new InvalidSubscriptionProviderException(providerName);
-        }
-        return service;
+        return getProvider(providerName).getSubscriptionWriteService();
+    }
+
+    public SubscriptionServiceAsync<?> getAsyncServiceByProvider(String providerName)
+            throws InvalidSubscriptionProviderException {
+        return getProvider(providerName).getSubscriptionService();
     }
 
     /**
@@ -68,8 +66,16 @@ public class SubscriptionServiceFactory {
     /**
      * Return default subscription service
      */
-    public SubscriptionServiceAsync<?, ?> getDefaultAsyncService() throws InvalidSubscriptionProviderException {
+    public SubscriptionServiceAsync<?> getDefaultAsyncService() throws InvalidSubscriptionProviderException {
         return getAsyncServiceByProvider(DEFAULT_PROVIDER_NAME);
+    }
+
+    /**
+     * Return default subscription write service
+     */
+    public SubscriptionWriteServiceAsync<?, ?> getDefaultWriteAsyncService()
+            throws InvalidSubscriptionProviderException {
+        return getWriteAsyncServiceByProvider(DEFAULT_PROVIDER_NAME);
     }
 
     private SubscriptionClientProvider getProvider(String name) throws InvalidSubscriptionProviderException {
@@ -86,6 +92,5 @@ public class SubscriptionServiceFactory {
 
     private void registerSubscriptionProvider(SubscriptionClientProvider provider) {
         providers.put(provider.getProviderName(), provider);
-        services.put(provider.getProviderName(), provider.getSubscriptionService());
     }
 }

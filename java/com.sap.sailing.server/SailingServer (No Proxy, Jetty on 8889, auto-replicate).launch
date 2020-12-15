@@ -112,6 +112,7 @@
         <setEntry value="routeconverter@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="slf4j.jdk14@default:false"/>
+        <setEntry value="com.chargebee.chargebee-java@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="com.google.gwt.servlet@default:default"/>

@@ -12,9 +12,12 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPresenter {
     private ChargebeeSubscriptionServiceAsync service;
+    private ChargebeeSubscriptionWriteServiceAsync writeService;
 
-    public ChargebeeSubscriptionViewPresenter(ChargebeeSubscriptionServiceAsync service) {
+    public ChargebeeSubscriptionViewPresenter(ChargebeeSubscriptionServiceAsync service,
+            ChargebeeSubscriptionWriteServiceAsync writeService) {
         this.service = service;
+        this.writeService = writeService;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     private void requestFinishingPlanUpdating(String hostedPageId, UserSubscriptionView view) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
-        service.finishCheckout(null, data, new AsyncCallback<SubscriptionDTO>() {
+        writeService.finishCheckout(null, data, new AsyncCallback<SubscriptionDTO>() {
 
             @Override
             public void onSuccess(SubscriptionDTO result) {

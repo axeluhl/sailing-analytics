@@ -150,7 +150,7 @@
 	<servlet>
         <display-name>Chargebee Subscription Service</display-name>
         <servlet-name>ChargebeeSubscriptionService</servlet-name>
-        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.ChargebeeSubscriptionServiceImpl</servlet-class>
+        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.ChargebeeSubscriptionWriteServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ChargebeeSubscriptionService</servlet-name>
