@@ -93,6 +93,8 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     public final static int REQUEST_CODE_QR_CODE = 45392;
 
+    private final static int NO_PRIORITY = -1;
+
     private View backdrop;
     private LoginListViews loginListViews = null;
 
@@ -112,7 +114,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private String branchEventId;
     private String branchCourseAreaUuid;
-    private int branchPriority = 0;
+    private int branchPriority = NO_PRIORITY;
 
     private final ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
         final Serializable eventId = selectEvent(event);
@@ -149,7 +151,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         }
         addAreaPositionListFragment();
 
-        if (positionName == null && branchPriority == 0) {
+        if (positionName == null && branchPriority == NO_PRIORITY) {
             // send intent to open the position selection list
             Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
             intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
@@ -364,7 +366,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             branchEventId = null;
             branchCourseAreaUuid = null;
-            branchPriority = 0;
+            branchPriority = NO_PRIORITY;
 
             //Non-branch link
             if (!referringParams.optBoolean(Clicked_Branch_Link.getKey())) {
@@ -394,7 +396,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
             branchEventId = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_EVENT_ID, null);
             branchCourseAreaUuid = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_COURSE_AREA_UUID, null);
-            branchPriority = referringParams.optInt(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_PRIORITY);
+            branchPriority = referringParams.optInt(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_PRIORITY, NO_PRIORITY);
 
             BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
         }
