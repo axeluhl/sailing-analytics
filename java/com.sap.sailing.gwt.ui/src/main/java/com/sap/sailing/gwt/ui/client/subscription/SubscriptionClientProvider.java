@@ -17,12 +17,13 @@ public interface SubscriptionClientProvider {
     String getProviderName();
     
     /**
-     * Return {@code SubscriptionService} for this provider
+     * Return {@code SubscriptionService} for this provider, running reading requests that also replicas may handle
      */
     SubscriptionServiceAsync<?> getSubscriptionService();
 
     /**
-     * Return {@code SubscriptionWriteService} for this provider
+     * Return {@code SubscriptionWriteService} for this provider; use this at least for all updating requests that a
+     * master node must handle.
      */
     SubscriptionWriteServiceAsync<?, ?> getSubscriptionWriteService();
 
