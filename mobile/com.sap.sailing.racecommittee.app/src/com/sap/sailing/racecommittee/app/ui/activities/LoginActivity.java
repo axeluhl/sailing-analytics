@@ -358,6 +358,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 return;
             }
             if (referringParams == null || referringParams.length() == 0) {
+                handleLegacyStart();
                 return;
             }
 
