@@ -198,8 +198,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private final ReplicatingCacheManager cacheManager;
     
-    private UserStore store;
-    private AccessControlStore accessControlStore;
+    private final UserStore store;
+    private final AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
     private boolean isNewServer;
@@ -1661,7 +1661,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             Callable<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
-                securityDisplayName, actionWithResult, true);
+                securityDisplayName, actionWithResult, /* check for SERVER:CREATE_OBJECT */ true);
     }
 
     /**
