@@ -202,13 +202,13 @@ public class TestProcedures {
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         // Comment the following line to get default eu-west-2 test environment; uncomment to upgrade current production images in eu-west-1
-        final AwsRegion region = new AwsRegion(Region.EU_WEST_1);
+        // final AwsRegion region = new AwsRegion(Region.EU_WEST_1);
         landscape.createKeyPair(region, keyName);
         final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
         final UpgradeAmi<String> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
-                    .setRegion(region)
+                    .setRegion(region) // only required in case a non-default region is used; see Landscape.getDefaultRegion()
                     .setKeyName(keyName)
                     .setOptionalTimeout(optionalTimeout)
                     .build();
