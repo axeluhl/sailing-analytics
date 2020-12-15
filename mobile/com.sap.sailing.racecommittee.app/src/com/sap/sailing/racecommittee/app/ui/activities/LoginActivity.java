@@ -114,7 +114,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private String branchCourseAreaUuid;
     private int branchPriority = 0;
 
-    private final ItemSelectedListener<EventBase> eventSelectionListener = (sender, event, expanded) -> {
+    private final ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
         final Serializable eventId = selectEvent(event);
 
         // FIXME: its weird to have this button setup in here
@@ -135,7 +135,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
-    private final ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea, expanded) -> {
+    private final ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea) -> {
         ExLog.i(LoginActivity.this, TAG, "Starting view for " + courseArea.getName());
         ExLog.i(LoginActivity.this, LogEvent.COURSE_SELECTED, courseArea.getName());
 

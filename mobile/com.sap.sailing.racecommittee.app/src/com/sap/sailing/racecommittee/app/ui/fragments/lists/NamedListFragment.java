@@ -100,7 +100,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        listener.itemSelected(this, namedList.get(position), true);
+        listener.itemSelected(this, namedList.get(position));
     }
 
     @Override
@@ -226,6 +226,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         listAdapter.setCheckedPosition(position);
 
         mSelectedIndex = position;
-        listener.itemSelected(this, eventBase, false);
+        listener.itemSelected(this, eventBase);
     }
 }
