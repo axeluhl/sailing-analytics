@@ -33,7 +33,9 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>timeasmillis [default: current time on server]</td>
+		<td>timeasmillis [default: current time on server]: used as the hypothetical start time point for the simulated race.
+		    The mark positions and the wind field is determined based on this time point. The duration estimated for each leg
+		    is carried forward into the start time estimation for the next leg.</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
@@ -42,6 +44,102 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	<tr>
 		<td>Example:</td>
 		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/targettime?timeasmillis=1431433847707">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/targettime?timeasmillis=1431433847707</a></td>
+	</tr>
+	<tr>
+		<td>Response:</td>
+		<td>
+		<pre>
+{
+  "durationMillis": 1901620,
+  "legs": [
+    {
+      "legStartMillis": 1431433847707,
+      "legDurationMillis": 546030,
+      "legDistanceMeters": 470.5053546126686,
+      "legBearingDegrees": 59.67415841886631,
+      "legTrueWindAngleToLegDegrees": 162.59560021351922,
+      "legType": "DOWNWIND",
+      "legWind": {
+        "position": {
+          "latitude_deg": 53.968658362927286,
+          "longitude_deg": 10.891913484616515
+        },
+        "timepoint": 1374491356261,
+        "speedinknots": 6.4849853515625,
+        "direction": 42.26975863238553
+      }
+    },
+    {
+      "legStartMillis": 1431434393737,
+      "legDurationMillis": 308535,
+      "legDistanceMeters": 579.5376010294224,
+      "legBearingDegrees": 232.8974267236084,
+      "legTrueWindAngleToLegDegrees": -10.621851295350126,
+      "legType": "UPWIND",
+      "legWind": {
+        "position": {
+          "latitude_deg": 53.968658110222464,
+          "longitude_deg": 10.891913809448758
+        },
+        "timepoint": 1374491356343,
+        "speedinknots": 6.4849853515625,
+        "direction": 42.27557542825828
+      }
+    },
+    {
+      "legStartMillis": 1431434702272,
+      "legDurationMillis": 621392,
+      "legDistanceMeters": 579.5376010294224,
+      "legBearingDegrees": 52.89170873703634,
+      "legTrueWindAngleToLegDegrees": 169.383866691218,
+      "legType": "DOWNWIND",
+      "legWind": {
+        "position": {
+          "latitude_deg": 53.968658110222464,
+          "longitude_deg": 10.891913809448756
+        },
+        "timepoint": 1374491356343,
+        "speedinknots": 6.4849853515625,
+        "direction": 42.27557542825434
+      }
+    },
+    {
+      "legStartMillis": 1431435323664,
+      "legDurationMillis": 308535,
+      "legDistanceMeters": 579.5376010294224,
+      "legBearingDegrees": 232.8974267236084,
+      "legTrueWindAngleToLegDegrees": -10.62185129536175,
+      "legType": "UPWIND",
+      "legWind": {
+        "position": {
+          "latitude_deg": 53.96865811022246,
+          "longitude_deg": 10.891913809448754
+        },
+        "timepoint": 1374491356343,
+        "speedinknots": 6.4849853515625,
+        "direction": 42.27557542824663
+      }
+    },
+    {
+      "legStartMillis": 1431435632199,
+      "legDurationMillis": 117128,
+      "legDistanceMeters": 120.41031715642531,
+      "legBearingDegrees": 46.33987300290059,
+      "legTrueWindAngleToLegDegrees": 175.92397905121354,
+      "legType": "DOWNWIND",
+      "legWind": {
+        "position": {
+          "latitude_deg": 53.96865861916294,
+          "longitude_deg": 10.891913155245673
+        },
+        "timepoint": 1374491356178,
+        "speedinknots": 6.4849853515625,
+        "direction": 42.26385205411413
+      }
+    }
+  ]
+}
+		</pre></td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>
