@@ -47,7 +47,6 @@ import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
@@ -196,9 +195,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
     }
 
     private void openSettings() {
-        Intent intent = new Intent(getActivity(), PreferenceActivity.class);
-        intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, GeneralPreferenceFragment.class.getName());
-        startActivity(intent);
+        startActivity(new Intent(requireContext(), PreferenceActivity.class));
     }
 
     private void requestQRCodeScan() {
