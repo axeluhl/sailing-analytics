@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -31,14 +31,14 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     }
 
     @Override
-    protected ItemSelectedListener<EventBase> attachListener(Activity activity) {
-        if (activity instanceof EventSelectedListenerHost) {
-            EventSelectedListenerHost listener = (EventSelectedListenerHost) activity;
+    protected ItemSelectedListener<EventBase> attachListener(Context context) {
+        if (context instanceof EventSelectedListenerHost) {
+            EventSelectedListenerHost listener = (EventSelectedListenerHost) context;
             return listener.getEventSelectionListener();
         }
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
-                EventListFragment.class.getName(), activity.getClass().getName()));
+                EventListFragment.class.getName(), context.getClass().getName()));
     }
 
     @Override

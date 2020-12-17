@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,16 +48,26 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected int mSelectedIndex = -1;
     private View footerView;
 
-    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+    protected abstract ItemSelectedListener<T> attachListener(Context context);
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
             ReadonlyDataManager manager
     );
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = attachListener(context);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list_fragment, container, false);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         namedList = new ArrayList<>();
         checkedItems = new ArrayList<>();
         listAdapter = new CheckedItemAdapter(getActivity(), checkedItems);
@@ -72,17 +82,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         footerView = View.inflate(requireContext(), R.layout.footer_progress, null);
@@ -90,6 +89,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         showProgressBar(true);
         loadItems();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("position", mSelectedIndex);
     }
 
     @Override
@@ -178,13 +183,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             }
         }
         return subText;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt("position", mSelectedIndex);
-
-        super.onSaveInstanceState(outState);
     }
 
     ReadonlyDataManager getDataManager() {

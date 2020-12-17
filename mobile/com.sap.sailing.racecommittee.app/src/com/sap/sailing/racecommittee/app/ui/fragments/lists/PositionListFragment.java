@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,15 +41,23 @@ public class PositionListFragment extends LoggableListFragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        host = (PositionSelectedListenerHost) context;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_fragment, container, false);
-
+        final View view = inflater.inflate(R.layout.list_fragment, container, false);
         preferences = AppPreferences.on(getActivity());
+        return view;
+    }
 
-        values.clear();
-
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         final int priority = getArguments() != null ? getArguments().getInt(AppConstants.EXTRA_PRIORITY, -1) : -1;
-
+        values.clear();
         //Define configuration to activate super user
         if (AuthorPriority.ADMIN.getPriority() == priority) {
             values.add(new LoginTypeItem(
@@ -88,8 +99,6 @@ public class PositionListFragment extends LoggableListFragment {
         final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), items);
         setListAdapter(adapter);
 
-        host = (PositionSelectedListenerHost) getActivity();
-
         for (int i = 0; i < values.size(); i++) {
             final LoginTypeItem item = values.get(i);
             if (item.priority == priority) {
@@ -97,7 +106,6 @@ public class PositionListFragment extends LoggableListFragment {
                 break;
             }
         }
-        return view;
     }
 
     @Override

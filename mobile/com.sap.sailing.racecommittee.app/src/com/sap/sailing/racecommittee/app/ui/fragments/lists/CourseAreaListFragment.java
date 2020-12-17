@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -44,19 +44,20 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    protected ItemSelectedListener<CourseArea> attachListener(Activity activity) {
-        if (activity instanceof CourseAreaSelectedListenerHost) {
-            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) activity;
+    protected ItemSelectedListener<CourseArea> attachListener(Context context) {
+        if (context instanceof CourseAreaSelectedListenerHost) {
+            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) context;
             return listener.getCourseAreaSelectionListener();
         }
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
-                CourseAreaListFragment.class.getName(), activity.getClass().getName()));
+                CourseAreaListFragment.class.getName(), context.getClass().getName()));
     }
 
     @Override
     protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(
-            ReadonlyDataManager manager) {
+            ReadonlyDataManager manager
+    ) {
         return manager.createCourseAreasLoader(eventId, this);
     }
 
