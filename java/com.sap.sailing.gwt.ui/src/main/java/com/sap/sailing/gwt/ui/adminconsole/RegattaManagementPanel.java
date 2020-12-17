@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -16,15 +17,20 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -35,27 +41,27 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, FilterablePanelProvider<RegattaDTO> {
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    private final EventsRefresher eventsRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    private final EventRefresher eventRefresher;
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final RegattaListComposite regattaListComposite;
     private final RegattaDetailsComposite regattaDetailsComposite;
     private final UserService userService;
     
-    public RegattaManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
-            EventsRefresher eventsRefresher) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
+    public RegattaManagementPanel(StringMessages stringMessages, Presenter presenter) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+        this.errorReporter = presenter.getErrorReporter();
+        this.regattaRefresher = presenter;
+        this.leaderboardsRefresher = presenter;
+        this.eventRefresher = presenter;
         final VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -68,6 +74,13 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         regattaListComposite.ensureDebugId("RegattaListComposite");
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, REGATTA);
+        final Button update = buttonPanel.addCreateAction(stringMessages.refresh(), new Command() {
+            @Override
+            public void execute() {
+                regattaRefresher.reloadRegattas();
+            }
+        });
+        update.ensureDebugId("UpdateRegattaButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.addRegatta(), this::openCreateRegattaDialog);
         create.ensureDebugId("AddRegattaButton");
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(),
@@ -125,7 +138,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
                 @Override
                 public void onSuccess(Void result) {
-                    regattaRefresher.fillRegattas();
+                    regattaRefresher.reloadRegattas();
+                    leaderboardsRefresher.reloadLeaderboards();
                 }
             });
         }
@@ -149,7 +163,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, sailingServiceWrite, stringMessages,
                 new CreateRegattaCallback(userService, sailingServiceWrite, stringMessages, errorReporter, regattaRefresher,
-                        eventsRefresher, existingEvents));
+                        leaderboardsRefresher, eventRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -165,5 +179,10 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             regattas.add(regatta.getRegattaIdentifier());
         }
         return regattas;
+    }
+    
+    @Override
+    public AbstractFilterablePanel<RegattaDTO> getFilterablePanel() {
+        return regattaListComposite.filterablePanelRegattas;
     }
 }

@@ -17,6 +17,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -52,6 +53,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -63,6 +65,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.NamedDTO;
@@ -71,7 +74,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> , FilterablePanelProvider<StrippedLeaderboardDTOWithSecurity> {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -183,7 +186,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD);
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
         leaderboardsPanel.add(buttonPanel);
-
+        
+        final Button createLeaderboardRefreshBtn = buttonPanel.addCreateAction(stringMessages.refresh(), new Command() {
+            @Override
+            public void execute() {
+                getLeaderboardsRefresher().reloadLeaderboards();
+            }
+        });
+        createLeaderboardRefreshBtn.ensureDebugId("LeaderboardRefreshButton");
+        
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTOWithSecurity>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity>(lblFilterEvents,
@@ -386,7 +397,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards) {
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
-        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList    
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
     }
@@ -410,8 +421,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                                                                                     // provider
                         leaderboardSelectionModel.setSelected(leaderboard, true);
                         leaderboardSelectionChanged();
-                        getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList(),
-                                AbstractLeaderboardConfigPanel.this);
+                        getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList());
                     }
 
                     @Override
@@ -422,6 +432,23 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                     }
                 });
         sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName, callback);
+    }
+    
+    public void loadAndRefreshLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderboard) {
+
+        for (StrippedLeaderboardDTOWithSecurity leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
+            if (leaderboardDTO.getName().equals(leaderboard.getName())) {
+                leaderboardSelectionModel.setSelected(leaderboardDTO, false);
+                break;
+            }
+        }
+        replaceLeaderboardInList(availableLeaderboardList, leaderboard.getName(), leaderboard);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList
+                                                                    // provider
+        leaderboardSelectionModel.setSelected(leaderboard, true);
+        leaderboardSelectionChanged();
+        getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList());
+
     }
 
     private void replaceLeaderboardInList(List<StrippedLeaderboardDTOWithSecurity> leaderboardList,
@@ -901,5 +928,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 callback.onSuccess(competitorToBoatMap.keySet());
             }
         });
+    }
+    
+    @Override
+    public AbstractFilterablePanel<StrippedLeaderboardDTOWithSecurity> getFilterablePanel() {
+        return filterLeaderboardPanel;
     }
 }

@@ -1050,6 +1050,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
         }
+        // TODO bug5288 replace with call of clearState() in ExpeditionTrackerFactory
+        for (WindTrackerFactory factory : getWindTrackerFactories()) {
+            if (factory instanceof ExpeditionTrackerFactory) {
+                ((ExpeditionTrackerFactory)factory).clearState();
+            }
+        }
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
         raceManagerDeviceConfigurationsById.clear();

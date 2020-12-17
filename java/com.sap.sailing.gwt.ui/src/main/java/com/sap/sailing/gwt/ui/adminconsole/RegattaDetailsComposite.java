@@ -302,7 +302,7 @@ public class RegattaDetailsComposite extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                regattaRefresher.reloadRegattas();
                             }
                         }));
             }
@@ -410,7 +410,7 @@ public class RegattaDetailsComposite extends Composite {
 
                                         @Override
                                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                                            regattaRefresher.fillRegattas();
+                                            regattaRefresher.reloadRegattas();
                                         }
                                     });
                         }
@@ -432,7 +432,7 @@ public class RegattaDetailsComposite extends Composite {
 
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                regattaRefresher.reloadRegattas();
                             }
                         });
             }

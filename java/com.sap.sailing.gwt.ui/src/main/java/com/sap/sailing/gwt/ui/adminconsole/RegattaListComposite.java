@@ -77,10 +77,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
-    private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
-
-    private final UserService userService;
-    
+    protected final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
+    private final UserService userService;   
     private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -140,7 +138,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(regattaTable);
         initWidget(panel);
     }
-
+    
     /**
      * True {@link RegattaDTO}s as managed by this panel usually shall be filterable based on the user's
      * permission to update. However, this panel may also be subclassed and used for objects that have not
@@ -276,11 +274,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         // https://github.com/gwtproject/gwt/issues/9333
         // https://github.com/gwtproject/gwt/issues/9307
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                regatta -> regattaRefresher.fillRegattas(), stringMessages);
+                regatta -> regattaRefresher.reloadRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
+                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.reloadRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 regattaDTO -> configACL.openDialog(regattaDTO));
@@ -308,7 +306,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.reloadRegattas();
             }
         }));
     }
@@ -359,7 +357,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.reloadRegattas();
                     }
                 }));
 
@@ -381,7 +379,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     
                             @Override
                             public void onSuccess(Void result) {
-                                regattaRefresher.fillRegattas();
+                                regattaRefresher.reloadRegattas();
                                 run(); // update next series if iterator has next element
                             }
                         }));
@@ -407,7 +405,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
-        filterablePanelRegattas.updateAll(allRegattas);
+        filterablePanelRegattas.updateAll(allRegattas);    
     }
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {

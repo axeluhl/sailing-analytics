@@ -37,6 +37,8 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,14 +54,13 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.security.ui.client.UserService;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    private final EventManagementPanel eventManagementPanel;
+    private final EventRefresher eventRefresher;
     private final StructureImportListComposite regattaListComposite;
     private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
@@ -97,18 +98,16 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
-    public StructureImportManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
-            EventManagementPanel eventManagementPanel) {
+    public StructureImportManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
-        this.eventManagementPanel = eventManagementPanel;
+        this.eventRefresher = presenter;
         this.busyIndicator = new SimpleBusyIndicator();
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(sailingServiceWrite, userService, regattaRefresher,
+        this.regattaRefresher = presenter;
+        this.regattaListComposite = new StructureImportListComposite(sailingServiceWrite, presenter.getUserService(), regattaRefresher,
                 this, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
@@ -453,7 +452,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
-        eventManagementPanel.fillEvents();
+        eventRefresher.loadEvents();
         final List<RegattaDTO> regattaConfigurationsToCreate = new ArrayList<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
@@ -478,7 +477,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.reloadRegattas();
                 Notification.notify(stringMessages.successfullyCreatedRegattas(), NotificationType.SUCCESS);
             }
         });

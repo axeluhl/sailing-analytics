@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.panels;
 
+import java.util.List;
+
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;

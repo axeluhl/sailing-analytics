@@ -6,6 +6,7 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -78,6 +79,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     protected RefreshableSelectionModel<RaceDTO> refreshableSelectionModel;
     
+    protected final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
+    
     protected CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
@@ -93,7 +96,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Button btnRefresh;
 
-    private CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
+    protected CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
 
@@ -113,6 +116,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
+        this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.sailingService = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -230,7 +234,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                regattaRefresher.fillRegattas();
+                regattaRefresher.reloadRegattas();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
@@ -420,11 +424,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         final AccessControlledActionsColumn<RaceDTO, RegattaConfigImagesBarCell> actionsColumn = create(
                 new RegattaConfigImagesBarCell(stringMessages), userService);
         final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                race -> regattaRefresher.fillRegattas(), stringMessages);
+                race -> regattaRefresher.loadRegattas(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
 
         final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
+                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.loadRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
@@ -450,7 +454,10 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.reloadRegattas();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.racesRemoved(Arrays.asList(name));
+                        }
                     }
                 }));
     }
@@ -467,7 +474,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        regattaRefresher.reloadRegattas();
                     }
                 }));
     }
@@ -505,7 +512,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
+                                    regattaRefresher.reloadRegattas();
                                 }
                             }
                     ));

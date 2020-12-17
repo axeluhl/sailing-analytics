@@ -162,7 +162,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                         response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
                         response.getSensorFixImporterType(), response.getStartTimes(), sailingServiceWrite, userService,
                         errorReporter, stringMessages);
-                regattaRefresher.fillRegattas();
+                regattaRefresher.loadRegattas();
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }

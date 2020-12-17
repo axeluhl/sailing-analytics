@@ -1,14 +1,22 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public interface LeaderboardGroupsRefresher {
     /**
-     * Fetch all leaderboard groups from the server and distribute to all {@link LeaderboardGroupsDisplayer}s registered.
+     * Fetch all leaderboard groups from the server, if not already done 
+     * and distribute to all {@link LeaderboardGroupsDisplayer}s registered.
      */
-    void fillLeaderboardGroups();
+    void loadLeaderboardGroups();
+    
+    /**
+     * Fetch all leaderboard groups from server and distribute to all 
+     * {@link LeaderboardGroupsDisplayer}s registered.
+     */
+    void reloadLeaderboardGroups();
     
     /**
      * Update all {@link LeaderboardGroupsDisplayer}s registered with the updated collection of leaderboard groups.
@@ -22,7 +30,7 @@ public interface LeaderboardGroupsRefresher {
      *            will not receive a call to its {@link LeaderboardGroupsDisplayer#fillLeaderboardGroups(Iterable)}, assuming that
      *            the update originated in <code>origin</code> and hence no notification is required.
      */
-    void updateLeaderboardGroups(Iterable<LeaderboardGroupDTO> updatedLeaderboardGroups, LeaderboardGroupsDisplayer origin);
+    void updateLeaderboardGroups(List<LeaderboardGroupDTO> updatedLeaderboardGroups);
     
     /**
      * Setup the state {@link LeaderboardGroupsDisplayer} using parameters

@@ -12,7 +12,8 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -33,18 +34,21 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
-    private final EventsRefresher eventsRefresher;
+    private final EventRefresher eventRefresher;
     private final RegattaRefresher regattaRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
 
     public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
-            EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
+            EventRefresher eventRefresher, List<EventDTO> existingEvents) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+        this.eventRefresher = eventRefresher;
+        this.leaderboardsRefresher = leaderboardsRefresher;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
     }
@@ -86,7 +90,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 // if regatta creation was successful, add race columns as modeled in the creation dialog;
                 // note that the SeriesCreationParametersDTO don't describe race columns.
                 createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
-                fillRegattas();
+                reloadRegattas();
                 fillEvents(); // events have their associated regattas
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
@@ -115,22 +119,34 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
                     @Override
                     public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                        fillRegattas();
+                        loadRegattas();
                     }
                 });
             }
         }
     }
     
-    private void fillRegattas() {
+    private void reloadLeaderboards() {
+        if (leaderboardsRefresher != null) {
+            leaderboardsRefresher.reloadLeaderboards();
+        }
+    }
+    
+    private void reloadRegattas() {
         if (regattaRefresher != null){
-            regattaRefresher.fillRegattas();
+            regattaRefresher.reloadRegattas();
+        }
+    }
+    
+    private void loadRegattas() {
+        if (regattaRefresher != null){
+            regattaRefresher.reloadRegattas();
         }
     }
     
     private void fillEvents() {
-        if (eventsRefresher != null) {
-            eventsRefresher.fillEvents();
+        if (eventRefresher != null) {
+            eventRefresher.reloadEvents();
         }
     }
     
@@ -157,6 +173,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                                 openRegattaLeaderboardToLeaderboardGroupOfEventLinkingDialog(result, event);
                             }
                         }
+                        reloadLeaderboards();
                     }
 
                 });
