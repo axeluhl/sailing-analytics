@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 
-public class LandscapeManagementServiceWriteImpl extends ResultCachingProxiedRemoteServiceServlet
+public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
 
