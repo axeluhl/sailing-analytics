@@ -38,7 +38,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private final Set<RegattasDisplayer> regattasDisplayers;
     private final Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private final Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
-    private Set<EventsDisplayer> eventsDisplayers;
+    private final Set<EventsDisplayer> eventsDisplayers;
     private AdminConsoleView adminConsoleView;
     private MediaServiceWriteAsync mediaServiceWrite;
     private SailingServiceWriteAsync sailingService;
@@ -76,6 +76,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         regattasDisplayers = new HashSet<>();
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
+        eventsDisplayers = new HashSet<>();
     }
     
     public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
