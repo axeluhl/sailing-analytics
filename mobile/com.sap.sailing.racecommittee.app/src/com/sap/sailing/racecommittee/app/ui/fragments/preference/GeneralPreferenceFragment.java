@@ -188,13 +188,16 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         }
 
         if (resultCode == CommonStatusCodes.SUCCESS && data != null) {
-            Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+            final Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
             final Uri uri = Uri.parse(barcode.displayValue);
-            final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra(Defines.Jsonkey.ForceNewBranchSession.getKey(), true);
-            intent.putExtra(Defines.Jsonkey.AndroidPushNotificationKey.getKey(), barcode.displayValue);
-            startActivity(intent);
+            final Intent intent = requireContext().getPackageManager()
+                    .getLaunchIntentForPackage(requireContext().getPackageName());
+            if (intent != null) {
+                intent.setData(uri);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra(Defines.Jsonkey.ForceNewBranchSession.getKey(), true);
+                startActivity(intent);
+            }
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

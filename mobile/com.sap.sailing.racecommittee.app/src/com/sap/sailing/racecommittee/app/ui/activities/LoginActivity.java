@@ -398,9 +398,19 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             branchCourseAreaUuid = referringParams.optString(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_COURSE_AREA_UUID, null);
             branchPriority = referringParams.optInt(BranchIOConstants.RACEMANAGER_APP_BRANCH_PARAM_PRIORITY, NO_PRIORITY);
 
-            BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
+            final String accessToken = preferences.getString(getString(R.string.preference_access_token_key), null);
+            if (TextUtils.isEmpty(token) && TextUtils.isEmpty(accessToken)) {
+                LocalBroadcastManager.getInstance(LoginActivity.this)
+                        .sendBroadcast(new Intent(AppConstants.ACTION_SHOW_LOGIN));
+            } else {
+                checkLogin();
+            }
         }
     };
+
+    private void checkLogin() {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(AppConstants.ACTION_CHECK_LOGIN));
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -422,9 +432,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, 1).show();
         }
 
-        EulaHelper.with(this).showEulaDialogIfNotAccepted(() ->
-                Branch.getInstance().initSession(branchReferralInitListener, getIntent().getData(), LoginActivity.this)
-        );
+        EulaHelper.with(this).showEulaDialogIfNotAccepted(() -> {
+            Branch.getInstance().initSession(branchReferralInitListener, getIntent().getData(), LoginActivity.this);
+        });
     }
 
     @Override
@@ -473,8 +483,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.show();
             }
+            final String accessToken = AppPreferences.on(this).getAccessToken();
+            if (TextUtils.isEmpty(accessToken)) {
+                LocalBroadcastManager.getInstance(LoginActivity.this)
+                        .sendBroadcast(new Intent(AppConstants.ACTION_SHOW_LOGIN));
+                return;
+            }
         }
-        BroadcastManager.getInstance(LoginActivity.this).addIntent(new Intent(AppConstants.ACTION_CHECK_LOGIN));
+        checkLogin();
     }
 
     @Override
