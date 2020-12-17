@@ -13,14 +13,6 @@
 # start on that machine.
 # MEMORY="6000m"
 
-# To start replication upon startup provide the fully-qualified names of the Replicable service classes
-# for which to trigger replication. If you activate this make sure to
-# set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
-# same channel the master is using in its REPLICATION_CHANNEL variable
-
-if [ -n "$AUTO_REPLICATE" ]; then
-  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
-fi
 # Host / port where the master Java instance is running
 # Make sure firewall configurations allow access
 #
