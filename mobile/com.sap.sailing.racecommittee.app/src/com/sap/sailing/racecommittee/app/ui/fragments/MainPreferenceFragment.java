@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,10 +27,10 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
-import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
@@ -122,9 +122,13 @@ public class MainPreferenceFragment extends LoggableFragment {
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AppPreferences.on(getActivity()).setAccessToken(null);
-                                    startActivity(new Intent(getActivity(), PasswordActivity.class));
-                                    getActivity().finish();
+                                    final Activity activity = requireActivity();
+                                    AppPreferences.on(activity).setAccessToken(null);
+
+                                    DataManager dataManager = (DataManager) DataManager.create(activity);
+                                    dataManager.resetAll();
+
+                                    RaceApplication.getInstance().restart();
                                 }
                             }).setNegativeButton(android.R.string.cancel, null).show();
                 }
