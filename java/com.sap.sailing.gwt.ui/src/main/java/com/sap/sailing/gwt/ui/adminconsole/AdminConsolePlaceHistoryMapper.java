@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CompetitorsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CourseLayoutPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.TrackedRacesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
-import com.sap.sailing.landscape.ui.LandscapeManagementPlace;
+import com.sap.sailing.landscape.ui.client.LandscapeManagementPlace;
 
 @WithTokenizers({EventsPlace.Tokenizer.class, RegattasPlace.Tokenizer.class, 
     LeaderboardsPlace.Tokenizer.class, LeaderboardGroupsPlace.Tokenizer.class, TrackedRacesPlace.Tokenizer.class, CompetitorsPlace.Tokenizer.class,

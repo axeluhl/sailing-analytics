@@ -1,18 +1,17 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.landscape.ui.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
+import com.sap.sse.gwt.adminconsole.AdminConsolePresenter;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.adminconsole.LandscapeManagementPanel;
 
 public class LandscapeManagementPanelSupplier extends AdminConsolePanelSupplier<LandscapeManagementPanel> {
-    private final Presenter presenter;
+    private final AdminConsolePresenter presenter;
     private final AdminConsoleTableResources tableResources;
 
-    public LandscapeManagementPanelSupplier(final Presenter presenter, final AdminConsoleTableResources tableResources) {
+    public LandscapeManagementPanelSupplier(final AdminConsolePresenter presenter, final AdminConsoleTableResources tableResources) {
         super();
         this.tableResources = tableResources;
         this.presenter = presenter;
@@ -21,8 +20,8 @@ public class LandscapeManagementPanelSupplier extends AdminConsolePanelSupplier<
     @Override
     public LandscapeManagementPanel init() {
         logger.info("Create LandscapeManagementPanel");
-        final LandscapeManagementPanel landscapeManagementPanel = new LandscapeManagementPanel(StringMessages.INSTANCE,
-                presenter.getUserService(), tableResources, presenter.getErrorReporter());
+        final LandscapeManagementPanel landscapeManagementPanel = new LandscapeManagementPanel(
+                StringMessages.INSTANCE, presenter.getUserService(), tableResources, presenter.getErrorReporter());
         landscapeManagementPanel.ensureDebugId("LandscapeManagementPanel");
         return landscapeManagementPanel;
     }

@@ -10,5 +10,7 @@ Require-Bundle: com.sap.sse.gwt,
  com.google.gwt.servlet;bundle-version="2.9.0",
  com.google.gwt.user;bundle-version="2.9.0";resolution:=optional,
  org.apache.shiro.core,
- com.sap.sse.gwt.adminconsole
-Export-Package: com.sap.sailing.landscape.ui
+ com.sap.sse.gwt.adminconsole,
+ com.sap.sse.security,
+ com.sap.sse.security.ui
+Export-Package: com.sap.sailing.landscape.ui.client

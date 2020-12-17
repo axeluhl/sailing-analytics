@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.ui;
+package com.sap.sailing.landscape.ui.client;
 
 import java.util.function.Function;
 

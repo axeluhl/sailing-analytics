@@ -16,9 +16,8 @@ import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
-import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.adminconsole.AdminConsolePresenter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
-import com.sap.sse.security.ui.client.UserService;
 
 public interface AdminConsoleView extends IsWidget {
 
@@ -30,11 +29,8 @@ public interface AdminConsoleView extends IsWidget {
     
     void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace);
     
-    public interface Presenter extends LeaderboardGroupsRefresher, RegattaRefresher,
+    public interface Presenter extends AdminConsolePresenter, LeaderboardGroupsRefresher, RegattaRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, EventRefresher, MediaTracksRefresher {
-
-        ErrorReporter getErrorReporter();
-
         Iterable<RegattasDisplayer> getRegattasDisplayers();
 
         void addRegattasDisplayer(RegattasDisplayer regattasDisplayer);
@@ -49,8 +45,6 @@ public interface AdminConsoleView extends IsWidget {
 
         SailingServiceWriteAsync getSailingService();
 
-        UserService getUserService();
-
         MediaServiceWriteAsync getMediaServiceWrite();
 
         PlaceController getPlaceController();
@@ -59,9 +53,6 @@ public interface AdminConsoleView extends IsWidget {
         
         void addEventsDisplayer(EventsDisplayer eventsDisplayer);
         
-        void loadMediaTracks();
-        
         void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher);
     }
-
 }
