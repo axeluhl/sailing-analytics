@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 
 public abstract class AbstractAdvancedPlace extends AbstractAdminConsolePlace {
     public AbstractAdvancedPlace(String token) {

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.FileStoragePlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.advanced.LandscapeManagementPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.LocalServerPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.MasterDataImportPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.RemoteServerInstancesPlace;
@@ -34,6 +33,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CompetitorsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CourseLayoutPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.TrackedRacesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
+import com.sap.sailing.landscape.ui.LandscapeManagementPlace;
 
 @WithTokenizers({EventsPlace.Tokenizer.class, RegattasPlace.Tokenizer.class, 
     LeaderboardsPlace.Tokenizer.class, LeaderboardGroupsPlace.Tokenizer.class, TrackedRacesPlace.Tokenizer.class, CompetitorsPlace.Tokenizer.class,

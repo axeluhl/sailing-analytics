@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.racemanager;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 
 public class DeviceConfigurationPlace extends AbstractAdminConsolePlace {
     

@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.security.ui.client.UserService;

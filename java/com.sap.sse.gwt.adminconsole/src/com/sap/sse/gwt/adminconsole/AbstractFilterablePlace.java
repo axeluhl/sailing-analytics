@@ -1,10 +1,9 @@
-package com.sap.sailing.gwt.ui.adminconsole.places;
+package com.sap.sse.gwt.adminconsole;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sse.gwt.adminconsole.FilterableAdminConsolePlace;
 import com.sap.sse.gwt.client.panels.FilterAndSelectParameters;
 
 public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace implements FilterableAdminConsolePlace {

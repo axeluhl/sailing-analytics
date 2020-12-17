@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
+package com.sap.sailing.landscape.ui;
 
 import java.util.function.Function;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
 public class LandscapeManagementPlace extends AbstractFilterablePlace {
     public LandscapeManagementPlace(String token) {

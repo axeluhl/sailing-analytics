@@ -1,9 +1,8 @@
-package com.sap.sailing.gwt.ui.adminconsole.places;
+package com.sap.sse.gwt.adminconsole;
 
 import java.util.Map;
 
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public abstract class AbstractAdminConsolePlace extends AbstractBasePlace implements AdminConsolePlace  {
     protected AbstractAdminConsolePlace(String placeParamsFromUrlFragment) {
