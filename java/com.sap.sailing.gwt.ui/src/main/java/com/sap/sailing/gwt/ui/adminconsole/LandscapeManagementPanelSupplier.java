@@ -6,25 +6,25 @@ import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
+import com.sap.sse.gwt.adminconsole.LandscapeManagementPanel;
 
-public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<RoleDefinitionsPanel> {
+public class LandscapeManagementPanelSupplier extends AdminConsolePanelSupplier<LandscapeManagementPanel> {
     private final Presenter presenter;
     private final AdminConsoleTableResources tableResources;
 
-    public RoleDefinitionsPanelSupplier(final Presenter presenter, final AdminConsoleTableResources tableResources) {
+    public LandscapeManagementPanelSupplier(final Presenter presenter, final AdminConsoleTableResources tableResources) {
         super();
         this.tableResources = tableResources;
         this.presenter = presenter;
     }
 
     @Override
-    public RoleDefinitionsPanel init() {
-        logger.info("Create RoleDefinitionsPanel");
-        final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanelWrapper(StringMessages.INSTANCE,
+    public LandscapeManagementPanel init() {
+        logger.info("Create LandscapeManagementPanel");
+        final LandscapeManagementPanel landscapeManagementPanel = new LandscapeManagementPanel(StringMessages.INSTANCE,
                 presenter.getUserService(), tableResources, presenter.getErrorReporter());
-        roleManagementPanel.ensureDebugId("RoleDefinitionsPanelWrapper");
-        return roleManagementPanel;
+        landscapeManagementPanel.ensureDebugId("LandscapeManagementPanel");
+        return landscapeManagementPanel;
     }
 
     @Override

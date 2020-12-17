@@ -108,4 +108,6 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the server name
      */
     public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.ALL_ACTIONS);
+    
+    public static final HasPermissions LANDSCAPE = new SecuredSecurityTypes("LANDSCAPE");
 }

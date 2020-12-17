@@ -2423,4 +2423,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manageEvents();
     String sharingLinkCopied();
     String startOfTrackingMustNotBeAfterEndOfTracking();
+    String landscape();
 }

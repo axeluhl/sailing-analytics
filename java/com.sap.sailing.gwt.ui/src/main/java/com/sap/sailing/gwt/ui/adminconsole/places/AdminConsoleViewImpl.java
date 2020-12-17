@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanelSu
 import com.sap.sailing.gwt.ui.adminconsole.FileStoragePanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanel;
 import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanelSupplier;
+import com.sap.sailing.gwt.ui.adminconsole.LandscapeManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupConfigPanel;
@@ -68,6 +69,7 @@ import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkPropertiesPanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkRolePanel;
 import com.sap.sailing.gwt.ui.adminconsole.coursecreation.MarkTemplatePanel;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.FileStoragePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.advanced.LandscapeManagementPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.LocalServerPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.MasterDataImportPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.RemoteServerInstancesPlace;
@@ -104,6 +106,7 @@ import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
+import com.sap.sse.gwt.adminconsole.LandscapeManagementPanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -471,6 +474,12 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 stringMessages.fileStorage(), new FileStoragePlace(null),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
+        /* Landscape Management */
+        final LandscapeManagementPanelSupplier landscapeManagementPanelSupplier = new LandscapeManagementPanelSupplier(presenter, tableResources);
+        adminConsolePanel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<LandscapeManagementPanel>(landscapeManagementPanelSupplier), stringMessages.landscape(), new LandscapeManagementPlace((String) null /* no place token */),
+                SecuredSecurityTypes.LANDSCAPE.getPermission(DefaultActions.MUTATION_ACTIONS));
+        
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(stringMessages.courseCreation(), COURSE_CREATION);
