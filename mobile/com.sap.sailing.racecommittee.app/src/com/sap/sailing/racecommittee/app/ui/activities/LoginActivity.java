@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -13,10 +14,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.LocalBroadcastManager;
@@ -533,7 +532,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                             ExLog.ex(LoginActivity.this, TAG, reason);
                         }
 
-                        slideUpBackdropDelayed();
+                        slideUpBackdrop(() -> {});
                     }
 
                     @Override
@@ -547,7 +546,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
                         Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded),
                                 Toast.LENGTH_LONG).show();
-                        slideUpBackdropDelayed();
+                        slideUpBackdrop(() -> {});
                     }
                 });
 
@@ -584,16 +583,11 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     }
 
-    private void slideUpBackdropDelayed() {
-        Handler handler = new Handler();
-        Runnable runnable = () -> slideUpBackdrop();
-        handler.postDelayed(runnable, 1000);
-    }
-
-    private void slideUpBackdrop() {
+    private void slideUpBackdrop(Runnable runnable) {
         final View loginView = findViewById(R.id.login_listview);
         // don't slide up if already up
         if (backdrop.getY() != 0) {
+            runnable.run();
             return;
         }
 
@@ -623,6 +617,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         animatorSet.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
         animatorSet.addListener(new AnimatorSetListener());
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                runnable.run();
+            }
+        });
         animatorSet.start();
     }
 
@@ -644,16 +644,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             setupDataManager();
         }
 
-        if (backdrop.getY() == 0f) {
-            slideUpBackdropDelayed();
-        }
-
-        addEventListFragment(force);
-
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.area_fragment, new Fragment());
-        transaction.replace(R.id.position_fragment, new Fragment());
-        transaction.commit();
+        slideUpBackdrop(() -> addEventListFragment(force));
     }
 
     private class IntentReceiver extends BroadcastReceiver {
