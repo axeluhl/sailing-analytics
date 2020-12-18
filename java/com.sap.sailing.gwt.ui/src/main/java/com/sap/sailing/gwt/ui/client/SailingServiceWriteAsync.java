@@ -84,7 +84,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public interface SailingWriteServiceAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
+public interface SailingServiceWriteAsync extends FileStorageManagementGwtServiceAsync, SailingServiceAsync {
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, int priority, AsyncCallback<Void> callback)

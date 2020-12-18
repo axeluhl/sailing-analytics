@@ -55,7 +55,7 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -63,7 +63,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
 import com.sap.sailing.gwt.ui.client.RaceTimePanelSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
@@ -138,9 +138,9 @@ public class RaceBoardPanel
         extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
         implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
-    private final MediaWriteServiceAsync mediaServiceWrite;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final UUID eventId;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -213,7 +213,7 @@ public class RaceBoardPanel
             ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> componentContext,
             RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, SailingServiceAsync sailingService,
-            MediaServiceAsync mediaService, MediaWriteServiceAsync mediaServiceWrite, UserService userService,
+            MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID leaderboardGroupId, UUID eventId, ErrorReporter errorReporter,
@@ -221,7 +221,7 @@ public class RaceBoardPanel
             RaceTimesInfoProvider raceTimesInfoProvider, boolean showChartMarkEditMediaButtonsAndVideo,
             boolean showHeaderPanel, Iterable<DetailType> availableDetailTypes,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, final RaceWithCompetitorsAndBoatsDTO raceDTO,
-            TrackingConnectorInfoDTO trackingConnectorInfo, SailingWriteServiceAsync sailingServiceWrite) {
+            TrackingConnectorInfoDTO trackingConnectorInfo, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, componentContext, lifecycle, settings);
         this.sailingService = sailingService;
         this.sailingServiceWrite = sailingServiceWrite;

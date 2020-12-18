@@ -4,7 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
-public interface MediaWriteServiceAsync extends MediaServiceAsync {
+public interface MediaServiceWriteAsync extends MediaServiceAsync {
 
     void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<MediaTrackWithSecurityDTO> asyncCallback);
 

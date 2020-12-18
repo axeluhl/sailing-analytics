@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sse.common.Util.Pair;
@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Tim Hessenmüller (D062243)
  */
 public class ResultImportUrlsListComposite extends Composite {
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
@@ -40,7 +40,7 @@ public class ResultImportUrlsListComposite extends Composite {
 
     private final ResultImportUrlsTableWrapper<RefreshableMultiSelectionModel<UrlDTO>> table;
 
-    public ResultImportUrlsListComposite(SailingWriteServiceAsync sailingServiceWriteAsync, UserService userService,
+    public ResultImportUrlsListComposite(SailingServiceWriteAsync sailingServiceWriteAsync, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWriteAsync;
         this.errorReporter = errorReporter;

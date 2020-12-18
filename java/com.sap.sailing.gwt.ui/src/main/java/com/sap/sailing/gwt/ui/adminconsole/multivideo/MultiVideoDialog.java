@@ -44,7 +44,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
-import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils;
@@ -84,7 +84,7 @@ public class MultiVideoDialog extends DialogBox {
     private StringMessages stringMessages;
     private List<RemoteFileInfo> remoteFiles = new ArrayList<>();
     private FlexTable dataTable;
-    private MediaWriteServiceAsync mediaServiceWrite;
+    private MediaServiceWriteAsync mediaServiceWrite;
     private Button doScanButton;
     private Label statusLabel;
     private SailingServiceAsync sailingService;
@@ -94,7 +94,7 @@ public class MultiVideoDialog extends DialogBox {
     protected int offsetTimeInMS;
     private boolean isWorking;
 
-    public MultiVideoDialog(SailingServiceAsync sailingService, MediaWriteServiceAsync mediaServiceWrite,
+    public MultiVideoDialog(SailingServiceAsync sailingService, MediaServiceWriteAsync mediaServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
         this.mediaServiceWrite = mediaServiceWrite;

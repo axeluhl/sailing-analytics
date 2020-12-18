@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -27,7 +27,7 @@ public class BoatPanel extends SimplePanel {
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private Button allowReloadButton;
 
-    public BoatPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public BoatPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,

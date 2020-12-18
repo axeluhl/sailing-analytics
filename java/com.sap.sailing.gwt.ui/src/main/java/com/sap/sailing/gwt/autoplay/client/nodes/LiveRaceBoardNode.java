@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.autoplay.client.places.screens.liveraceloop.raceboard
 import com.sap.sailing.gwt.autoplay.client.utils.AutoplayHelper;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -61,7 +61,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         UserService userService = cf.getUserService();
         SailingServiceAsync sailingService = cf.getSailingService();
         MediaServiceAsync mediaService = cf.getMediaService();
-        MediaWriteServiceAsync mediaServiceWrite = cf.getMediaServiceWrite();
+        MediaServiceWriteAsync mediaServiceWrite = cf.getMediaServiceWrite();
         AsyncCallback<RaceboardDataDTO> raceBoardDataCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {

@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -128,7 +128,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, SailingWriteServiceAsync sailingServiceWrite,
+    public EventDialog(EventParameterValidator validator, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);

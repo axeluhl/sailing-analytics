@@ -27,7 +27,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
@@ -63,7 +63,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
     private final SwissTimingConnectionTableWrapper connectionsTable;
 
-    public SwissTimingEventManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public SwissTimingEventManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants, final CellTableWithCheckboxResources tableResources) {
         super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringConstants);
@@ -377,7 +377,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
 
-    private void fillRaces(final SailingWriteServiceAsync sailingServiceWrite) {
+    private void fillRaces(final SailingServiceWriteAsync sailingServiceWrite) {
         final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
                 .getSelectedSet().iterator().next();
         sailingServiceWrite.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),

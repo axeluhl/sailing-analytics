@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 
-public interface MediaWriteService extends MediaService {
+public interface MediaServiceWrite extends MediaService {
 
     MediaTrackWithSecurityDTO addMediaTrack(MediaTrack mediaTrack);
 

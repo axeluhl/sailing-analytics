@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -36,7 +36,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
 
     private final PairingListTemplateDTO template;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
 
@@ -51,7 +51,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final Grid pairingListGrid;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
-            PairingListTemplateDTO template, SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter) {
+            PairingListTemplateDTO template, SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter) {
         super(/* title */ stringMessages.pairingList(), /* message */ null, stringMessages.close(),
                 /* cancel button name */ null, /* validator */ null, /* callback */ null);
         this.errorReporter = errorReporter;

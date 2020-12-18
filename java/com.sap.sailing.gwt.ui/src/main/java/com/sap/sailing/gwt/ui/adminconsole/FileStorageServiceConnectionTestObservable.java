@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 
@@ -22,7 +22,7 @@ public class FileStorageServiceConnectionTestObservable {
     private List<FileStorageServiceConnectionTestObserver> observer = new ArrayList<>();
     private boolean value;
 
-    public FileStorageServiceConnectionTestObservable(SailingWriteServiceAsync sailingServiceWrite) {
+    public FileStorageServiceConnectionTestObservable(SailingServiceWriteAsync sailingServiceWrite) {
         value = false;
         sailingServiceWrite.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {

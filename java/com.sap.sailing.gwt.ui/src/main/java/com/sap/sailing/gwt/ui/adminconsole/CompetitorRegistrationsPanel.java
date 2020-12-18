@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -77,7 +77,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      *            to all competitors in the server's competitor store
      * @param additionalWidgetsBeforeTables widgets to be inserted above / before the competitor tables; may be {@code null} or empty
      */
-    protected CompetitorRegistrationsPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    protected CompetitorRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
@@ -208,7 +208,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
+            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override

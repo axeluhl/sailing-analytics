@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -44,15 +44,15 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     
-    public BoatTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
+    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
         this(sailingServiceWrite, userService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
                 allowActions);
     }
 
-    public BoatTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {

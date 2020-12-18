@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnec
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
@@ -65,7 +65,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     private final SwissTimingArchivedConnectionTableWrapper connectionsTable;
 
-    public SwissTimingReplayConnectorPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public SwissTimingReplayConnectorPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
         super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -251,7 +251,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 e -> btnTrack.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
     }
 
-    private AccessControlledButtonPanel createButtonPanel(final SailingWriteServiceAsync sailingServiceWrite,
+    private AccessControlledButtonPanel createButtonPanel(final SailingServiceWriteAsync sailingServiceWrite,
             UserService userService, ErrorReporter errorReporter, StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT);

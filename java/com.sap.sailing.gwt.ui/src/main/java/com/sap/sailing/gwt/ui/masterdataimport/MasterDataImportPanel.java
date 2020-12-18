@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
@@ -59,7 +59,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private final StringMessages stringMessages;
     private String currentHost;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
@@ -74,7 +74,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite,
+    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {

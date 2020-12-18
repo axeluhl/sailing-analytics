@@ -23,9 +23,9 @@ public abstract class SailingServiceHelper {
     }
     
     /**
-     * Creates a new {@link SailingWriteServiceAsync} instance, should be used when code resides in the same bundle as the sailing service code.
+     * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
-    public static SailingWriteServiceAsync createSailingServiceWriteInstance() {
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
         return createSailingServiceWriteInstance(/* same bundle */ true, /* no routing provider required, no sharding for write requests */ null);
     }
     
@@ -67,14 +67,14 @@ public abstract class SailingServiceHelper {
     }
 
     /**
-     * Creates a new {@link SailingWriteServiceAsync} instance that uses a routing provider, for code in same bundle.
+     * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
      */
-    public static SailingWriteServiceAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
         return createSailingServiceWriteInstance(/* same bundle */ true, routingProvider);
     }
 
-    public static SailingWriteServiceAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
-        final SailingWriteServiceAsync service = GWT.create(SailingWriteService.class);
+    public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
+        final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
         final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
         if (routingProvider != null) {

@@ -42,7 +42,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util.Triple;
@@ -80,7 +80,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     private final Map<String, BoatDTO> boatsByIdAsString;
     private final CertificatesTableWrapper<RefreshableSingleSelectionModel<ORCCertificate>> certificateTable;
     private final BusyIndicator busyIndicator;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     
     private final StringListEditorComposite urls;
@@ -126,7 +126,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     /**
      * After invoking this superclass constructor, and after doing any other initialization work, subclasses must call {@link #refresh}.
      */
-    public AbstractBoatCertificatesPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public AbstractBoatCertificatesPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final SecuredDTO objectToCheckUpdatePermissionFor, final StringMessages stringMessages,
             final ErrorReporter errorReporter, Supplier<Boolean> contextUpdatePermissionCheck, String errorContext) {
         this.sailingServiceWrite = sailingServiceWrite;
@@ -450,7 +450,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         assignCertificates(sailingServiceWrite, certificatesByBoatIdAsString, callback);
     }
 
-    protected abstract void assignCertificates(SailingWriteServiceAsync sailingServiceWrite,
+    protected abstract void assignCertificates(SailingServiceWriteAsync sailingServiceWrite,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
 

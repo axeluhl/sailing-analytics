@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObser
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -20,7 +20,7 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
-    private SailingWriteServiceAsync sailingService;
+    private SailingServiceWriteAsync sailingService;
 
     private ErrorReporter errorReporter;
 
@@ -35,7 +35,7 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
     private UserService userService;
 
     public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
-            StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+            StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, Set<RegattasDisplayer> regattasDisplayers,
             FileStorageServiceConnectionTestObservable storageServiceConnection,

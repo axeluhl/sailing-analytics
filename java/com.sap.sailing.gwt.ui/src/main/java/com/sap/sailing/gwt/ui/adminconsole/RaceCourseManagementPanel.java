@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.client.UserService;
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CourseManagementWidget courseManagementWidget;
 
-    public RaceCourseManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public RaceCourseManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
         super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
         courseManagementWidget = new CourseManagementWidget(sailingServiceWrite, errorReporter, stringMessages,

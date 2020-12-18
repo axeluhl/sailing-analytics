@@ -18,7 +18,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -35,7 +35,7 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
 
     private final LabeledAbstractFilterablePanel<ORCCertificate> filterField;
 
-    public CertificatesTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
+    public CertificatesTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, int pagingSize) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize, new EntityIdentityComparator<ORCCertificate>() {
             @Override

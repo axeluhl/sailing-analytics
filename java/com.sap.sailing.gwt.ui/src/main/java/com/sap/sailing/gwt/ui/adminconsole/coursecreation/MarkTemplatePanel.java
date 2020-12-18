@@ -27,7 +27,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.Util;
@@ -52,7 +52,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MarkTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MarkTemplateDTO> filterableMarkTemplates;
     private List<MarkTemplateDTO> allMarkTemplates;
     private final ErrorReporter errorReporter;
@@ -61,7 +61,7 @@ public class MarkTemplatePanel extends FlowPanel {
     private ListDataProvider<MarkTemplateDTO> markTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkTemplateDTO> refreshableSelectionModel;
 
-    public MarkTemplatePanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public MarkTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;

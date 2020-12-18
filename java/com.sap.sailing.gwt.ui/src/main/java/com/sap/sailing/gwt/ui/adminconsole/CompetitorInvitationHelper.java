@@ -5,7 +5,7 @@ import java.util.Set;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util.Pair;
@@ -17,10 +17,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class CompetitorInvitationHelper {
     
     private StringMessages stringMessages;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private ErrorReporter errorReporter;
 
-    public CompetitorInvitationHelper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+    public CompetitorInvitationHelper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;

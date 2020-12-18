@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.orc.impl.FixedSpeedImpliedWindSourceImpl;
 import com.sap.sailing.domain.common.orc.impl.OtherRaceAsImpliedWindSourceImpl;
 import com.sap.sailing.domain.common.orc.impl.OwnMaxImpliedWindImpl;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util.Triple;
@@ -44,7 +44,7 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
     public ImpliedWindSourceEditDialog(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceSlot,
             final ImpliedWindSource previousImpliedWindSource,
             Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, final StringMessages stringMessages,
-            ErrorReporter errorReporter, SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+            ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             DialogCallback<ImpliedWindSource> callback) {
         super(stringMessages.impliedWindSource(),
                 stringMessages.provideImpliedWindSourceForRace(

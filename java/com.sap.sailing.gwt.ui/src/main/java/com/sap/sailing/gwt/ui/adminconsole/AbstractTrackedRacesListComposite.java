@@ -45,7 +45,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -86,7 +86,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Label noTrackedRacesLabel;
 
-    protected final SailingWriteServiceAsync sailingService;
+    protected final SailingServiceWriteAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
@@ -109,7 +109,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingWriteServiceAsync sailingServiceWrite,
+            final SailingServiceWriteAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);

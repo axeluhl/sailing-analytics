@@ -41,7 +41,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
@@ -72,7 +72,7 @@ public class MarkPropertiesPanel extends FlowPanel {
     private static final AbstractImagePrototype setDeviceIdentifierImagePrototype = AbstractImagePrototype
             .create(resources.mapDevices());
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MarkPropertiesDTO> filterableMarkProperties;
     private List<MarkPropertiesDTO> allMarkProperties;
     private final ErrorReporter errorReporter;
@@ -81,7 +81,7 @@ public class MarkPropertiesPanel extends FlowPanel {
     private ListDataProvider<MarkPropertiesDTO> markPropertiesListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkPropertiesDTO> refreshableSelectionModel;
 
-    public MarkPropertiesPanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public MarkPropertiesPanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;

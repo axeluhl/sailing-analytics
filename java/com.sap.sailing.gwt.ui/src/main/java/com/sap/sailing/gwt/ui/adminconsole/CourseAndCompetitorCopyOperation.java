@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -16,11 +16,11 @@ public class CourseAndCompetitorCopyOperation {
     final boolean copyCompetitors;
     final Integer priority;
     final private ErrorReporter errorReporter;
-    final private SailingWriteServiceAsync sailingServiceWrite;
+    final private SailingServiceWriteAsync sailingServiceWrite;
 
     public CourseAndCompetitorCopyOperation(
             Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
-            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter) {
+            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
         this.copyCompetitors = copyCompetitors;

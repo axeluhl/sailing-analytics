@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer {
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -47,7 +47,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private final RegattaDetailsComposite regattaDetailsComposite;
     private final UserService userService;
     
-    public RegattaManagementPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public RegattaManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventsRefresher eventsRefresher) {
         this.sailingServiceWrite = sailingServiceWrite;

@@ -10,7 +10,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -41,7 +41,7 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class ExpeditionAllInOneAfterImportHandler {
     
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -61,7 +61,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
             String leaderboardGroupName, UUID leaderboardGroupId, List<Triple<String,  String, String>> raceEntries,
             List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
-            Iterable<TimePoint> startTimes, final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
+            Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
@@ -111,7 +111,7 @@ public class ExpeditionAllInOneAfterImportHandler {
     }
     
     private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace) {
             this(boatClass, sailingServiceWrite, userService, stringMessages, errorReporter, editable, leaderboardName,
@@ -119,7 +119,7 @@ public class ExpeditionAllInOneAfterImportHandler {
                     new CallbackForCompetitorRegistrationDialog());
         }
         
-        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
                 StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
                 boolean canBoatsOfCompetitorsChangePerRace, ValidatorForCompetitorRegistrationDialog validator,
                 CallbackForCompetitorRegistrationDialog callback) {

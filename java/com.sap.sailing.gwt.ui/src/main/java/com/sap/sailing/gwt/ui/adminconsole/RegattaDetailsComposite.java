@@ -36,7 +36,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -59,7 +59,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private final CaptionPanel mainPanel;
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -87,7 +87,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaDetailsComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;

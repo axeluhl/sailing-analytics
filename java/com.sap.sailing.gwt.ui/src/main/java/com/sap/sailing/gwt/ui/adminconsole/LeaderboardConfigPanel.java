@@ -77,7 +77,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -136,7 +136,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         SafeHtml cell(SafeUri url, String displayName);
     }
 
-    public LeaderboardConfigPanel(final SailingWriteServiceAsync sailingService, final UserService userService,
+    public LeaderboardConfigPanel(final SailingServiceWriteAsync sailingService, final UserService userService,
             RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, StringMessages theStringConstants,
             final boolean showRaceDetails,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher) {

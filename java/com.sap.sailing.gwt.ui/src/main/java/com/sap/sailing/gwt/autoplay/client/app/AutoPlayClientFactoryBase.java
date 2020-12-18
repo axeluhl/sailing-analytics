@@ -17,21 +17,21 @@ import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPla
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaWriteService;
-import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 public abstract class AutoPlayClientFactoryBase
         extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory {
     private final SailingServiceAsync sailingService;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
-    private final MediaWriteServiceAsync mediaServiceWrite;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final AutoPlayPlaceNavigator navigator;
 
     private final Map<String, SailingServiceAsync> services = new HashMap<>();
@@ -43,7 +43,7 @@ public abstract class AutoPlayClientFactoryBase
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         mediaService = GWT.create(MediaService.class);
-        mediaServiceWrite = GWT.create(MediaWriteService.class);
+        mediaServiceWrite = GWT.create(MediaServiceWrite.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
@@ -81,7 +81,7 @@ public abstract class AutoPlayClientFactoryBase
     }
   
     @Override
-    public SailingWriteServiceAsync getSailingServiceWrite() {
+    public SailingServiceWriteAsync getSailingServiceWrite() {
         return sailingServiceWrite;
     }
 
@@ -90,7 +90,7 @@ public abstract class AutoPlayClientFactoryBase
         return mediaService;
     }
     
-    public MediaWriteServiceAsync getMediaServiceWrite() {
+    public MediaServiceWriteAsync getMediaServiceWrite() {
         return mediaServiceWrite;
     }
 

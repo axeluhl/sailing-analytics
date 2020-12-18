@@ -65,7 +65,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
@@ -123,7 +123,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     private String raceListSelection;
     private boolean showCarryColumn;
     
-    private final SailingWriteServiceAsync sailingServiceWrite; 
+    private final SailingServiceWriteAsync sailingServiceWrite; 
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -696,7 +696,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     }
 
     public EditableLeaderboardPanel(ComponentContext<EditableLeaderboardSettings> context,
-            final SailingWriteServiceAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
+            final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes, 
             EditableLeaderboardSettings settings) {
@@ -1263,7 +1263,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     protected void blurFocusedElementAfterSelectionChange() {
     }   
 
-    public SailingWriteServiceAsync getSailingService() {
+    public SailingServiceWriteAsync getSailingService() {
         return sailingServiceWrite;
     }
     

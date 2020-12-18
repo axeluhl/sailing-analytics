@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.ui.adminconsole.SetTimePointDialog;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -66,7 +66,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         }
     }
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final SailingServiceAsync sailingService;
     private RegattaAndRaceIdentifier raceIdentifier;
     private final ErrorReporter errorReporter;
@@ -100,7 +100,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     public EditMarkPassingsPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
-            final SailingWriteServiceAsync sailingServiceWrite,
+            final SailingServiceWriteAsync sailingServiceWrite,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
             final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
         super(parent, context);

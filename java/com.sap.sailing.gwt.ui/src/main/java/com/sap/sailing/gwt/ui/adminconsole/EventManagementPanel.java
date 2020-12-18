@@ -11,7 +11,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -32,7 +32,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private final CaptionPanel eventsPanel;
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     
-    public EventManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
+    public EventManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final HandleTabSelectable handleTabSelectable) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);

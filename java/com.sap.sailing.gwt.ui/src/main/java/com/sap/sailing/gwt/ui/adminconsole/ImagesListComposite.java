@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -50,7 +50,7 @@ import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
  */
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -77,7 +77,7 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
+    public ImagesListComposite(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             final FileStorageServiceConnectionTestObservable storageServiceAvailable) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;

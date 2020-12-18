@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -30,13 +30,13 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final String leaderboardName;
     private final String raceColumnName;
     private final String fleetName;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
-    public CompetitorToBoatMappingsViewPanel(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
+    public CompetitorToBoatMappingsViewPanel(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName,
             final String fleetName, UserService userService) {
         super();

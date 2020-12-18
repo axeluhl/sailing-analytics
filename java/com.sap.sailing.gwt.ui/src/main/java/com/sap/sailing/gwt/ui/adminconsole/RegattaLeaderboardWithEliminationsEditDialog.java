@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -25,7 +25,7 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderboardWithEliminationsDialog {
-    public RegattaLeaderboardWithEliminationsEditDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLeaderboardWithEliminationsEditDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithEliminations leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {

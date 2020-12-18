@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
@@ -29,7 +29,7 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
         PassingInstruction getDefaultPassingInstruction(int numberOfMarksInControlPoint, String controlPointIdAsString);
     }
     
-    public WaypointCreationDialog(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public WaypointCreationDialog(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, AdminConsoleTableResources tableRes,
             List<ControlPointDTO> controlPoints, final DefaultPassingInstructionProvider defaultPassingInstructionProvider,
             DialogCallback<WaypointDTO> callback) {

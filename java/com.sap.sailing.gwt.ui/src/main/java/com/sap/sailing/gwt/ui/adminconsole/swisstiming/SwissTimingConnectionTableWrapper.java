@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -47,7 +47,7 @@ public class SwissTimingConnectionTableWrapper extends
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public SwissTimingConnectionTableWrapper(final UserService userService, final SailingWriteServiceAsync sailingServiceWriteAsync,
+    public SwissTimingConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceWriteAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, true, enablePager,

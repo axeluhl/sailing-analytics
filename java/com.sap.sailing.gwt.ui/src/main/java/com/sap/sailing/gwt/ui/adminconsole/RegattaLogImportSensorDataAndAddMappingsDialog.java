@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -12,7 +12,7 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends AbstractRega
 
     private final SensorDataImportWidget importWidget;
 
-    public RegattaLogImportSensorDataAndAddMappingsDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLogImportSensorDataAndAddMappingsDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
         super(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName, callback);

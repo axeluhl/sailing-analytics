@@ -50,11 +50,11 @@ import com.sap.sailing.domain.common.media.MediaUtil;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
-import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
@@ -94,11 +94,11 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MediaTrackWithSecurityDTO> filterableMediaTracks;
     private List<MediaTrackWithSecurityDTO> allMediaTracks;
     private final RegattaRefresher regattaRefresher;
-    private final MediaWriteServiceAsync mediaServiceWrite;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final UserService userService;
@@ -109,8 +109,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher {
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingWriteServiceAsync sailingServiceWrite,
-            RegattaRefresher regattaRefresher, MediaWriteServiceAsync mediaServiceWrite,
+    public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceWriteAsync sailingServiceWrite,
+            RegattaRefresher regattaRefresher, MediaServiceWriteAsync mediaServiceWrite,
             ErrorReporter errorReporter, StringMessages stringMessages, final UserService userService) {
         this.regattasDisplayers = regattasDisplayers;
         this.sailingServiceWrite = sailingServiceWrite;

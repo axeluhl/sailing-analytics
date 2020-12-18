@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
@@ -50,11 +50,11 @@ public class DeviceConfigurationListComposite extends Composite  {
 
     private final Label noConfigurationsLabel;
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public DeviceConfigurationListComposite(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;

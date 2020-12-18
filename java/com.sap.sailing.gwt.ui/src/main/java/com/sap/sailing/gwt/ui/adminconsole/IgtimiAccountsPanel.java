@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -67,7 +67,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class IgtimiAccountsPanel extends FlowPanel {
 
     private final StringMessages stringMessages;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel;
 
@@ -92,7 +92,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
     }
 
-    public IgtimiAccountsPanel(final SailingWriteServiceAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public IgtimiAccountsPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
@@ -291,7 +291,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         private TextBox eMail;
         private PasswordTextBox password;
 
-        public AddAccountDialog(final Runnable refresher, final SailingWriteServiceAsync sailingServiceWrite,
+        public AddAccountDialog(final Runnable refresher, final SailingServiceWriteAsync sailingServiceWrite,
                 final StringMessages stringMessages, final ErrorReporter errorReporter) {
             super(stringMessages.addIgtimiUser(), stringMessages.addIgtimiUser(), stringMessages.ok(),
                     stringMessages.cancel(), new Validator<UserData>() {

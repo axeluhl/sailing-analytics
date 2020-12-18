@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.Selec
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -56,7 +56,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     protected Grid entryGrid;
     private String regattaRegisterSecret;
 
-    public RegattaLogAddDeviceMappingDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
+    public RegattaLogAddDeviceMappingDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret, final MailInvitationType mailInvitationType,
             DialogCallback<DeviceMappingDTO> callback,
             final DeviceMappingDTO mapping) {

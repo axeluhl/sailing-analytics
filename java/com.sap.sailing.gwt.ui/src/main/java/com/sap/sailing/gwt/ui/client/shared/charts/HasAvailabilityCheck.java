@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
@@ -36,7 +36,7 @@ public interface HasAvailabilityCheck {
      * @param stringMessages
      *            message bundle for popup dialog
      */
-    static void validateBackendAvailabilityAndExecuteBusinessLogic(SailingWriteServiceAsync sailingServiceWrite,
+    static void validateBackendAvailabilityAndExecuteBusinessLogic(SailingServiceWriteAsync sailingServiceWrite,
             Consumer<Boolean> callback, StringMessages stringMessages) {
         sailingServiceWrite.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
             @Override
