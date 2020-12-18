@@ -62,8 +62,8 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    public void onLoadSucceeded(int loaderId, Collection<CourseArea> data, boolean isCached) {
-        super.onLoadSucceeded(loaderId, data, isCached);
+    public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
+        super.onLoadSucceeded(data, isCached);
 
         for (CheckedItem item : checkedItems) {
             item.setDisabled(true);
@@ -83,7 +83,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             final String uuid = args.getString(AppConstants.EXTRA_COURSE_UUID);
             for (CourseArea area : data) {
                 if (area.getId().toString().equals(uuid)) {
-                    selectItem(area);
+                    selectItem(area, true);
                     break;
                 }
             }

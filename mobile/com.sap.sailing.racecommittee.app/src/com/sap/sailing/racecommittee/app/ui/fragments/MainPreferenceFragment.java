@@ -76,7 +76,7 @@ public class MainPreferenceFragment extends LoggableFragment {
                         .createConfigurationLoader(deviceConfigurationName, deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
 
                             @Override
-                            public void onLoadFailed(int loaderId, Exception reason) {
+                            public void onLoadFailed(Exception reason) {
                                 if (reason instanceof FileNotFoundException) {
                                     Toast.makeText(getActivity(),
                                             getString(R.string.loading_configuration_not_found),
@@ -93,7 +93,7 @@ public class MainPreferenceFragment extends LoggableFragment {
                             }
 
                             @Override
-                            public void onLoadSucceeded(int loaderId, DeviceConfiguration configuration,
+                            public void onLoadSucceeded(DeviceConfiguration configuration,
                                                         boolean isCached) {
                                 getLoaderManager().destroyLoader(0);
 

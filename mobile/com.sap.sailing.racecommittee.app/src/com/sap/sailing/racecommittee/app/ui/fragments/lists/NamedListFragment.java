@@ -88,6 +88,11 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         getListView().addFooterView(footerView);
 
         showProgressBar(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         loadItems();
     }
 
@@ -109,7 +114,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadFailed(int loaderId, Exception reason) {
+    public void onLoadFailed(Exception reason) {
         namedList.clear();
         listAdapter.notifyDataSetChanged();
 
@@ -131,16 +136,17 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadSucceeded(int loaderId, Collection<T> data, boolean isCached) {
+    public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
         if (isForceLoad() && !isCached) {
             listAdapter.setCheckedPosition(-1);
+            mSelectedIndex = -1;
         }
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator<T>());
+            Collections.sort(namedList, new NaturalNamedComparator<>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
@@ -189,15 +195,18 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return OnlineDataManager.create(getActivity());
     }
 
-    Loader<DataLoaderResult<Collection<T>>> getLoader() {
+    Loader<DataLoaderResult<Collection<T>>> initLoader() {
         return getLoaderManager().initLoader(0, null, createLoaderCallbacks(getDataManager()));
     }
 
+    Loader<DataLoaderResult<Collection<T>>> restartLoader() {
+        return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
+    }
+
     private void loadItems() {
+        final Loader<DataLoaderResult<Collection<T>>> loader = initLoader();
         if (isForceLoad()) {
-            getLoader().forceLoad();
-        } else {
-            getLoader().startLoading();
+            loader.forceLoad();
         }
     }
 
@@ -219,11 +228,15 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         footerView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    protected void selectItem(T eventBase) {
+    protected void selectItem(T eventBase, boolean notify) {
         final int position = namedList.indexOf(eventBase);
         listAdapter.setCheckedPosition(position);
+        listAdapter.notifyDataSetChanged();
 
         mSelectedIndex = position;
-        listener.itemSelected(this, eventBase);
+        getListView().setSelection(position);
+        if (notify) {
+            listener.itemSelected(this, eventBase);
+        }
     }
 }

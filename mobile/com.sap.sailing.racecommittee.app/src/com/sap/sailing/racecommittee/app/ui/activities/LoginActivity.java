@@ -519,7 +519,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(deviceConfigurationName,
                 deviceConfigurationUuid, new LoadClient<DeviceConfiguration>() {
                     @Override
-                    public void onLoadFailed(int loaderId, Exception reason) {
+                    public void onLoadFailed(Exception reason) {
                         dismissProgressSpinner();
 
                         if (reason instanceof FileNotFoundException) {
@@ -537,7 +537,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                     }
 
                     @Override
-                    public void onLoadSucceeded(int loaderId, DeviceConfiguration configuration, boolean isCached) {
+                    public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
                         getSupportLoaderManager().destroyLoader(0);
 
                         dismissProgressSpinner();
