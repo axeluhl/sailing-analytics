@@ -182,13 +182,16 @@ public class MainPreferenceFragment extends LoggableFragment {
                     handler.post(item.runnable);
                 } else {
                     try {
-                        Fragment fragment = (Fragment) Class.forName(item.clazz).newInstance();
-                        final ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
-                        if (actionBar != null) {
-                            actionBar.setTitle(item.title);
-                        }
+                        final Fragment fragment = (Fragment) Class.forName(item.clazz).newInstance();
                         requireFragmentManager().beginTransaction()
                                 .replace(R.id.content_frame, fragment)
+                                .addToBackStack(fragment.getClass().getSimpleName())
+                                .runOnCommit(() -> {
+                                    final ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
+                                    if (actionBar != null) {
+                                        actionBar.setTitle(item.title);
+                                    }
+                                })
                                 .commit();
                     } catch (ClassNotFoundException ex) {
                         ExLog.ex(getActivity(), TAG, ex);

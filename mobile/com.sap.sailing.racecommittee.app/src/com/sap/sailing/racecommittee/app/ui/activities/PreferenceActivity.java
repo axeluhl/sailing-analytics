@@ -129,9 +129,17 @@ public class PreferenceActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(getString(R.string.settings_activity_title));
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+            getSupportFragmentManager().beginTransaction()
+                    .runOnCommit(() -> {
+                        if (getSupportActionBar() != null) {
+                            getSupportActionBar().setTitle(getString(R.string.settings_activity_title));
+                        }
+                    })
+                    .commit();
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 }
