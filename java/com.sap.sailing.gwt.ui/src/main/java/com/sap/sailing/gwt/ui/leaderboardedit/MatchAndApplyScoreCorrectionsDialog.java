@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.SailNumberCanonicalizerAndMatcher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
@@ -54,7 +54,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private final CheckBox allAllCheckbox;
 
     public MatchAndApplyScoreCorrectionsDialog(EditableLeaderboardPanel leaderboardPanel, StringMessages stringMessages,
-            SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
+            SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback(leaderboardPanel,
                         sailingServiceWrite, stringMessages, errorReporter));
@@ -338,12 +338,12 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     }
 
     private static class Callback implements DialogCallback<BulkScoreCorrectionDTO> {
-        private final SailingServiceWriteAsync sailingServiceWrite;
+        private final SailingWriteServiceAsync sailingServiceWrite;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         private final EditableLeaderboardPanel leaderboardPanel;
         
-        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
             super();
             this.leaderboardPanel = leaderboardPanel;
             this.sailingServiceWrite = sailingServiceWrite;

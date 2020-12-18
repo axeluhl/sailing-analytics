@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -31,14 +31,14 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final EventsRefresher eventsRefresher;
     private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
 
-    public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
+    public CreateRegattaCallback(UserService userService, SailingWriteServiceAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
             EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
         this.sailingServiceWrite = sailingServiceWrite;

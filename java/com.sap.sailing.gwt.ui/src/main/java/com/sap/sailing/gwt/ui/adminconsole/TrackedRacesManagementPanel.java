@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -33,7 +33,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Grid raceDataGrid;
     private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public TrackedRacesManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
                 stringMessages);

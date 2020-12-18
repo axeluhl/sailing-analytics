@@ -30,9 +30,9 @@ import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
@@ -66,7 +66,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
-        T createVideoContainer(MediaSynchPlayer videoPlayer, UserService userService, MediaServiceWriteAsync mediaService,
+        T createVideoContainer(MediaSynchPlayer videoPlayer, UserService userService, MediaWriteServiceAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
     
@@ -83,7 +83,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private final Timer raceTimer;
     private final MediaServiceAsync mediaService;
-    private final MediaServiceWriteAsync mediaServiceWrite;
+    private final MediaWriteServiceAsync mediaServiceWrite;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
@@ -96,9 +96,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
-            MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceWriteAsync sailingServiceWrite,
+            MediaPlayerLifecycle mediaPlayerLifecycle, SailingWriteServiceAsync sailingServiceWrite,
             RegattaAndRaceIdentifier selectedRaceIdentifier, RaceTimesInfoProvider raceTimesInfoProvider,
-            Timer raceTimer, MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite,
+            Timer raceTimer, MediaServiceAsync mediaService, MediaWriteServiceAsync mediaServiceWrite,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings,
             RaceDTO raceDto) {
@@ -335,7 +335,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<VideoDockedContainer>() {
                         @Override
                         public VideoDockedContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userService, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
+                                UserService userService, MediaWriteServiceAsync mediaServiceWrite, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
                                     videoPlayer, playerCloseListener, popoutListener);
@@ -387,7 +387,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     new VideoContainerFactory<FloatingMediaPlayerContainer>() {
                         @Override
                         public FloatingMediaPlayerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userservice, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
+                                UserService userservice, MediaWriteServiceAsync mediaServiceWrite, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             FloatingMediaPlayerContainer videoFloatingContainer = new FloatingMediaPlayerContainer(videoPlayer, popupPositionProvider,
                                     userservice, mediaServiceWrite, errorReporter, playerCloseListener, popoutListener);
@@ -714,7 +714,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public MediaServiceWriteAsync getMediaServiceWrite() {
+    public MediaWriteServiceAsync getMediaServiceWrite() {
         return mediaServiceWrite;
     }
 

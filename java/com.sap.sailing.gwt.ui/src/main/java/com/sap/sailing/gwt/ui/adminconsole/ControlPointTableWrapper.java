@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class ControlPointTableWrapper<S extends RefreshableSelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
-    public ControlPointTableWrapper(boolean multiSelection, SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
+    public ControlPointTableWrapper(boolean multiSelection, SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
                 new EntityIdentityComparator<ControlPointDTO>() {

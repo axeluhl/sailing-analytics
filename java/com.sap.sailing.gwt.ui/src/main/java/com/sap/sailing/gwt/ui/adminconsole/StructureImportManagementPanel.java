@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -55,7 +55,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -97,7 +97,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
-    public StructureImportManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public StructureImportManagementPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventManagementPanel eventManagementPanel) {
         this.regattaDefaultsPerStructure = new HashMap<>();

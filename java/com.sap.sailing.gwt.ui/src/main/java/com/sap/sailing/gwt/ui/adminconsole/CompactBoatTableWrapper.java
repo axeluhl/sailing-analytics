@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.filter.Filter;
@@ -35,7 +35,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
     private final CustomizableFilterablePanel<BoatDTO> filterField;
     private final Set<BoatDTO> boatsRegisteredWithRegatta;
     
-    public CompactBoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
+    public CompactBoatTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<BoatDTO>() {

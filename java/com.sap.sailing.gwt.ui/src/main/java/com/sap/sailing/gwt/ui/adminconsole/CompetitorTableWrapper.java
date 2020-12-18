@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -82,7 +82,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
      *            {@code false}.
      */
-    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public CompetitorTableWrapper(SailingWriteServiceAsync sailingServiceWrite, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
         super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {

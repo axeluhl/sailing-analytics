@@ -35,7 +35,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -61,7 +61,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class CourseTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingServiceWriteAsync sailingService;
+    private final SailingWriteServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<CourseTemplateDTO> filterableCourseTemplatePanel;
     private List<CourseTemplateDTO> allCourseTemplates;
     private final ErrorReporter errorReporter;
@@ -72,7 +72,7 @@ public class CourseTemplatePanel extends FlowPanel {
     private List<MarkRoleDTO> allMarkRoles;
     private List<MarkTemplateDTO> allMarkTemplates;
 
-    public CourseTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public CourseTemplatePanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
         this.sailingService = sailingServiceWrite;
         this.stringMessages = stringMessages;

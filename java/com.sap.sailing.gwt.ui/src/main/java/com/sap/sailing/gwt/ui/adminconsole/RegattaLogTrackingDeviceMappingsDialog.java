@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -63,7 +63,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     public static final String SERIES_COLOR = "#fcb913";
     
     private final  ErrorReporter errorReporter;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final StringMessages stringMessages;
     private List<DeviceMappingDTO> mappings = new ArrayList<>();
@@ -80,7 +80,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private String regattaRegistrationSecret;
     
-    public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public RegattaLogTrackingDeviceMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String regattaRegistrationSecret, DialogCallback<Void> callback) {
         super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);

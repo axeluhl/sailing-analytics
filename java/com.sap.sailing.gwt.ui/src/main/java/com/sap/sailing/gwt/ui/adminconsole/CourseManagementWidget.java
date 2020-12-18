@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -57,7 +57,7 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
     protected final WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>> waypoints;
     protected final Grid mainPanel;
-    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
     protected final HorizontalPanel waypointsBtnsPanel;
@@ -134,7 +134,7 @@ public abstract class CourseManagementWidget implements IsWidget {
      *            ORC PCS leg data. By default, these actions are enabled, particularly to cover the case where this
      *            widget is used without an existing {@code TrackedRace} and only with a race log.
      */
-    public CourseManagementWidget(final SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public CourseManagementWidget(final SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserService userService, final Supplier<Boolean> showOrcPcsLegEditActions) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;

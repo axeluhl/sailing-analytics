@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartZoomChangedEvent;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -64,7 +64,7 @@ public class SliceRaceHandler {
 
     private final UUID eventId;
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
 
     private final SailingServiceAsync sailingService;
 
@@ -83,7 +83,7 @@ public class SliceRaceHandler {
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
-    public SliceRaceHandler(SailingServiceWriteAsync sailingServiceWrite, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
+    public SliceRaceHandler(SailingWriteServiceAsync sailingServiceWrite, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {

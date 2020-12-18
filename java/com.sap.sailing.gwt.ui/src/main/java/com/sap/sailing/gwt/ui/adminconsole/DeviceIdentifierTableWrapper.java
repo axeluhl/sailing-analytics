@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 public class DeviceIdentifierTableWrapper extends TableWrapper<DeviceIdentifierDTO, RefreshableMultiSelectionModel<DeviceIdentifierDTO>> {
 
-    public DeviceIdentifierTableWrapper(SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
+    public DeviceIdentifierTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter) {
         super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false,
                 new EntityIdentityComparator<DeviceIdentifierDTO>() {

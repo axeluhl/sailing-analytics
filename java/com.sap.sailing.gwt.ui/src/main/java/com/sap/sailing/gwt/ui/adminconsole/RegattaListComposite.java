@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
@@ -73,7 +73,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private final CellTable<RegattaDTO> regattaTable;
     private final Label noRegattasLabel;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
@@ -93,7 +93,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     @SuppressWarnings("unchecked")
-    public RegattaListComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public RegattaListComposite(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.regattaRefresher = regattaRefresher;

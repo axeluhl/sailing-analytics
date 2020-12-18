@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -28,7 +28,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     private final String fleetName;
     private final Button removeMark; 
 
-    public RaceLogCourseManagementWidget(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public RaceLogCourseManagementWidget(final SailingWriteServiceAsync sailingServiceWrite, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
             final String fleetName, final UserService userService) {
         super(sailingServiceWrite, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);

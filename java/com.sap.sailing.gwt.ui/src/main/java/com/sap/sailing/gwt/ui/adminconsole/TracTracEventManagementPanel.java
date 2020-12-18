@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationWithSecurityDTO;
@@ -81,9 +81,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private final UserService userService;
     private final CellTableWithCheckboxResources tableResources;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
 
-    public TracTracEventManagementPanel(final SailingServiceWriteAsync sailingService, UserService userService,
+    public TracTracEventManagementPanel(final SailingWriteServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);

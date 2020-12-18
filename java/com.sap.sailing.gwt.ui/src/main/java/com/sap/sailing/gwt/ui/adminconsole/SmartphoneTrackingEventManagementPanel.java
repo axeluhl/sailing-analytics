@@ -52,7 +52,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -102,7 +102,7 @@ public class SmartphoneTrackingEventManagementPanel
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     private CaptionPanel importPanel;
     
-    public SmartphoneTrackingEventManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public SmartphoneTrackingEventManagementPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             RegattaRefresher regattaRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {

@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
@@ -46,7 +46,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
     private CaptionPanel captionPanel;
@@ -68,7 +68,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public DeviceConfigurationDetailComposite(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;

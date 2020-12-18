@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sse.gwt.client.ServiceRoutingProvider;
 
-public class AbstractSailingWriteEntryPoint extends AbstractSailingEntryPoint<SailingServiceWriteAsync> {
+public class AbstractSailingWriteEntryPoint extends AbstractSailingEntryPoint<SailingWriteServiceAsync> {
     
     /**
      * Lazily initialize sailing service. Concrete entry point subclasses may influence sailing service creation by
@@ -12,7 +12,7 @@ public class AbstractSailingWriteEntryPoint extends AbstractSailingEntryPoint<Sa
      * method is called for the first time. Repetitive calls will not cause a new leaderboard name to take effect.
      */
     @Override
-    protected SailingServiceWriteAsync getSailingService() {
+    protected SailingWriteServiceAsync getSailingService() {
         if (sailingService == null) {
             if (this instanceof ServiceRoutingProvider) {
                 sailingService = SailingServiceHelper.createSailingServiceWriteInstance((ServiceRoutingProvider)this);

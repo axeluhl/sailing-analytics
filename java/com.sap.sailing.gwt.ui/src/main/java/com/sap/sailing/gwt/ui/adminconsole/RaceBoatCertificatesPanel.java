@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
@@ -31,7 +31,7 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     private final String raceColumnName;
     private final String fleetName;
 
-    public RaceBoatCertificatesPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public RaceBoatCertificatesPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StrippedLeaderboardDTOWithSecurity leaderboard, final RaceColumnDTO raceColumn, final FleetDTO fleet,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         // TODO problem: what is the secured object here? What is it for other RaceLog updates?
@@ -46,7 +46,7 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     }
 
     @Override
-    protected void assignCertificates(SailingServiceWriteAsync sailingServiceWrite,
+    protected void assignCertificates(SailingWriteServiceAsync sailingServiceWrite,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback) {
         sailingServiceWrite.assignORCPerformanceCurveCertificates(leaderboardName, raceColumnName, fleetName,

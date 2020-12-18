@@ -18,7 +18,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -60,7 +60,7 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         }
     }
     
-    public CompetitorToBoatMappingsDialog(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
+    public CompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
             final ErrorReporter errorReporter, String leaderboardName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,
             DialogCallback<Map<CompetitorDTO, BoatDTO>> callback, UserService userService) {
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);

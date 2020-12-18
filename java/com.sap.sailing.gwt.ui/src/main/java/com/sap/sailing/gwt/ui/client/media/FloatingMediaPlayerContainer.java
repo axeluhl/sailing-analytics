@@ -15,7 +15,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchControl.EditButtonProxy;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
 import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
@@ -33,7 +33,7 @@ public class FloatingMediaPlayerContainer extends AbstractMediaContainer impleme
     private Anchor edit;
 
     public FloatingMediaPlayerContainer(MediaSynchPlayer mediaPlayer, PopupPositionProvider popupPositionProvider,
-            UserService userservice, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
+            UserService userservice, MediaWriteServiceAsync mediaServiceWrite, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
         super(new FlowPanel(), mediaPlayer, popoutListener, playerCloseListener);
 

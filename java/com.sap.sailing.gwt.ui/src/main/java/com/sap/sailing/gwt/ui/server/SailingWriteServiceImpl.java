@@ -256,7 +256,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
+import com.sap.sailing.gwt.ui.client.SailingWriteService;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -384,7 +384,7 @@ import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 import com.sap.sse.util.impl.UUIDHelper;
 
-public class SailingServiceWriteImpl extends SailingServiceImpl implements SailingServiceWrite {
+public class SailingWriteServiceImpl extends SailingServiceImpl implements SailingWriteService {
 
     /** serial version uid */
     private static final long serialVersionUID = -992637440342246674L;

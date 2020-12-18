@@ -27,8 +27,8 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaWriteService;
+import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -52,7 +52,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
      * Controls the predefined mode into which to switch or configure the race viewer.
      */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
+    private final MediaWriteServiceAsync mediaServiceWrite = GWT.create(MediaWriteService.class);
     private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override

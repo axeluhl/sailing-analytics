@@ -59,7 +59,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -95,7 +95,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
     private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -128,7 +128,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer {
     private CaptionPanel igtimiImportPanel;
     private CaptionPanel expeditionAllInOneImporterPanel;
     
-    public WindPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public WindPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final AsyncActionsExecutor asyncActionsExecutor, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         this.ensureDebugId("WindPanel");

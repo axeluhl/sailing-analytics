@@ -37,7 +37,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -60,14 +60,14 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final StringMessages stringMessages;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final CellTable<ExpeditionDeviceConfiguration> allDeviceConfigurations;
     private final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterDeviceConfigurationsPanel;
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
     private final UserService userService;
 
-    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
+    public ExpeditionDeviceConfigurationsPanel(final SailingWriteServiceAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
@@ -236,7 +236,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
 
         public AddDeviceConfigurationDialog(
                 final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-                final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
                 final StringMessages stringMessages, final ErrorReporter errorReporter) {
             super(filterAccountsPanel, sailingServiceWrite,
                     stringMessages, errorReporter, stringMessages.addExpeditionDeviceConfiguration(),
@@ -277,7 +277,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         private final ExpeditionDeviceConfiguration valueToEdit;
         
         public EditDeviceConfigurationDialog(final LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration> filterAccountsPanel,
-                final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, final ErrorReporter errorReporter,
+                final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages, final ErrorReporter errorReporter,
                 final ExpeditionDeviceConfiguration valueToEdit) {
             super(filterAccountsPanel, sailingServiceWrite, stringMessages, errorReporter, stringMessages.editExpeditionDeviceConfiguration(),
                     new DialogCallback<ExpeditionDeviceConfiguration>() {

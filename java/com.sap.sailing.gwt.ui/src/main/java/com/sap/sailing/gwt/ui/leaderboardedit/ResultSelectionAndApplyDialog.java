@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -45,7 +45,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
-            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+            SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
                 new Callback(sailingServiceWrite, leaderboardPanel, errorReporter, stringMessages));
         this.sailingService = sailingServiceWrite;
@@ -195,11 +195,11 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     private static class Callback implements DialogCallback<Util.Triple<String, String, Util.Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
-        private final SailingServiceWriteAsync sailingServiceWrite;
+        private final SailingWriteServiceAsync sailingServiceWrite;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingServiceWriteAsync sailingServiceWrite, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
+        public Callback(SailingWriteServiceAsync sailingServiceWrite, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingServiceWrite = sailingServiceWrite;
             this.leaderboardPanel = leaderboardPanel;

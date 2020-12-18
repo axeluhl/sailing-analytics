@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorDescriptorTableWrapper.CompetitorsToImportToExistingLinking;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -64,7 +64,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     private TextBox searchTagField;
 
     private final StringMessages stringMessages;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
 
@@ -75,7 +75,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
             final Iterable<CompetitorDTO> existingCompetitor, String localizedHint,
-            StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             ErrorReporter errorReporter, DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
         super(stringMessages.importCompetitors(),
                 String.join("\n", stringMessages.chooseWhichCompetitorsShouldBeImported(), localizedHint),

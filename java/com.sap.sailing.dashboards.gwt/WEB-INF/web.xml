@@ -30,7 +30,7 @@
     <servlet>
         <display-name>Sailing Service</display-name>
         <servlet-name>SailingService</servlet-name>
-        <servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceWriteImpl</servlet-class>
+        <servlet-class>com.sap.sailing.gwt.ui.server.SailingWriteServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>SailingService</servlet-name>

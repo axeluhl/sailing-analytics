@@ -6,13 +6,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
 public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
-    public ShowCompetitorToBoatMappingsDialog(final SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, 
+    public ShowCompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages, 
             final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
             String raceName, UserService userService) {
         super();

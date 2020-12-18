@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.client.UserService;
 public class CompetitorSelectionDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
 
-    public CompetitorSelectionDialog(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public CompetitorSelectionDialog(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, String title, String message,
             Consumer<AsyncCallback<Iterable<? extends CompetitorDTO>>> competitorProvider, StringMessages stringMessages,
             CompetitorDTO initialSelection,

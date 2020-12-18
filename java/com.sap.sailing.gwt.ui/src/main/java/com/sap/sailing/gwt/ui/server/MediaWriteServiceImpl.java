@@ -6,14 +6,14 @@ import org.apache.shiro.authz.UnauthenticatedException;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaWriteService;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
-public class MediaServiceWriteImpl extends MediaServiceImpl implements MediaServiceWrite {
+public class MediaWriteServiceImpl extends MediaServiceImpl implements MediaWriteService {
     private static final long serialVersionUID = 7177987884609485859L;
 
     @Override

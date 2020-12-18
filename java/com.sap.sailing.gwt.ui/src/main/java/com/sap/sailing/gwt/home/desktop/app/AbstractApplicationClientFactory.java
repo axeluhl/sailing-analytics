@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaWriteService;
+import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceFactory;
@@ -27,7 +27,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final MediaServiceWriteAsync mediaServiceWrite;
+    private final MediaWriteServiceAsync mediaServiceWrite;
     private final DesktopPlacesNavigator navigator;
     private final SubscriptionServiceFactory subscriptionService;
 
@@ -41,7 +41,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         subscriptionService.registerAsyncServices(subscriptionServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
-        mediaServiceWrite = GWT.create(MediaServiceWrite.class);
+        mediaServiceWrite = GWT.create(MediaWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
@@ -72,7 +72,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     }
 
     @Override
-    public MediaServiceWriteAsync getMediaServiceWrite() {
+    public MediaWriteServiceAsync getMediaServiceWrite() {
         return mediaServiceWrite;
     }
 

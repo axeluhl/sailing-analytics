@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -39,13 +39,13 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private final String boatClassName;
     private final BusyIndicator busyIndicator;
 
-    public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
+    public CompetitorPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         this(sailingServiceWrite, userService, /* leaderboardName */ null, /* boatClassName */ null, /* createWithBoatByDefault */ true,
                 stringMessages, errorReporter);
     }
 
-    public CompetitorPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final String leaderboardName,
+    public CompetitorPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final String leaderboardName,
             String boatClassName, boolean createWithBoatByDefault, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
         this.leaderboardName = leaderboardName;
@@ -111,7 +111,7 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     }
 
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
+            final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override

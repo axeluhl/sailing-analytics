@@ -55,7 +55,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -147,7 +147,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private final Set<Widget> permissionRestrictedComponent = new HashSet<>();
     private final Label idLabel = new Label();
 
-    public LeaderboardGroupConfigPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public LeaderboardGroupConfigPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, ErrorReporter errorReporter,
             StringMessages stringMessages) {

@@ -18,7 +18,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
@@ -30,7 +30,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -43,7 +43,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     
     private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
-    public DeviceConfigurationPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public DeviceConfigurationPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             StringMessages stringMessages, ErrorReporter reporter) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;

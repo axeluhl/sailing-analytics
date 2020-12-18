@@ -42,7 +42,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -78,7 +78,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
 
     protected final StringMessages stringMessages;
 
-    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
 
     protected final ListDataProvider<StrippedLeaderboardDTOWithSecurity> filteredLeaderboardList;
 
@@ -156,7 +156,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         }
     }
 
-    public AbstractLeaderboardConfigPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public AbstractLeaderboardConfigPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             RegattaRefresher regattaRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             final ErrorReporter errorReporter, StringMessages theStringConstants, boolean multiSelection) {

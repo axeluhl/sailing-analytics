@@ -83,7 +83,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
@@ -137,13 +137,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     protected boolean nonTrackingWarningWasDisplayed;
 
     private final Set<MarkDTO> marksCurrentlyRequestedViaRemoteCall = new HashSet<>();
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite) {
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingWriteServiceAsync sailingServiceWrite) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
         this.markPositionService = new MarkPositionServiceForSailingService(sailingServiceWrite);

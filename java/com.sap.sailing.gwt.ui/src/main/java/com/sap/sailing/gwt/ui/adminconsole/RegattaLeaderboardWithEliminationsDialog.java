@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -29,7 +29,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected final ListBox regattaLeaderboardsListBox;
     protected final Collection<RegattaDTO> existingRegattas;
     protected final FlowPanel competitorEliminationPanelHolder;
-    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
     protected final UserService userService;
     private final Collection<StrippedLeaderboardDTO> existingLeaderboards;
     protected final ErrorReporter errorReporter;
@@ -80,7 +80,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         }
     }
 
-    public RegattaLeaderboardWithEliminationsDialog(SailingServiceWriteAsync sailingServiceWrite, UserService userService, String title,
+    public RegattaLeaderboardWithEliminationsDialog(SailingWriteServiceAsync sailingServiceWrite, UserService userService, String title,
             LeaderboardDescriptorWithEliminations leaderboardDTO, Collection<RegattaDTO> existingRegattas,
             final Collection<StrippedLeaderboardDTO> existingLeaderboards, final StringMessages stringMessages,
             final ErrorReporter errorReporter, LeaderboardParameterValidator validator,

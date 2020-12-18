@@ -34,7 +34,7 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -129,7 +129,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     // misc. elements
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final Timer timer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -170,7 +170,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, SailingWriteServiceAsync sailingServiceWrite) {
         super(parent, context);
 
         this.stringMessages = stringMessages;

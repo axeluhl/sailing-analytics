@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -66,7 +66,7 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
      *            whether the pool of "all" boats is to be restricted to those obtained from the leaderboard, or
      *            to all boats in the server's boat store
      */
-    protected BoatRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    protected BoatRegistrationsPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,

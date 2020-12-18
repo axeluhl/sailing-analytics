@@ -106,7 +106,7 @@ import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public interface SailingServiceWrite extends FileStorageManagementGwtService, SailingService {
+public interface SailingWriteService extends FileStorageManagementGwtService, SailingService {
 
     void setORCPerformanceCurveScratchBoat(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO newScratchBoatDTO) throws NotFoundException;

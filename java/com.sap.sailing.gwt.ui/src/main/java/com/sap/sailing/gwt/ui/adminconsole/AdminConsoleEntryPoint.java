@@ -27,8 +27,8 @@ import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
-import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.MediaWriteService;
+import com.sap.sailing.gwt.ui.client.MediaWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -71,7 +71,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
     private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
-    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
+    private final MediaWriteServiceAsync mediaServiceWrite = GWT.create(MediaWriteService.class);
     
     @Override
     protected void doOnModuleLoad() {
