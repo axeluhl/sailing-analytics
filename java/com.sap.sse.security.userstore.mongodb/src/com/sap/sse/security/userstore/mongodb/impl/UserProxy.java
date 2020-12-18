@@ -14,6 +14,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 public class UserProxy implements User {
     private static final long serialVersionUID = 1L;
@@ -205,6 +206,31 @@ public class UserProxy implements User {
 
     @Override
     public String createRandomSecret() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Iterable<Subscription> getSubscriptions() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSubscriptions(Subscription[] subscriptions) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Subscription getSubscriptionByPlan(String planId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Subscription getSubscriptionById(String subscriptionId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasActiveSubscription() {
         throw new UnsupportedOperationException();
     }
 }

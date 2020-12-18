@@ -151,5 +151,12 @@
          install-size="0"
          version="2.12.2.201406032322"
          unpack="false"/>
+         
+   <plugin
+         id="com.chargebee.chargebee-java"
+         download-size="0"
+         install-size="0"
+         version="2.7.7"
+         unpack="false"/>
 
 </feature>

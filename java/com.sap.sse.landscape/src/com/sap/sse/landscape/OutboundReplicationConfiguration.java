@@ -31,12 +31,12 @@ public interface OutboundReplicationConfiguration extends UserDataProvider {
     default Map<ProcessConfigurationVariable, String> getUserData() {
         final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
         if (getOutboundReplicationExchangeName() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATION_CHANNEL, getOutboundReplicationExchangeName());
+            result.put(DefaultProcessConfigurationVariables.REPLICATION_CHANNEL, getOutboundReplicationExchangeName());
         }
         if (getOutboundRabbitMQEndpoint() != null) {
-            result.put(ProcessConfigurationVariable.REPLICATION_PORT, Integer.toString(getOutboundRabbitMQEndpoint().getPort()));
+            result.put(DefaultProcessConfigurationVariables.REPLICATION_PORT, Integer.toString(getOutboundRabbitMQEndpoint().getPort()));
             if (getOutboundRabbitMQEndpoint().getNodeName() != null) {
-                result.put(ProcessConfigurationVariable.REPLICATION_HOST, getOutboundRabbitMQEndpoint().getNodeName());
+                result.put(DefaultProcessConfigurationVariables.REPLICATION_HOST, getOutboundRabbitMQEndpoint().getNodeName());
             }
         }
         return result;

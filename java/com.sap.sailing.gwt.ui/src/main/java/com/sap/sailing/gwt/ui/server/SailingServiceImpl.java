@@ -584,7 +584,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        securityServiceTracker.open();
         igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -5804,13 +5803,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     public String openRegattaRegistrationQrCode(String url) {
-        String result = "";
+        String result;
         try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 600, "H"))) {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
             result = Base64Utils.toBase64(targetArray);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error while generating QR code for open regatta", e);
+            result = "";
         }
         return result;
     }
