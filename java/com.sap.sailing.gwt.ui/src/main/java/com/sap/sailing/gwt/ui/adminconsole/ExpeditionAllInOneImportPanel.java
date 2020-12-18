@@ -49,7 +49,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
 
     private final RegattaSuggestOracle regattaOracle;
 
-    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public ExpeditionAllInOneImportPanel(final StringMessages stringMessages, final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher) {
         final FormPanel formPanel = new FormPanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator();
@@ -160,7 +160,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
                 new ExpeditionAllInOneAfterImportHandler(response.getEventId(), response.getRegattaName(),
                         response.getLeaderboardName(), response.getLeaderboardGroupName(), response.getLeaderboardGroupId(), 
                         response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
-                        response.getSensorFixImporterType(), response.getStartTimes(), sailingServiceWrite, userService,
+                        response.getSensorFixImporterType(), response.getStartTimes(), sailingWriteService, userService,
                         errorReporter, stringMessages);
                 regattaRefresher.fillRegattas();
             } else {
@@ -172,7 +172,7 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
             public void onSelection(SelectionEvent<Suggestion> event) {
                 final String selected = event.getSelectedItem().getReplacementString();
                 if (selected != null) {
-                    sailingServiceWrite.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
+                    sailingWriteService.getRegattaByName(selected, new AsyncCallback<RegattaDTO>() {
                         @Override
                         public void onSuccess(RegattaDTO result) {
                             validation.run();

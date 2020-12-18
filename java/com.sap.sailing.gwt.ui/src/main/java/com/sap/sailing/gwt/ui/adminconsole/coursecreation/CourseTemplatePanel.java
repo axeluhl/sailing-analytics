@@ -72,9 +72,9 @@ public class CourseTemplatePanel extends FlowPanel {
     private List<MarkRoleDTO> allMarkRoles;
     private List<MarkTemplateDTO> allMarkTemplates;
 
-    public CourseTemplatePanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public CourseTemplatePanel(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingServiceWrite;
+        this.sailingService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,

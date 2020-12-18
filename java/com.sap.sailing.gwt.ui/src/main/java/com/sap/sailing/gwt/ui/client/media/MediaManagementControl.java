@@ -178,7 +178,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     
     private void disconnectVideoFromRace(final MediaTrackWithSecurityDTO videoTrack, final ToggleButton connectButton) {
         videoTrack.assignedRaces.remove(mediaPlayerManager.getCurrentRace());
-        mediaPlayerManager.getMediaServiceWrite().updateRace(videoTrack, new AsyncCallback<Void>() {
+        mediaPlayerManager.getMediaWriteService().updateRace(videoTrack, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 mediaPlayerManager.getErrorReporter().reportError(t.toString());
@@ -194,7 +194,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
 
     private void connectVideoToRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
         videoTrack.assignedRaces.add(mediaPlayerManager.getCurrentRace());
-        mediaPlayerManager.getMediaServiceWrite().updateRace(videoTrack, new AsyncCallback<Void>() {
+        mediaPlayerManager.getMediaWriteService().updateRace(videoTrack, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 mediaPlayerManager.getErrorReporter().reportError(t.toString());

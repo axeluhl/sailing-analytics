@@ -66,7 +66,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         }
     }
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final SailingServiceAsync sailingService;
     private RegattaAndRaceIdentifier raceIdentifier;
     private final ErrorReporter errorReporter;
@@ -100,13 +100,13 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     public EditMarkPassingsPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
-            final SailingWriteServiceAsync sailingServiceWrite,
+            final SailingWriteServiceAsync sailingWriteService,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
             final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
         super(parent, context);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.sailingService = sailingService;
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.raceIdentifier = raceIdentifier;
         this.errorReporter = errorReporter;
         this.competitorSelectionModel = competitorSelectionModel;
@@ -186,7 +186,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
                     Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                    sailingServiceWrite.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                                 selectedObject.getA(), null, competitor, new AsyncCallback<Void>() {
@@ -230,7 +230,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingServiceWrite.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                             waypointSelectionModel.getSelectedObject().getA(),
@@ -256,7 +256,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingServiceWrite.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                             null, competitor,
@@ -278,7 +278,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         warningChangesHaveNoEffect.setStylePrimaryName("errorLabel");
         warningChangesHaveNoEffect.setVisible(false);
         // it's okay to require a master response here because replicas don't have their own mark passing calculator
-        sailingServiceWrite.getTrackedRaceIsUsingMarkPassingCalculator(raceIdentifier, new AsyncCallback<Boolean>() {
+        sailingWriteService.getTrackedRaceIsUsingMarkPassingCalculator(raceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 warningChangesHaveNoEffect.setVisible(!result);
@@ -316,7 +316,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         if (time != null && leaderboardNameRaceColumnNameAndFleetName != null) {
             final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
             if (isSettingFixedTimePossible(time, stringMessages)) {
-                sailingServiceWrite.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                sailingWriteService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                         leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                         leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
                         new AsyncCallback<Void>() {
@@ -508,7 +508,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
 
     @Override
     public void checkBackendAvailability(Consumer<Boolean> callback) {
-        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingWriteService, callback,
                 stringMessages);
     }
 

@@ -13,11 +13,11 @@ public class RegattaLogSensorDataAddMappingsDialog extends AbstractRegattaLogSen
 
     private final String importerType;
 
-    public RegattaLogSensorDataAddMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLogSensorDataAddMappingsDialog(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             Collection<TrackFileImportDeviceIdentifierDTO> importedDeviceIds, String importerType,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
-        super(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName, callback);
+        super(sailingWriteService, userService, errorReporter, stringMessages, leaderboardName, callback);
         this.importerType = importerType;
         deviceIdTable.getDataProvider().getList().addAll(importedDeviceIds);
     }

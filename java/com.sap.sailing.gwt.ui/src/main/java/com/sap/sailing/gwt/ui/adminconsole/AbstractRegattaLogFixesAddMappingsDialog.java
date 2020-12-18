@@ -45,7 +45,7 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
-    public AbstractRegattaLogFixesAddMappingsDialog(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public AbstractRegattaLogFixesAddMappingsDialog(SailingWriteServiceAsync sailingWriteService, UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<DeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -63,22 +63,22 @@ public class AbstractRegattaLogFixesAddMappingsDialog extends DataEntryDialog<Co
         this.leaderboardName = leaderboardName;
         this.stringMessages = stringMessages;
         importWidgetHolder = new SimplePanel();
-        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
+        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingWriteService, stringMessages, errorReporter);
         registerSelectionChangeHandler(deviceIdTable.getSelectionModel(), this::deviceSelectionChanged);
-        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
+        competitorTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enable pager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
-                /* multiSelection */ false, sailingServiceWrite, stringMessages, errorReporter);
-        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService, stringMessages,
+                /* multiSelection */ false, sailingWriteService, stringMessages, errorReporter);
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingWriteService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
 
         registerSelectionChangeHandler(competitorTable.getSelectionModel(), this::mappedToSelectionChanged);
         registerSelectionChangeHandler(markTable.getSelectionModel(), this::mappedToSelectionChanged);
         registerSelectionChangeHandler(boatTable.getSelectionModel(), this::mappedToSelectionChanged);
 
-        getBoatRegistrations(sailingServiceWrite, errorReporter);
-        getCompetitorRegistrations(sailingServiceWrite, errorReporter);
-        getMarks(sailingServiceWrite, errorReporter);
+        getBoatRegistrations(sailingWriteService, errorReporter);
+        getCompetitorRegistrations(sailingWriteService, errorReporter);
+        getMarks(sailingWriteService, errorReporter);
     }
 
     private void getMarks(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {

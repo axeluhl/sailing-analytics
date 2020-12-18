@@ -36,7 +36,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class PairingListCreationDialog extends DataEntryDialog<PairingListTemplateDTO> {
 
     private final PairingListTemplateDTO template;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final StrippedLeaderboardDTO leaderboardDTO;
     private final StringMessages stringMessages;
 
@@ -51,13 +51,13 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     private final Grid pairingListGrid;
 
     public PairingListCreationDialog(StrippedLeaderboardDTO leaderboardDTO, final StringMessages stringMessages,
-            PairingListTemplateDTO template, SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter) {
+            PairingListTemplateDTO template, SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter) {
         super(/* title */ stringMessages.pairingList(), /* message */ null, stringMessages.close(),
                 /* cancel button name */ null, /* validator */ null, /* callback */ null);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.template = template;
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.leaderboardDTO = leaderboardDTO;
         this.ensureDebugId("PairingListCreationDialog");
         applyToRacelogButton = new Button(stringMessages.insertIntoRegatta());
@@ -72,7 +72,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 this.template.getPairingListTemplate()[0].length);
         pairingListTemplateScrollPanel = new ScrollPanel(pairingListGrid);
         if (template.getCompetitorCount() == leaderboardDTO.competitorsCount) {
-            sailingServiceWrite.getPairingListFromTemplate(this.leaderboardDTO.getName(),
+            sailingWriteService.getPairingListFromTemplate(this.leaderboardDTO.getName(),
                     this.template.getFlightMultiplier(), this.template.getSelectedFlightNames(), this.template,
                     new AsyncCallback<PairingListDTO>() {
                         @Override
@@ -191,7 +191,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         applyToRacelogButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingServiceWrite.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
+                sailingWriteService.fillRaceLogsFromPairingListTemplate(leaderboardDTO.getName(),
                         template.getFlightMultiplier(), template.getSelectedFlightNames(), pairingListDTO,
                         new AsyncCallback<Void>() {
                             @Override
@@ -211,7 +211,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         printPreViewButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingServiceWrite.getRaceDisplayNamesFromLeaderboard(leaderboardDTO.getName(),
+                sailingWriteService.getRaceDisplayNamesFromLeaderboard(leaderboardDTO.getName(),
                         Util.asList(template.getSelectedFlightNames()), new AsyncCallback<List<String>>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -234,7 +234,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 BusyDialog busyDialog = new BusyDialog();
                 busyDialog.show();
                 try {
-                    sailingServiceWrite.calculatePairingListTemplate(template.getFlightCount(), template.getGroupCount(),
+                    sailingWriteService.calculatePairingListTemplate(template.getFlightCount(), template.getGroupCount(),
                             template.getCompetitorCount(), template.getFlightMultiplier(),
                             template.getBoatChangeFactor(), new AsyncCallback<PairingListTemplateDTO>() {
 
@@ -249,7 +249,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                                     busyDialog.hide();
                                     result.setSelectedFlightNames(template.getSelectedFlightNames());
                                     PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO,
-                                            stringMessages, result, sailingServiceWrite, errorReporter);
+                                            stringMessages, result, sailingWriteService, errorReporter);
                                     dialog.show();
                                 }
                             });

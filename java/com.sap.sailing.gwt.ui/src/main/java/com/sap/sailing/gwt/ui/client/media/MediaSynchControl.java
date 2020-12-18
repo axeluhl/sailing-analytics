@@ -28,7 +28,7 @@ public class MediaSynchControl implements EditFlag {
     private static final int FAST = 1000;
     private static final int SLOW = 100;
 
-    private final MediaWriteServiceAsync mediaServiceWrite;
+    private final MediaWriteServiceAsync mediaWriteService;
     private final MediaSynchAdapter mediaSynchAdapter;
     private final ErrorReporter errorReporter;
     private final MediaTrack backupVideoTrack;
@@ -58,9 +58,9 @@ public class MediaSynchControl implements EditFlag {
         void setEnabled(boolean b);
     }
 
-    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaWriteServiceAsync mediaServiceWrite,
+    public MediaSynchControl(MediaSynchAdapter mediaSynchAdapter, MediaWriteServiceAsync mediaWriteService,
             ErrorReporter errorReporter, EditButtonProxy editButtonProxy, UserService userservice) {
-        this.mediaServiceWrite = mediaServiceWrite;
+        this.mediaWriteService = mediaWriteService;
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         this.userservice = userservice;
@@ -206,7 +206,7 @@ public class MediaSynchControl implements EditFlag {
 
     private void save() {
         if (!backupVideoTrack.startTime.equals(mediaSynchAdapter.getMediaTrack().startTime)) {
-            mediaServiceWrite.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
+            mediaWriteService.updateStartTime(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.startTime = mediaSynchAdapter.getMediaTrack().startTime;
@@ -221,7 +221,7 @@ public class MediaSynchControl implements EditFlag {
             });
         }
         if (!backupVideoTrack.title.equals(mediaSynchAdapter.getMediaTrack().title)) {
-            mediaServiceWrite.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
+            mediaWriteService.updateTitle(mediaSynchAdapter.getMediaTrack(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     backupVideoTrack.title = mediaSynchAdapter.getMediaTrack().title;

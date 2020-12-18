@@ -58,7 +58,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
     
     private final RefreshableSingleSelectionModel<StrippedLeaderboardDTOWithSecurity> leaderboardSelectionModel;
 
-    public RaceSlotSelectionPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RaceSlotSelectionPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final boolean multiSelection,
             Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, RaceColumnDTOAndFleetDTOWithNameBasedEquality preselected) {
         final Resources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -136,7 +136,7 @@ public class RaceSlotSelectionPanel extends HorizontalPanel {
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardSelectionModel.addSelectionChangeHandler(e->updateRaceColumnTableAfterLeaderboardSelectionChange());
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingServiceWrite, stringMessages, errorReporter, multiSelection);
+                sailingWriteService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnInRaceSlotSelectionPanelTable");
         final Grid tableGrid = new Grid(2, 2);
         tableGrid.setWidget(0, 0, filterLeaderboardPanel);

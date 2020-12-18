@@ -17,12 +17,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public class CompetitorInvitationHelper {
     
     private StringMessages stringMessages;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingWriteServiceAsync sailingWriteService;
     private ErrorReporter errorReporter;
 
-    public CompetitorInvitationHelper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+    public CompetitorInvitationHelper(SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
     }
 
@@ -50,11 +50,11 @@ public class CompetitorInvitationHelper {
     }
     
     private void openChooseEventDialogAndSendMails(final Set<CompetitorDTO> competitors, final String leaderboardName) {
-        new SelectEventAndHostnameDialog(sailingServiceWrite, stringMessages, errorReporter, leaderboardName, new DialogCallback<Pair<EventDTO, String>>() {
+        new SelectEventAndHostnameDialog(sailingWriteService, stringMessages, errorReporter, leaderboardName, new DialogCallback<Pair<EventDTO, String>>() {
 
             @Override
             public void ok(Pair<EventDTO, String> result) {
-                sailingServiceWrite.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
+                sailingWriteService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
                         competitors,
                         stringMessages.appstoreSapSailInsight(),
                                 stringMessages.playstoreInsightApp(),

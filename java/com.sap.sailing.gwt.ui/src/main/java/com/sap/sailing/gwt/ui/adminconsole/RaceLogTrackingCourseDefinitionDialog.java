@@ -50,7 +50,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
         }
     }
 
-    public RaceLogTrackingCourseDefinitionDialog(final SailingWriteServiceAsync sailingServiceWrite,
+    public RaceLogTrackingCourseDefinitionDialog(final SailingWriteServiceAsync sailingWriteService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String raceColumnName, final String fleetName,
             DialogCallback<Result> callback, final UserService userService) {
@@ -69,7 +69,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
                 },
                 callback);
         this.stringMessages = stringMessages;
-        courseManagementWidget = new RaceLogCourseManagementWidget(sailingServiceWrite, errorReporter, stringMessages,
+        courseManagementWidget = new RaceLogCourseManagementWidget(sailingWriteService, errorReporter, stringMessages,
                 leaderboardName, raceColumnName, fleetName, userService);
         priorityBox = createIntegerBox(/* default priority: race officer */ 1, /* visibleLength */ 1);
         refreshButton = new Button(stringMessages.refresh());

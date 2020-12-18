@@ -61,14 +61,14 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
         UserService userService = cf.getUserService();
         SailingServiceAsync sailingService = cf.getSailingService();
         MediaServiceAsync mediaService = cf.getMediaService();
-        MediaWriteServiceAsync mediaServiceWrite = cf.getMediaServiceWrite();
+        MediaWriteServiceAsync mediaWriteService = cf.getMediaWriteService();
         AsyncCallback<RaceboardDataDTO> raceBoardDataCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
                 PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> raceboardSettings = settings
                         .findSettingsByComponentId(autoplayLifecycle.getRaceboardLifecycle().getComponentId());
                 RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, null,
-                        autoplayLifecycle.getRaceboardLifecycle(), raceboardSettings, sailingService, mediaService, mediaServiceWrite,
+                        autoplayLifecycle.getRaceboardLifecycle(), raceboardSettings, sailingService, mediaService, mediaWriteService,
                         userService, AutoplayHelper.asyncActionsExecutor, result.getCompetitorAndTheirBoats(),
                         raceboardTimer,
                         cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace(), cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
@@ -76,7 +76,7 @@ public class LiveRaceBoardNode extends FiresPlaceNode implements RaceTimesInfoPr
                         null, /** leaderboardGroupId */
                         null, /** eventId */
                         null, cf.getErrorReporter(), StringMessages.INSTANCE, null, raceTimesInfoProvider, true, false,
-                        Arrays.asList(DetailType.values()), result.getLeaderboard(), result.getRace(), result.getTrackingConnectorInfo(), cf.getSailingServiceWrite());
+                        Arrays.asList(DetailType.values()), result.getLeaderboard(), result.getRace(), result.getTrackingConnectorInfo(), cf.getSailingWriteService());
                 setPlaceToGo(new LiveRaceWithRaceboardPlace(raceboardPerspective));
                 firePlaceChangeAndStartTimer();
                 getBus().fireEvent(new AutoPlayHeaderEvent(cf.getAutoPlayCtxSignalError().getLifeOrPreLiveRace().getRegattaName(),

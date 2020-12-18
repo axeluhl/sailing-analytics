@@ -22,9 +22,9 @@ public class FileStorageServiceConnectionTestObservable {
     private List<FileStorageServiceConnectionTestObserver> observer = new ArrayList<>();
     private boolean value;
 
-    public FileStorageServiceConnectionTestObservable(SailingWriteServiceAsync sailingServiceWrite) {
+    public FileStorageServiceConnectionTestObservable(SailingWriteServiceAsync sailingWriteService) {
         value = false;
-        sailingServiceWrite.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
+        sailingWriteService.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
                 new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

@@ -67,7 +67,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class IgtimiAccountsPanel extends FlowPanel {
 
     private final StringMessages stringMessages;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel;
 
@@ -92,9 +92,9 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
     }
 
-    public IgtimiAccountsPanel(final SailingWriteServiceAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public IgtimiAccountsPanel(final SailingWriteServiceAsync sailingWriteService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
 
@@ -159,7 +159,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 : Window.Location.getProtocol();
         final String hostname = Window.Location.getHostName();
         final String port = Window.Location.getPort();
-        this.sailingServiceWrite.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {
+        this.sailingWriteService.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(
@@ -255,7 +255,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
     }
 
     public void refresh() {
-        sailingServiceWrite.getAllIgtimiAccountsWithSecurity(new AsyncCallback<Iterable<AccountWithSecurityDTO>>() {
+        sailingWriteService.getAllIgtimiAccountsWithSecurity(new AsyncCallback<Iterable<AccountWithSecurityDTO>>() {
             @Override
             public void onSuccess(Iterable<AccountWithSecurityDTO> result) {
                 filterAccountsPanel.updateAll(result);
@@ -291,7 +291,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         private TextBox eMail;
         private PasswordTextBox password;
 
-        public AddAccountDialog(final Runnable refresher, final SailingWriteServiceAsync sailingServiceWrite,
+        public AddAccountDialog(final Runnable refresher, final SailingWriteServiceAsync sailingWriteService,
                 final StringMessages stringMessages, final ErrorReporter errorReporter) {
             super(stringMessages.addIgtimiUser(), stringMessages.addIgtimiUser(), stringMessages.ok(),
                     stringMessages.cancel(), new Validator<UserData>() {
@@ -308,7 +308,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
                     }, /* animationEnabled */ true, new DialogCallback<UserData>() {
                         @Override
                         public void ok(final UserData editedObject) {
-                            sailingServiceWrite.authorizeAccessToIgtimiUser(editedObject.geteMail(),
+                            sailingWriteService.authorizeAccessToIgtimiUser(editedObject.geteMail(),
                                     editedObject.getPassword(), new AsyncCallback<Boolean>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -365,12 +365,12 @@ public class IgtimiAccountsPanel extends FlowPanel {
     }
 
     private void addAccount() {
-        new AddAccountDialog(this::refresh, sailingServiceWrite, stringMessages, errorReporter).show();
+        new AddAccountDialog(this::refresh, sailingWriteService, stringMessages, errorReporter).show();
     }
 
     private void removeAccount(final AccountWithSecurityDTO account,
             final ListDataProvider<AccountWithSecurityDTO> removeFrom) {
-        sailingServiceWrite.removeIgtimiAccount(account.getEmail(), new AsyncCallback<Void>() {
+        sailingWriteService.removeIgtimiAccount(account.getEmail(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToRemoveIgtimiAccount(account.getEmail()));

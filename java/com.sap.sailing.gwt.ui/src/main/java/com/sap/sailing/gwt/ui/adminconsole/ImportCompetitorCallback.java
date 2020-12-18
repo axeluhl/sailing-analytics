@@ -33,13 +33,13 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  *
  */
 public class ImportCompetitorCallback implements DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> {
-    protected final SailingWriteServiceAsync sailingServiceWrite;
+    protected final SailingWriteServiceAsync sailingWriteService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public ImportCompetitorCallback(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public ImportCompetitorCallback(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
     }
@@ -57,7 +57,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
                 existingCompetitorsSelected.add(existingCompetitor);
             }
         }
-        sailingServiceWrite.addOrUpdateCompetitors(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
+        sailingWriteService.addOrUpdateCompetitors(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
                 new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -84,7 +84,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
      */
     private void registerCompetitorsAfterSaving(final List<CompetitorDescriptor> competitorsForSaving,
             final Iterable<CompetitorDTO> competitorsForRegistration, String searchTag) {
-        sailingServiceWrite.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorWithBoatDTO>>() {
+        sailingWriteService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorWithBoatDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());

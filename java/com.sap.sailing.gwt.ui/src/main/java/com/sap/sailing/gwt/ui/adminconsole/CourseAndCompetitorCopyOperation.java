@@ -16,15 +16,15 @@ public class CourseAndCompetitorCopyOperation {
     final boolean copyCompetitors;
     final Integer priority;
     final private ErrorReporter errorReporter;
-    final private SailingWriteServiceAsync sailingServiceWrite;
+    final private SailingWriteServiceAsync sailingWriteService;
 
     public CourseAndCompetitorCopyOperation(
             Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
-            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter) {
+            boolean copyCourse, boolean copyCompetitors, Integer priority, SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
         this.copyCompetitors = copyCompetitors;
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.priority = priority;
     }
@@ -65,7 +65,7 @@ public class CourseAndCompetitorCopyOperation {
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);
 
         if (copyCourse) {
-            sailingServiceWrite.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
+            sailingWriteService.copyCourseToOtherRaceLogs(fromTriple, toRacelogs, getPriority(), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Could not copy course and competitors: " + caught.getMessage());
@@ -81,7 +81,7 @@ public class CourseAndCompetitorCopyOperation {
         }
 
         if (copyCompetitors) {
-            sailingServiceWrite.copyCompetitorsToOtherRaceLogs(fromTriple, toRacelogs, new AsyncCallback<Void>() {
+            sailingWriteService.copyCompetitorsToOtherRaceLogs(fromTriple, toRacelogs, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Could not copy course and competitors: " + caught.getMessage());

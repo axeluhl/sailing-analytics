@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile;
 
 import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 
-public interface WithSailingServiceWrite {
+public interface WithSailingWriteService {
 
-    SailingWriteServiceAsync getSailingServiceWrite();
+    SailingWriteServiceAsync getSailingWriteService();
 }

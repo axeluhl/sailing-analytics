@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  */
 public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer {
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -47,10 +47,10 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private final RegattaDetailsComposite regattaDetailsComposite;
     private final UserService userService;
     
-    public RegattaManagementPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public RegattaManagementPanel(SailingWriteServiceAsync sailingWriteService, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventsRefresher eventsRefresher) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -63,7 +63,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         mainPanel.add(regattasPanel);
         final VerticalPanel regattasContentPanel = new VerticalPanel();
         regattasPanel.setContentWidget(regattasContentPanel);
-        regattaListComposite = new RegattaListComposite(sailingServiceWrite, userService, regattaRefresher, errorReporter,
+        regattaListComposite = new RegattaListComposite(sailingWriteService, userService, regattaRefresher, errorReporter,
                 stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
@@ -108,7 +108,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             }
         });
         regattasContentPanel.add(regattaListComposite);
-        regattaDetailsComposite = new RegattaDetailsComposite(sailingServiceWrite, userService, regattaRefresher,
+        regattaDetailsComposite = new RegattaDetailsComposite(sailingWriteService, userService, regattaRefresher,
                 errorReporter, stringMessages);
         regattaDetailsComposite.ensureDebugId("RegattaDetailsComposite");
         regattaDetailsComposite.setVisible(false);
@@ -117,7 +117,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
     protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
         if (!regattas.isEmpty()) {
-            sailingServiceWrite.removeRegattas(regattas, new AsyncCallback<Void>() {
+            sailingWriteService.removeRegattas(regattas, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove the regattas:" + caught.getMessage());
@@ -133,7 +133,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
     private void openCreateRegattaDialog() {
         final Collection<RegattaDTO> existingRegattas = Collections.unmodifiableCollection(regattaListComposite.getAllRegattas());
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
+        sailingWriteService.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList());
@@ -147,8 +147,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
 
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, sailingServiceWrite, stringMessages,
-                new CreateRegattaCallback(userService, sailingServiceWrite, stringMessages, errorReporter, regattaRefresher,
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, sailingWriteService, stringMessages,
+                new CreateRegattaCallback(userService, sailingWriteService, stringMessages, errorReporter, regattaRefresher,
                         eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();

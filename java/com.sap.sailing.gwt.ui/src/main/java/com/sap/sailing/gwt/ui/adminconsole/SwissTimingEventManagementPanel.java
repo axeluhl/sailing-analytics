@@ -63,10 +63,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
     private final SwissTimingConnectionTableWrapper connectionsTable;
 
-    public SwissTimingEventManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public SwissTimingEventManagementPanel(final SailingWriteServiceAsync sailingWriteService, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants, final CellTableWithCheckboxResources tableResources) {
-        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringConstants);
+        super(sailingWriteService, userService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -76,7 +76,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         VerticalPanel verticalPanel = new VerticalPanel();
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingServiceWrite, stringConstants,
+        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingWriteService, stringConstants,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshSwissTimingConnectionList();
         // Add button panel
@@ -92,7 +92,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(SwissTimingConfigurationWithSecurityDTO editedConnection) {
-                                sailingServiceWrite.createSwissTimingConfiguration(editedConnection.getName(),
+                                sailingWriteService.createSwissTimingConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getHostname(),
                                         editedConnection.getPort(), editedConnection.getUpdateURL(),
                                         editedConnection.getUpdateUsername(), editedConnection.getUpdatePassword(),
@@ -118,7 +118,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         }, userService, errorReporter).show());
         // Remove SwissTiming Connection
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
-            sailingServiceWrite.deleteSwissTimingConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+            sailingWriteService.deleteSwissTimingConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -134,7 +134,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         });
         // List Races in SwissTiming Connection
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
-            fillRaces(sailingServiceWrite);
+            fillRaces(sailingWriteService);
         });
         listRacesButton.setEnabled(false);
         connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
@@ -377,10 +377,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
 
-    private void fillRaces(final SailingWriteServiceAsync sailingServiceWrite) {
+    private void fillRaces(final SailingWriteServiceAsync sailingWriteService) {
         final SwissTimingConfigurationWithSecurityDTO selectedObject = connectionsTable.getSelectionModel()
                 .getSelectedSet().iterator().next();
-        sailingServiceWrite.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
+        sailingWriteService.getRacesOfSwissTimingEvent(selectedObject.getJsonUrl(),
                 new AsyncCallback<SwissTimingEventRecordDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -401,7 +401,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         // store a successful configuration in the database for later retrieval
                         final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
                                 selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
-                        sailingServiceWrite.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
+                        sailingWriteService.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(
@@ -439,7 +439,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port==null?0:port,
+            sailingWriteService.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port==null?0:port,
                     trackWind, correctWindByDeclination, useInternalMarkPassingAlgorithm, updateURL, updateUsername,
                     updatePassword, selectedObject.getName(), selectedObject.getJsonUrl(), new AsyncCallback<Void>() {
                         @Override

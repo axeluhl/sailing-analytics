@@ -59,7 +59,7 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private final StringMessages stringMessages;
     private String currentHost;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingWriteServiceAsync sailingWriteService;
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
@@ -74,11 +74,11 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite,
+    public MasterDataImportPanel(StringMessages stringMessages, SailingWriteServiceAsync sailingWriteService,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
         this.eventRefresher = eventsRefresher;
@@ -164,7 +164,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
-            sailingServiceWrite.importMasterData(currentHost, leaderboardGroupIds, override, compress, exportWind,
+            sailingWriteService.importMasterData(currentHost, leaderboardGroupIds, override, compress, exportWind,
                     exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -176,7 +176,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                     final Timer timer = new Timer() {
                         @Override
                         public void run() {
-                            sailingServiceWrite.getImportOperationProgress(resultId,
+                            sailingWriteService.getImportOperationProgress(resultId,
                                     new AsyncCallback<DataImportProgress>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -316,7 +316,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingServiceWrite.getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(host, usernameBox.getValue(),
+        sailingWriteService.getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(host, usernameBox.getValue(),
                 passwordBox.getValue(), new AsyncCallback<Map<String, String>>() {
                     @Override
                     public void onFailure(Throwable caught) {

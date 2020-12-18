@@ -26,11 +26,11 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     private final CheckBox competitorCheckBox;
     private final IntegerBox priorityBox;
     private final StringMessages stringMessages;
-    private SailingWriteServiceAsync sailingServiceWrite;
+    private SailingWriteServiceAsync sailingWriteService;
     private ErrorReporter errorReporter;
     
     
-    public CopyCourseAndCompetitorsDialog(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter, final StringMessages stringMessages,
+    public CopyCourseAndCompetitorsDialog(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
             String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
@@ -48,7 +48,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         }, true, dialogCallback);
         this.stringMessages = stringMessages;
         racesTable = new RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
-                sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ true);
+                sailingWriteService, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
         racesTable.getDataProvider().getList().addAll(races);
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
@@ -62,7 +62,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         competitorCheckBox = createCheckbox(stringMessages.copyCompetitors());
         competitorCheckBox.setValue(false); // competitors are usually registered on the regatta
         priorityBox = createIntegerBox(/* default priority */ 1, /* visibleLength */ 1);
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
     }
     
@@ -88,7 +88,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable
                 .getSelectionModel().getSelectedSet();
         return new CourseAndCompetitorCopyOperation(racesToCopyTo, courseCheckBox.getValue(), competitorCheckBox.getValue(),
-                priorityBox.getValue(), sailingServiceWrite, errorReporter);
+                priorityBox.getValue(), sailingWriteService, errorReporter);
     }
 
 }

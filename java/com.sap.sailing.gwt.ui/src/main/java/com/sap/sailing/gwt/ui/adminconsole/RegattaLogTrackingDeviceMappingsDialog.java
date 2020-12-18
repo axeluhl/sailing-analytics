@@ -63,7 +63,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     public static final String SERIES_COLOR = "#fcb913";
     
     private final  ErrorReporter errorReporter;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final UserService userService;
     private final StringMessages stringMessages;
     private List<DeviceMappingDTO> mappings = new ArrayList<>();
@@ -80,12 +80,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private String regattaRegistrationSecret;
     
-    public RegattaLogTrackingDeviceMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLogTrackingDeviceMappingsDialog(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
             final String regattaRegistrationSecret, DialogCallback<Void> callback) {
         super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
         this.stringMessages = stringMessages;
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.regattaRegistrationSecret = regattaRegistrationSecret;
@@ -123,7 +123,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         buttonPanel.add(busyIndicator);
         mainPanel.add(buttonPanel);
         
-        deviceMappingTable = new DeviceMappingTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
+        deviceMappingTable = new DeviceMappingTableWrapper(sailingWriteService, stringMessages, errorReporter);
         deviceMappingTable.getTable().addCellPreviewHandler(new CellPreviewEvent.Handler<DeviceMappingDTO>() {
             @Override
             public void onCellPreview(CellPreviewEvent<DeviceMappingDTO> event) {
@@ -286,7 +286,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     
     private void refresh() {
         busyIndicator.setBusy(true);
-        sailingServiceWrite.getDeviceMappings(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
+        sailingWriteService.getDeviceMappings(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 busyIndicator.setBusy(false);
@@ -304,7 +304,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
-        sailingServiceWrite.getMailType(new AsyncCallback<MailInvitationType>() {
+        sailingWriteService.getMailType(new AsyncCallback<MailInvitationType>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -313,12 +313,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
             @Override
             public void onSuccess(MailInvitationType mailInvitationType) {
-                new RegattaLogAddDeviceMappingDialog(sailingServiceWrite, userService, errorReporter, stringMessages,
+                new RegattaLogAddDeviceMappingDialog(sailingWriteService, userService, errorReporter, stringMessages,
                         leaderboardName, regattaRegistrationSecret, mailInvitationType,
                         new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
                             @Override
                             public void ok(final DeviceMappingDTO mapping) {
-                                sailingServiceWrite.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                sailingWriteService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
                                         new AsyncCallback<Void>() {
                                             @Override
                                             public void onSuccess(Void result) {
@@ -344,12 +344,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void importFixes() {
-        new RegattaLogImportFixesAndAddMappingsDialog(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogImportFixesAndAddMappingsDialog(sailingWriteService, userService, errorReporter, stringMessages, leaderboardName,
                 new DialogCallback<Collection<DeviceMappingDTO>>() {
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
                         for (DeviceMappingDTO mapping : editedObject) {
-                            sailingServiceWrite.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                            sailingWriteService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
                                     new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
@@ -371,12 +371,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
     
     private void importFoiling() {
-        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingWriteService, userService, errorReporter, stringMessages, leaderboardName,
                 new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
             @Override
             public void ok(Collection<TypedDeviceMappingDTO> editedObject) {
                 for (TypedDeviceMappingDTO mapping : editedObject) {
-                    sailingServiceWrite.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
+                    sailingWriteService.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             RegattaLogTrackingDeviceMappingsDialog.this.refresh();
@@ -405,7 +405,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                             new DataEntryDialog.DialogCallback<java.util.Date>() {
                                 @Override
                                 public void ok(java.util.Date editedObject) {
-                                    sailingServiceWrite.closeOpenEndedDeviceMapping(leaderboardName, dto, editedObject,
+                                    sailingWriteService.closeOpenEndedDeviceMapping(leaderboardName, dto, editedObject,
                                             new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
@@ -425,7 +425,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                                 }
                             }).show();
                 } else if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    sailingServiceWrite.revokeRaceAndRegattaLogEvents(leaderboardName, dto.originalRaceLogEventIds,
+                    sailingWriteService.revokeRaceAndRegattaLogEvents(leaderboardName, dto.originalRaceLogEventIds,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {

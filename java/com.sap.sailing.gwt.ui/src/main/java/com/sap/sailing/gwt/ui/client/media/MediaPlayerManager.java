@@ -86,7 +86,7 @@ public interface MediaPlayerManager {
 
     MediaServiceAsync getMediaService();
 
-    MediaWriteServiceAsync getMediaServiceWrite();
+    MediaWriteServiceAsync getMediaWriteService();
 
     ErrorReporter getErrorReporter();
 

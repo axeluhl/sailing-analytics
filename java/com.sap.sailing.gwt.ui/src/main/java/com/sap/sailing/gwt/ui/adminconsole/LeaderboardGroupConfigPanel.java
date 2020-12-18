@@ -147,11 +147,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private final Set<Widget> permissionRestrictedComponent = new HashSet<>();
     private final Label idLabel = new Label();
 
-    public LeaderboardGroupConfigPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public LeaderboardGroupConfigPanel(SailingWriteServiceAsync sailingWriteService, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
             LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingServiceWrite, regattaRefresher, errorReporter, stringMessages);
+        super(sailingWriteService, regattaRefresher, errorReporter, stringMessages);
         this.userService = userService;
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         this.availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
@@ -564,7 +564,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 e -> configACL.openDialog(e));
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
-                    sailingServiceWrite.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
+                    sailingWriteService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -665,7 +665,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
      */
     private void refreshLeaderboardsList() {
         if (isSingleGroupSelected && getSelectedGroup() != null) {
-            sailingServiceWrite.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+            sailingWriteService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
                     new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -696,7 +696,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
-        sailingServiceWrite.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+        sailingWriteService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                         new AsyncCallback<LeaderboardGroupDTO>() {
@@ -721,7 +721,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingServiceWrite.updateLeaderboardGroup(oldGroupId, oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
+        sailingWriteService.updateLeaderboardGroup(oldGroupId, oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
                 updateDescriptor.getDisplayName(),
                 leaderboardNames, updateDescriptor.getOverallLeaderboardDiscardThresholds(),
                 updateDescriptor.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -773,7 +773,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
             leaderboardNames.add(leaderboardDTO.getName());
         }
-        sailingServiceWrite.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.getDescription(),
+        sailingWriteService.updateLeaderboardGroup(group.getId(), group.getName(), group.getName(), group.getDescription(),
                 group.getDisplayName(),
                 leaderboardNames, group.getOverallLeaderboardDiscardThresholds(),
                 group.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(
@@ -795,7 +795,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             for (LeaderboardGroupDTO group : groups) {
                 groupIds.add(group.getId());
             }
-            sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
+            sailingWriteService.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable t) {
@@ -816,7 +816,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     private void removeLeaderboardGroup(final LeaderboardGroupDTO group) {
         final Set<UUID> groupIds = new HashSet<>();
         groupIds.add(group.getId());
-        sailingServiceWrite.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
+        sailingWriteService.removeLeaderboardGroups(groupIds, new MarkedAsyncCallback<Void>(
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {

@@ -43,7 +43,7 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
      *            The boat class is the default shown boat class for new boats. Set <code>null</code> if your boat is
      *            already initialized or you don't want a default boat class.
      */
-    public CompetitorWithBoatCreateDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter, CompetitorWithBoatDTO competitorToEdit,
+    public CompetitorWithBoatCreateDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter, CompetitorWithBoatDTO competitorToEdit,
             DialogCallback<CompetitorWithBoatDTO> callback, String boatClass) {
         super("Add competitor with boat", stringMessages, competitorToEdit, callback, boatClass);
         this.ensureDebugId("CompetitorWithBoatCreateDialog");
@@ -64,7 +64,7 @@ public class CompetitorWithBoatCreateDialog extends AbstractCompetitorWithBoatDi
         });        
         newBoatPanel = new VerticalPanel();
         existingBoatPanel = new VerticalPanel();
-        this.existingBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false, 
+        this.existingBoatsTable = new BoatTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter, /* multiSelection */ false, 
                 /* enablePager */ true, /* pagingSize*/ 10, false);
         existingBoatsTable.refreshBoatList(true, /* callback */ null);
         this.existingBoatsTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

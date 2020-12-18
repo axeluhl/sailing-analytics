@@ -82,9 +82,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
      *            {@code false}.
      */
-    public CompetitorTableWrapper(SailingWriteServiceAsync sailingServiceWrite, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public CompetitorTableWrapper(SailingWriteServiceAsync sailingWriteService, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
@@ -400,9 +400,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
         if (leaderboardName != null) {
-            sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
+            sailingWriteService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
+            sailingWriteService.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
         }
     }
 
@@ -430,7 +430,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 originalCompetitor, new DialogCallback<CompetitorWithBoatDTO>() {
             @Override
             public void ok(final CompetitorWithBoatDTO competitor) {
-                sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorWithBoatDTO>() {
+                sailingWriteService.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor with boat: " + caught.getMessage());
@@ -466,9 +466,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
                         if (competitor.hasBoat()) {
-                            sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
+                            sailingWriteService.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {
-                            sailingServiceWrite.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
+                            sailingWriteService.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
                         }
                     }
 
@@ -484,7 +484,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final CompetitorEditDialog<CompetitorDTO> dialog = CompetitorEditDialog.create(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
-                sailingServiceWrite.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
+                sailingWriteService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
@@ -517,7 +517,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     protected void allowUpdate(final Iterable<CompetitorDTO> competitors) {
         List<CompetitorDTO> serializableSingletonList = new ArrayList<>();
         Util.addAll(competitors, serializableSingletonList);
-        sailingServiceWrite.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
+        sailingWriteService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to allow resetting competitors " + competitors

@@ -60,15 +60,15 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
         }
     }
     
-    public CompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
+    public CompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages,
             final ErrorReporter errorReporter, String leaderboardName, Map<CompetitorDTO, BoatDTO> competitorsAndBoats,
             DialogCallback<Map<CompetitorDTO, BoatDTO>> callback, UserService userService) {
         super(stringMessages.actionEditCompetitorToBoatAssignments(), null, stringMessages.ok(), stringMessages.cancel(), new CompetitorToBoatMappingValidator(), callback);
         this.stringMessages = stringMessages;
         this.competitorToBoatMappings = new HashMap<>(competitorsAndBoats);
-        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter,
+        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingWriteService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, userService);
-        this.boatTable = new CompactBoatTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.boatTable = new CompactBoatTableWrapper<>(sailingWriteService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         ImagesBarColumn<CompetitorDTO, CompactCompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<>(new CompactCompetitorConfigImagesBarCell(stringMessages));
         competitorActionColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
             @Override

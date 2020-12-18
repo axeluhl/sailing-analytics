@@ -33,9 +33,9 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Grid raceDataGrid;
     private final Button setStartTimeButton;
     
-    public TrackedRacesManagementPanel(final SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public TrackedRacesManagementPanel(final SailingWriteServiceAsync sailingWriteService, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+        super(sailingWriteService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
                 stringMessages);
         this.userService = userService;
         this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
@@ -44,7 +44,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                 new SetStartTimeReceivedDialog(stringMessages, new DialogCallback<Date>() {
                     @Override
                     public void ok(Date newStartTimeReceived) {
-                        sailingServiceWrite.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
+                        sailingWriteService.setStartTimeReceivedForRace(selectedRaceDTO.getRaceIdentifier(), newStartTimeReceived, new AsyncCallback<RaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 TrackedRacesManagementPanel.this.errorReporter.reportError(stringMessages.errorSettingStartTime(caught.getMessage()));

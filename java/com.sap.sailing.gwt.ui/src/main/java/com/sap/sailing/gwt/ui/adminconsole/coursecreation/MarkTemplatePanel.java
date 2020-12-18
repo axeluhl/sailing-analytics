@@ -52,7 +52,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MarkTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final LabeledAbstractFilterablePanel<MarkTemplateDTO> filterableMarkTemplates;
     private List<MarkTemplateDTO> allMarkTemplates;
     private final ErrorReporter errorReporter;
@@ -61,9 +61,9 @@ public class MarkTemplatePanel extends FlowPanel {
     private ListDataProvider<MarkTemplateDTO> markTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkTemplateDTO> refreshableSelectionModel;
 
-    public MarkTemplatePanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public MarkTemplatePanel(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -110,7 +110,7 @@ public class MarkTemplatePanel extends FlowPanel {
 
     public void loadMarkTemplates() {
         markTemplateListDataProvider.getList().clear();
-        sailingServiceWrite.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
+        sailingWriteService.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
@@ -292,7 +292,7 @@ public class MarkTemplatePanel extends FlowPanel {
                 new DialogCallback<MarkTemplateDTO>() {
                     @Override
                     public void ok(MarkTemplateDTO markTemplate) {
-                        sailingServiceWrite.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
+                        sailingWriteService.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter

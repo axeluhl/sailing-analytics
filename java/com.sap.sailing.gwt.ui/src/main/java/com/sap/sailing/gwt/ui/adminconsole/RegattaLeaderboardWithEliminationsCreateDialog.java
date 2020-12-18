@@ -16,10 +16,10 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaLeaderboardWithEliminationsCreateDialog extends RegattaLeaderboardWithEliminationsDialog {
 
-    public RegattaLeaderboardWithEliminationsCreateDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLeaderboardWithEliminationsCreateDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService,
             Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
             ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
-        super(sailingServiceWrite, userService, stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptorWithEliminations(
+        super(sailingWriteService, userService, stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptorWithEliminations(
                 new LeaderboardDescriptor(), Collections.emptySet()), existingRegattas,
                 existingLeaderboards, stringMessages,
                 errorReporter, new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);

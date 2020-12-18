@@ -52,7 +52,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
      * Controls the predefined mode into which to switch or configure the race viewer.
      */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
-    private final MediaWriteServiceAsync mediaServiceWrite = GWT.create(MediaWriteService.class);
+    private final MediaWriteServiceAsync mediaWriteService = GWT.create(MediaWriteService.class);
     private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override
@@ -60,7 +60,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaWriteService,
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
@@ -160,7 +160,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 asyncActionsExecutor, this, Collections.singletonList(selectedRace.getRaceIdentifier()),
                 5000l /* requestInterval */);
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(/* parent */ null, context, raceLifeCycle, settings,
-                getSailingService(), mediaService, mediaServiceWrite, getUserService(), asyncActionsExecutor,
+                getSailingService(), mediaService, mediaWriteService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getLeaderboardGroupId(),

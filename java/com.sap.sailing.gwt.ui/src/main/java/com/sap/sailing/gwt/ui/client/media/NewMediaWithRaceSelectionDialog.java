@@ -35,13 +35,13 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
     private UserService userService;
 
     public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
-            StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+            StringMessages stringMessages, SailingWriteServiceAsync sailingWriteService, UserService userService,
             ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, Set<RegattasDisplayer> regattasDisplayers,
             FileStorageServiceConnectionTestObservable storageServiceConnection,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
         super(mediaService, defaultStartTime, stringMessages, null, storageServiceConnection, dialogCallback);
-        this.sailingService = sailingServiceWrite;
+        this.sailingService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.regattasDisplayers = regattasDisplayers;

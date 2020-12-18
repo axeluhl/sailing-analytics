@@ -41,9 +41,9 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
 
     private String lastUsedProviderName = null;
 
-    public ResultImportUrlsTableWrapper(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
+    public ResultImportUrlsTableWrapper(SailingWriteServiceAsync sailingWriteService, UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(sailingServiceWrite, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
+        super(sailingWriteService, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
         ListHandler<UrlDTO> listHandler = super.getColumnSortHandler();
 
         TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(url -> url.getUrl());
@@ -76,7 +76,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
     public void update(String providerName) {
         lastUsedProviderName = providerName;
         if (providerName != null) {
-            sailingServiceWrite.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
+            sailingWriteService.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
                 @Override
                 public void onSuccess(List<UrlDTO> result) {
                     ResultImportUrlsTableWrapper.super.refresh(result);

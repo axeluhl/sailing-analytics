@@ -59,7 +59,7 @@ public class MultiURLChangeDialog extends DialogBox {
     private TextBox replacePartIn;
     private TextBox replacePartOut;
 
-    public MultiURLChangeDialog(MediaWriteServiceAsync mediaServiceWrite, StringMessages stringMessages,
+    public MultiURLChangeDialog(MediaWriteServiceAsync mediaWriteService, StringMessages stringMessages,
             Set<MediaTrackWithSecurityDTO> selected,
             ErrorReporter errorReporter, Runnable afterLinking) {
         this.stringMessages = stringMessages;
@@ -129,7 +129,7 @@ public class MultiURLChangeDialog extends DialogBox {
                 for (MediaTrack track : mediaTrackRenameMap) {
                     String newUrl = getPatchedUrl(track);
                     track.url = newUrl;
-                    mediaServiceWrite.updateUrl(track, new AsyncCallback<Void>() {
+                    mediaWriteService.updateUrl(track, new AsyncCallback<Void>() {
 
                         @Override
                         public void onSuccess(Void result) {

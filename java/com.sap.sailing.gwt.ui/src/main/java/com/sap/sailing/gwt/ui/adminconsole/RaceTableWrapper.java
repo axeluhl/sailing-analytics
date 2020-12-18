@@ -29,9 +29,9 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
 
-    public RaceTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
+    public RaceTableWrapper(SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
                 new EntityIdentityComparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
                     public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,

@@ -28,10 +28,10 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     private final String fleetName;
     private final Button removeMark; 
 
-    public RaceLogCourseManagementWidget(final SailingWriteServiceAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public RaceLogCourseManagementWidget(final SailingWriteServiceAsync sailingWriteService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
             final String fleetName, final UserService userService) {
-        super(sailingServiceWrite, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
+        super(sailingWriteService, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
@@ -43,7 +43,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         new DataEntryDialog.DialogCallback<MarkDTO>() {
                             @Override
                             public void ok(MarkDTO mark) {
-                                sailingServiceWrite.addMarkToRegattaLog(leaderboardName, mark, new AsyncCallback<Void>() {
+                                sailingWriteService.addMarkToRegattaLog(leaderboardName, mark, new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
                                         refreshMarks();
@@ -69,7 +69,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
                 for (final MarkDTO markToRemove : marksToRemove) {
-                    sailingServiceWrite.revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markToRemove,
+                    sailingWriteService.revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markToRemove,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onSuccess(Void result) {
@@ -95,7 +95,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                             new DataEntryDialog.DialogCallback<Pair<Position, TimePoint>>() {
                                 @Override
                                 public void ok(Pair<Position, TimePoint> positionAndTimePoint) {
-                                    sailingServiceWrite.pingMark(leaderboardName, markDTO,
+                                    sailingWriteService.pingMark(leaderboardName, markDTO,
                                             positionAndTimePoint.getB(), positionAndTimePoint.getA(), new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
@@ -123,7 +123,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
-        sailingServiceWrite.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
+        sailingWriteService.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
                 new AsyncCallback<Pair<Boolean, String>>() {
                     @Override
                     public void onSuccess(Pair<Boolean, String> result) {
@@ -150,7 +150,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     }
 
     private void refreshORCPerformanceCurveLegs() {
-        sailingServiceWrite.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
+        sailingWriteService.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
                     @Override
                     public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {
@@ -165,7 +165,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     }
 
     private void refreshCourse() {
-        sailingServiceWrite.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
+        sailingWriteService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<RaceCourseDTO>() {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
@@ -186,7 +186,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
      * the {@link #marks} table with the results.
      */
     protected void refreshMarks() {
-        sailingServiceWrite.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
+        sailingWriteService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
             public void onSuccess(Iterable<MarkDTO> result) {
                 marks.refresh(result);
@@ -202,6 +202,6 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     @Override
     protected LegGeometrySupplier getLegGeometrySupplier() {
         return (zeroBasedLegIndices, legTypes, callback)->
-            sailingServiceWrite.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
+            sailingWriteService.getLegGeometry(leaderboardName, raceColumnName, fleetName, zeroBasedLegIndices, legTypes, callback);
     }
 }

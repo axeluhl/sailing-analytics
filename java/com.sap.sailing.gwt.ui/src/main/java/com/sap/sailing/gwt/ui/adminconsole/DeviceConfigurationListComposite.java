@@ -50,13 +50,13 @@ public class DeviceConfigurationListComposite extends Composite  {
 
     private final Label noConfigurationsLabel;
 
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public DeviceConfigurationListComposite(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         mainPanel = new SimplePanel();
@@ -88,7 +88,7 @@ public class DeviceConfigurationListComposite extends Composite  {
     }
 
     public void refreshTable() {
-        sailingServiceWrite.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
+        sailingWriteService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationWithSecurityDTO> result) {
                 if (configurationsDataProvider.getList().isEmpty()) {
@@ -141,7 +141,7 @@ public class DeviceConfigurationListComposite extends Composite  {
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, config -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveDeviceConfiguration(config.getName()))) {
-                sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
+                sailingWriteService.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         refreshTable();

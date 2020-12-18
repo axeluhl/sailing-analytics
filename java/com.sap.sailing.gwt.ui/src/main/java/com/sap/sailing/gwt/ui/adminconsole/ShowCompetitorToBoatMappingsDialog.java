@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
 public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
-    public ShowCompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages, 
+    public ShowCompetitorToBoatMappingsDialog(final SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages, 
             final ErrorReporter errorReporter, String leaderboardName, final String raceColumnName, final String fleetName,
             String raceName, UserService userService) {
         super();
@@ -26,7 +26,7 @@ public class ShowCompetitorToBoatMappingsDialog extends DialogBox {
             }
         });
         VerticalPanel vPanel = new VerticalPanel();
-        CompetitorToBoatMappingsViewPanel competitorPanel = new CompetitorToBoatMappingsViewPanel(sailingServiceWrite,
+        CompetitorToBoatMappingsViewPanel competitorPanel = new CompetitorToBoatMappingsViewPanel(sailingWriteService,
                 stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, userService);
         vPanel.add(new Label(stringMessages.race() + ": " + raceName));
         vPanel.add(competitorPanel);

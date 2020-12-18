@@ -33,7 +33,7 @@ public class FloatingMediaPlayerContainer extends AbstractMediaContainer impleme
     private Anchor edit;
 
     public FloatingMediaPlayerContainer(MediaSynchPlayer mediaPlayer, PopupPositionProvider popupPositionProvider,
-            UserService userservice, MediaWriteServiceAsync mediaServiceWrite, ErrorReporter errorReporter,
+            UserService userservice, MediaWriteServiceAsync mediaWriteService, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
         super(new FlowPanel(), mediaPlayer, popoutListener, playerCloseListener);
 
@@ -66,7 +66,7 @@ public class FloatingMediaPlayerContainer extends AbstractMediaContainer impleme
                 edit.getElement().getStyle().setDisplay(b ? Display.BLOCK : Display.NONE);
             }
         };
-        mediaSynchControl = new MediaSynchControl(this.mediaPlayer, mediaServiceWrite, errorReporter, proxy, userservice);
+        mediaSynchControl = new MediaSynchControl(this.mediaPlayer, mediaWriteService, errorReporter, proxy, userservice);
         mediaSynchControl.widget().addStyleName("media-synch-control");
         rootPanel.add(mediaSynchControl.widget());
 

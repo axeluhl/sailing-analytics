@@ -29,19 +29,19 @@ import com.sap.sse.security.ui.client.UserService;
 public class RegattaBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     private final RegattaIdentifier regattaIdentifier;
     
-    public RegattaBoatCertificatesPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final RegattaDTO regatta,
+    public RegattaBoatCertificatesPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService, final RegattaDTO regatta,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
-        super(sailingServiceWrite, userService, /* objectToCheckUpdatePermissionFor */ regatta, stringMessages, errorReporter,
+        super(sailingWriteService, userService, /* objectToCheckUpdatePermissionFor */ regatta, stringMessages, errorReporter,
                 /* context update permission check: */ ()->userService.hasPermission(regatta, DefaultActions.UPDATE), regatta.getName());
         this.regattaIdentifier = regatta.getRegattaIdentifier();
         refresh();
     }
 
     @Override
-    protected void assignCertificates(SailingWriteServiceAsync sailingServiceWrite,
+    protected void assignCertificates(SailingWriteServiceAsync sailingWriteService,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback) {
-        sailingServiceWrite.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, callback);        
+        sailingWriteService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, callback);        
     }
 
     protected void getORCCertificateAssignemtnsByBoatIdAsString(SailingServiceAsync sailingService,

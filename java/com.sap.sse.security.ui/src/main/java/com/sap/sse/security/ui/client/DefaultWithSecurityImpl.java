@@ -45,7 +45,7 @@ public class DefaultWithSecurityImpl implements WithSecurity {
     
     public static final String sailingServiceRemotePath = "service/sailing";
     
-    public static final String sailingServiceWriteRemotePath = "service/sailingmaster";
+    public static final String sailingWriteServiceRemotePath = "service/sailingmaster";
     
     
 }

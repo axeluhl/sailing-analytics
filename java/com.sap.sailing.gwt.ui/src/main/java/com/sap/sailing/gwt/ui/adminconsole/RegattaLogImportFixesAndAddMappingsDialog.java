@@ -11,11 +11,11 @@ import com.sap.sse.security.ui.client.UserService;
 public class RegattaLogImportFixesAndAddMappingsDialog extends AbstractRegattaLogFixesAddMappingsDialog {
     TrackFileImportWidget importWidget;
 
-    public RegattaLogImportFixesAndAddMappingsDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
+    public RegattaLogImportFixesAndAddMappingsDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<DeviceMappingDTO>> callback) {
-        super(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName, callback);
-        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages, sailingServiceWrite, errorReporter);
+        super(sailingWriteService, userService, errorReporter, stringMessages, leaderboardName, callback);
+        importWidget = new TrackFileImportWidget(deviceIdTable, stringMessages, sailingWriteService, errorReporter);
         setImportWidget(importWidget);
     }
 }

@@ -16,9 +16,9 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(boolean multiSelection, SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
+    public MarkTableWrapper(boolean multiSelection, SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, true,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, true,
                 new EntityIdentityComparator<MarkDTO>() {
                     @Override
                     public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {

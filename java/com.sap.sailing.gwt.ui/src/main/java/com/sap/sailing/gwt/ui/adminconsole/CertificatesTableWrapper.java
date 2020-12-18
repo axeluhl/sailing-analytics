@@ -35,9 +35,9 @@ public class CertificatesTableWrapper<S extends RefreshableSelectionModel<ORCCer
 
     private final LabeledAbstractFilterablePanel<ORCCertificate> filterField;
 
-    public CertificatesTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
+    public CertificatesTableWrapper(SailingWriteServiceAsync sailingWriteService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, int pagingSize) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize, new EntityIdentityComparator<ORCCertificate>() {
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize, new EntityIdentityComparator<ORCCertificate>() {
             @Override
             public boolean representSameEntity(ORCCertificate cert1, ORCCertificate cert2) {
                 return cert1.getId().equals(cert2.getId());

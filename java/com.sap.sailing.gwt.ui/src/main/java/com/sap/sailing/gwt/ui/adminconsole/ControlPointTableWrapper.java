@@ -11,9 +11,9 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class ControlPointTableWrapper<S extends RefreshableSelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
-    public ControlPointTableWrapper(boolean multiSelection, SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
+    public ControlPointTableWrapper(boolean multiSelection, SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
                 new EntityIdentityComparator<ControlPointDTO>() {
                     @Override
                     public boolean representSameEntity(ControlPointDTO dto1, ControlPointDTO dto2) {

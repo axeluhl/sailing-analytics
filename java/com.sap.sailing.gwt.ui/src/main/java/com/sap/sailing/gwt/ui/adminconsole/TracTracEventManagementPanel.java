@@ -81,13 +81,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private final UserService userService;
     private final CellTableWithCheckboxResources tableResources;
-    private final SailingWriteServiceAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
 
     public TracTracEventManagementPanel(final SailingWriteServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
         super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
-        this.sailingServiceWrite = sailingService;
+        this.sailingWriteService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.tableResources = tableResources;
@@ -112,7 +112,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         connectionsPanel.ensureDebugId("ConnectionsSection");
         connectionsPanel.setStyleName("bold");
         VerticalPanel tableAndConfigurationPanel = new VerticalPanel();
-        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingServiceWrite, stringMessages,
+        connectionsTable = new TracTracConnectionTableWrapper(userService, sailingWriteService, stringMessages,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshTracTracConnectionList();
 
@@ -129,7 +129,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         new DialogCallback<TracTracConfigurationWithSecurityDTO>() {
                             @Override
                             public void ok(TracTracConfigurationWithSecurityDTO editedConnection) {
-                                sailingServiceWrite.createTracTracConfiguration(editedConnection.getName(),
+                                sailingWriteService.createTracTracConfiguration(editedConnection.getName(),
                                         editedConnection.getJsonUrl(), editedConnection.getLiveDataURI(),
                                         editedConnection.getStoredDataURI(),
                                         editedConnection.getCourseDesignUpdateURI(),
@@ -154,7 +154,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         }, userService, errorReporter).show());
         addCreateAction.ensureDebugId("AddConnectionButton");
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
-            sailingServiceWrite.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+            sailingWriteService.deleteTracTracConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -171,7 +171,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         loadingMessageLabel = new Label();
         final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
             loadingMessageLabel.setText(stringMessages.loading());
-            fillRaces(sailingServiceWrite, showHiddenRacesCheckbox.getValue());
+            fillRaces(sailingWriteService, showHiddenRacesCheckbox.getValue());
         });
         listRacesButton.ensureDebugId("ListRacesButton");
         listRacesButton.setEnabled(false);
@@ -482,7 +482,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         TracTracEventManagementPanel.this.racesTable.setPageSize(races.size());
                         loadingMessageLabel.setText("");
                         // store a successful configuration in the database for later retrieval
-                        sailingServiceWrite.updateTracTracConfiguration(updatedConnection,
+                        sailingWriteService.updateTracTracConfiguration(updatedConnection,
                                 new MarkedAsyncCallback<Void>(
                             new AsyncCallback<Void>() {
                                 @Override
@@ -529,7 +529,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingServiceWrite.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
+            sailingWriteService.trackWithTracTrac(regattaIdentifier, selectedRaces, liveURI, storedURI,
                     courseDesignUpdateURI, trackWind, correctWind, offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings,
                     useOfficialResultsToUpdateRaceLogs, tractracUsername,
                     tractracPassword, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
