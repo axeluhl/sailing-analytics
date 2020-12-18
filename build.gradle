@@ -46,9 +46,9 @@ allprojects {
 ext {
     // regular
     buildTools = "28.0.3"
-    compileSdk = 28
+    compileSdk = 29
     minSdk = 16
-    targetSdk = 28
+    targetSdk = 29
 
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8
