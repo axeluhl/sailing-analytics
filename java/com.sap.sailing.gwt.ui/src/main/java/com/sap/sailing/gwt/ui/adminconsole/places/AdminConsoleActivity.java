@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
