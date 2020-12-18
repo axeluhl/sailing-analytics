@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
-public interface LeaderboardGroupsDisplayer {
+public interface LeaderboardGroupsDisplayer extends Displayer {
     void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups);
 
     void setupLeaderboardGroups(Map<String, String> params);

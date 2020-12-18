@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +25,8 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
+public class EventManagementPanel extends SimplePanel
+        implements EventsDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -40,8 +40,7 @@ public class EventManagementPanel extends SimplePanel implements EventsDisplayer
         mainPanel.add(eventsPanel);
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
-        eventListComposite = new EventListComposite(presenter.getSailingService(), presenter.getUserService(),
-                presenter.getErrorReporter(), presenter, presenter, presenter, placeController, stringMessages);
+        eventListComposite = new EventListComposite(presenter, placeController, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         eventDetailsComposite = new EventDetailsComposite(presenter.getSailingService(), presenter.getErrorReporter(), stringMessages);
@@ -71,7 +70,7 @@ public class EventManagementPanel extends SimplePanel implements EventsDisplayer
     }
 
     @Override
-    public void fillEvents(List<EventDTO> events) {
+    public void fillEvents(Iterable<EventDTO> events) {
         eventListComposite.fillEvents(events);
     }
 

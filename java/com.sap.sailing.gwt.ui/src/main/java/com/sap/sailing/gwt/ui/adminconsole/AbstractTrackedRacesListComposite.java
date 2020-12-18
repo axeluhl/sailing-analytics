@@ -44,7 +44,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -91,7 +92,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     protected final SailingServiceWriteAsync sailingService;
     protected final ErrorReporter errorReporter;
-    protected final RegattaRefresher regattaRefresher;
+    protected final Refresher<RegattaDTO> regattaRefresher;
     protected final StringMessages stringMessages;
 
     private Button btnRefresh;
@@ -112,17 +113,15 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceWriteAsync sailingServiceWrite,
-            final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
+            final Presenter presenter, final StringMessages stringMessages, boolean hasMultiSelection) {
         super(parent, context);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
-        this.sailingService = sailingServiceWrite;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
+        this.sailingService = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.regattaRefresher = presenter.getRegattasRefresher();
         this.multiSelection = hasMultiSelection;
         this.stringMessages = stringMessages;
-        this.userService = userService;
+        this.userService = presenter.getUserService();
     }
 
     public void setRegattaFilterValue(String regattaName) {
@@ -234,7 +233,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                regattaRefresher.reloadRegattas();
+                regattaRefresher.reloadAndCallFillAll();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
@@ -424,11 +423,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         final AccessControlledActionsColumn<RaceDTO, RegattaConfigImagesBarCell> actionsColumn = create(
                 new RegattaConfigImagesBarCell(stringMessages), userService);
         final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
-                race -> regattaRefresher.loadRegattas(), stringMessages);
+                race -> {}, stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
 
         final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.loadRegattas(),
+                userService.getUserManagementWriteService(), type, regatta -> {},
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
@@ -454,7 +453,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.reloadRegattas();
+                        regattaRefresher.reloadAndCallFillAll();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.racesRemoved(Arrays.asList(name));
                         }
@@ -474,7 +473,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.reloadRegattas();
+                        regattaRefresher.reloadAndCallFillAll();
                     }
                 }));
     }
@@ -512,7 +511,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    regattaRefresher.reloadRegattas();
+                                    regattaRefresher.reloadAndCallFillAll();
                                 }
                             }
                     ));

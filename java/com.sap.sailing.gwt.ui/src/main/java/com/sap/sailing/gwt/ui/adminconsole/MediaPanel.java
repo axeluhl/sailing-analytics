@@ -604,7 +604,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaServiceWrite,
-                getDefaultStartTime(), stringMessages, sailingServiceWrite, userService, errorReporter, presenter,
+                getDefaultStartTime(), stringMessages, presenter,
                 storageServiceAvailable, new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
@@ -694,9 +694,8 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
     public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
-        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingServiceWrite, userService, mediaTrack,
-                errorReporter,
-                presenter, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(presenter, mediaTrack,
+                stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
                     @Override
                     public void cancel() {
                     }
@@ -716,7 +715,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
                     }
                 });
-        presenter.addRegattasDisplayer(dialog);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(dialog);
         dialog.ensureDebugId("AssignedRacesDialog");
         dialog.show();
     }
