@@ -15,7 +15,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
  *
  * <p>
  * On result {@link DataLoaderResult#isSuccessful()} is checked. If true
- * {@link LoadClient#onLoadSucceeded(int, Object, boolean)} is called; other {@link LoadClient#onLoadFailed(int, Exception)} is
+ * {@link LoadClient#onLoadSucceeded(Object, boolean)} is called; other {@link LoadClient#onLoadFailed(Exception)} is
  * called.
  * </p>
  *
@@ -56,9 +56,9 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
     public void onLoadFinished(Loader<DataLoaderResult<T>> loader, DataLoaderResult<T> result) {
 
         if (result.isSuccessful()) {
-            clientCallback.onLoadSucceeded(loader.getId(), result.getResult(), result.isResultCached());
+            clientCallback.onLoadSucceeded(result.getResult(), result.isResultCached());
         } else {
-            clientCallback.onLoadFailed(loader.getId(), result.getException());
+            clientCallback.onLoadFailed(result.getException());
         }
     }
 

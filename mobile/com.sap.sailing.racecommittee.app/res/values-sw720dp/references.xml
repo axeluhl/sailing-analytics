@@ -5,7 +5,6 @@
     <item name="finish_current_button" type="layout">@layout/finish_current_button_xlarge</item>
     <item name="finish_custom_button" type="layout">@layout/finish_custom_button_xlarge</item>
     <item name="flag_list_item" type="layout">@layout/flag_list_item_xlarge</item>
-    <item name="login_backdrop" type="layout">@layout/login_backdrop_xlarge</item>
     <item name="login_listviews_button" type="layout">@layout/login_listviews_button_xlarge</item>
     <item name="photo_list_button" type="layout">@layout/photo_list_button_xlarge</item>
     <item name="photo_list_item" type="layout">@layout/photo_list_item_xlarge</item>

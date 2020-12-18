@@ -188,7 +188,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">Snap</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">Do you want to log out and log in as a new user? All your races will still be monitored.</string>
+    <string name="logout_dialog_message">Do you want to log out and log in as a new user?</string>
     <string name="change_dialog_title">Change Regatta</string>
     <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
     <string name="logout">Log out</string>

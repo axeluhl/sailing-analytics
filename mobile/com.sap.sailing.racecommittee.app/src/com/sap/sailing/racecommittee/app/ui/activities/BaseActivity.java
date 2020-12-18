@@ -18,6 +18,7 @@ import com.sap.sailing.android.shared.util.AuthCheckTask;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -108,7 +109,7 @@ public class BaseActivity extends SendingServiceAwareActivity implements AuthChe
      */
     protected boolean onReset() {
         resetDataManager();
-        fadeActivity(LoginActivity.class, true);
+        RaceApplication.getInstance().restart();
         return true;
     }
 

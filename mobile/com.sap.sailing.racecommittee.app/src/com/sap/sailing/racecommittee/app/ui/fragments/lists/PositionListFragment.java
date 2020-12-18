@@ -1,6 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.ListView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,10 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PositionListFragment extends LoggableListFragment {
-
-    private static final int PRIORITY_OFFICER_VESSEL = 1;
-    private static final int PRIORITY_SHORE_CONTROL = 2;
-    private static final int PRIORITY_VIEWER = 3;
 
     private LogEventAuthorImpl author;
     private AppPreferences preferences;
@@ -41,22 +41,52 @@ public class PositionListFragment extends LoggableListFragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        host = (PositionSelectedListenerHost) context;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_fragment, container, false);
-
+        final View view = inflater.inflate(R.layout.list_fragment, container, false);
         preferences = AppPreferences.on(getActivity());
+        return view;
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        final int priority = getArguments() != null ? getArguments().getInt(AppConstants.EXTRA_PRIORITY, -1) : -1;
         values.clear();
-        values.add(new LoginTypeItem(PRIORITY_OFFICER_VESSEL, getString(R.string.login_type_officer_on_vessel),
-                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL /* TODO bug 5456: use user name instead */, LoginType.OFFICER));
-        values.add(new LoginTypeItem(PRIORITY_SHORE_CONTROL, getString(R.string.login_type_shore_control),
-                AppConstants.AUTHOR_TYPE_SHORE_CONTROL /* TODO bug 5456: use user name instead */, LoginType.OFFICER));
-        // TODO define configuration to activate super user
-        // values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER,
-        // LoginType.OFFICER));
-        if (preferences.isDemoAllowed()) {
-            values.add(new LoginTypeItem(PRIORITY_VIEWER, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER,
-                    LoginType.VIEWER));
+        //Define configuration to activate super user
+        if (AuthorPriority.ADMIN.getPriority() == priority) {
+            values.add(new LoginTypeItem(
+                    AuthorPriority.ADMIN.getPriority(),
+                    getString(R.string.login_type_superuser),
+                    AppConstants.AUTHOR_TYPE_SUPERUSER /* TODO bug 5456: use user name instead */,
+                    LoginType.OFFICER
+            ));
+        }
+        values.add(new LoginTypeItem(
+                AuthorPriority.OFFICER_ON_VESSEL.getPriority(),
+                getString(R.string.login_type_officer_on_vessel),
+                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL /* TODO bug 5456: use user name instead */,
+                LoginType.OFFICER
+        ));
+        values.add(new LoginTypeItem(
+                AuthorPriority.SHORE_CONTROL.getPriority(),
+                getString(R.string.login_type_shore_control),
+                AppConstants.AUTHOR_TYPE_SHORE_CONTROL /* TODO bug 5456: use user name instead */,
+                LoginType.OFFICER
+        ));
+        //Demo mode
+        if (AuthorPriority.DEMO_MODE.getPriority() == priority || preferences.isDemoAllowed()) {
+            values.add(new LoginTypeItem(
+                    AuthorPriority.DEMO_MODE.getPriority(),
+                    getString(R.string.login_type_viewer),
+                    AppConstants.AUTHOR_TYPE_VIEWER /* TODO bug 5456: use user name instead */,
+                    LoginType.VIEWER
+            ));
         }
 
         final List<CheckedItem> items = new ArrayList<>();
@@ -69,20 +99,13 @@ public class PositionListFragment extends LoggableListFragment {
         final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), items);
         setListAdapter(adapter);
 
-        host = (PositionSelectedListenerHost) getActivity();
-
-        final Bundle args = getArguments();
-        if (args != null) {
-            final int priority = args.getInt(AppConstants.EXTRA_PRIORITY);
-            for (int i = 0; i < values.size(); i++) {
-                final LoginTypeItem item = values.get(i);
-                if (item.priority == priority) {
-                    positionSelected(i, adapter);
-                    break;
-                }
+        for (int i = 0; i < values.size(); i++) {
+            final LoginTypeItem item = values.get(i);
+            if (item.priority == priority) {
+                positionSelected(i, adapter);
+                break;
             }
         }
-        return view;
     }
 
     @Override

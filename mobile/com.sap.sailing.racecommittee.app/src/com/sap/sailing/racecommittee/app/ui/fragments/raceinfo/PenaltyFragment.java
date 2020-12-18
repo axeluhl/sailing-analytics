@@ -375,13 +375,13 @@ public class PenaltyFragment extends BaseFragment
         final Loader<?> competitorLoader = getLoaderManager().initLoader(COMPETITOR_LOADER, null,
                 dataManager.createCompetitorsLoader(getRace(), new LoadClient<Map<Competitor, Boat>>() {
                     @Override
-                    public void onLoadFailed(int loaderId, Exception reason) {
+                    public void onLoadFailed(Exception reason) {
                         Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()),
                                 Toast.LENGTH_LONG).show();
                     }
 
                     @Override
-                    public void onLoadSucceeded(int loaderId, Map<Competitor, Boat> data, boolean isCached) {
+                    public void onLoadSucceeded(Map<Competitor, Boat> data, boolean isCached) {
                         if (isAdded() && !isCached) {
                             onLoadCompetitorsSucceeded(data);
                         }
@@ -396,11 +396,11 @@ public class PenaltyFragment extends BaseFragment
         final Loader<?> leaderboardResultLoader = getLoaderManager().initLoader(LEADERBOARD_ORDER_LOADER, null,
                 dataManager.createLeaderboardLoader(getRace(), new LoadClient<LeaderboardResult>() {
                     @Override
-                    public void onLoadFailed(int loaderId, Exception reason) {
+                    public void onLoadFailed(Exception reason) {
                     }
 
                     @Override
-                    public void onLoadSucceeded(int loaderId, LeaderboardResult data, boolean isCached) {
+                    public void onLoadSucceeded(LeaderboardResult data, boolean isCached) {
                         onLoadLeaderboardResultSucceeded(data);
                     }
                 }));

@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,16 +48,26 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     protected int mSelectedIndex = -1;
     private View footerView;
 
-    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+    protected abstract ItemSelectedListener<T> attachListener(Context context);
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
             ReadonlyDataManager manager
     );
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = attachListener(context);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list_fragment, container, false);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         namedList = new ArrayList<>();
         checkedItems = new ArrayList<>();
         listAdapter = new CheckedItemAdapter(getActivity(), checkedItems);
@@ -72,24 +82,24 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         footerView = View.inflate(requireContext(), R.layout.footer_progress, null);
         getListView().addFooterView(footerView);
 
         showProgressBar(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         loadItems();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("position", mSelectedIndex);
     }
 
     @Override
@@ -100,11 +110,11 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        listener.itemSelected(this, namedList.get(position), true);
+        listener.itemSelected(this, namedList.get(position));
     }
 
     @Override
-    public void onLoadFailed(int loaderId, Exception reason) {
+    public void onLoadFailed(Exception reason) {
         namedList.clear();
         listAdapter.notifyDataSetChanged();
 
@@ -126,16 +136,17 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     @Override
-    public void onLoadSucceeded(int loaderId, Collection<T> data, boolean isCached) {
+    public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
         if (isForceLoad() && !isCached) {
             listAdapter.setCheckedPosition(-1);
+            mSelectedIndex = -1;
         }
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator<T>());
+            Collections.sort(namedList, new NaturalNamedComparator<>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
@@ -180,26 +191,22 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return subText;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt("position", mSelectedIndex);
-
-        super.onSaveInstanceState(outState);
-    }
-
     ReadonlyDataManager getDataManager() {
         return OnlineDataManager.create(getActivity());
     }
 
-    Loader<DataLoaderResult<Collection<T>>> getLoader() {
+    Loader<DataLoaderResult<Collection<T>>> initLoader() {
         return getLoaderManager().initLoader(0, null, createLoaderCallbacks(getDataManager()));
     }
 
+    Loader<DataLoaderResult<Collection<T>>> restartLoader() {
+        return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
+    }
+
     private void loadItems() {
+        final Loader<DataLoaderResult<Collection<T>>> loader = initLoader();
         if (isForceLoad()) {
-            getLoader().forceLoad();
-        } else {
-            getLoader().startLoading();
+            loader.forceLoad();
         }
     }
 
@@ -221,11 +228,15 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         footerView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    protected void selectItem(T eventBase) {
+    protected void selectItem(T eventBase, boolean notify) {
         final int position = namedList.indexOf(eventBase);
         listAdapter.setCheckedPosition(position);
+        listAdapter.notifyDataSetChanged();
 
         mSelectedIndex = position;
-        listener.itemSelected(this, eventBase, false);
+        getListView().setSelection(position);
+        if (notify) {
+            listener.itemSelected(this, eventBase);
+        }
     }
 }

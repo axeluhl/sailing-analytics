@@ -16,7 +16,7 @@ public interface LoadClient<T> {
      *
      * @param reason the loading has failed.
      */
-    void onLoadFailed(int loaderId, Exception reason);
+    void onLoadFailed(Exception reason);
 
     /**
      * Called when a {@link Loader} returned successfully to its {@link LoaderCallbacks#onLoadFinished(Loader, Object)}.
@@ -24,5 +24,5 @@ public interface LoadClient<T> {
      * @param data that was loaded.
      * @param isCached <code>true</code> if returned data is cached data.
      */
-    void onLoadSucceeded(int loaderId, T data, boolean isCached);
+    void onLoadSucceeded(T data, boolean isCached);
 }

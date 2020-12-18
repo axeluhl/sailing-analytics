@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -44,25 +44,26 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
     }
 
     @Override
-    protected ItemSelectedListener<CourseArea> attachListener(Activity activity) {
-        if (activity instanceof CourseAreaSelectedListenerHost) {
-            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) activity;
+    protected ItemSelectedListener<CourseArea> attachListener(Context context) {
+        if (context instanceof CourseAreaSelectedListenerHost) {
+            CourseAreaSelectedListenerHost listener = (CourseAreaSelectedListenerHost) context;
             return listener.getCourseAreaSelectionListener();
         }
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
-                CourseAreaListFragment.class.getName(), activity.getClass().getName()));
+                CourseAreaListFragment.class.getName(), context.getClass().getName()));
     }
 
     @Override
     protected LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createLoaderCallbacks(
-            ReadonlyDataManager manager) {
+            ReadonlyDataManager manager
+    ) {
         return manager.createCourseAreasLoader(eventId, this);
     }
 
     @Override
-    public void onLoadSucceeded(int loaderId, Collection<CourseArea> data, boolean isCached) {
-        super.onLoadSucceeded(loaderId, data, isCached);
+    public void onLoadSucceeded(Collection<CourseArea> data, boolean isCached) {
+        super.onLoadSucceeded(data, isCached);
 
         for (CheckedItem item : checkedItems) {
             item.setDisabled(true);
@@ -82,7 +83,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
             final String uuid = args.getString(AppConstants.EXTRA_COURSE_UUID);
             for (CourseArea area : data) {
                 if (area.getId().toString().equals(uuid)) {
-                    selectItem(area);
+                    selectItem(area, true);
                     break;
                 }
             }
