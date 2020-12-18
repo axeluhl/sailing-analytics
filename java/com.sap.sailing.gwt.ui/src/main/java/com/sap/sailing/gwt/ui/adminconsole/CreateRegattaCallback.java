@@ -12,9 +12,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -28,27 +26,19 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.security.ui.client.UserService;
 
 public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
-    private final EventRefresher eventRefresher;
-    private final RegattaRefresher regattaRefresher;
-    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
+    private final Presenter presenter;
 
-    public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
-            StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            EventRefresher eventRefresher, List<EventDTO> existingEvents) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.eventRefresher = eventRefresher;
-        this.leaderboardsRefresher = leaderboardsRefresher;
+    public CreateRegattaCallback(StringMessages stringMessages, Presenter presenter, List<EventDTO> existingEvents) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.presenter = presenter;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
     }
@@ -119,7 +109,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
                     @Override
                     public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                        loadRegattas();
+                        reloadRegattas();
                     }
                 });
             }
@@ -127,26 +117,20 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     }
     
     private void reloadLeaderboards() {
-        if (leaderboardsRefresher != null) {
-            leaderboardsRefresher.reloadLeaderboards();
+        if (presenter.getLeaderboardsRefresher() != null) {
+            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
         }
     }
     
     private void reloadRegattas() {
-        if (regattaRefresher != null){
-            regattaRefresher.reloadRegattas();
-        }
-    }
-    
-    private void loadRegattas() {
-        if (regattaRefresher != null){
-            regattaRefresher.reloadRegattas();
+        if (presenter.getRegattasRefresher() != null){
+            presenter.getRegattasRefresher().reloadAndCallFillAll();
         }
     }
     
     private void fillEvents() {
-        if (eventRefresher != null) {
-            eventRefresher.reloadEvents();
+        if (presenter.getEventsRefresher() != null) {
+            presenter.getEventsRefresher().reloadAndCallFillAll();
         }
     }
     

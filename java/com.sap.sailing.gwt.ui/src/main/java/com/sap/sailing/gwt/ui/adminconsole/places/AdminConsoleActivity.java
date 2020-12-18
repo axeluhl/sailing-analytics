@@ -1,10 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -12,13 +9,11 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.adminconsole.places.refresher.AbstractRefresher;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -36,20 +31,17 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class AdminConsoleActivity extends AbstractActivity implements AdminConsoleView.Presenter {
     private AdminConsoleClientFactory clientFactory;
-    private final Set<RegattasDisplayer> regattasDisplayers;
-    private final Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
-    private final Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
-    private final Set<EventsDisplayer> eventsDisplayers;
     private AdminConsoleView adminConsoleView;
     private MediaServiceWriteAsync mediaServiceWrite;
     private SailingServiceWriteAsync sailingService;
     private static AdminConsoleActivity instance;
     private AbstractAdminConsolePlace defaultPlace;
-    private MediaTracksRefresher mediaTracksRefresher;
-    private List<StrippedLeaderboardDTOWithSecurity> leaderboards;
-    private List<LeaderboardGroupDTO> leaderboardGroups;
-    private List<RegattaDTO> regattas;
-    private List<EventDTO> events;
+    
+    private final Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    private final Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher;
+    private final Refresher<RegattaDTO> regattasRefresher;
+    private final Refresher<EventDTO> eventsRefresher;
+    private final Refresher<MediaTrackWithSecurityDTO> mediaTracksRefresher;
     
     public static boolean instantiated() {
         return instance != null;
@@ -74,10 +66,115 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        regattasDisplayers = new HashSet<>();
-        leaderboardsDisplayers = new HashSet<>();
-        leaderboardGroupsDisplayers = new HashSet<>();
         eventsDisplayers = new HashSet<>();
+        
+        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>(clientFactory.getErrorReporter()) {
+            @Override
+            public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {
+                sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+                        new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
+                            @Override
+                            public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> result) {
+                                callback.onSuccess(new ArrayList<StrippedLeaderboardDTOWithSecurity>(result));
+                            }
+                            @Override
+                            public void onFailure(Throwable t) {
+                                callback.onFailure(t);
+                            }
+                        }));
+            }
+        };
+        leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>(clientFactory.getErrorReporter()) {
+            @Override
+            public void reload(AsyncCallback<Iterable<LeaderboardGroupDTO>> callback) {
+                sailingService.getLeaderboardGroups(false /* withGeoLocationData */,
+                        new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+                            @Override
+                            public void onSuccess(List<LeaderboardGroupDTO> result) {
+                                callback.onSuccess(new ArrayList<LeaderboardGroupDTO>(result));
+                            }
+                            @Override
+                            public void onFailure(Throwable t) {
+                                callback.onFailure(t);
+                            }
+                        }));
+            }
+        };
+        regattasRefresher = new AbstractRefresher<RegattaDTO>(clientFactory.getErrorReporter()) {
+            @Override
+            public void reload(AsyncCallback<Iterable<RegattaDTO>> callback) {
+                sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
+                        new AsyncCallback<List<RegattaDTO>>() {
+                            @Override
+                            public void onSuccess(List<RegattaDTO> result) {
+                                callback.onSuccess(new ArrayList<RegattaDTO>(result));
+                            }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                callback.onFailure(caught);
+                            }
+                        }));
+            }
+        };
+        eventsRefresher = new AbstractRefresher<EventDTO>(clientFactory.getErrorReporter()) {
+            @Override
+            public void reload(AsyncCallback<Iterable<EventDTO>> callback) {
+                sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+                    @Override
+                    public void onSuccess(List<EventDTO> result) {
+                        callback.onSuccess(new ArrayList<EventDTO>(result));
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+                });
+            }
+        };
+        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>(clientFactory.getErrorReporter()) {
+            @Override
+            public void reload(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback) {
+                mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(Iterable<MediaTrackWithSecurityDTO> result) {
+                        List<MediaTrackWithSecurityDTO> list = new ArrayList<MediaTrackWithSecurityDTO>();
+                        result.forEach(mediaTrackDto -> list.add(mediaTrackDto));
+                        callback.onSuccess(list);
+                    }
+                });
+            }
+        };
+    }
+
+    @Override
+    public Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher() {
+        return leaderboardsRefresher;
+    }
+    
+    @Override
+    public Refresher<LeaderboardGroupDTO> getLeaderboardGroupsRefresher() {
+        return leaderboardGroupsRefresher;
+    }
+
+    @Override
+    public Refresher<RegattaDTO> getRegattasRefresher() {
+        return regattasRefresher;
+    }
+
+    @Override
+    public Refresher<EventDTO> getEventsRefresher() {
+        return eventsRefresher;
+    }
+    
+    @Override
+    public Refresher<MediaTrackWithSecurityDTO> getMediaTracksRefresher() {
+        return mediaTracksRefresher;
     }
     
     public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
@@ -126,197 +223,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public ErrorReporter getErrorReporter() {
         return clientFactory.getErrorReporter();
-    }
-    
-    @Override
-    public Iterable<RegattasDisplayer> getRegattasDisplayers() {
-        return regattasDisplayers;
-    }
-    
-    @Override
-    public Iterable<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> getLeaderboardsDisplayers() {
-        return leaderboardsDisplayers;
-    }
-    
-    @Override
-    public Iterable<LeaderboardGroupsDisplayer> getLeaderboardGroupsDisplayers() {
-        return leaderboardGroupsDisplayers;
-    }
-    
-    @Override
-    public void addLeaderboardGroupsDisplayer(LeaderboardGroupsDisplayer leaderboardGroupsDisplayer) {
-        this.leaderboardGroupsDisplayers.add(leaderboardGroupsDisplayer);
-    }
-
-    @Override
-    public void addRegattasDisplayer(RegattasDisplayer regattasDisplayer) {
-        this.regattasDisplayers.add(regattasDisplayer);
-    }
-
-    @Override
-    public void addLeaderboardsDisplayer(
-            LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer) {
-        this.leaderboardsDisplayers.add(leaderboardsDisplayer);
-    }
-
-    @Override
-    public Iterable<EventsDisplayer> getEventsDisplayers() {
-        return eventsDisplayers;
-    }
-    
-    public void addEventsDisplayer(EventsDisplayer eventsDisplayer) {
-        this.eventsDisplayers.add(eventsDisplayer);
-    }
-
-    @Override
-    public void loadLeaderboards() {
-        if (!leaderboardsDisplayers.isEmpty()) {
-            if (leaderboards == null) {
-                reloadLeaderboards();
-            } else {
-                updateLeaderboardDisplayer();
-            }
-        }
-    }
-    
-    @Override
-    public void loadLeaderboardGroups() {
-        if (!leaderboardGroupsDisplayers.isEmpty()) {
-            if (leaderboardGroups == null) {
-                reloadLeaderboardGroups();
-            } else {
-                updateLeaderboardGroupDisplayer();
-            }
-        }
-    }
-
-
-    @Override
-    public void loadRegattas() {
-        if (!regattasDisplayers.isEmpty()) {
-            if (regattas == null) {
-                reloadRegattas();
-            } else {
-                updateRegattaDisplayer();
-            }
-        }
-    }
-    
-    @Override
-    public void loadEvents() {
-        if (!eventsDisplayers.isEmpty()) {
-            if (events == null) {
-                reloadEvents();
-            } else {
-                updateEventDisplayer();
-            }
-        }
-    }
-
-    @Override
-    public void reloadLeaderboards() {
-        sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
-                new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
-                    @Override
-                    public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> result) {
-                        leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(result);
-                        updateLeaderboardDisplayer();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        clientFactory.getErrorReporter()
-                                .reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
-                    }
-                }));
-    }
-
-    @Override
-    public void reloadRegattas() {
-        sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
-                new AsyncCallback<List<RegattaDTO>>() {
-                    @Override
-                    public void onSuccess(List<RegattaDTO> result) {
-                        regattas = new ArrayList<RegattaDTO>(result);
-                        updateRegattaDisplayer();
-                    }
-        
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        clientFactory.getErrorReporter().reportError("Remote Procedure Call getRegattas() - Failure");
-                    }
-                }));
-    }
-    
-    public void reloadEvents() {
-        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                events = new ArrayList<EventDTO>(result);
-                updateEventDisplayer();
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                clientFactory.getErrorReporter().reportError("Remote Procedure Call getEvents() - Failure: " + caught.getMessage());
-            }
-        });
-    }
-
-    @Override
-    public void updateLeaderboards(List<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards) {
-        leaderboards = new ArrayList<StrippedLeaderboardDTOWithSecurity>(updatedLeaderboards);
-    }
-
-    @Override
-    public void updateLeaderboardGroups(List<LeaderboardGroupDTO> updatedLeaderboardGroups) {
-        leaderboardGroups = new ArrayList<LeaderboardGroupDTO>(updatedLeaderboardGroups);
-    }
-
-    private void updateLeaderboardDisplayer() {
-        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : getLeaderboardsDisplayers()) {
-            leaderboardsDisplayer.fillLeaderboards(new ArrayList<StrippedLeaderboardDTOWithSecurity>(leaderboards));
-        }
-    }
-    
-    private void updateRegattaDisplayer() {
-        for (RegattasDisplayer regattaDisplayer : getRegattasDisplayers()) {
-            regattaDisplayer.fillRegattas(new ArrayList<RegattaDTO>(regattas));
-        }
-    }
-    
-    private void updateLeaderboardGroupDisplayer() {
-        for (LeaderboardGroupsDisplayer leaderboardGroupsDisplayer : getLeaderboardGroupsDisplayers()) {
-            leaderboardGroupsDisplayer.fillLeaderboardGroups(leaderboardGroups);
-        }
-    }
-    
-    private void updateEventDisplayer() {
-        for (final EventsDisplayer eventsDisplayer : getEventsDisplayers()) {
-            eventsDisplayer.fillEvents(events);
-        }
-    }
-
-    @Override
-    public void reloadLeaderboardGroups() {
-        sailingService.getLeaderboardGroups(false /* withGeoLocationData */,
-                new MarkedAsyncCallback<List<LeaderboardGroupDTO>>(new AsyncCallback<List<LeaderboardGroupDTO>>() {
-                    @Override
-                    public void onSuccess(List<LeaderboardGroupDTO> result) {
-                        leaderboardGroups = new ArrayList<LeaderboardGroupDTO>(result);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                        clientFactory.getErrorReporter()
-                                .reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
-                    }
-                }));
-    }
-    
-    @Override
-    public void setupLeaderboardGroups(LeaderboardGroupsDisplayer displayer, Map<String, String> params) {
-        displayer.setupLeaderboardGroups(params);
     }
 
     protected void checkPublicServerNonPublicUserWarning() {
@@ -369,17 +275,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
-    }
-
-    @Override
-    public void loadMediaTracks() {
-        if (mediaTracksRefresher != null) {
-            mediaTracksRefresher.loadMediaTracks();
-        }
-    }
-    
-    public void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher) {
-        this.mediaTracksRefresher = mediaTracksRefresher;
     }
 
  

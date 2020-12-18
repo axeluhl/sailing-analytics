@@ -25,12 +25,10 @@ public class TracTracEventManagementPanelSupplier extends AdminConsolePanelSuppl
     public TracTracEventManagementPanel init() {
         logger.info("Create TracTracEventManagementPanel");
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(
-                presenter.getSailingService(), presenter.getUserService(), presenter.getErrorReporter(), presenter,
-                stringMessages, tableResources);
+                presenter, stringMessages, tableResources);
         tractracEventManagementPanel.ensureDebugId("TracTracEventManagement");
         tractracEventManagementPanel.refreshTracTracConnectors();
-        presenter.addRegattasDisplayer(tractracEventManagementPanel);
-        presenter.loadRegattas();
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(tractracEventManagementPanel.getRegattasDisplayer());
         return tractracEventManagementPanel;
     }
 

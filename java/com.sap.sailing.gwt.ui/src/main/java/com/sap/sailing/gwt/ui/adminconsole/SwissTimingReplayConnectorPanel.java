@@ -68,7 +68,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final SwissTimingArchivedConnectionTableWrapper connectionsTable;
 
     public SwissTimingReplayConnectorPanel(final Presenter presenter, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
-        super(presenter.getSailingService(), presenter.getUserService(), presenter, presenter.getErrorReporter(), true, stringMessages);
+        super(presenter, true, stringMessages);
         this.errorReporter = presenter.getErrorReporter();
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
 
@@ -395,7 +395,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.reloadRegattas();
+                        presenter.getRegattasRefresher().reloadAndCallFillAll();
                     }
                 });
         }

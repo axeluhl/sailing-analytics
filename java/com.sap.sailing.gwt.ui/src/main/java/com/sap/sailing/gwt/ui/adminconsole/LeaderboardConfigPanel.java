@@ -74,8 +74,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiv
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -109,8 +107,8 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>,
+        TrackedRaceChangedListener {
     private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
@@ -120,7 +118,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private Button addRaceColumnsButton;
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
-
+    
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -134,8 +132,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     public LeaderboardConfigPanel(final Presenter presenter, StringMessages theStringConstants, final boolean showRaceDetails) {
-        super(presenter.getSailingService(), presenter.getUserService(), presenter, presenter, presenter.getErrorReporter(), theStringConstants,
-                /* multi-selection */ false);
+        super(presenter, theStringConstants, /* multi-selection */ false);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }
@@ -1073,7 +1070,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList);
+                    getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
+                            LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
                 }
             });
         }
@@ -1091,7 +1089,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList);
+                        getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
+                                LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
                     }
                 }));
     }

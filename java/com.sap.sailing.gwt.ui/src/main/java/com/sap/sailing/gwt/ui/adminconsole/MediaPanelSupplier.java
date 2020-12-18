@@ -23,7 +23,7 @@ public class MediaPanelSupplier extends AdminConsolePanelSupplier<MediaPanel> {
         final MediaPanel mediaPanel = new MediaPanel(presenter, stringMessages);
         mediaPanel.ensureDebugId("mediaPanel");
         mediaPanel.onShow();
-        presenter.setMediaTracksRefresher(mediaPanel);
+        presenter.getMediaTracksRefresher().addDisplayerAndCallFillOnInit(mediaPanel.getMediaTracksDisplayer());
         return mediaPanel;
     }
 

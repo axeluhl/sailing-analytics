@@ -32,7 +32,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Button setStartTimeButton;
     
     public TrackedRacesManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
-        super(presenter.getSailingService(), presenter.getUserService(), presenter.getErrorReporter(), presenter, /* actionButtonsEnabled */ true,
+        super(presenter, /* actionButtonsEnabled */ true,
                 stringMessages);
         this.userService = presenter.getUserService();
         this.setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {
@@ -50,7 +50,7 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
                             public void onSuccess(RaceDTO result) {
                                 selectedRaceDTO = result;
                                 refreshSelectedRaceData();
-                                TrackedRacesManagementPanel.this.regattaRefresher.reloadRegattas();
+                                TrackedRacesManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
                             }
                         });
                     }

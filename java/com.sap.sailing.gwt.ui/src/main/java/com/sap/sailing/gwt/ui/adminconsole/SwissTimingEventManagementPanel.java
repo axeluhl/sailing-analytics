@@ -65,8 +65,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     public SwissTimingEventManagementPanel(final Presenter presenter, StringMessages stringConstants,
             final CellTableWithCheckboxResources tableResources) {
-        super(presenter.getSailingService(), presenter.getUserService(), presenter, presenter.getErrorReporter(), true,
-                stringConstants);
+        super(presenter, true, stringConstants);
         this.errorReporter = presenter.getErrorReporter();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -450,7 +449,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
                         @Override
                         public void onSuccess(Void result) {
-                            regattaRefresher.reloadRegattas();
+                            presenter.getRegattasRefresher().reloadAndCallFillAll();
                         }
                     });
         }

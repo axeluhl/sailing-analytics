@@ -50,7 +50,6 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -89,8 +88,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
 public class SmartphoneTrackingEventManagementPanel
-        extends AbstractLeaderboardConfigPanel
-        implements LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        extends AbstractLeaderboardConfigPanel {
     private ToggleButton startStopTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
@@ -100,8 +98,7 @@ public class SmartphoneTrackingEventManagementPanel
     private CaptionPanel importPanel;
     
     public SmartphoneTrackingEventManagementPanel(final Presenter presenter, StringMessages stringMessages) {
-        super(presenter.getSailingService(), presenter.getUserService(), presenter, presenter,
-                presenter.getErrorReporter(), stringMessages, /* multiSelection */ true);
+        super(presenter, stringMessages, /* multiSelection */ true);
         // add upload panel
         importPanel = new CaptionPanel(stringMessages.importFixes());
         importPanel.setVisible(false);
@@ -359,7 +356,7 @@ public class SmartphoneTrackingEventManagementPanel
         final String leaderboardName = t.getC().getName();
         final String raceColumnName = t.getA().getName();
         final String fleetName = t.getB().getName();
-        new RaceLogTrackingCourseDefinitionDialog(sailingServiceWrite, stringMessages, errorReporter, leaderboardName,
+        new RaceLogTrackingCourseDefinitionDialog(presenter, stringMessages, leaderboardName,
                 raceColumnName, fleetName, new DialogCallback<RaceLogTrackingCourseDefinitionDialog.Result>() {
                     @Override
                     public void cancel() {
@@ -391,7 +388,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     }
                                 });
                     }
-                }, userService).show();
+                }).show();
     }
 
     private void handleCompetitorRegistration(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
@@ -535,7 +532,7 @@ public class SmartphoneTrackingEventManagementPanel
         
                     @Override
                     public void onSuccess(Void result) {
-                        trackedRacesListComposite.regattaRefresher.reloadRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                         for (TrackedRaceChangedListener listener : trackedRacesListComposite.raceIsTrackedRaceChangeListener) {
                             listener.racesStoppedTracking(racesToStopTracking);
                         }
@@ -822,7 +819,7 @@ public class SmartphoneTrackingEventManagementPanel
                     @Override
                     public void onSuccess(Void result) {
                         loadAndRefreshLeaderboard(leaderboard.getName());
-                        trackedRacesListComposite.regattaRefresher.reloadRegattas();
+                        trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                     }
 
                     @Override
@@ -851,7 +848,7 @@ public class SmartphoneTrackingEventManagementPanel
                                     Notification.notify(stringMessages.failedToSetNewStartTime(),
                                             NotificationType.ERROR);
                                 } else {
-                                    trackedRacesListComposite.regattaRefresher.reloadRegattas();
+                                    trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                                 }
                             }
                         });
@@ -881,7 +878,7 @@ public class SmartphoneTrackingEventManagementPanel
                                             Notification.notify(stringMessages.failedToSetNewFinishingAndFinishTime(),
                                                     NotificationType.ERROR);
                                         } else {
-                                            trackedRacesListComposite.regattaRefresher.reloadRegattas();
+                                            trackedRacesListComposite.regattaRefresher.reloadAndCallFillAll();
                                         }
                                     }
                                 });
