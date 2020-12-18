@@ -56,7 +56,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     protected Grid entryGrid;
     private String regattaRegisterSecret;
 
-    public RegattaLogAddDeviceMappingDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService, final ErrorReporter errorReporter,
+    public RegattaLogAddDeviceMappingDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, String regattaRegisterSecret, final MailInvitationType mailInvitationType,
             DialogCallback<DeviceMappingDTO> callback,
             final DeviceMappingDTO mapping) {
@@ -89,7 +89,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                     }
                 }, true, callback);
         this.stringMessages = stringMessages;
-        this.sailingService = sailingWriteService;
+        this.sailingService = sailingServiceWrite;
         this.regattaRegisterSecret = regattaRegisterSecret;
         from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
@@ -97,7 +97,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         to.setValue(null);
 
         deviceType = createListBox(false);
-        sailingWriteService.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
+        sailingServiceWrite.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> result) {
                 String typeToPreselect = mapping != null ? mapping.deviceIdentifier.deviceType : null;
@@ -118,7 +118,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
             }
         });
         deviceId = createTextBox("");
-        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingWriteService, userService, stringMessages, errorReporter,
+        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingServiceWrite, userService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
@@ -164,7 +164,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
                 qrWidget.generateQRCode();
             }
         });
-        sailingWriteService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
+        sailingServiceWrite.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
             @Override
             public void onSuccess(Collection<EventDTO> result) {
                 events.addItems(result);

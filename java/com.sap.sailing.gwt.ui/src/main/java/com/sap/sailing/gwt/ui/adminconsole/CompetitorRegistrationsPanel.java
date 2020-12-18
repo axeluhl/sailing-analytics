@@ -77,7 +77,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
      *            to all competitors in the server's competitor store
      * @param additionalWidgetsBeforeTables widgets to be inserted above / before the competitor tables; may be {@code null} or empty
      */
-    protected CompetitorRegistrationsPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    protected CompetitorRegistrationsPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<CompetitorDTO>>> registeredCompetitorsRetriever,
@@ -88,7 +88,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         this.leaderboardName = leaderboardName;
         this.busyIndicator = new SimpleBusyIndicator();
         this.registeredCompetitorsRetriever = registeredCompetitorsRetriever;
-        this.importCompetitorCallback = new RaceOrRegattaImportCompetitorCallback(this, sailingWriteService, errorReporter, stringMessages);
+        this.importCompetitorCallback = new RaceOrRegattaImportCompetitorCallback(this, sailingServiceWrite, errorReporter, stringMessages);
         final HorizontalPanel buttonPanel = new HorizontalPanel();
         addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
         addCompetitorButton.addClickHandler(new ClickHandler() {
@@ -113,7 +113,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
             @Override
             public void onClick(ClickEvent event) {
                 Set<CompetitorDTO> competitors = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
-                CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingWriteService, stringMessages,
+                CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingServiceWrite, stringMessages,
                         errorReporter);
                 helper.inviteCompetitors(competitors, leaderboardName);
             }
@@ -122,13 +122,13 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         competitorImportButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingWriteService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
+                sailingServiceWrite.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                                sailingWriteService, userService, stringMessages, errorReporter);
+                                sailingServiceWrite, userService, stringMessages, errorReporter);
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingWriteService,
+                                matchCompetitorsDialogFactory, CompetitorRegistrationsPanel.this, providerNames, sailingServiceWrite,
                                 stringMessages, errorReporter);
                         dialog.show();
                     }
@@ -144,10 +144,10 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
         final HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages,
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ true, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ !canBoatsOfCompetitorsChangePerRace);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages,
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ false, /* filterCompetitorWithBoat */ false,
                 /* filterCompetitorsWithoutBoat */ false);
         registeredCompetitorsTable.getSelectionModel().addSelectionChangeHandler(event -> validateAndUpdate());
@@ -208,7 +208,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
     }
     
     private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
-            final SailingWriteServiceAsync sailingWriteService, final UserService userService, final StringMessages stringMessages,
+            final SailingWriteServiceAsync sailingServiceWrite, final UserService userService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
         return new MatchImportedCompetitorsDialogFactory() {
             @Override
@@ -216,7 +216,7 @@ public class CompetitorRegistrationsPanel extends FlowPanel implements BusyDispl
                     final Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint,
                     final Iterable<CompetitorDTO> competitors) {
                 return new MatchImportedCompetitorsDialog(competitorDescriptorsAndHint.getA(), competitors, competitorDescriptorsAndHint.getB(),
-                        stringMessages, sailingWriteService, userService, errorReporter, importCompetitorCallback);
+                        stringMessages, sailingServiceWrite, userService, errorReporter, importCompetitorCallback);
             }
         };
     }

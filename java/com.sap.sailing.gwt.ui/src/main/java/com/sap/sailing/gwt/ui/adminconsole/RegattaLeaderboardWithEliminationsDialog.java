@@ -29,7 +29,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected final ListBox regattaLeaderboardsListBox;
     protected final Collection<RegattaDTO> existingRegattas;
     protected final FlowPanel competitorEliminationPanelHolder;
-    protected final SailingWriteServiceAsync sailingWriteService;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
     protected final UserService userService;
     private final Collection<StrippedLeaderboardDTO> existingLeaderboards;
     protected final ErrorReporter errorReporter;
@@ -80,13 +80,13 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         }
     }
 
-    public RegattaLeaderboardWithEliminationsDialog(SailingWriteServiceAsync sailingWriteService, UserService userService, String title,
+    public RegattaLeaderboardWithEliminationsDialog(SailingWriteServiceAsync sailingServiceWrite, UserService userService, String title,
             LeaderboardDescriptorWithEliminations leaderboardDTO, Collection<RegattaDTO> existingRegattas,
             final Collection<StrippedLeaderboardDTO> existingLeaderboards, final StringMessages stringMessages,
             final ErrorReporter errorReporter, LeaderboardParameterValidator validator,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -122,7 +122,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         competitorEliminationPanelHolder.clear();
         StrippedLeaderboardDTO selectedRegattaLeaderboard = getSelectedLeaderboard();
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
-        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingWriteService, userService, stringMessages,
+        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
                 selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
                 /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),

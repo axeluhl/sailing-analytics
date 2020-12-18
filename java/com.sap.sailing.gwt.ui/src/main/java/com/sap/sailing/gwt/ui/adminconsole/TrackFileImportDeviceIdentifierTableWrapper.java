@@ -29,9 +29,9 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
     private TextColumn<TrackFileImportDeviceIdentifierDTO> trackNameColumn;
     private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
 
-    public TrackFileImportDeviceIdentifierTableWrapper(SailingWriteServiceAsync sailingWriteService,
+    public TrackFileImportDeviceIdentifierTableWrapper(SailingWriteServiceAsync sailingServiceWrite,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(sailingWriteService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+        super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 new EntityIdentityComparator<TrackFileImportDeviceIdentifierDTO>() {
                     @Override
                     public boolean representSameEntity(TrackFileImportDeviceIdentifierDTO dto1,

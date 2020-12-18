@@ -30,25 +30,25 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     private final String leaderboardName;
     private final String raceColumnName;
     private final String fleetName;
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
     private final RefreshableSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
 
-    public CompetitorToBoatMappingsViewPanel(final SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages,
+    public CompetitorToBoatMappingsViewPanel(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
             final ErrorReporter errorReporter, final String leaderboardName, final String raceColumnName,
             final String fleetName, UserService userService) {
         super();
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         this.errorReporter = errorReporter;
-        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingWriteService, stringMessages, errorReporter,
+        this.competitorTable = new CompactCompetitorTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, userService);
-        this.boatTable = new CompactBoatTableWrapper<>(sailingWriteService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        this.boatTable = new CompactBoatTableWrapper<>(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
         refreshableCompetitorSelectionModel = competitorTable.getSelectionModel();
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -94,7 +94,7 @@ public class CompetitorToBoatMappingsViewPanel extends SimplePanel {
     }
 
     private void selectBoatForCompetitor(CompetitorDTO selectedCompetitor) {
-        sailingWriteService.getBoatLinkedToCompetitorForRace(leaderboardName,
+        sailingServiceWrite.getBoatLinkedToCompetitorForRace(leaderboardName,
                 raceColumnName, fleetName, selectedCompetitor.getIdAsString(), new MarkedAsyncCallback<BoatDTO>(
                         new AsyncCallback<BoatDTO>() {
                             @Override

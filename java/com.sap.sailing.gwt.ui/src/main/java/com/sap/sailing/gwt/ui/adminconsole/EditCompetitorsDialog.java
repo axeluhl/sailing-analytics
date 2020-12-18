@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBoatDTO>> {
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -30,12 +30,12 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
         }
     }
         
-    public EditCompetitorsDialog(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public EditCompetitorsDialog(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final String leaderboardName, final String boatClassName, boolean createWithBoatByDefault,
             final StringMessages stringMessages, final ErrorReporter errorReporter, DialogCallback<List<CompetitorWithBoatDTO>> callback) {
         super(stringMessages.actionEditCompetitors(), null, stringMessages.ok(), stringMessages.cancel(),
                 new CompetitorsValidator(), callback);
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -51,7 +51,7 @@ public class EditCompetitorsDialog extends DataEntryDialog<List<CompetitorWithBo
 
     @Override
     protected Widget getAdditionalWidget() {
-        CompetitorPanel competitorPanel = new CompetitorPanel(sailingWriteService, userService, leaderboardName,
+        CompetitorPanel competitorPanel = new CompetitorPanel(sailingServiceWrite, userService, leaderboardName,
                 boatClassName, createWithBoatByDefault, stringMessages, errorReporter);
         return competitorPanel;
     }

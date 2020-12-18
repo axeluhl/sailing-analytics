@@ -47,7 +47,7 @@ public class SwissTimingConnectionTableWrapper extends
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public SwissTimingConnectionTableWrapper(final UserService userService, final SailingWriteServiceAsync sailingWriteServiceAsync,
+    public SwissTimingConnectionTableWrapper(final UserService userService, final SailingWriteServiceAsync sailingServiceWriteAsync,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, true, enablePager,
@@ -64,7 +64,7 @@ public class SwissTimingConnectionTableWrapper extends
                     }
                 }, tableResources);
         this.stringMessagesClient = stringMessages;
-        this.sailingServiceAsync = sailingWriteServiceAsync;
+        this.sailingServiceAsync = sailingServiceWriteAsync;
         final ListHandler<SwissTimingConfigurationWithSecurityDTO> swissTimingConectionColumnListHandler = getColumnSortHandler();
 
         // table
@@ -93,7 +93,7 @@ public class SwissTimingConnectionTableWrapper extends
             new SwissTimingConnectionEditDialog(dto, new DialogCallback<SwissTimingConfigurationWithSecurityDTO>() {
                 @Override
                 public void ok(final SwissTimingConfigurationWithSecurityDTO editedObject) {
-                    sailingWriteServiceAsync.updateSwissTimingConfiguration(editedObject,
+                    sailingServiceWriteAsync.updateSwissTimingConfiguration(editedObject,
                             new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -115,7 +115,7 @@ public class SwissTimingConnectionTableWrapper extends
         });
 
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, DefaultActions.DELETE, dto -> {
-            sailingWriteServiceAsync.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
+            sailingServiceWriteAsync.deleteSwissTimingConfigurations(Collections.singletonList(dto), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Exception trying to delete configuration in DB: " + caught.getMessage());

@@ -29,26 +29,26 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 public abstract class AutoPlayClientFactoryBase
         extends SecureClientFactoryImpl<ApplicationTopLevelView> implements AutoPlayClientFactory {
     private final SailingServiceAsync sailingService;
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
-    private final MediaWriteServiceAsync mediaWriteService;
+    private final MediaWriteServiceAsync mediaServiceWrite;
     private final AutoPlayPlaceNavigator navigator;
 
     private final Map<String, SailingServiceAsync> services = new HashMap<>();
-
+    
     public AutoPlayClientFactoryBase(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController,
             AutoPlayPlaceNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
-        sailingWriteService = SailingServiceHelper.createSailingServiceWriteInstance();
+        sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         mediaService = GWT.create(MediaService.class);
-        mediaWriteService = GWT.create(MediaWriteService.class);
+        mediaServiceWrite = GWT.create(MediaWriteService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService,
                 RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaWriteService, mediaServiceRemotePath,
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
@@ -81,8 +81,8 @@ public abstract class AutoPlayClientFactoryBase
     }
   
     @Override
-    public SailingWriteServiceAsync getSailingWriteService() {
-        return sailingWriteService;
+    public SailingWriteServiceAsync getSailingServiceWrite() {
+        return sailingServiceWrite;
     }
 
     @Override
@@ -90,8 +90,8 @@ public abstract class AutoPlayClientFactoryBase
         return mediaService;
     }
     
-    public MediaWriteServiceAsync getMediaWriteService() {
-        return mediaWriteService;
+    public MediaWriteServiceAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
 
     @Override

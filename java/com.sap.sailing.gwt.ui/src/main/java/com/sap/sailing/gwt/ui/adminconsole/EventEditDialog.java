@@ -12,8 +12,8 @@ import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 
 public class EventEditDialog extends EventDialog {
     public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups,
-            SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringMessages, otherExistingEvents), sailingWriteService, stringMessages, availableLeaderboardGroups, event.getLeaderboardGroups(), callback);
+            SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+        super(new EventParameterValidator(stringMessages, otherExistingEvents), sailingServiceWrite, stringMessages, availableLeaderboardGroups, event.getLeaderboardGroups(), callback);
         nameEntryField = createTextBox(event.getName());
         nameEntryField.setVisibleLength(50);
         descriptionEntryField = createTextArea(event.getDescription());

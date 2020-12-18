@@ -109,11 +109,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingWriteServiceAsync sailingWriteService,
+            final SailingWriteServiceAsync sailingServiceWrite,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
-        this.sailingService = sailingWriteService;
+        this.sailingService = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;

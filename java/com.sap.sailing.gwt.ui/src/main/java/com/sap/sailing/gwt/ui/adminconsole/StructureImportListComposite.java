@@ -26,10 +26,10 @@ public class StructureImportListComposite extends RegattaListComposite implement
         RegattaStructure getRegattaStructure(RegattaDTO regatta);
     }
 
-    public StructureImportListComposite(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public StructureImportListComposite(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             RegattaRefresher regattaRefresher, RegattaStructureProvider regattaStructureProvider,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        super(sailingWriteService, userService, regattaRefresher, errorReporter, stringMessages);
+        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
     

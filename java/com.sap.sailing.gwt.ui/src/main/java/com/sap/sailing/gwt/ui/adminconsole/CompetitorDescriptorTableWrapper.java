@@ -85,9 +85,9 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
     }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
-            SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages, ErrorReporter errorReporter,
+            SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, final CompetitorsToImportToExistingLinking unlinkCallback) {
-        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDescriptor>() {
                     @Override
                     public boolean representSameEntity(CompetitorDescriptor dto1, CompetitorDescriptor dto2) {

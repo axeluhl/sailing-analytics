@@ -10,9 +10,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public class RaceOrRegattaImportCompetitorCallback extends ImportCompetitorCallback {
     private final CompetitorRegistrationsPanel registrationsDialog;
 
-    public RaceOrRegattaImportCompetitorCallback(CompetitorRegistrationsPanel registrationsDialog, SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
+    public RaceOrRegattaImportCompetitorCallback(CompetitorRegistrationsPanel registrationsDialog, SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingWriteService, errorReporter, stringMessages);
+        super(sailingServiceWrite, errorReporter, stringMessages);
         this.registrationsDialog = registrationsDialog;
     }
 

@@ -59,7 +59,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private final CaptionPanel mainPanel;
 
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -87,10 +87,10 @@ public class RegattaDetailsComposite extends Composite {
 
     private static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public RegattaDetailsComposite(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public RegattaDetailsComposite(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final RegattaRefresher regattaRefresher, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -148,7 +148,7 @@ public class RegattaDetailsComposite extends Composite {
             public void onClick(ClickEvent event) {
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-                sailingWriteService.getMailType(new AsyncCallback<MailInvitationType>() {
+                sailingServiceWrite.getMailType(new AsyncCallback<MailInvitationType>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.SEVERE, "Could not determine MailInvitationType", caught);
@@ -156,7 +156,7 @@ public class RegattaDetailsComposite extends Composite {
 
                     @Override
                     public void onSuccess(MailInvitationType result) {
-                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingWriteService,
+                        RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingServiceWrite,
                                 stringMessages, regatta.getName(), registrationLinkWithQRCode,
                                 new DialogCallback<RegistrationLinkWithQRCode>() {
                                     @Override
@@ -292,7 +292,7 @@ public class RegattaDetailsComposite extends Composite {
         actionsColumn.addAction(SeriesConfigImagesBarCell.ACTION_REMOVE, UPDATE, series -> {
             RegattaIdentifier identifier = new RegattaName(regatta.getName());
             if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
-                sailingWriteService.removeSeries(identifier, series.getName(),
+                sailingServiceWrite.removeSeries(identifier, series.getName(),
                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable cause) {
@@ -389,7 +389,7 @@ public class RegattaDetailsComposite extends Composite {
         }
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
             // first remove:
-            sailingWriteService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
+            sailingServiceWrite.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -400,7 +400,7 @@ public class RegattaDetailsComposite extends Composite {
                         @Override
                         public void onSuccess(Void v) {
                             // when successfully removed, insert:
-                            sailingWriteService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
+                            sailingServiceWrite.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
                                     new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
@@ -418,7 +418,7 @@ public class RegattaDetailsComposite extends Composite {
             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
                     || seriesNameChanged || maximumNumberOfDiscardsChanged) {
-                sailingWriteService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
+                sailingServiceWrite.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),

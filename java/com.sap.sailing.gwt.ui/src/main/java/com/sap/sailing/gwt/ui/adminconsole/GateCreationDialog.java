@@ -27,7 +27,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
     private final TextBox shortName;
     private final StringMessages stringMessages;
     
-    public GateCreationDialog(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
+    public GateCreationDialog(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, AdminConsoleTableResources tableRes,
             List<MarkDTO> marks, DialogCallback<GateDTO> callback) {
         super(stringMessages.gate(), stringMessages.gate(),
@@ -46,7 +46,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
         name = createTextBox("");
         shortName = createTextBox("");
         marksWrapper = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
-                /* multiSelection */ true, sailingWriteService, stringMessages, errorReporter);
+                /* multiSelection */ true, sailingServiceWrite, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override

@@ -32,13 +32,13 @@ import com.sap.sse.security.ui.client.UserService;
 public class CompetitorSelectionDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
 
-    public CompetitorSelectionDialog(SailingWriteServiceAsync sailingWriteService, UserService userService,
+    public CompetitorSelectionDialog(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, String title, String message,
             Consumer<AsyncCallback<Iterable<? extends CompetitorDTO>>> competitorProvider, StringMessages stringMessages,
             CompetitorDTO initialSelection,
             DialogCallback<CompetitorDTO> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
-        competitorTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter,
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, /* filter with boat */ false,
                 /* filter without boat */ false);
         competitorProvider.accept(new AsyncCallback<Iterable<? extends CompetitorDTO>>() {

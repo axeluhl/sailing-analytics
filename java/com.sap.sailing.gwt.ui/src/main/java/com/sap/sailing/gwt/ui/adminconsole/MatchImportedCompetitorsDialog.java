@@ -64,7 +64,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     private TextBox searchTagField;
 
     private final StringMessages stringMessages;
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
 
@@ -75,13 +75,13 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
             final Iterable<CompetitorDTO> existingCompetitor, String localizedHint,
-            StringMessages stringMessages, SailingWriteServiceAsync sailingWriteService, final UserService userService,
+            StringMessages stringMessages, SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             ErrorReporter errorReporter, DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
         super(stringMessages.importCompetitors(),
                 String.join("\n", stringMessages.chooseWhichCompetitorsShouldBeImported(), localizedHint),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         this.stringMessages = stringMessages;
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.CompetitorDescriptors = CompetitorDescriptors;
@@ -95,7 +95,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     @Override
     protected Widget getAdditionalWidget() {
-        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages,
+        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */
                 false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {
@@ -113,7 +113,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
                 return existingCompetitorsByImported.get(competitor);
             }
         };
-        importedCompetitorsTable = new CompetitorDescriptorTableWrapper<>(competitorImportMatcher, sailingWriteService,
+        importedCompetitorsTable = new CompetitorDescriptorTableWrapper<>(competitorImportMatcher, sailingServiceWrite,
                 stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */false, /* unlinkCallback */ linker);
         importedCompetitorsTable.refreshCompetitorDescriptorList(CompetitorDescriptors);
         final RefreshableMultiSelectionModel<CompetitorDescriptor> importedCompetitorSelectionModel = importedCompetitorsTable.getSelectionModel();

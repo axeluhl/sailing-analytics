@@ -8,9 +8,9 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class TrackedRacesTableWrapper extends TableWrapper<RaceDTO, RefreshableSelectionModel<RaceDTO>> {
-    public TrackedRacesTableWrapper(SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages,
+    public TrackedRacesTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager) {
-        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager, new EntityIdentityComparator<RaceDTO>() {
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, new EntityIdentityComparator<RaceDTO>() {
             @Override
             public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
                 return dto1.getRaceIdentifier().equals(dto2.getRaceIdentifier());

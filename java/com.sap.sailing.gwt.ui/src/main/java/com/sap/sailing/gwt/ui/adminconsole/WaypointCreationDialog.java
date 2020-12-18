@@ -29,7 +29,7 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
         PassingInstruction getDefaultPassingInstruction(int numberOfMarksInControlPoint, String controlPointIdAsString);
     }
     
-    public WaypointCreationDialog(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
+    public WaypointCreationDialog(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter,
             final StringMessages stringMessages, AdminConsoleTableResources tableRes,
             List<ControlPointDTO> controlPoints, final DefaultPassingInstructionProvider defaultPassingInstructionProvider,
             DialogCallback<WaypointDTO> callback) {
@@ -45,7 +45,7 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
         controlPointsWrapper = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
-                /* multiSelection */ false, sailingWriteService, stringMessages, errorReporter);
+                /* multiSelection */ false, sailingServiceWrite, stringMessages, errorReporter);
         controlPointsWrapper.getDataProvider().getList().addAll(controlPoints);
         passingInstructions = createListBox(false);
         updatePassingInstructions(defaultPassingInstructionProvider);

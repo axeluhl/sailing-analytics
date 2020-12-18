@@ -312,7 +312,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         });
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE,
                 leaderboardDTO -> {
-                    EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingWriteService, userService,
+                    EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingServiceWrite, userService,
                             leaderboardDTO.getName(), leaderboardDTO.boatClassName,
                             /* createWithBoatByDefault */ !leaderboardDTO.canBoatsOfCompetitorsChangePerRace,
                             stringMessages, errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
@@ -328,7 +328,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 });
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL, READ,
                 leaderboardDTO -> {
-            sailingWriteService.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
+            sailingServiceWrite.getAvailableDetailTypesForLeaderboard(leaderboardDTO.getName(), null,
                     new AsyncCallback<Iterable<DetailType>>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -421,7 +421,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 dialog.show();
                 break;
             case RegattaLeaderboardWithEliminations:
-                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingWriteService, userService,
+                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingServiceWrite, userService,
                         Collections.unmodifiableCollection(otherExistingLeaderboard),
                         Collections.unmodifiableCollection(allRegattas),
                         new LeaderboardDescriptorWithEliminations(
@@ -436,7 +436,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                             @Override
                             public void ok(LeaderboardDescriptorWithEliminations result) {
                                 updateLeaderboard(oldLeaderboardName, result);
-                                sailingWriteService.setEliminatedCompetitors(oldLeaderboardName,
+                                sailingServiceWrite.setEliminatedCompetitors(oldLeaderboardName,
                                         result.getEliminatedCompetitors(), new AsyncCallback<Void>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -564,7 +564,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     protected void openUpdateFlexibleLeaderboardDialog(final StrippedLeaderboardDTO leaderboardDTO,
             final List<StrippedLeaderboardDTO> otherExistingLeaderboard, final String oldLeaderboardName,
             final LeaderboardDescriptor descriptor) {
-        sailingWriteService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+        sailingServiceWrite.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 openUpdateFlexibleLeaderboardDialog(leaderboardDTO, otherExistingLeaderboard, oldLeaderboardName,
@@ -636,18 +636,18 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         final String fleetName = fleetDTO.getName();
         final String raceName = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName) ? raceColumnName
                 : raceColumnName + ", " + fleetName;
-        ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingWriteService,
+        ShowCompetitorToBoatMappingsDialog dialog = new ShowCompetitorToBoatMappingsDialog(sailingServiceWrite,
                 stringMessages, errorReporter, selectedLeaderboardName, raceColumnName, fleetName, raceName,
                 userService);
         dialog.center();
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
-        new SetStartTimeDialog(sailingWriteService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
+        new SetStartTimeDialog(sailingServiceWrite, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(),
                 fleetDTO.getName(), stringMessages, new DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
                     @Override
                     public void ok(RaceLogSetStartTimeAndProcedureDTO editedObject) {
-                        sailingWriteService.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
+                        sailingServiceWrite.setStartTimeAndProcedure(editedObject, new AsyncCallback<Boolean>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(caught.getMessage());
@@ -671,12 +671,12 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void setEndTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
-        new SetFinishingAndFinishedTimeDialog(sailingWriteService, errorReporter, getSelectedLeaderboardName(),
+        new SetFinishingAndFinishedTimeDialog(sailingServiceWrite, errorReporter, getSelectedLeaderboardName(),
                 raceColumnDTO.getName(), fleetDTO.getName(), stringMessages,
                 new DialogCallback<RaceLogSetFinishingAndFinishTimeDTO>() {
                     @Override
                     public void ok(RaceLogSetFinishingAndFinishTimeDTO editedObject) {
-                        sailingWriteService.setFinishingAndEndTime(editedObject,
+                        sailingServiceWrite.setFinishingAndEndTime(editedObject,
                                 new AsyncCallback<Pair<Boolean, Boolean>>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -702,7 +702,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void removeRaceColumn(final RaceColumnDTO raceColumnDTO) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         final String raceColumnString = raceColumnDTO.getRaceColumnName();
-        sailingWriteService.removeLeaderboardColumn(getSelectedLeaderboardName(), raceColumnString,
+        sailingServiceWrite.removeLeaderboardColumn(getSelectedLeaderboardName(), raceColumnString,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -724,7 +724,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void moveSelectedRaceColumnDown() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         final String selectedRaceColumnName = getSelectedRaceColumnWithFleet().getA().getRaceColumnName();
-        sailingWriteService.moveLeaderboardColumnDown(getSelectedLeaderboardName(), selectedRaceColumnName,
+        sailingServiceWrite.moveLeaderboardColumnDown(getSelectedLeaderboardName(), selectedRaceColumnName,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -747,7 +747,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void moveSelectedRaceColumnUp() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         final String selectedRaceColumnName = getSelectedRaceColumnWithFleet().getA().getRaceColumnName();
-        sailingWriteService.moveLeaderboardColumnUp(getSelectedLeaderboardName(), selectedRaceColumnName,
+        sailingServiceWrite.moveLeaderboardColumnUp(getSelectedLeaderboardName(), selectedRaceColumnName,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -779,7 +779,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void setIsMedalRace(String leaderboardName, final RaceColumnDTO raceInLeaderboard,
             final boolean isMedalRace) {
-        sailingWriteService.updateIsMedalRace(leaderboardName, raceInLeaderboard.getRaceColumnName(), isMedalRace,
+        sailingServiceWrite.updateIsMedalRace(leaderboardName, raceInLeaderboard.getRaceColumnName(), isMedalRace,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -825,7 +825,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             }
         }
 
-        sailingWriteService.addColumnsToLeaderboard(leaderboardName, raceColumnsToAdd,
+        sailingServiceWrite.addColumnsToLeaderboard(leaderboardName, raceColumnsToAdd,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -881,7 +881,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void createFlexibleLeaderboard() {
-        sailingWriteService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+        sailingServiceWrite.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 createFlexibleLeaderboard(result);
@@ -905,7 +905,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
                     @Override
                     public void ok(final LeaderboardDescriptor newLeaderboard) {
-                        sailingWriteService.createFlexibleLeaderboard(newLeaderboard.getName(),
+                        sailingServiceWrite.createFlexibleLeaderboard(newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                                 newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaIds(),
                                 new MarkedAsyncCallback<StrippedLeaderboardDTOWithSecurity>(
@@ -940,7 +940,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void ok(final LeaderboardDescriptor newLeaderboard) {
                         RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
-                        sailingWriteService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDisplayName(),
+                        sailingServiceWrite.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDisplayName(),
                                 newLeaderboard.getDiscardThresholds(),
                                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                                     @Override
@@ -962,7 +962,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void createRegattaLeaderboardWithEliminations() {
         RegattaLeaderboardWithEliminationsCreateDialog dialog = new RegattaLeaderboardWithEliminationsCreateDialog(
-                sailingWriteService, userService, Collections.unmodifiableCollection(availableLeaderboardList),
+                sailingServiceWrite, userService, Collections.unmodifiableCollection(availableLeaderboardList),
                 Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
                 new DialogCallback<LeaderboardDescriptorWithEliminations>() {
                     @Override
@@ -971,7 +971,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
                     @Override
                     public void ok(final LeaderboardDescriptorWithEliminations newLeaderboard) {
-                        sailingWriteService.createRegattaLeaderboardWithEliminations(newLeaderboard.getName(),
+                        sailingServiceWrite.createRegattaLeaderboardWithEliminations(newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(), newLeaderboard.getRegattaName(),
                                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                                     @Override
@@ -983,7 +983,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                                     @Override
                                     public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                                         addLeaderboard(result);
-                                        sailingWriteService.setEliminatedCompetitors(newLeaderboard.getName(),
+                                        sailingServiceWrite.setEliminatedCompetitors(newLeaderboard.getName(),
                                                 newLeaderboard.getEliminatedCompetitors(), new AsyncCallback<Void>() {
                                                     @Override
                                                     public void onFailure(Throwable caught) {
@@ -1015,7 +1015,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
-        sailingWriteService.updateLeaderboard(leaderboardName, leaderboardToUpdate.getDisplayName(),
+        sailingServiceWrite.updateLeaderboard(leaderboardName, leaderboardToUpdate.getDisplayName(),
                 leaderboardToUpdate.getDiscardThresholds(), leaderboardToUpdate.getCourseAreaIds(),
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
@@ -1032,7 +1032,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void reloadLeaderboardForTable(final String leaderboardName) {
-        sailingWriteService.getLeaderboardWithSecurity(leaderboardName,
+        sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
                 new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
@@ -1067,7 +1067,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
             for (StrippedLeaderboardDTO leaderboard : leaderboards) {
                 leaderboardNames.add(leaderboard.getName());
             }
-            sailingWriteService.removeLeaderboards(leaderboardNames, new AsyncCallback<Void>() {
+            sailingServiceWrite.removeLeaderboards(leaderboardNames, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to remove the leaderboards:" + caught.getMessage());
@@ -1086,7 +1086,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void removeLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderBoard) {
-        sailingWriteService.removeLeaderboard(leaderBoard.getName(),
+        sailingServiceWrite.removeLeaderboard(leaderBoard.getName(),
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -1117,7 +1117,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     public void ok(PairingListTemplateDTO editedObject) {
                         BusyDialog busyDialog = new BusyDialog();
                         busyDialog.show();
-                        sailingWriteService.calculatePairingListTemplate(editedObject.getFlightCount(),
+                        sailingServiceWrite.calculatePairingListTemplate(editedObject.getFlightCount(),
                                 editedObject.getGroupCount(), editedObject.getCompetitorCount(),
                                 editedObject.getFlightMultiplier(), editedObject.getBoatChangeFactor(),
                                 new AsyncCallback<PairingListTemplateDTO>() {
@@ -1147,7 +1147,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void openPairingListCreationDialog(StrippedLeaderboardDTOWithSecurity leaderboardDTO,
             PairingListTemplateDTO template) {
         PairingListCreationDialog dialog = new PairingListCreationDialog(leaderboardDTO, stringMessages, template,
-                sailingWriteService, errorReporter);
+                sailingServiceWrite, errorReporter);
         dialog.show();
     }
 

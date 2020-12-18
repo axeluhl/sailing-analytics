@@ -64,7 +64,7 @@ public class SliceRaceHandler {
 
     private final UUID eventId;
 
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
 
     private final SailingServiceAsync sailingService;
 
@@ -83,11 +83,11 @@ public class SliceRaceHandler {
     /**
      * Registers this handler as a zoom event handler on the {@code competitorRaceChart}.
      */
-    public SliceRaceHandler(SailingWriteServiceAsync sailingWriteService, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
+    public SliceRaceHandler(SailingWriteServiceAsync sailingServiceWrite, SailingServiceAsync sailingService, UserService userService, final ErrorReporter errorReporter,
             MultiCompetitorRaceChart competitorRaceChart, RegattaAndRaceIdentifier selectedRaceIdentifier,
             final String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName, UUID eventId,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, RaceWithCompetitorsAndBoatsDTO raceDTO, StringMessages stringMessages) {
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.sailingService = sailingService;
         this.userService = userService;
         this.errorReporter = errorReporter;
@@ -169,7 +169,7 @@ public class SliceRaceHandler {
                         @Override
                         public void onSuccess(SliceRacePreperationDTO sliceRacePreperatioData) {
                             new SlicedRaceNameDialog(sliceRacePreperatioData, slicedRaceName -> {
-                                sailingWriteService.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(),
+                                sailingServiceWrite.sliceRace(selectedRaceIdentifier, slicedRaceName, visibleRange.from(),
                                         visibleRange.to(), new AsyncCallback<RegattaAndRaceIdentifier>() {
 
                                             @Override

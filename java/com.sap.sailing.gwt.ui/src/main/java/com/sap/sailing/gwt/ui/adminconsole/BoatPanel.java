@@ -27,10 +27,10 @@ public class BoatPanel extends SimplePanel {
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
     private Button allowReloadButton;
 
-    public BoatPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public BoatPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
-        this.boatTable = new BoatTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter,
+        this.boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, 100, true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();

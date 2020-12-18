@@ -123,7 +123,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     private String raceListSelection;
     private boolean showCarryColumn;
     
-    private final SailingWriteServiceAsync sailingWriteService; 
+    private final SailingWriteServiceAsync sailingServiceWrite; 
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -696,17 +696,17 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     }
 
     public EditableLeaderboardPanel(ComponentContext<EditableLeaderboardSettings> context,
-            final SailingWriteServiceAsync sailingWriteService, AsyncActionsExecutor asyncActionsExecutor,
+            final SailingWriteServiceAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes, 
             EditableLeaderboardSettings settings) {
-        super(null, context, sailingWriteService, asyncActionsExecutor, settings,
+        super(null, context, sailingServiceWrite, asyncActionsExecutor, settings,
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
                 FlagImageResolverImpl.get(), availableDetailTypes);
         initialize(settings);
         this.showCarryColumn = settings.getShowCarryColumn();
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.setStyleName("editableLeaderboardPanel");
         getContentPanel().addStyleName("editableLeaderboardContentPanel");
         if (DeviceDetector.isDesktop()) {
@@ -725,7 +725,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingWriteService.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
+                sailingServiceWrite.getScoreCorrectionProviderNames(new AsyncCallback<Iterable<String>>() {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(
@@ -759,7 +759,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             public void onClick(ClickEvent event) {
                 final String lastScoreCorrectionComment = lastScoreCorrectionCommentBox.getText();
                 final Date lastScoreCorrectionTime = lastScoreCorrectionTimeBox.getValue();
-                sailingWriteService.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(),
+                sailingServiceWrite.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(),
                         lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void noarg) {
@@ -1264,7 +1264,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     }   
 
     public SailingWriteServiceAsync getSailingService() {
-        return sailingWriteService;
+        return sailingServiceWrite;
     }
     
     /**

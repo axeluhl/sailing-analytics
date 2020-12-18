@@ -16,9 +16,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, RefreshableSingleSelectionModel<DeviceMappingDTO>> {
-    public DeviceMappingTableWrapper(SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages,
+    public DeviceMappingTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingWriteService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+        super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 /* leaving EntityIdentityComparator null, reducing comparison to equals/hashCode which is well
                  * defined on DeviceMappingDTO
                  */ null);

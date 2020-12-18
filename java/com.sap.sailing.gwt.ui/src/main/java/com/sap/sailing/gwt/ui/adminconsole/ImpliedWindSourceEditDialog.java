@@ -44,7 +44,7 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
     public ImpliedWindSourceEditDialog(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceSlot,
             final ImpliedWindSource previousImpliedWindSource,
             Iterable<StrippedLeaderboardDTOWithSecurity> availableLeaderboards, final StringMessages stringMessages,
-            ErrorReporter errorReporter, SailingWriteServiceAsync sailingWriteService, UserService userService,
+            ErrorReporter errorReporter, SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             DialogCallback<ImpliedWindSource> callback) {
         super(stringMessages.impliedWindSource(),
                 stringMessages.provideImpliedWindSourceForRace(
@@ -87,7 +87,7 @@ public class ImpliedWindSourceEditDialog extends DataEntryDialog<ImpliedWindSour
         this.fixedImpliedWindSpeedBox = createDoubleBox(previousImpliedWindSource instanceof FixedSpeedImpliedWind &&
                 ((FixedSpeedImpliedWind) previousImpliedWindSource).getFixedImpliedWindSpeed() != null ?
                         ((FixedSpeedImpliedWind) previousImpliedWindSource).getFixedImpliedWindSpeed().getKnots() : null, /* visible length */ 5);
-        this.raceSlotSelectionPanel = new RaceSlotSelectionPanel(sailingWriteService, userService, stringMessages,
+        this.raceSlotSelectionPanel = new RaceSlotSelectionPanel(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, availableLeaderboards, previousImpliedWindSource instanceof OtherRaceAsImpliedWindSource ?
                         getLeaderboardNameAndRaceColumnNameAndFleetName((OtherRaceAsImpliedWindSource) previousImpliedWindSource, availableLeaderboards) : null);
         this.raceSlotSelectionPanel.getSelectionModel().addSelectionChangeHandler(e->validateAndUpdate());

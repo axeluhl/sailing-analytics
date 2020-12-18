@@ -45,10 +45,10 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
-            SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, ErrorReporter errorReporter) {
+            SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
-                new Callback(sailingWriteService, leaderboardPanel, errorReporter, stringMessages));
-        this.sailingService = sailingWriteService;
+                new Callback(sailingServiceWrite, leaderboardPanel, errorReporter, stringMessages));
+        this.sailingService = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
@@ -195,13 +195,13 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     private static class Callback implements DialogCallback<Util.Triple<String, String, Util.Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
-        private final SailingWriteServiceAsync sailingWriteService;
+        private final SailingWriteServiceAsync sailingServiceWrite;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingWriteServiceAsync sailingWriteService, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
+        public Callback(SailingWriteServiceAsync sailingServiceWrite, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
-            this.sailingWriteService = sailingWriteService;
+            this.sailingServiceWrite = sailingServiceWrite;
             this.leaderboardPanel = leaderboardPanel;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
@@ -219,7 +219,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
             final Date timePointWhenResultPublished = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getB();
             leaderboardPanel.addBusyTask();
-            sailingWriteService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
+            sailingServiceWrite.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -232,7 +232,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
                             leaderboardPanel.removeBusyTask();
                                     new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages,
-                                            sailingWriteService, errorReporter, result).show();
+                                            sailingServiceWrite, errorReporter, result).show();
                         }
             });
         }

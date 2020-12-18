@@ -43,11 +43,11 @@ public class BoatWithCertificateTableWrapper<S extends RefreshableSelectionModel
     private final Consumer<BoatDTO> unlinkAction;
     private final Function<BoatDTO, Boolean> isLinkedChecker;
     
-    public BoatWithCertificateTableWrapper(SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public BoatWithCertificateTableWrapper(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
             int pagingSize, boolean allowActions, Consumer<BoatDTO> unlinkAction,
             SecuredDTO objectToCheckUpdatePermissionFor, Function<BoatDTO, Boolean> isLinkedChecker) {
-        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
                     public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {

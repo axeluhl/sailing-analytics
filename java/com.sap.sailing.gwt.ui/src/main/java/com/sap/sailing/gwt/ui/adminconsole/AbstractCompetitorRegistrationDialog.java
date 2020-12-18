@@ -21,7 +21,7 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
     protected final String leaderboardName;
     protected final CompetitorRegistrationsPanel competitorRegistrationsPanel;
 
-    public AbstractCompetitorRegistrationDialog(SailingWriteServiceAsync sailingWriteService,
+    public AbstractCompetitorRegistrationDialog(SailingWriteServiceAsync sailingServiceWrite,
             final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass,
@@ -30,9 +30,9 @@ public abstract class AbstractCompetitorRegistrationDialog extends DataEntryDial
                 validator, callback);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.sailingService = sailingWriteService;
+        this.sailingService = sailingServiceWrite;
         this.leaderboardName = leaderboardName;
-        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingWriteService, userService,
+        this.competitorRegistrationsPanel = new CompetitorRegistrationsPanel(sailingServiceWrite, userService,
                 stringMessages, errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, boatClass,
                 () -> validateAndUpdate(), getRegisteredCompetitorsRetriever(), /* restrictPoolToLeaderboard */ false,
                 getAdditionalWidgetsToInsertAboveCompetitorTables(stringMessages));

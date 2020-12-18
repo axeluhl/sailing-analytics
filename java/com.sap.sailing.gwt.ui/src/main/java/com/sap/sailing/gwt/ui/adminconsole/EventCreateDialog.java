@@ -17,8 +17,8 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 public class EventCreateDialog extends EventDialog {
 
     public EventCreateDialog(Collection<EventDTO> existingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, 
-            SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringMessages, existingEvents), sailingWriteService, stringMessages,
+            SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+        super(new EventParameterValidator(stringMessages, existingEvents), sailingServiceWrite, stringMessages,
                 availableLeaderboardGroups, /* leaderboardGroups */ Collections.<LeaderboardGroupDTO>emptyList(), callback);
         nameEntryField = createTextBox(null);
         nameEntryField.setVisibleLength(50);

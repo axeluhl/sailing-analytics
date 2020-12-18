@@ -10,9 +10,9 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 public class DeviceIdentifierTableWrapper extends TableWrapper<DeviceIdentifierDTO, RefreshableMultiSelectionModel<DeviceIdentifierDTO>> {
 
-    public DeviceIdentifierTableWrapper(SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages,
+    public DeviceIdentifierTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingWriteService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false,
+        super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false,
                 new EntityIdentityComparator<DeviceIdentifierDTO>() {
                     @Override
                     public boolean representSameEntity(DeviceIdentifierDTO dto1, DeviceIdentifierDTO dto2) {

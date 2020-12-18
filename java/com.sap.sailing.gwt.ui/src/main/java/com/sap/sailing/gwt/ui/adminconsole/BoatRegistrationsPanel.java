@@ -66,7 +66,7 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
      *            whether the pool of "all" boats is to be restricted to those obtained from the leaderboard, or
      *            to all boats in the server's boat store
      */
-    protected BoatRegistrationsPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    protected BoatRegistrationsPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,
@@ -88,9 +88,9 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
         final HorizontalPanel boatRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allBoatsPanel = new CaptionPanel(stringMessages.boatPool());
         final CaptionPanel registeredBoatsPanel = new CaptionPanel(stringMessages.registeredBoats());
-        allBoatsTable = new BoatTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter, /* multiSelection */
+        allBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */true, 20, false);
-        registeredBoatsTable = new BoatTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter, /* multiSelection */
+        registeredBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */false,  20, false);
         allBoatsPanel.add(allBoatsTable);
         registeredBoatsPanel.add(registeredBoatsTable);

@@ -54,10 +54,10 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private final CheckBox allAllCheckbox;
 
     public MatchAndApplyScoreCorrectionsDialog(EditableLeaderboardPanel leaderboardPanel, StringMessages stringMessages,
-            SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
+            SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback(leaderboardPanel,
-                        sailingWriteService, stringMessages, errorReporter));
+                        sailingServiceWrite, stringMessages, errorReporter));
         this.regattaScoreCorrection = result;
         this.leaderboard = leaderboardPanel.getLeaderboard();
         this.allOfficialSailIDs = new TreeSet<>();
@@ -338,15 +338,15 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     }
 
     private static class Callback implements DialogCallback<BulkScoreCorrectionDTO> {
-        private final SailingWriteServiceAsync sailingWriteService;
+        private final SailingWriteServiceAsync sailingServiceWrite;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         private final EditableLeaderboardPanel leaderboardPanel;
         
-        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, ErrorReporter errorReporter) {
+        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
             super();
             this.leaderboardPanel = leaderboardPanel;
-            this.sailingWriteService = sailingWriteService;
+            this.sailingServiceWrite = sailingServiceWrite;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
         }
@@ -359,7 +359,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         @Override
         public void ok(final BulkScoreCorrectionDTO result) {
             leaderboardPanel.addBusyTask();
-            sailingWriteService.updateLeaderboardScoreCorrectionsAndMaxPointsReasons(result, new AsyncCallback<Void>() {
+            sailingServiceWrite.updateLeaderboardScoreCorrectionsAndMaxPointsReasons(result, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     leaderboardPanel.removeBusyTask();

@@ -31,11 +31,11 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     private final String raceColumnName;
     private final String fleetName;
 
-    public RaceBoatCertificatesPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public RaceBoatCertificatesPanel(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final StrippedLeaderboardDTOWithSecurity leaderboard, final RaceColumnDTO raceColumn, final FleetDTO fleet,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         // TODO problem: what is the secured object here? What is it for other RaceLog updates?
-        super(sailingWriteService, userService, leaderboard, stringMessages, errorReporter,
+        super(sailingServiceWrite, userService, leaderboard, stringMessages, errorReporter,
                 /* context update permission check: */ () -> userService.hasPermission(leaderboard,
                         DefaultActions.UPDATE),
                 leaderboard.getName() + "/" + raceColumn.getName() + "/" + fleet.getName());
@@ -46,10 +46,10 @@ public class RaceBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     }
 
     @Override
-    protected void assignCertificates(SailingWriteServiceAsync sailingWriteService,
+    protected void assignCertificates(SailingWriteServiceAsync sailingServiceWrite,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback) {
-        sailingWriteService.assignORCPerformanceCurveCertificates(leaderboardName, raceColumnName, fleetName,
+        sailingServiceWrite.assignORCPerformanceCurveCertificates(leaderboardName, raceColumnName, fleetName,
                 certificatesByBoatIdAsString, callback);
     }
 

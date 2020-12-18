@@ -51,7 +51,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MarkRolePanel extends FlowPanel {
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final ListDataProvider<MarkRoleDTO> markRoleListDataProvider = new ListDataProvider<>();
@@ -60,9 +60,9 @@ public class MarkRolePanel extends FlowPanel {
     private CellTable<MarkRoleDTO> markRolesTable;
     private RefreshableMultiSelectionModel<MarkRoleDTO> refreshableSelectionModel;
 
-    public MarkRolePanel(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter, StringMessages stringMessages,
+    public MarkRolePanel(SailingWriteServiceAsync sailingServiceWrite, ErrorReporter errorReporter, StringMessages stringMessages,
             final UserService userService) {
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -109,7 +109,7 @@ public class MarkRolePanel extends FlowPanel {
 
     public void loadMarkRoles() {
         markRoleListDataProvider.getList().clear();
-        sailingWriteService.getMarkRoles(new AsyncCallback<List<MarkRoleDTO>>() {
+        sailingServiceWrite.getMarkRoles(new AsyncCallback<List<MarkRoleDTO>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -254,7 +254,7 @@ public class MarkRolePanel extends FlowPanel {
                 new DialogCallback<MarkRoleDTO>() {
                     @Override
                     public void ok(MarkRoleDTO markRole) {
-                        sailingWriteService.createMarkRole(markRole, new AsyncCallback<MarkRoleDTO>() {
+                        sailingServiceWrite.createMarkRole(markRole, new AsyncCallback<MarkRoleDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter

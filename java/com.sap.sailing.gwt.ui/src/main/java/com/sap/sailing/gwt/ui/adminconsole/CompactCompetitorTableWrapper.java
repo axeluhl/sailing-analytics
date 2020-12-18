@@ -45,9 +45,9 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     private final Map<CompetitorDTO, BoatDTO> boatsForCompetitors;
     
-    public CompactCompetitorTableWrapper(SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public CompactCompetitorTableWrapper(SailingWriteServiceAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, UserService userService) {
-        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
@@ -191,7 +191,7 @@ public class CompactCompetitorTableWrapper<S extends RefreshableSelectionModel<C
                 refreshCompetitorList(result);
             }
         };
-        sailingWriteService.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
+        sailingServiceWrite.getCompetitorsAndBoatsOfRace(leaderboardName, raceColumnName, fleetName, myCallback);
     }
 
     private void getFilteredCompetitors(Iterable<? extends CompetitorDTO> result) {

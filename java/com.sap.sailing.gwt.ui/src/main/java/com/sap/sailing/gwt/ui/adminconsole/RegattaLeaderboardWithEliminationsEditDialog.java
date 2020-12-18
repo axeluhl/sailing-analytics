@@ -25,11 +25,11 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderboardWithEliminationsDialog {
-    public RegattaLeaderboardWithEliminationsEditDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public RegattaLeaderboardWithEliminationsEditDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithEliminations leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
-        super(sailingWriteService, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
+        super(sailingServiceWrite, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
                 existingRegattas, otherExistingLeaderboards, stringMessages,
                 errorReporter,
                 new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages,
@@ -52,7 +52,7 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
             if (eliminatedCompetitors != null) {
                 callback.onSuccess(eliminatedCompetitors);
             } else {
-                sailingWriteService.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
+                sailingServiceWrite.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);

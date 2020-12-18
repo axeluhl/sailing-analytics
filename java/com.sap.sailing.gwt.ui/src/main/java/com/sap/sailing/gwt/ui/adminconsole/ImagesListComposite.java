@@ -50,7 +50,7 @@ import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
  */
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
@@ -77,9 +77,9 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(final SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages,
+    public ImagesListComposite(final SailingWriteServiceAsync sailingServiceWrite, final StringMessages stringMessages,
             final FileStorageServiceConnectionTestObservable storageServiceAvailable) {
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
         mainPanel = new SimplePanel();
@@ -274,7 +274,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
-        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingWriteService, stringMessages,
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingServiceWrite, stringMessages,
                 storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
@@ -294,7 +294,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
-        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingWriteService, stringMessages,
+        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingServiceWrite, stringMessages,
                 storageServiceAvailable, new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
@@ -327,7 +327,7 @@ public class ImagesListComposite extends Composite {
      *            returned ImageDTOs
      */
     protected void callResizingServiceAndUpdateTable(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
-        sailingWriteService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
+        sailingServiceWrite.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.resizeUnsuccessful(caught.getMessage()), NotificationType.ERROR);

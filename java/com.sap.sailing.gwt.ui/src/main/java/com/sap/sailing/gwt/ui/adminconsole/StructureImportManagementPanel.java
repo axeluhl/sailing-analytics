@@ -55,7 +55,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
@@ -97,18 +97,18 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
-    public StructureImportManagementPanel(SailingWriteServiceAsync sailingWriteService, UserService userService,
+    public StructureImportManagementPanel(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventManagementPanel eventManagementPanel) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
         this.eventManagementPanel = eventManagementPanel;
         this.busyIndicator = new SimpleBusyIndicator();
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(sailingWriteService, userService, regattaRefresher,
+        this.regattaListComposite = new StructureImportListComposite(sailingServiceWrite, userService, regattaRefresher,
                 this, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
@@ -223,7 +223,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         });
         grid.setWidget(0, 1, newEventBtn);
         editSeriesPanel.add(grid);
-        sailingWriteService.getEvents(new AsyncCallback<List<EventDTO>>() {
+        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToGetEvents(caught.getMessage()));
@@ -249,7 +249,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void openEventCreateDialog() {
-        EventCreateDialog dialog = new EventCreateDialog(existingEvents, Collections.<LeaderboardGroupDTO>emptyList(), sailingWriteService, stringMessages,
+        EventCreateDialog dialog = new EventCreateDialog(existingEvents, Collections.<LeaderboardGroupDTO>emptyList(), sailingServiceWrite, stringMessages,
                 new DialogCallback<EventDTO>() {
                     @Override
                     public void cancel() {
@@ -268,7 +268,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
         }
-        sailingWriteService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
+        sailingServiceWrite.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
                 newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(),
                 newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), new AsyncCallback<EventDTO>() {
@@ -298,7 +298,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());
         } else {
             busyIndicator.setBusy(true);
-            sailingWriteService.getRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
+            sailingServiceWrite.getRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
@@ -398,7 +398,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             existingEvents.add(getSelectedEvent());
         }
         DefaultRegattaCreateDialog dialog = new DefaultRegattaCreateDialog(existingEvents, regattaDefaultsPerStructure.get(regattaStructure),
-                sailingWriteService, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
+                sailingServiceWrite, errorReporter, stringMessages, new DialogCallback<EventAndRegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -469,7 +469,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             }
             regattaConfigurationsToCreate.add(cloneFromDefaults);
         }
-        sailingWriteService.createRegattaStructure(regattaConfigurationsToCreate, newEvent,
+        sailingServiceWrite.createRegattaStructure(regattaConfigurationsToCreate, newEvent,
                 new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {

@@ -27,7 +27,7 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
-    private final MediaWriteServiceAsync mediaWriteService;
+    private final MediaWriteServiceAsync mediaServiceWrite;
     private final DesktopPlacesNavigator navigator;
     private final SubscriptionServiceFactory subscriptionService;
 
@@ -41,8 +41,8 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
         subscriptionService.registerAsyncServices(subscriptionServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_REPLICA);
-        mediaWriteService = GWT.create(MediaWriteService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaWriteService, mediaServiceRemotePath,
+        mediaServiceWrite = GWT.create(MediaWriteService.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
@@ -72,8 +72,8 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     }
 
     @Override
-    public MediaWriteServiceAsync getMediaWriteService() {
-        return mediaWriteService;
+    public MediaWriteServiceAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
     }
 
     @Override

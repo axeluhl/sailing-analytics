@@ -46,7 +46,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    protected final SailingWriteServiceAsync sailingWriteService;
+    protected final SailingWriteServiceAsync sailingServiceWrite;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
     private CaptionPanel captionPanel;
@@ -68,9 +68,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(SailingWriteServiceAsync sailingWriteService, UserService userService,
+    public DeviceConfigurationDetailComposite(SailingWriteServiceAsync sailingServiceWrite, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
@@ -277,7 +277,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             return;
         }
         DeviceConfigurationWithSecurityDTO dto = getResult();
-        sailingWriteService.createOrUpdateDeviceConfiguration(dto, new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
+        sailingServiceWrite.createOrUpdateDeviceConfiguration(dto, new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 markAsDirty(false);

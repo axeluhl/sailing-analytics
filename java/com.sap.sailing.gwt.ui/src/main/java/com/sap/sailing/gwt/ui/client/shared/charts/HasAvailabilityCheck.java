@@ -29,16 +29,16 @@ public interface HasAvailabilityCheck {
     /**
      * Helper method to do the backend check.
      * 
-     * @param sailingWriteService
+     * @param sailingServiceWrite
      *            backend service to be called
      * @param callback
      *            the callback to handle out come of the check
      * @param stringMessages
      *            message bundle for popup dialog
      */
-    static void validateBackendAvailabilityAndExecuteBusinessLogic(SailingWriteServiceAsync sailingWriteService,
+    static void validateBackendAvailabilityAndExecuteBusinessLogic(SailingWriteServiceAsync sailingServiceWrite,
             Consumer<Boolean> callback, StringMessages stringMessages) {
-        sailingWriteService.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
+        sailingServiceWrite.getServerConfiguration(new AsyncCallback<ServerConfigurationDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 if (has5xxResponse(caught)) {

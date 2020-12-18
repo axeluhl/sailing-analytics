@@ -41,7 +41,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
-    public AbstractRegattaLogSensorDataAddMappingsDialog(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public AbstractRegattaLogSensorDataAddMappingsDialog(final SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -53,16 +53,16 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
                     }
                 }, true, callback);
         this.stringMessages = stringMessages;
-        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingWriteService, stringMessages, errorReporter);
+        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         deviceIdTable.removeTrackNameColumn();
 
         importWidgetHolder = new SimplePanel();
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(
                 event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
 
-        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingWriteService, userService, stringMessages,
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
-        competitorTable = new CompetitorTableWrapper<>(sailingWriteService, userService, stringMessages, errorReporter,
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
 
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {
@@ -75,8 +75,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         });
 
         this.leaderboardName = leaderboardName;
-        getBoatRegistrations(sailingWriteService, errorReporter);
-        getCompetitorRegistrations(sailingWriteService, errorReporter);
+        getBoatRegistrations(sailingServiceWrite, errorReporter);
+        getCompetitorRegistrations(sailingServiceWrite, errorReporter);
     }
 
     private void getBoatRegistrations(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {

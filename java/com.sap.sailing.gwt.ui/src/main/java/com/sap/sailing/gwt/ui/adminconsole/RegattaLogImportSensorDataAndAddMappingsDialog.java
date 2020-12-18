@@ -12,11 +12,11 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends AbstractRega
 
     private final SensorDataImportWidget importWidget;
 
-    public RegattaLogImportSensorDataAndAddMappingsDialog(SailingWriteServiceAsync sailingWriteService, final UserService userService,
+    public RegattaLogImportSensorDataAndAddMappingsDialog(SailingWriteServiceAsync sailingServiceWrite, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
-        super(sailingWriteService, userService, errorReporter, stringMessages, leaderboardName, callback);
-        this.importWidget = new SensorDataImportWidget(deviceIdTable, stringMessages, sailingWriteService, errorReporter);
+        super(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboardName, callback);
+        this.importWidget = new SensorDataImportWidget(deviceIdTable, stringMessages, sailingServiceWrite, errorReporter);
         setImportWidget(importWidget);
     }
     

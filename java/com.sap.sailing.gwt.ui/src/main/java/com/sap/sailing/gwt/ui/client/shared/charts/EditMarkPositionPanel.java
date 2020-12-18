@@ -137,20 +137,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     protected boolean nonTrackingWarningWasDisplayed;
 
     private final Set<MarkDTO> marksCurrentlyRequestedViaRemoteCall = new HashSet<>();
-    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingWriteServiceAsync sailingServiceWrite;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingWriteServiceAsync sailingWriteService) {
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingWriteServiceAsync sailingServiceWrite) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        this.markPositionService = new MarkPositionServiceForSailingService(sailingWriteService);
+        this.markPositionService = new MarkPositionServiceForSailingService(sailingServiceWrite);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
-        this.sailingWriteService = sailingWriteService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.polylines = new HashMap<>();
         this.marksPanel = new MarksPanel(this, context, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
@@ -1086,7 +1086,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
 
     @Override
     public void checkBackendAvailability(Consumer<Boolean> callback) {
-        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingWriteService, callback,
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
                 stringMessages);
     }
 }
