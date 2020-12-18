@@ -25,8 +25,8 @@ public class LeaderboardConfigPanelSupplier extends AdminConsolePanelSupplier<Le
         final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(presenter, stringMessages,
                 showRaceDetails);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(leaderboardConfigPanel);
-        presenter.getLeaderboardsRefresher().addDisplayerAndCallFillOnInit(leaderboardConfigPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(leaderboardConfigPanel.getRegattasDisplayer());
+        presenter.getLeaderboardsRefresher().addDisplayerAndCallFillOnInit(leaderboardConfigPanel.getLeaderboardsDisplayer());
         return leaderboardConfigPanel;
     }
 

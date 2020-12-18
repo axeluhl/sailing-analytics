@@ -45,8 +45,8 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -71,8 +71,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
-        RegattasDisplayer {
+public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
@@ -561,11 +560,23 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public void clearSelection() {
         refreshableSelectionModel.clear();
     }
+    
+    private final Displayer<RegattaDTO> RegattasDisplayer = new Displayer<RegattaDTO>() {
+
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+        
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return RegattasDisplayer;
+    }
 
     /**
      * @param regattas
      */
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
         displayRaceTableUI(regattas);

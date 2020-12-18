@@ -23,7 +23,7 @@ public class TrackedRacesManagementPanelSupplier extends AdminConsolePanelSuppli
         final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(presenter,
                 stringMessages);
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(trackedRacesManagementPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(trackedRacesManagementPanel.getRegattasDisplayer());
         return trackedRacesManagementPanel;
     }
 

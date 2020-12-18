@@ -18,7 +18,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -37,7 +37,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, FilterablePanelProvider<RegattaDTO> {
+public class RegattaManagementPanel extends SimplePanel implements FilterablePanelProvider<RegattaDTO> {
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -117,6 +117,18 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         regattaDetailsComposite.setVisible(false);
         mainPanel.add(regattaDetailsComposite);
     }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            regattaListComposite.fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
     protected void removeRegattas(Collection<RegattaIdentifier> regattas) {
         if (!regattas.isEmpty()) {
@@ -157,11 +169,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         dialog.show();
     }
 
-    @Override
-    public void fillRegattas(Iterable<RegattaDTO> regattas) {
-        regattaListComposite.fillRegattas(regattas);
-    }
-    
     private Collection<RegattaIdentifier> createModifiableCollection() {
         Collection<RegattaIdentifier> regattas = new HashSet<RegattaIdentifier>();
         for (RegattaDTO regatta : refreshableRegattaMultiSelectionModel.getSelectedSet()) {

@@ -23,9 +23,12 @@ public class LeaderboardGroupConfigPanelSupplier extends AdminConsolePanelSuppli
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(presenter,
                 stringMessages);
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel);
-        presenter.getLeaderboardGroupsRefresher().addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel);
-        presenter.getLeaderboardsRefresher().addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel);
+        presenter.getRegattasRefresher()
+                .addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel.getRegattasDisplayer());
+        presenter.getLeaderboardGroupsRefresher()
+                .addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel.getLeaderboardGroupsDisplayer());
+        presenter.getLeaderboardsRefresher()
+                .addDisplayerAndCallFillOnInit(leaderboardGroupConfigPanel.getLeaderboardsDisplayer());
         return leaderboardGroupConfigPanel;
     }
 

@@ -34,7 +34,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -66,7 +66,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * A composite showing the list of all regattas 
  * @author Frank
  */
-public class RegattaListComposite extends Composite implements RegattasDisplayer {
+public class RegattaListComposite extends Composite {
 
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
     protected final StringMessages stringMessages;
@@ -88,6 +88,18 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
             sb.append(safeHtml);
         }
+    }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
     }
 
     @SuppressWarnings("unchecked")
@@ -392,7 +404,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         return new ArrayList<RegattaDTO>(refreshableRegattaMultiSelectionModel.getSelectedSet());
     }
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         if (Util.isEmpty(regattas)) {
             regattaTable.setVisible(false);

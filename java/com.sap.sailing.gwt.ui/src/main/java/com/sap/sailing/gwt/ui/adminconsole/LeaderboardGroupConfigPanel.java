@@ -51,8 +51,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -86,13 +85,29 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
-        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>, FilterablePanelProvider<LeaderboardGroupDTO> {
+        implements FilterablePanelProvider<LeaderboardGroupDTO> {
 
     /**
      * The key to put into a params map passed into {@link #setupLeaderboardGroups(Map)} used to identify
      * the leaderboard to select.
      */
     static final String LEADERBOARD_GROUP_ID = "LeaderBoardGroupId";
+    
+    private final Displayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTOWithSecurity>() {
+
+        @Override
+        public void fill(Iterable<StrippedLeaderboardDTOWithSecurity> result) {
+            fillLeaderboards(result);
+        }
+    };
+
+    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+
+        @Override
+        public void fill(Iterable<LeaderboardGroupDTO> result) {
+            fillLeaderboardGroups(result);
+        }
+    };
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -626,7 +641,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         dialog.show();
     }
 
-    @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> groups) {
         availableLeaderboardGroups.clear();
         if (groups != null) {
@@ -635,7 +649,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
     }
 
-    @Override
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards) {
         availableLeaderboards.clear();
         leaderboardsProvider.getList().clear();
@@ -692,7 +705,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 refreshableGroupsSelectionModel.clear();
                                 refreshableGroupsSelectionModel.setSelected(newGroup, true);
-                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(
+                                        availableLeaderboardGroups,
+                                        LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
                             }
                         }));
     }
@@ -740,7 +755,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                     }
                                 }
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(
+                                        availableLeaderboardGroups,
+                                        LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
                                 groupsProvider.refresh();
                             }
                         }));
@@ -787,7 +804,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         public void onSuccess(Void result) {
                             for (LeaderboardGroupDTO group : groups) {
                                 removeGroupFromTable(group);
-                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(
+                                        availableLeaderboardGroups,
+                                        LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
                             }
                         }
                     }));
@@ -807,7 +826,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     @Override
                     public void onSuccess(Void v) {
                         removeGroupFromTable(group);
-                        presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
+                        presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups,
+                                LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
                     }
                 }));
     }
@@ -971,24 +991,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
     }
 
     @Override
-    public void setupLeaderboardGroups(Map<String, String> params) {
-        String leaderBoardGroupId = params.get(LEADERBOARD_GROUP_ID);
-        if (leaderBoardGroupId != null) {
-            // setup filter value to name from params
-            groupsFilterablePanel.search(leaderBoardGroupId);
-            // deselect all leaderboard groups except one which name is from params
-            for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
-                if (leaderBoardGroupId.equals(String.valueOf(leaderboardGroupDTO.getId()))) {
-                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
-                } else if (groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)) {
-                    groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
-                }
-            }
-        }
-    }
-
-    @Override
     public AbstractFilterablePanel<LeaderboardGroupDTO> getFilterablePanel() {
         return groupsFilterablePanel;
     }
+    
+    public Displayer<StrippedLeaderboardDTOWithSecurity> getLeaderboardsDisplayer() {
+        return leaderboardsDisplayer;
+    }
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
+    }
+    
 }

@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
 
-    private final Set<Displayer> displayers = new HashSet<Displayer>();
+    private final Set<Displayer<T>> displayers = new HashSet<Displayer<T>>();
     private Iterable<T> dtos;
     private final ErrorReporter errorReporter;
 
@@ -20,7 +20,10 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
 
     @Override
-    public void addDisplayerAndCallFillOnInit(Displayer displayer) {
+    public void addDisplayerAndCallFillOnInit(Displayer<T> displayer) {
+        if (displayer == null) {
+            throw new IllegalArgumentException("Displayer cannot be null.");
+        }
         displayers.add(displayer);
         if (dtos == null) {
             reloadAndCallFillAll();
@@ -30,7 +33,12 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
 
     @Override
-    public void reloadAndCallFillOnly(Displayer fillOnlyDisplayer) {
+    public void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer) {
+        reloadAndCallFillOnly(fillOnlyDisplayer, null);
+    }
+
+    public void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer, Displayer<T> fillAdditionally) {
+        final boolean isDisplayerRegistered = displayers.contains(fillAdditionally);
         AsyncCallback<Iterable<T>> callback = new AsyncCallback<Iterable<T>>() {
 
             @Override
@@ -45,37 +53,49 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 } else {
                     callAllFill(result, null);
                 }
+                if (!isDisplayerRegistered) {
+                    fill(result, fillAdditionally);
+                }
             }
         };
         reload(callback);
     }
-    
+
     @Override
     public void reloadAndCallFillAll() {
         reloadAndCallFillOnly(null);
     }
 
     @Override
-    public void updateAndCallFillForAll(Iterable<T> dtos, Displayer origin) {
+    public void updateAndCallFillForAll(Iterable<T> dtos, Displayer<T> origin) {
         callAllFill(dtos, origin);
     }
-    
 
     @Override
-    public void callFillAndReloadInitially(Displayer displayer) {
+    public void callFillAndReloadInitially(Displayer<T> displayer) {
         if (dtos == null) {
-            reloadAndCallFillAll();
-        } else {
+            reloadAndCallFillOnly(null, displayer);
+            ;
+        } else if (displayer != null) {
             fill(dtos, displayer);
+        } else {
+            // ignore this call because no displayer defined which can execute the fill method.
         }
     }
 
-    private void callAllFill(final Iterable<T> dtos, final Displayer origin) {
-        displayers.stream().filter(displayer -> !Objects.equals(displayer, origin))
+    /**
+     * Exclude the origin from execution of fill method -> Filter
+     */
+    private void callAllFill(final Iterable<T> dtos, final Displayer<T> origin) {
+        displayers.stream()
+                .filter(displayer -> !Objects.equals(displayer, origin))
                 .forEach(displayer -> fill(dtos, displayer));
     }
 
     public abstract void reload(AsyncCallback<Iterable<T>> callback);
-    public abstract void fill(Iterable<T> dtos, Displayer displayer);
+
+    public void fill(Iterable<T> dtos, Displayer<T> displayer) {
+        displayer.fill(dtos);
+    }
 
 }

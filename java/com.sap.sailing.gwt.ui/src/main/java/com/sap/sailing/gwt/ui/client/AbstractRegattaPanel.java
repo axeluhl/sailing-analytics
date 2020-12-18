@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 //TODO: Do not inherit from FormPanel since the provided functionality is never used!
-public abstract class AbstractRegattaPanel extends FormPanel implements RegattasDisplayer {
+public abstract class AbstractRegattaPanel extends FormPanel {
     protected final SailingServiceWriteAsync sailingServiceWrite;
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
@@ -24,8 +24,20 @@ public abstract class AbstractRegattaPanel extends FormPanel implements Regattas
         this.errorReporter  = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
     }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
 
-    @Override
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+        
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
+
     public abstract void fillRegattas(Iterable<RegattaDTO> result);
     
 }

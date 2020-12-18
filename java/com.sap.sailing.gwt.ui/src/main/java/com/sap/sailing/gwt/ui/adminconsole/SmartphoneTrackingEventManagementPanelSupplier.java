@@ -25,8 +25,8 @@ public class SmartphoneTrackingEventManagementPanelSupplier
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 presenter, stringMessages);
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(raceLogTrackingEventManagementPanel);
-        presenter.getLeaderboardsRefresher().addDisplayerAndCallFillOnInit(raceLogTrackingEventManagementPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(raceLogTrackingEventManagementPanel.getRegattasDisplayer());
+        presenter.getLeaderboardsRefresher().addDisplayerAndCallFillOnInit(raceLogTrackingEventManagementPanel.getLeaderboardsDisplayer());
         return raceLogTrackingEventManagementPanel;
     }
 

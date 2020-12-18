@@ -6,7 +6,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
@@ -16,7 +15,7 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.security.ui.client.UserService;
 
-public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
+public class StructureImportListComposite extends RegattaListComposite {
 
     private SelectionCheckboxColumn<RegattaDTO> selectionCheckboxColumn;
     private final RegattaStructureProvider regattaStructureProvider;

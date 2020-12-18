@@ -28,7 +28,7 @@ public class SwissTimingReplayConnectorPanelSupplier
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(presenter,
                 stringMessages, tableResources);
         swissTimingReplayConnectorPanel.ensureDebugId("swissTimingReplayConnectorPanel");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(swissTimingReplayConnectorPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(swissTimingReplayConnectorPanel.getRegattasDisplayer());
         return swissTimingReplayConnectorPanel;
     }
 

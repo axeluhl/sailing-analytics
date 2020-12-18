@@ -28,7 +28,7 @@ public class SwissTimingEventManagementPanelSupplier
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(presenter,
                 stringMessages, tableResources);
         swisstimingEventManagementPanel.ensureDebugId("swisstimingEventManagementPanel");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(swisstimingEventManagementPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(swisstimingEventManagementPanel.getRegattasDisplayer());
         return swisstimingEventManagementPanel;
     }
 

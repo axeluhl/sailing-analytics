@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole.places;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.Refresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -25,8 +25,7 @@ public interface AdminConsoleView extends IsWidget {
     
     void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace);
     
-    public interface Presenter
-            extends MediaTracksRefresher {
+    public interface Presenter {
 
         ErrorReporter getErrorReporter();
 
@@ -37,16 +36,13 @@ public interface AdminConsoleView extends IsWidget {
         MediaServiceWriteAsync getMediaServiceWrite();
 
         PlaceController getPlaceController();
-        
-        void loadMediaTracks();
-        
-        void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher);
-        
+
         // Refresher
         Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher();
         Refresher<LeaderboardGroupDTO> getLeaderboardGroupsRefresher();
         Refresher<RegattaDTO> getRegattasRefresher();
         Refresher<EventDTO> getEventsRefresher();
+        Refresher<MediaTrackWithSecurityDTO> getMediaTracksRefresher();
     }
 
 }

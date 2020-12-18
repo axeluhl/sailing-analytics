@@ -9,16 +9,11 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleClientFactory;
 import com.sap.sailing.gwt.ui.adminconsole.places.refresher.AbstractRefresher;
-import com.sap.sailing.gwt.ui.client.Displayer;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.Refresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -40,12 +35,12 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private SailingServiceWriteAsync sailingService;
     private static AdminConsoleActivity instance;
     private AbstractAdminConsolePlace defaultPlace;
-    private MediaTracksRefresher mediaTracksRefresher;
     
     private final Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher;
     private final Refresher<RegattaDTO> regattasRefresher;
     private final Refresher<EventDTO> eventsRefresher;
+    private final Refresher<MediaTrackWithSecurityDTO> mediaTracksRefresher;
     
     public static boolean instantiated() {
         return instance != null;
@@ -86,13 +81,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                             }
                         }));
             }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public void fill(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards, Displayer displayer) {
-                LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayer = (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>) displayer;
-                leaderboardDisplayer.fillLeaderboards(leaderboards);
-            }
         };
         leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>(clientFactory.getErrorReporter()) {
             @Override
@@ -108,12 +96,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                                 callback.onFailure(t);
                             }
                         }));
-            }
-
-            @Override
-            public void fill(Iterable<LeaderboardGroupDTO> leaderboardGroups, Displayer displayer) {
-                LeaderboardGroupsDisplayer leaderboardGroupsDisplayer = (LeaderboardGroupsDisplayer) displayer;
-                leaderboardGroupsDisplayer.fillLeaderboardGroups(leaderboardGroups);
             }
         };
         regattasRefresher = new AbstractRefresher<RegattaDTO>(clientFactory.getErrorReporter()) {
@@ -131,12 +113,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                             }
                         }));
             }
-
-            @Override
-            public void fill(Iterable<RegattaDTO> regattas, Displayer displayer) {
-                RegattasDisplayer regattasDisplayer = (RegattasDisplayer) displayer;
-                regattasDisplayer.fillRegattas(regattas);
-            }
         };
         eventsRefresher = new AbstractRefresher<EventDTO>(clientFactory.getErrorReporter()) {
             @Override
@@ -153,11 +129,23 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                     }
                 });
             }
-
+        };
+        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>(clientFactory.getErrorReporter()) {
             @Override
-            public void fill(Iterable<EventDTO> events, Displayer displayer) {
-                EventsDisplayer eventsDisplayer = (EventsDisplayer) displayer;
-                eventsDisplayer.fillEvents(events);
+            public void reload(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback) {
+                mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(Iterable<MediaTrackWithSecurityDTO> result) {
+                        List<MediaTrackWithSecurityDTO> list = new ArrayList<MediaTrackWithSecurityDTO>();
+                        result.forEach(mediaTrackDto -> list.add(mediaTrackDto));
+                        callback.onSuccess(list);
+                    }
+                });
             }
         };
     }
@@ -180,6 +168,11 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public Refresher<EventDTO> getEventsRefresher() {
         return eventsRefresher;
+    }
+    
+    @Override
+    public Refresher<MediaTrackWithSecurityDTO> getMediaTracksRefresher() {
+        return mediaTracksRefresher;
     }
     
     public AdminConsoleActivity(final AdminConsolePlace place, final AdminConsoleClientFactory clientFactory) {
@@ -280,17 +273,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     @Override
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
-    }
-
-    @Override
-    public void loadMediaTracks() {
-        if (mediaTracksRefresher != null) {
-            mediaTracksRefresher.loadMediaTracks();
-        }
-    }
-    
-    public void setMediaTracksRefresher(MediaTracksRefresher mediaTracksRefresher) {
-        this.mediaTracksRefresher = mediaTracksRefresher;
     }
 
  

@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.common.client.suggestion.RegattaSuggestOracle;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResponse;
 import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportResultsDialog;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.Notification;
@@ -41,7 +41,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 /**
  * The UI form to upload data for expedition all in one import.
  */
-public class ExpeditionAllInOneImportPanel extends Composite implements RegattasDisplayer {
+public class ExpeditionAllInOneImportPanel extends Composite {
     private static final String URL_SAILINGSERVER_EXPEDITION_FULL_IMPORT = "/../../sailingserver/expedition/import";
 
     private final RegattaSuggestOracle regattaOracle;
@@ -189,8 +189,19 @@ public class ExpeditionAllInOneImportPanel extends Composite implements Regattas
         validation.run();
         initWidget(formPanel);
     }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         regattaOracle.fillRegattas(regattas);
     }

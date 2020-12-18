@@ -14,12 +14,12 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> implements RegattasDisplayer {
+public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRaceIdentifier>> {
 
     protected StringMessages stringMessages;
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -28,6 +28,18 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     public boolean started = false;
     private final VerticalPanel panel;
     private Button btnRefresh;
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
+        
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
 
     public AssignRacesToMediaDialog(final Presenter presenter, final MediaTrack mediaTrack,
             final StringMessages stringMessages,
@@ -81,7 +93,6 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         return getAssignedRaces();
     }
 
-    @Override
     public void fillRegattas(Iterable<RegattaDTO> result) {
         hasRaceCandidates = false;
         this.trackedRacesListComposite.fillRegattas(result);

@@ -46,9 +46,8 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGro
 import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.MultipleLinkCell;
@@ -85,7 +84,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * A composite showing the list of all sailing events  
  * @author Frank Mittag (C5163974)
  */
-public class EventListComposite extends Composite implements EventsDisplayer, LeaderboardGroupsDisplayer {
+public class EventListComposite extends Composite {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
@@ -98,6 +97,30 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
     protected final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
 
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
+    
+    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
+
+        @Override
+        public void fill(Iterable<EventDTO> result) {
+            fillEvents(result);
+        }
+    };
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+    
+    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+        
+        @Override
+        public void fill(Iterable<LeaderboardGroupDTO> result) {
+            fillLeaderboardGroups(result);
+        }
+    };
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
+    }
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -724,12 +747,10 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
         });
     }
 
-    @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
         availableLeaderboardGroups = leaderboardGroups;
     }
 
-    @Override
     public void fillEvents(Iterable<EventDTO> events) {
         if (events.iterator().hasNext()) {
             eventTable.setVisible(true);
@@ -750,9 +771,5 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
     
     public RefreshableMultiSelectionModel<EventDTO> getRefreshableMultiSelectionModel() {
         return refreshableEventSelectionModel;
-    }
-
-    @Override
-    public void setupLeaderboardGroups(Map<String, String> params) {
     }
 }

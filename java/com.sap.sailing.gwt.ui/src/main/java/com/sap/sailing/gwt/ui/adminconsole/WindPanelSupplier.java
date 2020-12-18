@@ -22,7 +22,7 @@ public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
         logger.info("Create WindPanel");
         final WindPanel windPanel = new WindPanel(presenter, stringMessages);
         windPanel.ensureDebugId("WindPanel");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(windPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(windPanel.getRegattasDisplayer());
         return windPanel;
     }
 

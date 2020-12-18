@@ -31,7 +31,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -58,7 +57,6 @@ public class MasterDataImportPanel extends VerticalPanel {
     private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
     private final Presenter presenter;
-    private final MediaTracksRefresher mediaTracksRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
@@ -71,7 +69,6 @@ public class MasterDataImportPanel extends VerticalPanel {
         this.sailingServiceWrite = presenter.getSailingService();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
-        this.mediaTracksRefresher = presenter;
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
@@ -232,7 +229,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
         }
         if (mediaTracksImported > 0) {
-            mediaTracksRefresher.loadMediaTracks();
+            presenter.getMediaTracksRefresher().reloadAndCallFillAll();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,

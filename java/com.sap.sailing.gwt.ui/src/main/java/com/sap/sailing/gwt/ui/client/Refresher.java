@@ -19,7 +19,7 @@ public interface Refresher<T> {
      * @param displayer
      *            the {@link Displayer} to add.
      */
-    void addDisplayerAndCallFillOnInit(Displayer displayer);
+    void addDisplayerAndCallFillOnInit(Displayer<T> displayer);
 
     /**
      * Force a reload of the data from server and call afterwards asynchronously the fill method of the given
@@ -28,7 +28,7 @@ public interface Refresher<T> {
      * @param fillOnlyDisplayer
      *            if not <code>null</code> only the fill method of the given {@link Displayer} will be called.
      */
-    void reloadAndCallFillOnly(Displayer fillOnlyDisplayer);
+    void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer);
 
     /**
      * Force a reload of the data from server and call afterwards asynchronously the fill method of all registered
@@ -45,15 +45,16 @@ public interface Refresher<T> {
      * @param origin
      *            if not <code>null</code> the given {@link Displayer} will be ignored when calling the fill method.
      */
-    void updateAndCallFillForAll(Iterable<T> dtos, Displayer origin);
+    void updateAndCallFillForAll(Iterable<T> dtos, Displayer<T> origin);
 
     /**
-     * Call fill method of given {@link Displayer}. If data was not loaded before, do an initial load and call fill
-     * method of all registered {@link Displayer} asynchronously.
+     * Call fill method of given {@link Displayer} even if he is not registered. If data was not loaded before, do an
+     * initial load and call fill method of all registered {@link Displayer} asynchronously and if not registered of the
+     * given {@link Displayer}, too.
      * 
      * @param displayer
      *            the {@link Displayer} on which the fill method should be called.
      */
-    void callFillAndReloadInitially(Displayer displayer);
+    void callFillAndReloadInitially(Displayer<T> displayer);
 
 }

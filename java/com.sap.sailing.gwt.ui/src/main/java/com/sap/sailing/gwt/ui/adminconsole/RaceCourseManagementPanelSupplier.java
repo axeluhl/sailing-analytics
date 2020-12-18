@@ -23,7 +23,7 @@ public class RaceCourseManagementPanelSupplier extends AdminConsolePanelSupplier
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(
                 presenter, stringMessages);
         raceCourseManagementPanel.ensureDebugId("raceCourseManagementPanel");
-        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(raceCourseManagementPanel);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(raceCourseManagementPanel.getRegattasDisplayer());
         return raceCourseManagementPanel;
     }
 

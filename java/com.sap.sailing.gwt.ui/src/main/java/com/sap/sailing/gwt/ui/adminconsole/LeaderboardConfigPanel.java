@@ -74,7 +74,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiv
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -108,7 +107,7 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>,
         TrackedRaceChangedListener {
     private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
@@ -119,7 +118,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private Button addRaceColumnsButton;
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
-
+    
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -1055,7 +1054,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
 
     private void removeLeaderboards(final Collection<StrippedLeaderboardDTOWithSecurity> leaderboards) {
-        LeaderboardConfigPanel that = this;
         if (!leaderboards.isEmpty()) {
             Set<String> leaderboardNames = new HashSet<String>();
             for (StrippedLeaderboardDTO leaderboard : leaderboards) {
@@ -1072,14 +1070,14 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList, that);
+                    getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
+                            LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
                 }
             });
         }
     }
 
     private void removeLeaderboard(final StrippedLeaderboardDTOWithSecurity leaderBoard) {
-        LeaderboardConfigPanel that = this;
         sailingServiceWrite.removeLeaderboard(leaderBoard.getName(),
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
@@ -1091,7 +1089,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList, that);
+                        getLeaderboardsRefresher().updateAndCallFillForAll(availableLeaderboardList,
+                                LeaderboardConfigPanel.this.getLeaderboardsDisplayer());
                     }
                 }));
     }

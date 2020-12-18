@@ -58,7 +58,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -90,7 +90,7 @@ import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattasDisplayer, FilterablePanelProvider<RaceDTO> {
+public class WindPanel extends FormPanel implements FilterablePanelProvider<RaceDTO> {
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
@@ -121,7 +121,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, Filterabl
      * Composite pattern over the {@link RegattasDisplayer} interface. Calls to {@link #fillRegattas(Iterable)}
      * will be forwarded to those objects contained in this collection.
      */
-    private final Set<RegattasDisplayer> containedRegattaDisplayers;
+    private final Set<Displayer<RegattaDTO>> containedRegattaDisplayers;
     private CaptionPanel expeditionImportPanel;
     private CaptionPanel gribImportPanel;
     private CaptionPanel nmeaImportPanel;
@@ -144,7 +144,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, Filterabl
         this.setWidget(mainPanel);
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages, /* multiselection */true,
                 /* actionButtonsEnabled */ false);
-        containedRegattaDisplayers.add(trackedRacesListComposite);
+        containedRegattaDisplayers.add(trackedRacesListComposite.getRegattasDisplayer());
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
         refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
@@ -280,7 +280,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, Filterabl
         final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(presenter);
         expeditionAllInOneImporterPanel = expeditionAllInOneRootAndImportPanel.getA();
         mainPanel.add(expeditionAllInOneImporterPanel);
-        containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB());
+        containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB().getRegattasDisplayer());
 
         updateVisibilityStateForPanels();
 
@@ -621,11 +621,23 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, Filterabl
             }
         });
     }
+    
+    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
 
-    @Override
+        @Override
+        public void fill(Iterable<RegattaDTO> result) {
+            fillRegattas(result);
+        }
+        
+    };
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
+    }
+
     public void fillRegattas(Iterable<RegattaDTO> result) {
-        for (final RegattasDisplayer containedRegattaDisplayer : containedRegattaDisplayers) {
-            containedRegattaDisplayer.fillRegattas(result);
+        for (final Displayer<RegattaDTO> containedRegattaDisplayer : containedRegattaDisplayers) {
+            containedRegattaDisplayer.fill(result);
         }
     }
 

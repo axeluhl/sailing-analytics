@@ -7,7 +7,7 @@ package com.sap.sailing.gwt.ui.client;
  * @param <T>
  *            the DTO
  */
-public interface Displayer {
+public interface Displayer<T> {
 
     /**
      * This method will be called after data changes take effect and can be used to react on such events, e.g. to
@@ -16,5 +16,5 @@ public interface Displayer {
      * @param result
      *            the currently valid set of DTOs
      */
-    //void fill(Iterable<T> result);
+    void fill(Iterable<T> result);
 }

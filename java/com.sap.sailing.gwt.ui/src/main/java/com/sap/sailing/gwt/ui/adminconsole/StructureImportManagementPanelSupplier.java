@@ -23,7 +23,7 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
                 presenter, stringMessages);
         structureImportUrlsManagementPanel.ensureDebugId("structureImportUrlsManagementPanel");
-        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(structureImportUrlsManagementPanel);
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(structureImportUrlsManagementPanel.getEventsDisplayer());
         return structureImportUrlsManagementPanel;
     }
 

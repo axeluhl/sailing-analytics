@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
@@ -54,7 +54,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider, EventsDisplayer {
+public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -238,7 +238,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createEvent(final EventDTO newEvent) {
-        StructureImportManagementPanel that = this;
         List<String> courseAreaNames = new ArrayList<String>();
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
@@ -255,7 +254,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                     @Override
                     public void onSuccess(EventDTO newEvent) {
                         existingEvents.add(newEvent);
-                        presenter.getEventsRefresher().updateAndCallFillForAll(existingEvents, that);
+                        presenter.getEventsRefresher().updateAndCallFillForAll(existingEvents,
+                                StructureImportManagementPanel.this.getEventsDisplayer());
                         sailingEventsListBox.addItem(newEvent.getName());
                         sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     }
@@ -464,8 +464,20 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     public RegattaStructure getRegattaStructure(RegattaDTO regatta) {
         return regattaStructures.get(regatta);
     }
+    
+    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
 
-    @Override
+        @Override
+        public void fill(Iterable<EventDTO> result) {
+            fillEvents(result);
+        }
+        
+    };
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+
     public void fillEvents(Iterable<EventDTO> result) {
         existingEvents = new ArrayList<EventDTO>();
         result.forEach(existingEvents::add);
