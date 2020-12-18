@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.shared;
 
 /**
- * This class contains convenience boolean flags to enable/ disable features in experimental phase.
+ * This interface contains convenience boolean flags to enable/ disable features in experimental phase.
  */
-public class ExperimentalFeatures {
+public interface ExperimentalFeatures {
 
     /**
      * Provide button to show the competitor analytics in fullscreen view (work in progress)
