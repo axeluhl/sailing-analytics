@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
-<module>
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="com.sap.sailing.gwt.ui.AdminConsole" />
-	<source path="client"/>
-	
-	<servlet path='/testsailing' class='com.sap.sailing.gwt.ui.test.MyTestSailingServiceImpl'/>
-</module>

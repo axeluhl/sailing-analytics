@@ -10,6 +10,8 @@
 
 ### Firing up replica's
 
+(Note: the following was current back in 2016 but may not be current anymore in terms of the properties used to configure the instance! See [[here|/wiki/info/landscape/amazon-ec2] for up-to-date information.)
+
 ```
 INSTALL_FROM_RELEASE=build-201608091706
 USE_ENVIRONMENT=live-replica-server

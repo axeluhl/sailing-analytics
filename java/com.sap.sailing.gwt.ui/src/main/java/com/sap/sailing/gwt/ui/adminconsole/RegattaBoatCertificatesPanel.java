@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util.Triple;
@@ -29,19 +29,19 @@ import com.sap.sse.security.ui.client.UserService;
 public class RegattaBoatCertificatesPanel extends AbstractBoatCertificatesPanel {
     private final RegattaIdentifier regattaIdentifier;
     
-    public RegattaBoatCertificatesPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService, final RegattaDTO regatta,
+    public RegattaBoatCertificatesPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService, final RegattaDTO regatta,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
-        super(sailingServiceWrite, userService, /* objectToCheckUpdatePermissionFor */ regatta, stringMessages, errorReporter,
+        super(sailingWriteService, userService, /* objectToCheckUpdatePermissionFor */ regatta, stringMessages, errorReporter,
                 /* context update permission check: */ ()->userService.hasPermission(regatta, DefaultActions.UPDATE), regatta.getName());
         this.regattaIdentifier = regatta.getRegattaIdentifier();
         refresh();
     }
 
     @Override
-    protected void assignCertificates(SailingServiceWriteAsync sailingServiceWrite,
+    protected void assignCertificates(SailingWriteServiceAsync sailingWriteService,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback) {
-        sailingServiceWrite.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, callback);        
+        sailingWriteService.assignORCPerformanceCurveCertificates(regattaIdentifier, certificatesByBoatIdAsString, callback);        
     }
 
     protected void getORCCertificateAssignemtnsByBoatIdAsString(SailingServiceAsync sailingService,

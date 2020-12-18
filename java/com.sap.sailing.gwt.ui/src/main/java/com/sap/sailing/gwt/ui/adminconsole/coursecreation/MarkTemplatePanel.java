@@ -27,7 +27,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.Util;
@@ -52,7 +52,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class MarkTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final LabeledAbstractFilterablePanel<MarkTemplateDTO> filterableMarkTemplates;
     private List<MarkTemplateDTO> allMarkTemplates;
     private final ErrorReporter errorReporter;
@@ -61,9 +61,9 @@ public class MarkTemplatePanel extends FlowPanel {
     private ListDataProvider<MarkTemplateDTO> markTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkTemplateDTO> refreshableSelectionModel;
 
-    public MarkTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public MarkTemplatePanel(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -110,7 +110,7 @@ public class MarkTemplatePanel extends FlowPanel {
 
     public void loadMarkTemplates() {
         markTemplateListDataProvider.getList().clear();
-        sailingServiceWrite.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
+        sailingWriteService.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
@@ -272,13 +272,13 @@ public class MarkTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markTemplate -> configACL.openACLDialog(markTemplate));
+                markTemplate -> configACL.openDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
@@ -292,7 +292,7 @@ public class MarkTemplatePanel extends FlowPanel {
                 new DialogCallback<MarkTemplateDTO>() {
                     @Override
                     public void ok(MarkTemplateDTO markTemplate) {
-                        sailingServiceWrite.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
+                        sailingWriteService.addOrUpdateMarkTemplate(markTemplate, new AsyncCallback<MarkTemplateDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter

@@ -53,9 +53,9 @@ public class BoatClassJsonSerializer implements JsonSerializer<BoatClass> {
                 result.put(FIELD_HULL_BEAM_IN_METERS, boatClass.getHullBeam().getMeters());
             }
             final JSONArray aliasNames = new JSONArray();
-            if (boatClass.getDisplayName() != null) {
-                result.put(FIELD_DISPLAY_NAME, boatClass.getDisplayName());
-                final BoatClassMasterdata masterData = BoatClassMasterdata.resolveBoatClass(boatClass.getDisplayName());
+            if (boatClass.getName() != null) {
+                result.put(FIELD_DISPLAY_NAME, boatClass.getName());
+                final BoatClassMasterdata masterData = BoatClassMasterdata.resolveBoatClass(boatClass.getName());
                 if (masterData != null) {
                     result.put(FIELD_ICON_URL, "/gwt/src/main/resources/com/sap/sailing/gwt/ui/client/images/boatclass/"+masterData.name().replaceAll("^_", "")+".png");
                     aliasNames.addAll(Arrays.asList(masterData.getAlternativeNames()));

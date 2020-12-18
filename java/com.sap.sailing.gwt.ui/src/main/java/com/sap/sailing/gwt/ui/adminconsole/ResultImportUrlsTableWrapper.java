@@ -9,7 +9,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -41,9 +41,9 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
 
     private String lastUsedProviderName = null;
 
-    public ResultImportUrlsTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public ResultImportUrlsTableWrapper(SailingWriteServiceAsync sailingWriteService, UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(sailingServiceWrite, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
+        super(sailingWriteService, stringMessages, errorReporter, true, false, new UrlDTOEntityIdentityComparator());
         ListHandler<UrlDTO> listHandler = super.getColumnSortHandler();
 
         TextColumn<UrlDTO> urlColumn = new AbstractSortableTextColumn<UrlDTO>(url -> url.getUrl());
@@ -54,15 +54,15 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
         AccessControlledActionsColumn<UrlDTO, DefaultActionsImagesBarCell> actionsColumn = AccessControlledActionsColumn
                 .create(new DefaultActionsImagesBarCell(stringMessages), userService);
 
-        DialogConfig<UrlDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(),
+        DialogConfig<UrlDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(),
                 SecuredDomainType.RESULT_IMPORT_URL, event -> update(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 config::openOwnershipDialog);
 
-        EditACLDialog.DialogConfig<UrlDTO> configACL = EditACLDialog.create(userService.getUserManagementService(),
+        EditACLDialog.DialogConfig<UrlDTO> configACL = EditACLDialog.create(userService.getUserManagementWriteService(),
                 SecuredDomainType.RESULT_IMPORT_URL, event -> update(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                e -> configACL.openACLDialog(e));
+                e -> configACL.openDialog(e));
 
         super.table.addColumn(urlColumn, stringMessages.url());
         SecuredDTOOwnerColumn.configureOwnerColumns(super.table, listHandler, stringMessages);
@@ -76,7 +76,7 @@ public class ResultImportUrlsTableWrapper<S extends RefreshableSelectionModel<Ur
     public void update(String providerName) {
         lastUsedProviderName = providerName;
         if (providerName != null) {
-            sailingServiceWrite.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
+            sailingWriteService.getResultImportUrls(providerName, new AsyncCallback<List<UrlDTO>>() {
                 @Override
                 public void onSuccess(List<UrlDTO> result) {
                     ResultImportUrlsTableWrapper.super.refresh(result);

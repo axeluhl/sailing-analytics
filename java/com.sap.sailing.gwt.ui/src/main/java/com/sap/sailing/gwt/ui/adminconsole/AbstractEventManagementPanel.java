@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -29,17 +29,17 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     private final List<RegattaDTO> availableRegattas;
     private final ListBox availableRegattasListBox;
     
-    public AbstractEventManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
+    public AbstractEventManagementPanel(SailingWriteServiceAsync sailingWriteService, UserService userService,
             RegattaRefresher regattaRefresher, ErrorReporter errorReporter, boolean actionButtonsEnabled,
             StringMessages stringMessages) {
-        super(sailingServiceWrite, regattaRefresher, errorReporter, stringMessages);
+        super(sailingWriteService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
         
         this.availableRegattasListBox = new ListBox();
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingServiceWrite, userService,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingWriteService, userService,
                 errorReporter, regattaRefresher, stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }

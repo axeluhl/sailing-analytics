@@ -7,9 +7,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Optional;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>> extends OperationsToMasterSendingQueue, WithID {
     final Logger logger = Logger.getLogger(OperationsToMasterSender.class.getName());
@@ -44,19 +47,14 @@ public interface OperationsToMasterSender<S, O extends OperationWithResult<S, ?>
         final OperationWithResultWithIdWrapper<S, T> operationWithResultWithIdWrapper = new OperationWithResultWithIdWrapper<S, T>(operation);
         addOperationSentToMasterForReplication(operationWithResultWithIdWrapper);
         URL url = masterDescriptor.getSendReplicaInitiatedOperationToMasterURL(this.getId().toString());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type", "application/octet-stream");
-        String optionalBearerToken = masterDescriptor.getBearerToken();
-        if (optionalBearerToken != null && !optionalBearerToken.isEmpty()) {
-            connection.setRequestProperty("Authorization", "Bearer " + optionalBearerToken);
-        }
-        connection.setDoOutput(true); // we want to post the serialized operation
-        logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
-        connection.connect();
-        OutputStream outputStream = connection.getOutputStream();
-        DataOutputStream dos = new DataOutputStream(outputStream);
-        dos.writeUTF(getId().toString());
-        this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
+        HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
+                url, Duration.ONE_MINUTE.times(10), "POST", masterDescriptor.getBearerToken(), "application/octet-stream",
+                Optional.of(outputStream->{
+                    logger.info("Sending operation "+operation+" to master "+masterDescriptor+"'s replicable with ID "+this+" for initial execution and replication");
+                    DataOutputStream dos = new DataOutputStream(outputStream);
+                    dos.writeUTF(getId().toString());
+                    this.writeOperation(operationWithResultWithIdWrapper, outputStream, /* closeStream */ true);
+                }));
         final int responseCode = connection.getResponseCode();
         if (responseCode < 300 || responseCode >= 500 || responseCode == 404) {
             // if OK or an internal error, process as usual; in case of >= 500 this will throw an exception

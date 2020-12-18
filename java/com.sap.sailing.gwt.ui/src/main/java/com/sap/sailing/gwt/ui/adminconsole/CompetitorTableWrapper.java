@@ -29,7 +29,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -82,9 +82,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      *            to be loaded. In this case, competitors without boat will be fetched only if this flag is
      *            {@code false}.
      */
-    public CompetitorTableWrapper(SailingServiceWriteAsync sailingServiceWrite, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public CompetitorTableWrapper(SailingWriteServiceAsync sailingWriteService, UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
@@ -290,7 +290,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?"":(""+competitor.getTimeOnDistanceAllowancePerNauticalMile());
             }
         };
-        timeOnTimeFactorColumn.setSortable(true);
+        timeOnDistanceAllowancePerNauticalMileColumn.setSortable(true);
         competitorColumnListHandler.setComparator(timeOnDistanceAllowancePerNauticalMileColumn, new Comparator<CompetitorDTO>() {
             @Override
                     public int compare(CompetitorDTO o1, CompetitorDTO o2) {
@@ -330,19 +330,20 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 new CompetitorConfigImagesBarCell(getStringMessages()), userService);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
-        final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
+        final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementWriteService(), SecuredDomainType.COMPETITOR,
                 competitorDTO -> refresh(Collections.singleton(competitorDTO)), stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, null, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, getStringMessages().name());
         table.addColumn(competitorShortNameColumn, stringMessages.shortName());
         table.addColumn(flagImageColumn, stringMessages.flags());
+        table.addColumn(timeOnTimeFactorColumn, getStringMessages().timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, getStringMessages().timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, getStringMessages().color());
         table.addColumn(imageColumn, getStringMessages().image());
@@ -399,9 +400,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
         if (leaderboardName != null) {
-            sailingServiceWrite.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
+            sailingWriteService.getCompetitorsOfLeaderboard(leaderboardName, myCallback);
         } else {
-            sailingServiceWrite.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
+            sailingWriteService.getCompetitors(filterCompetitorsWithBoat, filterCompetitorsWithoutBoat, myCallback);
         }
     }
 
@@ -429,7 +430,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 originalCompetitor, new DialogCallback<CompetitorWithBoatDTO>() {
             @Override
             public void ok(final CompetitorWithBoatDTO competitor) {
-                sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorWithBoatDTO>() {
+                sailingWriteService.addOrUpdateCompetitorWithBoat(competitor, new AsyncCallback<CompetitorWithBoatDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor with boat: " + caught.getMessage());
@@ -465,9 +466,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     @Override
                     public void ok(final CompetitorWithBoatDTO competitor) {
                         if (competitor.hasBoat()) {
-                            sailingServiceWrite.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
+                            sailingWriteService.addOrUpdateCompetitorWithBoat(competitor, createAddCompetitorCallback());
                         } else {
-                            sailingServiceWrite.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
+                            sailingWriteService.addOrUpdateCompetitorWithoutBoat(competitor, createAddCompetitorCallback());
                         }
                     }
 
@@ -483,7 +484,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final CompetitorEditDialog<CompetitorDTO> dialog = CompetitorEditDialog.create(getStringMessages(), originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
-                sailingServiceWrite.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
+                sailingWriteService.addOrUpdateCompetitorWithoutBoat(competitor, new AsyncCallback<CompetitorDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
@@ -516,7 +517,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     protected void allowUpdate(final Iterable<CompetitorDTO> competitors) {
         List<CompetitorDTO> serializableSingletonList = new ArrayList<>();
         Util.addAll(competitors, serializableSingletonList);
-        sailingServiceWrite.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
+        sailingWriteService.allowCompetitorResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to allow resetting competitors " + competitors

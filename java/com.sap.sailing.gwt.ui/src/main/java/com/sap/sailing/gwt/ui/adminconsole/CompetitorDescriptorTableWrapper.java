@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageRenderer;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.util.NaturalComparator;
@@ -85,9 +85,9 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
     }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
-            SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages, ErrorReporter errorReporter,
+            SailingWriteServiceAsync sailingWriteService, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, final CompetitorsToImportToExistingLinking unlinkCallback) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDescriptor>() {
                     @Override
                     public boolean representSameEntity(CompetitorDescriptor dto1, CompetitorDescriptor dto2) {
@@ -190,7 +190,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 new ImagesBarColumn<CompetitorDescriptor, CompetitorDescriptorTableWrapper.CompetitorImportTableActionIcons>(new CompetitorImportTableActionIcons(stringMessages)) {
                     @Override
                     public String getValue(CompetitorDescriptor competitor) {
-                        return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":"linked";
+                        return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":CompetitorImportTableActionIcons.ACTION_UNLINK;
                     }
         };
         unlinkColumn.setFieldUpdater(new FieldUpdater<CompetitorDescriptor, String>() {

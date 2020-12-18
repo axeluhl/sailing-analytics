@@ -4,6 +4,39 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">October 2020</h5>
+         <ul class="bulletList">
+           <li>An SAP Qualtrics survey is now part of the /gwt/Home.html page. It presents itself after 60s as
+               a small feedback tab rolling into view from the right and can be reached through the "Feedback"
+               link in the page footer at any time. Once answered (even empty is okay), you won't be bothered again
+               by the tab for the next three months. We're looking forward to your feedback!</li>
+           <li>Bug fix: if a start or finish line was missing position information for one of its ends, the map display
+               of tracks and course broke. This has been fixed now.</li>
+           <li>For better visibility especially with satellite view enabled, rhumb line display now uses a bright
+               green color.</li>
+           <li>Added an optional COG (Course over Ground) column to the leaderboard which shows all competitors'
+               COG in true degrees.</li>
+           <li>The rhumb line ("course middle line") for the first leg is now already displayed prior to the
+               start time point.</li>
+         </ul>
+         <h5 class="articleSubheadline">September 2020</h5>
+         <ul class="bulletList">
+           <li>Problems and inconsistencies with the gap (in seconds) calculation, especially after finishing legs and races,
+               have been fixed now. Different issues existed for the different ranking metrics (one-design, ToT/ToD, ORC PCS),
+               particularly when competitors finished a leg or a race and their gaps kept counting.</li>
+           <li>Calculated leg time is now also displayed in hh:mm:ss format.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2020</h5>
+         <ul class="bulletList">
+           <li>Fixed a problem with cross-track error calculations in case no track can be found for a competitor</li>
+           <li>New menu entries in the header of the SAP Sailing home. Depending on the currently logged in users rights a link to the Administration Console and/or Data Mining is shown.</li>
+           <li>Fixed an issue with ToT/ToD handicap ranking in case a duration to the end of a leg cannot be computed based on missing data.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2020</h5>
+         <ul class="bulletList">
+            <li>The "Gap Change" for the first leg will now show the current gap in the first leg rather than
+                "NaN" (not a number).</li>
+         </ul>        
          <h5 class="articleSubheadline">March 2020</h5>
          <ul class="bulletList">
             <li>The security infrastructure of the previously separate environments of

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-master
+  labels:
+    app: {{ template "sapsailing-app-name" . }}
+    role: sailing-deployment
+    environment: {{ .Values.environment }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "sapsailing-app-name" . }}
+      role: {{ .Values.master.role }}
+      environment: {{ .Values.environment }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sapsailing-app-name" . }}
+        role: {{ .Values.master.role }}
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+      - name: sailing
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8888
+          name: http-port
+        - containerPort: 14888
+          name: telnet-port       
+        resources:
+{{- if .Values.master.resources }}
+{{- tpl (toYaml .Values.master.resources) . | nindent 10 }}
+{{- end }}
+        env:
+        - name: MONGODB_URI
+          value: {{ template "mongodb-connection-string-master" . }}
+        - name: REPLICATION_CHANNEL
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+        - name: REPLICATION_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_QUEUE_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_QUEUE_PORT
+          value: "{{ .Values.rabbitmq.port }}"
+        - name: SERVER_NAME
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+        - name: ADDITIONAL_JAVA_ARGS
+          value: -Dcom.sun.management.jmxremote
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - ./status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecret }}

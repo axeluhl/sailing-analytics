@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -32,14 +32,14 @@ import com.sap.sse.security.ui.client.UserService;
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CourseManagementWidget courseManagementWidget;
 
-    public RaceCourseManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public RaceCourseManagementPanel(final SailingWriteServiceAsync sailingWriteService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
-        super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
-        courseManagementWidget = new CourseManagementWidget(sailingServiceWrite, errorReporter, stringMessages,
+        super(sailingWriteService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
+        courseManagementWidget = new CourseManagementWidget(sailingWriteService, errorReporter, stringMessages,
                 userService, ()->selectedRaceHasOrcPcsRankingMetric()) {
             @Override
             protected void save() {
-                sailingServiceWrite.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
+                sailingWriteService.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
@@ -48,7 +48,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     @Override
                     public void onSuccess(Void result) {
                         Notification.notify(stringMessages.successfullyUpdatedCourse(), NotificationType.INFO);
-                        sailingServiceWrite.setORCPerformanceCurveLegInfo(singleSelectedRace, getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
+                        sailingWriteService.setORCPerformanceCurveLegInfo(singleSelectedRace, getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
@@ -66,7 +66,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             protected LegGeometrySupplier getLegGeometrySupplier() {
                 return (zeroBasedLegIndices, legTypes, callback)->
-                    sailingServiceWrite.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, legTypes, callback);
+                    sailingWriteService.getLegGeometry(singleSelectedRace, zeroBasedLegIndices, legTypes, callback);
             }
 
             @Override
@@ -74,7 +74,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 if (singleSelectedRace != null && selectedRaceDTO != null) {
                     mainPanel.setVisible(true);
                     // TODO bug 1351: never use System.currentTimeMillis() on the client when trying to compare anything with "server time"; this one is not so urgent as it is reached only in the AdminConsole and we expect administrators to have proper client-side time settings
-                    sailingServiceWrite.getRaceCourse(singleSelectedRace, new Date(), new AsyncCallback<RaceCourseDTO>() {
+                    sailingWriteService.getRaceCourse(singleSelectedRace, new Date(), new AsyncCallback<RaceCourseDTO>() {
                         @Override
                         public void onSuccess(RaceCourseDTO raceCourseDTO) {
                             updateWaypointsAndControlPoints(raceCourseDTO, selectedRaceDTO);
@@ -96,7 +96,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             
             private void refreshORCPerformanceCurveLegs() {
                 if (singleSelectedRace != null) {
-                    sailingServiceWrite.getORCPerformanceCurveLegInfo(singleSelectedRace,
+                    sailingWriteService.getORCPerformanceCurveLegInfo(singleSelectedRace,
                             new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
                                 @Override
                                 public void onSuccess(Map<Integer, ORCPerformanceCurveLegImpl> result) {

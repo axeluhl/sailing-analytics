@@ -2,6 +2,7 @@ package com.sap.sailing.domain.anniversary;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.TimePoint;
@@ -20,19 +21,21 @@ public class SimpleRaceInfo implements Serializable {
     private final RegattaAndRaceIdentifier identifier;
     private final TimePoint startOfRace;
     private final URL remoteUrl;
+    protected final UUID eventID;
 
     /**
      * @param remoteUrl
      *            use {@code null} to mean "local"; a local server does not necessarily know under which URL it is being
      *            reached and therefore cannot provide this
      */
-    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl) {
+    public SimpleRaceInfo(RegattaAndRaceIdentifier identifier, TimePoint startOfRace, URL remoteUrl, UUID eventId) {
         if (identifier == null || startOfRace == null) {
             throw new IllegalStateException("SimpleRaceInfo Data is not allowed to contain any null values!");
         }
         this.identifier = identifier;
         this.startOfRace = startOfRace;
         this.remoteUrl = remoteUrl;
+        this.eventID = eventId;
     }
 
     public RegattaAndRaceIdentifier getIdentifier() {
@@ -51,12 +54,17 @@ public class SimpleRaceInfo implements Serializable {
         return startOfRace;
     }
 
+    public UUID getEventID() {
+        return eventID;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
         result = prime * result + ((startOfRace == null) ? 0 : startOfRace.hashCode());
+        result = prime * result + ((eventID == null) ? 0 : eventID.hashCode());
         return result;
     }
 
@@ -78,6 +86,11 @@ public class SimpleRaceInfo implements Serializable {
             if (other.startOfRace != null)
                 return false;
         } else if (!startOfRace.equals(other.startOfRace))
+            return false;
+        if (eventID == null) {
+            if (other.eventID != null)
+                return false;
+        } else if (!eventID.equals(other.eventID))
             return false;
         return true;
     }

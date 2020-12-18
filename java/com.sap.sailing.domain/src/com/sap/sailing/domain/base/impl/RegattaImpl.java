@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -844,13 +845,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Double getTimeOnTimeFactor(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnTimeFactor(competitor);
+    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor, changeCallback);
     }
 
     @Override
-    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
-        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor, changeCallback);
     }
 
     @Override

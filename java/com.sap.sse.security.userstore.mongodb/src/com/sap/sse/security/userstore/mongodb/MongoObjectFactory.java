@@ -17,27 +17,35 @@ public interface MongoObjectFactory {
 
     public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlList acl);
     
+    public void deleteAllAccessControlLists();
+
     public void storeOwnership(OwnershipAnnotation owner);
-    
+
     public void deleteOwnership(QualifiedObjectIdentifier ownedObjectId, Ownership owner);
     
+    public void deleteAllOwnerships();
+
     public void storeRoleDefinition(RoleDefinition role);
-    
+
     public void deleteRoleDefinition(RoleDefinition role);
-    
+
     public void storeUserGroup(UserGroup group);
-    
+
     public void deleteUserGroup(UserGroup userGroup);
 
     public void storeUser(User user);
-    
+
     public void deleteUser(User user);
-    
+
     public void storeSettings(Map<String, Object> settings);
-    
+
     public void storeSettingTypes(Map<String, Class<?>> settingTypes);
 
+    public void deleteAllSettings();
+
     public void storePreferences(String username, Map<String, String> userMap);
+
+    public void deleteAllPreferences();
 
     public MongoDatabase getDatabase();
 }

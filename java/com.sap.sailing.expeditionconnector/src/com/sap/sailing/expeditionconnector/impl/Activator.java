@@ -25,12 +25,9 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
-import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class Activator implements BundleActivator {
@@ -83,22 +80,16 @@ public class Activator implements BundleActivator {
                     /* sensorFixStore will be discovered by tracker factory through OSGi */ null, domainObjectFactory, mongoObjectFactory);
             registrations.add(context.registerService(ExpeditionTrackerFactory.class, expeditionTrackerFactory, /* properties */null));
             registrations.add(context.registerService(WindTrackerFactory.class, expeditionTrackerFactory, /* properties */null));
-            
             registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new ExpeditionGpsDeviceIdentifierJsonHandler(), getDict(ExpeditionGpsDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionGpsStringSerializationHandler(), getDict(ExpeditionGpsDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new ExpeditionSensorDeviceIdentifierJsonHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionSensorStringSerializationHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
-
             new Thread(() -> {
                 final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
                 try {
                     final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
-                    final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
-                    for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
-                            .getDeviceConfigurations()) {
-                        QualifiedObjectIdentifier identifier = deviceConfiguration.getType().getQualifiedObjectIdentifier(deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()));
-                        securityService.migrateOwnership(identifier, permissionEncoder.decodePermissionPart(
-                                deviceConfiguration.getTypeRelativeObjectIdentifier(ServerInfo.getName()).toString()));
+                    for (final ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory.getDeviceConfigurations()) {
+                        securityService.migrateOwnership(deviceConfiguration);
                     }
                     securityService
                             .assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName());

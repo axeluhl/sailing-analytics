@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -44,17 +44,17 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     
-    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
+    public BoatTableWrapper(SailingWriteServiceAsync sailingWriteService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
-        this(sailingServiceWrite, userService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
+        this(sailingWriteService, userService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
                 allowActions);
     }
 
-    public BoatTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public BoatTableWrapper(SailingWriteServiceAsync sailingWriteService, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
-        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
+        super(sailingWriteService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
                     @Override
                     public boolean representSameEntity(BoatDTO dto1, BoatDTO dto2) {
@@ -65,7 +65,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                         return t.getIdAsString().hashCode();
                     }
                 });
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         ListHandler<BoatDTO> boatColumnListHandler = getColumnSortHandler();
         
         // boats table
@@ -179,13 +179,13 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.BOAT, boatDTO -> refresh(Collections.singleton(boatDTO)), stringMessages);
+                userService.getUserManagementWriteService(), SecuredDomainType.BOAT, boatDTO -> refresh(Collections.singleton(boatDTO)), stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, null, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, null, stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());
@@ -214,7 +214,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     
     public void refreshBoatList(boolean loadOnlyStandaloneBoats, final Callback<Iterable<BoatDTO>, Throwable> callback) {
         if (loadOnlyStandaloneBoats) {
-            sailingServiceWrite.getStandaloneBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+            sailingWriteService.getStandaloneBoats(new AsyncCallback<Iterable<BoatDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
@@ -233,7 +233,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 }
             });
         } else {
-            sailingServiceWrite.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
+            sailingWriteService.getAllBoats(new AsyncCallback<Iterable<BoatDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getBoats() - Failure: " + caught.getMessage());
@@ -262,7 +262,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         final BoatEditDialog dialog = new BoatEditDialog(getStringMessages(), originalBoat, boatClassName, new DialogCallback<BoatDTO>() {
             @Override
             public void ok(BoatDTO boat) {
-                sailingServiceWrite.addOrUpdateBoat(boat, new AsyncCallback<BoatDTO>() {
+                sailingWriteService.addOrUpdateBoat(boat, new AsyncCallback<BoatDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update boat: " + caught.getMessage());
@@ -298,7 +298,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     public void allowUpdate(final Iterable<BoatDTO> boats) {
         List<BoatDTO> serializableSingletonList = new ArrayList<BoatDTO>();
         Util.addAll(boats, serializableSingletonList);
-        sailingServiceWrite.allowBoatResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
+        sailingWriteService.allowBoatResetToDefaults(serializableSingletonList, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to allow resetting boats " + boats

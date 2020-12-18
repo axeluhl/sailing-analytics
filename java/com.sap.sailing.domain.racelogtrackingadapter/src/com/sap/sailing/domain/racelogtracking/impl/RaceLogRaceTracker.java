@@ -64,8 +64,8 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -99,7 +99,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
     
     private final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl(LOGGER_AND_LOGAUTHOR_NAME, 0);
-    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
+    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<>();
     
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
@@ -232,7 +232,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             // into the race log
             raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
         }
-        
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
@@ -370,7 +369,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
                     params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                     boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
                     /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
-                    new TrackingConnectorInfoImpl(TrackingConnectorType.RaceLog, /* webUrl */ null));
+                    new TrackingConnectorInfoImpl(RaceLogTrackingAdapter.NAME, RaceLogTrackingAdapter.DEFAULT_URL, /* no webUrl */ null));
             notifyRaceCreationListeners();
             logger.info(String.format("Started tracking race-log race (%s)", raceLog));
             // this wakes up all waiting race handles

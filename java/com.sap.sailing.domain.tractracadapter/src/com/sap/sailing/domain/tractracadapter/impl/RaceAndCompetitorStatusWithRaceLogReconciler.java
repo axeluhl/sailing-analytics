@@ -124,7 +124,13 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
 
         @Override
         public void visit(RaceLogRevokeEvent event) {
-            final RaceLogEvent revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+            final RaceLogEvent revokedEvent;
+            raceLog.lockForRead();
+            try {
+                revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+            } finally {
+                raceLog.unlockAfterRead();
+            }
             if (revokedEvent != null) {
                 if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
                     final RaceLogFinishPositioningConfirmedEvent revokedResultsEvent = (RaceLogFinishPositioningConfirmedEvent) revokedEvent;
@@ -219,7 +225,6 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                     flagForRaceStatus.get(raceStatus), /* lower flag */ null, /* is displayed */ true));
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         }
-        // TODO bug5154 check IRace.getStatus() and copy all competitor ranks to the leaderboard once the race status reached RaceStatusType.OFFICIAL
     }
 
     protected void startNewPass(final MillisecondsTimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
@@ -316,59 +321,53 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * {@link IRaceCompetitor#getOfficialRank()} methods. If the {@link IRaceCompetitor} has a status update time but
      * empty results and there is a {@link CompetitorResult} for that competitor coming from the race log, that competitor
      * result will be "invalidated" / "revoked" by adding a new {@link CompetitorResult} at the end of the race log that
-     * has an empty finishing time and zero rank.
+     * has an empty finishing time and zero rank.<p>
+     * 
+     * See also <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5154">bug 5154</a> for a discussion
+     * about the functionality expected, and see also {@code TestTracTracRaceAndCompetitorStatusReconciler} for the
+     * corresponding tests expressing the expected results in the form of test cases.
      */
     public void reconcileCompetitorStatus(IRaceCompetitor raceCompetitor, TrackedRace trackedRace) {
-        final IRace tractracRace = raceCompetitor.getRace();
-        final RaceStatusType raceStatus = tractracRace.getStatus();
-        final int officialRank = raceCompetitor.getOfficialRank(); // TODO accept rank information only if race status is OFFICIAL
+        final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();
         if (timePointForStatusEvent != 0) {
             // there is an official result for the competitor on TracTrac's side
-            // TODO bug5154: shall we really ignore that result in case the raceStatus is not OFFICIAL?
-            if (raceStatus == RaceStatusType.OFFICIAL) {
-                // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
-                final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
-                Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
-                final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
-                final MaxPointsReason officialMaxPointsReason = getMaxPointsReason(competitorStatus);
-                final MillisecondsTimePoint officialResultTime = new MillisecondsTimePoint(timePointForStatusEvent);
-                // accept even OFFICIAL results only if at least one of officialRank or officialFinishingTime is
-                // provided:
-                // Jorge Piera Llodra on 2020-04-01: "If both the finishing time and the rank are not defined means that
-                // we don’t have these values. In fact, we only have these values for some races of the test event in
-                // Enoshima last year.
-                // If the race is OFFICIAL but these values are empty, just ignore them."
-                if ((officialFinishingTime != 0 || officialRank != 0) && (resultFromRaceLogAndItsCreationTimePoint == null
-                        || (resultFromRaceLogAndItsCreationTimePoint.getA().getOneBasedRank() != officialRank
-                         || ((resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime() == null) ? 0
-                                : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
-                         || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
-                        && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
-                    // We have an official statement from TracTrac, rank or finishing time or penalty varies and is newer
-                    // than the last thing we see in the race log (including we may not have anything in the race
-                    // log for the results of that competitor at all yet).
-                    // --> Write the official result to the race log
-                    final CompetitorResult resultForRaceLog = new CompetitorResultImpl(competitor.getId(), competitor.getName(),
-                            competitor.getShortName(),
-                            /* boat name: */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getName() : competitor.getShortInfo())),
-                            /* boatSailId */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getSailID() : competitor.getShortInfo())),
-                            officialRank, officialMaxPointsReason, /* score null means let the scoring system calculate it */ null,
-                            officialFinishingTime == 0 ? null : new MillisecondsTimePoint(officialFinishingTime),
-                                    "Official results from TracTrac connector", MergeState.OK);
-                    final CompetitorResults resultsForRaceLog = new CompetitorResultsImpl();
-                    resultsForRaceLog.add(resultForRaceLog);
-                    final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
-                    defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
-                            new LogEventAuthorImpl("Official TracTrac Result Provider", 1), // equally important as race officer on water
-                            UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
-                }
+            // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
+            final Competitor competitor = domainFactory.resolveCompetitor(raceCompetitor.getCompetitor());
+            Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = getRaceLogResultAndCreationTimePointForCompetitor(trackedRace, competitor);
+            final RaceCompetitorStatusType competitorStatus = raceCompetitor.getStatus();
+            final MaxPointsReason officialMaxPointsReason = getMaxPointsReason(competitorStatus);
+            final MillisecondsTimePoint officialResultTime = new MillisecondsTimePoint(timePointForStatusEvent);
+            if (resultFromRaceLogAndItsCreationTimePoint == null
+                    || ((resultFromRaceLogAndItsCreationTimePoint.getA().getOneBasedRank() != officialRank
+                     || ((resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime() == null) ? 0
+                            : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
+                     || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
+                    && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
+                // We have received an update from TracTrac, rank or finishing time or penalty varies and is newer
+                // than the last thing we see in the race log (including we may not have anything in the race
+                // log for the results of that competitor at all yet).
+                // --> Write the TracTrac result to the race log, where 0 for the "official rank" maps to 0 of our
+                // one-based rank; and 0 as official finishing time maps to null as the official finishing time:
+                final CompetitorResult resultForRaceLog = new CompetitorResultImpl(competitor.getId(), competitor.getName(),
+                        competitor.getShortName(),
+                        /* boat name: */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getName() : competitor.getShortInfo())),
+                        /* boatSailId */ ((competitor.hasBoat() ? ((CompetitorWithBoat) competitor).getBoat().getSailID() : competitor.getShortInfo())),
+                        officialRank, officialMaxPointsReason, /* score null means let the scoring system calculate it */ null,
+                        officialFinishingTime == 0 ? null : new MillisecondsTimePoint(officialFinishingTime),
+                                "Official results from TracTrac connector", MergeState.OK);
+                final CompetitorResults resultsForRaceLog = new CompetitorResultsImpl();
+                resultsForRaceLog.add(resultForRaceLog);
+                final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
+                defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
+                        new LogEventAuthorImpl("Official TracTrac Result Provider", 1), // equally important as race officer on water
+                        UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
             }
         }
     }
 
-    private Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(TrackedRace trackedRace,
+    protected Pair<CompetitorResult, TimePoint> getRaceLogResultAndCreationTimePointForCompetitor(TrackedRace trackedRace,
             final Competitor competitor) {
         Pair<CompetitorResult, TimePoint> resultFromRaceLogAndItsCreationTimePoint = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {

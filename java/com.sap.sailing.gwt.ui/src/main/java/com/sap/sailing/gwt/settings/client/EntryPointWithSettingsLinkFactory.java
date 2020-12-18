@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
@@ -47,13 +47,16 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
         return linkWithSettingsGenerator.createUrl(settings);
     }
     
-    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName) {
-        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName, regattaName, raceName, null);
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName,
+            String leaderboardGroupName, UUID leaderboardGroupId, String regattaName, String raceName) {
+        return createRaceBoardLinkWithDefaultSettings(eventId, leaderboardName, leaderboardGroupName,
+                leaderboardGroupId, regattaName, raceName, null);
     }
     
-    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, String regattaName, String raceName, String mode) {
+    public static String createRaceBoardLinkWithDefaultSettings(UUID eventId, String leaderboardName, String leaderboardGroupName, 
+            UUID leadeboardGroupId, String regattaName, String raceName, String mode) {
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(regattaName,
-                raceName, leaderboardName, leaderboardGroupName, eventId, mode);
+                raceName, leaderboardName, leaderboardGroupName, leadeboardGroupId, eventId, mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
         PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                 perspectiveOwnSettings, Collections.emptyMap());
@@ -72,7 +75,7 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
     
     public static String createLeaderboardEditingLink(String leaderboardName) {
         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                LEADERBOARD_EDITING_PATH, new LeaderboardEditContextDefinition(leaderboardName));
+                LEADERBOARD_EDITING_PATH, new EditableLeaderboardContextDefinition(leaderboardName));
         return linkWithSettingsGenerator.createUrl();
     }
 

@@ -40,7 +40,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -277,7 +277,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     public Iterable<CertificateHandle> search(CountryCode issuingCountry, Integer yearOfIssuance, String referenceNumber,
             String yachtName, String sailNumber, String boatClassName, boolean includeInvalid) throws Exception {
         final Set<ORCPublicCertificateDatabase.CertificateHandle> result = new HashSet<>(); 
-        final HttpClient client = new SystemDefaultHttpClient();
+        final HttpClient client = HttpClientBuilder.create().build();
         final List<NameValuePair> params = new ArrayList<>();
         params.add(ACTION_PARAM);
         params.add(XSLP_PARAM);
@@ -496,7 +496,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private ORCCertificate getSingleCertificate(final String queryParameters)
             throws IOException, org.json.simple.parser.ParseException, ClientProtocolException {
         final HttpGet getRequest = new HttpGet(SINGLE_CERTIFICATE_DOWNLOAD_URL+"&"+queryParameters);
-        final HttpClient client = new SystemDefaultHttpClient();
+        final HttpClient client = HttpClientBuilder.create().build();
         addAuthorizationHeader(getRequest);
         final Iterable<ORCCertificate> certificates = new ORCCertificatesJsonImporter().read(client.execute(getRequest).getEntity().getContent())
                 .getCertificates();
@@ -629,7 +629,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
             final Set<CertificateHandle> restrictedResults = new HashSet<>();
             for (final CertificateHandle handle : filterHandlesForCurrentYear(certificateHandles)) {
                 final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(handle.getBoatClassName());
-                if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getDisplayName())) {
+                if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getName())) {
                     restrictedResults.add(handle);
                 }
             }

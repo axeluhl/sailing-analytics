@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
@@ -73,7 +73,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private final CellTable<RegattaDTO> regattaTable;
     private final Label noRegattasLabel;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
@@ -93,9 +93,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     @SuppressWarnings("unchecked")
-    public RegattaListComposite(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public RegattaListComposite(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -275,15 +275,15 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         // method across two different objects. See:
         // https://github.com/gwtproject/gwt/issues/9333
         // https://github.com/gwtproject/gwt/issues/9307
-        final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+        final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), type,
                 regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 regattaDTO -> config.openOwnershipDialog(regattaDTO));
         final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, regatta -> regattaRefresher.fillRegattas(),
+                userService.getUserManagementWriteService(), type, regatta -> regattaRefresher.fillRegattas(),
                 stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                regattaDTO -> configACL.openACLDialog(regattaDTO));
+                regattaDTO -> configACL.openDialog(regattaDTO));
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
@@ -299,7 +299,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        sailingServiceWrite.removeRegatta(regattaIdentifier, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+        sailingWriteService.removeRegatta(regattaIdentifier, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to remove regatta " + regatta.getName() + ": "
@@ -315,7 +315,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void editRegatta(final RegattaDTO toBeEdited) {
         final Collection<RegattaDTO> existingRegattas = getAllRegattas();
-        sailingServiceWrite.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
+        sailingWriteService.getEvents(new MarkedAsyncCallback<List<EventDTO>>(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 openEditRegattaDialog(toBeEdited, existingRegattas, Collections.<EventDTO> emptyList());
@@ -331,7 +331,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
-                existingEvents, /*correspondingEvent*/ null, sailingServiceWrite, stringMessages, new DialogCallback<RegattaDTO>() {
+                existingEvents, /*correspondingEvent*/ null, sailingWriteService, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
                     }
@@ -346,7 +346,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     private void commitEditedRegatta(final RegattaDTO editedRegatta) {
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
-        sailingServiceWrite.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate,
+        sailingWriteService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate,
                 Util.mapToArrayList(editedRegatta.courseAreas, CourseAreaDTO::getId),
                 editedRegatta.configuration, editedRegatta.buoyZoneRadiusInHullLengths, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
                 editedRegatta.autoRestartTrackingUponCompetitorSetChange, editedRegatta.registrationLinkSecret,
@@ -369,7 +369,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             public void run() {
                 if (seriesIter.hasNext()) {
                     final SeriesDTO series = seriesIter.next();
-                    sailingServiceWrite.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
+                    sailingWriteService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
                         series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                         series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                         series.getMaximumNumberOfDiscards(), series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
@@ -411,8 +411,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
     
     private void handleBoatCertificateAssignment(RegattaDTO regatta) {
-        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingServiceWrite, userService,
-                stringMessages, errorReporter, new RegattaBoatCertificatesPanel(sailingServiceWrite, userService, regatta, stringMessages, errorReporter));
+        BoatCertificateAssignmentDialog dialog = new BoatCertificateAssignmentDialog(sailingWriteService, userService,
+                stringMessages, errorReporter, new RegattaBoatCertificatesPanel(sailingWriteService, userService, regatta, stringMessages, errorReporter));
         dialog.show();
     }
 

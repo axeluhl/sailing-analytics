@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -20,10 +23,10 @@ public abstract class SailingServiceHelper {
     }
     
     /**
-     * Creates a new {@link SailingServiceWriteAsync} instance, should be used when code resides in the same bundle as the sailing service code.
+     * Creates a new {@link SailingWriteServiceAsync} instance, should be used when code resides in the same bundle as the sailing service code.
      */
-    public static SailingServiceWriteAsync createSailingServiceWriteInstance() {
-        return createSailingServiceWriteInstance(true, null);
+    public static SailingWriteServiceAsync createSailingServiceWriteInstance() {
+        return createSailingServiceWriteInstance(/* same bundle */ true, /* no routing provider required, no sharding for write requests */ null);
     }
     
     /**
@@ -56,34 +59,32 @@ public abstract class SailingServiceHelper {
         }
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_REPLICA);
         }
         return service;
     }
-    
+
     /**
-     * Creates a new {@link SailingServiceWriteAsync} instance that uses a routing provider, for code in same bundle.
+     * Creates a new {@link SailingWriteServiceAsync} instance that uses a routing provider, for code in same bundle.
      */
-    public static SailingServiceWriteAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
-        return createSailingServiceWriteInstance(true, routingProvider);
+    public static SailingWriteServiceAsync createSailingServiceWriteInstance(ServiceRoutingProvider routingProvider) {
+        return createSailingServiceWriteInstance(/* same bundle */ true, routingProvider);
     }
-    
-    public static SailingServiceWriteAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
-        final SailingServiceWriteAsync service = GWT.create(SailingServiceWrite.class);
+
+    public static SailingWriteServiceAsync createSailingServiceWriteInstance(boolean sameBundle, ServiceRoutingProvider routingProvider) {
+        final SailingWriteServiceAsync service = GWT.create(SailingWriteService.class);
         final ServiceDefTarget serviceToRegister = (ServiceDefTarget) service;
-        
-        final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceWriteRemotePath);
+        final StringBuilder servicePath = new StringBuilder(RemoteServiceMappingConstants.sailingServiceRemotePath);
         if (routingProvider != null) {
             servicePath.append(routingProvider.routingSuffixPath());
         }
-        
         final String servicePathWithRoutingSuffix = servicePath.toString();
         if (sameBundle) {
-            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         } else {
-            EntryPointHelper.registerASyncService(serviceToRegister, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, servicePathWithRoutingSuffix);
+            EntryPointHelper.registerASyncService(serviceToRegister, servicePathWithRoutingSuffix, HEADER_FORWARD_TO_MASTER);
         }
         return service;
     }

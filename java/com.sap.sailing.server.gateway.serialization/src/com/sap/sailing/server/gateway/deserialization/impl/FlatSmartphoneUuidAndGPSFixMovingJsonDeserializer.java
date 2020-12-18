@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +36,7 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
             JSONObject fixObject = Helpers.toJSONObjectSafe(jsonFixes.get(i));
             double lonDeg = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG).toString());
             double latDeg = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG).toString());
-            long timeMillis = Long.parseLong(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS).toString());
+            long timeMillis = deserializeTimestamp(fixObject);
             double speedMperS = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S).toString());
             double speedKnots = new MeterPerSecondSpeedImpl(speedMperS).getKnots();
             double bearingDeg = Double.parseDouble(fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG).toString());
@@ -43,5 +45,27 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
         }
 
         return new Pair<UUID, List<GPSFixMoving>>(device, fixes);
+    }
+
+    private long deserializeTimestamp(JSONObject fixObject) throws JsonDeserializationException {
+        long timeMillis;
+        Object timeMillisObj = fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS);
+        Object timeIsoObj = fixObject.get(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_ISO);
+        if (timeMillisObj != null && timeIsoObj != null) {
+            throw new JsonDeserializationException("two timestamp fields are filled. Please use only one of both.");
+        }
+        if (timeMillisObj != null) {
+            timeMillis = Long.parseLong(timeMillisObj.toString());
+        } else if (timeIsoObj != null) {
+            String strIsoTimestamp = timeIsoObj.toString();
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+            OffsetDateTime offsetDateTime = OffsetDateTime.parse(strIsoTimestamp, timeFormatter);
+            timeMillis = offsetDateTime.toInstant().toEpochMilli();
+        } else {
+            throw new JsonDeserializationException("no timestamp field provided. Please provide one of these fields: "
+                    + FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS + ", "
+                    + FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_ISO);
+        }
+        return timeMillis;
     }
 }

@@ -49,19 +49,20 @@ public class TrackedEventsApi {
         json.put(KEY_EVENT_BASE_URL, eventBaseUrl);
 
         final JSONArray elements = new JSONArray();
-        for (Triple<String, String, String> trackedId : trackedIds) {
-            final JSONObject elem = new JSONObject();
-            elem.put(KEY_TRACKED_ELEMENT_DEVICE_ID, deviceId);
-            if (trackedId.getA() != null) {
-                elem.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, trackedId.getA());
-            } else if (trackedId.getB() != null) {
-                elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, trackedId.getB());
-            } else if (trackedId.getC() != null) {
-                elem.put(KEY_TRACKED_ELEMENT_MARK_ID, trackedId.getC());
+        if (trackedIds != null) {
+            for (Triple<String, String, String> trackedId : trackedIds) {
+                final JSONObject elem = new JSONObject();
+                elem.put(KEY_TRACKED_ELEMENT_DEVICE_ID, deviceId);
+                if (trackedId.getA() != null) {
+                    elem.put(KEY_TRACKED_ELEMENT_COMPETITOR_ID, trackedId.getA());
+                } else if (trackedId.getB() != null) {
+                    elem.put(KEY_TRACKED_ELEMENT_BOAT_ID, trackedId.getB());
+                } else if (trackedId.getC() != null) {
+                    elem.put(KEY_TRACKED_ELEMENT_MARK_ID, trackedId.getC());
+                }
+                elements.add(elem);
             }
-            elements.add(elem);
         }
-
         json.put(KEY_EVENT_REGATTA_SECRET, regattaSecret);
         json.put(KEY_EVENT_TRACKED_ELEMENTS, elements);
         json.put(KEY_EVENT_IS_ARCHIVED, false);

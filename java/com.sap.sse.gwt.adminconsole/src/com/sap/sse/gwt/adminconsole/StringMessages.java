@@ -107,4 +107,8 @@ public interface StringMessages extends Messages {
     String explainPassword();
 
     String additionalInformation();
+
+    String serverInformation();
+
+    String serverName(String buildVersion);
 }

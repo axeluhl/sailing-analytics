@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -45,7 +45,7 @@ public class SwissTimingArchivedConnectionTableWrapper extends
     private final SailingServiceAsync sailingServiceAsync;
     private final com.sap.sailing.gwt.ui.client.StringMessages stringMessagesClient;
 
-    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingServiceWriteAsync sailingServiceAsyncWrite,
+    public SwissTimingArchivedConnectionTableWrapper(final UserService userService, final SailingWriteServiceAsync sailingServiceAsyncWrite,
             final com.sap.sailing.gwt.ui.client.StringMessages stringMessages, final ErrorReporter errorReporter,
             final boolean enablePager, final CellTableWithCheckboxResources tableResources, final Runnable refresher) {
         super(stringMessages, errorReporter, true, enablePager,
@@ -113,15 +113,15 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             });
         });
         final EditOwnershipDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, dto -> refreshConnectionList(),
+                .create(userService.getUserManagementWriteService(), type, dto -> refreshConnectionList(),
                         stringMessages);
         final EditACLDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configACL = EditACLDialog
                 .create(
-                userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, dto -> dto.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

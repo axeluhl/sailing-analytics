@@ -37,7 +37,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider;
@@ -127,21 +127,23 @@ public class UserGroupDetailPanel extends Composite
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
         initWidget(addUserToGroupPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
-        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
+        final UserManagementWriteServiceAsync userManagementService = userService.getUserManagementWriteService();
         // setup suggest
         this.oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
         final SuggestBox suggestUser = new SuggestBox(oracle);
         suggestUser.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
         suggestUser.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
+        suggestUser.ensureDebugId("UserSuggestion");
         // add suggest
         buttonPanel.insertWidgetAtPosition(suggestUser, 0);
         // add add button
-        buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
+        final Button addButton = buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
             final String selectedUsername = suggestUser.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
                 final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
@@ -164,6 +166,7 @@ public class UserGroupDetailPanel extends Composite
                 }
             }
         });
+        addButton.ensureDebugId("AddUserButton");
         // add remove button
         final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
             final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();

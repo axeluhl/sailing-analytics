@@ -3,7 +3,6 @@ package com.sap.sse.common.settings.generic;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -183,7 +182,9 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
 
     @Override
     public Map<String, Setting> getChildSettings() {
-        return Collections.unmodifiableMap(childSettings);
+        synchronized(childSettings) {
+            return new HashMap<String, Setting>(childSettings);
+        }
     }
     
     @GwtIncompatible

@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -64,9 +65,9 @@ public class SailMasterConnectivityTest {
         Race race4702 = new RaceImpl("W4702", "R2", "470 Women Race 2");
         Race race4711 = new RaceImpl("4711", "R2", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "R2", "Not such a wonderful race");
-        connector4702 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4702.getRaceID(), race4702.getRaceName(), race4702.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
-        connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), race4702.getRaceName(), race4711.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
-        connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), race4702.getRaceName(), race4712.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
+        connector4702 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4702.getRaceID(), /* raceDataUrl */ null, race4702.getRaceName(), race4702.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
+        connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), /* raceDataUrl */ null, race4702.getRaceName(), race4711.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
+        connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), /* raceDataUrl */ null, race4702.getRaceName(), race4712.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
         Thread.sleep(1000); // wait until all connectors are really connected to the SailMasterDummy
     }
 
@@ -111,7 +112,7 @@ public class SailMasterConnectivityTest {
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override
-            public void storedDataProgress(String raceID, double progress) {}
+            public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {}
             @Override
             public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {}
             @Override
@@ -153,7 +154,7 @@ public class SailMasterConnectivityTest {
             @Override
             public void receivedAvailableRaces(Iterable<Race> races) {}
             @Override
-            public void storedDataProgress(String raceID, double progress) {}
+            public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {}
             @Override
             public void receivedWindData(String raceID, int zeroBasedMarkIndex, double windDirectionTrueDegrees, double windSpeedInKnots) {}
             @Override

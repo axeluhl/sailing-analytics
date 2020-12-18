@@ -75,7 +75,7 @@
     <servlet>
         <display-name>User Management Service</display-name>
         <servlet-name>UserManagementService</servlet-name>
-        <servlet-class>com.sap.sse.security.ui.server.UserManagementServiceImpl</servlet-class>
+        <servlet-class>com.sap.sse.security.ui.server.UserManagementWriteServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UserManagementService</servlet-name>

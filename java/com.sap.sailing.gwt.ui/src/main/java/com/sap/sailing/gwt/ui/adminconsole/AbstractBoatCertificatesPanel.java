@@ -42,7 +42,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util.Triple;
@@ -80,7 +80,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     private final Map<String, BoatDTO> boatsByIdAsString;
     private final CertificatesTableWrapper<RefreshableSingleSelectionModel<ORCCertificate>> certificateTable;
     private final BusyIndicator busyIndicator;
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final ErrorReporter errorReporter;
     
     private final StringListEditorComposite urls;
@@ -126,10 +126,10 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
     /**
      * After invoking this superclass constructor, and after doing any other initialization work, subclasses must call {@link #refresh}.
      */
-    public AbstractBoatCertificatesPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+    public AbstractBoatCertificatesPanel(final SailingWriteServiceAsync sailingWriteService, final UserService userService,
             final SecuredDTO objectToCheckUpdatePermissionFor, final StringMessages stringMessages,
             final ErrorReporter errorReporter, Supplier<Boolean> contextUpdatePermissionCheck, String errorContext) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.certificateTableSelectionHandler = createCertificateTableSelectionHandler();
@@ -142,10 +142,10 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         this.urls = new StringListEditorComposite(Collections.emptySet(), stringMessages, stringMessages.courseAreas(), IconResources.INSTANCE.removeIcon(),
                 /* suggested values */ Collections.emptySet(), stringMessages.enterURLsForCertificateDownload());
         this.hiddenCertificateUrlsFields = new ArrayList<>();
-        this.boatTable = new BoatWithCertificateTableWrapper<>(sailingServiceWrite, userService, stringMessages,
+        this.boatTable = new BoatWithCertificateTableWrapper<>(sailingWriteService, userService, stringMessages,
                 errorReporter, /* multiSelection */ true, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE, /* allow actions */ true,
                 boat->unlink(boat), objectToCheckUpdatePermissionFor, boat->certificateAssignments.containsKey(boat));
-        this.certificateTable = new CertificatesTableWrapper<>(sailingServiceWrite, userService, stringMessages,
+        this.certificateTable = new CertificatesTableWrapper<>(sailingWriteService, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enablePager */ true, TableWrapper.DEFAULT_PAGING_SIZE);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         this.form = new FormPanel();
@@ -225,7 +225,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         searchGrid.setWidget(1, 6, boatClassNameTextBox);
         searchButton.addClickHandler(e->{
             busyIndicator.setBusy(true);
-            sailingServiceWrite.searchORCBoatCertificates(DialogUtils.getSelectedCountry(issuingCountryListBox),
+            sailingWriteService.searchORCBoatCertificates(DialogUtils.getSelectedCountry(issuingCountryListBox),
                    yearOfIssuanceBox.getValue(), referenceNumberTextBox.getValue().trim().isEmpty() ?
                            null : referenceNumberTextBox.getValue(),
                            yachtNameTextBox.getValue() == null ? null : yachtNameTextBox.getValue(),
@@ -252,7 +252,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         try {
             final JSONObject json = (JSONObject) JSONParser.parseStrict(e.getResults());
             if (json.get(ORCCertificateUploadConstants.CERTIFICATES) != null) {
-                sailingServiceWrite.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
+                sailingWriteService.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         busyIndicator.setBusy(false);
@@ -402,7 +402,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         final Set<BoatDTO> selectedBoats = boatTable.getSelectionModel().getSelectedSet();
         if (selectedBoats != null && !selectedBoats.isEmpty()) {
             busyIndicator.setBusy(true);
-            sailingServiceWrite.getSuggestedORCBoatCertificates(new ArrayList<>(selectedBoats),
+            sailingWriteService.getSuggestedORCBoatCertificates(new ArrayList<>(selectedBoats),
                     new AsyncCallback<Map<BoatDTO, Set<ORCCertificate>>>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -447,10 +447,10 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                         result.getB(), result.getC()), Notification.NotificationType.INFO);
             }
         };
-        assignCertificates(sailingServiceWrite, certificatesByBoatIdAsString, callback);
+        assignCertificates(sailingWriteService, certificatesByBoatIdAsString, callback);
     }
 
-    protected abstract void assignCertificates(SailingServiceWriteAsync sailingServiceWrite,
+    protected abstract void assignCertificates(SailingWriteServiceAsync sailingWriteService,
             Map<String, ORCCertificate> certificatesByBoatIdAsString,
             AsyncCallback<Triple<Integer, Integer, Integer>> callback);
 
@@ -496,10 +496,10 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
                         boatTable.setBoats(boatResults);
                     }
                 };
-                getORCCertificateAssignemtnsByBoatIdAsString(sailingServiceWrite, callbackForGetCertificates);
+                getORCCertificateAssignemtnsByBoatIdAsString(sailingWriteService, callbackForGetCertificates);
             }
         };
-        getBoats(sailingServiceWrite, callbackForGetBoats);
+        getBoats(sailingWriteService, callbackForGetBoats);
 
     }
 

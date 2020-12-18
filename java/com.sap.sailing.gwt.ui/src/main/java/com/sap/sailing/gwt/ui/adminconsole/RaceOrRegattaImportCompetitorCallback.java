@@ -3,16 +3,16 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RaceOrRegattaImportCompetitorCallback extends ImportCompetitorCallback {
     private final CompetitorRegistrationsPanel registrationsDialog;
 
-    public RaceOrRegattaImportCompetitorCallback(CompetitorRegistrationsPanel registrationsDialog, SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public RaceOrRegattaImportCompetitorCallback(CompetitorRegistrationsPanel registrationsDialog, SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingServiceWrite, errorReporter, stringMessages);
+        super(sailingWriteService, errorReporter, stringMessages);
         this.registrationsDialog = registrationsDialog;
     }
 

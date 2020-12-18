@@ -7,75 +7,17 @@
 # of this file as there could be overwritten ones!
 # *******************************************************
 
-if [ -z $SERVER_NAME ]; then
-  SERVER_NAME=MASTER
-fi
-
-# This is a default heap size only; the boot script of an instance (see
-# configuration/sailing) will add a MEMORY assignment to this file in the
-# server's directory that has a default value computed from the total
+# Set the heap size here if you want to override the default which
+# will compute a MEMORY assignment from the total
 # memory installed in the machine and the number of server instances to
-# start on that machine. This default can be overwritten by manually appending
-# another MEMORY assignment at the end of the file or by defining an environment
-# file with a MEMORY assignment which is then used in conjunction with refreshInstance.sh
-# or by setting the MEMORY variable in the EC2 Instance Details section which will be appended
-# at the end of the file.
-MEMORY="6000m"
+# start on that machine.
+# MEMORY="6000m"
 
-# Message Queue hostname where to
-# send messages for replicas (this server is master)
-if [ -z $REPLICATION_HOST ]; then
-  REPLICATION_HOST=localhost
-fi
-# For the port, use 0 for the RabbitMQ default or a specific port that your RabbitMQ server is listening on
-if [ -z $REPLICATION_PORT ]; then
-  REPLICATION_PORT=0
-fi
-# The name of the message queuing fan-out exchange that this server will use in its role as replication master.
-# Make sure this is unique so that no other master is writing to this exchange at any time.
-if [ -z $REPLICATION_CHANNEL ]; then
-  REPLICATION_CHANNEL=sapsailinganalytics-master
-fi
-
-if [ -z $TELNET_PORT ]; then
-  TELNET_PORT=14888
-fi
-if [ -z $SERVER_PORT ]; then
-  SERVER_PORT=8888
-fi
-if [ -z $MONGODB_HOST ]; then
-  MONGODB_HOST=10.0.75.1
-fi
-if [ -z $MONGODB_PORT ]; then
-  MONGODB_PORT=27017
-fi
-if [ -z $MONGODB_NAME ]; then
-  MONGODB_NAME=winddb
-fi
-if [ -z $EXPEDITION_PORT ]; then
-  EXPEDITION_PORT=2010
-fi
-
-# To start replication upon startup provide the fully-qualified names of the Replicable service classes
-# for which to trigger replication. If you activate this make sure to
-# set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
-# same channel the master is using in its REPLICATION_CHANNEL variable
-
-if [ -n "$AUTO_REPLICATE" ]; then
-  REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.server.impl.com.sap.sailing.shared.server.impl.SharedSailingDataImpl
-fi
-# Host where the master Java instance is running
+# Host / port where the master Java instance is running
 # Make sure firewall configurations allow access
 #
 # REPLICATE_MASTER_SERVLET_HOST=
 # REPLICATE_MASTER_SERVLET_PORT=
-
-# Host where RabbitMQ is running 
-# REPLICATE_MASTER_QUEUE_HOST=
-# Port that RabbitMQ is listening on (normally something like 5672); use 0 to connect to RabbitMQ's default port
-if [ -z $REPLICATE_MASTER_QUEUE_PORT ]; then
-  REPLICATE_MASTER_QUEUE_PORT=0
-fi
 
 # Exchange name that the master from which to auto-replicate is using as
 # its REPLICATION_CHANNEL variable, mapping to the master's replication.exchangeName
@@ -96,7 +38,6 @@ fi
 # REPLICATE_MASTER_BEARER_TOKEN=
 
 # Automatic build and test configuration
-DEPLOY_TO=server
 BUILD_BEFORE_START=False
 BUILD_FROM=master
 COMPILE_GWT=True
@@ -165,8 +106,16 @@ fi
 
 # White labeling: use -Dcom.sap.sse.debranding=true to remove branding images and text
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
-ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -XX:MaxGCPauseMillis=500"
+# Anniversary calculation:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -DAnniversaryRaceDeterminator.enabled=true"
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -Drestore.tracked.races=true -XX:MaxGCPauseMillis=500 -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog"
+# Use the following to obtain initial polar sheet data from the archive server, without live replication:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dpolardata.source.url=https://www.sapsailing.com"
+# Use the following to obtain initial models for wind estimation from maneuvers from the archive server, without live replication:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dwindestimation.source.url=https://www.sapsailing.com"
 
+# Custom event management URL: use -Dcom.sap.sailing.eventmanagement.url to modify from hardcoded default (https://my.sapsailing.com) to, e.g., https://dev.sapsailing.com
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.eventmanagement.url=https://dev.sapsailing.com"
 
 # To enable the use of the shared SecurityService and SharedSailingData from security-service.sapsailing.com, uncomment and fill in the following:
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sapsailing.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sapsailing\.com(:[0-9]*)?$"
@@ -178,7 +127,5 @@ ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersis
 # getting https://security-service.sapsailing.com/security/api/restsecurity/access_token
 #REPLICATE_MASTER_BEARER_TOKEN="..."
 
-echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
-
-# **** Overwritten environment variables ****
+### End of Standard env.sh ###

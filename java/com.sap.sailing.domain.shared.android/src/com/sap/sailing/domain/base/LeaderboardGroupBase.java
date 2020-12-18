@@ -6,9 +6,8 @@ import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.Renamable;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-public interface LeaderboardGroupBase extends Renamable, NamedWithID, WithQualifiedObjectIdentifier {
+public interface LeaderboardGroupBase extends Renamable, NamedWithID, WithQualifiedObjectIdentifier, WithDescription {
     UUID getId();
-    String getDescription();
     void setDescriptiom(String description);
     boolean hasOverallLeaderboard();
     String getDisplayName();

@@ -129,9 +129,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             jsonId.put("Description", identifier.getDescription());
             predefinedQueryNames.add(jsonId);
         }
-        
-        String json = predefinedQueryNames.toJSONString();
-        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        return Response.ok(streamingOutput(predefinedQueryNames)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {

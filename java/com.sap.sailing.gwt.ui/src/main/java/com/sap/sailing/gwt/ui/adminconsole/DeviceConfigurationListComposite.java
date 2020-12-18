@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.common.Util;
@@ -50,13 +50,13 @@ public class DeviceConfigurationListComposite extends Composite  {
 
     private final Label noConfigurationsLabel;
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public DeviceConfigurationListComposite(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingWriteService = sailingWriteService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         mainPanel = new SimplePanel();
@@ -88,7 +88,7 @@ public class DeviceConfigurationListComposite extends Composite  {
     }
 
     public void refreshTable() {
-        sailingServiceWrite.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
+        sailingWriteService.getDeviceConfigurations(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationWithSecurityDTO> result) {
                 if (configurationsDataProvider.getList().isEmpty()) {
@@ -141,7 +141,7 @@ public class DeviceConfigurationListComposite extends Composite  {
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, config -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveDeviceConfiguration(config.getName()))) {
-                sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
+                sailingWriteService.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                         refreshTable();
@@ -155,13 +155,13 @@ public class DeviceConfigurationListComposite extends Composite  {
             }
         });
         final EditOwnershipDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, user -> refreshTable(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, user -> refreshTable(), stringMessages);
         final EditACLDialog.DialogConfig<DeviceConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, user -> user.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(deviceConfigurationUUidColumn, stringMessages.id());
         table.addColumn(actionColumn, stringMessages.actions());

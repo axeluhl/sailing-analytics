@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
@@ -45,10 +45,10 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     private final BoatClassDTO boatClass;
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
-            SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages, ErrorReporter errorReporter) {
+            SailingWriteServiceAsync sailingWriteService, StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
-                new Callback(sailingServiceWrite, leaderboardPanel, errorReporter, stringMessages));
-        this.sailingService = sailingServiceWrite;
+                new Callback(sailingWriteService, leaderboardPanel, errorReporter, stringMessages));
+        this.sailingService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         boatClass = leaderboardPanel.getLeaderboard().getBoatClass();
@@ -195,13 +195,13 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     private static class Callback implements DialogCallback<Util.Triple<String, String, Util.Pair<String, Date>>> {
         private final EditableLeaderboardPanel leaderboardPanel;
-        private final SailingServiceWriteAsync sailingServiceWrite;
+        private final SailingWriteServiceAsync sailingWriteService;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingServiceWriteAsync sailingServiceWrite, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
+        public Callback(SailingWriteServiceAsync sailingWriteService, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
-            this.sailingServiceWrite = sailingServiceWrite;
+            this.sailingWriteService = sailingWriteService;
             this.leaderboardPanel = leaderboardPanel;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
@@ -219,7 +219,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
             final Date timePointWhenResultPublished = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getB();
             leaderboardPanel.addBusyTask();
-            sailingServiceWrite.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
+            sailingWriteService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -232,7 +232,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
                             leaderboardPanel.removeBusyTask();
                                     new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages,
-                                            sailingServiceWrite, errorReporter, result).show();
+                                            sailingWriteService, errorReporter, result).show();
                         }
             });
         }

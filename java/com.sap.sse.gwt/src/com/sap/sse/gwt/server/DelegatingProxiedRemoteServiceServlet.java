@@ -76,11 +76,19 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
             throw securityException;
         } catch (InvocationTargetException e) {
             // Try to encode the caught exception
-            Throwable cause = e.getCause();
+            Throwable cause = resolveCause(e);
             logger.log(Level.SEVERE, "Uncaught exception, forwarded to client", cause);
             responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
         }
         return responsePayload;
+    }
+
+    private Throwable resolveCause(InvocationTargetException e) {
+        Throwable result = e;
+        while (result.getCause() != null && result.getCause() != result) {
+            result = result.getCause();
+        }
+        return result;
     }
 
     /**

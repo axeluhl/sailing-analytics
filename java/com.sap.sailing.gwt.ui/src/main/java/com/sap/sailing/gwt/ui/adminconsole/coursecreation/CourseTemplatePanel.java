@@ -35,7 +35,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
@@ -61,7 +61,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class CourseTemplatePanel extends FlowPanel {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
-    private final SailingServiceWriteAsync sailingService;
+    private final SailingWriteServiceAsync sailingService;
     private final LabeledAbstractFilterablePanel<CourseTemplateDTO> filterableCourseTemplatePanel;
     private List<CourseTemplateDTO> allCourseTemplates;
     private final ErrorReporter errorReporter;
@@ -72,9 +72,9 @@ public class CourseTemplatePanel extends FlowPanel {
     private List<MarkRoleDTO> allMarkRoles;
     private List<MarkTemplateDTO> allMarkTemplates;
 
-    public CourseTemplatePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
+    public CourseTemplatePanel(SailingWriteServiceAsync sailingWriteService, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingServiceWrite;
+        this.sailingService = sailingWriteService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
@@ -308,9 +308,9 @@ public class CourseTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {
@@ -331,7 +331,7 @@ public class CourseTemplatePanel extends FlowPanel {
         actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, userService, false));
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                courseTemplate -> configACL.openACLDialog(courseTemplate));
+                courseTemplate -> configACL.openDialog(courseTemplate));
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }

@@ -126,7 +126,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         videoCheckBox.setTitle(videoTrack.toString());
         videoCheckBox.setValue(selectedVideos.contains(videoTrack));
         videoCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-        
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
@@ -136,12 +135,10 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 }
             }
         });
-
         if (mediaPlayerManager.allowsEditing(videoTrack)) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
             panel.add(videoCheckBox);
-
             Button deleteButton = createDeleteButton(videoTrack);
             panel.add(deleteButton);
             ToggleButton connectButton = createConnectButton(videoTrack);
@@ -154,7 +151,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         } else {
             return videoCheckBox;
         }
-
     }
 
     private ToggleButton createConnectButton(final MediaTrackWithSecurityDTO videoTrack) {
@@ -163,7 +159,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 .contains(mediaPlayerManager.getCurrentRace()));
         connectButton.setTitle("Connect video to this race");
         connectButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (connectButton.isDown()) {
@@ -183,8 +178,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     
     private void disconnectVideoFromRace(final MediaTrackWithSecurityDTO videoTrack, final ToggleButton connectButton) {
         videoTrack.assignedRaces.remove(mediaPlayerManager.getCurrentRace());
-        mediaPlayerManager.getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
-
+        mediaPlayerManager.getMediaWriteService().updateRace(videoTrack, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 mediaPlayerManager.getErrorReporter().reportError(t.toString());
@@ -196,13 +190,11 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 mediaPlayerManager.closeFloatingPlayer(videoTrack);
             }
         });
-        
     }
 
     private void connectVideoToRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
         videoTrack.assignedRaces.add(mediaPlayerManager.getCurrentRace());
-        mediaPlayerManager.getMediaService().updateRace(videoTrack, new AsyncCallback<Void>() {
-
+        mediaPlayerManager.getMediaWriteService().updateRace(videoTrack, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 mediaPlayerManager.getErrorReporter().reportError(t.toString());
@@ -246,7 +238,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 }
             }
         });
-
         if (mediaPlayerManager.allowsEditing(audioTrack) && audioTrack != null) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
@@ -277,5 +268,4 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     @Override
     protected void updateUi() {
     }
-
 }

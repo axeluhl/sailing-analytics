@@ -146,7 +146,6 @@ public class UserGroupResource extends AbstractSecurityResource {
         final JSONObject jsonResult = new JSONObject();
         jsonResult.put(KEY_GROUP_ID, usergroup.getId().toString());
         jsonResult.put(KEY_GROUP_NAME, usergroup.getName());
-
         if (includingUsers) {
             final JSONArray jsonUsersInGroup = new JSONArray();
             for (final User user : usergroup.getUsers()) {
@@ -157,7 +156,6 @@ public class UserGroupResource extends AbstractSecurityResource {
             }
             jsonResult.put(KEY_USERS, jsonUsersInGroup);
         }
-
         if (includingRoles) {
             final JSONArray jsonRolesOfGroup = new JSONArray();
             for (final Map.Entry<RoleDefinition, Boolean> roleDefinition : usergroup.getRoleDefinitionMap()
@@ -173,7 +171,6 @@ public class UserGroupResource extends AbstractSecurityResource {
             }
             jsonResult.put(KEY_ROLES, jsonRolesOfGroup);
         }
-
         return jsonResult;
     }
 
@@ -206,7 +203,6 @@ public class UserGroupResource extends AbstractSecurityResource {
                 response = Response.status(Status.CREATED).entity(streamingOutput(convertUserGroupToJson(group, /* includingUsers */ true, /* includingRoles */ true))).build();
             }
         }
-
         return response;
     }
 
@@ -270,7 +266,6 @@ public class UserGroupResource extends AbstractSecurityResource {
                             } else {
                                 response = Response.status(Status.UNAUTHORIZED).build();
                             }
-
                         }
                     } else {
                         response = Response.status(Status.UNAUTHORIZED).build();

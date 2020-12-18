@@ -11,6 +11,9 @@ The new model is not intended to replace the regatta specific course and mark mo
 
 We defined the model for course templating and configuration. In addition the various model elements have defined masterdata and other properties.
 
+See also the following class diagram for a UML model representing the most relevant classes around course creation:
+<img src="CourseCreation.png">
+
 ## Mark templates
 
 A mark template defines the appearance of a mark in a regatta independent representation. Mark templates represent marks in the waypoint sequence of a course template.

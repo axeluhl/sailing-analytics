@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -35,7 +36,8 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.adminconsole.SetTimePointDialog;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingWriteServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -56,7 +58,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener {
+public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener, HasAvailabilityCheck {
     private static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -64,7 +66,8 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         }
     }
 
-    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final SailingWriteServiceAsync sailingWriteService;
+    private final SailingServiceAsync sailingService;
     private RegattaAndRaceIdentifier raceIdentifier;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -96,13 +99,14 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     private Label selectCompetitorLabel = new Label();
 
     public EditMarkPassingsPanel(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceWriteAsync sailingServiceWrite,
-            final RegattaAndRaceIdentifier raceIdentifier,
-            final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
-            final ErrorReporter errorReporter, final Timer timer) {
+            SailingServiceAsync sailingService,
+            final SailingWriteServiceAsync sailingWriteService,
+            final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
+            final CompetitorSelectionProvider competitorSelectionModel, final ErrorReporter errorReporter, final Timer timer) {
         super(parent, context);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
-        this.sailingServiceWrite = sailingServiceWrite;
+        this.sailingService = sailingService;
+        this.sailingWriteService = sailingWriteService;
         this.raceIdentifier = raceIdentifier;
         this.errorReporter = errorReporter;
         this.competitorSelectionModel = competitorSelectionModel;
@@ -182,7 +186,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
                     Pair<Integer, Date> selectedObject = waypointSelectionModel.getSelectedObject();
-                    sailingServiceWrite.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                                 selectedObject.getA(), null, competitor, new AsyncCallback<Void>() {
@@ -226,7 +230,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingServiceWrite.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                             waypointSelectionModel.getSelectedObject().getA(),
@@ -252,7 +256,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingServiceWrite.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingWriteService.updateSuppressedMarkPassings(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
                             null, competitor,
@@ -273,7 +277,8 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         Label warningChangesHaveNoEffect = new Label(stringMessages.warningMarkPassingChangesNoEffect());
         warningChangesHaveNoEffect.setStylePrimaryName("errorLabel");
         warningChangesHaveNoEffect.setVisible(false);
-        sailingServiceWrite.getTrackedRaceIsUsingMarkPassingCalculator(raceIdentifier, new AsyncCallback<Boolean>() {
+        // it's okay to require a master response here because replicas don't have their own mark passing calculator
+        sailingWriteService.getTrackedRaceIsUsingMarkPassingCalculator(raceIdentifier, new AsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 warningChangesHaveNoEffect.setVisible(!result);
@@ -311,7 +316,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         if (time != null && leaderboardNameRaceColumnNameAndFleetName != null) {
             final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
             if (isSettingFixedTimePossible(time, stringMessages)) {
-                sailingServiceWrite.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                sailingWriteService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                         leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                         leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
                         new AsyncCallback<Void>() {
@@ -350,7 +355,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         }
         return true;
     }
-   
+
     @Override
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
@@ -405,7 +410,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
-        sailingServiceWrite.getCompetitorMarkPassings(raceIdentifier, competitor, waitForCalculations, new AsyncCallback<Map<Integer, Date>>() {
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, waitForCalculations, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));
@@ -425,7 +430,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    sailingServiceWrite.getCompetitorRaceLogMarkPassingData(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                    sailingService.getCompetitorRaceLogMarkPassingData(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(), competitor, new AsyncCallback<Map<Integer, Date>>() {
                         @Override
@@ -466,10 +471,10 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     }
 
     private void refreshWaypoints() {
-        sailingServiceWrite.getRaceCourse(raceIdentifier, new Date(), new AsyncCallback<RaceCourseDTO>() {
+        sailingService.getRaceCourse(raceIdentifier, new Date(), new AsyncCallback<RaceCourseDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()), /* silent */ true);
             }
 
             @Override
@@ -499,6 +504,12 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 }
             }
         }
+    }
+
+    @Override
+    public void checkBackendAvailability(Consumer<Boolean> callback) {
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingWriteService, callback,
+                stringMessages);
     }
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {

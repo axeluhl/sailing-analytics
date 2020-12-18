@@ -175,12 +175,6 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
                 default:
                     break;
                 }
-                if (storedDataEvent.getProgress() == 1.0) {
-                    synchronized (semaphor) {
-                        storedDataLoaded = true;
-                        semaphor.notifyAll();
-                    }
-                }
             }
             
             @Override
@@ -195,6 +189,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace.getId());
         assertNotNull(race);
         logger.info("Waiting for stored data to be loaded for " + race.getName());
+        getTrackedRace().runWhenDoneLoading(()->{
+            synchronized (semaphor) {
+                storedDataLoaded = true;
+                semaphor.notifyAll();
+            }
+        });
         synchronized (getSemaphor()) {
             while (!isStoredDataLoaded()) {
                 getSemaphor().wait();
