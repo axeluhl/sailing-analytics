@@ -35,7 +35,6 @@ public class LandscapeManagementPanel extends VerticalPanel {
                     add(new Label(region));
                 }
             }
-            
         });
     }
     
