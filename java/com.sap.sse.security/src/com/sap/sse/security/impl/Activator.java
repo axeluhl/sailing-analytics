@@ -146,10 +146,13 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
         subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate(context);
-        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance());
-        final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
-        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
-        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService, chargebeeProviderProperties);
+        final ChargebeeConfiguration chargebeeConfiguration = ChargebeeConfiguration.getInstance();
+        if (chargebeeConfiguration != null) {
+            final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(chargebeeConfiguration);
+            final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
+            chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
+            context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService, chargebeeProviderProperties);
+        }
         if (testUserStore != null && testAccessControlStore != null) {
             createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
         } else {

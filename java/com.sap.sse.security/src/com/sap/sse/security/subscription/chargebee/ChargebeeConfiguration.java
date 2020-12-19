@@ -29,8 +29,13 @@ public class ChargebeeConfiguration {
         if (instance == null) {
             String site = System.getProperty(CHARGEBEE_SITE);
             String apiKey = System.getProperty(CHARGEBEE_APIKEY);
-            logger.log(Level.INFO, "Chargebee site: " + site);
-            instance = new ChargebeeConfiguration(site, apiKey);
+            logger.info("Chargebee site: " + site);
+            if (site != null && apiKey != null) {
+                instance = new ChargebeeConfiguration(site, apiKey);
+                logger.info("Activating Chargebee Configuration and service");
+            } else {
+                logger.info("No "+CHARGEBEE_SITE+" and "+CHARGEBEE_APIKEY+" system properties provided. Not activating Chargebee service");
+            }
         }
         return instance;
     }
