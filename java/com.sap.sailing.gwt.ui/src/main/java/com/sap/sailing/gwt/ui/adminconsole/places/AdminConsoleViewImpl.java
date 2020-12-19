@@ -197,7 +197,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 //presenter.loadLeaderboardGroups();
             }
         }, stringMessages.events(), new EventsPlace((String) null /* no place token */), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
-        
         /* REGATTAS */
         final RegattaManagementPanelSupplier regattaManagementPanelSupplier = new RegattaManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
@@ -206,7 +205,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 //presenter.loadRegattas();
             }
         }, stringMessages.regattas(), new RegattasPlace((String) null /* no place token */), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
-        
         /* LEADERBOARDS */
         final HorizontalTabLayoutPanel leaderboardTabPanel = adminConsolePanel.addVerticalTab(stringMessages.leaderboards(), LEADERBOARDS);
         /* Leaderboard */
@@ -221,7 +219,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 //presenter.loadLeaderboards();
             }
         }, stringMessages.leaderboards(), new LeaderboardsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* Leaderboard Group */
         final LeaderboardGroupConfigPanelSupplier leaderboardGroupConfigPanelSupplier = new LeaderboardGroupConfigPanelSupplier(
                 stringMessages, presenter);
@@ -232,10 +229,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 //presenter.loadLeaderboardGroups();
             }
         }, stringMessages.leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* RACES */
         final HorizontalTabLayoutPanel racesTabPanel = adminConsolePanel.addVerticalTab(stringMessages.trackedRaces(), RACES);
-
         /* Tracked races */
         final TrackedRacesManagementPanelSupplier trackedRacesManagementPanelSupplier = new TrackedRacesManagementPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel,
@@ -246,7 +241,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.trackedRaces(), new TrackedRacesPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
-
         /* Competitor */
         final CompetitorPanelSupplier competitorPanelSupplier = new CompetitorPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanelSupplier) {
@@ -258,7 +252,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, stringMessages.competitors(), new CompetitorsPlace(null),
                 SecuredDomainType.COMPETITOR.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
-
         /* Boat */
         final BoatPanelSupplier boatPanelSupplier = new BoatPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanelSupplier) {
@@ -270,7 +263,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, stringMessages.boats(), new BoatsPlace((String) null /* no place token */),
                 SecuredDomainType.BOAT.getPermission(DefaultActions.MUTATION_ACTIONS_FOR_NON_DELETABLE_TYPES));
-
         /* Race */
         final RaceCourseManagementPanelSupplier raceCourseManagementPanelSupplier =
                 new RaceCourseManagementPanelSupplier(stringMessages, presenter);
@@ -282,7 +274,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.courseLayout(), new CourseLayoutPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
-
         /* Wind */
         final WindPanelSupplier windPanelSupplier = new WindPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanelSupplier) {
@@ -291,7 +282,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 //presenter.loadRegattas();
             }
         }, stringMessages.wind(), new WindPlace((String) null /* no place token */), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
-
         /* Media */
         final MediaPanelSupplier mediaPanelSupplier = new MediaPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<MediaPanel>(mediaPanelSupplier) {
@@ -303,20 +293,16 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, stringMessages.mediaPanel(), new AudioAndVideoPlace((String) null /* no place token */),
                 SecuredDomainType.MEDIA_TRACK.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = adminConsolePanel.addVerticalTab(stringMessages.raceCommitteeApp(), RACE_COMMITEE);
-
         /* Device Configuration User */
         final DeviceConfigurationPanelSupplier deviceConfigurationUserPanelSupplier = new DeviceConfigurationPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(raceCommitteeTabPanel,
                 new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanelSupplier),
                 stringMessages.deviceConfiguration(), new DeviceConfigurationPlace((String) null /* no place token */),
                 SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* CONNECTORS */
         final HorizontalTabLayoutPanel connectorsTabPanel = adminConsolePanel.addVerticalTab(stringMessages.connectors(), CONNECTORS);
-
         /* TracTrac Event Management */
         final TracTracEventManagementPanelSupplier tracTracEventManagementPanelSupplier =
                 new TracTracEventManagementPanelSupplier(stringMessages, presenter, tableResources);
@@ -331,7 +317,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 },
                 stringMessages.tracTracEvents(), new TracTracEventsPlace((String) null /* no place token */),
                 SecuredDomainType.TRACTRAC_ACCOUNT.getPermission(DefaultActions.values()));
-
         /* Swiss Timing Replay Connector */
         final SwissTimingReplayConnectorPanelSupplier swissTimingReplayConnectorPanelSupplier =
                 new SwissTimingReplayConnectorPanelSupplier(stringMessages, presenter, tableResources);
@@ -340,14 +325,12 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         swissTimingReplayConnectorPanelSupplier),
                 stringMessages.swissTimingArchiveConnector(), new SwissTimingArchivedEventsPlace((String) null /* no place token */),
                 SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getPermission(DefaultActions.values()));
-
         /* Swiss Timing Event Management */
         final SwissTimingEventManagementPanelSupplier swissTimingEventManagementPanelSupplier =
                 new SwissTimingEventManagementPanelSupplier(stringMessages, presenter, tableResources);
         adminConsolePanel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SwissTimingEventManagementPanel>(swissTimingEventManagementPanelSupplier),
                 stringMessages.swissTimingEvents(), new SwissTimingEventsPlace((String) null /* no place token */),
                 SecuredDomainType.SWISS_TIMING_ACCOUNT.getPermission(DefaultActions.values()));
-
         /* Smartphone Tracking Event Management */
         final SmartphoneTrackingEventManagementPanelSupplier trackingEventManagementPanelSupplier =
                 new SmartphoneTrackingEventManagementPanelSupplier(stringMessages, presenter);
@@ -361,7 +344,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
-
         /* Igtimi Accounts */
         final IgtimiAccountsPanelSupplier accountsPanelSupplier = new IgtimiAccountsPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
@@ -374,7 +356,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.igtimiAccounts(), new IgtimiAccountsPlace((String) null /* no place token */),
                 SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
-
         /* Expedition Device Configurations */
         final ExpeditionDeviceConfigurationsPanelSupplier expeditionDeviceConfigurationsPanelSupplier =
                 new ExpeditionDeviceConfigurationsPanelSupplier(stringMessages, presenter);
@@ -388,7 +369,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
             }
         }, stringMessages.expeditionDeviceConfigurations(), new ExpeditionDeviceConfigurationsPlace((String) null /* no place token */),
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getPermission(DefaultActions.values()));
-
         /* Result Import Urls List */
         final ResultImportUrlsListCompositeSupplier urlsListCompositeSupplier = new ResultImportUrlsListCompositeSupplier(
                 stringMessages, presenter);
@@ -396,7 +376,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<ResultImportUrlsListComposite>(urlsListCompositeSupplier),
                 stringMessages.resultImportUrls(), new ResultImportUrlsPlace((String) null /* no place token */),
                 SecuredDomainType.RESULT_IMPORT_URL.getPermission(DefaultActions.values()));
-
         /* Structure Import Management */
         final StructureImportManagementPanelSupplier structureImportManagementPanelSupplier = new StructureImportManagementPanelSupplier(
                 stringMessages, presenter);
@@ -406,11 +385,9 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 stringMessages.manage2Sail() + " " + stringMessages.regattaStructureImport(),
                 new Manage2SailRegattaStructureImportPlace((String) null /* no place token */),
                 SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE));
-
         /* ADVANCED */
         final HorizontalTabLayoutPanel advancedTabPanel = adminConsolePanel.addVerticalTab(stringMessages.advanced(),
                 ADVANCED);
-
         /* Replication */
         final ReplicationPanelSupplier replicationPanelSupplier = new ReplicationPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanelSupplier) {
@@ -423,13 +400,11 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }, stringMessages.replication(), new ReplicationPlace((String) null /* no place token */),
                 () -> userService.hasAnyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION,
                         ServerActions.READ_REPLICATOR));
-
         /* Master Data */
         final MasterDataImportPanelSupplier masterDataImportPanelSupplier = new MasterDataImportPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanelSupplier),
                 stringMessages.masterDataImportPanel(), new MasterDataImportPlace((String) null /* no place token */), SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CAN_IMPORT_MASTERDATA, serverInfo));
-
         /* Remote Server Instance Manager */
         final RemoteServerInstancesManagementPanelSupplier remoteServerInstancesManagementPanelSupplier =
                 new RemoteServerInstancesManagementPanelSupplier(stringMessages, presenter, tableResources);
@@ -437,7 +412,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 stringMessages.remoteServerInstances(), new RemoteServerInstancesPlace((String) null /* no place token */),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_REMOTE_INSTANCES, serverInfo));
-
         /* Local Server Management */
         final LocalServerManagementPanelSupplier localServerInstancesManagementPanelSupplier =
                 new LocalServerManagementPanelSupplier(stringMessages, presenter);
@@ -458,7 +432,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 // information to work as intended.
                 () -> userService.hasAnyServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER,
                         DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL));
-
         /* User Management */
         final UserManagementPanelSupplier userManagementPanelSupplier = new UserManagementPanelSupplier(presenter, tableResources);
         adminConsolePanel.addToTabPanel(advancedTabPanel,
@@ -471,7 +444,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         }
                     }
                 }, stringMessages.userManagement(), new UserManagementPlace((String) null /* no place token */), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* Role Definition */
         final RoleDefinitionsPanelSupplier roleDefinitionsPanelSupplier = new RoleDefinitionsPanelSupplier(presenter, tableResources);
         adminConsolePanel.addToTabPanel(advancedTabPanel,
@@ -484,7 +456,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.roles(), new RolesPlace((String) null /* no place token */),
                 SecuredSecurityTypes.ROLE_DEFINITION.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* User Group Management */
         final UserGroupManagementPanelSupplier userGroupManagementPanelSupplier = new UserGroupManagementPanelSupplier(presenter, tableResources);
         adminConsolePanel.addToTabPanel(advancedTabPanel,
@@ -497,18 +468,15 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         }
                     }
                 }, stringMessages.userGroupManagement(), new UserGroupManagementPlace((String) null /* no place token */), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* File Storage */
         final FileStoragePanelSupplier fileStoragePanelSupplier = new FileStoragePanelSupplier(presenter);
         adminConsolePanel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanelSupplier),
                 stringMessages.fileStorage(), new FileStoragePlace(null),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
-
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(stringMessages.courseCreation(), COURSE_CREATION);
-
         /* Mark Template */
         final MarkTemplatePanelSupplier markTemplatePanelSupplier = new MarkTemplatePanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
@@ -521,7 +489,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }
             }, stringMessages.markTemplates(), new MarkTemplatesPlace((String) null /* no place token */),
             SecuredDomainType.MARK_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* Mark Properties */
         final MarkPropertiesPanelSupplier markPropertiesPanelSupplier = new MarkPropertiesPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
@@ -534,7 +501,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.markProperties(), new MarkPropertiesPlace((String) null /* no place token */),
                 SecuredDomainType.MARK_PROPERTIES.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* Course Template */
         final CourseTemplatePanelSupplier courseTemplatePanelSupplier = new CourseTemplatePanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
@@ -547,7 +513,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.courseTemplates(), new CourseTemplatesPlace((String) null /* no place token */),
                 SecuredDomainType.COURSE_TEMPLATE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         /* Mark Role */
         final MarkRolePanelSupplier markRolePanelSupplier = new MarkRolePanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(courseCreationTabPanel,
@@ -560,10 +525,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.markRoles(), new MarkRolesPlace((String) null /* no place token */),
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         adminConsolePanel.initUI(defaultPlace);
-
-
         return adminConsolePanel;
     }
 
