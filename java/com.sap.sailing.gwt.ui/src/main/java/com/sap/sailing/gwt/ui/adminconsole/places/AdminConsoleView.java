@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
+import com.sap.sse.gwt.adminconsole.AdminConsolePresenter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 
 public interface AdminConsoleView extends IsWidget {
@@ -24,13 +25,10 @@ public interface AdminConsoleView extends IsWidget {
     
     void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace);
     
-    public interface Presenter {
+    public interface Presenter extends AdminConsolePresenter {
         SailingServiceWriteAsync getSailingService();
-
         MediaServiceWriteAsync getMediaServiceWrite();
-
         PlaceController getPlaceController();
-
         // Refresher
         Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher();
         Refresher<LeaderboardGroupDTO> getLeaderboardGroupsRefresher();

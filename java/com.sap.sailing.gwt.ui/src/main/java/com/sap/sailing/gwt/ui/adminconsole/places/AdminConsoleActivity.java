@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole.places;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -67,8 +66,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        eventsDisplayers = new HashSet<>();
-        
         leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>(clientFactory.getErrorReporter()) {
             @Override
             public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {
