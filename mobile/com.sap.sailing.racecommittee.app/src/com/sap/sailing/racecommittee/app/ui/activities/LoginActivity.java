@@ -481,12 +481,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 }
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.show();
-            }
-            final String accessToken = AppPreferences.on(this).getAccessToken();
-            if (TextUtils.isEmpty(accessToken)) {
-                LocalBroadcastManager.getInstance(LoginActivity.this)
-                        .sendBroadcast(new Intent(AppConstants.ACTION_SHOW_LOGIN));
-                return;
+                final String accessToken = AppPreferences.on(this).getAccessToken();
+                if (TextUtils.isEmpty(accessToken)) {
+                    LocalBroadcastManager.getInstance(LoginActivity.this)
+                            .sendBroadcast(new Intent(AppConstants.ACTION_SHOW_LOGIN));
+                    return;
+                }
             }
         }
         checkLogin();
