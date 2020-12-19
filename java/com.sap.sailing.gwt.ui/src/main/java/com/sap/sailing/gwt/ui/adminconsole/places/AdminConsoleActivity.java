@@ -34,7 +34,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private AdminConsoleView adminConsoleView;
     private MediaServiceWriteAsync mediaServiceWrite;
     private SailingServiceWriteAsync sailingService;
-    private static AdminConsoleActivity instance;
     private AbstractAdminConsolePlace defaultPlace;
     
     private final Refresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
@@ -43,26 +42,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     private final Refresher<EventDTO> eventsRefresher;
     private final Refresher<MediaTrackWithSecurityDTO> mediaTracksRefresher;
     
-    public static boolean instantiated() {
-        return instance != null;
-    }
-    
-    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory) {
-        if(instance == null) {
-            instance = new AdminConsoleActivity(clientFactory);
-        }
-        return instance;
-    }
-    
-    public static AdminConsoleActivity getInstance(final AdminConsoleClientFactory clientFactory, AbstractAdminConsolePlace defaultPlace) {
-        if(instance == null) {
-            instance = new AdminConsoleActivity(clientFactory);
-            instance.setRedirectToPlace(defaultPlace);
-        }
-        return instance;
-    }
-    
-    private AdminConsoleActivity(final AdminConsoleClientFactory clientFactory) {
+    public AdminConsoleActivity(final AdminConsoleClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
@@ -274,6 +254,4 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
     }
-
- 
 }

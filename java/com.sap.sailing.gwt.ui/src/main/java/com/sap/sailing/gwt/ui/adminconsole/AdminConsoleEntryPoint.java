@@ -34,13 +34,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
      
     private void initActivitiesAndPlaces() {
         final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
-        EventBus eventBus = clientFactory.getEventBus();
-        PlaceController placeController = clientFactory.getPlaceController();
-        AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
-        ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
+        final EventBus eventBus = clientFactory.getEventBus();
+        final PlaceController placeController = clientFactory.getPlaceController();
+        final AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
+        final ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(appWidget);
-        AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
-        PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
+        final AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
+        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new DefaultPlace());
         RootLayoutPanel.get().add(appWidget);    
         historyHandler.handleCurrentHistory();
