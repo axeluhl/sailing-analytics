@@ -9,11 +9,13 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<RaceDTO>{
     protected RegattaAndRaceIdentifier singleSelectedRace;
