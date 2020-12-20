@@ -4587,6 +4587,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        configuration.getEventId().ifPresent(eventId->dto.eventId = eventId);
+        configuration.getCourseAreaId().ifPresent(courseAreaId->dto.courseAreaId = courseAreaId);
+        configuration.getPriority().ifPresent(priority->dto.priority = priority);
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }
@@ -4600,11 +4603,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             return null;
         }
         DeviceConfigurationDTO.RegattaConfigurationDTO dto = new DeviceConfigurationDTO.RegattaConfigurationDTO();
-        
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
         dto.defaultProtestTimeDuration = configuration.getDefaultProtestTimeDuration();
-        
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             copyBasicRacingProcedureProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
@@ -5802,6 +5803,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return type;
     }
 
+    @Override
     public String openRegattaRegistrationQrCode(String url) {
         String result;
         try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 600, "H"))) {
