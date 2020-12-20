@@ -29,6 +29,13 @@ public interface SubscriptionApiService {
      * Cancel user subscription by its {@link Subscription#getSubscriptionId() id}
      */
     SubscriptionCancelResult cancelSubscription(String subscriptionId) throws Exception;
+    
+    /**
+     * Check if the service is active
+     */
+    default boolean isActive() {
+        return true;
+    }
 
     SubscriptionDataHandler getDataHandler();
 }

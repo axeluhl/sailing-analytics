@@ -44,7 +44,7 @@ public class SubscriptionUpdateTask implements Runnable {
         logger.info(() -> "Start checking and updating subscriptions for user: " + user.getName());
         for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker.getServiceReferences()) {
             final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
-            if (apiService != null) {
+            if (apiService != null && apiService.isActive()) {
                 try {
                     Iterable<Subscription> userSubscriptions = apiService.getUserSubscriptions(user);
                     checkAndUpdateSubscriptions(user, userSubscriptions, apiService);
