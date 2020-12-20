@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.shared.PolarBackendData;
