@@ -106,6 +106,7 @@
         <setEntry value="org.eclipse.osgi.services@default:default"/>
         <setEntry value="org.eclipse.osgi.util@default:default"/>
         <setEntry value="org.eclipse.osgi@-1:true"/>
+        <setEntry value="com.chargebee.chargebee-java@default:default"/>
         <setEntry value="org.hyperic.sigar@default:default"/>
         <setEntry value="org.jdom@default:default"/>
         <setEntry value="org.jvnet.mimepull@default:default"/>
@@ -115,6 +116,7 @@
         <setEntry value="routeconverter@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="slf4j.jdk14@default:false"/>
+        <setEntry value="com.chargebee.chargebee-java@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="com.google.gwt.servlet@default:default"/>

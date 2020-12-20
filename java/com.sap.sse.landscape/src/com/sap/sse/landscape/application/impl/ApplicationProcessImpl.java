@@ -2,7 +2,6 @@ package com.sap.sse.landscape.application.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,26 +10,22 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
-import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-        extends ProcessImpl<RotatingFileBasedLog, MetricsT>
-        implements ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends ProcessImpl<RotatingFileBasedLog, MetricsT>
+implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private static final String ENV_SH = "env.sh";
     private static final String VERSION_TXT = "configuration/jetty/version.txt";
     
@@ -41,19 +36,25 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     private final String serverDirectory;
 
+    /**
+     * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the {@link #ENV_SH env.sh} file
+     * located on the {@code host} in the {@code serverDirectory} specified.
+     */
+    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
+        this(readPortFromDirectory(host, serverDirectory, optionalTimeout), host, serverDirectory);
+    }
+    
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host);
         this.serverDirectory = serverDirectory;
     }
 
-    @Override
-    public ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet() {
-        // TODO Implement ApplicationProcessImpl.getReplicaSet(...)
-        return null;
+    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
+        return Integer.parseInt(getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(), optionalTimeout));
     }
-
+    
     @Override
-    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
         final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout));
         final Release result;
@@ -72,7 +73,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * one running now if this process is currently running and no other release has been deployed since the process
      * has started.
      */
-    private String getVersionTxt(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    private String getVersionTxt(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout);
     }
 
@@ -84,26 +85,32 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
     
     @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(getEnvSh(optionalTimeout), ProcessConfigurationVariable.TELNET_PORT, optionalTimeout));
+        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout));
     }
     
     /**
-     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
-     * in the {@code envShContents} string passed or that string was {@code null}.
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
      */
-    protected String getEnvShValueFor(String envShContents, String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout);
-        sshChannel.sendCommandLineSynchronously(". "+getEnvShPath()+">/dev/null 2>/dev/null; echo \"${"+variableName+"}\"", /* stderr */ new ByteArrayOutputStream());
-        final String variableValue = sshChannel.getStreamContentsAsString();
+    @Override
+    public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout);
+    }
+    
+    protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+        final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
+        final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
+                                                "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
         return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
     }
     
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
-     * in the {@code envShContents} string passed or that string was {@code null}.
+     * in the evaluated {@code env.sh} file.
      */
-    protected String getEnvShValueFor(String envShContents, ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return getEnvShValueFor(envShContents, variable.name(), optionalTimeout);
+    @Override
+    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+        return getEnvShValueFor(variable.name(), optionalTimeout);
     }
 
     @Override
@@ -111,43 +118,54 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
         return serverDirectory;
     }
     
+    private static String getEnvShPath(String serverDirectory) {
+        return serverDirectory+"/"+ENV_SH;
+        
+    }
     private String getEnvShPath() {
-        return getServerDirectory()+"/"+ENV_SH;
+        return getEnvShPath(getServerDirectory());
     }
 
     @Override
     public String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
-        return getEnvShValueFor(getEnvSh(optionalTimeout), ProcessConfigurationVariable.SERVER_NAME, optionalTimeout);
+        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout);
     }
 
     @Override
-    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException {
+    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
         return getFileContents(getEnvShPath(), optionalTimeout);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout)
-            throws JSchException, IOException, SftpException {
+            throws JSchException, IOException, SftpException, InterruptedException {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
         sftpChannel.get(path, bos);
+        sftpChannel.disconnect();
         return bos.toString();
     }
 
     
     /**
-     * No health check path known for arbitrary process; returning {@code null} as a default value.
+     * No good health check path known for arbitrary process; returning {@code "/"} as a default value.
      */
     @Override
     public String getHealthCheckPath() {
+        return "/";
+    }
+
+    @Override
+    public ProcessT getMaster() {
+        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
+        // TODO Implement ApplicationReplicaProcess<ShardingKey,SailingAnalyticsMetrics,SailingAnalyticsMaster<ShardingKey>,SailingAnalyticsReplica<ShardingKey>>.getMaster(...)
         return null;
     }
 
-    /**
-     * Without knowledge about how to do an availability check, we report {@code true} as the default result.
-     */
     @Override
-    public boolean isReady(Optional<Duration> optionalTimeout) throws MalformedURLException, IOException {
-        return true;
+    public Iterable<ProcessT> getReplicas() {
+        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
+        // TODO Implement ApplicationProcessImpl.getReplicas(...)
+        return null;
     }
 }

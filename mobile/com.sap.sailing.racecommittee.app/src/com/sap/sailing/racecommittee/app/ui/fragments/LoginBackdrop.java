@@ -381,7 +381,7 @@ public class LoginBackdrop extends Fragment implements BackPressListener {
             if (AppConstants.ACTION_CHECK_LOGIN.equals(action)) {
                 final AppPreferences pref = AppPreferences.on(getActivity());
                 if (TextUtils.isEmpty(pref.getAccessToken())) {
-                    if (onboarding != null && EulaHelper.with(requireContext()).isEulaAccepted()) {
+                    if (login.getVisibility() == View.GONE && EulaHelper.with(requireContext()).isEulaAccepted()) {
                         onboarding.setVisibility(View.VISIBLE);
                     }
                     return;
