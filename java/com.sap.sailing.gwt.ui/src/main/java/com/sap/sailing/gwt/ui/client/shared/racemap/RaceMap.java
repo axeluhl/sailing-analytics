@@ -777,7 +777,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
-                    Image sapLogo = createSAPLogo();
+                    final Image sapLogo = createSAPLogo();
                     if (ClientConfiguration.getInstance().isBrandingActive()) {
                         rootPanel.add(sapLogo);
                     }
@@ -3267,7 +3267,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         sapLogo.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("https://www.sap.com/sponsorships", "_blank", null);
+                Window.open(stringMessages.sapAnalyticsURL(), "_blank", null);
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");

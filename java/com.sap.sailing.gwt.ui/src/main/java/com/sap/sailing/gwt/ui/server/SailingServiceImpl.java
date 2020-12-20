@@ -586,7 +586,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        securityServiceTracker.open();
         igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
@@ -3779,8 +3778,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private VideoDTO convertToVideoDTO(VideoDescriptor video) {
-        String videoRef = convertToNoCookieUrlWhereApplicable(video.getURL(), video.getMimeType());
-        VideoDTO result = new VideoDTO(videoRef, video.getMimeType(), 
+        VideoDTO result = new VideoDTO(video.getURL().toString(), video.getMimeType(), 
                 video.getCreatedAtDate() != null ? video.getCreatedAtDate().asDate() : null);
         result.setCopyright(video.getCopyright());
         result.setTitle(video.getTitle());
@@ -3795,23 +3793,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         result.setTags(tags);
         return result;
     }
-    
-    private String convertToNoCookieUrlWhereApplicable(URL videoUrl, MimeType mimeType) {
-        String result = videoUrl.toString();
-        switch (mimeType) {
-        case youtube:
-            result.replace("youtube", "youtube-nocookies");
-            break;
-        case vimeo:
-            result += videoUrl.getQuery() == null ? "?" : "&";
-            result += "dnt=true";
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
-    
+
     //READ
     private Locale toLocale(String localeName) {
         if(localeName == null || localeName.isEmpty()) {
@@ -4622,6 +4604,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         dto.allowedCourseAreaNames = configuration.getAllowedCourseAreaNames();
         dto.resultsMailRecipient = configuration.getResultsMailRecipient();
         dto.byNameDesignerCourseNames = configuration.getByNameCourseDesignerCourseNames();
+        configuration.getEventId().ifPresent(eventId->dto.eventId = eventId);
+        configuration.getCourseAreaId().ifPresent(courseAreaId->dto.courseAreaId = courseAreaId);
+        configuration.getPriority().ifPresent(priority->dto.priority = priority);
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }
@@ -4635,11 +4620,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             return null;
         }
         DeviceConfigurationDTO.RegattaConfigurationDTO dto = new DeviceConfigurationDTO.RegattaConfigurationDTO();
-        
         dto.defaultRacingProcedureType = configuration.getDefaultRacingProcedureType();
         dto.defaultCourseDesignerMode = configuration.getDefaultCourseDesignerMode();
         dto.defaultProtestTimeDuration = configuration.getDefaultProtestTimeDuration();
-        
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             copyBasicRacingProcedureProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
@@ -5062,18 +5045,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     @Override
     public ArrayList<EventDTO> getEventsForLeaderboard(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        HashMap<UUID, EventDTO> events = new HashMap<>();
-        for (Event e : getService().getAllEvents()) {
-            for (LeaderboardGroup g : e.getLeaderboardGroups()) {
-                for (Leaderboard l : g.getLeaderboards()) {
-                    if (leaderboard.equals(l)) {
-                        events.put(e.getId(), convertToEventDTO(e, false));
-                    }
-                }
-            }
+        final RacingEventService service = getService();
+        final Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
+        final Set<Event> events = service.findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, service.getAllEvents());
+        ArrayList<EventDTO> eventDTOs = new ArrayList<>();
+        for (Event event : events) {
+            eventDTOs.add(convertToEventDTO(event, false));
         }
-        return new ArrayList<>(events.values());
+        return eventDTOs;
     }
 
     @Override
@@ -5313,36 +5292,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (MarkDTO markDTO : marksToRemove) {
             markIds.add(markDTO.getIdAsString());
         }
-        RaceLog raceLogToIgnore = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        HashSet<String> racesContainingMarksToDeleteInCourse = new HashSet<String>();
-        boolean marksAreUsedInOtherRaceLogs = false;
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                if (raceLog != raceLogToIgnore) {
-                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true);
-                    CourseBase course = finder.analyze();
-                    if (course != null) {
-                        for (Waypoint waypoint : course.getWaypoints()) {
-                            for (Mark mark : waypoint.getMarks()) {
-                                if (markIds.contains(mark.getId().toString())) {
-                                    racesContainingMarksToDeleteInCourse.add(raceColumn.getName() + "/"
-                                            + fleet.getName());
-                                    marksAreUsedInOtherRaceLogs = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }         
-        StringBuilder racesInCollision = new StringBuilder();
-        for (String raceName : racesContainingMarksToDeleteInCourse) {
-            racesInCollision.append(raceName+", ");
-        }
-        return new Pair<Boolean, String>(marksAreUsedInOtherRaceLogs, 
-                racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
+        return getService().checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, markIds);
     }
 
     @Override
@@ -5870,14 +5820,16 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return type;
     }
 
+    @Override
     public String openRegattaRegistrationQrCode(String url) {
-        String result = "";
+        String result;
         try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 600, "H"))) {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
             result = Base64Utils.toBase64(targetArray);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error while generating QR code for open regatta", e);
+            result = "";
         }
         return result;
     }

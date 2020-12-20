@@ -107,7 +107,7 @@ public class WildcardPermissionWithSecurityDTOTableWrapper extends
                 userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                permission -> configACL.openACLDialog(permission));
+                permission -> configACL.openDialog(permission));
         // filter field configuration
         filterField = new LabeledAbstractFilterablePanel<WildcardPermissionWithSecurityDTO>(
                 new Label(stringMessages.filterPermission()), new ArrayList<WildcardPermissionWithSecurityDTO>(),

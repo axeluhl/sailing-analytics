@@ -430,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"Attualmente %1$d eventi attendono di essere inviati.\nL\'ultimo invio eseguito correttamente è avvenuto alle: %2$s."</string>
     <string name="no_event_to_be_sent">"Attualmente non vi sono eventi in attesa di invio."</string>
     <string name="never">"mai"</string>
-    <string name="connected_to_wp">"Collegato a: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="theme_changed_title">"Modifica tema"</string>
     <string name="theme_changed_message">"Le modifiche al tema saranno effettive dopo il riavvio dell\'applicazione."</string>
     <string name="url_refresh_title">"URL server modificato"</string>

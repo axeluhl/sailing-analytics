@@ -1,14 +1,16 @@
 package com.sap.sse.landscape.application;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
 
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
      * The application version that the nodes in this replica set are currently running. During an
      * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
@@ -22,12 +24,18 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     void upgrade(ApplicationVersion newVersion);
     
-    MasterProcessT getMaster();
+    ProcessT getMaster();
     
-    Iterable<ReplicaProcessT> getReplicas();
+    Iterable<ProcessT> getReplicas();
     
-    default Iterable<ReplicaProcessT> getReadyReplicas() {
-        return Util.filter(getReplicas(), r->r.isReady());
+    default Iterable<ProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
+        return Util.filter(getReplicas(), r->{
+            try {
+                return r.isReady(optionalTimeout);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
     
     /**
@@ -46,7 +54,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #setRemoteReference
      */
-    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> source, Scope<ShardingKey> scopeToImport,
+    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> source, Scope<ShardingKey> scopeToImport,
             boolean failUponDiff, boolean removeFromSourceUponSuccess, boolean setRemoveReferenceInSourceUponSuccess);
     
     void removeScope(Scope<ShardingKey> scope);
@@ -57,7 +65,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * whether the reference shall only <em>include</em> those scopes ({@code true}) or it should list all scopes
      * <em>except those listed in {@code scopes}</em> ({@code false}) instead.
      */
-    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> to,
+    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> to,
             Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
     
     void removeRemoteReference(String name);
@@ -67,13 +75,15 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * more {@link #getReplicas() replicas} configured. If setting this to {@code true}, the {@link #getMaster() master
      * process} will be targeted by regular read requests just like any other {@link #getReplicas() replica} will.
      * Otherwise, if one or more replicas are available, the master node will receive only modifying transactions, and
-     * reading requests require a replica to be {@link Process#isAlive() available} in this replica set; if trying
+     * reading requests require a replica to be {@link Process#isAlive(Optional) available} in this replica set; if trying
      * to set to {@code false} and no replica is currently available, the method throws an
-     * {@link IllegalStateException}.
+     * {@link IllegalStateException}.<p>
+     * 
+     * TODO Maybe this should move to the {@link ApplicationLoadBalancer} interface; otherwise, ApplicationReplicaSet would need to know about the load balancer(s) responsible for it
      * 
      * @throws IllegalStateException
      *             in case {@code readFromMaster} is {@code false} and there is currently no {@link #getReplicas()
-     *             replica} currently {@link Process#isReady() ready} to receive requests.
+     *             replica} currently {@link Process#isReady(Optional<Duration>) ready} to receive requests.
      */
     void setReadFromMaster(boolean readFromMaster) throws IllegalStateException;
 
@@ -82,7 +92,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     boolean isReadFromMaster();
 
-    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>> getShardingInfo();
+    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>>> getShardingInfo();
     
     /**
      * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
@@ -94,7 +104,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #removeSharding
      */
-    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> processesToPrimarilyHandleShard);
+    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>> processesToPrimarilyHandleShard);
     
     /**
      * Re-configures this replica set such that requests for {@code shard} will be spread across all processes

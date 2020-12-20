@@ -25,5 +25,6 @@ public class MongoClientURITest {
         assertEquals(12345, config.getPort());
         assertEquals("mydb", config.getDatabaseName());
         assertSame(ReadPreference.primary(), config.getMongoClientURI().getOptions().getReadPreference()); 
+        assertEquals("rs0", config.getMongoClientURI().getOptions().getRequiredReplicaSetName());
     }
 }
