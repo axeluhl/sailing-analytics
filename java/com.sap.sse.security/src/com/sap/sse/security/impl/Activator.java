@@ -145,9 +145,9 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
+        subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate(context);
         final ChargebeeConfiguration chargebeeConfiguration = ChargebeeConfiguration.getInstance();
         if (chargebeeConfiguration != null) {
-            subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate(context);
             final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(chargebeeConfiguration);
             final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
             chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
@@ -337,8 +337,6 @@ public class Activator implements BundleActivator {
      * be set.
      */
     private void startSubscriptionDataUpdateTask() {
-        if (subscriptionBackgroundUpdate!=null) {
-            subscriptionBackgroundUpdate.start(securityService);
-        }
+        subscriptionBackgroundUpdate.start(securityService);
     }
 }
