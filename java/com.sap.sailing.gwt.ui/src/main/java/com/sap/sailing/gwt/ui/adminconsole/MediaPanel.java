@@ -51,8 +51,8 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiURLChangeDialog;
 import com.sap.sailing.gwt.ui.adminconsole.multivideo.MultiVideoDialog;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
@@ -92,7 +92,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * @author D047974
  * 
  */
-public class MediaPanel extends FlowPanel implements MediaTracksRefresher, FilterablePanelProvider<MediaTrackWithSecurityDTO> {
+public class MediaPanel extends FlowPanel implements FilterablePanelProvider<MediaTrackWithSecurityDTO> {
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -125,7 +125,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
             @Override
             public void execute() {
-                loadMediaTracks();
+                presenter.getMediaTracksRefresher().reloadAndCallFillAll();
             }
         });
         buttonAndFilterPanel.addCreateAction(stringMessages.addMediaTrack(), new Command() {
@@ -141,7 +141,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
                     @Override
                     public void run() {
-                        loadMediaTracks();
+                        presenter.getMediaTracksRefresher().reloadAndCallFillAll();
                     }
                 }).center();
             }
@@ -158,7 +158,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
                     new MultiURLChangeDialog(mediaServiceWrite, stringMessages, selected, errorReporter, new Runnable() {
                         @Override
                         public void run() {
-                            loadMediaTracks();
+                            presenter.getMediaTracksRefresher().reloadAndCallFillAll();
                         }
                     }).center();
                 }
@@ -208,26 +208,25 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
                 multiURLChange.setEnabled(!refreshableSelectionModel.getSelectedSet().isEmpty() && canUpdateAll);
             }
         });
-
     }
 
-    @Override
-    public void loadMediaTracks() {
-        mediaTrackListDataProvider.getList().clear();
-        mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError(t.toString());
-            }
+    private final Displayer<MediaTrackWithSecurityDTO> mediaTracksDisplayer = new Displayer<MediaTrackWithSecurityDTO>() {
+        
+        @Override
+        public void fill(Iterable<MediaTrackWithSecurityDTO> result) {
+            fillMediaTracks(result);
+        }
+    };
 
-            @Override
-            public void onSuccess(Iterable<MediaTrackWithSecurityDTO> allMediaTracks) {
-                mediaTrackListDataProvider.getList().clear();
-                Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
-                filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
-                mediaTrackListDataProvider.refresh();
-            }
-        });
+    public Displayer<MediaTrackWithSecurityDTO> getMediaTracksDisplayer() {
+        return mediaTracksDisplayer;
+    }
+
+    public void fillMediaTracks(Iterable<MediaTrackWithSecurityDTO> allMediaTracks) {
+        mediaTrackListDataProvider.getList().clear();
+        Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
+        filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
+        mediaTrackListDataProvider.refresh();
     }
 
     private void createMediaTracksTable(final UserService userService) {
@@ -597,14 +596,14 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
             @Override
             public void onSuccess(Void deleteMediaTrack) {
-                loadMediaTracks();
+                presenter.getMediaTracksRefresher().reloadAndCallFillAll();
             }
         });
     }
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaServiceWrite,
-                getDefaultStartTime(), stringMessages, sailingServiceWrite, userService, errorReporter, presenter,
+                getDefaultStartTime(), stringMessages, presenter,
                 storageServiceAvailable, new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
@@ -622,7 +621,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
                             @Override
                             public void onSuccess(MediaTrackWithSecurityDTO mediaTrackWithSecurity) {
                                 mediaTrack.dbId = mediaTrackWithSecurity.dbId;
-                                loadMediaTracks();
+                                presenter.getMediaTracksRefresher().reloadAndCallFillAll();
 
                             }
                         });
@@ -688,15 +687,14 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
     }
 
     public void onShow() {
-        loadMediaTracks();
+        presenter.getMediaTracksRefresher().callFillAndReloadInitially(getMediaTracksDisplayer());
     }
 
     public void openAssignedRacesDialog(final Context context, final Element parent,
             final ValueUpdater<String> valueUpdater) {
         final MediaTrackWithSecurityDTO mediaTrack = (MediaTrackWithSecurityDTO) context.getKey();
-        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(sailingServiceWrite, userService, mediaTrack,
-                errorReporter,
-                presenter, stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
+        final AssignRacesToMediaDialog dialog = new AssignRacesToMediaDialog(presenter, mediaTrack,
+                stringMessages, null, new DialogCallback<Set<RegattaAndRaceIdentifier>>() {
                     @Override
                     public void cancel() {
                     }
@@ -716,7 +714,7 @@ public class MediaPanel extends FlowPanel implements MediaTracksRefresher, Filte
 
                     }
                 });
-        presenter.addRegattasDisplayer(dialog);
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(dialog.getRegattasDisplayer());
         dialog.ensureDebugId("AssignedRacesDialog");
         dialog.show();
     }

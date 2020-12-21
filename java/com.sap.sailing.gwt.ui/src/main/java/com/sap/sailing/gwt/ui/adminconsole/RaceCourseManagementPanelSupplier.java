@@ -21,11 +21,9 @@ public class RaceCourseManagementPanelSupplier extends AdminConsolePanelSupplier
     public RaceCourseManagementPanel init() {
         logger.info("Create RaceCourseManagementPanel");
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(
-                presenter.getSailingService(), presenter.getErrorReporter(), presenter, stringMessages,
-                presenter.getUserService());
+                presenter, stringMessages);
         raceCourseManagementPanel.ensureDebugId("raceCourseManagementPanel");
-        presenter.addRegattasDisplayer(raceCourseManagementPanel);
-        presenter.loadRegattas();
+        presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(raceCourseManagementPanel.getRegattasDisplayer());
         return raceCourseManagementPanel;
     }
 

@@ -43,13 +43,10 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.MultipleLinkCell;
@@ -58,7 +55,6 @@ import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
@@ -88,7 +84,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
  * A composite showing the list of all sailing events  
  * @author Frank Mittag (C5163974)
  */
-public class EventListComposite extends Composite implements EventsDisplayer, LeaderboardGroupsDisplayer {
+public class EventListComposite extends Composite {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
@@ -101,6 +97,30 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
     protected final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
 
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
+    
+    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
+
+        @Override
+        public void fill(Iterable<EventDTO> result) {
+            fillEvents(result);
+        }
+    };
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+    
+    private final Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+        
+        @Override
+        public void fill(Iterable<LeaderboardGroupDTO> result) {
+            fillLeaderboardGroups(result);
+        }
+    };
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
+    }
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -117,22 +137,16 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-    private final RegattaRefresher regattaRefresher;
-    private final EventRefresher eventRefresher;
-    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
+    private final Presenter presenter;
     private final PlaceController placeController;
     
-    public EventListComposite(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            final ErrorReporter errorReporter, RegattaRefresher regattaRefresher, EventRefresher eventRefresher,
-            final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            final PlaceController placeController, final StringMessages stringMessages) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
+    public EventListComposite(final Presenter presenter, final PlaceController placeController,
+            final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.eventRefresher = eventRefresher;
-        this.leaderboardsRefresher = leaderboardsRefresher;
+        this.errorReporter = presenter.getErrorReporter();
+        this.presenter = presenter;
         this.placeController = placeController;
         this.availableLeaderboardGroups = Collections.emptyList();
         this.allEvents = new ArrayList<EventDTO>();
@@ -167,7 +181,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
         final RefreshableMultiSelectionModel<EventDTO> selectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         refreshableEventSelectionModel = selectionModel;
         eventTable.setVisible(false);
-        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), eventRefresher::reloadEvents);
+        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> presenter.getEventsRefresher().reloadAndCallFillAll());
         refresh.ensureDebugId("RefreshEventsButton");
         final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
         create.ensureDebugId("CreateEventButton");
@@ -194,7 +208,8 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
-        eventRefresher.loadEvents();
+        //presenter.getEventsRefresher().reloadAndCallFill(null);
+        //eventRefresher.loadEvents();
         initWidget(panel);
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
@@ -324,10 +339,10 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), EVENT,
-                event -> eventRefresher.loadEvents(), stringMessages);
+                event -> presenter.getEventsRefresher().reloadAndCallFillAll(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), EVENT, event -> eventRefresher.loadEvents(), stringMessages);
+                userService.getUserManagementWriteService(), EVENT, event -> presenter.getEventsRefresher().reloadAndCallFillAll(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
@@ -340,7 +355,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
 
                         @Override
                         public void onSuccess(Void result) {
-                            eventRefresher.reloadEvents();
+                            presenter.getEventsRefresher().reloadAndCallFillAll();
                         }
                     });
                 });
@@ -448,7 +463,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
                 }
                 @Override
                 public void onSuccess(Void result) {
-                    eventRefresher.reloadEvents();
+                    presenter.getEventsRefresher().reloadAndCallFillAll();
                 }
             });
         }
@@ -463,7 +478,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
 
             @Override
             public void onSuccess(Void result) {
-                eventRefresher.reloadEvents();
+                presenter.getEventsRefresher().reloadAndCallFillAll();
             }
         });
     }
@@ -533,11 +548,11 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
         dialog.show();
     }
     
-    private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO createdEvent) {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, sailingServiceWrite, stringMessages,
-                new CreateRegattaCallback(userService, sailingServiceWrite, stringMessages, errorReporter, regattaRefresher,
-                        leaderboardsRefresher, eventRefresher, existingEvents));
+    private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas, List<EventDTO> existingEvents,
+            EventDTO createdEvent) {
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas,
+                existingEvents, createdEvent, sailingServiceWrite, stringMessages,
+                new CreateRegattaCallback(stringMessages, presenter, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -628,7 +643,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
 
                     @Override
                     public void onSuccess(EventDTO result) {
-                        eventRefresher.loadEvents();
+                        //eventRefresher.loadEvents();
                         final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
                         int i = 0;
                         for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
@@ -660,7 +675,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
 
                                                     @Override
                                                     public void onSuccess(Void result) {
-                                                        eventRefresher.reloadEvents();
+                                                        presenter.getEventsRefresher().reloadAndCallFillAll();
                                                         if (!oldEvent.getName().equals(updatedEvent.getName())) {
                                                             sailingServiceWrite.renameEvent(oldEvent.id,
                                                                     updatedEvent.getName(), new AsyncCallback<Void>() {
@@ -709,7 +724,7 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
 
             @Override
             public void onSuccess(final EventDTO newEvent) {
-                eventRefresher.reloadEvents();
+                presenter.getEventsRefresher().reloadAndCallFillAll();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
                     DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(
@@ -732,22 +747,20 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
         });
     }
 
-    @Override
     public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
         availableLeaderboardGroups = leaderboardGroups;
     }
 
-    @Override
-    public void fillEvents(List<EventDTO> events) {
-        if (events.isEmpty()) {
-            eventTable.setVisible(false);
-            noEventsLabel.setVisible(true);
-        } else {
+    public void fillEvents(Iterable<EventDTO> events) {
+        if (events.iterator().hasNext()) {
             eventTable.setVisible(true);
             noEventsLabel.setVisible(false);
+        } else {
+            eventTable.setVisible(false);
+            noEventsLabel.setVisible(true);
         }
         allEvents.clear();
-        allEvents.addAll(events);
+        events.forEach(allEvents::add);
         filterTextbox.updateAll(allEvents);
         eventTable.redraw();
     }
@@ -758,9 +771,5 @@ public class EventListComposite extends Composite implements EventsDisplayer, Le
     
     public RefreshableMultiSelectionModel<EventDTO> getRefreshableMultiSelectionModel() {
         return refreshableEventSelectionModel;
-    }
-
-    @Override
-    public void setupLeaderboardGroups(Map<String, String> params) {
     }
 }

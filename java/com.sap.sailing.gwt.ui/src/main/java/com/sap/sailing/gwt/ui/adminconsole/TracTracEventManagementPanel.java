@@ -29,9 +29,9 @@ import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.tractrac.TracTracConnectionTableWrapper;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -85,13 +85,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
     private final CellTableWithCheckboxResources tableResources;
     private final SailingServiceWriteAsync sailingServiceWrite;
 
-    public TracTracEventManagementPanel(final SailingServiceWriteAsync sailingService, UserService userService,
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
+    public TracTracEventManagementPanel(final Presenter presenter, StringMessages stringMessages,
             final CellTableWithCheckboxResources tableResources) {
-        super(sailingService, userService, regattaRefresher, errorReporter, true, stringMessages);
-        this.sailingServiceWrite = sailingService;
-        this.userService = userService;
-        this.errorReporter = errorReporter;
+        super(presenter, true, stringMessages);
+        this.userService = presenter.getUserService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.sailingServiceWrite = presenter.getSailingService();
         this.tableResources = tableResources;
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
         this.raceList = new ListDataProvider<TracTracRaceRecordDTO>();
@@ -542,7 +541,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel i
 
                         @Override
                         public void onSuccess(Void result) {
-                            TracTracEventManagementPanel.this.regattaRefresher.reloadRegattas();
+                            TracTracEventManagementPanel.this.presenter.getRegattasRefresher().reloadAndCallFillAll();
                         }
                     }));
         }

@@ -38,8 +38,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
@@ -59,8 +58,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final RegattaRefresher regattaRefresher;
-    private final EventRefresher eventRefresher;
+    private final Presenter presenter;
     private final StructureImportListComposite regattaListComposite;
     private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
@@ -101,13 +99,12 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     public StructureImportManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
-        this.eventRefresher = presenter;
         this.busyIndicator = new SimpleBusyIndicator();
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.regattaRefresher = presenter;
-        this.regattaListComposite = new StructureImportListComposite(sailingServiceWrite, presenter.getUserService(), regattaRefresher,
+        this.presenter = presenter;
+        this.regattaListComposite = new StructureImportListComposite(presenter,
                 this, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
@@ -222,28 +219,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         });
         grid.setWidget(0, 1, newEventBtn);
         editSeriesPanel.add(grid);
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToGetEvents(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(List<EventDTO> events) {
-                existingEvents = events;
-                Collections.sort(existingEvents, new Comparator<EventDTO>() {
-                    private final NaturalComparator comp = new NaturalComparator();
-                    @Override
-                    public int compare(EventDTO o1, EventDTO o2) {
-                        return comp.compare(o1.getName(), o2.getName());
-                    }
-                });
-                sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-                for (EventDTO event : existingEvents) {
-                    sailingEventsListBox.addItem(event.getName());
-                }
-            }
-        });
         return grid;
     }
 
@@ -279,6 +254,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                     @Override
                     public void onSuccess(EventDTO newEvent) {
                         existingEvents.add(newEvent);
+                        presenter.getEventsRefresher().updateAndCallFillForAll(existingEvents,
+                                StructureImportManagementPanel.this.getEventsDisplayer());
                         sailingEventsListBox.addItem(newEvent.getName());
                         sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     }
@@ -452,7 +429,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
-        eventRefresher.loadEvents();
+        
         final List<RegattaDTO> regattaConfigurationsToCreate = new ArrayList<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
@@ -477,7 +454,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.reloadRegattas();
+                presenter.getRegattasRefresher().reloadAndCallFillAll();
                 Notification.notify(stringMessages.successfullyCreatedRegattas(), NotificationType.SUCCESS);
             }
         });
@@ -486,6 +463,35 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     @Override
     public RegattaStructure getRegattaStructure(RegattaDTO regatta) {
         return regattaStructures.get(regatta);
+    }
+    
+    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
+
+        @Override
+        public void fill(Iterable<EventDTO> result) {
+            fillEvents(result);
+        }
+        
+    };
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
+
+    public void fillEvents(Iterable<EventDTO> result) {
+        existingEvents = new ArrayList<EventDTO>();
+        result.forEach(existingEvents::add);
+        Collections.sort(existingEvents, new Comparator<EventDTO>() {
+            private final NaturalComparator comp = new NaturalComparator();
+            @Override
+            public int compare(EventDTO o1, EventDTO o2) {
+                return comp.compare(o1.getName(), o2.getName());
+            }
+        });
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
+        for (EventDTO event : existingEvents) {
+            sailingEventsListBox.addItem(event.getName());
+        }
     }
 
 }

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.place.shared.PlaceController;
@@ -11,8 +9,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.EventsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -26,7 +23,8 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsDisplayer, LeaderboardGroupsDisplayer, FilterablePanelProvider<EventDTO> {
+public class EventManagementPanel extends SimplePanel
+        implements FilterablePanelProvider<EventDTO> {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -40,8 +38,7 @@ public class EventManagementPanel extends SimplePanel implements EventsDisplayer
         mainPanel.add(eventsPanel);
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
-        eventListComposite = new EventListComposite(presenter.getSailingService(), presenter.getUserService(),
-                presenter.getErrorReporter(), presenter, presenter, presenter, placeController, stringMessages);
+        eventListComposite = new EventListComposite(presenter, placeController, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         eventDetailsComposite = new EventDetailsComposite(presenter.getSailingService(), presenter.getErrorReporter(), stringMessages);
@@ -69,20 +66,37 @@ public class EventManagementPanel extends SimplePanel implements EventsDisplayer
             }
         });
     }
+    
+    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
+        
+        @Override
+        public void fill(Iterable<EventDTO> result) {
+            fillEvents(result);
+        }
+    };
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
 
-    @Override
-    public void fillEvents(List<EventDTO> events) {
+    public void fillEvents(Iterable<EventDTO> events) {
         eventListComposite.fillEvents(events);
     }
-
-    @Override
-    public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
-        eventListComposite.fillLeaderboardGroups(leaderboardGroups);
+    
+    public Displayer<LeaderboardGroupDTO> leaderboardGroupsDisplayer = new Displayer<LeaderboardGroupDTO>() {
+        
+        @Override
+        public void fill(Iterable<LeaderboardGroupDTO> result) {
+            fillLeaderboardGroups(result);
+        }
+    };
+    
+    public Displayer<LeaderboardGroupDTO> getLeaderboardGroupsDisplayer() {
+        return leaderboardGroupsDisplayer;
     }
 
-    @Override
-    public void setupLeaderboardGroups(Map<String, String> params) {
-        eventListComposite.setupLeaderboardGroups(params);
+    public void fillLeaderboardGroups(Iterable<LeaderboardGroupDTO> leaderboardGroups) {
+        eventListComposite.fillLeaderboardGroups(leaderboardGroups);
     }
 
     @Override
