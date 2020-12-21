@@ -25,13 +25,10 @@ public interface AdminConsoleView extends IsWidget {
     
     void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace);
     
-    public interface Presenter {
+    public interface Presenter extends AdminConsolePresenter {
         SailingServiceWriteAsync getSailingService();
-
         MediaServiceWriteAsync getMediaServiceWrite();
-
         PlaceController getPlaceController();
-
         // Refresher
         Refresher<StrippedLeaderboardDTOWithSecurity> getLeaderboardsRefresher();
         Refresher<LeaderboardGroupDTO> getLeaderboardGroupsRefresher();
