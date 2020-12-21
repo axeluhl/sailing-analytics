@@ -138,6 +138,7 @@ import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
+import com.sap.sse.security.operations.UpdateUserSubscriptionOperation;
 import com.sap.sse.security.operations.ValidateEmailOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -170,6 +171,9 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
@@ -194,8 +198,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private final ReplicatingCacheManager cacheManager;
     
-    private UserStore store;
-    private AccessControlStore accessControlStore;
+    private final UserStore store;
+    private final AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
     private boolean isNewServer;
@@ -499,7 +503,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
     
-    public UserGroup getDefaultTenantForUser(User user) {
+    private UserGroup getDefaultTenantForUser(User user) {
         UserGroup specificTenant = temporaryDefaultTenant.get();
         if (specificTenant == null) {
             specificTenant = user.getDefaultTenant(ServerInfo.getName());
@@ -2491,5 +2495,319 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void registerCustomizer(SecurityInitializationCustomizer customizer) {
         customizers.add(customizer);
         customizer.customizeSecurityService(this);
+    }
+
+    @Override
+    public void updateUserSubscription(String username, Subscription newSubscription) throws UserManagementException {
+        final User user = getUserByName(username);
+        if (user != null) {
+            apply(new UpdateUserSubscriptionOperation(username, newSubscription));
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Void internalUpdateSubscription(String username, Subscription newSubscription)
+            throws UserManagementException {
+        User user = getUserByName(username);
+        if (user != null) {
+            String newSubscriptionPlanId = newSubscription.getPlanId();
+            Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
+                logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
+                logger.info(() -> "Current user plan subscription: "
+                        + (currentSubscription != null ? currentSubscription.toString() : "null"));
+                logger.info(() -> "New plan subscription: "
+                        + (newSubscription != null ? newSubscription.toString() : "null"));
+                if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
+                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+                }
+                Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                if (newSubscriptions != null) {
+                    user.setSubscriptions(newSubscriptions);
+                }
+                store.updateUser(user);
+            } else {
+                logger.info(() -> "New subscription has been ignored: " + newSubscription);
+            }
+            return null;
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+    
+    /**
+     * Check if new subscription should be processed, such as if it has a valid plan, or it's the most recent
+     * subscription of a plan
+     */
+    private boolean shouldProcessNewSubscription(Subscription currentSubscription, Subscription newSubscription) {
+        final boolean shouldProcess;
+        if (!newSubscription.hasPlan()) {
+            // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
+            // clearing all user subscriptions
+            shouldProcess = true;
+        } else if (SubscriptionPlan.getPlan(newSubscription.getPlanId()) != null) {
+            if (currentSubscription == null) {
+                // New subscription plan is valid, but current subscription of the plan is empty
+                shouldProcess = true;
+            } else if (!newSubscription.hasSubscriptionId()) {
+                // New subscription has plan id but doesn't have subscription id, this is an empty subscription for the
+                // plan that holds updated dates data for the plan's subscription
+                shouldProcess = newSubscription.isUpdatedMoreRecently(currentSubscription);
+            } else {
+                // Only process new subscription if it is the most recently created subscription
+                shouldProcess = newSubscription.getSubscriptionCreatedAt().asMillis() >= currentSubscription
+                        .getSubscriptionCreatedAt().asMillis();
+            }
+        } else {
+            // New subscription doesn't have a valid plan
+            shouldProcess = false;
+        }
+        return shouldProcess;
+    }
+
+    /**
+     * Build new subscription list for user from new subscription. This might update a subscription model, or add new
+     * one to user's subscription list. In case no updates for current user subscriptions then null will be returned
+     */
+    private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
+        Subscription[] newUserSubscriptions = null;
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
+        if (newSubscription != null) {
+            if (subscriptions == null || !subscriptions.iterator().hasNext()) {
+                newUserSubscriptions = new Subscription[] { newSubscription };
+            } else if (!newSubscription.hasPlan()) {
+                // New subscription has no plan, that means new subscription is just an empty one with some meta data
+                // for updated dates, and user has been deleted from provider. In this case we need to remove all
+                // current subscriptions of the user for this provider
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                for (Subscription subscription : subscriptions) {
+                    if (!subscription.getProviderName().equals(newSubscription.getProviderName())) {
+                        newSubscriptionList.add(subscription);
+                    }
+                }
+                newSubscriptionList.add(newSubscription);
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
+            } else {
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                boolean foundCurrentSubscription = false;
+                for (Subscription subscription : subscriptions) {
+                    if (!foundCurrentSubscription && ((!subscription.hasPlan()
+                            && subscription.getProviderName().equals(newSubscription.getProviderName()))
+                            || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
+                        newSubscriptionList.add(newSubscription);
+                        foundCurrentSubscription = true;
+                    } else {
+                        newSubscriptionList.add(subscription);
+                    }
+                }
+                if (!foundCurrentSubscription) {
+                    newSubscriptionList.add(newSubscription);
+                }
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
+            }
+        }
+        return newUserSubscriptions;
+    }
+
+    /**
+     * Add or remove subscription plan's roles for user
+     */
+    private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
+            Subscription newSubscription) throws UserManagementException {
+        logger.info(() -> "Update user subscription roles for user " + user.getName());
+        // in case new subscription has no planId, it means the subscription is an empty one with just meta data for
+        // update times, and user doesn't subscribe to any plans, so all plan's roles assigned to the user must be
+        // removed, but only if no other plan that the user still is subscribed to implies an equal role:
+        if (newSubscription != null && !newSubscription.hasPlan()) {
+            SubscriptionPlan[] plans = SubscriptionPlan.values();
+            for (SubscriptionPlan plan : plans) {
+                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
+            }
+        } else {
+            assert currentSubscription == null || newSubscription == null
+                    || currentSubscription.getPlanId().equals(newSubscription.getPlanId());
+            if (currentSubscription != null && currentSubscription.hasPlan()
+                    && currentSubscription.isActiveSubscription() && newSubscription != null
+                    && !newSubscription.isActiveSubscription()) {
+                SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
+                removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
+            }
+            if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
+                SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
+                addUserPlanRoles(user, newPlan);
+            }
+        }
+    }
+
+    /**
+     * Remove user roles implied by a subscription plan
+     * 
+     * @param checkOverlappingRoles
+     *            true if it needs to check overlapping roles with other active subscription plans of the same user,
+     *            otherwise roles will be removed without any overlap check
+     */
+    private void removeUserPlanRoles(User user, SubscriptionPlan plan, boolean checkOverlappingRoles)
+            throws UserManagementException {
+        if (plan != null) {
+            logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
+            final Role[] rolesToRemove;
+            if (checkOverlappingRoles) {
+                rolesToRemove = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
+            } else {
+                rolesToRemove = getSubscriptionPlanUserRoles(user, plan);
+            }
+            for (Role role : rolesToRemove) {
+                store.removeRoleFromUser(user.getName(), role);
+            }
+        }
+    }
+
+    private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
+        if (plan != null) {
+            logger.info(() -> "Add user roles for subscription plan " + plan.getName());
+            Role[] roles = getSubscriptionPlanUserRoles(user, plan);
+            for (Role role : roles) {
+                store.addRoleForUser(user.getName(), role);
+            }
+        }
+    }
+
+    private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
+        final List<Role> roles = new ArrayList<Role>();
+        for (SubscriptionPlanRole planRole : plan.getRoles()) {
+            roles.add(getSubscriptionPlanUserRole(user, planRole));
+        }
+        return roles.toArray(new Role[] {});
+    }
+    
+    /**
+     * Get user roles of a plan that are not overlapping with roles of other user active subscription plan
+     */
+    private Role[] getSubscriptionPlanUserRolesWithoutOverlapping(User user, SubscriptionPlan plan) {
+        final Set<Role> otherPlanRoles = new HashSet<Role>();
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
+        for (Subscription subscription : subscriptions) {
+            if (subscription.isActiveSubscription() && !subscription.getPlanId().equals(plan.getId())) {
+                SubscriptionPlan otherPlan = SubscriptionPlan.getPlan(subscription.getPlanId());
+                for (SubscriptionPlanRole planRole : otherPlan.getRoles()) {
+                    otherPlanRoles.add(getSubscriptionPlanUserRole(user, planRole));
+                }
+            }
+        }
+        final List<Role> roles = new ArrayList<Role>();
+        for (SubscriptionPlanRole planRole : plan.getRoles()) {
+            Role role = getSubscriptionPlanUserRole(user, planRole);
+            if (!otherPlanRoles.contains(role)) {
+                roles.add(role);
+            }
+        }
+        return roles.toArray(new Role[] {});
+    }
+
+    /**
+     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
+     */
+    private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
+        final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
+        final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
+    }
+
+    /**
+     * Check and return role qualified user {@code User} for a subscription plan role {@code SubscriptionPlanRole}
+     * definition
+     */
+    private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
+        final User qualifiedUser;
+        if (planRole.getUserQualificationMode() != null
+                && planRole.getUserQualificationMode() == SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) {
+            qualifiedUser = user;
+        } else if (planRole.getExplicitUserQualification() != null
+                && !planRole.getExplicitUserQualification().isEmpty()) {
+            qualifiedUser = getUserByName(planRole.getExplicitUserQualification());
+        } else {
+            qualifiedUser = null;
+        }
+        return qualifiedUser;
+    }
+
+    /**
+     * Check and return role qualified tenant {@code UserGroup} for a subscription plan role
+     * {@code SubscriptionPlanRole} definition
+     * 
+     * @param qualifiedUser
+     *            qualified user from
+     *            {@code SecurityServiceImpl#getSubscriptionPlanRoleQualifiedUser(User, SubscriptionPlanRole)}
+     */
+    private UserGroup getSubscriptionPlanRoleQualifiedTenant(User subscriptionUser, User qualifiedUser,
+            SubscriptionPlanRole planRole) {
+        final UserGroup qualifiedForGroup;
+        final SubscriptionPlanRole.GroupQualificationMode groupQualificationMode = planRole.getGroupQualificationMode();
+        if (groupQualificationMode != null
+                && groupQualificationMode != SubscriptionPlanRole.GroupQualificationMode.NONE) {
+            final User u;
+            switch (groupQualificationMode) {
+            case DEFAULT_QUALIFIED_USER_TENANT:
+                if (qualifiedUser != null) {
+                    u = qualifiedUser;
+                } else {
+                    u = null;
+                }
+                break;
+            case SUBSCRIBING_USER_DEFAULT_TENANT:
+                if (subscriptionUser != null) {
+                    u = subscriptionUser;
+                } else {
+                    u = null;
+                }
+                break;
+            default:
+                u = null;
+                break;
+            }
+            if (u != null) {
+                // don't use the default tenant but the default tenant name to resolve the user's own default group;
+                // example: the user may have set a default object creation group (e.g., "kielerwoche2020-server") for
+                // the current server that is different from the user's own default group ("{username}-tenant"). Yet,
+                // when assigning a role based on a subscription, the "default tenant/group" has to be the user's own
+                // group, not the current object creation group that the user has currently set. Otherwise, those role
+                // assignments would be specific to a server which they shall not.
+                qualifiedForGroup = getUserGroupByName(getDefaultTenantNameForUsername(u.getName()));
+            } else {
+                qualifiedForGroup = null;
+            }
+        } else if (planRole.getIdOfExplicitGroupQualification() != null) {
+            qualifiedForGroup = getUserGroup(planRole.getIdOfExplicitGroupQualification());
+        } else {
+            qualifiedForGroup = null;
+        }
+        return qualifiedForGroup;
+    }
+
+    /**
+     * Role assignments that are based on plans subscribed need to be adjusted if the
+     * {@link Subscription#isActiveSubscription() is-active} status of the user's subscription has changed.
+     */
+    private boolean shouldUpdateUserRolesForSubscription(User user, Subscription currentSubscription,
+            Subscription newSubscription) {
+        final boolean result;
+        if (currentSubscription == null && newSubscription == null) {
+            result = false;
+        } else if (currentSubscription == null) {
+            // A case when there's no current subscription for a plan, if the plan's new subscription is active then
+            // user roles need to be updated with granted new roles, otherwise if currently user has active subscription
+            // then premium roles need to be removed
+            result = newSubscription.isActiveSubscription() || user.hasActiveSubscription();
+        } else if (newSubscription == null) {
+            // In case new subscription is null, user's subscriptions won't be changed
+            result = false;
+        } else {
+            assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
+            // in this case user roles will be needed to update only when subscription active status is changed
+            result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+        }
+        return result;
     }
 }

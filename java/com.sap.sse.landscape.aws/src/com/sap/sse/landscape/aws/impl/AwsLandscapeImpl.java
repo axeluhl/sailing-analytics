@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -26,9 +27,8 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -63,6 +63,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairResponse;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
@@ -131,10 +132,8 @@ import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private static final String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
@@ -146,13 +145,11 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
     private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
-    private static final String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     private final String accessKeyId;
     private final String secretAccessKey;
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final Map<com.sap.sse.landscape.Region, ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog>> centralReverseProxyByRegion;
     private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
     
     /**
@@ -171,7 +168,6 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
             DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, String s3BucketForAlbLogs) {
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
-        this.centralReverseProxyByRegion = new HashMap<>();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
@@ -181,13 +177,6 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
-        // TODO automate handling of central reverse proxy instances across regions and AZs, e.g., based on tags
-        final AwsRegion euWest2 = new AwsRegion("eu-west-2");
-        final AwsInstanceImpl<ShardingKey, MetricsT> euWest2CentralReverseProxyInstance = new AwsInstanceImpl<ShardingKey, MetricsT>("i-0cb21cef39d853b34", getAvailabilityZoneByName(euWest2, "eu-west-2a"), this);
-        final ApacheReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> euWest2CentralReverseProxy = new ApacheReverseProxyCluster<>(
-                this);
-        euWest2CentralReverseProxy.addHost(euWest2CentralReverseProxyInstance);
-        centralReverseProxyByRegion.put(euWest2, euWest2CentralReverseProxy);
     }
     
     /**
@@ -197,8 +186,20 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
         sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
     }
     
+    
+    private static byte[] getPrivateKeyBytes(KeyPair unencryptedKeyPair) {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        unencryptedKeyPair.writePrivateKey(bos);
+        return bos.toByteArray();
+    }
+
     @Override
-    public void addSSHKeyPair(SSHKeyPair keyPair) {
+    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) {
+        addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
+                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey)));
+    }
+    
+    private void addSSHKeyPair(SSHKeyPair keyPair) {
         internalAddKeyPair(keyPair);
         mongoObjectFactory.storeSSHKeyPair(keyPair);
     }
@@ -257,7 +258,7 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     
     private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
-        final ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
                 port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
@@ -457,12 +458,16 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     }
     
     @Override
-    public AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName) {
+    public AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName, Optional<Tags> tags) {
         logger.info("Creating Amazon Machine Image (AMI) named "+imageName+" for instance "+instance.getInstanceId());
         final Ec2Client client = getEc2Client(getRegion(instance.getRegion()));
         final String imageId = client.createImage(b->b
                 .instanceId(instance.getInstanceId())
                 .name(imageName)).imageId();
+        final CreateTagsRequest.Builder createTagsRequestBuilder = CreateTagsRequest.builder().resources(imageId);
+        // Apply the tags if present
+        tags.ifPresent(t->t.forEach(tag->createTagsRequestBuilder.tags(Tag.builder().key(tag.getKey()).value(tag.getValue()).build())));
+        client.createTags(createTagsRequestBuilder.build());
         return getImage(instance.getRegion(), imageId);
     }
 
@@ -576,13 +581,13 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     }
 
     @Override
-    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getScopes() {
+    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
         return null;
     }
     
     @Override
-    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier,
+    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier,
             int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
@@ -714,8 +719,12 @@ implements AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> 
     }
 
     @Override
-    public ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        return centralReverseProxyByRegion.get(region);
+    public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
+        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+            reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        return reverseProxyCluster;
     }
 
     @Override

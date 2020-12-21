@@ -1,0 +1,85 @@
+package com.sap.sse.security.shared.subscription.chargebee;
+
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.subscription.Subscription;
+
+public class ChargebeeSubscription extends Subscription {
+    private static final String SUBSCRIPTION_STATUS_TRIAL = "in_trial";
+    private static final String SUBSCRIPTION_STATUS_ACTIVE = "active";
+    public static final String SUBSCRIPTION_STATUS_CANCELLED = "cancelled";
+    protected static final String SUBSCRIPTION_STATUS_PAUSED = "paused";
+
+    public static final String TRANSACTION_TYPE_PAYMENT = "payment";
+    protected static final String TRANSACTION_TYPE_REFUND = "refund";
+
+    public static final String INVOICE_STATUS_PAID = "paid";
+
+    public static final String TRANSACTION_STATUS_SUCCESS = "success";
+
+    private static final long serialVersionUID = -3682427457347116687L;
+
+    public static Subscription createEmptySubscription(String planId, TimePoint latestEventTime,
+            TimePoint manualUpdatedAt) {
+        return new ChargebeeSubscription(null, planId, null, Subscription.emptyTime(), Subscription.emptyTime(), null,
+                null, null, null, null, null, Subscription.emptyTime(), Subscription.emptyTime(), latestEventTime,
+                manualUpdatedAt);
+    }
+
+    /**
+     * Determining payment status, return {@code Subscription#PAYMENT_STATUS_SUCCESS} or
+     * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS}
+     */
+    public static String determinePaymentStatus(String transactionType, String transactionStatus,
+            String invoiceStatus) {
+        String paymentStatus = null;
+        if (transactionStatus == null) {
+            if (invoiceStatus != null) {
+                paymentStatus = determinePaymentStatusFromInvoiceStatus(invoiceStatus);
+            }
+        } else {
+            if (transactionType != null && transactionType.equals(TRANSACTION_TYPE_PAYMENT)) {
+                paymentStatus = determinePaymentStatusFromTransactionStatus(transactionStatus);
+            }
+        }
+        return paymentStatus;
+    }
+
+    /**
+     * If invoice is paid then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
+     * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
+     */
+    public static String determinePaymentStatusFromInvoiceStatus(String invoiceStatus) {
+        return invoiceStatus.equals(INVOICE_STATUS_PAID) ? Subscription.PAYMENT_STATUS_SUCCESS
+                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
+    }
+
+    /**
+     * If transaction is success then payment status will be {@code Subscription#PAYMENT_STATUS_SUCCESS}, and
+     * {@code Subscription#PAYMENT_STATUS_NO_SUCCESS} otherwise
+     */
+    public static String determinePaymentStatusFromTransactionStatus(String transactionStatus) {
+        return transactionStatus.equals(ChargebeeSubscription.TRANSACTION_STATUS_SUCCESS)
+                ? Subscription.PAYMENT_STATUS_SUCCESS
+                : Subscription.PAYMENT_STATUS_NO_SUCCESS;
+    }
+
+    public ChargebeeSubscription(String subscriptionId, String planId, String customerId, TimePoint trialStart,
+            TimePoint trialEnd, String subscriptionStatus, String paymentStatus, String transactionType,
+            String transactionStatus, String invoiceId, String invoiceStatus, TimePoint subscriptionCreatedAt,
+            TimePoint subscriptionUpdatedAt, TimePoint latestEventTime, TimePoint manualUpdatedAt) {
+        super(subscriptionId, planId, customerId, trialStart, trialEnd, subscriptionStatus, paymentStatus,
+                transactionType, transactionStatus, invoiceId, invoiceStatus, subscriptionCreatedAt,
+                subscriptionUpdatedAt, latestEventTime, manualUpdatedAt,
+                ChargebeeSubscriptionProvider.PROVIDER_NAME);
+    }
+
+    public boolean isActiveSubscription() {
+        String subscriptionStatus = getSubscriptionStatus();
+        String paymentStatus = getPaymentStatus();
+        String transactionType = getTransactionType();
+        return subscriptionStatus != null && (subscriptionStatus.equals(SUBSCRIPTION_STATUS_TRIAL)
+                || (subscriptionStatus.equals(SUBSCRIPTION_STATUS_ACTIVE) && paymentStatus != null
+                        && paymentStatus.equals(PAYMENT_STATUS_SUCCESS) && transactionType != null
+                        && transactionType.equals(TRANSACTION_TYPE_PAYMENT)));
+    }
+}

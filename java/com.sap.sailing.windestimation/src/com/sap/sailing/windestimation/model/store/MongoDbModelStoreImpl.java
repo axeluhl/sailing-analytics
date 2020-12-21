@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 
 import com.mongodb.MongoException;
+import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
@@ -50,7 +52,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
         ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(newModel);
         String fileName = getPersistenceKey(newModel);
         String bucketName = getCollectionName(newModel.getModelContext().getDomainType());
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         try (GridFSDownloadStream inputStream = gridFs.openDownloadStream(fileName)) {
             ModelContext<?> requestedModelContext = newModel.getModelContext();
             @SuppressWarnings("unchecked")
@@ -68,7 +70,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
         ModelSerializationStrategy serializationStrategy = checkAndGetModelSerializationStrategy(trainedModel);
         String newFileName = getPersistenceKey(trainedModel);
         String bucketName = getCollectionName(trainedModel.getModelContext().getDomainType());
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
         try {
             try (OutputStream outputStream = gridFs.openUploadStream(newFileName)) {
                 serializationStrategy.serializeToStream(trainedModel, outputStream);
@@ -81,7 +83,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     @Override
     public void deleteAll(ModelDomainType domainType) throws ModelPersistenceException {
         try {
-            GridFSBuckets.create(db, getCollectionName(domainType)).drop();
+            GridFSBuckets.create(db, getCollectionName(domainType)).withWriteConcern(WriteConcern.MAJORITY).drop();
         } catch (Exception e) {
             throw new ModelPersistenceException(e);
         }
@@ -95,7 +97,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public Map<String, byte[]> exportAllPersistedModels(ModelDomainType domainType) throws ModelPersistenceException {
         Map<String, byte[]> exportedModels = new HashMap<>();
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
             byte[] exportedModel;
@@ -113,7 +115,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public void importPersistedModels(Map<String, byte[]> exportedPersistedModels, ModelDomainType domainType)
             throws ModelPersistenceException {
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withWriteConcern(WriteConcern.MAJORITY);
         for (Entry<String, byte[]> entry : exportedPersistedModels.entrySet()) {
             String fileName = entry.getKey();
             byte[] exportedModel = entry.getValue();
@@ -131,7 +133,7 @@ public class MongoDbModelStoreImpl extends AbstractModelStoreImpl {
     public List<PersistableModel<?, ?>> loadAllPersistedModels(ModelDomainType domainType) {
         List<PersistableModel<?, ?>> loadedModels = new ArrayList<>();
         String bucketName = getCollectionName(domainType);
-        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName);
+        GridFSBucket gridFs = GridFSBuckets.create(db, bucketName).withReadConcern(ReadConcern.MAJORITY);
         for (GridFSFile gridFSFile : gridFs.find()) {
             String fileName = gridFSFile.getFilename();
             ModelSerializationStrategy serializationStrategy = getModelSerializationStrategyFromPersistenceKey(

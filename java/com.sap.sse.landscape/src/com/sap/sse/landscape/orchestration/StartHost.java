@@ -1,20 +1,17 @@
 package com.sap.sse.landscape.orchestration;
 
 import com.sap.sse.landscape.Host;
-import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 
 public abstract class StartHost<ShardingKey,
                        MetricsT extends ApplicationProcessMetrics,
-                       MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-                       ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+                       ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
                        HostT extends Host>
-extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>
-implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT>
+implements Procedure<ShardingKey, MetricsT, ProcessT> {
     /**
      * The {@link AwsLandscape#getLatestImageWithTag(com.sap.sse.landscape.Region, String, String)} method is
      * used to obtain default images for specific AWS host starting procedures that subclass this class. The
@@ -33,25 +30,23 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends Host>
-    extends com.sap.sse.common.Builder<BuilderT, T> {
+    extends Procedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         BuilderT setImageType(String imageType);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends Host>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private MachineImage machineImage;
-        private Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
         private Region region;
         private String imageType;
         
@@ -82,19 +77,10 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
             this.imageType = imageType;
             return self();
         }
-
-        protected Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
-            return landscape;
-        }
-
-        protected BuilderT setLandscape(Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-            this.landscape = landscape;
-            return self();
-        }
     }
     
-    protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) {
-        super(builder.getLandscape());
+    protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) {
+        super(builder);
         this.machineImage = builder.getMachineImage();
     }
 

@@ -188,7 +188,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">Snap</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">Do you want to log out and log in as a new user? All your races will still be monitored.</string>
+    <string name="logout_dialog_message">Do you want to log out and log in as a new user?</string>
     <string name="change_dialog_title">Change Regatta</string>
     <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
     <string name="logout">Log out</string>
@@ -431,7 +431,6 @@
     <string name="events_waiting_to_be_sent"><![CDATA[Currently %1$d events waiting to be sent.\nLast successful sent was at: %2$s.]]></string>
     <string name="no_event_to_be_sent">Currently no event waiting to be sent.</string>
     <string name="never">never</string>
-    <string name="connected_to_wp">Connected to: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
