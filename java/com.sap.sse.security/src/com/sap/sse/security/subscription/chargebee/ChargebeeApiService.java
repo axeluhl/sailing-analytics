@@ -40,12 +40,14 @@ public class ChargebeeApiService implements SubscriptionApiService {
     // after 400ms from previous request
     private static final long TIME_FOR_API_REQUEST_MS = 400;
     
-    private boolean active;
+    private final boolean active;
 
     public ChargebeeApiService(ChargebeeConfiguration configuration) {
-        if (configuration!=null) {
+        if (configuration != null) {
             Environment.configure(configuration.getSite(), configuration.getApiKey());
             active = true;
+        } else {
+            active = false;
         }
     }
     

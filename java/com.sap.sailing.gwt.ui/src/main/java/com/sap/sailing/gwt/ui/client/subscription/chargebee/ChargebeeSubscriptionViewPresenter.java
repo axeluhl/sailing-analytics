@@ -61,7 +61,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     private void requestFinishingPlanUpdating(String hostedPageId, UserSubscriptionView view) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
-        writeService.finishCheckout(null, data, new AsyncCallback<SubscriptionDTO>() {
+        writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
             @Override
             public void onSuccess(SubscriptionDTO result) {
                 view.updateView(result);

@@ -30,24 +30,30 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
         logger.info("finishCheckout hostedPageId: " + data.getHostedPageId());
         SubscriptionDTO subscriptionDto;
         try {
-            User user = getCurrentUser();
-            Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
-            Content content = result.hostedPage().content();
-            String transactionType = null;
-            String transactionStatus = null;
-            Transaction transaction = content.transaction();
+            final User user = getCurrentUser();
+            final Result result = HostedPage.acknowledge(data.getHostedPageId()).request();
+            final Content content = result.hostedPage().content();
+            final String transactionType;
+            final String transactionStatus;
+            final Transaction transaction = content.transaction();
             if (transaction != null) {
                 transactionType = transaction.type().name().toLowerCase();
                 transactionStatus = transaction.status().name().toLowerCase();
+            } else {
+                transactionType = null;
+                transactionStatus = null;
             }
-            Invoice invoice = content.invoice();
-            String invoiceId = null;
-            String invoiceStatus = null;
+            final Invoice invoice = content.invoice();
+            final String invoiceId;
+            final String invoiceStatus;
             if (invoice != null) {
                 invoiceId = invoice.id();
                 invoiceStatus = invoice.status().name().toLowerCase();
+            } else {
+                invoiceId = null;
+                invoiceStatus = null;
             }
-            Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
+            final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
                     content.subscription().planId(), content.customer().id(),
                     TimePoint.of(content.subscription().trialStart()), TimePoint.of(content.subscription().trialEnd()),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
