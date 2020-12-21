@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,16 +29,22 @@ public class SubscriptionUpdateTask implements Runnable {
 
     private final ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
 
-    public SubscriptionUpdateTask(CompletableFuture<SecurityService> securityService, ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker) {
+    private final ScheduledExecutorService executor;
+
+    public SubscriptionUpdateTask(CompletableFuture<SecurityService> securityService,
+            ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker,
+            ScheduledExecutorService executor) {
         this.securityService = securityService;
         this.subscriptionApiServiceTracker = subscriptionApiServiceTracker;
+        this.executor = executor;
     }
 
     @Override
     public void run() {
         Iterable<User> users = getSecurityService().getUserList();
+        long delayInSeconds = 0;
         for (User user : users) {
-            fetchAndUpdateUserSubscriptions(user);
+            executor.schedule(()->fetchAndUpdateUserSubscriptions(user), delayInSeconds++, TimeUnit.SECONDS);
         }
     }
 

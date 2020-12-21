@@ -16,15 +16,15 @@ import com.sap.sse.util.ThreadPoolUtil;
  * Manage to start a schedule task to perfom fetching, checking and updating subscriptions for users from payment
  * service providers. Call {@code #start(CompletableFuture)} to schedule task in background thread.
  */
-public class SubscriptionBackgroundUpdate {
-    private static final Logger logger = Logger.getLogger(SubscriptionBackgroundUpdate.class.getName());
+public class SubscriptionBackgroundUpdater {
+    private static final Logger logger = Logger.getLogger(SubscriptionBackgroundUpdater.class.getName());
 
     private final ScheduledExecutorService executor;
     private final ServiceTracker<SubscriptionApiService, SubscriptionApiService> subscriptionApiServiceTracker;
 
     private boolean started;
 
-    public SubscriptionBackgroundUpdate(BundleContext context) {
+    public SubscriptionBackgroundUpdater(BundleContext context) {
         this.executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         subscriptionApiServiceTracker = ServiceTrackerFactory.createAndOpen(context, SubscriptionApiService.class);
     }
@@ -32,7 +32,7 @@ public class SubscriptionBackgroundUpdate {
     public void start(CompletableFuture<SecurityService> securityService) {
         if (!started) {
             logger.info(() -> "Start subscription background update task");
-            executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker), /* initial */ 0, /* period */ 12, TimeUnit.HOURS);
+            executor.scheduleAtFixedRate(new SubscriptionUpdateTask(securityService, subscriptionApiServiceTracker, executor), /* initial */ 0, /* period */ 12, TimeUnit.HOURS);
         }
     }
 }
