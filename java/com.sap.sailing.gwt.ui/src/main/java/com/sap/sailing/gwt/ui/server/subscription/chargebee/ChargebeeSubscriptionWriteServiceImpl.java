@@ -15,13 +15,14 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
 
 public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscriptionServiceImpl
         implements ChargebeeSubscriptionWriteService {
-    
+
     private static final long serialVersionUID = 3058555834123504387L;
-    
+
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionWriteServiceImpl.class.getName());
 
     @Override
@@ -69,24 +70,30 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             Subscription subscription = user.getSubscriptionByPlan(planId);
             if (isValidSubscription(subscription)) {
                 logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
-                SubscriptionCancelResult cancelResult = getApiService()
-                        .cancelSubscription(subscription.getSubscriptionId());
-                if (cancelResult.isSuccess()) {
-                    logger.info(() -> "Cancel subscription successful");
-                    result = true;
-                    if (cancelResult.getSubscription() != null) {
-                        updateUserSubscription(user, cancelResult.getSubscription());
+                SubscriptionApiService apiService = getApiService();
+                if (apiService != null) {
+                    SubscriptionCancelResult cancelResult = apiService
+                            .cancelSubscription(subscription.getSubscriptionId());
+                    if (cancelResult.isSuccess()) {
+                        logger.info(() -> "Cancel subscription successful");
+                        result = true;
+                        if (cancelResult.getSubscription() != null) {
+                            updateUserSubscription(user, cancelResult.getSubscription());
+                        }
+                    } else {
+                        result = false;
+                        if (cancelResult.isDeleted()) {
+                            logger.info(() -> "Subscription for plan was deleted");
+                            Subscription emptySubscription = ChargebeeSubscription.createEmptySubscription(planId,
+                                    subscription.getLatestEventTime(), TimePoint.now());
+                            updateUserSubscription(user, emptySubscription);
+                        } else {
+                            logger.info(() -> "Cancel subscription failed");
+                        }
                     }
                 } else {
+                    logger.info(() -> "No active api service found");
                     result = false;
-                    if (cancelResult.isDeleted()) {
-                        logger.info(() -> "Subscription for plan was deleted");
-                        Subscription emptySubscription = ChargebeeSubscription.createEmptySubscription(planId,
-                                subscription.getLatestEventTime(), TimePoint.now());
-                        updateUserSubscription(user, emptySubscription);
-                    } else {
-                        logger.info(() -> "Cancel subscription failed");
-                    }
                 }
             } else {
                 logger.info(() -> "Invalid subscription");

@@ -39,9 +39,19 @@ public class ChargebeeApiService implements SubscriptionApiService {
     // So to prevent the limit would be reached, a request has a frame of ~400ms, and a next request should be made
     // after 400ms from previous request
     private static final long TIME_FOR_API_REQUEST_MS = 400;
+    
+    private boolean active;
 
     public ChargebeeApiService(ChargebeeConfiguration configuration) {
-        Environment.configure(configuration.getSite(), configuration.getApiKey());
+        if (configuration!=null) {
+            Environment.configure(configuration.getSite(), configuration.getApiKey());
+            active = true;
+        }
+    }
+    
+    @Override
+    public boolean isActive() {
+        return active;
     }
 
     @Override
