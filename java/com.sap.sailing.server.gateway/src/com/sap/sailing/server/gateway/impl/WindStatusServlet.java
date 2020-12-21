@@ -39,7 +39,7 @@ import com.sap.sse.common.Util;
  * @author Simon Marcel Pamies
  *
  */
-public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedConrentReplacing implements IgtimiWindListener, BulkFixReceiver {
+public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedContentReplacing implements IgtimiWindListener, BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(WindStatusServlet.class.getName());
     private static final long serialVersionUID = -6791613843435003810L;
     

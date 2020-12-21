@@ -14,7 +14,7 @@
 AVAILABILITY_ZONE=eu-west-1c
 INSTANCE_TYPE=i3.xlarge
 # eu-west-1:
-IMAGE_ID=ami-080cce167279f643c
+IMAGE_ID=ami-054a4c20d297ab81e
 # eu-west-2:
 #IMAGE_ID=ami-0c0907685eae2dbab
 # eu-west-1:

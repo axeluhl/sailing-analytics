@@ -1,13 +1,12 @@
 package com.sap.sse.landscape.orchestration;
 
-import java.util.Arrays;
+import java.util.Optional;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
-import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
 
 /**
  * Encodes a potentially compound sequence of actions that transform the landscape from one state to another, trying to
@@ -42,16 +41,26 @@ import com.sap.sse.landscape.orchestration.impl.ProcedureSequence;
  */
 public interface Procedure<ShardingKey, 
                            MetricsT extends ApplicationProcessMetrics,
-                           MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-                           ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+                           ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends RunnableWithException<Exception> {
-    Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape();
-    
-    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> andThen(Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> nextStep) {
-        return new ProcedureSequence<>(getLandscape(), Arrays.asList(this, nextStep));
+    /**
+     * The following defaults apply:
+     * <ul>
+     * <li>The {@link #getOptionalTimeout() optional timeout} defaults to an {@link Optional#empty() empty optional},
+     * meaning that waiting for the instance won't timeout by default.</li>
+     * </ul>
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<BuilderT extends com.sap.sse.common.Builder<BuilderT, T>,
+    T extends Procedure<ShardingKey, MetricsT, ProcessT>, ShardingKey, 
+    MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends com.sap.sse.common.Builder<BuilderT, T> {
+        BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape);
+        
+        BuilderT setOptionalTimeout(Optional<Duration> optionalTimeout);
     }
     
-    default Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> fromSteps(Iterable<Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> steps) {
-        return new ProcedureSequence<>(getLandscape(), steps);
-    }
+    Landscape<ShardingKey, MetricsT, ProcessT> getLandscape();
 }
