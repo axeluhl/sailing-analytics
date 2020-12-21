@@ -13,35 +13,40 @@ public class DeviceConfigurationQRCodeUtils {
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
     public static final String deviceUuidKey = "uuid";
-    
+
     public static class DeviceConfigurationDetails {
-        private final String apkUrl;
+        private final String url;
         private final String deviceIdentifier;
         private final UUID uuid;
         private final String accessToken;
-        public DeviceConfigurationDetails(String apkUrl, UUID uuid, String deviceConfigurationName, String accessToken) {
+
+        public DeviceConfigurationDetails(String url, UUID uuid, String deviceConfigurationName, String accessToken) {
             super();
-            this.apkUrl = apkUrl;
+            this.url = url;
             this.uuid = uuid;
             this.deviceIdentifier = deviceConfigurationName;
             this.accessToken = accessToken;
         }
-        public String getApkUrl() {
-            return apkUrl;
+
+        public String getUrl() {
+            return url;
         }
+
         public UUID getUuid() { return uuid; }
+
         public String getDeviceIdentifier() { return deviceIdentifier; }
+
         public String getAccessToken() {
             return accessToken;
         }
     }
-    
+
     public static interface URLDecoder {
         String decode(String encodedURL);
     }
 
-    public static String composeQRContent(String urlEncodedDeviceConfigName, String apkUrl, String accessToken, String urlEncodedDeviceIdAsString) {
-        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName + "&" + deviceUuidKey + "="
+    public static String composeQRContent(String urlEncodedDeviceConfigName, String url, String accessToken, String urlEncodedDeviceIdAsString) {
+        return url + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName + "&" + deviceUuidKey + "="
                 + urlEncodedDeviceIdAsString + "&" + accessTokenKey + "=" + accessToken;
     }
 
@@ -50,7 +55,7 @@ public class DeviceConfigurationQRCodeUtils {
         if (fragmentIndex == -1 || fragmentIndex == 0 || qrCodeContent.length() == fragmentIndex + 1) {
             throw new IllegalArgumentException("There is no server or identifier.");
         }
-        String fragment = qrCodeContent.substring(fragmentIndex + 1, qrCodeContent.length());
+        String fragment = qrCodeContent.substring(fragmentIndex + 1);
         final String[] params = fragment.split("&");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {

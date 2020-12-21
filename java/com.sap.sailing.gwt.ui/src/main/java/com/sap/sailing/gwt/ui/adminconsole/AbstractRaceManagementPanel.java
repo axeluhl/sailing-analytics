@@ -29,11 +29,6 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     protected final VerticalPanel selectedRaceContentPanel;
     
-    public AbstractRaceManagementPanel(final SailingServiceWriteAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        this(sailingService, null, errorReporter, regattaRefresher, actionButtonsEnabled, stringMessages);
-    }
-    
     public AbstractRaceManagementPanel(final SailingServiceWriteAsync sailingService,
             UserService userService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {

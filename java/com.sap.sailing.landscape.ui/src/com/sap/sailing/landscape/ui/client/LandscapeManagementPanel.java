@@ -1,7 +1,6 @@
 package com.sap.sailing.landscape.ui.client;
 
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
-import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import java.util.ArrayList;
 
@@ -40,8 +39,6 @@ public class LandscapeManagementPanel extends VerticalPanel {
     
     private LandscapeManagementWriteServiceAsync initAndRegisterLandscapeManagementService() {
         final LandscapeManagementWriteServiceAsync result = GWT.create(LandscapeManagementWriteService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) result,
-                RemoteServiceMappingConstants.landscapeManagementServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) result,
                 RemoteServiceMappingConstants.landscapeManagementServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         return result;
