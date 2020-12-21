@@ -18,6 +18,7 @@ public class AppConstants {
 
     public final static String KEY_RACE_FLAG = "RACE_FLAG";
 
+    public final static String EXTRA_PRIORITY = "PRIORITY";
     public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
     public final static String AUTHOR_TYPE_VIEWER = "Viewer";

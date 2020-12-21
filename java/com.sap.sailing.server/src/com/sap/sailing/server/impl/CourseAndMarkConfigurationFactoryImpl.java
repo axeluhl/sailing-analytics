@@ -219,7 +219,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     Iterable<String> tags = Collections.emptySet();
                     if (effectiveProperties instanceof FreestyleMarkProperties) {
                         tags = ((FreestyleMarkProperties) effectiveProperties).getTags();
-                    }else {
+                    } else {
                         tags = Collections.emptySet();
                     }
                     // If no mark properties exist yet, a new one is created

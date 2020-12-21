@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -55,7 +57,10 @@ public class AuthorizationCallback {
         Response result;
         if (state != null) {
             // redirect to the server whose base URL is contained in the state parameter
-            result = Response.temporaryRedirect(new URI(state+"/igtimi/oauth/v1"+AUTHORIZATIONCALLBACK+"?code="+URLEncoder.encode(code, "UTF-8"))).build();
+            String target = Base64.getEncoder().encodeToString(
+                    (state + "/igtimi/oauth/v1" + AUTHORIZATIONCALLBACK + "?code=" + URLEncoder.encode(code, "UTF-8"))
+                            .getBytes());
+            result = Response.temporaryRedirect(new URI(state + "/igtimi/redirect.html?" + target)).build();
         } else {
             if (code != null) {
                 try {
@@ -82,7 +87,15 @@ public class AuthorizationCallback {
         }
         return result;
     }
-    
+
+    @POST
+    @Produces("text/plain;charset=UTF-8")
+    @Path(AUTHORIZATIONCALLBACK)
+    public Response obtainAccessTokenPost(@QueryParam("code") String code, @QueryParam("state") String state)
+            throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
+        return obtainAccessToken(code, state);
+    }
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("uri")

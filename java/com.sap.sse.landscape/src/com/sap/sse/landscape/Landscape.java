@@ -2,20 +2,18 @@ package com.sap.sse.landscape;
 
 import java.util.Map;
 
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
 public interface Landscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
      * Tells which scope currently lives where
      */
-    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> getScopes();
+    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes();
     
     /**
      * @return the security group that shall be assigned by default to any application server host, whether master or

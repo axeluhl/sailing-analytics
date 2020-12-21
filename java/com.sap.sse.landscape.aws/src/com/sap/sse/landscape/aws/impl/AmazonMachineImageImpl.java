@@ -19,9 +19,9 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
     private static final long serialVersionUID = 1615200981492476022L;
     private final Image image;
     private final Region region;
-    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey, MetricsT, ?> landscape;
     
-    public AmazonMachineImageImpl(Image image, Region region, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
+    public AmazonMachineImageImpl(Image image, Region region, AwsLandscape<ShardingKey, MetricsT, ?> landscape) {
         this.image = image;
         this.region = region;
         this.landscape = landscape;

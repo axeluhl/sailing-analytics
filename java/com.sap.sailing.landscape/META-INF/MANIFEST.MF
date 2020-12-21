@@ -13,4 +13,6 @@ Require-Bundle: com.sap.sse.landscape,
  com.amazon.aws.aws-java-api;bundle-version="2.14.24",
  com.sap.sse.shared.android,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.0"
-Export-Package: com.sap.sailing.landscape
+Export-Package: com.sap.sailing.landscape,
+ com.sap.sailing.landscape.impl,
+ com.sap.sailing.landscape.procedures

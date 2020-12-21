@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -12,9 +13,8 @@ import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -55,9 +55,8 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -87,6 +86,16 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     String MONGO_REPLICA_SETS_TAG_NAME = "mongo-replica-sets";
 
     String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
+    
+    String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
+    
+    /**
+     * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
+     * be the port number (usually 5672) on which the RabbitMQ endpoint can be reached.
+     */
+    String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
+    
+    String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
@@ -95,9 +104,8 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * an EC2 client, a Route53 client, etc.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> obtain() {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
         return new AwsLandscapeImpl<>();
     }
     
@@ -105,7 +113,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
-        final HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> hostSupplier =
+        final HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> hostSupplier =
                 (instanceId, az, landscape)->new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId, az, landscape);
         return launchHost(hostSupplier, image, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
     }
@@ -122,7 +130,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            the AWS SDK installed on the instance.
      */
     default <HostT extends AwsInstance<ShardingKey, MetricsT>> HostT launchHost(
-            HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier,
+            HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier,
             MachineImage fromImage, InstanceType instanceType, AwsAvailabilityZone az, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         return launchHosts(hostSupplier, /* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName,
@@ -139,14 +147,14 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
     <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(
-            HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> hostSupplier, int numberOfHostsToLaunch,
+            HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier, int numberOfHostsToLaunch,
             MachineImage fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
             String... userData);
 
     AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
 
-    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName);
+    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName, Optional<Tags> tags);
 
     void deleteImage(Region region, String imageId);
 
@@ -181,7 +189,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
     
     byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
 
-    void addSSHKeyPair(SSHKeyPair keyPair);
+    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey);
 
     /**
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
@@ -336,7 +344,7 @@ extends Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
      * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
      * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
      */
-    ReverseProxyCluster<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
     
     /**
      * Each region can have a single load balancer per {@code wildcardDomain} that is the target for any sub-domain of

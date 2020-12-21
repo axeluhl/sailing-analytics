@@ -127,10 +127,8 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
 
     private Widget createInputPanel() {
         Grid content = new Grid(4, 4);
-        
         Button startNow = new Button(stringMessages.now());
         startNow.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 startTimeBox.setValue(new Date());
@@ -138,13 +136,11 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
         });
         Button endNow = new Button(stringMessages.now());
         endNow.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 endTimeBox.setValue(new Date());
             }
         });
-
         startTimeBox = createDateTimeBox(null, Accuracy.SECONDS);
         startTimeBox.addValueChangeHandler(e->startTimeSetCheckbox.setValue(true)); // when the start time is manipulated, assume the user wants to really set it
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
@@ -152,7 +148,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
         startTimeSetCheckbox = createCheckbox(stringMessages.set());
         content.setWidget(0, 2, startTimeSetCheckbox);
         content.setWidget(0, 3, startNow);
-
         endTimeBox = createDateTimeBox(null, Accuracy.SECONDS);
         endTimeBox.addValueChangeHandler(e->endTimeSetCheckbox.setValue(true)); // when the end time is manipulated, assume the user wants to really set it
         content.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
@@ -160,14 +155,12 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
         endTimeSetCheckbox = createCheckbox(stringMessages.set());
         content.setWidget(1, 2, endTimeSetCheckbox);
         content.setWidget(1, 3, endNow);
-        
         authorNameBox = createTextBox("Shore");
         content.setWidget(2, 0, createLabel(stringMessages.authorName()));
         content.setWidget(2, 1, authorNameBox);
         authorPriorityBox = createIntegerBox(0, 2);
         content.setWidget(3, 0, createLabel(stringMessages.authorPriority()));
         content.setWidget(3, 1, authorPriorityBox);
-
         return content;
     }
 
@@ -179,12 +172,10 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
         currentStartLabel = new Label("");
         grid.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
         grid.setWidget(0, 1, currentStartLabel);
-
         currentEndLabel = new Label("");
         grid.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
         grid.setWidget(1, 1, currentEndLabel);
         currentPanel.add(grid);
-
         PushButton refreshButton = new PushButton(new Image(resources.reloadIcon()));
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -233,6 +224,10 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithDateTimeBox<RaceL
             final String result;
             if (dto.authorName == null || dto.authorPriority == null) {
                 result = stringMessages.pleaseEnterAValue();
+            } else if (dto.newStartOfTracking != null && dto.newStartOfTracking.getTimePoint() != null
+                    && dto.newEndOfTracking != null && dto.newEndOfTracking.getTimePoint() != null
+                    && dto.newStartOfTracking.getTimePoint().after(dto.newEndOfTracking.getTimePoint())) {
+                result = stringMessages.startOfTrackingMustNotBeAfterEndOfTracking();
             } else {
                 result = null;
             }
