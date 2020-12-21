@@ -48,7 +48,9 @@ public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTempla
         result.put(FIELD_OPTIONAL_IMAGE_URL, courseTemplate.getOptionalImageURL());
         result.put(FIELD_DEFAULT_NUMBER_OF_LAPS, courseTemplate.getDefaultNumberOfLaps());
         final JSONArray tags = new JSONArray();
-        courseTemplate.getTags().forEach(tags::add);
+        if (courseTemplate.getTags() != null) {
+            courseTemplate.getTags().forEach(tags::add);
+        }
         result.put(FIELD_TAGS, tags);
         final JSONArray allMarkRoles = new JSONArray();
         courseTemplate.getMarkRoles().forEach(markRole -> {

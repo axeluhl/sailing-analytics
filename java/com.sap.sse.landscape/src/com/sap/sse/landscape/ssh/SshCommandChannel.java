@@ -3,6 +3,7 @@ package com.sap.sse.landscape.ssh;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
 
 import com.jcraft.jsch.JSchException;
 
@@ -12,6 +13,19 @@ import com.jcraft.jsch.JSchException;
  *
  */
 public interface SshCommandChannel {
+    /**
+     * Executes the {@code commandLine}, then {@link #disconnect() disconnects} this channel. Any standard error content
+     * will be logged with the {@code stderrLogLevel} specified or will be ignored when the {@code stderrLogLevel} is
+     * {@code null}, prefixed with the {@code stderrLogPrefix}. The standard output will be returned as a single
+     * {@link String}.
+     * 
+     * @param stderrLogPrefix
+     *            may be {@code null}, meaning no prefix
+     * @param stderrLogLevel
+     *            {@code null} means not to log stderr at all
+     */
+    String runCommandAndReturnStdoutAndLogStderr(String commandLine, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException;
+    
     /**
      * @param commandLine
      *            the command without any trailing line separator
