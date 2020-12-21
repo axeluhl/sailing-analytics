@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ImageState;
 
 public interface AmazonMachineImage<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends MachineImage {
-     Iterable<BlockDeviceMapping> getBlockDeviceMappings();
+    Iterable<BlockDeviceMapping> getBlockDeviceMappings();
 
     @Override
     String getId();

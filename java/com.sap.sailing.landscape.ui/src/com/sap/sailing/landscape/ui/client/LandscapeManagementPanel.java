@@ -15,6 +15,34 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.security.ui.client.UserService;
 
+/**
+ * A panel for managing an SAP Sailing Analytics landscape in the AWS cloud. The main widgets offered will address the
+ * following areas:
+ * <ul>
+ * <li>AWS Credentials: manage an AWS key (with persistence) and the corresponding secret (without persistence, maybe
+ * provided by the browser's password manager)</li>
+ * <li>SSH Key Pairs: generate, import, export, and deploy SSH key pairs used for spinning up and connect to compute
+ * instances</li>
+ * <li>Application server replica sets: single process per instance, or multiple processes per instance; with or without
+ * auto scaling groups and launch configurations for auto-scaling the number of replicas; change the software version running on an application server
+ * replica set while maintaining availability as good as possible by de-registering the master instance from the master target group, then
+ * spinning up a new master, then any desired number of replicas, then swap the old replicas for the new replicas in the public target group
+ * and register the master instance again.</li>
+ * <li>MongoDB replica sets: single node or true replica set; scale out / in by adding / removing instances</li>
+ * <li>RabbitMQ infrastructure: usually a single node per region</li>
+ * <li>Central Reverse Proxies: currently a single node per region, but ideally this could potentially be a
+ * multi-instance scenario for high availability with those instances sharing a common configuration; eventually, the
+ * functionality of these reverse proxies may be taken over by the AWS Application Load Balancer component, such as
+ * central logging as well as specific re-write rules, SSL offloading, certificate management, and http-to-https
+ * forwarding.</li>
+ * <li>Amazon Machine Images (AMIs) of different types: the {@code image-type} tag tells the type; images and their
+ * snapshots can exist in one or more versions, and updates can be triggered explicitly. Maybe at some point we would
+ * have automated tests asserting that an update went well.</li>
+ * </ul>
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class LandscapeManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
 
