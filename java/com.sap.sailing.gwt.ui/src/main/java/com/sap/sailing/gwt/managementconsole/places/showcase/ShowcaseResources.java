@@ -13,7 +13,7 @@ public interface ShowcaseResources extends ClientBundle {
     @Source({ ManagementConsoleResources.COLORS, "Showcase.gss" })
     Style style();
 
-    @Source("Image-EventBackdrop.png")
+    @Source("../../resources/images/Image-EventBackdrop.png")
     ImageResource eventBackdrop();
 
     interface Style extends CssResource {

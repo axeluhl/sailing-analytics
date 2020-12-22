@@ -5,7 +5,7 @@ html, body {
     margin: 0;
 }
 
-html {
+html, .backdropImage {
     background:  no-repeat center center fixed;
     background-image: resourceUrl("backdropGeneralSized");
     background-position: center center ;
@@ -56,17 +56,20 @@ button {
     border-style: solid;
     outline: none;
     color: TEXT_COLOR_PRIMARY;
-    margin-bottom: 1em;
+    margin: 1rem 0;
+    cursor: pointer;
 }
 
 label {
     color: TEXT_COLOR_PRIMARY;
     font-size: 12px;
     font-weight: bold;
+    line-height: 16px;
     margin: 10px 0 20px 0;
     width: 100%;
     display: inline-block;
     outline: none;
+    text-transform: uppercase;
 }
 
 input {
@@ -140,6 +143,7 @@ input::-ms-input-placeholder { /* Microsoft Edge */
     width: auto;
     float: right;
     outline: none;
+    padding: 0;
 }
 
 .one-line-container {
@@ -156,7 +160,7 @@ input::-ms-input-placeholder { /* Microsoft Edge */
 }
 
 @media (min-width: 45em) {
-    html {
+    html, .backdropImage {
        background-image: resourceUrl("backdropGeneral");
     }
 

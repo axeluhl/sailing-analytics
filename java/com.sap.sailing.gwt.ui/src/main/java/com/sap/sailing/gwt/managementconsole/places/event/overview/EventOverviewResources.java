@@ -14,14 +14,14 @@ public interface EventOverviewResources  extends ClientBundle {
     @Source({ ManagementConsoleResources.COLORS, "EventOverview.gss" })
     Style style();
 
-    @Source("Image-EventBackdrop.png")
+    @Source("../../../resources/images/Image-EventBackdrop.png")
     ImageResource eventBackdrop();
 
     interface Style extends CssResource {
 
         @ClassName("featured-marker")
         String featuredMarker();
-        
+
         String cards();
 
         @ClassName("card-panel")

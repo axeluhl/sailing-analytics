@@ -1,14 +1,20 @@
 package com.sap.sailing.gwt.managementconsole.partials.header;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.common.client.DropdownHandler;
 
@@ -26,7 +32,7 @@ public class Header extends Composite {
     AnchorElement logoAnchor, navigationAnchor;
 
     @UiField
-    Element mobileMenu;
+    Element actions, mobileMenu;
 
     @UiField
     FlowPanel desktopMenu, mobileMenuActions;
@@ -48,27 +54,62 @@ public class Header extends Composite {
         };
     }
 
-    public void addMenuItem(final String text, final ClickHandler handler) {
+    public HasVisibility addMenuItem(final String text, final ClickHandler handler) {
         final Anchor desktopItem = new Anchor(text);
         desktopItem.addClickHandler(handler);
         desktopMenu.add(desktopItem);
 
         final Anchor mobileItem = new Anchor(text);
-        mobileItem.addClickHandler(event -> {
+        mobileItem.addClickHandler(new CloseMenuClickHandler(handler));
+        mobileMenuActions.add(mobileItem);
+
+        return new MenuItem(desktopItem, mobileItem);
+    }
+
+    public HasVisibility initUserDetailsItem(final ClickHandler handler) {
+        userDetails.addClickHandler(handler);
+        userDetailsMobile.addClickHandler(new CloseMenuClickHandler(handler));
+        return new MenuItem(userDetails, userDetailsMobile);
+    }
+
+    public HasVisibility initSignOutItem(final ClickHandler handler) {
+        signOutMobile.addClickHandler(new CloseMenuClickHandler(handler));
+        return new MenuItem(signOutMobile);
+    }
+
+    private class CloseMenuClickHandler implements ClickHandler {
+
+        private final ClickHandler handler;
+
+        private CloseMenuClickHandler(final ClickHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void onClick(final ClickEvent event) {
             Header.this.dropdownHandler.setVisible(false);
             handler.onClick(event);
-        });
-        mobileMenuActions.add(mobileItem);
+        }
     }
 
-    public void setUserDetailsHandler(final ClickHandler handler) {
-        userDetails.addClickHandler(handler);
-        userDetailsMobile.addClickHandler(handler);
-    }
+    private class MenuItem implements HasVisibility {
 
-    public void setSignOutHandler(final ClickHandler handler) {
-        signOutMobile.addClickHandler(handler);
-    }
+        private final Set<HasVisibility> items = new HashSet<>();
 
+        private MenuItem(final HasVisibility... anchors) {
+            this.items.addAll(Arrays.asList(anchors));
+        }
+
+        @Override
+        public boolean isVisible() {
+            return items.stream().anyMatch(HasVisibility::isVisible);
+        }
+
+        @Override
+        public void setVisible(final boolean visible) {
+            items.forEach(item -> item.setVisible(visible));
+        }
+
+    }
 
 }

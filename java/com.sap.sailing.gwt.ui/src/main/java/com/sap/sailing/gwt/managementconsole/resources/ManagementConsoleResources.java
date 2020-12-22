@@ -73,6 +73,8 @@ public interface ManagementConsoleResources extends ClientBundle {
 
     interface Style extends CssResource {
 
+        String backdropImage();
+
         String primaryButton();
 
         String secondaryButton();
@@ -81,7 +83,7 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("header-line")
         String headerLine();
-        
+
         String right();
 
         @ClassName("one-line-container")
@@ -92,7 +94,7 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("one-line-auto-width-item")
         String oneLineAutoWidthItem();
-        
+
         String ellipsis();
 
     }
@@ -127,12 +129,12 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-previous")
         String iconPrevious();
-        
+
         @ClassName("icon-navigation")
         String iconNavigation();
-        
+
         @ClassName("icon-elipse")
         String iconElipse();
-        
+
     }
 }

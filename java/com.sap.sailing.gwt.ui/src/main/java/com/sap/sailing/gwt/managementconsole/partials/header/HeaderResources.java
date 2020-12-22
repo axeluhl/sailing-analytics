@@ -13,7 +13,7 @@ public interface HeaderResources extends AuthenticationResources {
     @Source({ ManagementConsoleResources.COLORS, "Header.gss" })
     Style style();
 
-    @Source("sap-logo.png")
+    @Source("../../resources/sap-logo.png")
     ImageResource sapLogo();
 
     public interface Style extends CssResource {
