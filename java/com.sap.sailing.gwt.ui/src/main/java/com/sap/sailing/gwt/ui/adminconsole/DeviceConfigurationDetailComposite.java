@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -23,14 +26,21 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -42,17 +52,16 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
-public class DeviceConfigurationDetailComposite extends Composite {
-
+public class DeviceConfigurationDetailComposite extends Composite implements Displayer<EventDTO> {
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected final SailingServiceWriteAsync sailingServiceWrite;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
-    private CaptionPanel captionPanel;
-    private VerticalPanel contentPanel;
-    private Button cloneButton;
-    private Button updateButton;
+    private final CaptionPanel captionPanel;
+    private final VerticalPanel contentPanel;
+    private final Button cloneButton;
+    private final Button updateButton;
     protected DeviceConfigurationWithSecurityDTO originalConfiguration;
     protected TextBox uuidBox;
     protected TextBox identifierBox;
@@ -60,6 +69,25 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private TextBox mailRecipientBox;
     private StringListEditorComposite courseNamesList;
     private CheckBox overwriteRegattaConfigurationBox;
+    
+    /**
+     * names are the event names, values are the event UUIDs as String
+     */
+    private final ListBox eventListBox;
+    
+    private final Map<UUID, EventDTO> eventsById;
+
+    /**
+     * names are the course area names, values are the course area UUIDs as String
+     */
+    private final ListBox courseAreaListBox;
+    
+    /**
+     * Names are the internationalized descriptions of the roles, values are their corresponding integer values as
+     * String, or the empty string for the first empty "placeholder" record.
+     */
+    private final ListBox priorityListBox;
+    
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private final UserService userService;
 
@@ -68,12 +96,21 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    public DeviceConfigurationDetailComposite(Presenter presenter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
+        this.eventsById = new HashMap<>();
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
+        priorityListBox = createPriorityListBox();
+        courseAreaListBox = new ListBox();
+        courseAreaListBox.addChangeHandler(e->markAsDirty(true));
+        eventListBox = new ListBox();
+        eventListBox.addChangeHandler(e->{
+            markAsDirty(true);
+            final String selectedValue = eventListBox.getSelectedValue();
+            fillCourseAreaListBox(eventsById.get(selectedValue==null||selectedValue.isEmpty() ? null : UUID.fromString(selectedValue)));
+        });
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
@@ -104,8 +141,38 @@ public class DeviceConfigurationDetailComposite extends Composite {
         verticalPanel.add(actionPanel);
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
-        setConfiguration(null);
-        this.userService = userService;
+        setConfiguration(/* configuration to display */ null);
+        this.userService = presenter.getUserService();
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(this);
+    }
+
+    private ListBox createPriorityListBox() {
+        final ListBox result = new ListBox();
+        result.addItem(stringMessages.selectARole(), "");
+        for (final AuthorPriority priority : AuthorPriority.values()) {
+            result.addItem(AuthorPriorityFormatter.getDescription(priority, stringMessages), Integer.toString(priority.getPriority()));
+        }
+        return result;
+    }
+
+    @Override
+    public void fill(Iterable<EventDTO> events) {
+        eventListBox.clear();
+        eventsById.clear();
+        eventListBox.addItem(stringMessages.selectSailingEvent(), "");
+        final List<EventDTO> eventsSortedByName = new ArrayList<>();
+        Util.addAll(events, eventsSortedByName);
+        Collections.sort(eventsSortedByName, (e1, e2)->{
+            int result = e1.getName().compareTo(e2.getName());
+            if (result == 0) {
+                result = e1.getId().compareTo(e2.getId());
+            }
+            return result;
+        });
+        for (final EventDTO event : eventsSortedByName) {
+            eventsById.put(event.getId(), event);
+            eventListBox.addItem(event.getName(), event.getId().toString());
+        }
     }
 
     public void setConfiguration(final DeviceConfigurationWithSecurityDTO config) {
@@ -117,6 +184,31 @@ public class DeviceConfigurationDetailComposite extends Composite {
             setVisible(true);
         }
     }
+    
+    private void updateEventSelection(UUID eventId) {
+        for (int i=0; i<eventListBox.getItemCount(); i++) {
+            final String value = eventListBox.getValue(i);
+            if (eventId == null && value.isEmpty() || Util.equalsWithNull(eventId==null?null:eventId.toString(), value)) {
+                eventListBox.setSelectedIndex(i);
+                fillCourseAreaListBox(eventsById.get(eventId));
+            }
+        }
+    }
+
+    private void fillCourseAreaListBox(EventDTO event) {
+        courseAreaListBox.clear();
+        courseAreaListBox.addItem(stringMessages.selectCourseArea(), "");
+        if (event != null) {
+            int i=1;
+            for (final CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
+                courseAreaListBox.addItem(courseArea.getName(), courseArea.getId().toString());
+                if (Util.equalsWithNull(originalConfiguration.courseAreaId, courseArea.getId())) {
+                    courseAreaListBox.setSelectedIndex(i);
+                }
+                i++;
+            }
+        }
+    }
 
     private void setupUi(DeviceConfigurationWithSecurityDTO config) {
         clearUi();
@@ -124,7 +216,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
         this.currentRegattaConfiguration = config.regattaConfiguration;
         setupGeneral();
         setupRegattaConfiguration();
-
         final boolean hasUpdatePermission = userService.hasPermission(config, DefaultActions.UPDATE);
         final boolean hasUpdateAndCreatePermission = hasUpdatePermission
                 && userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION);
@@ -133,6 +224,21 @@ public class DeviceConfigurationDetailComposite extends Composite {
         allowedCourseAreasList.setEnabled(hasUpdatePermission);
         courseNamesList.setEnabled(hasUpdatePermission);
         overwriteRegattaConfigurationBox.setEnabled(hasUpdatePermission);
+        updateEventSelection(config.eventId);
+        updatePrioritySelection(config.priority);
+    }
+
+    private void updatePrioritySelection(Integer priority) {
+        if (priority == null) {
+            priorityListBox.setSelectedIndex(0);
+        } else {
+            for (int i=1; i<priorityListBox.getItemCount(); i++) {
+                if (new Integer(priorityListBox.getValue(i)).equals(priority)) {
+                    priorityListBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void setupRegattaConfiguration() {
@@ -175,15 +281,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(5, 2);
+        Grid grid = new Grid(8, 2);
         int row = 0;
         identifierBox = new TextBox();
         identifierBox.setWidth("80%");
         identifierBox.setText(originalConfiguration.name);
         identifierBox.setReadOnly(true);
-        grid.setWidget(row, 0, new Label("Identifier"));
+        grid.setWidget(row, 0, new Label(stringMessages.identifier()));
         HorizontalPanel panel = new HorizontalPanel();
-        final Button qrCodeButton = getQrCodeButton();
+        final Button qrCodeButton = createQrCodeButton();
         panel.add(identifierBox);
         panel.add(qrCodeButton);
         grid.setWidget(row++, 1, panel);
@@ -196,6 +302,12 @@ public class DeviceConfigurationDetailComposite extends Composite {
         setupCourseAreasBox(grid, row++);
         setupRecipientBox(grid, row++);
         setupCourseNameBox(grid, row++);
+        grid.setWidget(row, 0, new Label(stringMessages.event()));
+        grid.setWidget(row++, 1, eventListBox);
+        grid.setWidget(row, 0, new Label(stringMessages.courseArea()));
+        grid.setWidget(row++, 1, courseAreaListBox);
+        grid.setWidget(row, 0, new Label(stringMessages.authorPriority()));
+        grid.setWidget(row++, 1, priorityListBox);
         contentPanel.add(grid);
     }
 
@@ -268,6 +380,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
         if (overwriteRegattaConfigurationBox.getValue()) {
             result.regattaConfiguration = currentRegattaConfiguration;
         }
+        if (!eventListBox.getSelectedValue().isEmpty()) {
+            result.eventId = UUID.fromString(eventListBox.getSelectedValue());
+        }
+        if (!courseAreaListBox.getSelectedValue().isEmpty()) {
+            result.courseAreaId = UUID.fromString(courseAreaListBox.getSelectedValue());
+        }
+        if (!priorityListBox.getSelectedValue().isEmpty()) {
+            result.priority = Integer.decode(priorityListBox.getSelectedValue());
+        }
         return result;
     }
 
@@ -305,7 +426,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
     };
 
-    private Button getQrCodeButton() {
+    private Button createQrCodeButton() {
         Button qrCodeButton = new Button(stringMessages.qrSync());
         qrCodeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -337,7 +458,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void createAndShowDialogForAccessToken(String accessToken) {
-        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(), stringMessages, accessToken);
+        final DeviceConfigurationWithSecurityDTO config = getResult();
+        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(),
+                config.eventId, config.courseAreaId, config.priority, accessToken, stringMessages);
         dialog.show();
         dialog.center();
     }

@@ -30,7 +30,6 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();

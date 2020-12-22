@@ -104,14 +104,11 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         this.presenter = presenter;
-        this.regattaListComposite = new StructureImportListComposite(presenter,
-                this, errorReporter, stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(presenter, this, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
-
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         createUI(mainPanel);
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
@@ -126,7 +123,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private void createUI(VerticalPanel mainPanel) {        
         final Panel progressPanel = new FlowPanel();
         progressPanel.add(busyIndicator);
-
         eventIDTextBox = new TextBox();
         eventIDTextBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -166,31 +162,25 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 listRegattasAndTheirStructures();
             }
         });
-
         Grid eventURLGrid = new Grid(3, 2);
         eventURLGrid.setWidget(0, 0, new Label(stringMessages.manage2SailEvent() + stringMessages.id() + ":"));
         eventURLGrid.setWidget(0, 1, eventIDTextBox);
         eventURLGrid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
         eventURLGrid.setWidget(1, 1, jsonURLTextBox);
         eventURLGrid.setWidget(2, 1, listRegattasButton);
-
         mainPanel.add(progressPanel);
         mainPanel.add(eventURLGrid);
-        
         regattaImportPanel = new CaptionPanel(stringMessages.manage2SailEvent());
         mainPanel.add(regattaImportPanel);
         VerticalPanel regattaImportContentPanel = new VerticalPanel();
         regattaImportPanel.setContentWidget(regattaImportContentPanel);
-
         editSeriesPanel = new VerticalPanel();
-
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setSpacing(10);
         hPanel.add(regattaListComposite);
         hPanel.setCellWidth(regattaListComposite, "50%");
         hPanel.add(editSeriesPanel);
         hPanel.setCellWidth(editSeriesPanel, "50%");
-        
         regattaImportContentPanel.add(hPanel);
         regattaImportContentPanel.add(importDetailsButton);
     }
@@ -466,19 +456,17 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
     
     private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
-
         @Override
         public void fill(Iterable<EventDTO> result) {
             fillEvents(result);
         }
-        
     };
     
     public Displayer<EventDTO> getEventsDisplayer() {
         return eventsDisplayer;
     }
 
-    public void fillEvents(Iterable<EventDTO> result) {
+    private void fillEvents(Iterable<EventDTO> result) {
         existingEvents = new ArrayList<EventDTO>();
         result.forEach(existingEvents::add);
         Collections.sort(existingEvents, new Comparator<EventDTO>() {
@@ -493,5 +481,4 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             sailingEventsListBox.addItem(event.getName());
         }
     }
-
 }

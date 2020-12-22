@@ -102,7 +102,6 @@ public class RegattaListComposite extends Composite {
         return regattasDisplayer;
     }
 
-    @SuppressWarnings("unchecked")
     public RegattaListComposite(final Presenter presenter, final StringMessages stringMessages) {
         this.sailingServiceWrite = presenter.getSailingService();
         this.presenter = presenter;
@@ -110,7 +109,6 @@ public class RegattaListComposite extends Composite {
         this.stringMessages = stringMessages;
         this.userService = presenter.getUserService();
         allRegattas = new ArrayList<RegattaDTO>();
-        
         final VerticalPanel panel = new VerticalPanel();
         Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
@@ -118,9 +116,7 @@ public class RegattaListComposite extends Composite {
         noRegattasLabel.ensureDebugId("NoRegattasLabel");
         noRegattasLabel.setWordWrap(false);
         panel.add(noRegattasLabel);
-
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
                 regattaListDataProvider, stringMessages) {
             @Override
@@ -141,11 +137,12 @@ public class RegattaListComposite extends Composite {
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         regattaTable = createRegattaTable(userService);
         regattaTable.ensureDebugId("RegattasCellTable");
-        refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
+        @SuppressWarnings("unchecked")
+        final RefreshableMultiSelectionModel<RegattaDTO> selectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
+        refreshableRegattaMultiSelectionModel = selectionModel;
         regattaTable.setVisible(false);
         setUpdatePermissionFilter(userService);
         panel.add(filterablePanelRegattas);
-
         panel.add(regattaTable);
         initWidget(panel);
     }
