@@ -15,6 +15,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -270,7 +271,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                     instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
                 }
             }
-            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(IMAGE_TYPE_TAG_NAME, imageType)));
+            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(Landscape.IMAGE_TYPE_TAG_NAME, imageType)));
             final TimePoint startedWaiting = TimePoint.now();
             while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                 logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()

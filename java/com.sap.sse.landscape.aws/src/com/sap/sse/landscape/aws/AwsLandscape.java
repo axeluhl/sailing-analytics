@@ -160,6 +160,12 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
+    default AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithType(Region region, String imageType) {
+        return getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
+    }
+
+    Iterable<String> getMachineImageTypes(Region region);
+    
     void setSnapshotName(Region region, String snapshotId, String snapshotName);
     
     void deleteSnapshot(Region region, String snapshotId);

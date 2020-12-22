@@ -83,8 +83,14 @@ public class TestProcedures {
     }
     
     @Test
-    public 
-    void testStartupEmptyMultiServerAndDeployAnotherProcess() throws Exception {
+    public void testGetImageTypes() {
+        final Iterable<String> imageTypes = landscape.getMachineImageTypes(region);
+        assertTrue(Util.contains(imageTypes, "sailing-analytics-server"));
+        assertTrue(Util.contains(imageTypes, "mongodb-server"));
+    }
+    
+    @Test
+    public void testStartupEmptyMultiServerAndDeployAnotherProcess() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
         final StartMultiServer.Builder<?, String> builder = StartMultiServer.builder();

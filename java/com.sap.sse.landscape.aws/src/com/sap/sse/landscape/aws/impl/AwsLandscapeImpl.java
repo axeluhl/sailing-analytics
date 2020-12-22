@@ -484,6 +484,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public Iterable<String> getMachineImageTypes(com.sap.sse.landscape.Region region) {
+        final DescribeImagesResponse response = getEc2Client(getRegion(region))
+                .describeImages(DescribeImagesRequest.builder().filters(
+                        Filter.builder().name("tag-key").values(IMAGE_TYPE_TAG_NAME).build()).build());
+        return Util.map(response.images(), image->image.tags().stream().filter(t->t.key().equals(IMAGE_TYPE_TAG_NAME)).findAny().get().value());
+    }
+
+    @Override
     public void setSnapshotName(com.sap.sse.landscape.Region region, String snapshotId, String snapshotName) {
         getEc2Client(getRegion(region)).createTags(b->b
                 .resources(snapshotId)

@@ -253,7 +253,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageOfType(String imageType, AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, Region region) {
-        return landscape.getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
+        return landscape.getLatestImageWithType(region, imageType);
     }
     
     protected static <ShardingKey,
