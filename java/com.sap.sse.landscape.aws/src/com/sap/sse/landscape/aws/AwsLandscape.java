@@ -416,6 +416,8 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      */
     MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
 
+    Iterable<MongoEndpoint> getMongoEndpoints(Region region);
+
     /**
      * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
      * 

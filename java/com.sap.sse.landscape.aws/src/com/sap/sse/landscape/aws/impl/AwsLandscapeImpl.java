@@ -7,10 +7,12 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
@@ -48,6 +50,7 @@ import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
+import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
@@ -878,16 +881,52 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
         final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME)) {
-            getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
-                for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
-                    final String[] splitByColon = replicaNameWithOptionalPortColonSeparated.split(MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR);
-                    if (splitByColon[0].trim().equals(mongoReplicaSetName.trim())) {
-                        // standalone; no replica set name provided; maybe a port?
-                        final int port = getMongoPort(splitByColon);
-                        result.addReplica(new MongoProcessInReplicaSetImpl(result, port, host));
+        for (final AwsInstance<ShardingKey, MetricsT> host : getMongoDBHosts(region)) {
+            for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(host)) {
+                if (replicaSetNameAndPort.getA().equals(mongoReplicaSetName)) {
+                    result.addReplica(new MongoProcessInReplicaSetImpl(result, replicaSetNameAndPort.getB(), host));
+                }
+            }
+        }
+        return result;
+    }
+
+    private Iterable<AwsInstance<ShardingKey, MetricsT>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
+        return getHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
+    }
+
+    /**
+     * @param host
+     *            assumed to be a host that has the {@link #MONGO_REPLICA_SETS_TAG_NAME} tag set
+     * @return the replica set name / port number pairs extracted from the tag value
+     */
+    private Iterable<Pair<String, Integer>> getMongoEndpointSpecificationsAsReplicaSetNameAndPort(final AwsInstance<ShardingKey, MetricsT> host) {
+        final List<Pair<String, Integer>> result = new ArrayList<>();
+        getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
+            for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
+                final String[] splitByColon = replicaNameWithOptionalPortColonSeparated.split(MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR);
+                final int port = getMongoPort(splitByColon);
+                result.add(new Pair<>(splitByColon[0].trim(), port));
+            }});
+        return result;
+    }
+
+    @Override
+    public Iterable<MongoEndpoint> getMongoEndpoints(com.sap.sse.landscape.Region region) {
+        final Set<MongoEndpoint> result = new HashSet<>();
+        final Set<String> replicaSetsCreated = new HashSet<>();
+        for (final AwsInstance<ShardingKey, MetricsT> mongoDBHost : getMongoDBHosts(region)) {
+            for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(mongoDBHost)) {
+                if (replicaSetNameAndPort.getA() != null && !replicaSetNameAndPort.getA().isEmpty()) { // non-empty replica set name
+                    if (!replicaSetsCreated.contains(replicaSetNameAndPort.getA())) {
+                        replicaSetsCreated.add(replicaSetNameAndPort.getA());
+                        result.add(getDatabaseConfigurationForReplicaSet(region, replicaSetNameAndPort.getA()));
                     }
-                }});
+                } else {
+                    // single instance:
+                    result.add(new MongoProcessImpl(replicaSetNameAndPort.getB(), mongoDBHost));
+                }
+            }
         }
         return result;
     }

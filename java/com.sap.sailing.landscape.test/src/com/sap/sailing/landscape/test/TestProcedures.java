@@ -46,7 +46,9 @@ import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
+import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.regions.Region;
@@ -87,6 +89,22 @@ public class TestProcedures {
         final Iterable<String> imageTypes = landscape.getMachineImageTypes(region);
         assertTrue(Util.contains(imageTypes, "sailing-analytics-server"));
         assertTrue(Util.contains(imageTypes, "mongodb-server"));
+    }
+    
+    @Test
+    public void testGetMongoEndpoints() {
+        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1));
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+            (mongoEndpoint instanceof MongoReplicaSet &&
+             ((MongoReplicaSet) mongoEndpoint).getName().equals("live") &&
+             Util.size(((MongoReplicaSet) mongoEndpoint).getInstances()) == 3))));
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+        (mongoEndpoint instanceof MongoReplicaSet &&
+             ((MongoReplicaSet) mongoEndpoint).getName().equals("archive") &&
+             Util.size(((MongoReplicaSet) mongoEndpoint).getInstances()) == 1)))); // unless archive restart is ongoing...
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+            (mongoEndpoint instanceof MongoProcess &&
+             ((MongoProcess) mongoEndpoint).getPort() == 10202))));
     }
     
     @Test
