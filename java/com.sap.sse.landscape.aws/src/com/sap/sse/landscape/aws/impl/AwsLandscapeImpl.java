@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -35,6 +36,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -970,6 +972,25 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
             result = null;
         }
         return result;
+    }
+    
+    @Override
+    public Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+        final List<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> result = new ArrayList<>();
+        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, tagName)) {
+            final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> applicationProcessHost =
+                    new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);
+            result.add(applicationProcessHost);
+        }
+        return result;
+    }
+    
+    @Override
+    public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+        // TODO implement AwsLandscapeImpl.getApplicationReplicaSetsByTag
+        return null;
     }
 
     @Override

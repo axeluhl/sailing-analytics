@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -15,6 +16,7 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -437,4 +439,30 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * is returned. Otherwise, the {@link Optional} returned {@link Optional#isPresent() is not present}.
      */
     Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName);
+
+    /**
+     * Obtains all hosts with a tag named {@code tagName}, regardless the tag's value, and returns them as
+     * {@link ApplicationProcessHost}s. Callers have to provide the bi-function that produces instances of the desired
+     * {@link ApplicationProcess} subtype for each server directory holding a process installation on that host.
+     * 
+     * @param processFactoryFromHostAndServerDirectory
+     *            takes the host and the server directory as arguments and is expected to produce an
+     *            {@link ApplicationProcess} object of some sort.
+     */
+    Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(Region region,
+            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
+
+    /**
+     * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
+     * specified by {@code tagName} and discovers all application server processes configured on it. These are then
+     * grouped by {@link ApplicationProcess#getServerName(Optional) server name}, and using
+     * {@link ApplicationProcess#getMaster()} the master/replica relationships between the processes with equal server
+     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
+     * 
+     * @param processFactoryFromHostAndServerDirectory
+     *            takes the host and the server directory as arguments and is expected to produce an
+     *            {@link ApplicationProcess} object of some sort.
+     */
+    Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
+            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
 }
