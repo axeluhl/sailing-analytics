@@ -33,7 +33,6 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
-import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -52,7 +51,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
-public class DeviceConfigurationDetailComposite extends Composite implements Displayer<EventDTO> {
+public class DeviceConfigurationDetailComposite extends Composite {
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected final SailingServiceWriteAsync sailingServiceWrite;
@@ -143,7 +142,7 @@ public class DeviceConfigurationDetailComposite extends Composite implements Dis
         initWidget(captionPanel);
         setConfiguration(/* configuration to display */ null);
         this.userService = presenter.getUserService();
-        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(this);
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(eventDTOs->fillEvents(eventDTOs));
     }
 
     private ListBox createPriorityListBox() {
@@ -155,8 +154,7 @@ public class DeviceConfigurationDetailComposite extends Composite implements Dis
         return result;
     }
 
-    @Override
-    public void fill(Iterable<EventDTO> events) {
+    private void fillEvents(Iterable<EventDTO> events) {
         eventListBox.clear();
         eventsById.clear();
         eventListBox.addItem(stringMessages.selectSailingEvent(), "");

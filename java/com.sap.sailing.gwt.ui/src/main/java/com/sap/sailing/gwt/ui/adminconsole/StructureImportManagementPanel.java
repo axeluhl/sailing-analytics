@@ -71,6 +71,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private List<EventDTO> existingEvents;
     private ListBox sailingEventsListBox;
     
+    private final Displayer<EventDTO> eventsDisplayer;
+    
     /**
      * Holds one {@link RegattaDTO} for each distinct regatta structure. The user can work with this panel
      * to adjust the defaults for each structure recognized, working with the table selection to show/hide
@@ -105,6 +107,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.stringMessages = stringMessages;
         this.presenter = presenter;
         this.regattaListComposite = new StructureImportListComposite(presenter, this, errorReporter, stringMessages);
+        this.eventsDisplayer = result->fillEvents(result);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -189,7 +192,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      * Adds an event selector and a "create new event" button to the {@link #editSeriesPanel} in its first row
      */
     private Widget createEventSelectionAndCreateEventButtonUI() {
-        Grid grid = new Grid(1, 2);
+        final Grid grid = new Grid(1, 2);
         sailingEventsListBox = new ListBox();
         sailingEventsListBox.setMultipleSelect(false);
         sailingEventsListBox.addChangeHandler(new ChangeHandler() {
@@ -198,9 +201,10 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 updateImportRegattasButtonEnabledness();
             }
         });
+        presenter.getEventsRefresher().callFillAndReloadInitially(getEventsDisplayer());
         sailingEventsListBox.ensureDebugId("EventListBox");
         grid.setWidget(0, 0, sailingEventsListBox);
-        Button newEventBtn = new Button(stringMessages.createNewEvent());
+        final Button newEventBtn = new Button(stringMessages.createNewEvent());
         newEventBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -419,7 +423,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
-        
         final List<RegattaDTO> regattaConfigurationsToCreate = new ArrayList<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
@@ -455,30 +458,26 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         return regattaStructures.get(regatta);
     }
     
-    private final Displayer<EventDTO> eventsDisplayer = new Displayer<EventDTO>() {
-        @Override
-        public void fill(Iterable<EventDTO> result) {
-            fillEvents(result);
-        }
-    };
-    
     public Displayer<EventDTO> getEventsDisplayer() {
         return eventsDisplayer;
     }
 
     private void fillEvents(Iterable<EventDTO> result) {
-        existingEvents = new ArrayList<EventDTO>();
-        result.forEach(existingEvents::add);
-        Collections.sort(existingEvents, new Comparator<EventDTO>() {
-            private final NaturalComparator comp = new NaturalComparator();
-            @Override
-            public int compare(EventDTO o1, EventDTO o2) {
-                return comp.compare(o1.getName(), o2.getName());
+        if (sailingEventsListBox != null) { // is initialized only one a regatta structure has been loaded
+            sailingEventsListBox.clear();
+            existingEvents = new ArrayList<EventDTO>();
+            result.forEach(existingEvents::add);
+            Collections.sort(existingEvents, new Comparator<EventDTO>() {
+                private final NaturalComparator comp = new NaturalComparator();
+                @Override
+                public int compare(EventDTO o1, EventDTO o2) {
+                    return comp.compare(o1.getName(), o2.getName());
+                }
+            });
+            sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
+            for (EventDTO event : existingEvents) {
+                sailingEventsListBox.addItem(event.getName());
             }
-        });
-        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-        for (EventDTO event : existingEvents) {
-            sailingEventsListBox.addItem(event.getName());
         }
     }
 }

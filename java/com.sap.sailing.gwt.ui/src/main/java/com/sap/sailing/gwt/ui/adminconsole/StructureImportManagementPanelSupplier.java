@@ -20,8 +20,7 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
     @Override
     public StructureImportManagementPanel init() {
         logger.info("Create StructureImportManagementPanel");
-        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
-                presenter, stringMessages);
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(presenter, stringMessages);
         structureImportUrlsManagementPanel.ensureDebugId("structureImportUrlsManagementPanel");
         presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(structureImportUrlsManagementPanel.getEventsDisplayer());
         return structureImportUrlsManagementPanel;
@@ -42,5 +41,4 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
             }
         });
     }
-
 }
