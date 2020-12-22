@@ -21,7 +21,6 @@ public class QRCodeComposite extends Composite {
         qrCodeContainer.getElement().setId(qrCodeDivId);
         qrCodeContainer.setHeight(sizeInPixel + "px");
         qrCodeContainer.setWidth(sizeInPixel + "px");
-        //
         initWidget(qrCodeContainer);
         qrCodeWrapper = QRCodeWrapper.wrap(qrCodeContainer, sizeInPixel, errorCorrectionLevel);
     }
