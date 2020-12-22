@@ -6,9 +6,13 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.mainframe.MainFrameResources" />
-    
+
     <g:HeaderPanel>
-        <p:header.Header ui:field="header" addStyleNames="{local_res.style.header}"/>
-        <g:ScrollPanel ui:field="contentContainer" addStyleNames="{local_res.style.content}"/>
+        <p:header.Header ui:field="header" addStyleNames="{local_res.style.header}" />
+        <p:authentication.decorator.AuthorizedDecorator ui:field="decorator">
+            <p:content>
+                <g:ScrollPanel ui:field="contentContainer" addStyleNames="{local_res.style.content}" />
+            </p:content>
+        </p:authentication.decorator.AuthorizedDecorator>
     </g:HeaderPanel>
 </ui:UiBinder>

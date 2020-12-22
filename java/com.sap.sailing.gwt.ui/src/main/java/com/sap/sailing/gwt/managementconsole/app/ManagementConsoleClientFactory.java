@@ -6,9 +6,10 @@ import com.sap.sailing.gwt.managementconsole.services.EventService;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.client.WithSecurity;
 
-public interface ManagementConsoleClientFactory extends WithSecurity {
+public interface ManagementConsoleClientFactory extends WithSecurity, WithAuthenticationManager {
 
     public PlaceController getPlaceController();
 
@@ -17,9 +18,9 @@ public interface ManagementConsoleClientFactory extends WithSecurity {
     public SailingServiceWriteAsync getSailingService();
 
     public MediaServiceWriteAsync getMediaServiceWrite();
-    
+
     public EventService getEventService();
-    
+
     public ViewFactory getViewFactory();
 
 }

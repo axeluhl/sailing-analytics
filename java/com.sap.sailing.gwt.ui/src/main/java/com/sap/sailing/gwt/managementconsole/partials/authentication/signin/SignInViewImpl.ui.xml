@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.authentication.AuthenticationResources" />
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    
+    <g:HTMLPanel addStyleNames="{app_res.style.backdropImage} {local_res.style.signIn}">
+        <div class="{res.mediaCss.grid} {local_res.style.content}">
+            <div class="{res.mediaCss.column}">
+                <a ui:field="logoAnchor" class="{local_res.style.logo}" target="_blank"></a>
+            </div>
+            <div class="{res.mediaCss.column}">
+                <label class="{res.mediaCss.small12}"><ui:text from="{i18n.username}" /></label>
+                <g:TextBox styleName="{res.mediaCss.small12}" ui:field="username" />
+            </div>
+            <div class="{res.mediaCss.column}">
+                <label class="{res.mediaCss.small12}"><ui:text from="{i18n.password}" /></label>
+                <g:PasswordTextBox styleName="{res.mediaCss.small12}" ui:field="password" />
+            </div>
+            <div class="{res.mediaCss.column} {app_res.style.secondaryCtaButton} {local_res.style.link}">
+                <g:Button ui:field="forgotPassword" text="{i18n.forgotPassword}" styleName="{res.mediaCss.small12}" />
+            </div>
+            <div class="{res.mediaCss.column}">
+                <g:Button ui:field="signIn" text="{i18n.signIn}" styleName="{res.mediaCss.small12} {app_res.style.primaryButton}" />
+                <g:Button ui:field="createAccount" text="{i18n.signUp}" styleName="{res.mediaCss.small12} {app_res.style.secondaryButton}" /> 
+            </div>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

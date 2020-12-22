@@ -7,9 +7,13 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.managementconsole.partials.authentication.decorator.AuthorizedDecorator;
 import com.sap.sailing.gwt.managementconsole.partials.header.Header;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
-public class MainFrame extends ResizeComposite {
+public class MainFrame extends ResizeComposite implements NeedsAuthenticationContext {
 
     interface MainFrameUiBinder extends UiBinder<Widget, MainFrame> {
     }
@@ -19,22 +23,32 @@ public class MainFrame extends ResizeComposite {
     @UiField
     MainFrameResources local_res;
 
+    @UiField(provided = true)
+    AuthorizedDecorator decorator;
+
     @UiField
     Header header;
 
     @UiField
     ScrollPanel contentContainer;
 
-    public MainFrame() {
+    public MainFrame(final NotLoggedInPresenter presenter) {
+        this.decorator = new AuthorizedDecorator(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         local_res.style().ensureInjected();
     }
 
-    public AcceptsOneWidget getContentContainer() {
-        return contentContainer;
+    @Override
+    public void setAuthenticationContext(final AuthenticationContext authenticationContext) {
+        decorator.setAuthenticationContext(authenticationContext);
+        header.setAuthenticationContext(authenticationContext);
     }
 
     public Header getHeader() {
         return header;
+    }
+
+    public AcceptsOneWidget getContentContainer() {
+        return contentContainer;
     }
 }

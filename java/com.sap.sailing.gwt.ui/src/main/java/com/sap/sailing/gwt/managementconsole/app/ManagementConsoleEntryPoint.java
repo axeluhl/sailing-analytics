@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.managementconsole.app;
 
+import static com.sap.sse.security.ui.authentication.AuthenticationPlaces.SIGN_IN;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,9 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.UserService;
 
 public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
@@ -50,7 +55,11 @@ public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint 
         final EventBus eventBus = new SimpleEventBus();
         final SailingServiceWriteAsync service = getSailingService();
         final ManagementConsoleClientFactory clientFactory = new ManagementConsoleClientFactoryImpl(eventBus, service);
-        final MainFrame mainFrame = new MainFrame();
+        final MainFrame mainFrame = new MainFrame(() -> eventBus.fireEvent(new AuthenticationRequestEvent(SIGN_IN)));
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event -> {
+            mainFrame.setAuthenticationContext(event.getCtx());
+            menuItemConfigs.forEach(c -> c.validate(event.getCtx()));
+        });
         initActivitiesAndPlaces(clientFactory, eventBus, mainFrame);
         initMenuItems(clientFactory, mainFrame.getHeader());
     }

@@ -17,8 +17,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.common.client.DropdownHandler;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
-public class Header extends Composite {
+public class Header extends Composite implements NeedsAuthenticationContext {
 
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
@@ -52,6 +54,11 @@ public class Header extends Composite {
                 setStyleName(mobileMenu, local_res.style().active(), dropdownShown);
             }
         };
+    }
+
+    @Override
+    public void setAuthenticationContext(final AuthenticationContext authenticationContext) {
+        setVisible(actions, authenticationContext.isLoggedIn());
     }
 
     public HasVisibility addMenuItem(final String text, final ClickHandler handler) {

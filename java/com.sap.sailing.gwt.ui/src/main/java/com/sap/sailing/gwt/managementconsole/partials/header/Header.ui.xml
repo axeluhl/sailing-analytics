@@ -9,10 +9,10 @@
     <g:HTMLPanel tag="header" addStyleNames="{local_res.style.header}">
         <a ui:field="logoAnchor" class="{res.mediaCss.hideonsmall} {local_res.style.logo}" target="_blank"></a>
         <g:FlowPanel tag="nav" ui:field="desktopMenu" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
-        <div class="{local_res.style.actions}">
+        <div ui:field="actions" class="{local_res.style.actions}">
             <g:Anchor ui:field="userDetails" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.account}" />
             <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.iconNavigation} {local_res.style.navigation}"/>
-            <nav ui:field="mobileMenu" class="{local_res.style.menuMobile}">
+            <nav ui:field="mobileMenu" class="{res.mediaCss.showonsmall} {local_res.style.menuMobile}">
                 <g:FlowPanel ui:field="mobileMenuActions" />
                 <div class="{local_res.style.separator}" />
                 <g:Anchor ui:field="userDetailsMobile" text="{i18n.userDetails}" />

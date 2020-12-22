@@ -1,0 +1,40 @@
+.notLoggedIn .message {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: bold;
+    padding: 1rem 0;
+}
+
+.notLoggedIn .control {
+}
+
+.signIn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 1rem;
+    display: flex;
+}
+
+.signIn .content {
+    max-width: 30rem;
+    margin: auto;
+}
+
+.signIn .logo,
+.signIn .logo:hover,
+.signIn .logo:visited {
+    display: inline-block;
+    gwt-sprite: "sapLogo";
+    background-size: cover;
+    width: 80px;
+    height: 40px;
+    text-decoration: none;
+    margin: 1rem 0 3rem;
+}
+
+.signIn .link {
+    margin: -2rem 0 2rem
+}
