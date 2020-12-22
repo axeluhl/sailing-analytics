@@ -334,7 +334,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         this.addToTabPanel(tabPanel, panelToAdd, tabTitle, place, new WildcardPermission(WildcardPermission.WILDCARD_TOKEN));
     }
     
-    public BooleanSupplier anyPermissionCheck(WildcardPermission... requiresAnyOfThesePermissions) {
+    private BooleanSupplier anyPermissionCheck(WildcardPermission... requiresAnyOfThesePermissions) {
         return () -> {
             boolean permitted = false;
             for (WildcardPermission requiredPermission : requiresAnyOfThesePermissions) {
@@ -350,50 +350,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsolePlace place, WildcardPermission... requiresAnyOfThesePermissions) {
         addToTabPanel(tabPanel, panelToAdd, tabTitle, place, anyPermissionCheck(requiresAnyOfThesePermissions));
     }
-    
-    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, BooleanSupplier permissionCheck, AdminConsolePlace place) {
-        VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
-            @Override
-            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
-                child.setTitle(text);
-                tabPanel.add(child, text, asHtml, fireEvents);
-                tabPanel.forceLayout();
-            }
 
-            @Override
-            public boolean remove(Widget child) {
-                return tabPanel.remove(child);
-            }
-            
-            @Override
-            public boolean remove(Widget child, boolean fireEvents) {
-                return tabPanel.remove(tabPanel.getWidgetIndex(child), fireEvents);
-            }
-
-            @Override
-            public Widget getPanel() {
-                return tabPanel;
-            }
-
-            @Override
-            public void selectTab(int index) {
-               tabPanel.selectTab(index);
-            }
-            
-            @Override
-            public void selectTab(int index, boolean fireEvent) {
-                tabPanel.selectTab(index, fireEvent);     
-            }
-
-            @Override
-            public int getWidgetIndex(Widget child) {
-                return tabPanel.getWidgetIndex(child);
-            }
-
-        };
-        addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck, place);
-    }
-    
     public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, AdminConsolePlace place, BooleanSupplier permissionCheck) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
