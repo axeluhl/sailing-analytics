@@ -43,6 +43,7 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -658,4 +659,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void registerCustomizer(SecurityInitializationCustomizer customizer);
 
+    /**
+     * Persist user subscription data
+     */
+    void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
 }

@@ -263,7 +263,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         result.put(DetailType.LEG_TIME_TRAVELED, new TotalTimeColumn(DetailType.LEG_TIME_TRAVELED,
                 new TimeTraveledInSeconds(), detailHeaderStyle, detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_CORRECTED_TIME_TRAVELED,
-                new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.LEG_CORRECTED_TIME_TRAVELED,
+                new TotalTimeColumn(DetailType.LEG_CORRECTED_TIME_TRAVELED,
                         new DurationAsSecondsDetailTypeExtractor(e -> e.correctedTotalTime), detailHeaderStyle,
                         detailColumnStyle, leaderboardPanel));
         result.put(DetailType.LEG_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS,

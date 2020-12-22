@@ -42,7 +42,6 @@ import org.apache.shiro.subject.Subject;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.BaseORCCertificateAssignmentAnalyzer;
 import com.sap.sailing.domain.abstractlog.orc.ORCCertificateAssignmentEvent;
@@ -114,8 +113,6 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceBoatMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -209,6 +206,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -2019,15 +2017,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             Set<CompetitorWithBoatDTO> competitorDTOs)
             throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-
         Map<CompetitorWithBoat, Boat> competitorsToRegister = new HashMap<>();
         for (CompetitorWithBoatDTO dto : competitorDTOs) {
             competitorsToRegister.put(getCompetitor(dto), getBoat(dto.getBoat()));
         }
-
         Map<CompetitorWithBoat, Boat> competitorsRegisteredInRaceLog = new HashMap<>();
         for (final Entry<Competitor, Boat> e : raceColumn.getCompetitorsRegisteredInRacelog(fleet).entrySet()) {
             competitorsRegisteredInRaceLog.put((CompetitorWithBoat) e.getKey(), e.getValue());
@@ -2150,10 +2145,10 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         int flightCount = 0;
         int groupCount = 0;
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if (Util.contains(selectedFlightNames, raceColumn.getName())) {
-                groupCount = 0;
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+            groupCount = 0;
+            for (Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.enableCompetitorRegistrationOnRaceLog(fleet);
+                if (Util.contains(selectedFlightNames, raceColumn.getName())) {
                     Map<CompetitorDTO, BoatDTO> competitors = new HashMap<>();
                     List<Pair<CompetitorDTO, BoatDTO>> competitorsFromPairingList = pairingListDTO.getPairingList()
                             .get(flightCount).get(groupCount);
@@ -2165,14 +2160,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), competitors);
                     groupCount++;
-                }
-                flightCount++;
-            } else {
-                for (Fleet fleet : raceColumn.getFleets()) {
+                } else {
                     this.setCompetitorRegistrationsInRaceLog(leaderboard.getName(), raceColumn.getName(),
                             fleet.getName(), new HashSet<CompetitorWithBoatDTO>());
                 }
             }
+            flightCount++;
         }
         if (leaderboard instanceof LeaderboardThatHasRegattaLike && flightMultiplier > 1) {
             final IsRegattaLike regattaLike = ((LeaderboardThatHasRegattaLike) leaderboard).getRegattaLike();
@@ -2185,31 +2178,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void addMarkToRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
-        getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
         Mark mark = convertToMark(markDTO, false);
-
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
-        regattaLog.add(event);
+        getService().addMarkToRegattaLog(leaderboardName, mark);
     }
 
     @Override
-    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
-            throws DoesNotHaveRegattaLogException, NotFoundException {
-        getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(leaderboardName));
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog,
-                /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
-        RegattaLogDefineMarkEvent eventToRevoke = null;
-        for (RegattaLogEvent event : regattaLogDefineMarkEvents) {
-            RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) event;
-            if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())) {
-                eventToRevoke = defineMarkEvent;
-                break;
-            }
-        }
-        regattaLog.revokeDefineMarkEventAndRelatedDeviceMappings(eventToRevoke, getService().getServerAuthor(), logger);
+    public void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO)
+            throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException {
+        getService().revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markDTO.getIdAsString());
     }
 
     @Override
@@ -2748,7 +2724,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+    public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) throws IllegalStateException {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, deviceConfiguration.getTypeRelativeObjectIdentifier(),
                 /* display name */ deviceConfiguration.getName(), () -> {
@@ -3570,6 +3546,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
+        configuration.setEventId(dto.eventId);
+        configuration.setCourseAreaId(dto.courseAreaId);
+        configuration.setPriority(dto.priority);
         return configuration;
     }
     

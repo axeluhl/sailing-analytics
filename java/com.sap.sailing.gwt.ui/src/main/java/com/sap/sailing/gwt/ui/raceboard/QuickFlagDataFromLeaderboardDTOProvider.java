@@ -124,7 +124,7 @@ public class QuickFlagDataFromLeaderboardDTOProvider extends AbstractQuickFlagDa
                         final LeaderboardRowDTO row = leaderboard.rows.get(c);
                         final int oneBasedLegNumber;
                         Double speedInKnots = null;
-                        if (row != null) {
+                        if (row != null && row.fieldsByRaceColumnName.get(raceColumnName) != null) {
                             final LeaderboardEntryDTO raceEntryForCompetitor = row.fieldsByRaceColumnName
                                     .get(raceColumnName);
                             List<LegEntryDTO> legDetailsList = raceEntryForCompetitor.legDetails;

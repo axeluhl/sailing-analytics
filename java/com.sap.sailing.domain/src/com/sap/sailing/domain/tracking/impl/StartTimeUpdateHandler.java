@@ -15,10 +15,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.parser.ParseException;
 
@@ -92,8 +92,9 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                     params.add(new BasicNameValuePair(FIELD_TRACKING_START_TIME, String.valueOf(newStartTime.minus(
                             TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START).asMillis())));
                     request.setEntity(new UrlEncodedFormEntity(params));
-                    final AbstractHttpClient client = new SystemDefaultHttpClient();
-                    client.setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes());
+                    final HttpClient client = HttpClientBuilder.create()
+                            .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
+                            .build();
                     logger.info("Using " + startTrackingURI.toString() + " to start tracking");
                     final HttpResponse response = client.execute(request);
                     try {

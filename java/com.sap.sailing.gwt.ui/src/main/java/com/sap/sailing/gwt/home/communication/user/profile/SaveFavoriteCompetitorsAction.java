@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -34,15 +32,13 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult>,
     public VoidResult execute(SailingDispatchContext ctx) throws DispatchException {
         CompetitorNotificationPreferences prefs = new CompetitorNotificationPreferences(ctx.getRacingEventService());
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
-        CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
-            Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorDTO.getIdAsString());
-            competitorPreferences.add(new CompetitorNotificationPreference(competitorStore, competitor,
-                    favorites.isNotifyAboutResults()));
+            String competitorIdAsString = competitorDTO.getIdAsString();
+
+            competitorPreferences.add(new CompetitorNotificationPreference(competitorIdAsString, favorites.isNotifyAboutResults()));
         }
         prefs.setCompetitors(competitorPreferences);
         ctx.setPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME, prefs);
         return new VoidResult();
     }
-
 }

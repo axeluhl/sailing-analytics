@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import static com.sap.sse.gwt.shared.RpcConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
 
 import java.util.HashSet;
 import java.util.List;
@@ -288,7 +288,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
         final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(
-                getSailingService(), getUserService(), getStringMessages(), this);
+                eventManagementPanel, getSailingService(), getUserService(), getStringMessages(), this);
         panel.addToTabPanel(raceCommitteeTabPanel,
                 new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanel),
                 getStringMessages().deviceConfiguration(),

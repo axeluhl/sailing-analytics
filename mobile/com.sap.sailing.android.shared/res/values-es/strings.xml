@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<resources>
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
     <string name="options_menu_live">"Información de conexión"</string>
     <string name="remove">"Eliminar"</string>
     <string name="enter_new_item">"Introducir posición nueva"</string>
@@ -7,7 +9,14 @@
     <string name="there_are_no_items_yet_">"Todavía no hay posiciones"</string>
 
     <!-- SystemInformationActivity -->
-
+    
+    
+    
+    
+    
+    
+    
+    
 
     <!-- Generic -->
     <string name="generic_error">"Error"</string>
@@ -35,7 +44,9 @@
     <string name="notify_user_api_call_failed">"Se ha producido un error al ponerse en contacto con el servidor. Inténtelo de nuevo."</string>
     <string name="please_wait">"Espere"</string>
     <string name="error_invalid_qr_code">"Código QR no válido"</string>
-
+    
+    
+    
 
     <!-- Eula -->
     <string name="eula_title">"EULA"</string>
@@ -49,7 +60,10 @@
     <string name="license_information">"Información de licencia"</string>
 
     <!-- HTTP Requests -->
-
+    
+    
+    
+    
 
     <!-- Dialog -->
     <string name="yes">"Sí"</string>
@@ -58,6 +72,7 @@
     <string name="enable_gps">"El GPS está desactivado. Esta aplicación necesita las posiciones de GPS. ¿Desea activar el GPS en las opciones de ubicación?"</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">"Conectado a: %1$s\n%2$s\nServicio de enlace:%3$s"</string>
     <string name="sending_waiting">"Actualmente existen %1$d eventos a la espera de ser enviados.\nEl último que se envió con éxito fue a las %2$s"</string>
     <string name="sending_no_waiting">"No existe ningún evento a la espera de ser enviado actualmente."</string>
 
@@ -68,4 +83,8 @@
     <string name="yesterday">"Ayer"</string>
     <string name="today">"Hoy"</string>
     <string name="tomorrow">"Mañana"</string>
+    
+    
+
+    
 </resources>

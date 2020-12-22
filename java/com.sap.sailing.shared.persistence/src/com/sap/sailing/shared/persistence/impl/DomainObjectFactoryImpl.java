@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -107,13 +108,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String pattern = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_PATTERN.name());
         final String shape = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_SHAPE.name());
         final String type = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_TYPE.name());
-        final MarkType markType = MarkType.valueOf(type);
+        final MarkType markType = type == null ? null : MarkType.valueOf(type);
         final String storedColor = dbObject.getString(FieldNames.COMMON_MARK_PROPERTIES_COLOR.name());
         final Color color = AbstractColor.getCssColor(storedColor);
         final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
-        final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
+        final Collection<String> tags = tagsList == null ? Collections.emptyList() : tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
         // all mandatory data are loaded -> create builder 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
         if (fixedPosition != null) {

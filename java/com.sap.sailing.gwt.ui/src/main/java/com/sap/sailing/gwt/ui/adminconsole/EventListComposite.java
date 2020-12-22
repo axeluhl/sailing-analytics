@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -44,6 +43,7 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventsRefresherAndProvider;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -80,11 +80,10 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
-/**
  * A composite showing the list of all sailing events  
  * @author Frank Mittag (C5163974)
  */
-public class EventListComposite extends Composite implements EventsRefresher, LeaderboardGroupsDisplayer {
+public class EventListComposite extends Composite implements EventsRefresherAndProvider, LeaderboardGroupsDisplayer {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final ErrorReporter errorReporter;
@@ -317,24 +316,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementWriteService(), EVENT,
                 event -> fillEvents(), stringMessages);
-        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO t) {
-                        config.openOwnershipDialog(t);
-                    }
-                });
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO e) {
-                        configACL.openACLDialog(e);
-                    }
-                });
+                configACL::openDialog);
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {
                     sailingServiceWrite.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
@@ -350,13 +336,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                // Explicitly using an anonymous inner class. Using a method reference caused problems with the GWT compiler (see bug 5269)
-                new Consumer<EventDTO>() {
-                    @Override
-                    public void accept(EventDTO t) {
-                        migrateDialogConfig.openDialog(t);
-                    }
-                });
+                migrateDialogConfig::openDialog);
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);
         isPublicColumn.setSortable(true);

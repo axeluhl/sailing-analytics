@@ -23,8 +23,42 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">December 2020</h2>
+                    <ul class="bulletList">
+                        <li>On replicas, user group memberships did not always update correctly, due to a reference to a stale
+                            user store received with the initial load when replication starts up. This problem has been fixed now.</li>
+                        <li>Under "Race Manager App" the device configurations now offer additional options to pre-configure a device
+                            for a particular event, a specific course area of the event, and an optional role/priority such as
+                            "Officer on vessel" or "Shore control". The QR-code and link produced are in a new format that is
+                            understood starting with Race Manager App version 1.4.91 and which supports installing the app
+                            and still recognizing the configuration upon the first app start ("deep link support").</li>
+                    </ul>
+                    <h2 class="articleSubheadline">November 2020</h2>
+                    <ul class="bulletList">
+                        <li>Anniversary calculation must now be turned on explicitly. Set system property <pre>-DAnniversaryRaceDeterminator.enabled=true</pre> at startup. Otherwise no anniversary is calculated.</li>
+                        <li>REST endpoint /api/v1/trackedRaces/getRaces to retrieve list of races that are available on the requested server 
+                        has been extended to filter returned list of races by given events. A inclusive/exclusive logic is available. 
+                        Using HTTP is deprecated for this interface from now. Use HTTP POST instead.</li>
+                    </ul>
+                    <h2 class="articleSubheadline">October 2020</h2>
+                    <ul class="bulletList">
+                    	<li>Fixed a regression regarding the transmission of a time-on-time/time-on-distance ranking metric
+                    	    configuration to a new replica server in the initial load.</li>
+                    	<li>The "unlink" button in the competitor import dialog now shows again correctly.</li>
+                    	<li>Competitors to be imported for which a competitor already exists with an equal ID are
+                    	    now recognized as "similar" and suggested for mapping.</li>
+                    	<li>Fixed bug that occurred when a pairing list was to be inserted into a regatta's series,
+                    	    and another series existed whose races not yet had the flag set that allows per-race competitor
+                    	    assignments.</li>
+                    	<li>WindFinder has offered us a new spot collection <tt>new_york</tt> which is now listed in the corresponding
+                    	    content assist in the Events editing dialog, tab "WindFinder".</li>
+                    </ul>
                     <h2 class="articleSubheadline">September 2020</h2>
                     <ul class="bulletList">
+                        <li>Due to loadbalancing request between master and replica all GET requests are routed to replicas. As API calls 
+                            going to /api/v1/regattas/{regattaName}/tracking_devices need to be answered by master, HTTP Post is required from now.
+                            Please update existing applications. Support for GET will be removed in the future.</li>
+                        <li>GET request for /sailingserver/api/v1/tracking_devices/[deviceUUID] are removed. Please use POST instead.</li>
                         <li>Due to loadbalancing between master and replica all GET requests are routed to replicas. As API calls 
                             going to /sailingserver/api/v1/tracking_devices/[deviceUUID] need to be answered by master, HTTP POST is required from now.
                             Please update existing applications. As support for GET will be removed in the near future. 
@@ -44,6 +78,8 @@
                             Additionally, the client posting the fixes can use the <tt>returnLiveDelay</tt> boolean parameter to request the live delay
                             of each race the fixes were posted to. Clients may use this to adjust their sending delay and buffering behavior, e.g., as to
                             preserve energy and bandwidth in case the server-side live delay permits for more latency in data transmission.</li>
+                        <li>A regression in the "Replication" panel has been fixed; it led to a growing empty space underneath the list
+                            of replicas attached.</li>
                     </ul>
                     <h2 class="articleSubheadline">August 2020</h2>
                     <ul class="bulletList">
