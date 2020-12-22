@@ -20,8 +20,7 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
     @Override
     public StructureImportManagementPanel init() {
         logger.info("Create StructureImportManagementPanel");
-        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
-                presenter, stringMessages);
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(presenter, stringMessages);
         structureImportUrlsManagementPanel.ensureDebugId("structureImportUrlsManagementPanel");
         presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(structureImportUrlsManagementPanel.getEventsDisplayer());
         return structureImportUrlsManagementPanel;
@@ -30,7 +29,6 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -43,5 +41,4 @@ public class StructureImportManagementPanelSupplier extends AdminConsolePanelSup
             }
         });
     }
-
 }

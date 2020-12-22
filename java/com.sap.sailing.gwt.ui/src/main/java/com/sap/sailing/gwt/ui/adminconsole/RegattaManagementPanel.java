@@ -48,6 +48,8 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
     private final RegattaDetailsComposite regattaDetailsComposite;
     private final UserService userService;
     
+    private final Displayer<RegattaDTO> regattasDisplayer;
+    
     public RegattaManagementPanel(StringMessages stringMessages, Presenter presenter) {
         this.sailingServiceWrite = presenter.getSailingService();
         this.userService = presenter.getUserService();
@@ -63,6 +65,7 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
         regattasPanel.setContentWidget(regattasContentPanel);
         regattaListComposite = new RegattaListComposite(presenter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
+        regattasDisplayer = result->regattaListComposite.fillRegattas(result);
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, REGATTA);
         final Button update = buttonPanel.addCreateAction(stringMessages.refresh(), new Command() {
@@ -117,14 +120,6 @@ public class RegattaManagementPanel extends SimplePanel implements FilterablePan
         regattaDetailsComposite.setVisible(false);
         mainPanel.add(regattaDetailsComposite);
     }
-    
-    private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        
-        @Override
-        public void fill(Iterable<RegattaDTO> result) {
-            regattaListComposite.fillRegattas(result);
-        }
-    };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
         return regattasDisplayer;

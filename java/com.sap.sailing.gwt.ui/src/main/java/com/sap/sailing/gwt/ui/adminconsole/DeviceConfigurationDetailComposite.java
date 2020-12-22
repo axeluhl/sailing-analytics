@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -50,7 +52,6 @@ import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DeviceConfigurationDetailComposite extends Composite {
-
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     protected final SailingServiceWriteAsync sailingServiceWrite;
@@ -94,11 +95,10 @@ public class DeviceConfigurationDetailComposite extends Composite {
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
+    public DeviceConfigurationDetailComposite(Presenter presenter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
         this.eventsById = new HashMap<>();
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
         priorityListBox = createPriorityListBox();
@@ -140,9 +140,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         verticalPanel.add(actionPanel);
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
-        setConfiguration(null);
-        this.userService = userService;
-        fillEventListBox();
+        setConfiguration(/* configuration to display */ null);
+        this.userService = presenter.getUserService();
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(eventDTOs->fillEvents(eventDTOs));
     }
 
     private ListBox createPriorityListBox() {
@@ -154,28 +154,23 @@ public class DeviceConfigurationDetailComposite extends Composite {
         return result;
     }
 
-    /**
-     * Obtains those events the user can UPDATE and presents them in the {@link #eventListBox} such that the visible string is
-     * the event's name and the 
-     */
-    private void fillEventListBox() {
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onSuccess(List<EventDTO> result) {
-                eventListBox.clear();
-                eventsById.clear();
-                eventListBox.addItem(stringMessages.selectSailingEvent(), "");
-                for (final EventDTO event : result) {
-                    eventsById.put(event.getId(), event);
-                    eventListBox.addItem(event.getName(), event.getId().toString());
-                }
+    private void fillEvents(Iterable<EventDTO> events) {
+        eventListBox.clear();
+        eventsById.clear();
+        eventListBox.addItem(stringMessages.selectSailingEvent(), "");
+        final List<EventDTO> eventsSortedByName = new ArrayList<>();
+        Util.addAll(events, eventsSortedByName);
+        Collections.sort(eventsSortedByName, (e1, e2)->{
+            int result = e1.getName().compareTo(e2.getName());
+            if (result == 0) {
+                result = e1.getId().compareTo(e2.getId());
             }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to fetch events for selection in Device Configuration: "+caught.getMessage());
-            }
+            return result;
         });
+        for (final EventDTO event : eventsSortedByName) {
+            eventsById.put(event.getId(), event);
+            eventListBox.addItem(event.getName(), event.getId().toString());
+        }
     }
 
     public void setConfiguration(final DeviceConfigurationWithSecurityDTO config) {
@@ -228,6 +223,20 @@ public class DeviceConfigurationDetailComposite extends Composite {
         courseNamesList.setEnabled(hasUpdatePermission);
         overwriteRegattaConfigurationBox.setEnabled(hasUpdatePermission);
         updateEventSelection(config.eventId);
+        updatePrioritySelection(config.priority);
+    }
+
+    private void updatePrioritySelection(Integer priority) {
+        if (priority == null) {
+            priorityListBox.setSelectedIndex(0);
+        } else {
+            for (int i=1; i<priorityListBox.getItemCount(); i++) {
+                if (new Integer(priorityListBox.getValue(i)).equals(priority)) {
+                    priorityListBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void setupRegattaConfiguration() {
@@ -297,19 +306,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         grid.setWidget(row++, 1, courseAreaListBox);
         grid.setWidget(row, 0, new Label(stringMessages.authorPriority()));
         grid.setWidget(row++, 1, priorityListBox);
-        fillEventAndCourseAreaListBoxes();
         contentPanel.add(grid);
-    }
-
-    /**
-     * Based on the set of {@link EventDTO} objects available and the {@link #originalConfiguration}'s values for
-     * {@link DeviceConfigurationWithSecurityDTO#eventId} and {@link DeviceConfigurationWithSecurityDTO#courseAreaId}
-     * this method fills the {@link #eventListBox and {@link #courseAreaListBox} contents, matching and resolving
-     * the respective IDs if provided.
-     */
-    private void fillEventAndCourseAreaListBoxes() {
-        
-        // TODO continue here...
     }
 
     private void setupCourseAreasBox(Grid grid, int gridRow) {
@@ -459,7 +456,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
     }
 
     private void createAndShowDialogForAccessToken(String accessToken) {
-        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(), stringMessages, accessToken);
+        final DeviceConfigurationWithSecurityDTO config = getResult();
+        final DialogBox dialog = new DeviceConfigurationQRIdentifierDialog(uuidBox.getValue(), identifierBox.getValue(),
+                config.eventId, config.courseAreaId, config.priority, accessToken, stringMessages);
         dialog.show();
         dialog.center();
     }
