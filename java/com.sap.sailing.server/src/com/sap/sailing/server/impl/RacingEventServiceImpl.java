@@ -46,6 +46,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -933,7 +935,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
-        this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        if (anniversaryRaceDeterminator.isEnabled()) {
+            this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        }
     }
 
     private void populateBoatClasses(DomainFactory baseDomainFactory) {
@@ -1671,6 +1675,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsById.values()));
     }
 
+    @Override
+    public Iterable<Regatta> getRegattasSelectively(final boolean include, final Iterable<UUID> regattaIds) {
+        Iterable<Regatta> regattas;
+        if (regattaIds != null && !Util.isEmpty(regattaIds)) {
+            regattas = Collections.unmodifiableCollection(Util.stream(getAllRegattas())
+                    .filter(element -> include ? Util.contains(regattaIds, element.getId()) : !Util.contains(regattaIds, element.getId()))
+                    .collect(Collectors.toList()));
+        } else {
+            if (include) {
+                regattas = Collections.emptyList();
+            } else {
+                regattas = getAllRegattas();
+            }
+        }
+        return regattas; 
+    }
+    
     @Override
     public Iterable<Event> getEventsSelectively(final boolean include, final Iterable<UUID> eventIds) {
         Iterable<Event> events;
@@ -4695,42 +4716,45 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> remoteServerRaces : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
-            if (race.getValue().getB() != null) {
-                throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
+            if (remoteServerRaces.getValue().getB() != null) {
+                throw new RuntimeException("Some remoteserver did not respond " + remoteServerRaces.getKey());
             }
-            for (SimpleRaceInfo raceinfo : race.getValue().getA()) {
-                store.put(raceinfo.getIdentifier(), raceinfo);
-            }
+            stream(remoteServerRaces.getValue().getA())
+                .filter(race->eventListFilter.test(race.getEventID()))
+                .forEach(race->{
+                    Util.addToValueSet(store, race.getIdentifier(), race);
+                });
         }
         return store;
     }
 
+    private static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
+    }
+    
     @Override
-    public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Event event : getAllEvents()) {
-            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                for (Leaderboard leaderboard : group.getLeaderboards()) {
-                    for (RaceColumn race : leaderboard.getRaceColumns()) {
-                        for (Fleet fleet : race.getFleets()) {
-                            TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null && trackedRace.hasGPSData()) {
-                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                final TimePoint startOfRace = trackedRace.getStartOfRace();
-                                if (startOfRace != null) {
-                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, /* remoteURL */ null);
-                                    store.put(raceInfo.getIdentifier(), raceInfo);
-                                }
-                            }
-                        }
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        stream(getAllEvents())
+                .filter(event->eventListFilter.test(event.getId()))
+                .forEach(event -> stream(event.getLeaderboardGroups())
+                        .flatMap(group -> stream(group.getLeaderboards()))
+                        .flatMap(leaderBoard -> stream(leaderBoard.getRaceColumns()))
+                        .flatMap(race -> stream(race.getFleets())
+                                .flatMap(fleet -> Stream.of(race.getTrackedRace(fleet))))
+                        .filter(trackedRace -> trackedRace != null && trackedRace.hasGPSData())
+                        .forEach(trackedRace -> {
+                            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                            final TimePoint startOfRace = trackedRace.getStartOfRace();
+                            if (startOfRace != null) {
+                                Util.addToValueSet(store, raceIdentifier, new SimpleRaceInfo(raceIdentifier, startOfRace,
+                                /* remoteURL */ null, event.getId()));
                     }
-                }
-            }
-        }
+                }));
         return store;
     }
     
@@ -4805,18 +4829,36 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Event findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard) {
+        /*
+         * TODO: bug5424: The code previously contained within this method has been extracted to
+         * findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea for public use. Investigate whether a more
+         * precise selection of which event to choose can be made in the use cases for this method or if all events
+         * found should be considered.
+         */
+        Set<Event> events = findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(leaderboard, getAllEvents());
+        if (!events.isEmpty()) {
+            return Util.get(events, 0);
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
+    public Set<Event> findEventsContainingLeaderboardAndMatchingAtLeastOneCourseArea(Leaderboard leaderboard,
+            Iterable<Event> events) {
+        Set<Event> foundEvents = new HashSet<>();
         if (!Util.isEmpty(leaderboard.getCourseAreas())) {
-            for (final Event event : getAllEvents()) {
+            for (final Event event : events) {
                 if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
                     for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                         if (leaderboardGroup.getIndexOf(leaderboard) >= 0) {
-                            return event;
+                            foundEvents.add(event);
                         }
                     }
                 }
             }
         }
-        return null;
+        return foundEvents;
     }
 
     @Override

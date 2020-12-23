@@ -1,0 +1,41 @@
+#!/bin/sh
+
+REGION=`wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//'`
+AMI_ID=`wget -q -O - http://169.254.169.254/latest/meta-data/ami-id`
+AMI_INFO=`aws ec2 describe-images --region ${REGION} --image-ids "$AMI_ID"`
+AMI_NAME=`echo $AMI_INFO | python -c "import sys,json; print json.load(sys.stdin)['Images'][0]['Name']"`
+AMI_CREATED=`echo $AMI_INFO | python -c "import sys,json; print json.load(sys.stdin)['Images'][0]['CreationDate']"`
+
+INSTANCE_ID=`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`
+INSTANCE_NAME_INFO=`aws ec2 describe-tags --region ${REGION} --filter "Name=resource-id,Values=$INSTANCE_ID"`
+INSTANCE_AWS_NAME=`echo $INSTANCE_NAME_INFO | python -c "import sys,json; print json.load(sys.stdin)['Tags'][0]['Value']"`
+
+source /home/sailing/servers/server/env.sh
+cat << EOF
+...........................................................
+/////////////////////////////////////////////////////////, 
+///////////////////////////////////////////////////////,   
+///*       .*//////     /////         .*/////////////,     
+(.            /((/       ((((             /((((((((,       
+.    ,((((/.,((((        .(((     /(/*     ((((((,         
+.     ./((((((((,    ,    *((     /(((*    /(((,           
+(.         ./((*    ,(.    ((     */*.     ((,             
+(((*          (     (((    .(             /*               
+((((((((/                   ,        .,/(*                 
+(/ .*(((*                         (((((*                   
+,                 (((/((/         (##*                     
+##(,.    ./#,,,,,/#######,,,,,,,,,(*                       
+#################################*   .*,                   
+###############################*    ,./ *                  
+..............................        .                    
+
+Welcome to instance running image $AMI_NAME!
+The image has been created at <$AMI_CREATED>.
+
+This instance is named <$INSTANCE_AWS_NAME> and 
+is running the Analytics server <$SERVER_NAME>.
+
+It will use a maximum of <$MEMORY> memory and is configured to
+be a <$USE_ENVIRONMENT>. Please handle with love and care!
+
+EOF

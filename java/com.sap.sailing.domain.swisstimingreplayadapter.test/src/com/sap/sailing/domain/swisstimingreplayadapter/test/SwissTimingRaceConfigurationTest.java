@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -10,9 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,23 +23,16 @@ import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplaySer
 
 public class SwissTimingRaceConfigurationTest {
     
-    private static final String JSON_URL = "/2012_OSG.json";
+    private static final String JSON_URL = "https://static.sapsailing.com/OSG2012/OSG2012_static.json";
     
-    @Ignore("Takes a very long time; only used to see if we can parse all configurations")
     @Test
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
-        InputStream inputStream = getClass().getResourceAsStream(JSON_URL);
+        InputStream inputStream = (InputStream) new URL(JSON_URL).getContent();
         List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).parseJSONObject(inputStream , JSON_URL);
-        Map<String, SwissTimingRaceConfig> configsById = new HashMap<String, SwissTimingRaceConfig>();
-        for (SwissTimingReplayRace race : races) {
-            URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, race.getRaceId()));
-            URLConnection connection = configFileURL.openConnection();
-            InputStream configDataStream = connection.getInputStream();
-            SwissTimingRaceConfig raceConfig = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
-            configsById.put(race.getRaceId(), raceConfig);
-        }
+        assertFalse(races.isEmpty());
     }
     
+    @Ignore("SwissTiming shut down their configuration server for good (2020-11-13), so we cannot get at the configs anymore")
     @Test
     public void testRaceConfig_446483_no_detail_config() throws Exception {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "446483"));
@@ -58,6 +50,7 @@ public class SwissTimingRaceConfigurationTest {
 
     }
 
+    @Ignore("SwissTiming shut down their configuration server for good (2020-11-13), so we cannot get at the configs anymore")
     @Test
     public void testRaceConfig_6260_with_detail_config() throws Exception {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "6260"));
@@ -76,5 +69,4 @@ public class SwissTimingRaceConfigurationTest {
         assertEquals("Nothe", config_446483.location);
         assertEquals("-2,442963", config_446483.longitude);
     }
-
 }

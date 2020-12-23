@@ -1,7 +1,7 @@
 package com.sap.sse.landscape;
 
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
 
 /**
  * An image (e.g., an AMI for AWS) that can be used to
@@ -13,7 +13,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (D043530)
  *
  */
-public interface MachineImage extends WithID {
+public interface MachineImage extends NamedWithID {
     /**
      * The image lives in a region; it can only be used for {@link Host} creation in that region.
      */
