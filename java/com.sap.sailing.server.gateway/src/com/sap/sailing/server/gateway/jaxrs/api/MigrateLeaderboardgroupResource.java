@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -24,7 +25,6 @@ import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
 
 @Path ("/v1/scopemigration")
@@ -53,7 +53,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam("password2") String password2,
             @FormParam("bearer1") String bearer1,
             @FormParam("bearer2") String bearer2) {
-        Response response = null;
+        Response response;
         final String baseServerBearerToken = getService().getOrCreateTargetServerBearerToken(baseServer, user1,
                 password1, bearer1);
         final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer,
@@ -95,7 +95,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
             @FormParam("password2") String password2,
             @FormParam("bearer1") String bearer1,
             @FormParam("bearer2") String bearer2) {
-        Response response = null;
+        Response response;
         final String archiveServerBearerToken = getService().getOrCreateTargetServerBearerToken(archiveServer, user1,
                 password1, bearer1);
         final String dedicatedServerBearerToken = getService().getOrCreateTargetServerBearerToken(dedicatedServer,
@@ -139,7 +139,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
     private Util.Pair<JSONObject, Number> doMDI(String remoteServerHostAsString, String dedicatedServerHostAsString,
             Set<String> leaderboardGroupIds, String remoteServerBearerToken, String dedicatedServerBearerToken)
             throws Exception {
-        final HttpURLConnection mdiConnection = createHttpUrlConnectionWithBearerToken(dedicatedServerHostAsString,
+        final HttpURLConnection mdiConnection = createPostHttpUrlConnectionWithBearerToken(dedicatedServerHostAsString,
                 dedicatedServerBearerToken, MDI_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("remoteServer=" + remoteServerHostAsString);
@@ -151,23 +151,27 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         form.add("exportTrackedRacesAndStartTracking=true");
         form.add("remoteServerBearerToken=" + URLEncoder.encode(remoteServerBearerToken, "utf-8"));
         form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
-        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
-        int length = out.length;
-        mdiConnection.setFixedLengthStreamingMode(length);
-        mdiConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        mdiConnection.connect();
-        try(OutputStream os = mdiConnection.getOutputStream()) {
+        return postFormAndReturnJsonAndResponseCode(mdiConnection, form);
+    }
+
+    private Util.Pair<JSONObject, Number> postFormAndReturnJsonAndResponseCode(final HttpURLConnection urlConnection,
+            final StringJoiner formBody) throws IOException, Exception {
+        final byte[] out = formBody.toString().getBytes(StandardCharsets.UTF_8);
+        final int length = out.length;
+        urlConnection.setFixedLengthStreamingMode(length);
+        urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        urlConnection.connect();
+        try (OutputStream os = urlConnection.getOutputStream()) {
             os.write(out);
             os.flush();
         }
-        final JSONObject json = parseInputStreamToJsonAndLog(mdiConnection);
-        Util.Pair<JSONObject, Number> result = new Util.Pair<>(json, mdiConnection.getResponseCode());
-        return result;
+        final JSONObject json = parseInputStreamToJsonAndLog(urlConnection);
+        return new Util.Pair<>(json, urlConnection.getResponseCode());
     }
 
     private Util.Pair<JSONObject, Number> doCompareServers(String server1, String server2, String bearer1,
             String bearer2, Set<String> leaderboardGroupIds) throws Exception {
-        final HttpURLConnection compareServersConnection = createHttpUrlConnectionWithBearerToken(server2, bearer1,
+        final HttpURLConnection compareServersConnection = createPostHttpUrlConnectionWithBearerToken(server2, bearer1,
                 COMPARESERVERS_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("server1=" + server1);
@@ -175,55 +179,27 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         form.add("bearer1=" + URLEncoder.encode(bearer2, "utf-8"));
         form.add("bearer2=" + URLEncoder.encode(bearer1, "utf-8"));
         form.add(addLeaderboardGroupIdsToStringJoiner(leaderboardGroupIds).toString());
-        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
-        int length = out.length;
-        compareServersConnection.setFixedLengthStreamingMode(length);
-        compareServersConnection.connect();
-        try (OutputStream os = compareServersConnection.getOutputStream()) {
-            os.write(out);
-            os.flush();
-        }
-        final JSONObject json = parseInputStreamToJsonAndLog(compareServersConnection);
-        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json,
-                compareServersConnection.getResponseCode());
-        return result;
+        return postFormAndReturnJsonAndResponseCode(compareServersConnection, form);
     }
 
     private Util.Pair<JSONObject, Number> doRemoteServerReferenceAdd(String serverToAddTo, String serverToBeAdded,
             String serverToAddToToken) throws Exception {
-        final HttpURLConnection remoteServerReferenceAddConnection = createHttpUrlConnectionWithBearerToken(
+        final HttpURLConnection remoteServerReferenceAddConnection = createPostHttpUrlConnectionWithBearerToken(
                 serverToAddTo, serverToAddToToken, REMOTESERVERREFERENCEADD_PATH);
         final StringJoiner form = new StringJoiner("&");
         form.add("remoteServerUrl=" + serverToBeAdded);
         form.add("remoteServerName=" + serverToBeAdded);
-        byte[] out = form.toString().getBytes(StandardCharsets.UTF_8);
-        int length = out.length;
-        remoteServerReferenceAddConnection.setFixedLengthStreamingMode(length);
-        remoteServerReferenceAddConnection.connect();
-        try (OutputStream os = remoteServerReferenceAddConnection.getOutputStream()) {
-            os.write(out);
-            os.flush();
-        }
-        final JSONObject json = parseInputStreamToJsonAndLog(remoteServerReferenceAddConnection);
-        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json,
-                remoteServerReferenceAddConnection.getResponseCode());
-        return result;
+        return postFormAndReturnJsonAndResponseCode(remoteServerReferenceAddConnection, form);
+
     }
 
     private Util.Pair<JSONObject, Number> doRemoteServerReferenceRemove(String serverFromWhichToDelete,
             String serverNameToDelete, String serverFromWhichToDeleteBearerToken) throws Exception {
-        final HttpURLConnection remoteServerReferenceDelete = createHttpUrlConnectionWithBearerToken(serverFromWhichToDelete,
+        final HttpURLConnection remoteServerReferenceDelete = createPostHttpUrlConnectionWithBearerToken(serverFromWhichToDelete,
                 serverFromWhichToDeleteBearerToken, REMOTESERVERREFERENCEDELETE_PATH);
-        byte[] out = ("remoteServerName=" + serverNameToDelete).getBytes(StandardCharsets.UTF_8);
-        int length = out.length;
-        remoteServerReferenceDelete.setFixedLengthStreamingMode(length);
-        try (OutputStream os = remoteServerReferenceDelete.getOutputStream()) {
-            os.write(out);
-            os.flush();
-        }
-        final JSONObject json = parseInputStreamToJsonAndLog(remoteServerReferenceDelete);
-        final Util.Pair<JSONObject, Number> result = new Pair<JSONObject, Number>(json, remoteServerReferenceDelete.getResponseCode());
-        return result;
+        final StringJoiner form = new StringJoiner("&");
+        form.add("remoteServerName=" + serverNameToDelete);
+        return postFormAndReturnJsonAndResponseCode(remoteServerReferenceDelete, form);
     }
 
     private JSONObject parseInputStreamToJsonAndLog(HttpURLConnection connection) throws Exception {
@@ -234,7 +210,7 @@ public class MigrateLeaderboardgroupResource extends AbstractSailingServerResour
         return json;
     }
 
-    private HttpURLConnection createHttpUrlConnectionWithBearerToken(String serverHost, String serverToken,
+    private HttpURLConnection createPostHttpUrlConnectionWithBearerToken(String serverHost, String serverToken,
             String serverPath) throws Exception {
         final URL url = RemoteServerUtil.createRemoteServerUrl(RemoteServerUtil.createBaseUrl(serverHost), serverPath,
                 null);
