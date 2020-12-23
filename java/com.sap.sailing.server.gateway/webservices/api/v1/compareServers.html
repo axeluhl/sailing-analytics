@@ -17,7 +17,7 @@
   if the leaderboardgroupnames match on both servers the missing parts
   within the leaderboardgroups. If the servers contain the exact same
   content the return will just have the given server hostnames in it.
-  You may also query for a given leaderboardgroup id, there the same
+  You may also query for a specific leaderboardgroup id; there the same
   logic applies. The HTTP return code will be 409 if a mismatch is
   detected in your query, if equal content is present on both servers
   the response code will be 200. The caller needs authorization with a
@@ -39,19 +39,19 @@
         </td>
     </tr>
     <tr>
-        <td>Optional query parameters:</td>
+        <td>Optional form parameters:</td>
         <td>
             <div>server1, the hostname for the first server. Defaults to the server that you target your request</div>
             <div>leaderboardgroupUUID[], the leaderboardgroup UUID you want to compare.
              Use multiple times if you need to compare more then one
              leaderboardgroup.</div>
-             <div>user1, the user to authenticate agains server1.</div>
-             <div>password1, password for user1.</div>
-             <div>bearer1, you might provide a bearer token instead of user1 and password1.</div>
-             <div>user2, see user1.</div>
-             <div>password2, see password1.</div>
-             <div>bearer2, see bearer1.</div>
-   </td>
+            <div>user1, the user to authenticate against server1.</div>
+            <div>password1, password for user1.</div>
+            <div>bearer1, you might provide a bearer token instead of user1 and password1.</div>
+            <div>user2, see user1.</div>
+            <div>password2, see password1.</div>
+            <div>bearer2, see bearer1.</div>
+        </td>
     </tr>
     <tr>
         <td>Request method:</td>
@@ -134,8 +134,8 @@
     <tr>
         <td>Example:</td>
         <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -d
-        "UUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
-        "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
+        "leaderboardgroupUUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
+        "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
         Basic YWRtaW46YWRtaW4="<br> produces output:<pre>
         {
          "localhost:8888": [],
