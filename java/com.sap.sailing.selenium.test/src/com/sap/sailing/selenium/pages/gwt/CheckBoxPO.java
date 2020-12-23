@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.gwt;
 
+import java.util.function.BooleanSupplier;
+
 import org.openqa.selenium.By.ByTagName;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,6 +42,24 @@ public class CheckBoxPO extends AbstractInputPO {
     }
     
     /**
+     * Wait until checkbox status equals to expected one.
+     * 
+     * @param expected expected status
+     */
+    public void waitForElementUntil(boolean expected) {
+        waitUntil(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    return getWebElement().isDisplayed() && isSelected() == expected;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
+    }
+    
+    /**
      * Get the text of the check boxes label.
      * 
      * @return the label text
@@ -56,7 +76,23 @@ public class CheckBoxPO extends AbstractInputPO {
      * @see WebElement#isSelected()
      */
     public boolean isSelected() {
+        checkVisibility();
         return this.input.isSelected();
+    }
+    
+    public void checkVisibility() {
+        if (!getWebElement().isDisplayed()) {
+            waitUntil(new BooleanSupplier() {
+                @Override
+                public boolean getAsBoolean() {
+                    try {
+                        return getWebElement().isDisplayed();
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+            });
+        }
     }
     
     /**

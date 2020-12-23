@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 minutos"</string>
     <string name="race_start_in_2_minutes">"2 minutos"</string>
     <string name="race_start_in_1_minute">"1 minuto"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Fijar hora"</string>
     <string name="race_reset_course">"Reinicializar regata"</string>
     <string name="no_course_active">"Ninguna regata activa"</string>
@@ -435,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"Actualmente existen %1$d eventos a la espera de ser enviados.\nEl último que se envió con éxito fue a las %2$s"</string>
     <string name="no_event_to_be_sent">"No existe ningún evento a la espera de ser enviado actualmente."</string>
     <string name="never">"nunca"</string>
-    <string name="connected_to_wp">"Conectado a: %1$s\n%2$s\nServicio de enlace:%3$s"</string>
     <string name="theme_changed_title">"Modificación del tema"</string>
     <string name="theme_changed_message">"Las modificaciones que se realicen al tema se harán efectivas tras reinicializar la aplicación."</string>
     <string name="url_refresh_title">"URL del servidor modificada"</string>

@@ -4,4 +4,4 @@
 # and make sure to have activated local-p2-admin target to check
 # if everything went well
 
-./uploadSpecifiedRepositoryToServer.sh sailing com.sap.sailing.targetplatform.base
+`dirname $0`/uploadSpecifiedRepositoryToServer.sh sailing com.sap.sailing.targetplatform.base

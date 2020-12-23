@@ -55,7 +55,8 @@ public class FieldNames {
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET,
         DEFAULT_TENANT_SERVER,
-        DEFAULT_TENANT_GROUP;
+        DEFAULT_TENANT_GROUP,
+        SUBSCRIPTIONS;
     }
     
     public static enum Settings {
@@ -81,6 +82,4 @@ public class FieldNames {
         SALTED_PW,
         SALT;
     }
-    
-    
 }

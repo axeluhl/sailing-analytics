@@ -557,7 +557,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze().getCompetitorResults();
         if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
             cachedPositionedCompetitors = positionedCompetitors;
-            changedListeners.onFinishingPositioningsChanged(this);
+            changedListeners.onFinishingPositionsChanged(this);
         }
         CompetitorResultsAndTheirCreationTimePoints confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedConfirmedPositionedCompetitors, confirmedPositionedCompetitors)) {

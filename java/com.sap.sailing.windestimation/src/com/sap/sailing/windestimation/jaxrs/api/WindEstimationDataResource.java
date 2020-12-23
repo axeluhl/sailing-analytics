@@ -1,17 +1,18 @@
 package com.sap.sailing.windestimation.jaxrs.api;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -41,11 +42,12 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
         logger.info("Wind Estimation Model Data requested by "+
                 (subject.getPrincipal() == null ? "anonymous user" :
                     subject.getPrincipal().toString()));
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        getWindEstimationFactoryServiceImpl().serializeForInitialReplication(bos);
-        bos.close();
-        return Response.ok(new ByteArrayInputStream(bos.toByteArray()))
-                .header("Content-Type", "application/octet-stream").build();
+        return Response.ok(new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                getWindEstimationFactoryServiceImpl().serializeForInitialReplication(output);
+            }
+        }).header("Content-Type", "application/octet-stream").build();
     }
 
     @POST

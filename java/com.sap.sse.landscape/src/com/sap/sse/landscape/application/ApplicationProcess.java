@@ -1,35 +1,35 @@
 package com.sap.sse.landscape.application;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.mongodb.Database;
 
-public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Process<RotatingFileBasedLog, MetricsT> {
-    /**
-     * @return the configuration as requested when this process was launched
-     */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT> getRequestedConfiguration();
+public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends Process<RotatingFileBasedLog, MetricsT> {
+    static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     
     /**
-     * @return the effective configuration with which this process is running, resulting from the
-     *         {@link #getRequestedConfiguration() requested configuration} by filling in the "blanks" with defaults as
-     *         deemed appropriate by the {@link ApplicationHost} {@link Process#getHost() running} this this process, e.g.,
-     *         to avoid any conflicting resource assignments.
+     * @param releaseRepository
+     *            mandatory parameter required to enable resolving the release and enabling the download of its
+     *            artifacts, including its release notes
+     * @return the release that this process is currently running
      */
-    ApplicationProcessConfiguration<ShardingKey, MetricsT> getEffectiveConfiguration();
-
-    /**
-     * @return the replica set to which this process belongs
-     */
-    ApplicationReplicaSet<ShardingKey, MetricsT> getReplicaSet();
-    
-    String getJavaVirtualMachineName();
-    
-    String getJavaVirtualMachineVendor();
-    
-    String getJavaVirtualMachineVersion();
-    
-    JMXConnection getJMXConnection();
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -45,4 +45,79 @@ public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationPro
      *         shutdown didn't work.
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
+    
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
+
+    /**
+     * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
+     *         it or to copy files to or read files from there.
+     */
+    String getServerDirectory();
+    
+    /**
+     * The name that is the basis for the user group name; e.g., a server named "my" will by default be owned by a
+     * dedicated user group named "my-server". For multi-instance servers, a default setup will use this server name also
+     * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
+     * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
+     * for replication.
+     */
+    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    
+    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
+
+    /**
+     * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
+     * appended to the protocol, hostname and port specification in order to produce a full health check URL. The
+     * health check URL, when connected to, is expected to return a 200 response if the service is healthy, and anything
+     * else in case it's not.
+     */
+    String getHealthCheckPath();
+
+    ProcessT getMaster();
+
+    Iterable<ProcessT> getReplicas();
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * in the evaluated {@code env.sh} file.
+     */
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     */
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Tells whether this process is ready to accept requests. Use this for a health check in a target group
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
+     */
+    default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http",
+                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
+        final TimePoint startingToPollForReady = TimePoint.now();
+        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+            if (optionalTimeout.isPresent()) {
+                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
+                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
+            } else {
+                logger.info(""+this+" not yet ready; waiting forever...");
+            }
+            Thread.sleep(5000);
+        }
+        return isReady(optionalTimeout);
+    }
 }

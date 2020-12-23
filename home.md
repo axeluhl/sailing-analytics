@@ -33,6 +33,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
+  * [[Upgrading an EC2 image|wiki/info/landscape/upgrading-ec2-image]]
   * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
   * [[EC2 mail relaying vs. Amazon Simple E-Mail Service (SES)|wiki/info/landscape/mail-relaying]]
   * [[Establishing support@sapsailing.com with AWS SES, SNS, and Lambda|wiki/info/landscape/support-email]]
@@ -43,7 +44,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
-
+* [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
 
 ### Mobile
 
@@ -93,9 +94,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ## HowTo
 
 * [[Onboarding|wiki/howto/onboarding]]
+* [[Managing Events with the AdminConsole|wiki/howto/adminconsoleinstructions]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
+* [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 
 ### Development
 

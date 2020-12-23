@@ -26,7 +26,7 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -36,7 +36,7 @@ public class RegisterView extends Composite {
     interface RegisterViewUiBinder extends UiBinder<Widget, RegisterView> {
     }
 
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementWriteService;
     private final StringMessages stringMessages;
     
     @UiField Label appNameLabel;
@@ -48,8 +48,8 @@ public class RegisterView extends Composite {
     @UiField PasswordTextBoxWithWatermark password2TextBox;
     @UiField ImageElement logoImage;
 
-    public RegisterView(UserManagementServiceAsync userManagementService, StringMessages stringMessages, String appName) {
-        this.userManagementService = userManagementService;
+    public RegisterView(UserManagementWriteServiceAsync userManagementService, StringMessages stringMessages, String appName) {
+        this.userManagementWriteService = userManagementService;
         this.stringMessages = stringMessages;
 
         RegisterViewResources.INSTANCE.css().ensureInjected();
@@ -85,7 +85,7 @@ public class RegisterView extends Composite {
 
     @UiHandler("signUpButton")
     void signUpButtonClicked(ClickEvent e) {
-        userManagementService.createSimpleUser(usernameTextBox.getText(), emailTextBox.getText(), passwordTextBox.getText(),
+        userManagementWriteService.createSimpleUser(usernameTextBox.getText(), emailTextBox.getText(), passwordTextBox.getText(),
                 /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                 new AsyncCallback<UserDTO>() {

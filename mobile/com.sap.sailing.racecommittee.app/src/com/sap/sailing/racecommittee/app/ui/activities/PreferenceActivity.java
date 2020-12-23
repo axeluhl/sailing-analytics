@@ -1,13 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -15,11 +7,20 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class PreferenceActivity extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class PreferenceActivity extends AppCompatActivity {
         AppUtils.lockOrientation(this);
         setContentView(R.layout.preference_view);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
 
@@ -66,9 +67,11 @@ public class PreferenceActivity extends AppCompatActivity {
         if (getIntent() != null && getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
             if (bundle.containsKey(EXTRA_SHOW_FRAGMENT)) {
-                String className = bundle.getString(EXTRA_SHOW_FRAGMENT);
+                final String className = bundle.getString(EXTRA_SHOW_FRAGMENT);
                 try {
-                    fragment = (Fragment) Class.forName(className).newInstance();
+                    if (className != null) {
+                        fragment = (Fragment) Class.forName(className).newInstance();
+                    }
                 } catch (InstantiationException ex) {
                     ExLog.ex(this, TAG, ex);
                 } catch (IllegalAccessException ex) {
@@ -81,7 +84,10 @@ public class PreferenceActivity extends AppCompatActivity {
                     if (info != null) {
                         String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
                         String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
-                        getSupportActionBar().setTitle(title);
+                        final ActionBar actionBar = getSupportActionBar();
+                        if (actionBar != null) {
+                            actionBar.setTitle(title);
+                        }
                         if (fragment != null) {
                             fragment.setArguments(info);
                         }
@@ -114,24 +120,24 @@ public class PreferenceActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case android.R.id.home:
+        if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;
-
-        default:
-            return super.onOptionsItemSelected(item);
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onBackPressed() {
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(getString(R.string.settings_activity_title));
-            }
-            getFragmentManager().popBackStack();
-            getFragmentManager().beginTransaction().commit();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+            getSupportFragmentManager().beginTransaction()
+                    .runOnCommit(() -> {
+                        if (getSupportActionBar() != null) {
+                            getSupportActionBar().setTitle(getString(R.string.settings_activity_title));
+                        }
+                    })
+                    .commit();
         } else {
             super.onBackPressed();
         }

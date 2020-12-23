@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -39,7 +39,7 @@ public class LoginView extends Composite {
     interface LoginViewUiBinder extends UiBinder<Widget, LoginView> {
     }
 
-    private final UserManagementServiceAsync userManagementService;
+    private final UserManagementWriteServiceAsync userManagementWriteService;
     private final UserService userService;
     private final StringMessages stringMessages;
     
@@ -52,8 +52,8 @@ public class LoginView extends Composite {
     @UiField HTMLPanel oAuthPanel;
     @UiField ImageElement logoImage;
     
-    public LoginView(UserManagementServiceAsync userManagementService, UserService userService, StringMessages stringMessages, String appName) {
-        this.userManagementService = userManagementService;
+    public LoginView(UserManagementWriteServiceAsync userManagementWriteService, UserService userService, StringMessages stringMessages, String appName) {
+        this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.stringMessages = stringMessages;
         LoginViewResources.INSTANCE.css().ensureInjected();
@@ -63,7 +63,7 @@ public class LoginView extends Composite {
         userNameTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().textInput_watermark());
         passwordTextBox.setWatermark(stringMessages.password());
         passwordTextBox.setWatermarkStyleName(LoginViewResources.INSTANCE.css().passwordTextInput_watermark());
-        oAuthPanel.add(new OAuthLogin(userManagementService));
+        oAuthPanel.add(new OAuthLogin(userManagementWriteService));
         userNameTextBox.setFocus(true);
         
         DialogUtils.linkEnterToButton(loginButton, userNameTextBox, passwordTextBox);
@@ -115,6 +115,6 @@ public class LoginView extends Composite {
     
     @UiHandler("forgotPasswordAnchor")
     void forgotPasswordClicked(ClickEvent e) {
-        new ForgotPasswordDialog(stringMessages, userManagementService, userService.getCurrentUser()).show();
+        new ForgotPasswordDialog(stringMessages, userManagementWriteService, userService.getCurrentUser()).show();
     }
 }

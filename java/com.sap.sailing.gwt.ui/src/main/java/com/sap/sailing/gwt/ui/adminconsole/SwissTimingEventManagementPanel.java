@@ -401,7 +401,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         // store a successful configuration in the database for later retrieval
                         final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
                                 selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
-
                         sailingServiceWrite.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -440,7 +439,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port,
+            sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port==null?0:port,
                     trackWind, correctWindByDeclination, useInternalMarkPassingAlgorithm, updateURL, updateUsername,
                     updatePassword, selectedObject.getName(), selectedObject.getJsonUrl(), new AsyncCallback<Void>() {
                         @Override

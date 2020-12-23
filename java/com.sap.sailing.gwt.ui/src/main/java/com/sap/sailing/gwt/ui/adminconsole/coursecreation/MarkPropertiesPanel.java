@@ -333,10 +333,10 @@ public class MarkPropertiesPanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markProperties -> 
+                .create(userService.getUserManagementWriteService(), type, markProperties -> 
                     markPropertiesListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveMarkProperties(e.getName()))) {
@@ -362,7 +362,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 this::unsetPosition);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markProperties -> configACL.openACLDialog(markProperties));
+                markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
     }

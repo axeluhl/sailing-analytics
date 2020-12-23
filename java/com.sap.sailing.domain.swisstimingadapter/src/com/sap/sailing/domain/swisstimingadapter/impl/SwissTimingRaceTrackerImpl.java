@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
@@ -36,7 +37,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.TrackingConnectorType;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -49,6 +49,7 @@ import com.sap.sailing.domain.swisstimingadapter.RacingStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingAdapter;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -60,13 +61,13 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tracking.impl.TrackingConnectorInfoImpl;
 import com.sap.sailing.domain.tracking.impl.UpdateHandler;
@@ -187,8 +188,32 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
         // Ensure this is called last, otherwise the connector starts running without having a complete racetracker
         this.connector = factory.getOrCreateSailMasterConnector(connectivityParams.getHostname(),
-                connectivityParams.getPort(), connectivityParams.getRaceID(), connectivityParams.getRaceName(),
-                connectivityParams.getRaceDescription(), connectivityParams.getBoatClass(), this);
+                connectivityParams.getPort(), connectivityParams.getRaceID(), getRaceDataUrl(connectivityParams),
+                connectivityParams.getRaceName(), connectivityParams.getRaceDescription(), connectivityParams.getBoatClass(), this);
+    }
+
+    /**
+     * If a valid hostname/port combination is set in the connectivity parameters, {@code null} is returned. Otherwise,
+     * a {@link URL} is constructed from the {@link SwissTimingTrackingConnectivityParameters#getManage2SailEventUrl()}
+     * by stripping all URL parameters and replacing the last path element which is expected to be a file name for the
+     * {@code .json} file by the {race-id}.log combination, expecting the race data to reside in the same folder as
+     * the JSON file describing the Manage2Sail event.
+     */
+    private URL getRaceDataUrl(SwissTimingTrackingConnectivityParameters connectivityParams) throws MalformedURLException {
+        final URL result;
+        if (connectivityParams.getHostname() == null) {
+            final java.net.URL manage2SailEventURL = new URL(connectivityParams.getManage2SailEventUrl());
+            final String path = manage2SailEventURL.getPath();
+            final String logFile = path.substring(0, path.lastIndexOf('/')+1) + connectivityParams.getRaceID()+".log";
+            if (manage2SailEventURL.getPort() != -1) {
+                result = new java.net.URL(manage2SailEventURL.getProtocol(), manage2SailEventURL.getHost(), manage2SailEventURL.getPort(), logFile);
+            } else {
+                result = new java.net.URL(manage2SailEventURL.getProtocol(), manage2SailEventURL.getHost(), logFile);
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -415,18 +440,25 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public void storedDataProgress(String raceID, double progress) {
+    public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {
         assert this.raceID.equals(raceID);
         if (isTrackedRaceStillReachable()) {
             final TrackedRaceStatusImpl newStatus;
             if (progress == 0.0) {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.PREPARED, 0.0);
             } else if (progress == 1.0) {
-                newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, progress);
+                newStatus = new TrackedRaceStatusImpl(statusAfterLoadingComplete, progress);
             } else {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
             }
             trackedRace.onStatusChanged(this, newStatus);
+            if (newStatus.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+                try {
+                    trackedRegattaRegistry.stopTracker(getRegatta(), this);
+                } catch (IOException | InterruptedException e) {
+                    logger.log(Level.SEVERE, "Error trying to stop the tracker "+this, e);
+                }
+            }
         }
     }
 
@@ -508,7 +540,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                 }
             }, useInternalMarkPassingAlgorithm, raceLogResolver,
                     /* Not needed because the RaceTracker is not active on a replica */ Optional.empty(),
-                    new TrackingConnectorInfoImpl(TrackingConnectorType.SwissTiming, /*no api connection to query the webUrl*/ null));
+                    new TrackingConnectorInfoImpl(SwissTimingAdapter.NAME, SwissTimingAdapter.DEFAULT_URL,/*no api connection to query the webUrl*/ null));
             addUpdateHandlers();
             notifyRaceCreationListeners();
             logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());

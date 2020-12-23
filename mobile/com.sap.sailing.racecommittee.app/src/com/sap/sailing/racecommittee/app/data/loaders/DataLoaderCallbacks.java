@@ -1,30 +1,29 @@
 package com.sap.sailing.racecommittee.app.data.loaders;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+
 /**
  * <p>
  * {@link LoaderCallbacks} wrapper to be used with {@link LoadClient}s.
  * </p>
- * 
+ *
  * <p>
  * On result {@link DataLoaderResult#isSuccessful()} is checked. If true
  * {@link LoadClient#onLoadSucceeded(Object, boolean)} is called; other {@link LoadClient#onLoadFailed(Exception)} is
  * called.
  * </p>
- * 
+ *
  * <p>
  * There is currently no handling of a {@link Loader}'s reset.
  * </p>
- * 
- * @param <T>
- *            result type.
+ *
+ * @param <T> result type.
  */
 public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<T>> {
     private static String TAG = DataLoaderCallbacks.class.getName();

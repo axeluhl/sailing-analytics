@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 минуты"</string>
     <string name="race_start_in_2_minutes">"2 минуты"</string>
     <string name="race_start_in_1_minute">"1 минута"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"Установить время"</string>
     <string name="race_reset_course">"Сбросить курс"</string>
     <string name="no_course_active">"Нет активного курса"</string>
@@ -435,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"Ожидающих отправки событий: %1$d.\nПоследняя успешная отправка: %2$s."</string>
     <string name="no_event_to_be_sent">"Нет ожидающих отправки событий."</string>
     <string name="never">"никогда"</string>
-    <string name="connected_to_wp">"Подключено к: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="theme_changed_title">"Изменение темы"</string>
     <string name="theme_changed_message">"Изменения темы вступят в силу после перезапуска приложения."</string>
     <string name="url_refresh_title">"Изменен URL сервера"</string>

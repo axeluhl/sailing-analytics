@@ -38,7 +38,6 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
         Number createdAt = (Number) object.get(BaseRaceLogEventSerializer.FIELD_CREATED_AT);
         Number timeStamp = (Number) object.get(BaseRaceLogEventSerializer.FIELD_TIMESTAMP);
         Number passId = (Number) object.get(BaseRaceLogEventSerializer.FIELD_PASS_ID);
-        
         JSONArray jsonCompetitors = Helpers.getNestedArraySafe(object, BaseRaceLogEventSerializer.FIELD_COMPETITORS);
         List<Competitor> competitors = new ArrayList<>();
         for (Object competitorObject : jsonCompetitors) {

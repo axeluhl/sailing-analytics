@@ -40,7 +40,7 @@ import com.sap.sailing.selenium.api.coursetemplate.CourseConfigurationApi;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.CourseTemplateApi;
 import com.sap.sailing.selenium.api.coursetemplate.DeviceMapping;
-import com.sap.sailing.selenium.api.coursetemplate.MarkAppearance;
+import com.sap.sailing.selenium.api.coursetemplate.FreestyleProperties;
 import com.sap.sailing.selenium.api.coursetemplate.MarkConfiguration;
 import com.sap.sailing.selenium.api.coursetemplate.MarkProperties;
 import com.sap.sailing.selenium.api.coursetemplate.MarkPropertiesApi;
@@ -115,14 +115,14 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final Map<MarkConfiguration, String> markConfigurationToNameMap = new HashMap<>();
         for (final MarkConfiguration markConfiguration : srcMarkConfigurations) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
-            MarkAppearance srcAppearance = markConfiguration.getEffectiveProperties();
+            FreestyleProperties srcAppearance = markConfiguration.getEffectiveProperties();
             if (srcAppearance == null) {
                 srcAppearance = markConfiguration.getFreestyleProperties();
             }
             Positioning srcPositioning = markConfiguration.getPositioning();
             boolean found = false;
             for (final MarkConfiguration trgtMarkConfiguration : trgtMarkConfigurations) {
-                final MarkAppearance trgtAppearance = trgtMarkConfiguration.getEffectiveProperties();
+                final FreestyleProperties trgtAppearance = trgtMarkConfiguration.getEffectiveProperties();
                 if (srcAppearance == null && trgtAppearance == null) {
                     return;
                 }
@@ -572,14 +572,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), "startboat", "sb", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), "startboat", "sb",
+                null, null, null, null, Collections.emptySet());
         sb.setFixedPosition(5.5, 7.1);
         MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe",
+                null, null, null, null, Collections.emptySet());
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
         MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null, "#0000FF", null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null,
+                "#0000FF", null, null, null, Collections.emptySet());
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
@@ -596,14 +599,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     @Test
     public void testCreateCourseTemplateWithPositioningIncluded() {
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), "startboat", "sb", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), "startboat", "sb",
+                null, null, null, null, Collections.emptySet());
         sb.setFixedPosition(5.5, 7.1);
         MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe",
+                null, null, null, null, Collections.emptySet());
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
         MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null, "#0000FF", null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null,
+                "#0000FF", null, null, null, Collections.emptySet());
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("start/end", "s/e",
                 PassingInstruction.Line, Arrays.asList(sb.getId(), pe.getId()));
         WaypointWithMarkConfiguration wp2 = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Port,
@@ -640,7 +646,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         mc2.setFixedPosition(latDeg, longDeg); // overrides the 1.0 / 1.0 as provided by the mp1 MarkProperties object
 
         final MarkConfiguration mc3 = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_mp2", /* shortName */ null).getId(), "mc3", "mc3", "#0000FF", null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_mp2", /* shortName */ null).getId(), "mc3", "mc3",
+                "#0000FF", null, null, null, Collections.emptySet());
         mc3.setFixedPosition(latDeg, longDeg);
 
         final UUID deviceId = UUID.randomUUID();
@@ -764,11 +771,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, /* prefix */ null, 1)[0];
         final String pinEndName = "Start/Finish Pin";
         MarkConfiguration sfp = MarkConfiguration.createFreestyle(null, null, null, pinEndName, "SFP", null, null, null,
-                MarkType.BUOY.name());
+                MarkType.BUOY.name(), Collections.emptySet());
         sfp.setFixedPosition(47.159776, 27.5891346);
         sfp.setStoreToInventory(true);
         MarkConfiguration sfb = MarkConfiguration.createFreestyle(null, null, null, "Start/Finish Boat", "SFB", null,
-                null, null, MarkType.STARTBOAT.name());
+                null, null, MarkType.STARTBOAT.name(), Collections.emptySet());
         sfp.setStoreToInventory(true);
         WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("Start", "S", PassingInstruction.Gate,
                 Arrays.asList(sfp.getId(), sfb.getId()));
@@ -810,7 +817,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
 
         String markName = "some mark";
         MarkConfiguration mark = MarkConfiguration.createFreestyle(null, null, null, markName, null, null, null, null,
-                MarkType.BUOY.name());
+                MarkType.BUOY.name(), Collections.emptySet());
 
         WaypointWithMarkConfiguration wp = new WaypointWithMarkConfiguration(null, null, PassingInstruction.Starboard,
                 Arrays.asList(mark.getId()));
@@ -875,18 +882,21 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private void testCreateCourseConfigurationWithStoreToInventory(final ApiContext ctx, final ApiContext sharedServerCtx) {
         final String STARTBOAT_NAME = "startboat";
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), STARTBOAT_NAME, "sb", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), STARTBOAT_NAME,
+                "sb", null, null, null, null, Collections.emptySet());
         final double startBoatLatDeg = 5.5;
         final double startBoatLonDeg = 7.1;
         sb.setFixedPosition(startBoatLatDeg, startBoatLonDeg);
         sb.setStoreToInventory(true);
         MarkConfiguration pe = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe", null, null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_pe", /* shortName */ null).getId(), "pin end", "pe",
+                null, null, null, null, Collections.emptySet());
         pe.setStoreToInventory(true);
         UUID randomDeviceId = UUID.randomUUID();
         pe.setTrackingDeviceId(randomDeviceId);
         MarkConfiguration bl = MarkConfiguration.createFreestyle(null, null,
-                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null, "#0000FF", null, null, null);
+                markRoleApi.createMarkRole(sharedServerCtx, "role_bl", /* shortName */ null).getId(), "1", null,
+                "#0000FF", null, null, null, Collections.emptySet());
         MarkTemplate mtb2 = markTemplateApi.createMarkTemplate(sharedServerCtx, "mark template 1", "mt1", "#FFFFFF", "Cylinder",
                 "Checkered", MarkType.BUOY.name());
         MarkConfiguration b2 = MarkConfiguration.createMarkTemplateBased(mtb2.getId(),
@@ -986,6 +996,32 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 simpleCourseConfiguration, /* optionalRegattaName */ null);
         assertConsistentCourseConfiguration(createdCourseConfiguration);
         assertCourseConfigurationCompared(sharedServerCtx, simpleCourseConfiguration, createdCourseConfiguration);
+    }
+    
+    @Test
+    public void createCourseConfigurationWithFreestyleUpdateForExistingMarkProperty() {
+        final double MP_LAT_DEG = 49.097487;
+        final double MP_LNG_DEG = 8.648631;
+        final UUID markPropertiesId = markPropertiesApi.createMarkProperties(sharedServerCtx, "mpWithPos", "mpWithPos",
+                /* deviceUuid */ null, "#ffffff", "shape", "pattern", MarkType.LANDMARK.name(),
+                 Collections.emptyList(), MP_LAT_DEG, MP_LNG_DEG).getId();
+        final Set<String> tags = new HashSet<>();
+        tags.add("tag1");
+        final MarkConfiguration mc1 = MarkConfiguration.createFreestyle(null, markPropertiesId, null, null, null,
+                null, null, null, null, tags);
+        mc1.setStoreToInventory(true);
+        final WaypointWithMarkConfiguration wp1 = new WaypointWithMarkConfiguration("landmark", "landmark",
+                PassingInstruction.Single_Unknown, Arrays.asList(mc1.getId()));
+        final CourseConfiguration courseConfiguration = new CourseConfiguration("test1", Arrays.asList(mc1),
+                Arrays.asList(wp1));
+        final String regattaName = "Regatta1";
+        eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
+        final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
+        courseConfigurationApi.createCourse(ctx, courseConfiguration, regattaName,
+                race.getRaceName(), "Default");
+        MarkProperties markProperties = markPropertiesApi.getMarkProperties(sharedServerCtx, markPropertiesId);
+        Set<String> updatedTags = markProperties.getTags();
+        assertEquals(tags, updatedTags);
     }
 
     private CourseConfiguration createSimpleCourseConfiguration(final ApiContext ctx) {

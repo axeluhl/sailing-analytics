@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.subscriptionServiceRemotePath;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
@@ -10,29 +15,39 @@ import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouti
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>> extends
-        SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
+public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>>
+        extends SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
+    private final MediaServiceWriteAsync mediaServiceWrite;
     private final DesktopPlacesNavigator navigator;
+    private final SubscriptionServiceFactory subscriptionService;
 
-    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus,
-            PlaceController placeController, final DesktopPlacesNavigator navigator) {
+    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus, PlaceController placeController,
+            final DesktopPlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = SailingServiceHelper.createSailingServiceInstance();
         mediaService = GWT.create(MediaService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
+        subscriptionService = SubscriptionServiceFactory.getInstance();
+        subscriptionService.registerAsyncServices(subscriptionServiceRemotePath);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, mediaServiceRemotePath,
+                HEADER_FORWARD_TO_REPLICA);
+        mediaServiceWrite = GWT.create(MediaServiceWrite.class);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
+                HEADER_FORWARD_TO_MASTER);
         getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
-    
-    @Override
+
+    @Override 
     public Place getDefaultPlace() {
         return new StartPlace();
     }
@@ -57,7 +72,17 @@ public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationT
     }
 
     @Override
+    public MediaServiceWriteAsync getMediaServiceWrite() {
+        return mediaServiceWrite;
+    }
+
+    @Override
     public DesktopPlacesNavigator getHomePlacesNavigator() {
         return navigator;
+    }
+
+    @Override
+    public SubscriptionServiceFactory getSubscriptionService() {
+        return subscriptionService;
     }
 }

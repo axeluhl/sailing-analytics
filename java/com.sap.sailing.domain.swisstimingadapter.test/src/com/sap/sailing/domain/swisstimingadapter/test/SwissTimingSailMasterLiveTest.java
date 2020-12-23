@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
@@ -41,7 +42,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
 
     @Before
     public void connect() throws InterruptedException, ParseException {
-        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", "R2", "Women 470 Race 2", null /* boat class*/, /* SwissTimingRaceTracker */ null);
+        connector = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("gps.sportresult.com", 40300, "W4702", /* raceDataUrl */ null, "R2", "Women 470 Race 2", null /* boat class*/, /* SwissTimingRaceTracker */ null);
     }
     
     @After
@@ -195,7 +196,7 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void storedDataProgress(String raceID, double progress) {
+    public void storedDataProgress(String raceID, double progress, TrackedRaceStatusEnum statusAfterLoadingComplete) {
     }
 
     @Override

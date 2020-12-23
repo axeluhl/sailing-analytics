@@ -74,10 +74,11 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
     private final Map<CompetitorDescriptor, CompetitorDTO> existingCompetitorsByImported = new HashMap<>();
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
-            final Iterable<CompetitorDTO> existingCompetitor, StringMessages stringMessages,
-            SailingServiceWriteAsync sailingServiceWrite, final UserService userService, ErrorReporter errorReporter,
-            DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
-        super(stringMessages.importCompetitors(), stringMessages.chooseWhichCompetitorsShouldBeImported(),
+            final Iterable<CompetitorDTO> existingCompetitor, String localizedHint,
+            StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            ErrorReporter errorReporter, DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
+        super(stringMessages.importCompetitors(),
+                String.join("\n", stringMessages.chooseWhichCompetitorsShouldBeImported(), localizedHint),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         this.stringMessages = stringMessages;
         this.sailingServiceWrite = sailingServiceWrite;
