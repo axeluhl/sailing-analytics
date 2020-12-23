@@ -37,6 +37,10 @@
                             imported on the importing server again. This includes, e.g., the TracTrac JSON URLs and all other
                             connectivity parameters. As an effect, by default after the Master Data Import completes, all
                             races of the event(s) imported will automatically be loaded on the importing side.</li>
+                        <li>When changing competitor or boat ownerships from within a registration list at race or regatta
+                            level and then saving the list again, due to a bug only the single record whose ownership data
+                            was modified was still considered registered, and all other objects from the list got de-registered.
+                            This has now been fixed.</li>
                     </ul>
                     <h2 class="articleSubheadline">November 2020</h2>
                     <ul class="bulletList">
