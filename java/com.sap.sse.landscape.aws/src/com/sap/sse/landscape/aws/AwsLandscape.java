@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -7,6 +8,8 @@ import java.util.function.BiFunction;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.SftpException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -183,6 +186,8 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName);
     
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
+
+    Iterable<KeyPairInfo> getAllKeyPairInfos(Region region);
     
     void deleteKeyPair(Region region, String keyName);
     
@@ -462,7 +467,11 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param processFactoryFromHostAndServerDirectory
      *            takes the host and the server directory as arguments and is expected to produce an
      *            {@link ApplicationProcess} object of some sort.
+     * @param optionalTimeout
+     *            an optional timeout for communicating with the application server(s) to try to read the application
+     *            configuration; used, e.g., as timeout during establishing SSH connections
      */
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
-            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
+            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
+            Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException;
 }

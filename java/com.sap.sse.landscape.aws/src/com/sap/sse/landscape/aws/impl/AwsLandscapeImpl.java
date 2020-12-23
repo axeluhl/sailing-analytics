@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -22,6 +23,8 @@ import java.util.logging.Logger;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.SftpException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -34,6 +37,7 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -559,6 +563,12 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
+    public Iterable<KeyPairInfo> getAllKeyPairInfos(com.sap.sse.landscape.Region region) {
+        return getEc2Client(getRegion(region))
+                .describeKeyPairs(DescribeKeyPairsRequest.builder().build()).keyPairs();
+    }
+
+    @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
         mongoObjectFactory.removeSSHKeyPair(region.getId(), keyName);
@@ -980,7 +990,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         final List<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> result = new ArrayList<>();
         for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, tagName)) {
             final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> applicationProcessHost =
-                    new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);
+                    new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(
+                            host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);
             result.add(applicationProcessHost);
         }
         return result;
@@ -988,9 +999,29 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
-            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
-        // TODO implement AwsLandscapeImpl.getApplicationReplicaSetsByTag
-        return null;
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException {
+        final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
+        final Map<String, ProcessT> mastersByServerName = new HashMap<>();
+        final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
+        for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
+            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout)) {
+                final String serverName = applicationProcess.getServerName(optionalTimeout);
+                final ProcessT master = applicationProcess.getMaster();
+                if (master.getServerName(optionalTimeout).equals(serverName)) {
+                    // then applicationProcess is a replica in the serverName cluster:
+                    Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
+                } else {
+                    mastersByServerName.put(serverName, applicationProcess);
+                }
+            }
+        }
+        final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
+        for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
+            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), serverNameAndMaster.getValue(),
+                    Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
+            result.add(replicaSet);
+        }
+        return result;
     }
 
     @Override

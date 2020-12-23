@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM extends StringMessages, TR extends CellTableWithCheckboxResources> implements IsWidget {
     /**
-     * If the {@code enablePager} constructur argument is set to {@code true} then this many entries are shown
+     * If the {@code enablePager} constructor argument is set to {@code true} then this many entries are shown
      * at most on one page, and users will have to flip through the pages one by one.
      */
     private static final int PAGING_SIZE = 100;
