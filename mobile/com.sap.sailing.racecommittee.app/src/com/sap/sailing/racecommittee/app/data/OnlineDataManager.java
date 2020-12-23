@@ -133,12 +133,14 @@ public class OnlineDataManager extends DataManager {
             final DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
             final DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
             final List<Util.Pair<String, Object>> params = new ArrayList<>();
-            params.add(new Util.Pair<>("showNonPublic", AppPreferences.on(context).showNonPublic()));
             if (eventIds.length > 0) {
+                params.add(new Util.Pair<>("showNonPublic", "true"));
                 params.add(new Util.Pair<>("include", true));
                 for (UUID eventId : eventIds) {
                     params.add(new Util.Pair<>("id", eventId));
                 }
+            } else {
+                params.add(new Util.Pair<>("showNonPublic", AppPreferences.on(context).showNonPublic()));
             }
             URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/api/v1/events", params);
             return new OnlineDataLoader<>(context, url, parser, handler);
