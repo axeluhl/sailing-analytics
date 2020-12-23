@@ -35,14 +35,14 @@
     <tr>
         <td>Mandatory query parameters:</td>
         <td>
-            <div>server1, the hostname for the first server.</div>
             <div>server2, the hostname for the second server.</div>
         </td>
     </tr>
     <tr>
         <td>Optional query parameters:</td>
         <td>
-            <div>UUID[], the leaderboardgroup UUID you want to compare.
+            <div>server1, the hostname for the first server. Defaults to the server that you target your request</div>
+            <div>leaderboardgroupUUID[], the leaderboardgroup UUID you want to compare.
              Use multiple times if you need to compare more then one
              leaderboardgroup.</div>
              <div>user1, the user to authenticate agains server1.</div>
@@ -59,7 +59,7 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server1=localhost:8888" -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
         produces output:<pre>
         {
           "localhost:8888": [
@@ -133,8 +133,7 @@
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d
-        "server1=localhost:8888" -d "server2=localhost:8889" -d
+        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -d
         "UUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
         "UUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
         Basic YWRtaW46YWRtaW4="<br> produces output:<pre>

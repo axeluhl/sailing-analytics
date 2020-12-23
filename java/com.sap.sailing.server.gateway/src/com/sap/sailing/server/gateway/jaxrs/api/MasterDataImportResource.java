@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,35 +31,32 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(
-            @FormParam("remoteServer") String remoteServerHostAsString,
-            @FormParam("remoteServerUsername") String remoteServerUsername,
-            @FormParam("remoteServerPassword") String remoteServerPassword,
-            @FormParam("remoteServerBearerToken") String remoteServerBearerToken,
-            @FormParam("UUID[]") List<UUID> requestedLeaderboardGroupIds, 
-            @FormParam("override") Boolean override,
-            @FormParam("compress") Boolean compress, 
-            @FormParam("exportWind") Boolean exportWind,
-            @FormParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
-            @FormParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
+    public Response importMasterData(@FormParam("targetServerUrl") String targetServerUrlAsString,
+            @FormParam("targetServerUsername") String targetServerUsername,
+            @FormParam("targetServerPassword") String targetServerPassword,
+            @FormParam("targetServerBearerToken") String targetServerBearerToken,
+            @FormParam("leaderboardgroupUUID[]") List<UUID> requestedLeaderboardGroupIds,
+            @FormParam("override") @DefaultValue("false") Boolean override,
+            @FormParam("compress") @DefaultValue("true") Boolean compress,
+            @FormParam("exportWind") @DefaultValue("true") Boolean exportWind,
+            @FormParam("exportDeviceConfigs") @DefaultValue("false") Boolean exportDeviceConfigs,
+            @FormParam("exportTrackedRacesAndStartTracking") @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(remoteServerHostAsString) || requestedLeaderboardGroupIds.isEmpty() || override == null
-                || compress == null || exportWind == null || exportDeviceConfigs == null
-                || exportTrackedRacesAndStartTracking == null
-                || ((Util.hasLength(remoteServerUsername) && Util.hasLength(remoteServerPassword))
-                        && Util.hasLength(remoteServerBearerToken))) {
+        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty()
+                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword))
+                        && Util.hasLength(targetServerBearerToken))) {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
             final UUID importMasterDataUid = UUID.randomUUID();
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
-                getService().importMasterData(remoteServerHostAsString,
+                getService().importMasterData(targetServerUrlAsString,
                         requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
-                        compress, exportWind, exportDeviceConfigs, remoteServerUsername, remoteServerPassword,
-                        remoteServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
+                        compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
+                        targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
                 jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
-                jsonResponse.put("ImportedFrom", remoteServerHostAsString);
+                jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
                 jsonResponse.put("exportDeviceConfigs", exportDeviceConfigs);

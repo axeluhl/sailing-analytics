@@ -21,15 +21,19 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.util.RemoteServerUtil;
@@ -44,21 +48,29 @@ public class CompareServersResource extends AbstractSailingServerResource {
     /**
      * The list of keys that are compared during a compare run.
      */
-    private static final String[] KEYLISTTOCOMPARE = new String[] {"id", "description", "events", "leaderboards", "displayName",
-            "isMetaLeaderboard", "isRegattaLeaderboard", "scoringComment", "lastScoringUpdate", "scoringScheme",
-            "regattaName", "series", "isMedalSeries", "fleets", "color", "ordering", "races", "isMedalRace",
-            "isTracked", "regattaName", "trackedRaceName", "hasGpsData", "hasWindData"};
+    private static final String[] KEYLISTTOCOMPARE = new String[] { LeaderboardGroupConstants.ID,
+            LeaderboardGroupConstants.DESCRIPTION, LeaderboardGroupConstants.EVENTS,
+            LeaderboardGroupConstants.LEADERBOARDS, LeaderboardGroupConstants.DISPLAYNAME,
+            LeaderboardNameConstants.ISMETALEADERBOARD, LeaderboardNameConstants.ISREGATTALEADERBOARD,
+            LeaderboardNameConstants.SCORINGCOMMENT, LeaderboardNameConstants.LASTSCORINGUPDATE,
+            LeaderboardNameConstants.SCORINGSCHEME, LeaderboardNameConstants.REGATTANAME,
+            LeaderboardNameConstants.SERIES, LeaderboardNameConstants.ISMEDALSERIES, LeaderboardNameConstants.FLEETS,
+            LeaderboardNameConstants.COLOR, LeaderboardNameConstants.ORDERING, LeaderboardNameConstants.RACES,
+            LeaderboardNameConstants.ISMEDALRACE, LeaderboardNameConstants.ISTRACKED,
+            LeaderboardNameConstants.REGATTANAME, LeaderboardNameConstants.TRACKEDRACENAME,
+            LeaderboardNameConstants.HASGPSDATA, LeaderboardNameConstants.HASWINDDATA };
     private static final Set<String> KEYSETTOCOMPARE = new HashSet<>(Arrays.asList(KEYLISTTOCOMPARE));
     /**
      * The list of keys that are not compared.
      */
-    private static final String[] KEYSTOIGNORE = new String[] { "timepoint", "raceViewerUrls" };
+    private static final String[] KEYSTOIGNORE = new String[] { LeaderboardGroupConstants.TIMEPOINT,
+            LeaderboardNameConstants.RACEVIEWERURLS };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
     /**
      * The list of keys that get always printed. "name" needs a special treatment, as it should be printed, but also
      * during a compare run there is no need to compare entries with different values for "name".
      */
-    private static final String[] KEYSTOPRINT = new String[] { "id" };
+    private static final String[] KEYSTOPRINT = new String[] { LeaderboardGroupConstants.ID };
     private static final Set<String> KEYSETTOPRINT = new HashSet<>(Arrays.asList(KEYSTOPRINT));
 
     private static final String SERVERTOOLD = "At least one server you are trying to compare has not yet enabled the "
@@ -68,12 +80,15 @@ public class CompareServersResource extends AbstractSailingServerResource {
     public CompareServersResource() {
     }
     
+    @Context
+    UriInfo uriInfo;
+    
     @POST
     @Produces("application/json;charset=UTF-8")
     public Response compareServers(
             @FormParam("server1") String server1, 
             @FormParam("server2") String server2,
-            @FormParam("UUID[]") Set<String> uuidset,
+            @FormParam("leaderboardgroupUUID[]") Set<String> uuidset,
             @FormParam("user1") String user1,
             @FormParam("user2") String user2,
             @FormParam("password1") String password1,
@@ -82,39 +97,41 @@ public class CompareServersResource extends AbstractSailingServerResource {
             @FormParam("bearer2") String bearer2) {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
-        if (!validateParameters(server1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
+        final String effectiveServer1;
+        effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
+        if (!validateParameters(effectiveServer1, server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
             response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
         } 
         else if (getSecurityService().getCurrentUser() == null) {
             response = badRequest("Provide valid user.");
         }
         else {
-            final String token1 = getService().getOrCreateTargetServerBearerToken(server1, user1, password1, bearer1);
+            final String token1 = getService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
             final String token2 = getService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);
-            result.put(server1, new HashSet<>());
+            result.put(effectiveServer1, new HashSet<>());
             result.put(server2, new HashSet<>());
             try {
                 if (!uuidset.isEmpty()) {
                     for (String uuid : uuidset) {
-                        Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1,
+                        Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(effectiveServer1,
                                 server2, uuid, token1, token2);
                         if (jsonPair.getA() != null && jsonPair.getB() != null) {
-                            result.get(server1).add(jsonPair.getA());
+                            result.get(effectiveServer1).add(jsonPair.getA());
                             result.get(server2).add(jsonPair.getB());
                         }
                     }
                 } else {
-                    final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(server1, token1);
+                    final JSONArray leaderboardgroupList1 = getLeaderboardgroupList(effectiveServer1, token1);
                     final JSONArray leaderboardgroupList2 = getLeaderboardgroupList(server2, token2);
                     for (Object lg1 : leaderboardgroupList1) {
                         if (!leaderboardgroupList2.contains(lg1)) {
-                            result.get(server1).add(lg1);
+                            result.get(effectiveServer1).add(lg1);
                         } else {
                             final String lgId = ((JSONObject) lg1).get("id").toString();
-                            Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(server1,
+                            Pair<Object, Object> jsonPair = fetchLeaderboardgroupDetailsAndRemoveDuplicates(effectiveServer1,
                                     server2, lgId, token1, token2);
                             if (jsonPair.getA() != null && jsonPair.getB() != null) {
-                                result.get(server1).add(jsonPair.getA());
+                                result.get(effectiveServer1).add(jsonPair.getA());
                                 result.get(server2).add(jsonPair.getB());
                             }
                         }
@@ -129,7 +146,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
                 for (Entry<String, Set<Object>> entry : result.entrySet()) {
                     json.put(entry.getKey(), entry.getValue());
                 }
-                if (result.get(server1).isEmpty() && result.get(server2).isEmpty()) {
+                if (result.get(effectiveServer1).isEmpty() && result.get(server2).isEmpty()) {
                     response = Response.ok(streamingOutput(json)).build();
                 } else {
                     response = Response.status(Status.CONFLICT).entity(streamingOutput(json)).build();
