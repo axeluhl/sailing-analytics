@@ -430,6 +430,7 @@
     <string name="events_waiting_to_be_sent">"Ожидающих отправки событий: %1$d.\nПоследняя успешная отправка: %2$s."</string>
     <string name="no_event_to_be_sent">"Нет ожидающих отправки событий."</string>
     <string name="never">"никогда"</string>
+    <string name="connected_to_wp">"Подключено к: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="theme_changed_title">"Изменение темы"</string>
     <string name="theme_changed_message">"Изменения темы вступят в силу после перезапуска приложения."</string>
     <string name="url_refresh_title">"Изменен URL сервера"</string>
