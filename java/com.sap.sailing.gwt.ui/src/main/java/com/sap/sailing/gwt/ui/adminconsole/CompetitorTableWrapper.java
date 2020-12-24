@@ -302,7 +302,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     }
         });
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
+                Collections.emptySet(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();

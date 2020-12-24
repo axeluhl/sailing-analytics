@@ -3,16 +3,21 @@ package com.sap.sailing.landscape.ui.client;
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -45,11 +50,29 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class LandscapeManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
+    private final TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regionsTable;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
         landscapeManagementService = initAndRegisterLandscapeManagementService();
         add(new Label(stringMessages.explainNoConnectionsToMaster()+" "+stringMessages.region()));
+        regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, /* enablePager */ false,
+                /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
+                /* filter checkbox label */ null) {
+            @Override
+            protected Iterable<String> getSearchableStrings(String t) {
+                return Collections.singleton(t);
+            }
+        };
+        regionsTable.addColumn(new TextColumn<String>() {
+            @Override
+            public String getValue(String s) {
+                return s;
+            }
+        }, stringMessages.region(), new NaturalComparator());
+        add(regionsTable);
         landscapeManagementService.getRegions(new AsyncCallback<ArrayList<String>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -58,9 +81,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
 
             @Override
             public void onSuccess(ArrayList<String> regions) {
-                for (final String region : regions) {
-                    add(new Label(region));
-                }
+                regionsTable.refresh(regions);
             }
         });
     }

@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.Comparator;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -19,7 +21,11 @@ import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 /**
  * The {@link #getTable() table} created and wrapped by this object offers already a {@link ListHandler} for sorting.
  * Subclasses can obtain the table's default column sort handler created by this class's constructor by calling
- * {@link #getColumnSortHandler}. The table is wrapped by a panel that can be obtained using {@link #asWidget()}
+ * {@link #getColumnSortHandler}. This may not even be necessary when adding sortable columns by using the
+ * {@link #addColumn(Column, String, Comparator)} method which provides the comparator and sets the column
+ * as {@link Column#setSortable(boolean) sortable}.<p>
+ * 
+ * The table is wrapped by a panel that can be obtained using {@link #asWidget()}
  * and which contains, if requested, the pager widget underneath the table.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM extends StringMessages, TR extends CellTableWithCheckboxResources> implements IsWidget {
@@ -106,6 +112,18 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
     
     public void addColumn(Column<T, ?> column, String header) {
         table.addColumn(column, header);
+    }
+    
+    /**
+     * Sets the {@code column} as {@link Column#setSortable(boolean) sortable}, assigns the comparator for the
+     * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
+     * column}.
+     */
+    public void addColumn(Column<T, ?> column, String header, Comparator<T> comparator) {
+        ListHandler<T> boatColumnListHandler = getColumnSortHandler();
+        column.setSortable(true);
+        boatColumnListHandler.setComparator(column, comparator);
+        addColumn(column, header);
     }
 
     public void setEmptyTableWidget(Widget widget) {
