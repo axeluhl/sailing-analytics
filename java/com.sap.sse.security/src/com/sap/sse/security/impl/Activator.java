@@ -40,10 +40,12 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionBackgroundUpdater;
+import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -154,10 +156,15 @@ public class Activator implements BundleActivator {
     }
 
     private void createAndRegisterSubscriptionServices() {
-        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance());
+        final SubscriptionRequestManagementService requestManagementService = new SubscriptionRequestManagementService(
+                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
+        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance(),
+                requestManagementService);
         final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
-        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
-        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService, chargebeeProviderProperties);
+        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY,
+                chargebeeApiService.getProviderName());
+        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService,
+                chargebeeProviderProperties);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.sap.sse.security.subscription;
 
+import java.util.concurrent.Future;
+
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 
@@ -11,25 +13,24 @@ public interface SubscriptionApiService {
      * The OSGi registry property name under which to look up a specific implementation of this API.
      */
     String PROVIDER_NAME_OSGI_REGISTRY_KEY = "provider-name";
-    
+
     /**
-     * The name used for the {@link #PROVIDER_NAME_OSGI_REGISTRY_KEY} key during registration of this
-     * service with the OSGi service registry.
+     * The name used for the {@link #PROVIDER_NAME_OSGI_REGISTRY_KEY} key during registration of this service with the
+     * OSGi service registry.
      */
     String getProviderName();
 
     /**
-     * Return all subscriptions of user from payment service provider
-     * 
-     * @throws Exception
+     * Fetch user subscriptions from payment service provider. The logic of fetching subscriptions should be done in
+     * background.
      */
-    Iterable<Subscription> getUserSubscriptions(User user) throws Exception;
+    Future<Iterable<Subscription>> getUserSubscriptions(User user);
 
     /**
      * Cancel user subscription by its {@link Subscription#getSubscriptionId() id}
      */
-    SubscriptionCancelResult cancelSubscription(String subscriptionId) throws Exception;
-    
+    Future<SubscriptionCancelResult> cancelSubscription(String subscriptionId);
+
     /**
      * Check if the service is active
      */

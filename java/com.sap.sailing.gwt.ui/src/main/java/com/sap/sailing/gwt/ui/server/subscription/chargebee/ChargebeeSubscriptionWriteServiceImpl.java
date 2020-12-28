@@ -79,7 +79,7 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 SubscriptionApiService apiService = getApiService();
                 if (apiService != null) {
                     SubscriptionCancelResult cancelResult = apiService
-                            .cancelSubscription(subscription.getSubscriptionId());
+                            .cancelSubscription(subscription.getSubscriptionId()).get();
                     if (cancelResult.isSuccess()) {
                         logger.info(() -> "Cancel subscription successful");
                         result = true;
