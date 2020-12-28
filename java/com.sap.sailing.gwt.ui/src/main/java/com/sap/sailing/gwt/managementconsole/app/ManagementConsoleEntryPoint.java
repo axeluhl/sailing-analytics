@@ -114,7 +114,9 @@ public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint 
                 .permission(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.MUTATION_ACTIONS)
                 .permission(SecuredSecurityTypes.USER_GROUP, DefaultActions.MUTATION_ACTIONS);
 
-        initMenuItem(clientFactory, header.initUserDetailsItem(event -> {}));
+        initMenuItem(clientFactory, header.initUserDetailsItem(
+                // TODO: Temporary! Replace with account management navigation as soon as specified
+                event -> clientFactory.getAuthenticationManager().logout()));
         initMenuItem(clientFactory, header.initSignOutItem(event -> clientFactory.getAuthenticationManager().logout()));
 
     }
