@@ -1,0 +1,18 @@
+.file-select {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.file-select > input.filename {
+    text-overflow: ellipsis;
+    margin-bottom: 0;
+}
+
+.file-select > input.filename:focus {
+    text-overflow: initial;
+}
+
+.file-select button.control {
+    background-color: BACKGROUND_COLOR;
+    border-color: BACKGROUND_COLOR;
+}

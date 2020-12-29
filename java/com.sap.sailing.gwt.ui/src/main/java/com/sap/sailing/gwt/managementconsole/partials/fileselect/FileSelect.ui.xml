@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.fileselect.FileSelectResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <g:FlowPanel addStyleNames="{local_res.style.fileSelect}">
+        <g:TextBox readOnly="true" styleName="{local_res.style.filename}" ui:field="selectedFilename"/>
+        <g:Button styleName="{local_res.style.control}" ui:field="selectFileControl">
+            <ui:text from="{i18n.upload}" />
+        </g:Button>
+        <g:FileUpload visible="false" ui:field="fileUpload"/>
+    </g:FlowPanel>
+</ui:UiBinder>

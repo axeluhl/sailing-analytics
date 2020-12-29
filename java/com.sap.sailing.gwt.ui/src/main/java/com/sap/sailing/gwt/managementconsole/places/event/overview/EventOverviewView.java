@@ -9,8 +9,10 @@ public interface EventOverviewView extends View<EventOverviewView.Presenter> {
 
     interface Presenter extends com.sap.sailing.gwt.managementconsole.mvp.Presenter {
         void reloadEventList();
+
+        void navigateToEvent(final EventDTO event);
     }
 
     void renderEvents(List<EventDTO> events);
-    
+
 }

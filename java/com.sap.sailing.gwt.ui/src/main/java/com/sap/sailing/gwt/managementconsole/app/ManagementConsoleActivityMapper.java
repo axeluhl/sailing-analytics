@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.managementconsole.app;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaActivityProxy;
+import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaPlace;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewActivityProxy;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewPlace;
 import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseActivityProxy;
@@ -23,6 +25,8 @@ public class ManagementConsoleActivityMapper implements ActivityMapper {
             return new ShowcaseActivityProxy(clientFactory, (ShowcasePlace) place);
         } else if (place instanceof EventOverviewPlace) {
             return new EventOverviewActivityProxy(clientFactory, (EventOverviewPlace) place);
+        } else if (place instanceof EventMediaPlace) {
+            return new EventMediaActivityProxy(clientFactory, (EventMediaPlace) place);
         }
         return null;
     }

@@ -6,9 +6,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,6 +24,7 @@ public class EventCard extends Composite {
 
     Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final EventDTO event;
     private final Presenter presenter;
 
     @UiField
@@ -35,7 +38,7 @@ public class EventCard extends Composite {
 
     @UiField
     HeadingElement subTitle;
-    
+
     @UiField
     Anchor advancedSettingsEventAnchor;
 
@@ -46,10 +49,11 @@ public class EventCard extends Composite {
 
     public EventCard(final EventDTO event, final Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));
+        this.event = event;
         this.presenter = presenter;
         local_res.style().ensureInjected();
 
-        String title = event.getName();
+        final String title = event.getName();
         String venue = "-";
         if (event.venue != null) {
             venue = event.venue.getName();
@@ -61,7 +65,7 @@ public class EventCard extends Composite {
             time = DateAndTimeFormatterUtil.formatDateAndTime(event.startDate);
         }
         String imageUrl = null;
-        ImageDTO teaserImage = event.getTeaserImage();
+        final ImageDTO teaserImage = event.getTeaserImage();
 
         if (teaserImage != null) {
             imageUrl = teaserImage.getSourceRef();
@@ -69,11 +73,16 @@ public class EventCard extends Composite {
 
         this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(title));
         this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
-        
+
         if (imageUrl != null) {
             this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')");
             this.card.addClassName(local_res.style().customTeaser());
         }
+    }
+
+    @UiHandler("advancedSettingsEventAnchor")
+    void onSettingsIconClick(final ClickEvent event) {
+        presenter.navigateToEvent(this.event);
     }
 
 }

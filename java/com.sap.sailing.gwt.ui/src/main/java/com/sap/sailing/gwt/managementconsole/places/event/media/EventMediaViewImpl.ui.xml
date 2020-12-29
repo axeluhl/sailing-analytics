@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:p="urn:import:com.sap.sailing.gwt.managementconsole.partials">
+             
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <div ui:field="eventName" class="{res.mediaCss.column}" />
+        <p:fileselect.FileSelect ui:field="fileSelect" accept=".jpg, .png" addStyleNames="{res.mediaCss.column}" />
+    </g:HTMLPanel>
+</ui:UiBinder>

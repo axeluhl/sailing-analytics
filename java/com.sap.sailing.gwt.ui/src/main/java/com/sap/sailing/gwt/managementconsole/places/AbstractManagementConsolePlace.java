@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.managementconsole.places;
 
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.google.gwt.place.shared.Place;
@@ -17,13 +19,35 @@ public abstract class AbstractManagementConsolePlace extends Place {
         }
 
         @Override
-        public P getPlace(String token) {
+        public P getPlace(final String token) {
             return placeFactory.get();
         }
 
         @Override
-        public String getToken(P place) {
+        public String getToken(final P place) {
             return "";
+        }
+    }
+
+    protected static abstract class UUIDTokenizer<P extends AbstractManagementConsolePlace>
+            implements PlaceTokenizer<P> {
+
+        private final Function<UUID, P> placeFactory;
+        private final Function<P, UUID> tokenProvider;
+
+        protected UUIDTokenizer(final Function<UUID, P> placeFactory, final Function<P, UUID> tokenProvider) {
+            this.placeFactory = placeFactory;
+            this.tokenProvider = tokenProvider;
+        }
+
+        @Override
+        public P getPlace(final String token) {
+            return placeFactory.apply(UUID.fromString(token));
+        }
+
+        @Override
+        public String getToken(final P place) {
+            return tokenProvider.apply(place).toString();
         }
     }
 
