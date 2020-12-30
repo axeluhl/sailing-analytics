@@ -1,14 +1,51 @@
 ## General
 
-This package contains lambda functions related to fix ingestion
+This package contains lambda functions related to fix ingestion. It is based on AWS Lambda. AWS Lambda is a compute service that runs your code in response to events and automatically manages the compute resources for you, making it easy to build applications that respond quickly to new information. In this case we're responding to fix ingestion events that are sent through by devices. A fix in this case is currently assumed to contain GPS data but this is not carved in stone.
 
-## Endpoints
+1. Devices send their fixes to https://fix-ingestion-eu-west2.sapsailing.com
+2. Sailing Server endpoints register themselves with one or more device identifiers at https://endpoint-registration-eu-west2.sapsailing.com
+3. Once a device sends fixes, these are being stored to S3 and then forwarded to registered endpoints
+4. A compressor runs every 5 minutes and combines multiple fix files into one
 
-### Endpoint Registration
+## Architecture
 
-URL
+The current architecture consist of the following parts in eu-west-2 (London).
 
-Format
+- A route 53 entry that routes entries for domains
+    - fix-ingestion-eu-west2.sapsailing.com
+    - endpoint-registration-eu-west2.sapsailing.com
+- An ALB that serves as the target for the DNS entries and routes data to respective target groups (FixIngestionLambda-1786459421.eu-west-2.elb.amazonaws.com)
+- Two target groups that handle ALB traffic and proxies it to the lambdas
+- Two lambdas (arn:aws:lambda:eu-west-2:017363970217:function:FixIngestion and arn:aws:lambda:eu-west-2:017363970217:function:EndpointRegistration)
+- One S3 bucket to hold the lambda binaries (arn:aws:s3:::sapsailing-lambda-functions-bucket-eu-west-2)
+- One S3 bucket that holds single fixes (arn:aws:s3:::sapsailing-gps-fixes)
+- One database running as a ElastiCache instance on Redis (arn:aws:elasticache:eu-west-2:017363970217:replicationgroup:fixingestionrediscache)
+
+## Development
+
+Development takes place in Eclipse running on Java 8. Make sure to install the official plugin from https://aws.amazon.com/eclipse/. Lambdas are classes that need to implement a specific interface and a method that gets called upon execution. See https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html for documentation. For our lambdas we have opted to use the RequestStreamHandler that just provides us with the binary stream. This makes it easier to accept different types of inputs (e.g. a GPS fix and a Bravo fix).
+
+## Deployment
+
+Before you can deploy you need to make sure that you have created an access key and stored the key to your machine. If you use a MFA token then make sure to read the last section of this document.
+
+Deployment can easily be done by right clicking on the lambda class and selecting Amazon Web Services -> Upload function to AWS Lambda. Make sure to select the correct mapping of the class to the lambda endpoint. Also you need to select the IAM role arn:aws:iam::017363970217:role/fixstorageendpoint-lambda-role for ALL endpoints you are deploying.
+
+## Lambda Endpoints
+
+### Endpoint Registration and Deregistration
+
+Endpoints can register themselves as consumers for fixes. They need to provide the URL and UUIDs of the devices.
+
+##### URL
+
+https://endpoint-registration-eu-west2.sapsailing.com
+
+##### Method
+
+POST
+
+##### Format (Body)
 
 ```
 {
@@ -21,14 +58,35 @@ Format
 }
 ```
 
+##### Example Code (cURL)
+
+```
+curl --location --request POST 'https://endpoint-registration-eu-west2.sapsailing.com' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "endpointUuid": "sailing-analytics-server-endpoint",
+  "action": "register",
+  "endpointCallbackUrl": "http://ec2-18-130-80-242.eu-west-2.compute.amazonaws.com",
+  "devicesUuid": [
+    "2605a6ea-ae9c-4f95-866c-396aebe7c369"
+  ]
+}'
+```
+
 
 ### Fix Ingestion
 
-URL
+Devices can send one or more fixes to be stored in S3 and forwarded to registered endpoints.
 
-https://fix-ingestion-eu-west2.sapsailing.com pointing to FixIngestionLambda
+##### URL
 
-Format
+https://fix-ingestion-eu-west2.sapsailing.com
+
+##### Method
+
+POST 
+
+##### Format (Body)
 
 ```
 {
@@ -45,10 +103,29 @@ Format
 }
 ```
 
+##### Example Code (cURL)
 
-## Development
+```
+curl --location --request POST 'https://fix-ingestion-eu-west2.sapsailing.com' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "deviceUuid": "2605a6ea-ae9c-4f95-866c-396aebe7c369",
+    "fixes": [
+        {
+            "timestamp": 14144168490000,
+            "latitude": 55.12456,
+            "longitude": 8.03456,
+            "speed": 5.1,
+            "course": 14.2
+        }
+    ]
+}'
+```
 
-In order to work with MFA the following command might come in handy. Requires jq to be installed and sapsailing set up as a profile.
+
+## MFA based AWS session token
+
+In order to work with MFA the following command might come in handy. Requires jq to be installed and sapsailing set up as a profile. Replace MFA_CURRENT_TOKEN with the token from your MFA device, e.g. 230499.
 
 ```
 $ cat ~ /.aws/config
