@@ -130,10 +130,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
             if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
                 TimePoint timePoint = MillisecondsTimePoint.now();
                 JSONObject jsonLeaderboardGroup = new JSONObject();
-                jsonLeaderboardGroup.put("name", leaderboardGroup.getName());
-                jsonLeaderboardGroup.put("id", leaderboardGroup.getId().toString());
-                jsonLeaderboardGroup.put("description", leaderboardGroup.getDescription());
-                jsonLeaderboardGroup.put("timepoint", timePoint.toString());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.NAME, leaderboardGroup.getName());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.ID, leaderboardGroup.getId().toString());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.DESCRIPTION, leaderboardGroup.getDescription());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT, timePoint.toString());
                 final Set<Event> eventsReferencingLeaderboardGroup = new HashSet<>();
                 JSONArray idsOfEventsReferencingLeaderboardGroup = new JSONArray();
                 for (final Event event : getService().getAllEvents()) {
@@ -142,36 +142,37 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                         idsOfEventsReferencingLeaderboardGroup.add(event.getId().toString());
                     }
                 }
-                jsonLeaderboardGroup.put("events", idsOfEventsReferencingLeaderboardGroup);
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.EVENTS, idsOfEventsReferencingLeaderboardGroup);
                 JSONArray jsonLeaderboardEntries = new JSONArray();
-                jsonLeaderboardGroup.put("leaderboards", jsonLeaderboardEntries);
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.LEADERBOARDS, jsonLeaderboardEntries);
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                     if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
                         boolean isMetaLeaderboard = leaderboard instanceof MetaLeaderboard ? true : false;
                         boolean isRegattaLeaderboard = leaderboard instanceof RegattaLeaderboard ? true : false;
                         JSONObject jsonLeaderboard = new JSONObject();
-                        jsonLeaderboard.put("name", leaderboard.getName());
-                        jsonLeaderboard.put("displayName", leaderboard.getDisplayName());
-                        jsonLeaderboard.put("isMetaLeaderboard", isMetaLeaderboard);
-                        jsonLeaderboard.put("isRegattaLeaderboard", isRegattaLeaderboard);
+                        jsonLeaderboard.put(LeaderboardNameConstants.NAME, leaderboard.getName());
+                        jsonLeaderboard.put(LeaderboardNameConstants.DISPLAYNAME, leaderboard.getDisplayName());
+                        jsonLeaderboard.put(LeaderboardNameConstants.ISMETALEADERBOARD, isMetaLeaderboard);
+                        jsonLeaderboard.put(LeaderboardNameConstants.ISREGATTALEADERBOARD, isRegattaLeaderboard);
                         jsonLeaderboardEntries.add(jsonLeaderboard);
                         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                         if (scoreCorrection != null) {
-                            jsonLeaderboard.put("scoringComment", scoreCorrection.getComment());
+                            jsonLeaderboard.put(LeaderboardNameConstants.SCORINGCOMMENT, scoreCorrection.getComment());
                             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
-                            jsonLeaderboard.put("lastScoringUpdate",
+                            jsonLeaderboard.put(LeaderboardNameConstants.LASTSCORINGUPDATE,
                                     lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString() : null);
                         } else {
-                            jsonLeaderboard.put("scoringComment", null);
-                            jsonLeaderboard.put("lastScoringUpdate", null);
+                            jsonLeaderboard.put(LeaderboardNameConstants.SCORINGCOMMENT, null);
+                            jsonLeaderboard.put(LeaderboardNameConstants.LASTSCORINGUPDATE, null);
                         }
                         final List<Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>> seriesNameAndFleetsAndRaceColumnsOfSeries = new ArrayList<>();
                         final Map<String, Boolean> medalSeriesNames = new HashMap<>();
                         if (isRegattaLeaderboard) {
                             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                             Regatta regatta = regattaLeaderboard.getRegatta();
-                            jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
-                            jsonLeaderboard.put("regattaName", regatta.getName());
+                            jsonLeaderboard.put(LeaderboardNameConstants.SCORINGSCHEME,
+                                    leaderboard.getScoringScheme().getType());
+                            jsonLeaderboard.put(LeaderboardNameConstants.REGATTANAME, regatta.getName());
                             for (final Series series : regatta.getSeries()) {
                                 List<Fleet> fleets = new ArrayList<>();
                                 Util.addAll(series.getFleets(), fleets);
@@ -181,8 +182,9 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                 medalSeriesNames.put(series.getName(), series.isMedal());
                             }
                         } else {
-                            jsonLeaderboard.put("scoringScheme", leaderboard.getScoringScheme().getType());
-                            jsonLeaderboard.put("regattaName", null);
+                            jsonLeaderboard.put(LeaderboardNameConstants.SCORINGSCHEME,
+                                    leaderboard.getScoringScheme().getType());
+                            jsonLeaderboard.put(LeaderboardNameConstants.REGATTANAME, null);
                             // write a 'default' series to conform with our common regatta structure
                             seriesNameAndFleetsAndRaceColumnsOfSeries
                                     .add(new Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>>(
@@ -192,53 +194,63 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                                             leaderboard.getRaceColumns()));
                         }
                         JSONArray jsonSeriesEntries = new JSONArray();
-                        jsonLeaderboard.put("series", jsonSeriesEntries);
+                        jsonLeaderboard.put(LeaderboardNameConstants.SERIES, jsonSeriesEntries);
                         for (final Triple<String, Iterable<Fleet>, Iterable<? extends RaceColumn>> e : seriesNameAndFleetsAndRaceColumnsOfSeries) {
                             JSONObject jsonSeries = new JSONObject();
                             jsonSeriesEntries.add(jsonSeries);
                             jsonSeries.put("name", e.getA());
-                            jsonSeries.put("isMedalSeries", medalSeriesNames.get(e.getA()));
+                            jsonSeries.put(LeaderboardNameConstants.ISMEDALSERIES, medalSeriesNames.get(e.getA()));
                             JSONArray jsonFleetsEntries = new JSONArray();
-                            jsonSeries.put("fleets", jsonFleetsEntries);
+                            jsonSeries.put(LeaderboardNameConstants.FLEETS, jsonFleetsEntries);
                             for (final Fleet fleet : e.getB()) {
                                 if (fleet != null) {
                                     JSONObject jsonFleet = new JSONObject();
                                     jsonFleet.put("name", fleet.getName());
-                                    jsonFleet.put("color",
+                                    jsonFleet.put(LeaderboardNameConstants.COLOR,
                                             fleet.getColor() != null ? fleet.getColor().getAsHtml() : null);
-                                    jsonFleet.put("ordering", fleet.getOrdering());
+                                    jsonFleet.put(LeaderboardNameConstants.ORDERING, fleet.getOrdering());
                                     jsonFleetsEntries.add(jsonFleet);
                                     JSONArray jsonRacesEntries = new JSONArray();
-                                    jsonFleet.put("races", jsonRacesEntries);
+                                    jsonFleet.put(LeaderboardNameConstants.RACES, jsonRacesEntries);
                                     for (RaceColumn raceColumn : e.getC()) {
                                         JSONObject jsonRaceColumn = new JSONObject();
                                         jsonRaceColumn.put("name", raceColumn.getName());
-                                        jsonRaceColumn.put("isMedalRace", raceColumn.isMedalRace());
+                                        jsonRaceColumn.put(LeaderboardNameConstants.ISMEDALRACE,
+                                                raceColumn.isMedalRace());
                                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                                         if (trackedRace != null) {
-                                            jsonRaceColumn.put("isTracked", true);
-                                            jsonRaceColumn.put("regattaName",
+                                            jsonRaceColumn.put(LeaderboardNameConstants.ISTRACKED, true);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.REGATTANAME,
                                                     trackedRace.getTrackedRegatta().getRegatta().getName());
-                                            jsonRaceColumn.put("trackedRaceName", trackedRace.getRace().getName());
-                                            jsonRaceColumn.put("trackingProviderType", trackedRace.getTrackingConnectorInfo().getTrackingConnectorName());
-                                            jsonRaceColumn.put("raceId", trackedRace.getRace().getId().toString());
+                                            jsonRaceColumn.put(LeaderboardNameConstants.TRACKEDRACENAME,
+                                                    trackedRace.getRace().getName());
+                                            jsonRaceColumn.put(LeaderboardNameConstants.TRACKINGPROVIDERTYPE,
+                                                    trackedRace.getTrackingConnectorInfo().getTrackingConnectorName());
+                                            jsonRaceColumn.put(LeaderboardNameConstants.RACEID,
+                                                    trackedRace.getRace().getId().toString());
                                             final JSONObject raceBoardURLsByEventID = new JSONObject();
                                             for (Event event : eventsReferencingLeaderboardGroup) {
-                                                if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
-                                                    raceBoardURLsByEventID.put(event.getId().toString(), RaceBoardLinkFactory.createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
-                                                            /* locale */ null));
+                                                if (Util.containsAny(event.getVenue().getCourseAreas(),
+                                                        leaderboard.getCourseAreas())) {
+                                                    raceBoardURLsByEventID.put(event.getId().toString(),
+                                                            RaceBoardLinkFactory.createRaceBoardLink(trackedRace,
+                                                                    leaderboard, event, leaderboardGroup, "PLAYER",
+                                                                    /* locale */ null));
                                                 }
                                             }
-                                            jsonRaceColumn.put("raceViewerUrls", raceBoardURLsByEventID);
-                                            jsonRaceColumn.put("hasGpsData", trackedRace.hasGPSData());
-                                            jsonRaceColumn.put("hasWindData", trackedRace.hasWindData());
+                                            jsonRaceColumn.put(LeaderboardNameConstants.RACEVIEWERURLS,
+                                                    raceBoardURLsByEventID);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.HASGPSDATA,
+                                                    trackedRace.hasGPSData());
+                                            jsonRaceColumn.put(LeaderboardNameConstants.HASWINDDATA,
+                                                    trackedRace.hasWindData());
                                         } else {
-                                            jsonRaceColumn.put("isTracked", false);
-                                            jsonRaceColumn.put("trackedRaceName", null);
-                                            jsonRaceColumn.put("trackingProviderType", null);
-                                            jsonRaceColumn.put("raceId", null);
-                                            jsonRaceColumn.put("hasGpsData", false);
-                                            jsonRaceColumn.put("hasWindData", false);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.ISTRACKED, false);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.TRACKEDRACENAME, null);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.TRACKINGPROVIDERTYPE, null);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.RACEID, null);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.HASGPSDATA, false);
+                                            jsonRaceColumn.put(LeaderboardNameConstants.HASWINDDATA, false);
                                         }
                                         jsonRacesEntries.add(jsonRaceColumn);
                                     }
