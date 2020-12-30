@@ -430,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"目前，%1$d个活动等待发送。\n上次成功发送时间：%2$s。"</string>
     <string name="no_event_to_be_sent">"目前没有等待发送的活动。"</string>
     <string name="never">"从不"</string>
-    <string name="connected_to_wp">"已连接到：%1$s\n%2$s\n绑定服务：%3$s"</string>
     <string name="theme_changed_title">"主题更改"</string>
     <string name="theme_changed_message">"主题更改将在重新启动应用后生效。"</string>
     <string name="url_refresh_title">"服务器 URL 已更改"</string>
