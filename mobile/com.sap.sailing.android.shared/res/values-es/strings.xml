@@ -72,6 +72,7 @@
     <string name="enable_gps">"El GPS está desactivado. Esta aplicación necesita las posiciones de GPS. ¿Desea activar el GPS en las opciones de ubicación?"</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">"Connected to: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="sending_waiting">"Actualmente existen %1$d eventos a la espera de ser enviados.\nEl último que se envió con éxito fue a las %2$s"</string>
     <string name="sending_no_waiting">"No existe ningún evento a la espera de ser enviado actualmente."</string>
 
