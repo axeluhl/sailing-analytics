@@ -8,7 +8,15 @@
 if [ -z "${SERVER_NAME}" ]; then
   SERVER_NAME=MASTER
 fi
-
+if [ -n "$AUTO_REPLICATE" ]; then
+  if [ -z "${REPLICATE_ON_START}" ]; then
+    # To start replication upon startup provide the fully-qualified names of the Replicable service classes
+    # for which to trigger replication. If you activate this make sure to
+    # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
+    # same channel the master is using in its REPLICATION_CHANNEL variable
+    REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl
+  fi
+fi
 # Message Queue hostname where to
 # send messages for replicas (this server is master)
 if [ -z "${REPLICATION_HOST}" ]; then

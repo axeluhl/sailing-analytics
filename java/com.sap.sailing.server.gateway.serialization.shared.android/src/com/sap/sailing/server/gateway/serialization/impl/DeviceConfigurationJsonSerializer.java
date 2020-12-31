@@ -14,6 +14,9 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
     public static final String FIELD_RESULTS_RECIPIENT = "resultsRecipient";
     public static final String FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES = "byValueCourseNames";
     public static final String FIELD_REGATTA_CONFIGURATION = "procedures";
+    public static final String FIELD_EVENT_ID = "eventId";
+    public static final String FIELD_COURSE_AREA_ID = "courseAreaId";
+    public static final String FIELD_PRIORITY = "priority";
     
     public static DeviceConfigurationJsonSerializer create() {
         return new DeviceConfigurationJsonSerializer(RegattaConfigurationJsonSerializer.create());
@@ -34,23 +37,22 @@ public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceC
             result.put(FIELD_REGATTA_CONFIGURATION, 
                     regattaConfigurationSerializer.serialize(object.getRegattaConfiguration()));
         }
-
         if (object.getAllowedCourseAreaNames() != null) {
             JSONArray courseAreaNames = new JSONArray();
             courseAreaNames.addAll(object.getAllowedCourseAreaNames());
             result.put(FIELD_COURSE_AREA_NAMES, courseAreaNames);
         }
-        
         if (object.getResultsMailRecipient() != null) {
             result.put(FIELD_RESULTS_RECIPIENT, object.getResultsMailRecipient());
         }
-        
         if (object.getByNameCourseDesignerCourseNames() != null) {
             JSONArray nameArray = new JSONArray();
             nameArray.addAll(object.getByNameCourseDesignerCourseNames());
             result.put(FIELD_BY_VALUE_COURSE_DESIGNER_COURSE_NAMES, nameArray);
         }
-
+        object.getEventId().ifPresent(eventId->result.put(FIELD_EVENT_ID, eventId.toString()));
+        object.getCourseAreaId().ifPresent(courseAreaId->result.put(FIELD_COURSE_AREA_ID, courseAreaId.toString()));
+        object.getPriority().ifPresent(priority->result.put(FIELD_PRIORITY, priority));
         return result;
     }
 

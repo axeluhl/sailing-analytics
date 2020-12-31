@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -200,11 +201,14 @@ public class TestProcedures {
     @Test
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
+        // Comment the following line to get default eu-west-2 test environment; uncomment to upgrade current production images in eu-west-1
+        final AwsRegion region = new AwsRegion(Region.EU_WEST_1);
         landscape.createKeyPair(region, keyName);
         final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
         final UpgradeAmi<String> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
+                    .setRegion(region)
                     .setKeyName(keyName)
                     .setOptionalTimeout(optionalTimeout)
                     .build();
@@ -215,6 +219,7 @@ public class TestProcedures {
             assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception during test", e);
+            fail(e.getMessage());
         } finally {
             landscape.deleteKeyPair(region, keyName);
             if (imageUpgradeProcedure.getUpgradedAmi() != null) {

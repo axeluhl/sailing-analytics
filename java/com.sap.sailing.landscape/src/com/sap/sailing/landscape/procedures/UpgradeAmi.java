@@ -76,6 +76,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * {@code IMAGE_UPGRADE+" for "+machineImage.getId()}</li>
      * <li>If no {@link #setInstanceType(software.amazon.awssdk.services.ec2.model.InstanceType) instance type} is
      * specified, it defaults to {@link InstanceType#T2_MEDIUM}.</li>
+     * <li>If no {@link #setImageType(String) image type} is specified, it defaults to the value of the constant
+     * {@link #IMAGE_TYPE_TAG_VALUE_SAILING} (expected to be {@code "sailing-analytics-server"}).</li>
      * <li>The user data are set to the string defined by {@link UpgradeAmi#IMAGE_UPGRADE_USER_DATA}, forcing the image to
      * boot without trying to launch a process instance.</li>
      * <li>The {@link #isNoShutdown()} property default is changed to {@code false} because when upgrading an image the
