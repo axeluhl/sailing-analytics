@@ -31,6 +31,50 @@ Before you can deploy you need to make sure that you have created an access key 
 
 Deployment can easily be done by right clicking on the lambda class and selecting Amazon Web Services -> Upload function to AWS Lambda. Make sure to select the correct mapping of the class to the lambda endpoint. Also you need to select the IAM role arn:aws:iam::017363970217:role/fixstorageendpoint-lambda-role for ALL endpoints you are deploying.
 
+Alternatively, build the project with Maven, using the following command:
+```
+mvn -Dmaven.test.skip=true package
+```
+This will produce a JAR file in the project's ``bin`` folder. Deploy it using the following command. Use the function name for ``${function-name}``, such as ``FixIngestion`` or ``EndpointRegistration``, respectively:
+
+```
+aws lambda update-function-code --function-name ${function-name} --zip-file fileb://java/com.sap.sailing.ingestion/bin/com.sap.sailing.ingestion-1.0.0-SNAPSHOT.jar
+```
+
+The output should look something like this:
+
+```
+{
+    "Version": "$LATEST",
+    "CodeSize": 23695265,
+    "VpcConfig": {
+        "SecurityGroupIds": [
+            "sg-063f9f90be58558b4"
+        ],
+        "VpcId": "vpc-e5ba568c",
+        "SubnetIds": [
+            "subnet-7fdb2616",
+            "subnet-cf1119b7",
+            "subnet-08391042"
+        ]
+    },
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    },
+    "MemorySize": 256,
+    "CodeSha256": "z1alnizk/76g9aZ0+uxGJfMedrQMg1PJEyvX9LZz0Ng=",
+    "Role": "arn:aws:iam::017363970217:role/fixstorageendpoint-lambda-role",
+    "FunctionArn": "arn:aws:lambda:eu-west-2:017363970217:function:FixIngestion",
+    "RevisionId": "7c5b654a-2b40-4c78-b1ed-be6b7ee59f2f",
+    "Runtime": "java8",
+    "Description": "Fix Ingestion storing data into S3 and triggering endpoints",
+    "Timeout": 75,
+    "Handler": "com.sap.sailing.ingestion.FixIngestionLambda",
+    "FunctionName": "FixIngestion",
+    "LastModified": "2021-01-01T01:11:08.096+0000"
+}
+```
+
 ## Lambda Endpoints
 
 ### Endpoint Registration and Deregistration
