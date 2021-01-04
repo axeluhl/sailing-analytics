@@ -1,30 +1,27 @@
 package com.sap.sse.landscape.application;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
-    /**
-     * @return the replica set to which this process belongs<p>
-     * 
-     *         TODO define this more precisely; an instance can be replica with regards to the SecurityService and
-     *         SharedSailingData replicables and at the same time be master for RacingEventService and all the other
-     *         replicables. What then is "the" replica set of the process?
-     */
-    ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
+    static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     
     /**
      * @param releaseRepository
@@ -32,7 +29,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -66,7 +63,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
     
-    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -75,4 +72,52 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * else in case it's not.
      */
     String getHealthCheckPath();
+
+    ProcessT getMaster();
+
+    Iterable<ProcessT> getReplicas();
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * in the evaluated {@code env.sh} file.
+     */
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     */
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout)
+            throws JSchException, IOException, InterruptedException;
+
+    /**
+     * Tells whether this process is ready to accept requests. Use this for a health check in a target group
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
+     */
+    default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http",
+                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
+        final TimePoint startingToPollForReady = TimePoint.now();
+        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+            if (optionalTimeout.isPresent()) {
+                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
+                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
+            } else {
+                logger.info(""+this+" not yet ready; waiting forever...");
+            }
+            Thread.sleep(5000);
+        }
+        return isReady(optionalTimeout);
+    }
 }

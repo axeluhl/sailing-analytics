@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/compareservers</h2>
+
+<b>Description:</b>
+ <p>Compares two SAP Sailing Analytics servers based on the content.
+  The return contains either the missing leaderboardgroup name and id or
+  if the leaderboardgroupnames match on both servers the missing parts
+  within the leaderboardgroups. If the servers contain the exact same
+  content the return will just have the given server hostnames in it.
+  You may also query for a specific leaderboardgroup id; there the same
+  logic applies. The HTTP return code will be 409 if a mismatch is
+  detected in your query, if equal content is present on both servers
+  the response code will be 200. The caller needs authorization with a
+  valid user.</p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory query parameters:</td>
+        <td>
+            <div>server2, the hostname for the second server.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional form parameters:</td>
+        <td>
+            <div>server1, the hostname for the first server. Defaults to the server that you target your request</div>
+            <div>leaderboardgroupUUID[], the leaderboardgroup UUID you want to compare.
+             Use multiple times if you need to compare more then one
+             leaderboardgroup.</div>
+            <div>user1, the user to authenticate against server1.</div>
+            <div>password1, password for user1.</div>
+            <div>bearer1, you might provide a bearer token instead of user1 and password1.</div>
+            <div>user2, see user1.</div>
+            <div>password2, see password1.</div>
+            <div>bearer2, see bearer1.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        produces output:<pre>
+        {
+          "localhost:8888": [
+            {
+              "name": "World Cup Series 2019 - Genoa, Italy",
+              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
+              "leaderboards": [
+                {
+                  "name": "WCS 2019 Genoa - 49er",
+                  "series": [
+                    {
+                      "name": "Qualifying Series",
+                      "fleets": [
+                        {
+                          "name": "Blue",
+                          "races": [
+                            {
+                              "name": "R1",
+                              "isTracked": true,
+                              "regattaName": "WCS 2019 Genoa - 49er",
+                              "trackedRaceName": "R1 Blue (49er)",
+                              "hasGpsData": true,
+                              "hasWindData": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "75e86618-8b0f-4291-9661-6b2a1fa47dff",
+              "name": "MyTestEventWithStrangeCharact/er*s"
+            }
+          ],
+          "localhost:8889": [
+            {
+              "name": "World Cup Series 2019 - Genoa, Italy",
+              "id": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68",
+              "leaderboards": [
+                {
+                  "name": "WCS 2019 Genoa - 49er",
+                  "series": [
+                    {
+                      "name": "Qualifying Series",
+                      "fleets": [
+                        {
+                          "name": "Blue",
+                          "races": [
+                            {
+                              "name": "R1",
+                              "isTracked": false,
+                              "trackedRaceName": null,
+                              "hasGpsData": false,
+                              "hasWindData": false
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        </pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl localhost:8888/sailingserver/api/v1/compareservers -d "server2=localhost:8889" -d
+        "leaderboardgroupUUID[]=1f07d1cf-0652-4fc3-83bc-a79612a5aa68" -d
+        "leaderboardgroupUUID[]=75e86618-8b0f-4291-9661-6b2a1fa47dff" -H "Authorization:
+        Basic YWRtaW46YWRtaW4="<br> produces output:<pre>
+        {
+         "localhost:8888": [],
+         "localhost:8889": []
+        }
+        </pre>
+   </td>
+  </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

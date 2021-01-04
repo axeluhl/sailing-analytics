@@ -34,10 +34,8 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
             StringMessages stringMessages) {
         super(sailingServiceWrite, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
-        
         this.availableRegattasListBox = new ListBox();
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
-        
         // TrackedEventsComposite should exist in every *ManagementPanel. 
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingServiceWrite, userService,
                 errorReporter, regattaRefresher, stringMessages, /* multiselection */ true, actionButtonsEnabled);

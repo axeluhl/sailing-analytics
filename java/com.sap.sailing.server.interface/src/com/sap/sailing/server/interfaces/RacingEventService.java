@@ -16,9 +16,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import javax.security.auth.Subject;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -805,15 +807,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * instance or reachable through a remote server reference, having a non-{@code null}
      * {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means that the race is linked to a
      * {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
-     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}. The list can be filtered by a predicate that is
+     * used to inspect the UUIDs of the associated events.
+     * 
+     * @param eventListFilter
+     *            a predicate that can be used to filter on the uuids of the events to which the races are assigned to.
      * 
      * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
      *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
-     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this server;
-     *         for races obtained through remote server references, the remote URL will be that of the remote server
-     *         reference. Callers may modify the map as each call to this method will produce a new copy.
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this
+     *         server; for races obtained through remote server references, the remote URL will be that of the remote
+     *         server reference. Callers may modify the map as each call to this method will produce a new copy. The
+     *         value of the map consists out of a set to reflect the situation where races are assigned to multiple
+     *         events. Therefore see also {@link SimpleRaceInfo#getEventID()}.
      */
-    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter);
 
     /**
      * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
@@ -821,12 +829,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * that the race is linked to a {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
      * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
      * 
+     * @param eventListFilter
+     *            a predicate that can be used to filter on the uuids of the events to which the races are assigned to.
+     * 
      * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
      *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
      *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
-     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
+     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy. The
+     *         value of the map consists out of a set to reflect the situation where races are assigned to multiple
+     *         events. Therefore see also {@link SimpleRaceInfo#getEventID()}.
      */
-    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
+    Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter);
 
     /**
      * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to
@@ -976,10 +989,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
     
     /**
+     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
+     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
+     * only username and password or bearer token, not the three of them.
+     */
+    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken);
+    
+    /**
      * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesStillLoading();
-
     /**
      * Returns the number of tracked races restored during server start-up that are
      * {@link TrackedRace#hasFinishedLoading() done with loading}.
