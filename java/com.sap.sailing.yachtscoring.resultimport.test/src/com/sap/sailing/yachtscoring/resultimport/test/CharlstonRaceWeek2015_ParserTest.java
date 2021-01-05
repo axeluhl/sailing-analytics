@@ -4,11 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,22 +34,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CharlstonRaceWeek2015_ParserTest {
+public class CharlstonRaceWeek2015_ParserTest extends AbstractYachtScoringEventResourceTest {
     private static final String CHARLSTONRACEWEEK2015_TESTFILE_XRR = "event1220_CharlstonRaceWeek2015_xrr.xml";
     private static final String CHARLSTONRACEWEEK2015_EVENT_NAME = "2015 Sperry Charleston Race Week, North Charleston, SC, USA";
     
     private static final String BOAT_CLASS_J111 = "J 111";
     private static final String BOAT_CLASS_MELGES24 = "Melges 24";
     
-    private static final String RESOURCES = "resources/";
-
-    private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
-        return new FileInputStream(getFile(filename));
-    }
-
-    private File getFile(String filename) {
-        return new File(RESOURCES + filename);
-    }
 
     private ResultDocumentProvider getTestDocumentProvider() {
         return new ResultDocumentProvider() {
