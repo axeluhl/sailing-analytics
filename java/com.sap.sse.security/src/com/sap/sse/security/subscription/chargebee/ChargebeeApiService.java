@@ -1,8 +1,5 @@
 package com.sap.sse.security.subscription.chargebee;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-
 import com.chargebee.Environment;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -48,31 +45,27 @@ public class ChargebeeApiService implements SubscriptionApiService {
     }
 
     @Override
-    public Future<Iterable<Subscription>> getUserSubscriptions(User user) {
-        CompletableFuture<Iterable<Subscription>> result = new CompletableFuture<Iterable<Subscription>>();
+    public void getUserSubscriptions(User user, OnSubscriptionsResultListener listener) {
         new ChargebeeFetchUserSubscriptionsTask(user, requestManagementService,
                 new ChargebeeFetchUserSubscriptionsTask.OnResultListener() {
 
                     @Override
                     public void onSubsctiptionsResult(Iterable<Subscription> subscriptions) {
-                        result.complete(subscriptions);
+                        listener.onSubscriptionsResult(subscriptions);
                     }
                 }).run();
-        return result;
     }
 
     @Override
-    public Future<SubscriptionCancelResult> cancelSubscription(String subscriptionId) {
-        CompletableFuture<SubscriptionCancelResult> result = new CompletableFuture<SubscriptionCancelResult>();
+    public void cancelSubscription(String subscriptionId, OnCancelSubscriptionResultListener listener) {
         new ChargebeeCancelSubscriptionTask(subscriptionId, requestManagementService,
                 new ChargebeeCancelSubscriptionTask.OnResultListener() {
 
                     @Override
-                    public void onCancelResult(SubscriptionCancelResult r) {
-                        result.complete(r);
+                    public void onCancelResult(SubscriptionCancelResult result) {
+                        listener.onCancelResult(result);
                     }
                 }).run();
-        return result;
     }
 
     @Override

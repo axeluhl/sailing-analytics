@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,8 +80,8 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 logger.info(() -> "Cancel user subscription, user " + user.getName() + ", plan " + planId);
                 SubscriptionApiService apiService = getApiService();
                 if (apiService != null) {
-                    SubscriptionCancelResult cancelResult = apiService
-                            .cancelSubscription(subscription.getSubscriptionId()).get();
+                    SubscriptionCancelResult cancelResult = requestCancelSubscription(apiService,
+                            subscription.getSubscriptionId()).get();
                     if (cancelResult.isSuccess()) {
                         logger.info(() -> "Cancel subscription successful");
                         result = true;
@@ -109,6 +111,19 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             logger.log(Level.SEVERE, "Error in cancel subscription ", e);
             result = false;
         }
+        return result;
+    }
+
+    private Future<SubscriptionCancelResult> requestCancelSubscription(SubscriptionApiService apiService,
+            String subscriptionId) {
+        CompletableFuture<SubscriptionCancelResult> result = new CompletableFuture<SubscriptionCancelResult>();
+        apiService.cancelSubscription(subscriptionId, new SubscriptionApiService.OnCancelSubscriptionResultListener() {
+
+            @Override
+            public void onCancelResult(SubscriptionCancelResult cancelResult) {
+                result.complete(cancelResult);
+            }
+        });
         return result;
     }
 }

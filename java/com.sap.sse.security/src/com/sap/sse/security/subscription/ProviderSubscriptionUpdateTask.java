@@ -17,7 +17,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 /**
  * Perform fetch and update user subscriptions of a provider service
  */
-public class ProviderSubscriptionUpdateTask {
+public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.OnSubscriptionsResultListener {
     private static final Logger logger = Logger.getLogger(ProviderSubscriptionUpdateTask.class.getName());
 
     private SubscriptionApiService apiService;
@@ -36,14 +36,25 @@ public class ProviderSubscriptionUpdateTask {
         if (usersIterator.hasNext()) {
             currentUser = usersIterator.next();
             try {
-                Iterable<Subscription> subscriptions = apiService.getUserSubscriptions(currentUser).get();
-                checkAndUpdateSubscriptions(currentUser, subscriptions, apiService);
-                run();
+                apiService.getUserSubscriptions(currentUser, this);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " + apiService.getProviderName()
                         + ", user: " + currentUser.getName(), e);
             }
         }
+    }
+
+    @Override
+    public void onSubscriptionsResult(Iterable<Subscription> subscriptions) {
+        try {
+            checkAndUpdateSubscriptions(currentUser, subscriptions, apiService);
+        } catch (UserManagementException e) {
+            logger.log(Level.SEVERE, "Update user subscriptions failed, provider: " + apiService.getProviderName()
+                    + ", user: " + currentUser.getName(), e);
+        }
+
+        // continue with next user
+        run();
     }
 
     private void checkAndUpdateSubscriptions(User user, Iterable<Subscription> userSubscriptions,
