@@ -32,8 +32,12 @@ import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
+/**
+ * When confirmed, the dialog tries to update the ownership information on the server, using the
+ * {@link #userManagementService}, and if successful, updates the {@link SecuredDTO} that was passed to the dialog in
+ * place before invoking the optional {@link DialogCallback callback}.
+ */
 public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> {
-
     private final StringMessages stringMessages;
     private final UserManagementServiceAsync userManagementService;
     private final SuggestBox suggestUserName;
@@ -268,14 +272,12 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     public static class DialogConfig<T extends SecuredDTO> {
         private final UserManagementWriteServiceAsync userManagementWriteService;
         private final Consumer<T> updateCallback;
-        private final Function<T, QualifiedObjectIdentifier> identifierFactory;
         private final StringMessages stringMessages;
 
         private DialogConfig(final UserManagementWriteServiceAsync userManagementWriteService, final HasPermissions type,
                 final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
             this.userManagementWriteService = userManagementWriteService;
-            this.identifierFactory = SecuredDTO::getIdentifier;
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;
         }
@@ -295,7 +297,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         }
 
         private class EditOwnershipDialogCallback implements DialogCallback<OwnershipDialogResult> {
-
             private final T securedObject;
 
             private EditOwnershipDialogCallback(T securedObject) {
@@ -304,7 +305,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
             @Override
             public void ok(OwnershipDialogResult editedObject) {
-                final QualifiedObjectIdentifier objectIdentifier = identifierFactory.apply(securedObject);
+                final QualifiedObjectIdentifier objectIdentifier = securedObject.getIdentifier();
                 userManagementWriteService.setOwnership(editedObject.getUsername(), editedObject.getUserGroupId(),
                         objectIdentifier, securedObject.getName(), new UpdateOwnershipAsyncCallback());
             }
@@ -314,7 +315,6 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             }
 
             private class UpdateOwnershipAsyncCallback implements AsyncCallback<OwnershipDTO> {
-
                 private UpdateOwnershipAsyncCallback() {
                 }
 
