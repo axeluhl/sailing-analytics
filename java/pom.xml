@@ -114,6 +114,7 @@
         <module>com.sap.sse.feature.runtime</module>
         <module>com.sap.sailing.competitorimport</module>
         <module>com.sap.sailing.domain</module>
+        <module>com.sap.sailing.awssensorfixstore</module>
         <module>com.sap.sailing.geocoding</module>
         <module>com.sap.sailing.datamining.provider</module>
         <module>com.sap.sailing.datamining</module>
