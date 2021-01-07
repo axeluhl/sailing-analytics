@@ -72,7 +72,7 @@
     <string name="enable_gps">"Il GPS è disattivato. Questa app richiede posizioni GPS. Attivare il GPS con la parametrizzazione dell\'ubicazione?"</string>
 
     <!-- Message Sending -->
-    <string name="connected_to_wp">"Connected to: %1$s\n%2$s\nBoundService:%3$s"</string>
+    <string name="connected_to_wp">"Collegato a: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="sending_waiting">"Attualmente %1$d eventi attendono di essere inviati.\nL\'ultimo invio eseguito correttamente è avvenuto alle %2$s"</string>
     <string name="sending_no_waiting">"Attualmente non vi sono eventi in attesa di invio."</string>
 
