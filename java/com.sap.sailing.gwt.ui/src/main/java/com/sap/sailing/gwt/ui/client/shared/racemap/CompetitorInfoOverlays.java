@@ -65,8 +65,8 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
                 /* info text */ "", raceMap.getCoordinateSystem());
         competitorInfoOverlays.put(competitorDTO.getIdAsString(), result);
         updatePosition(competitorDTO, gpsFixDTO, timeForPositionTransitionMillis);
-        result.setInfoText(createInfoText(competitorDTO));
         updateFlagData(competitorDTO, rank, speed);
+        result.setInfoText(createInfoText(competitorDTO));
         return result;
     }
     
