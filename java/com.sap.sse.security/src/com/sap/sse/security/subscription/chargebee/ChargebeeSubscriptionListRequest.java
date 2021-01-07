@@ -20,6 +20,7 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionListRequest.class.getName());
 
+    @FunctionalInterface
     public static interface OnResultListener {
         void onSubscriptionListResult(Iterable<ChargebeeApiSubscriptionData> subscriptions, String nextOffset);
     }

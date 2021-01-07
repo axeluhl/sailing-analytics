@@ -20,10 +20,10 @@ import com.sap.sse.security.shared.subscription.Subscription;
 public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.OnSubscriptionsResultListener {
     private static final Logger logger = Logger.getLogger(ProviderSubscriptionUpdateTask.class.getName());
 
-    private SubscriptionApiService apiService;
-    private Iterator<User> usersIterator;
+    private final SubscriptionApiService apiService;
+    private final Iterator<User> usersIterator;
     private User currentUser;
-    private CompletableFuture<SecurityService> securityService;
+    private final CompletableFuture<SecurityService> securityService;
 
     public ProviderSubscriptionUpdateTask(SubscriptionApiService apiService, Iterable<User> users,
             CompletableFuture<SecurityService> securityService) {
@@ -52,7 +52,6 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
             logger.log(Level.SEVERE, "Update user subscriptions failed, provider: " + apiService.getProviderName()
                     + ", user: " + currentUser.getName(), e);
         }
-
         // continue with next user
         run();
     }

@@ -17,6 +17,7 @@ public class ChargebeeCancelSubscriptionTask
     /**
      * Cancel result listener
      */
+    @FunctionalInterface
     public static interface OnResultListener {
         void onCancelResult(SubscriptionCancelResult result);
     }

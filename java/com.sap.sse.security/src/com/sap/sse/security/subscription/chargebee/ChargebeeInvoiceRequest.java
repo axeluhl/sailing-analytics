@@ -35,10 +35,8 @@ public class ChargebeeInvoiceRequest extends ChargebeeApiRequest {
     @Override
     public void run() {
         logger.info(() -> "Fetch Chargebee invoice, user: " + user.getName() + ", subscription id: " + subscriptionId);
-
         InvoiceListRequest request = Invoice.list().limit(1).subscriptionId().is(subscriptionId).customerId()
                 .is(user.getName()).sortByDate(SortOrder.DESC);
-
         try {
             ListResult result = request.request();
             if (!isRateLimitReached(result)) {

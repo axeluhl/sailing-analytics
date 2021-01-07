@@ -2,19 +2,17 @@ package com.sap.sse.security.subscription.chargebee;
 
 import com.chargebee.Environment;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiService;
-import com.sap.sse.security.subscription.SubscriptionCancelResult;
 import com.sap.sse.security.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 
 public class ChargebeeApiService implements SubscriptionApiService {
-    // Chargebee has API rate limits
-    // Threshold value for test site: ~750 API calls in 5 minutes.
-    // Threshold value for live site: ~150 API calls per site per minute.
-    // So to prevent the limit would be reached, a request has a frame of ~400ms, and a next request should be made
-    // after 400ms from previous request
+    /**
+     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
+     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
+     * ~400ms, and a next request should be made after 400ms from previous request.
+     */
     public static final long TIME_FOR_API_REQUEST_MS = 400;
 
     public static final long LIMIT_REACHED_RESUME_DELAY_MS = 65000;
@@ -47,25 +45,13 @@ public class ChargebeeApiService implements SubscriptionApiService {
     @Override
     public void getUserSubscriptions(User user, OnSubscriptionsResultListener listener) {
         new ChargebeeFetchUserSubscriptionsTask(user, requestManagementService,
-                new ChargebeeFetchUserSubscriptionsTask.OnResultListener() {
-
-                    @Override
-                    public void onSubsctiptionsResult(Iterable<Subscription> subscriptions) {
-                        listener.onSubscriptionsResult(subscriptions);
-                    }
-                }).run();
+                subscriptions->listener.onSubscriptionsResult(subscriptions)).run();
     }
 
     @Override
     public void cancelSubscription(String subscriptionId, OnCancelSubscriptionResultListener listener) {
         new ChargebeeCancelSubscriptionTask(subscriptionId, requestManagementService,
-                new ChargebeeCancelSubscriptionTask.OnResultListener() {
-
-                    @Override
-                    public void onCancelResult(SubscriptionCancelResult result) {
-                        listener.onCancelResult(result);
-                    }
-                }).run();
+                result->listener.onCancelResult(result)).run();
     }
 
     @Override

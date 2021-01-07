@@ -12,8 +12,9 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
 
 /**
- * Task to perform fetching, checking and updating user subscriptions from payment service providers. See
- * {@code SubscriptionBackgroundUpdate#start(CompletableFuture)}
+ * Task to perform fetching, checking and updating user subscriptions from payment service providers registered with the
+ * OSGi service registry under the {@link SubscriptionApiService} interface. See
+ * {@code SubscriptionBackgroundUpdater#start(CompletableFuture)}.
  */
 public class SubscriptionUpdateTask implements Runnable {
     private static final Logger logger = Logger.getLogger(SubscriptionUpdateTask.class.getName());
@@ -30,8 +31,7 @@ public class SubscriptionUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker
-                .getServiceReferences()) {
+        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker.getServiceReferences()) {
             final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
             if (apiService != null && apiService.isActive()) {
                 fetchAndUpdateProviderSubscriptions(apiService);

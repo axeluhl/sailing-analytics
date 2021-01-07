@@ -11,6 +11,7 @@ import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptionListRequest.OnResultListener {
     private static final Logger logger = Logger.getLogger(ChargebeeFetchUserSubscriptionsTask.class.getName());
 
+    @FunctionalInterface
     public static interface OnResultListener {
         void onSubsctiptionsResult(Iterable<Subscription> subscriptions);
     }
@@ -32,7 +33,6 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
     public void run() {
         logger.info(() -> "Schedule fetch Chargebee subscriptions, user: " + user.getName() + ", offset: "
                 + (offset == null ? "" : offset));
-
         requestManagementService.scheduleRequest(new ChargebeeSubscriptionListRequest(user, offset, this),
                 ChargebeeApiService.TIME_FOR_API_REQUEST_MS, ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
     }

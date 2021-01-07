@@ -31,7 +31,6 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
     public void run() {
         logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
         CancelRequest request = cancel(subscriptionId);
-
         try {
             Result result = request.request();
             if (!isRateLimitReached(result)) {
@@ -41,7 +40,6 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
             logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);
             onDone(null);
         }
-
     }
 
     private void onDone(Subscription subscription) {
