@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
@@ -64,8 +65,8 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
                 /* info text */ "", raceMap.getCoordinateSystem());
         competitorInfoOverlays.put(competitorDTO.getIdAsString(), result);
         updatePosition(competitorDTO, gpsFixDTO, timeForPositionTransitionMillis);
-        result.setInfoText(createInfoText(competitorDTO));
         updateFlagData(competitorDTO, rank, speed);
+        result.setInfoText(createInfoText(competitorDTO));
         return result;
     }
     
@@ -139,8 +140,13 @@ public class CompetitorInfoOverlays implements QuickFlagDataListener {
     private String createInfoText(CompetitorDTO competitorDTO) {
         StringBuilder infoText = new StringBuilder();
         infoText.append(competitorDTO.getShortInfo()).append("\n");
-        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(getLastSpeedInKnots(competitorDTO))).append(" ")
-                .append(stringMessages.knotsUnit()).append("\n");
+        final Double lastSpeedInKnots = getLastSpeedInKnots(competitorDTO);
+        if (lastSpeedInKnots != null) {
+            infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(lastSpeedInKnots)).append(" ")
+                    .append(stringMessages.knotsUnit()).append("\n");
+        } else {
+            GWT.log("Warning: no speed could be determined for competitor "+competitorDTO.getName());
+        }
         final Integer rank = ranks.get(competitorDTO.getIdAsString());
         if (rank != null && rank != 0) {
             infoText.append(stringMessages.rank()).append(" : ").append(rank);
