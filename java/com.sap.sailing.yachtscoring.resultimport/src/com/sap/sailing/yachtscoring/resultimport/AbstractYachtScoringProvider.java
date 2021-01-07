@@ -23,8 +23,7 @@ public abstract class AbstractYachtScoringProvider extends AbstractResultUrlProv
     
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return NAME;
     }
     
     @Override
