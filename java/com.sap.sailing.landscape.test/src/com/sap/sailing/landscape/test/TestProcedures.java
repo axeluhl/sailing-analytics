@@ -27,6 +27,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
@@ -38,6 +39,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
@@ -112,9 +114,11 @@ public class TestProcedures {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName);
         final StartMultiServer.Builder<?, String> builder = StartMultiServer.builder();
+        final String sailingAnalyticsServerTag = "sailing-analytics-server";
         final StartMultiServer<String> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
+              .setTags(Tags.with(sailingAnalyticsServerTag, ""))
               .setOptionalTimeout(optionalTimeout)
               .build();
         try {
@@ -127,8 +131,10 @@ public class TestProcedures {
             final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
             assertTrue(connection.getHeaderField("Server").startsWith("Apache"));
             connection.disconnect();
-            SailingAnalyticsProcess<String> processA = launchMasterOnMultiServer(host, "a");
-            SailingAnalyticsProcess<String> processB = launchMasterOnMultiServer(host, "b");
+            final String aServerName = "a";
+            SailingAnalyticsProcess<String> processA = launchMasterOnMultiServer(host, aServerName);
+            final String bServerName = "b";
+            SailingAnalyticsProcess<String> processB = launchMasterOnMultiServer(host, bServerName);
             assertTrue(processA.waitUntilReady(optionalTimeout));
             assertTrue(processB.waitUntilReady(optionalTimeout));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT+1)),
@@ -144,6 +150,18 @@ public class TestProcedures {
             final String curlOutput = curlChannel.getStreamContentsAsString();
             assertTrue(curlOutput.matches("(?ms).* 302 Found$.*"));
             assertTrue(curlOutput.replaceAll("\r", "").matches("(?ms).*^Location: https://b.sapsailing.com/gwt/Home.html$.*"));
+            // Now check if the landscape can find this "sailing-analytics-server" in the region and determine which applications it has running:
+            final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
+                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, (theHost, dir)->{
+                        try {
+                            return new SailingAnalyticsProcessImpl<String>(theHost, dir, optionalTimeout);
+                        } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, optionalTimeout);
+            // expecting to find at least "a" and "b"
+            assertTrue(Util.containsAll(Util.map(replicaSets, ApplicationReplicaSet::getName), Arrays.asList(aServerName, bServerName)));
+            Util.filter(replicaSets, rs->rs.getName().equals(aServerName) || rs.getName().equals(bServerName)).forEach(rs->assertTrue(Util.isEmpty(rs.getReplicas()) && rs.getMaster() != null));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;
@@ -274,7 +292,7 @@ public class TestProcedures {
                 .setRegion(region)
                 .setInstanceType(InstanceType.T3_LARGE)
                 .setKeyName(keyName)
-                .setTags(Optional.of(Tags.with("Hello", "World")))
+                .setTags(Tags.with("Hello", "World"))
                 .setOptionalTimeout(optionalTimeout)
                 .build();
         startSailingAnalyticsMaster.run();

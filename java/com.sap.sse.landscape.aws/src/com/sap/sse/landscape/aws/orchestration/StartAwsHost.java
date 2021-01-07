@@ -93,7 +93,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
 
         BuilderT setSecurityGroups(Iterable<SecurityGroup> securityGroups);
         
-        BuilderT setTags(Optional<Tags> tags);
+        BuilderT setTags(Tags tags);
 
         BuilderT setUserData(String[] userData);
 
@@ -177,8 +177,8 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
 
         @Override
-        public BuilderT setTags(Optional<Tags> tags) {
-            this.tags = tags;
+        public BuilderT setTags(Tags tags) {
+            this.tags = Optional.ofNullable(tags);
             return self();
         }
 

@@ -39,7 +39,6 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     @Override
     public void upgrade(Release newVersion) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.upgrade(...)
-        
     }
 
     @Override
@@ -63,7 +62,6 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             Scope<ShardingKey> scopeToImport, boolean failUponDiff, boolean removeFromSourceUponSuccess,
             boolean setRemoveReferenceInSourceUponSuccess) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.importScope(...)
-        
     }
 
     @Override

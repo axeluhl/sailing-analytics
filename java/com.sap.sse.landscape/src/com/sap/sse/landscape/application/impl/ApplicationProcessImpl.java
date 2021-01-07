@@ -145,7 +145,6 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         sftpChannel.disconnect();
         return bos.toString();
     }
-
     
     /**
      * No good health check path known for arbitrary process; returning {@code "/"} as a default value.
@@ -157,7 +156,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public ProcessT getMaster() {
-        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
+        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties; and how to find out master's real host if all we have in env.sh is a reference to the ALB / public hostname entry?
         // TODO Implement ApplicationReplicaProcess<ShardingKey,SailingAnalyticsMetrics,SailingAnalyticsMaster<ShardingKey>,SailingAnalyticsReplica<ShardingKey>>.getMaster(...)
         return null;
     }

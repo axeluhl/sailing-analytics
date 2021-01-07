@@ -3,7 +3,6 @@ package com.sap.sse.landscape.aws.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
@@ -1007,7 +1006,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
             for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout)) {
                 final String serverName = applicationProcess.getServerName(optionalTimeout);
                 final ProcessT master = applicationProcess.getMaster();
-                if (master.getServerName(optionalTimeout).equals(serverName)) {
+                if (master != null && Util.equalsWithNull(master.getServerName(optionalTimeout), serverName)) {
                     // then applicationProcess is a replica in the serverName cluster:
                     Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
                 } else {
@@ -1031,6 +1030,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
-        return Util.map(Arrays.asList(Region.EU_WEST_2, Region.CA_CENTRAL_1), AwsRegion::new);
+        return Util.map(Region.regions(), AwsRegion::new);
     }
 }
