@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.junit.Assert;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -32,8 +32,8 @@ import com.sap.sse.common.CountryCodeFactory;
  * @author Usman Ali
  *
  */
-
 public class FailIfNoValidOrcCertificateRule implements TestRule {
+    private final static Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     private List<ORCCertificate> availableCerts;
@@ -76,16 +76,18 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
                         orcCertificates.forEach(availableCerts::add);
                         if (orcCertificates.iterator().hasNext()) {
                             certificateExists = true;
-                            break;
+                            break; // Note: this stops after the first valid certificates for a country have been read!
                         }
                     } catch (Exception ex) {
-                        // Exceptions are ignored because we are searching for any countries orc certificate's
-                        // availability.
+                        // Exceptions are ignored because we are searching for any country's ORC certificate availability.
                     }
                 }
             }
-            Assert.assertTrue(certificateExists);
-            base.evaluate();
+            if (certificateExists) {
+                base.evaluate();
+            } else {
+                logger.warning("No certificates found. Are we at the beginning of a new year (January)? Then this may be okay. Otherwise, please check what's up!");
+            }
         }
     }
 }
