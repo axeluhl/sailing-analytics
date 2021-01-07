@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
@@ -40,10 +41,16 @@ public class YachtScoringCompetitorProvider extends AbstractYachtScoringProvider
     private static final long serialVersionUID = 7389956404604333931L;
     private static final Logger logger = Logger.getLogger(YachtScoringCompetitorProvider.class.getName());
     private final static String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private final YachtscoringResultDocumentProvider documentProvider;
+    private final ResultDocumentProvider documentProvider;
     private final ResourceBundleStringMessages stringMessages;
     
-
+    // Constructor for Testing
+    public YachtScoringCompetitorProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry, ResultDocumentProvider documentProvider) {
+        super(parserFactory, resultUrlRegistry);
+        this.documentProvider = documentProvider;
+        stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
+    }
+    
     public YachtScoringCompetitorProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
         super(parserFactory, resultUrlRegistry);
         documentProvider = new YachtscoringResultDocumentProvider(this, parserFactory);
@@ -160,7 +167,10 @@ public class YachtScoringCompetitorProvider extends AbstractYachtScoringProvider
             // use that of team; if not defined for team, use first nationality of a team member that has one defined
             team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
         };
-        final String boatClassName = parser.getBoatClassName(division);
+        String boatClassName = null;
+        if(division != null) {
+            boatClassName = parser.getBoatClassName(division);
+        }
         List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
                 Person xrrPerson = parser.getPerson(crew.getPersonID());
                 String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
@@ -200,7 +210,7 @@ public class YachtScoringCompetitorProvider extends AbstractYachtScoringProvider
         return competitorDescriptor;
     }
 
-    protected YachtscoringResultDocumentProvider getDocumentProvider() {
+    protected ResultDocumentProvider getDocumentProvider() {
         return documentProvider;
     }
     
