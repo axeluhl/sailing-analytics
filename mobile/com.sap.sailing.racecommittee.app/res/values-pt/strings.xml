@@ -187,7 +187,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">"Ajustar"</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">"Você pretende efetuar o logoff e efetuar o logon como um usuário novo? Todas as suas corridas ainda serão monitoradas."</string>
+    <string name="logout_dialog_message">"Você pretende efetuar o logoff e efetuar o logon como um usuário novo?"</string>
     <string name="change_dialog_title">"Modificar regata"</string>
     <string name="change_dialog_message">"Você pretende modificar uma regata e/ou a área? As corridas atualmente monitoradas serão desconectadas."</string>
     <string name="logout">"Efetuar logoff"</string>
