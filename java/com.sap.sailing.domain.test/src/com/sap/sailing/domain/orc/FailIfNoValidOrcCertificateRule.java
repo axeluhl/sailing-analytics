@@ -32,8 +32,9 @@ import com.sap.sse.common.CountryCodeFactory;
  * @author Usman Ali
  *
  */
+
 public class FailIfNoValidOrcCertificateRule implements TestRule {
-    private final static Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
+    private static final Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     private List<ORCCertificate> availableCerts;
@@ -80,7 +81,7 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
                                 break; // Note: this stops after the first valid certificates for a country have been read!
                             }
                         } catch (Exception ex) {
-                        // Exceptions are ignored because we are searching for any country's ORC certificate availability.
+                            // Exceptions are ignored because we are searching for any country's ORC certificate availability.
                         }
                     }
                 }
