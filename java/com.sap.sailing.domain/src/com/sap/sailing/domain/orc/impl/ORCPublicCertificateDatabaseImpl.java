@@ -684,7 +684,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final FutureTask<Set<ORCCertificate>> result = new FutureTask<Set<ORCCertificate>>(()->{
             final Set<ORCCertificate> certificates = new HashSet<>();
             Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingSailNumberPadding(yachtName, sailNumber, boatClass);
-            if (!containsHandleForCurrentYear(certificateHandles)) {
+            if (!containsValidHandle(certificateHandles)) {
                 // try swapping yacht name and sail number and go again:
                 logger.fine(()->"Nothing found for "+yachtName+"/"+sailNumber+"/"+boatClass+
                         "; trying by swapping sail number and yacht name");
@@ -712,7 +712,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         for (final String sailNumberVariant : getSailNumberVariants(sailNumber)) {
             logger.fine(()->"Trying sail number variation "+sailNumberVariant);
             final Iterable<CertificateHandle> certificateHandles = fuzzySearchVaryingBoatClassName(yachtName, sailNumberVariant, boatClass);
-            Util.addAll(filterHandlesForCurrentYear(certificateHandles), result);
+            Util.addAll(filterValidHandles(certificateHandles), result);
         }
         if (sailNumber != null && result.isEmpty() && (yachtName != null || boatClass != null)) {
             logger.fine(()->"Nothing found; trying without restricting sail number to "+sailNumber);
@@ -722,21 +722,12 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         return result;
     }
 
-    private boolean containsHandleForCurrentYear(Iterable<CertificateHandle> certificateHandles) {
-        return filterHandlesForCurrentYear(certificateHandles).iterator().hasNext();
+    private boolean containsValidHandle(Iterable<CertificateHandle> certificateHandles) {
+        return filterValidHandles(certificateHandles).iterator().hasNext();
     }
 
-    private Iterable<CertificateHandle> filterHandlesForCurrentYear(Iterable<CertificateHandle> certificateHandles) {
-        final List<CertificateHandle> result = new LinkedList<>();
-        final Calendar cal = new GregorianCalendar();
-        final int currentYear = cal.get(Calendar.YEAR);
-        for (final CertificateHandle handle : certificateHandles) {
-            cal.setTime(handle.getIssueDate().asDate());
-            if (cal.get(Calendar.YEAR) ==  currentYear) {
-                result.add(handle);
-            }
-        }
-        return result;
+    private Iterable<CertificateHandle> filterValidHandles(Iterable<CertificateHandle> certificateHandles) {
+        return Util.filter(certificateHandles, handle->handle.isValid());
     }
 
     /**
@@ -756,7 +747,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private Iterable<CertificateHandle> fuzzySearchVaryingBoatClassName(final String yachtName, final String sailNumber, final BoatClass boatClass) throws Exception {
         String successfulBoatClassName = boatClass==null?null:boatClass.getName();
         Iterable<CertificateHandle> certificateHandles = search(/* issuingCountry */ null, /* yearOfIssuance */ null, /* referenceNumber */ null, yachtName, sailNumber, successfulBoatClassName, /* includeInvalid */ false);
-        if (!containsHandleForCurrentYear(certificateHandles) && successfulBoatClassName != null) {
+        if (!containsValidHandle(certificateHandles) && successfulBoatClassName != null) {
             if (yachtName != null || sailNumber != null) {
                 logger.fine(()->"Nothing found; removing boat class name restriction "+boatClass.getName());
                 // try without boat class restriction
@@ -770,7 +761,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         // if a valid boatClass was specified, try to filter; if none match the filter, return unfiltered
         if (boatClass != null) {
             final Set<CertificateHandle> restrictedResults = new HashSet<>();
-            for (final CertificateHandle handle : filterHandlesForCurrentYear(certificateHandles)) {
+            for (final CertificateHandle handle : filterValidHandles(certificateHandles)) {
                 final BoatClassMasterdata boatClassMasterData = BoatClassMasterdata.resolveBoatClass(handle.getBoatClassName());
                 if (boatClassMasterData != null && boatClassMasterData.getDisplayName().equals(boatClass.getName())) {
                     restrictedResults.add(handle);
