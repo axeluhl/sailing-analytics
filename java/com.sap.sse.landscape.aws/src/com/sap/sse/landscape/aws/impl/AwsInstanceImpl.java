@@ -188,7 +188,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
                         + " while trying to connect. Probably timeout trying early SSH connection.");
                 Thread.sleep(5000); // wait a bit for the service to become available
             }
-            if (channel != null) {
+            if (channel == null) {
                 if (optionalTimeout.isPresent()) {
                     logger.info("Retrying until "+start.plus(optionalTimeout.get()));
                 } else {
