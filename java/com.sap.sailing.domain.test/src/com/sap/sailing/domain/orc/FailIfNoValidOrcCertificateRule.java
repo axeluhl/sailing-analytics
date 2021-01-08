@@ -32,8 +32,9 @@ import com.sap.sse.common.CountryCodeFactory;
  * @author Usman Ali
  *
  */
+
 public class FailIfNoValidOrcCertificateRule implements TestRule {
-    private final static Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
+    private static final Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     private List<ORCCertificate> availableCerts;
@@ -67,19 +68,21 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
             boolean certificateExists = true;
             FailIfNoValidOrcCertificates annotation = description.getAnnotation(FailIfNoValidOrcCertificates.class);
             if (annotation != null) {
-                int year = LocalDate.now().getYear();
+                int currentYear = LocalDate.now().getYear();
                 certificateExists = false;
-                for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
-                    try {
-                        Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null, /* includeInvalid */ false);
-                        Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
-                        orcCertificates.forEach(availableCerts::add);
-                        if (orcCertificates.iterator().hasNext()) {
-                            certificateExists = true;
-                            break; // Note: this stops after the first valid certificates for a country have been read!
+                for (int year=currentYear; year>=currentYear-1; year--) {
+                    for (CountryCode countryCode : CountryCodeFactory.INSTANCE.getAll()) {
+                        try {
+                            Iterable<CertificateHandle> certificateHandles = db.search(countryCode, year, null, null, null, null, /* includeInvalid */ false);
+                            Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
+                            orcCertificates.forEach(availableCerts::add);
+                            if (orcCertificates.iterator().hasNext()) {
+                                certificateExists = true;
+                                break; // Note: this stops after the first valid certificates for a country have been read!
+                            }
+                        } catch (Exception ex) {
+                            // Exceptions are ignored because we are searching for any country's ORC certificate availability.
                         }
-                    } catch (Exception ex) {
-                        // Exceptions are ignored because we are searching for any country's ORC certificate availability.
                     }
                 }
             }
