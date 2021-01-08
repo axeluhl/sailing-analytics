@@ -2,7 +2,9 @@ package com.sap.sailing.domain.orc.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -25,12 +27,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
@@ -46,6 +50,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -76,6 +81,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final NameValuePair ACTION_PARAM = new BasicNameValuePair(ACTION_PARAM_NAME, ACTION_PARAM_VALUE_LIST_CERT);
     private static final NameValuePair XSLP_PARAM = new BasicNameValuePair(XSLP_PARAM_NAME, XSLP_PARAM_VALUE_LIST_CERT);
     private static final String SEARCH_URL = "http://data.orc.org/public/WPub.dll";
+    private static final String COUNTRY_OVERVIEW_URL = SEARCH_URL+"/RMS";
     private static final String SINGLE_CERTIFICATE_DOWNLOAD_URL = "http://data.orc.org/public/WPub.dll?action=DownBoatRMS";
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
@@ -95,6 +101,62 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
     };
+    
+    private static class CountryOverviewImpl implements CountryOverview {
+        private final CountryCode issuingCountry;
+        private final CertificateFamily family;
+        private final Integer certType;
+        private final Integer vppYear;
+        private final int certCount;
+        private final TimePoint lastUpdate;
+        private final String certName;
+        private final String rmsCode;
+        
+        protected CountryOverviewImpl(CountryCode issuingCountry, CertificateFamily family, Integer certType,
+                Integer vppYear, int certCount, TimePoint lastUpdate, String certName, String rmsCode) {
+            super();
+            this.issuingCountry = issuingCountry;
+            this.family = family;
+            this.certType = certType;
+            this.vppYear = vppYear;
+            this.certCount = certCount;
+            this.lastUpdate = lastUpdate;
+            this.certName = certName;
+            this.rmsCode = rmsCode;
+        }
+        @Override
+        public CountryCode getIssuingCountry() {
+            return issuingCountry;
+        }
+        @Override
+        public CertificateFamily getFamily() {
+            return family;
+        }
+        @Override
+        public Integer getCertType() {
+            return certType;
+        }
+        @Override
+        public Integer getVPPYear() {
+            return vppYear;
+        }
+        @Override
+        public int getCertCount() {
+            return certCount;
+        }
+        @Override
+        public TimePoint getLastUpdate() {
+            return lastUpdate;
+        }
+        @Override
+        public String getCertName() {
+            return certName;
+        }
+        @Override
+        public String getRMSCode() {
+            return rmsCode;
+        }
+    }
     
     /**
      * Hash code and equality as based on {@link #getReferenceNumber() the reference number field} only.
@@ -325,6 +387,81 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         return result;
     }
 
+    @Override
+    public Iterable<CountryOverview> getCountriesWithValidCertificates()
+            throws SAXException, IOException, ParserConfigurationException, DOMException, ParseException {
+        final Set<ORCPublicCertificateDatabase.CountryOverview> result = new HashSet<>();
+        final HttpClient client = HttpClientBuilder.create().build();
+        final List<NameValuePair> params = new ArrayList<>();
+        final HttpPost postRequest = new HttpPost(COUNTRY_OVERVIEW_URL);
+        addAuthorizationHeader(postRequest);
+        logger.fine(()->"Searching for "+params+"...");
+        final HttpResponse processorResponse = client.execute(postRequest);
+        final InputStream content = processorResponse.getEntity().getContent();
+        final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final Document document = builder.parse(content);
+        final NodeList dataNodes = document.getElementsByTagName(ROOT_ELEMENT).item(0).getChildNodes();
+        for (int dataNodeIndex=0; dataNodeIndex<dataNodes.getLength(); dataNodeIndex++) {
+            final Node dataNode = dataNodes.item(dataNodeIndex);
+            if (dataNode.getNodeName().equals(DATA_ELEMENT)) {
+                final NodeList rowNodes = dataNode.getChildNodes();
+                for (int rowNodeIndex=0; rowNodeIndex<rowNodes.getLength(); rowNodeIndex++) {
+                    final Node rowNode = rowNodes.item(rowNodeIndex);
+                    if (rowNode.getNodeName().equals(ROW_ELEMENT)) {
+                        final CountryOverview countryOverview = parseCountryOverview(rowNode);
+                        if (countryOverview.getVPPYear() != null) {
+                            result.add(countryOverview);
+                        }
+                    }
+                }
+            }
+        }
+        logger.fine(()->"Search for "+params+" returned "+result.size()+" results");
+        return result;
+    }
+    
+    private CountryOverview parseCountryOverview(Node rowNode) throws DOMException, ParseException {
+        final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.mmmX");
+        CountryCode issuingCountry = null;
+        CertificateFamily family = null;
+        Integer certType = null;
+        Integer vppYear = null;
+        int certCount = 0;
+        TimePoint lastUpdate = null;
+        String certName = null;
+        String rmsCode = null;
+        for (int i=0; i<rowNode.getChildNodes().getLength(); i++) {
+            final Node child = rowNode.getChildNodes().item(i);
+            switch (child.getNodeName()) {
+            case "CountryId":
+                issuingCountry = CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(child.getTextContent().trim());
+                break;
+            case "Family":
+                family = Util.hasLength(child.getTextContent().trim()) ? CertificateFamily.fromId(new Integer(child.getTextContent().trim())) : null;
+                break;
+            case "CertType":
+                certType = child.getTextContent().trim().isEmpty() ? null : Integer.valueOf(child.getTextContent().trim());
+                break;
+            case "VPPYear":
+                vppYear = child.getTextContent().trim().isEmpty() ? null : Integer.valueOf(child.getTextContent().trim());
+                break;
+            case "CertCount":
+                certCount = Integer.valueOf(child.getTextContent().trim()).intValue();
+                break;
+            case "LastUpdate":
+                lastUpdate = TimePoint.of(isoDateFormat.parse(child.getTextContent().trim()));
+                break;
+            case "CertName":
+                certName = child.getTextContent().trim();
+                break;
+            case "RMSCode":
+                rmsCode = child.getTextContent().trim();
+                break;
+            }
+        }
+        return new CountryOverviewImpl(issuingCountry, family, certType, vppYear, certCount, lastUpdate, certName, rmsCode);
+    }
+
     private void addAuthorizationHeader(final HttpMessage httpMessage) {
         httpMessage.addHeader("Authorization", "Basic "+new String(Base64.getEncoder().encode((USER_NAME+":"+getDecodedCredentials()).getBytes())));
     }
@@ -486,7 +623,13 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     public ORCCertificate getCertificate(String referenceNumber, CertificateFamily family) throws Exception {
         final String queryParameters = "ext=json&RefNo="+referenceNumber+"&family="+family.getFamilyQueryParamValue();
         logger.fine("Obtaining certificate for reference number "+referenceNumber);
-        final ORCCertificate result = getSingleCertificate(queryParameters);
+        ORCCertificate result;
+        try {
+            result = getSingleCertificate(queryParameters);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error trying to find ORC certificate with reference number "+referenceNumber, e);
+            result = null;
+        }
         if (result == null) {
             logger.info("Couldn't find ORC certificate with reference number "+referenceNumber);
         }
