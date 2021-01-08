@@ -72,7 +72,7 @@
     <string name="enable_gps">"GPS がオフになっています。このアプリには GPS 位置が必要です。場所の設定で GPS をオンにしますか。"</string>
 
     <!-- Message Sending -->
-    <string name="connected_to_wp">"接続先: %1$s\n%2$s\nBoundService:%3$s"</string>
+    <string name="connected_to_wp">"接続先: %1$s\n%2$s\nBoundService: %3$s"</string>
     <string name="sending_waiting">"現在 %1$d イベントの送信が待機中です。\n前回の送信は %2$s に行われました"</string>
     <string name="sending_no_waiting">"現在送信を待機中のイベントはありません。"</string>
 
