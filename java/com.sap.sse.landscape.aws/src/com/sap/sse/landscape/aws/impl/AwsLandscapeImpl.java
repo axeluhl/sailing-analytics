@@ -1,7 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -22,7 +21,6 @@ import java.util.logging.Logger;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -998,15 +996,15 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
-            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException {
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout) throws Exception {
         final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
             for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout)) {
                 final String serverName = applicationProcess.getServerName(optionalTimeout);
-                final ProcessT master = applicationProcess.getMaster();
-                if (master != null && Util.equalsWithNull(master.getServerName(optionalTimeout), serverName)) {
+                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
+                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
                     // then applicationProcess is a replica in the serverName cluster:
                     Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
                 } else {

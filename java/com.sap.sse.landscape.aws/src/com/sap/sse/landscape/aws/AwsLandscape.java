@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +7,6 @@ import java.util.function.BiFunction;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
@@ -461,7 +459,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
      * specified by {@code tagName} and discovers all application server processes configured on it. These are then
      * grouped by {@link ApplicationProcess#getServerName(Optional) server name}, and using
-     * {@link ApplicationProcess#getMaster()} the master/replica relationships between the processes with equal server
+     * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
      * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
      * 
      * @param processFactoryFromHostAndServerDirectory
@@ -473,5 +471,5 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      */
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
-            Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException;
+            Optional<Duration> optionalTimeout) throws Exception;
 }

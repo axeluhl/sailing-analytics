@@ -145,7 +145,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         }
 
         @Override
-        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws Exception {
             final String result;
             if (super.getServerName() != null) {
                 result = super.getServerName();
@@ -165,7 +165,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();

@@ -1,10 +1,23 @@
 package com.sap.sse.landscape.application.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -127,7 +140,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException {
+    public String getServerName(Optional<Duration> optionalTimeout) throws Exception {
         return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout);
     }
 
@@ -153,18 +166,49 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     public String getHealthCheckPath() {
         return "/";
     }
+    
+    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout)
+            throws ClientProtocolException, IOException, ParseException {
+        return getReplicationStatus(getReplicationStatusPostUrlAndQuery(optionalTimeout));
+    }
 
-    @Override
-    public ProcessT getMaster() {
-        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties; and how to find out master's real host if all we have in env.sh is a reference to the ALB / public hostname entry?
-        // TODO Implement ApplicationReplicaProcess<ShardingKey,SailingAnalyticsMetrics,SailingAnalyticsMaster<ShardingKey>,SailingAnalyticsReplica<ShardingKey>>.getMaster(...)
-        return null;
+    private JSONObject getReplicationStatus(final URL url)
+            throws IOException, ClientProtocolException, ParseException {
+        final HttpPost postRequest = new HttpPost(url.toString());
+        final HttpClient client = HttpClientBuilder.create().build();
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        client.execute(postRequest).getEntity().writeTo(bos);
+        return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
     }
 
     @Override
-    public Iterable<ProcessT> getReplicas() {
-        // TODO various ways possible; tags, or reading env.sh, or using API on master (probably yet to be built) to ask for replication properties
-        // TODO Implement ApplicationProcessImpl.getReplicas(...)
-        return null;
+    public String getMasterServerName(Optional<Duration> optionalTimeout) throws ClientProtocolException, IOException, ParseException {
+        final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
+        String result = null;
+        for (final Object replicable : (JSONArray) replicationStatus.get("replicables")) {
+            final JSONObject replicableAsJson = (JSONObject) replicable;
+            if (replicableAsJson.get("replicatedfrom") != null) {
+                final JSONObject replicatedFrom = (JSONObject) replicableAsJson.get("replicatedfrom");
+                final String hostname = replicatedFrom.get("hostname").toString();
+                final int port = ((Number) replicatedFrom.get("port")).intValue();
+                // the bearer token that is good for the connection to this process instance should then also
+                // be recognized as valid on this instance's master and have the READ_REPLICATOR permission for the same server name
+                try {
+                    final JSONObject masterReplicationStatus = getReplicationStatus(optionalTimeout, hostname, port);
+                    result = masterReplicationStatus.get("servername").toString();
+                    break;
+                } catch (Exception e) {
+                    // could, e.g., be a security issue with a master with a different servername where there bearer token leads
+                    // to a user who does not have the READ_REPLICATOR permission for that server; log and ignore:
+                    logger.log(Level.INFO, "Problem trying to read replication status on "+hostname+":"+port+" to obtain server name; ignoring", e);
+                }
+            }
+        }
+        return result;
+    }
+
+    private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)
+            throws ClientProtocolException, IOException, ParseException {
+        return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
     }
 }

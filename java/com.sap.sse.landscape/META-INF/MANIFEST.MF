@@ -19,5 +19,9 @@ Export-Package: com.sap.sse.landscape,
 Require-Bundle: com.sap.sse.common,
  com.jcraft.jsch;bundle-version="0.1.54",
  org.mongodb.mongo-java-driver,
- com.sap.sse.landscape
-Import-Package: com.sap.sse.concurrent
+ com.sap.sse.landscape,
+ org.json.simple,
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
+ org.apache.httpcomponents.httpclient;bundle-version="4.5.5"
+Import-Package: com.sap.sse.concurrent,
+ com.sap.sse.util

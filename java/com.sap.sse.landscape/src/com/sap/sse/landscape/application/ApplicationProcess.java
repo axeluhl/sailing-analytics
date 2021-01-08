@@ -2,6 +2,7 @@ package com.sap.sse.landscape.application;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -22,6 +23,7 @@ public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationPro
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
+    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
     
     /**
      * @param releaseRepository
@@ -61,7 +63,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
-    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    String getServerName(Optional<Duration> optionalTimeout) throws Exception;
     
     String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
 
@@ -73,9 +75,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getHealthCheckPath();
 
-    ProcessT getMaster();
-
-    Iterable<ProcessT> getReplicas();
+    String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
@@ -97,14 +97,29 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
         try {
-            final HttpURLConnection connection = (HttpURLConnection) new URL("http",
-                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+            final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout)
                             .openConnection();
             return connection.getResponseCode() == 200;
         } catch (Exception e) {
             logger.info("Ready-check failed for "+this+": "+e.getMessage());
             return false;
         }
+    }
+
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(getHealthCheckPath(), optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
+        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+    }
+    
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
