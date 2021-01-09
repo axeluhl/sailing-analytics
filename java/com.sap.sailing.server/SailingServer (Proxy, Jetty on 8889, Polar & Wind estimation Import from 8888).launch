@@ -107,6 +107,7 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 </setAttribute>

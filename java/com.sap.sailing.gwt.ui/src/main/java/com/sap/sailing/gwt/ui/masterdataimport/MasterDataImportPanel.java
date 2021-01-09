@@ -373,7 +373,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(exportDeviceConfigsSwitch);
         exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
         exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
-        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
+        exportTrackedRacesAndStartTrackingSwitch.setValue(true);
         contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");

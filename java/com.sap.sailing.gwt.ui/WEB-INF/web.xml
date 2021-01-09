@@ -188,6 +188,15 @@
 		<servlet-name>UserManagementService</servlet-name>
 		<url-pattern>/service/usermanagement</url-pattern>
 	</servlet-mapping>
+	<servlet>
+        <display-name>Chargebee Subscription Service</display-name>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
+        <servlet-class>com.sap.sailing.gwt.ui.server.subscription.chargebee.ChargebeeSubscriptionWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ChargebeeSubscriptionService</servlet-name>
+        <url-pattern>/service/subscription/chargebee</url-pattern>
+    </servlet-mapping>
 
 	<!-- enabling remote logging -->
 	<servlet>

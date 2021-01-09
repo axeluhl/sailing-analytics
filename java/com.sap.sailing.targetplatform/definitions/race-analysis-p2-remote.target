@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="169">
+<target name="Race Analysis Target" sequenceNumber="170">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -120,7 +120,7 @@
 <repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.16"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.57"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 </locations>
@@ -273,6 +273,7 @@
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
+<plugin id="com.chargebee.chargebee-java"/>
 <plugin id="slf4j.jdk14"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>

@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 
 /**
  * An AWS EC2 host that has been created from a {@link MachineImage} that supports deploying an application,
@@ -15,4 +16,9 @@ public interface AwsInstance<ShardingKey, MetricsT extends ApplicationProcessMet
     String getInstanceId();
 
     void terminate();
+
+    @Override
+    default AwsRegion getRegion() {
+        return (AwsRegion) Host.super.getRegion();
+    }
 }
