@@ -67,9 +67,9 @@ implements SailingAnalyticsProcess<ShardingKey> {
         while (result == null && optionalTimeout.map(d->start.until(TimePoint.now()).compareTo(d) < 0).orElse(true)) {
             try {
                 result = getStatus(optionalTimeout).get("servername").toString();
-                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
             } catch (Exception e) {
                 logger.info("Exception waiting for server name."+optionalTimeout.map(d->" Waiting another "+d.minus(start.until(TimePoint.now())).toString()).orElse(""));
+                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
             }
         }
         return result;
