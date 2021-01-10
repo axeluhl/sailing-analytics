@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -19,12 +20,15 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
+    private final static Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());
+
     /**
      * Tries to obtain the port from the {@code env.sh} file found in the {@code serverDirectory}
      */
@@ -58,6 +62,16 @@ implements SailingAnalyticsProcess<ShardingKey> {
     @Override
     public String getServerName(Optional<Duration> optionalTimeout)
             throws JSchException, IOException, InterruptedException, SftpException, ParseException {
-        return getStatus(optionalTimeout).get("servername").toString();
+        String result = null;
+        final TimePoint start = TimePoint.now();
+        while (result == null && optionalTimeout.map(d->start.until(TimePoint.now()).compareTo(d) < 0).orElse(true)) {
+            try {
+                result = getStatus(optionalTimeout).get("servername").toString();
+                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
+            } catch (Exception e) {
+                logger.info("Exception waiting for server name."+optionalTimeout.map(d->" Waiting another "+d.minus(start.until(TimePoint.now())).toString()).orElse(""));
+            }
+        }
+        return result;
     }
 }

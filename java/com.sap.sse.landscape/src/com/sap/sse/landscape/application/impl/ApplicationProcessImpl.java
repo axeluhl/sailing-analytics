@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +22,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -182,26 +182,30 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getMasterServerName(Optional<Duration> optionalTimeout) throws ClientProtocolException, IOException, ParseException {
-        final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
+    public String getMasterServerName(Optional<Duration> optionalTimeout) throws ClientProtocolException, IOException, ParseException, InterruptedException {
         String result = null;
-        for (final Object replicable : (JSONArray) replicationStatus.get("replicables")) {
-            final JSONObject replicableAsJson = (JSONObject) replicable;
-            if (replicableAsJson.get("replicatedfrom") != null) {
-                final JSONObject replicatedFrom = (JSONObject) replicableAsJson.get("replicatedfrom");
-                final String hostname = replicatedFrom.get("hostname").toString();
-                final int port = ((Number) replicatedFrom.get("port")).intValue();
-                // the bearer token that is good for the connection to this process instance should then also
-                // be recognized as valid on this instance's master and have the READ_REPLICATOR permission for the same server name
-                try {
-                    final JSONObject masterReplicationStatus = getReplicationStatus(optionalTimeout, hostname, port);
-                    result = masterReplicationStatus.get("servername").toString();
-                    break;
-                } catch (Exception e) {
-                    // could, e.g., be a security issue with a master with a different servername where there bearer token leads
-                    // to a user who does not have the READ_REPLICATOR permission for that server; log and ignore:
-                    logger.log(Level.INFO, "Problem trying to read replication status on "+hostname+":"+port+" to obtain server name; ignoring", e);
+        boolean obtainedReplicationStatusSuccessfully = false;
+        final TimePoint start = TimePoint.now();
+        while (!obtainedReplicationStatusSuccessfully && optionalTimeout.map(d->start.until(TimePoint.now()).compareTo(d) < 0).orElse(true)) {
+            try {
+                final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
+                obtainedReplicationStatusSuccessfully = true;
+                for (final Object replicable : (JSONArray) replicationStatus.get("replicables")) {
+                    final JSONObject replicableAsJson = (JSONObject) replicable;
+                    if (replicableAsJson.get("replicatedfrom") != null) {
+                        final JSONObject replicatedFrom = (JSONObject) replicableAsJson.get("replicatedfrom");
+                        final String hostname = replicatedFrom.get("hostname").toString();
+                        final int port = ((Number) replicatedFrom.get("port")).intValue();
+                        // the bearer token that is good for the connection to this process instance should then also
+                        // be recognized as valid on this instance's master and have the READ_REPLICATOR permission for the same server name
+                        final JSONObject masterReplicationStatus = getReplicationStatus(optionalTimeout, hostname, port);
+                        result = masterReplicationStatus.get("servername").toString();
+                        break;
+                    }
                 }
+            } catch (Exception e) {
+                logger.info("Exception waiting for server name."+optionalTimeout.map(d->" Waiting another "+d.minus(start.until(TimePoint.now())).toString()).orElse(""));
+                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
             }
         }
         return result;
