@@ -69,10 +69,12 @@
 <unit id="org.apache.jasper.glassfish.source" version="2.2.2.v201501141630"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
+<!--
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
+-->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
 <unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
@@ -109,20 +111,17 @@
 <unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
 <unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
+<unit id="org.eclipse.equinox.event" version="1.4.0.v20170105-1446"/>
+<unit id="org.eclipse.equinox.cm" version="1.2.0.v20170105-1446"/>
+<!-- unit id="org.eclipse.equinox.weaving.hook" version="1.2.0.v20160929-1449"/ -->
 <repository location="https://download.eclipse.org/releases/oxygen/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
-<repository location="https://p2.sapsailing.com/p2/sailing/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.57"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
+<location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/>
+<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
 </locations>
 <includeBundles>
 <plugin id="com.rabbitmq.client"/>
@@ -210,34 +209,33 @@
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
-<plugin id="org.eclipse.jetty.continuation" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.continuation"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
-<plugin id="org.eclipse.jetty.http" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.http.source" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.io" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.io.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.http"/>
+<plugin id="org.eclipse.jetty.http.source"/>
+<plugin id="org.eclipse.jetty.io"/>
+<plugin id="org.eclipse.jetty.io.source"/>
 <plugin id="org.eclipse.jetty.jaas"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
 <plugin id="org.eclipse.jetty.osgi.boot.source"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl"/>
 <plugin id="org.eclipse.jetty.osgi.boot.warurl.source"/>
 <plugin id="org.eclipse.jetty.proxy"/>
 <plugin id="org.eclipse.jetty.rewrite"/>
 <plugin id="org.eclipse.jetty.rewrite.source"/>
-<plugin id="org.eclipse.jetty.security" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.security.source" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.server" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.server.source" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.servlet" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.servlet.source" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.util" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.util.source" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.util.ajax" version="9.4.35.v20201120"/>
-<plugin id="org.eclipse.jetty.util.ajax.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.security"/>
+<plugin id="org.eclipse.jetty.security.source"/>
+<plugin id="org.eclipse.jetty.server"/>
+<plugin id="org.eclipse.jetty.server.source"/>
+<plugin id="org.eclipse.jetty.servlet"/>
+<plugin id="org.eclipse.jetty.servlet.source"/>
+<plugin id="org.eclipse.jetty.util"/>
+<plugin id="org.eclipse.jetty.util.source"/>
+<plugin id="org.eclipse.jetty.util.ajax"/>
+<plugin id="org.eclipse.jetty.util.ajax.source"/>
 <plugin id="org.eclipse.jetty.webapp"/>
 <plugin id="org.eclipse.jetty.webapp.source"/>
 <plugin id="org.eclipse.jetty.websocket.api"/>
@@ -268,8 +266,6 @@
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>
 <plugin id="org.mongodb.mongo-java-driver.source"/>
-<plugin id="org.objectweb.asm"/>
-<plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
@@ -293,7 +289,18 @@
 <plugin id="javax.servlet.jsp.jstl.impl.source"/>
 <plugin id="javax.servlet.jsp.jstl.source"/>
 <plugin id="javax.servlet.jsp.source"/>
-    <plugin id="org.eclipse.jetty.apache-jsp"/>
+    <plugin id="org.eclipse.equinox.event"/>
+    <plugin id="org.eclipse.equinox.event.source"/>
+    <plugin id="org.eclipse.jetty.jndi" version="9.4.35.v20201120"/>
+    <plugin id="org.eclipse.jetty.jndi.source"/>
+    <plugin id="org.eclipse.jetty.plus"/>
+    <plugin id="org.eclipse.jetty.plus.source"/>
+    <plugin id="javax.annotation-api"/>
+    <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
+    <plugin id="org.objectweb.asm" version="7.0.0"/>
+    <plugin id="org.objectweb.asm.commons"/>
+    <plugin id="org.objectweb.asm.tree"/>
+    <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
