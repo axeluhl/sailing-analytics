@@ -473,6 +473,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                     @Override
                     public void onSuccess(Void result) {
                         regattaRefresher.reloadAndCallFillAll();
+                        for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
+                            listener.racesStoppedTracking(Arrays.asList(raceIdentifier));
+                        }
                     }
                 }));
     }
