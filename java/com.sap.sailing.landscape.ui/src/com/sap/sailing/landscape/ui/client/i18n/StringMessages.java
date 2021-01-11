@@ -13,4 +13,8 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String images();
     String imageType();
     String upgrade();
+    String replicaSet();
+    String awsCredentials();
+    String awsAccessKey();
+    String awsSecret();
 }

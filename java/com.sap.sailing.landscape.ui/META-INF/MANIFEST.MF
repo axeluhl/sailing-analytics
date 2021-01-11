@@ -19,5 +19,6 @@ Require-Bundle: com.sap.sse.gwt,
  com.sap.sse.landscape,
  com.sap.sse.landscape.aws
 Export-Package: com.sap.sailing.landscape.ui.client,
- com.sap.sailing.landscape.ui.server
+ com.sap.sailing.landscape.ui.server,
+ com.sap.sailing.landscape.ui.shared
 Bundle-ActivationPolicy: lazy

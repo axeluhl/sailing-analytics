@@ -112,7 +112,17 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
         return new AwsLandscapeImpl<>();
     }
     
-
+    /**
+     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object which
+     * internally has access to the clients for the underlying AWS landscape, such as an EC2 client, a Route53 client,
+     * etc.
+     */
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
+        return new AwsLandscapeImpl<>(accessKey, secret);
+    }
+    
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {

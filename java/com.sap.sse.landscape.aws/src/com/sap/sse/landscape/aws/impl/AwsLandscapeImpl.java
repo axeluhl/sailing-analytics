@@ -156,7 +156,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
     
     /**
      * Used for the symmetric encryption / decryption of private SSH keys. See also
@@ -165,21 +164,25 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private final byte[] privateKeyEncryptionPassphrase;
     
     public AwsLandscapeImpl() {
-        this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
+        this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+    }
+    
+    public AwsLandscapeImpl(String accessKeyId, String secretAccessKey) {
+        this(accessKeyId, secretAccessKey,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), System.getProperty(S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME));
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE));
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, String s3BucketForAlbLogs) {
+            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.mongoObjectFactory = mongoObjectFactory;
         this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
-        this.s3BucketForAlbLogs = s3BucketForAlbLogs;
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
@@ -241,6 +244,19 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
     }
     
+    /**
+     * For legacy reasons our primary region (eu-west-1) uses a special bucket name for ALB log storage.
+     */
+    private String getS3BucketForAlbLogs(com.sap.sse.landscape.Region region) {
+        final String result;
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = "sapsailing-access-logs";
+        } else {
+            result = "sapsailing-access-logs-"+region.getId();
+        }
+        return result;
+    }
+    
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
         Region awsRegion = getRegion(region);
@@ -254,7 +270,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         client.modifyLoadBalancerAttributes(b->b.loadBalancerArn(response.loadBalancers().iterator().next().loadBalancerArn()).
                 attributes(
                         LoadBalancerAttribute.builder().key("access_logs.s3.enabled").value("true").build(),
-                        LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(s3BucketForAlbLogs).build(),
+                        LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(getS3BucketForAlbLogs(region)).build(),
                         LoadBalancerAttribute.builder().key("idle_timeout.timeout_seconds").value("4000").build()).build());
         final ApplicationLoadBalancer<ShardingKey, MetricsT> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
         createLoadBalancerListener(result, ProtocolEnum.HTTP);
