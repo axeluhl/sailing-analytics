@@ -28,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConf
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -207,7 +208,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      */
     public void reconcileRaceStatus(IRace tractracRace, TrackedRace trackedRace) {
         final RaceStatusType raceStatus = tractracRace.getStatus();
-        final MillisecondsTimePoint raceStatusUpdateTime = new MillisecondsTimePoint(tractracRace.getStatusTime());
+        final TimePoint raceStatusUpdateTime = TimePoint.of(tractracRace.getStatusTime());
         RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             if (abortingFlagEvent == null) {
@@ -216,6 +217,10 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
+        if (raceStatus == RaceStatusType.OFFICIAL && !ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial()) {
+            // FIXME bug5477: synchronize this with any pending competitor updates providing official results which are managed in a queue with a separate thread processing it
+            RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+        }
         if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         } else if (isAbortedState(raceStatus) &&
@@ -227,7 +232,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         }
     }
 
-    protected void startNewPass(final MillisecondsTimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
+    protected void startNewPass(final TimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
         raceLog.add(new RaceLogPassChangeEventImpl(timePointForStartOfNewPass, raceLogEventAuthor, raceLog.getCurrentPassId() + 1));
     }
 
