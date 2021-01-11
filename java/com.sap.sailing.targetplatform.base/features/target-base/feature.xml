@@ -207,4 +207,58 @@
          install-size="0"
          version="1.2.4"
          unpack="false"/>
+
+   <plugin
+         id="org.mortbay.jasper.apache-el"
+         download-size="0"
+         install-size="0"
+         version="8.5.54"
+         unpack="false"/>
+
+   <plugin
+         id="org.mortbay.jasper.apache-jsp"
+         download-size="0"
+         install-size="0"
+         version="8.5.54"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.apache-jsp"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.jsp"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jdt.core.compiler.batch"
+         download-size="0"
+         install-size="0"
+         version="3.19.0.v20190903-0936"
+         unpack="false"/>
+         
+   <plugin
+         id="org.eclipse.jetty.schemas"
+         download-size="0"
+         install-size="0"
+         version="3.1.0.M0"
+         unpack="false"/>
+   <plugin
+         id="org.apache.taglibs.taglibs-standard-impl"
+         download-size="0"
+         install-size="0"
+         version="1.2.5"
+         unpack="false"/>
+   <plugin
+         id="org.apache.taglibs.taglibs-standard-spec"
+         download-size="0"
+         install-size="0"
+         version="1.2.5"
+         unpack="false"/>
 </feature>
