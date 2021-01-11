@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk-Spec: 11
+Automatic-Module-Name: org.eclipse.jetty.nosql
+Implementation-Vendor: Eclipse Jetty Project
+Implementation-Version: 9.4.35.v20201120
+url: https://eclipse.org/jetty
+Bnd-LastModified: 1605907951951
+Build-Jdk: 11.0.9
+Built-By: joakim
+Bundle-Classpath: .
+Bundle-Copyright: Copyright (c) 2008-2020 Mort Bay Consulting Pty Ltd an
+ d others.
+Bundle-Description: Jetty module for Jetty :: NoSQL Session Managers
+Bundle-DocURL: https://eclipse.org/jetty
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0, https://www.
+ eclipse.org/org/documents/epl-v10.php
+Bundle-ManifestVersion: 2
+Bundle-Name: Jetty :: NoSQL Session Managers
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.jetty.nosql
+Bundle-Vendor: Eclipse Jetty Project
+Bundle-Version: 9.4.35.v20201120
+Export-Package: org.eclipse.jetty.nosql.mongodb;version="9.4.35";uses:="
+ com.mongodb,org.eclipse.jetty.nosql,org.eclipse.jetty.server.session,or
+ g.eclipse.jetty.util.annotation",org.eclipse.jetty.nosql;version="9.4.3
+ 5";uses:="org.eclipse.jetty.server.session"
+Import-Package: com.mongodb;version="[2.13.2,3)",org.eclipse.jetty.nosql
+ ;version="[9.4.35,10)",org.eclipse.jetty.server.session;version="[9.4.3
+ 5,10)",org.eclipse.jetty.util;version="[9.4.35,10)";resolution:=optiona
+ l,org.eclipse.jetty.util.annotation;version="[9.4.35,10)";resolution:=o
+ ptional,org.eclipse.jetty.util.log;version="[9.4.35,10)";resolution:=op
+ tional
+Originally-Created-By: Apache Maven Bundle Plugin
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-3.5.0.201709291849
+

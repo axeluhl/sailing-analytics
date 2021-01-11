@@ -1,0 +1,48 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk-Spec: 11
+Automatic-Module-Name: org.eclipse.jetty.plus
+Implementation-Vendor: Eclipse Jetty Project
+Implementation-Version: 9.4.35.v20201120
+url: https://eclipse.org/jetty
+Bnd-LastModified: 1605907325284
+Build-Jdk: 11.0.9
+Built-By: joakim
+Bundle-Classpath: .
+Bundle-Copyright: Copyright (c) 2008-2020 Mort Bay Consulting Pty Ltd an
+ d others.
+Bundle-Description: Jetty module for Jetty :: Plus
+Bundle-DocURL: https://eclipse.org/jetty
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0, https://www.
+ eclipse.org/org/documents/epl-v10.php
+Bundle-ManifestVersion: 2
+Bundle-Name: Jetty :: Plus
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.jetty.plus
+Bundle-Vendor: Eclipse Jetty Project
+Bundle-Version: 9.4.35.v20201120
+Export-Package: org.eclipse.jetty.plus.security;version="9.4.35";uses:="
+ javax.naming,org.eclipse.jetty.security,org.eclipse.jetty.server,org.ec
+ lipse.jetty.util.security",org.eclipse.jetty.plus.webapp;version="9.4.3
+ 5";uses:="javax.naming,org.eclipse.jetty.util,org.eclipse.jetty.webapp,
+ org.eclipse.jetty.xml",org.eclipse.jetty.plus.annotation;version="9.4.3
+ 5";uses:="javax.naming,javax.servlet,org.eclipse.jetty.servlet,org.ecli
+ pse.jetty.webapp",org.eclipse.jetty.plus.jndi;version="9.4.35";uses:="j
+ avax.naming,javax.transaction,org.eclipse.jetty.util.component"
+Import-Package: javax.transaction;version="1.1",javax.naming,javax.servl
+ et;version="[3.1.0,4)",javax.sql,org.eclipse.jetty.jndi;version="[9.4.3
+ 5,10)",org.eclipse.jetty.jndi.local;version="[9.4.35,10)",org.eclipse.j
+ etty.plus.annotation;version="[9.4.35,10)",org.eclipse.jetty.plus.jndi;
+ version="[9.4.35,10)",org.eclipse.jetty.security;version="[9.4.35,10)",
+ org.eclipse.jetty.server;version="[9.4.35,10)",org.eclipse.jetty.server
+ .handler;version="[9.4.35,10)",org.eclipse.jetty.servlet;version="[9.4.
+ 35,10)",org.eclipse.jetty.util;version="[9.4.35,10)",org.eclipse.jetty.
+ util.component;version="[9.4.35,10)",org.eclipse.jetty.util.log;version
+ ="[9.4.35,10)",org.eclipse.jetty.util.resource;version="[9.4.35,10)",or
+ g.eclipse.jetty.util.security;version="[9.4.35,10)",org.eclipse.jetty.u
+ til.thread;version="[9.4.35,10)",org.eclipse.jetty.webapp;version="[9.4
+ .35,10)",org.eclipse.jetty.xml;version="[9.4.35,10)"
+Originally-Created-By: Apache Maven Bundle Plugin
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-3.5.0.201709291849
+

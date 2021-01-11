@@ -1,0 +1,56 @@
+Manifest-Version: 1.0
+Created-By: Apache Maven Bundle Plugin
+Build-Jdk-Spec: 11
+Automatic-Module-Name: org.eclipse.jetty.deploy
+Implementation-Vendor: Eclipse Jetty Project
+Implementation-Version: 9.4.35.v20201120
+url: https://eclipse.org/jetty
+Bnd-LastModified: 1605907677793
+Build-Jdk: 11.0.9
+Built-By: joakim
+Bundle-Classpath: .
+Bundle-Copyright: Copyright (c) 2008-2020 Mort Bay Consulting Pty Ltd an
+ d others.
+Bundle-Description: Jetty module for Jetty :: Deployers
+Bundle-DocURL: https://eclipse.org/jetty
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0, https://www.
+ eclipse.org/org/documents/epl-v10.php
+Bundle-ManifestVersion: 2
+Bundle-Name: Jetty :: Deployers
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-SymbolicName: org.eclipse.jetty.deploy
+Bundle-Vendor: Eclipse Jetty Project
+Bundle-Version: 9.4.35.v20201120
+Export-Package: org.eclipse.jetty.deploy;version="9.4.35";uses:="org.ecl
+ ipse.jetty.deploy.graph,org.eclipse.jetty.server,org.eclipse.jetty.serv
+ er.handler,org.eclipse.jetty.util,org.eclipse.jetty.util.annotation,org
+ .eclipse.jetty.util.component,org.eclipse.jetty.util.resource,org.eclip
+ se.jetty.xml",org.eclipse.jetty.deploy.util;version="9.4.35",org.eclips
+ e.jetty.deploy.jmx;version="9.4.35";uses:="org.eclipse.jetty.jmx,org.ec
+ lipse.jetty.server.handler,org.eclipse.jetty.util.annotation",org.eclip
+ se.jetty.deploy.providers;version="9.4.35";uses:="org.eclipse.jetty.dep
+ loy,org.eclipse.jetty.server.handler,org.eclipse.jetty.util,org.eclipse
+ .jetty.util.annotation,org.eclipse.jetty.util.component,org.eclipse.jet
+ ty.util.resource,org.eclipse.jetty.webapp",org.eclipse.jetty.deploy.pro
+ viders.jmx;version="9.4.35";uses:="org.eclipse.jetty.server.handler.jmx
+ ,org.eclipse.jetty.util.annotation",org.eclipse.jetty.deploy.graph;vers
+ ion="9.4.35",org.eclipse.jetty.deploy.bindings;version="9.4.35";uses:="
+ org.eclipse.jetty.deploy,org.eclipse.jetty.deploy.graph,org.eclipse.jet
+ ty.server"
+Import-Package: org.eclipse.jetty.deploy;version="[9.4.35,10)",org.eclip
+ se.jetty.deploy.bindings;version="[9.4.35,10)",org.eclipse.jetty.deploy
+ .graph;version="[9.4.35,10)",org.eclipse.jetty.deploy.providers;version
+ ="[9.4.35,10)",org.eclipse.jetty.deploy.util;version="[9.4.35,10)",org.
+ eclipse.jetty.jmx;version="[9.4.35,10)";resolution:=optional,org.eclips
+ e.jetty.server;version="[9.4.35,10)",org.eclipse.jetty.server.handler;v
+ ersion="[9.4.35,10)",org.eclipse.jetty.server.handler.jmx;version="[9.4
+ .35,10)",org.eclipse.jetty.util;version="[9.4.35,10)",org.eclipse.jetty
+ .util.annotation;version="[9.4.35,10)",org.eclipse.jetty.util.component
+ ;version="[9.4.35,10)",org.eclipse.jetty.util.log;version="[9.4.35,10)"
+ ,org.eclipse.jetty.util.resource;version="[9.4.35,10)",org.eclipse.jett
+ y.util.thread;version="[9.4.35,10)",org.eclipse.jetty.webapp;version="[
+ 9.4.35,10)",org.eclipse.jetty.xml;version="[9.4.35,10)",org.xml.sax
+Originally-Created-By: Apache Maven Bundle Plugin
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Tool: Bnd-3.5.0.201709291849
+
