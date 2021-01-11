@@ -153,7 +153,6 @@ public class UserGroupManagementPanel extends Composite {
     }
 
     public void refreshSuggests() {
-        userGroupDetailPanel.refreshSuggest();
         userGroupRoleDefinitionPanel.refreshSuggest();
     }
 }
