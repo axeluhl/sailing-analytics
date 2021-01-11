@@ -512,14 +512,27 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
-        Filter filter = Filter.builder().name("tag:"+tagName).values(tagValue).build();
-        return getHostsWithFilter(region, filter);
+        Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
+        return getHostsWithFilters(region, filter);
     }
 
-    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilter(com.sap.sse.landscape.Region region,
-            Filter filter) {
+    private Filter.Builder getHostWithTagValueFilter(String tagName, String tagValue) {
+        return Filter.builder().name("tag:"+tagName).values(tagValue);
+    }
+
+    @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue) {
+        return getHostsWithFilters(region, getRunningHostFilter());
+    }
+    
+    private Filter getRunningHostFilter() {
+        return Filter.builder().name("instance-state-name").values("running").build();
+    }
+
+    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
         final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
-        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filter));
+        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filters));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
                 result.add(getHost(region, i));
@@ -537,9 +550,17 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
+        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
+    }
+    
+    @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        Filter filter = Filter.builder().name("tag-key").values(tagName).build();
-        return getHostsWithFilter(region, filter);
+        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName));
+    }
+    
+    private Filter getFilterForHostWithTag(Filter.Builder builder, String tagName) {
+        return builder.name("tag-key").values(tagName).build();
     }
 
     private Comparator<? super Image> getMachineImageCreationDateComparator() {
@@ -741,7 +762,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -901,7 +922,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     private Iterable<AwsInstance<ShardingKey, MetricsT>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
-        return getHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
+        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
     }
 
     /**
@@ -943,7 +964,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getHostsWithTag(region, RABBITMQ_TAG_NAME);
+        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
         if (rabbitMQHostsInRegion.iterator().hasNext()) {
             final AwsInstance<ShardingKey, MetricsT> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
             result = new RabbitMQEndpoint() {
@@ -985,7 +1006,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     public Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
         final List<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> result = new ArrayList<>();
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, tagName)) {
+        for (final AwsInstance<ShardingKey, MetricsT> host : getRunningHostsWithTag(region, tagName)) {
             final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> applicationProcessHost =
                     new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(
                             host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);

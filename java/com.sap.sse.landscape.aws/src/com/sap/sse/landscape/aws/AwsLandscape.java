@@ -174,15 +174,34 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     void deleteSnapshot(Region region, String snapshotId);
     
     /**
-     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}.
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
+     * result includes instances regardless their state; they are not required to be RUNNING.
+     * 
+     * @see #getRunningHostsWithTagValue(Region, String)
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(Region region, String tagName, String tagValue);
 
     /**
-     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value.
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
+     * result includes instances regardless their state; they are not required to be RUNNING.
+     * 
+     * @see #getRunningHostsWithTag(Region, String)
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName);
     
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
+     * instances returned have been in state RUNNING at the time of the request.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(Region region, String tagName);
+
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
+     * instances returned have been in state RUNNING at the time of the request.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(Region region, String tagName,
+            String tagValue);
+
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
 
     Iterable<KeyPairInfo> getAllKeyPairInfos(Region region);
@@ -472,4 +491,5 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
             Optional<Duration> optionalTimeout) throws Exception;
+
 }
