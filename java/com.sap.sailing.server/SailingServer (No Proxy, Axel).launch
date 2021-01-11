@@ -11,6 +11,7 @@
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="default_auto_start" value="false"/>
 <intAttribute key="default_start_level" value="4"/>
+<setAttribute key="deselected_workspace_bundles"/>
 <booleanAttribute key="includeOptional" value="false"/>
 <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.pde.ui.launcher.PDESourceLookupDirector"/>
 <stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;sourceLookupDirector&gt;&#13;&#10;&lt;sourceContainers duplicates=&quot;false&quot;&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;classpathContainer path=&amp;quot;com.google.gwt.eclipse.core.GWT_CONTAINER&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.classpathContainer&quot;/&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;default/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#13;&#10;&lt;/sourceContainers&gt;&#13;&#10;&lt;/sourceLookupDirector&gt;&#13;&#10;"/>
@@ -32,9 +33,8 @@
 <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%false%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%true%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
 <setAttribute key="selected_target_bundles">
-<setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
+<setEntry value="com.chargebee.chargebee-java@default:default"/>
+<setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="com.sun.activation.javax.activation@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
@@ -60,6 +60,7 @@
 <setEntry value="org.apache.commons.fileupload@default:default"/>
 <setEntry value="org.apache.commons.io@default:default"/>
 <setEntry value="org.apache.commons.lang@default:default"/>
+<setEntry value="org.apache.commons.logging@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
 <setEntry value="org.apache.commons.math@default:default"/>
 <setEntry value="org.apache.felix.gogo.command@default:default"/>
@@ -72,12 +73,14 @@
 <setEntry value="org.apache.poi.ooxml.schemas@default:default"/>
 <setEntry value="org.apache.poi.ooxml@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
-<setEntry value="org.apache.servicemix.bundles.aws-java-sdk@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
+<setEntry value="org.apache.shiro.core.source"/>
 <setEntry value="org.apache.shiro.core@default:default"/>
+<setEntry value="org.apache.shiro.ehcache.source"/>
 <setEntry value="org.apache.shiro.ehcache@default:default"/>
+<setEntry value="org.apache.shiro.web.source"/>
 <setEntry value="org.apache.shiro.web@default:default"/>
 <setEntry value="org.apache.xmlbeans@default:default"/>
 <setEntry value="org.dom4j@default:default"/>
@@ -91,10 +94,12 @@
 <setEntry value="org.eclipse.jetty.http@4:true"/>
 <setEntry value="org.eclipse.jetty.io@4:true"/>
 <setEntry value="org.eclipse.jetty.jmx@4:true"/>
+<setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.security@4:true"/>
 <setEntry value="org.eclipse.jetty.server@4:true"/>
 <setEntry value="org.eclipse.jetty.servlet@4:true"/>
+<setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
 <setEntry value="org.eclipse.jetty.util@4:true"/>
 <setEntry value="org.eclipse.jetty.webapp@4:true"/>
 <setEntry value="org.eclipse.jetty.websocket.api@default:default"/>
@@ -107,6 +112,7 @@
 <setEntry value="org.hyperic.sigar@default:default"/>
 <setEntry value="org.jdom@default:default"/>
 <setEntry value="org.jvnet.mimepull@default:default"/>
+<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
 <setEntry value="org.mongodb.mongo-java-driver@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="routeconverter@default:default"/>
@@ -114,6 +120,7 @@
 <setEntry value="slf4j.jdk14@default:false"/>
 </setAttribute>
 <setAttribute key="selected_workspace_bundles">
+<setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="com.sap.sailing.barbados.resultimport@4:true"/>
@@ -166,6 +173,9 @@
 <setEntry value="com.sap.sailing.server.interface@default:default"/>
 <setEntry value="com.sap.sailing.server.trackfiles@default:default"/>
 <setEntry value="com.sap.sailing.server@5:true"/>
+<setEntry value="com.sap.sailing.shared.persistence@default:default"/>
+<setEntry value="com.sap.sailing.shared.server.gateway@5:true"/>
+<setEntry value="com.sap.sailing.shared.server@5:true"/>
 <setEntry value="com.sap.sailing.simulator@default:default"/>
 <setEntry value="com.sap.sailing.udpconnector@default:default"/>
 <setEntry value="com.sap.sailing.velum.resultimport@4:true"/>
@@ -181,15 +191,19 @@
 <setEntry value="com.sap.sse.datamining.shared@default:default"/>
 <setEntry value="com.sap.sse.datamining.ui@default:default"/>
 <setEntry value="com.sap.sse.datamining@default:default"/>
+<setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="com.sap.sse.filestorage@4:true"/>
 <setEntry value="com.sap.sse.gwt.adminconsole@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.sap.sse.jersey.jaxbdependencyfragment@default:false"/>
-<setEntry value="com.sap.sse.jettyextensions@default:false"/>
+<setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.mail@5:true"/>
 <setEntry value="com.sap.sse.mongodb@default:default"/>
 <setEntry value="com.sap.sse.operationaltransformation@default:default"/>
 <setEntry value="com.sap.sse.replication.interfaces@default:default"/>
+<setEntry value="com.sap.sse.replication.persistence@default:default"/>
 <setEntry value="com.sap.sse.replication@6:true"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="com.sap.sse.security.interface@default:default"/>

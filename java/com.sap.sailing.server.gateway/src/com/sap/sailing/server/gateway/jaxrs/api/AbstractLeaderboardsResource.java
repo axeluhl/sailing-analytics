@@ -180,6 +180,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 final JSONObject fleetJson = new JSONObject();
                 fleetsJson.add(fleetJson);
                 fleetJson.put("name", fleet.getName());
+                fleetJson.put("resultsAreOfficial", isResultsAreOfficial(raceColumn, fleet));
                 final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 final JSONObject trackedRaceInfo;
                 if (trackedRace == null) {
@@ -195,7 +196,6 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                                     ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
                                     : new MillisecondsTimePoint(resultTimePoint)));
                     trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
-                    trackedRaceInfo.put("resultsAreOfficial", isResultsAreOfficial(trackedRace));
                     if (trackedRace.getStatus() != null) {
                         trackedRaceInfo.put("status", trackedRace.getStatus().getStatus().toString());
                         trackedRaceInfo.put("loadingProgress", trackedRace.getStatus().getLoadingProgress());
@@ -206,13 +206,9 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
         }
     }
 
-    private boolean isResultsAreOfficial(TrackedRace trackedRace) {
-        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            if (new ResultsAreOfficialFinder(raceLog).analyze() != null) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        return new ResultsAreOfficialFinder(raceLog).analyze() != null;
     }
 
     protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
