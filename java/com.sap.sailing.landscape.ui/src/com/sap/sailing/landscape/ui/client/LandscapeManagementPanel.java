@@ -27,6 +27,8 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -158,19 +160,25 @@ public class LandscapeManagementPanel extends VerticalPanel {
             }
         }, stringMessages.hostname());
         add(mongoEndpointsTable);
+        final BusyIndicator mongoEndpointsBusy = new SimpleBusyIndicator();
+        add(mongoEndpointsBusy);
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
             {
+                mongoEndpointsTable.getDataProvider().getList().clear();
                 if (regionsTable.getSelectionModel().getSelectedObject() != null) {
+                    mongoEndpointsBusy.setBusy(true);
                     landscapeManagementService.getMongoEndpoints(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
                             regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<MongoEndpointDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(caught.getMessage());
+                            mongoEndpointsBusy.setBusy(false);
                         }
             
                         @Override
                         public void onSuccess(ArrayList<MongoEndpointDTO> mongoEndpointDTOs) {
                             mongoEndpointsTable.refresh(mongoEndpointDTOs);
+                            mongoEndpointsBusy.setBusy(false);
                         }
                     });
                 } else {
