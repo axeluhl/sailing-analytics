@@ -27,6 +27,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
@@ -64,6 +65,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private final LogEventAuthorImpl raceLogEventAuthor;
     private final IRace tractracRace;
     private final Map<Pair<TrackedRace, RaceLog>, RaceLogListener> raceLogListeners;
+    private OfficialCompetitorUpdateProvider officialCompetitorUpdateProvider;
     private final static Map<RaceStatusType, Flags> flagForRaceStatus;
     
     static {
@@ -218,8 +220,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
         if (raceStatus == RaceStatusType.OFFICIAL && !ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial()) {
-            // FIXME bug5477: synchronize this with any pending competitor updates providing official results which are managed in a queue with a separate thread processing it
-            RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+            final Runnable setResultsAreOfficial = ()->RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+            if (officialCompetitorUpdateProvider != null) {
+                officialCompetitorUpdateProvider.runWhenNoMoreOfficialCompetitorUpdatesPending(setResultsAreOfficial);
+            } else {
+                setResultsAreOfficial.run();
+            }
         }
         if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
@@ -388,5 +394,16 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         return resultFromRaceLogAndItsCreationTimePoint;
+    }
+
+    /**
+     * To be called by the object later calling {@link #reconcileCompetitorStatus(IRaceCompetitor, TrackedRace)}. This
+     * way, this object can tell when the race is to be {@link RaceState#setResultsAreOfficial(TimePoint) moved to
+     * OFFICIAL state} whether any updates are pending and defer the race state transition to that moment.
+     * 
+     * @see OfficialCompetitorUpdateProvider#runWhenNoMoreOfficialCompetitorUpdatesPending(Runnable)
+     */
+    public void setOfficialCompetitorUpdateProvider(OfficialCompetitorUpdateProvider officialCompetitorUpdateProvider) {
+        this.officialCompetitorUpdateProvider = officialCompetitorUpdateProvider;
     }
 }
