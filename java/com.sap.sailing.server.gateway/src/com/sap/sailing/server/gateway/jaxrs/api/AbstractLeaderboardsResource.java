@@ -10,6 +10,8 @@ import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
@@ -193,6 +195,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                                     ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis())
                                     : new MillisecondsTimePoint(resultTimePoint)));
                     trackedRaceInfo.put("delayToLiveInMillis", trackedRace.getDelayToLiveInMillis());
+                    trackedRaceInfo.put("resultsAreOfficial", isResultsAreOfficial(trackedRace));
                     if (trackedRace.getStatus() != null) {
                         trackedRaceInfo.put("status", trackedRace.getStatus().getStatus().toString());
                         trackedRaceInfo.put("loadingProgress", trackedRace.getStatus().getLoadingProgress());
@@ -201,6 +204,15 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 fleetJson.put("trackedRace", trackedRaceInfo);
             }
         }
+    }
+
+    private boolean isResultsAreOfficial(TrackedRace trackedRace) {
+        for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            if (new ResultsAreOfficialFinder(raceLog).analyze() != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
