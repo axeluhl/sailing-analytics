@@ -11,11 +11,11 @@
   overflow: hidden;
 }
 .siteheader_logo {
-  display: table-cell;
   font-size: 1rem;
   padding: 0 1rem;
   overflow: hidden;
   white-space: nowrap;
+  min-width: 6rem;
 }
 .siteheader_logo:hover a {
   text-decoration: none;
@@ -33,13 +33,17 @@
   color: #f6f9fc;
   white-space: nowrap;
 }
-@media (min-width: 64.2em) {
+@media (min-width: 61em) {
   .siteheader_logo_title {
     display: inline;
   }
+  .siteheader_logo {
+    min-width: 14rem;
+  }
 }
 .sitenavigation {
-  display: table-cell;
+  display: flex;
+  flex-wrap: nowrap;
   overflow: hidden;
   text-align: right;
   padding: 0 1rem;
@@ -52,6 +56,7 @@
   color: #f6f9fc;
   text-transform: uppercase;
   padding: 0 1rem;
+  white-space: nowrap;
 }
 .sitenavigation_link:hover,
 .sitenavigation_link:focus {
@@ -83,7 +88,6 @@
 }
 .sitenavigation_fixed {
   white-space: nowrap;
-  display: table-cell;
   text-align: right;
   padding-right: 1rem;
   box-sizing: border-box;
@@ -101,24 +105,19 @@
 }
 .search_textfield {
   display: none;
-  width: 8em;
+  width: 13.333333333333334em;
   padding: 0.357142857142857em 2.857142857142857em 0.357142857142857em 0.357142857142857em;
   border: 1px solid #666;
   font-size: 0.933333333333333em;
   color: #f6f9fc;
   background: #333;
-  -webkit-transition: width 0.33s ease-out;
-     -moz-transition: width 0.33s ease-out;
-          transition: width 0.33s ease-out;
 }
 @media (min-width: 61em) {
   .search_textfield {
     display: inline-block;
   }
 }
-.search_textfield:focus {
-  width: 13.333333333333334em;
-}
+
 .search_button {
   width: 2.666666666666667em !important;
   height: 1em !important;

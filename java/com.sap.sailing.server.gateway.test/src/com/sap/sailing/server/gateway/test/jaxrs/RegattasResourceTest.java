@@ -62,6 +62,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String closedRegattaName = RegattaImpl.getDefaultName(closedRegattaNamePart, boatClassName);
     private final String openRegattaName = RegattaImpl.getDefaultName(openRegattaNamePart, boatClassName);
     private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
+    private final String deviceUuid2 = "00000000-1111-2222-3333-444444444445";
     private final String secret = "ABCDEF";
     private final String competitorName1 = "Max Mustermann";
     private final String competitorShortName1 = "MM";
@@ -84,7 +85,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true,
-                fleets, raceColumnNames, /* trackedRegattaRegistry */null);
+                fleets, raceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(testSeries);
         final UUID closedRegattaUuid = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.REGATTA,
@@ -117,7 +118,6 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                 });
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
-
         Course course = new CourseImpl("emptyCourse", Collections.emptySet());
         // get the same instance! of the boat class object, as else addRace will fail
         BoatClass boatClass = racingEventService.getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
@@ -169,7 +169,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
         response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", "#0F0",
-                flagImageUri, teamImageUri, null, null, null, competitorName2, competitorShortName2, null, deviceUuid,
+                flagImageUri, teamImageUri, null, null, null, competitorName2, competitorShortName2, null, deviceUuid2,
                 null);
         assertTrue(response.getStatus() + ": " + StreamingOutputUtil.getEntityAsString(response.getEntity()),
                 response.getStatus() == Status.OK.getStatusCode());

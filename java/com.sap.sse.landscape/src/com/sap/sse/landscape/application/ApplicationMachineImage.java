@@ -10,5 +10,5 @@ import com.sap.sse.landscape.MachineImage;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ApplicationMachineImage extends MachineImage<ApplicationHost> {
+public interface ApplicationMachineImage extends MachineImage {
 }

@@ -109,7 +109,6 @@
                     android:gravity="center"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/textSize_72"
-                    android:visibility="visible"
                     tools:text="1:01:00" />
             </RelativeLayout>
 

@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
-
-    <string-array name="empty_array" tools:ignore="UnusedResources"/>
-    <string name="empty"/>
+<?xml version="1.0" encoding="UTF-8"?><resources>
     
     
 
@@ -190,7 +187,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">"捕捉"</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">"是否要注销并以新用户登录？将仍然监控所有比赛轮次。"</string>
+    <string name="logout_dialog_message">"是否要注销并以新用户登录？"</string>
     <string name="change_dialog_title">"更改比赛"</string>
     <string name="change_dialog_message">"是否要更改比赛和/或区域？将断开目前监控的比赛轮次。"</string>
     <string name="logout">"注销"</string>
@@ -257,8 +254,6 @@
     <string name="race_start_in_4_minutes">"4 分钟"</string>
     <string name="race_start_in_2_minutes">"2 分钟"</string>
     <string name="race_start_in_1_minute">"1 分钟"</string>
-    <string name="race_start_time_in">"-%s"</string>
-    <string name="race_start_time_ago">"%s"</string>
     <string name="race_set_time">"设置时间"</string>
     <string name="race_reset_course">"重置场地"</string>
     <string name="no_course_active">"没有有效的场地"</string>
@@ -435,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"目前，%1$d个活动等待发送。\n上次成功发送时间：%2$s。"</string>
     <string name="no_event_to_be_sent">"目前没有等待发送的活动。"</string>
     <string name="never">"从不"</string>
-    <string name="connected_to_wp">"已连接到：%1$s\n%2$s\n绑定服务：%3$s"</string>
     <string name="theme_changed_title">"主题更改"</string>
     <string name="theme_changed_message">"主题更改将在重新启动应用后生效。"</string>
     <string name="url_refresh_title">"服务器 URL 已更改"</string>
@@ -568,8 +562,4 @@
     <string name="finishing_revoke">"撤销"</string>
     <string name="error_revoke_finished">"无法撤销完成时间"</string>
     <string name="error_revoke_finishing">"无法撤销结束时间"</string>
-    <string-array name="sort_regattas">
-        <item>by Name</item>
-        <item>by Date</item>
-    </string-array>
 </resources>

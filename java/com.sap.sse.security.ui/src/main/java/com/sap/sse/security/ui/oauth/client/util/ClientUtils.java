@@ -7,7 +7,7 @@ import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -236,7 +236,6 @@ public class ClientUtils {
                 return UNKNOWN;
             }
         }
-
         return authProvider;
     }
 
@@ -322,7 +321,6 @@ public class ClientUtils {
         if (authProvider == null)
             return null;
         int ap = DEFAULT;
-
         try {
             ap = Integer.parseInt(authProvider);
         } catch (Exception e) {
@@ -368,7 +366,6 @@ public class ClientUtils {
             credential.setVerifier(Location.getParameter("oauth_verifier"));
             return credential;
         }
-
         default: {
             throw new Exception("ClientUtils.getCredential: Auth Provider " + authProvider + " Not implemented yet");
         }
@@ -399,10 +396,8 @@ public class ClientUtils {
         Notification.notify(message, NotificationType.ERROR);
     }
 
-    public static void logout(UserManagementWriteServiceAsync userManagementWriteService) {
-
-        userManagementWriteService.logout(new AsyncCallback<SuccessInfo>() {
-
+    public static void logout(UserManagementServiceAsync userManagementService) {
+        userManagementService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify("Could not log out! " + caught, NotificationType.ERROR);

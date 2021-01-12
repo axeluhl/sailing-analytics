@@ -330,14 +330,14 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 new CompetitorConfigImagesBarCell(getStringMessages()), userService);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
-        final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
-                competitorDTO -> refresh(Collections.singleton(competitorDTO)), stringMessages);
+        final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementWriteService(), SecuredDomainType.COMPETITOR,
+                competitorDTO -> getFilterField().filter(), stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, null, stringMessages);
+                .create(userService.getUserManagementWriteService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
         table.addColumn(competitorNameColumn, getStringMessages().name());

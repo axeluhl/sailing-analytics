@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
-<booleanAttribute key="append.args" value="true"/>
-<booleanAttribute key="automaticAdd" value="false"/>
-<booleanAttribute key="automaticValidate" value="false"/>
-<stringAttribute key="bootstrap" value=""/>
-<stringAttribute key="checked" value="[NONE]"/>
-<booleanAttribute key="clearConfig" value="false"/>
-<stringAttribute key="configLocation" value="${workspace_loc}/target"/>
-<booleanAttribute key="default" value="true"/>
-<booleanAttribute key="default_auto_start" value="true"/>
-<intAttribute key="default_start_level" value="4"/>
-<setAttribute key="deselected_workspace_bundles"/>
-<booleanAttribute key="includeOptional" value="true"/>
-<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
-<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
-<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
-</listAttribute>
-<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0_241"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
-<stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=2010 -Xms8000m -Xmx8000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Drestore.tracked.races=true"/>
-<stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
-<stringAttribute key="pde.version" value="3.3"/>
-<setAttribute key="selected_target_bundles">
+    <booleanAttribute key="append.args" value="true"/>
+    <booleanAttribute key="automaticAdd" value="false"/>
+    <booleanAttribute key="automaticValidate" value="false"/>
+    <stringAttribute key="bootstrap" value=""/>
+    <stringAttribute key="checked" value="[NONE]"/>
+    <booleanAttribute key="clearConfig" value="false"/>
+    <stringAttribute key="configLocation" value="${workspace_loc}/target"/>
+    <booleanAttribute key="default" value="true"/>
+    <booleanAttribute key="default_auto_start" value="true"/>
+    <intAttribute key="default_start_level" value="4"/>
+    <setAttribute key="deselected_workspace_bundles"/>
+    <booleanAttribute key="includeOptional" value="true"/>
+    <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+        <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+        <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+    </listAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_271"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
+    <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y -ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=2010 -Xms8000m -Xmx8000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -XX:+UseMembar -Drestore.tracked.races=true -DAnniversaryRaceDeterminator.enabled=true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
+    <stringAttribute key="pde.version" value="3.3"/>
+    <setAttribute key="selected_target_bundles">
 <setEntry value="routeconverter@default:default"/>
 <setEntry value="org.apache.commons.codec@default:default"/>
 <setEntry value="org.apache.poi@default:default"/>
@@ -43,7 +43,9 @@
 <setEntry value="org.jvnet.mimepull@default:default"/>
 <setEntry value="org.apache.commons.math3@default:default"/>
 <setEntry value="org.mongodb.mongo-java-driver@default:default"/>
+<setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
+<setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="slf4j.jdk14@default:default"/>
 <setEntry value="org.apache.felix.shell@0:true"/>
 <setEntry value="org.apache.felix.shell.remote@0:true"/>
@@ -60,6 +62,7 @@
 <setEntry value="org.eclipse.jetty.server@4:true"/>
 <setEntry value="org.eclipse.jetty.servlet@4:true"/>
 <setEntry value="org.eclipse.jetty.util@4:true"/>
+<setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
 <setEntry value="org.eclipse.jetty.webapp@4:true"/>
 <setEntry value="org.eclipse.jetty.websocket.api@default:default"/>
 <setEntry value="org.eclipse.jetty.websocket.client@default:default"/>
@@ -67,14 +70,12 @@
 <setEntry value="org.eclipse.jetty.xml@4:true"/>
 <setEntry value="slf4j.api@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.zxing@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-annotations@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-core@default:default"/>
-<setEntry value="com.fasterxml.jackson.core.jackson-databind@default:default"/>
 <setEntry value="org.apache.commons.io@default:default"/>
 <setEntry value="jcl.over.slf4j@default:default"/>
 <setEntry value="com.sun.mail.javax.mail@default:default"/>
 <setEntry value="com.rabbitmq.client@default:default"/>
 <setEntry value="org.apache.commons.lang@default:default"/>
+<setEntry value="org.apache.commons.logging@default:default"/>
 <setEntry value="jackson-jaxrs@default:default"/>
 <setEntry value="com.sun.jersey@default:default"/>
 <setEntry value="javax.ws.rs@default:default"/>
@@ -82,8 +83,11 @@
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.apache.shiro.core@default:default"/>
+<setEntry value="org.apache.shiro.core.source@default:default"/>
 <setEntry value="org.apache.shiro.ehcache@default:default"/>
+<setEntry value="org.apache.shiro.ehcache.source@default:default"/>
 <setEntry value="org.apache.shiro.web@default:default"/>
+<setEntry value="org.apache.shiro.web.source@default:default"/>
 <setEntry value="jackson-core-asl@default:default"/>
 <setEntry value="jackson-mapper-asl@default:default"/>
 <setEntry value="org.apache.commons.collections@default:default"/>
@@ -103,10 +107,11 @@
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
+<setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.jcraft.jsch@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 </setAttribute>
-<setAttribute key="selected_workspace_bundles">
+    <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
 <setEntry value="com.sap.sailing.domain@default:default"/>
@@ -209,8 +214,8 @@
 <setEntry value="com.sap.sse.landscape.aws@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 </setAttribute>
-<booleanAttribute key="show_selected_only" value="false"/>
-<booleanAttribute key="tracing" value="false"/>
-<booleanAttribute key="useCustomFeatures" value="false"/>
-<booleanAttribute key="useDefaultConfigArea" value="false"/>
+    <booleanAttribute key="show_selected_only" value="false"/>
+    <booleanAttribute key="tracing" value="false"/>
+    <booleanAttribute key="useCustomFeatures" value="false"/>
+    <booleanAttribute key="useDefaultConfigArea" value="false"/>
 </launchConfiguration>

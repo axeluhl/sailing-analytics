@@ -1,20 +1,22 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Spinner;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -28,14 +30,11 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDi
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,34 +43,31 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     protected ArrayList<T> namedList;
     protected List<CheckedItem> checkedItems;
-    private ItemSelectedListener<T> listener;
-    private CheckedItemAdapter listAdapter;
-    private int mSelectedIndex = -1;
+    protected ItemSelectedListener<T> listener;
+    protected CheckedItemAdapter listAdapter;
+    protected int mSelectedIndex = -1;
+    private View footerView;
 
-    private enum ItemsSort {
-        Name,
-        Date
-    }
-
-    private ItemsSort itemsSort = ItemsSort.Date;
-
-    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+    protected abstract ItemSelectedListener<T> attachListener(Context context);
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
-            ReadonlyDataManager manager);
+            ReadonlyDataManager manager
+    );
 
-    private void loadItems() {
-        setupLoader();
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = attachListener(context);
     }
 
-    boolean isSupportsSorting() {
-        return false;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list_fragment, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         namedList = new ArrayList<>();
         checkedItems = new ArrayList<>();
         listAdapter = new CheckedItemAdapter(getActivity(), checkedItems);
@@ -81,45 +77,29 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
                 listAdapter.setCheckedPosition(mSelectedIndex);
             }
         }
-        if (isSupportsSorting()) {
-            final LayoutInflater layoutInflater = LayoutInflater.from(requireContext());
-            final View header = layoutInflater.inflate(R.layout.list_header, null, false);
-            final Spinner sortOrder = header.findViewById(R.id.list_order);
-            sortOrder.setSelection(itemsSort == ItemsSort.Name ? 0 : 1);
-            sortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (position == 0) {
-                        itemsSort = ItemsSort.Name;
-                    } else {
-                        itemsSort = ItemsSort.Date;
-                    }
-                    displaySorted();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-            getListView().addHeaderView(header);
-        }
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         setListAdapter(listAdapter);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        footerView = View.inflate(requireContext(), R.layout.footer_progress, null);
+        getListView().addFooterView(footerView);
 
         showProgressBar(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         loadItems();
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("position", mSelectedIndex);
     }
 
     @Override
@@ -159,39 +139,26 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
-        listAdapter.setCheckedPosition(-1);
+        if (isForceLoad() && !isCached) {
+            listAdapter.setCheckedPosition(-1);
+            mSelectedIndex = -1;
+        }
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            displaySorted();
+            Collections.sort(namedList, new NaturalNamedComparator<>());
+            for (Named named : namedList) {
+                CheckedItem item = new CheckedItem();
+                item.setText(named.getName());
+                item.setSubtext(getEventSubText(named));
+                checkedItems.add(item);
+            }
+            listAdapter.notifyDataSetChanged();
         }
 
-        showProgressBar(false);
-    }
-
-    private void displaySorted() {
-        checkedItems.clear();
-        switch (itemsSort) {
-            case Name:
-                Collections.sort(namedList, new NaturalNamedComparator<T>());
-                break;
-            case Date:
-                Collections.sort(namedList, new Comparator<Named>() {
-                    @Override
-                    public int compare(Named o1, Named o2) {
-                        return getEventDate(o2).compareTo(getEventDate(o1));
-                    }
-                });
-                break;
+        if (!isForceLoad() || !isCached) {
+            showProgressBar(false);
         }
-
-        for (Named named : namedList) {
-            CheckedItem item = new CheckedItem();
-            item.setText(named.getName());
-            item.setSubtext(getEventSubText(named));
-            checkedItems.add(item);
-        }
-        listAdapter.notifyDataSetChanged();
     }
 
     private String getEventSubText(Named named) {
@@ -200,7 +167,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             EventBase eventBase = (EventBase) named;
             String dateString;
             if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
-                Locale locale = getActivity().getResources().getConfiguration().locale;
+                Locale locale = getResources().getConfiguration().locale;
                 Calendar startDate = Calendar.getInstance();
                 startDate.setTime(eventBase.getStartDate().asDate());
                 Calendar endDate = Calendar.getInstance();
@@ -224,27 +191,27 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return subText;
     }
 
-    private TimePoint getEventDate(Named named) {
+    ReadonlyDataManager getDataManager() {
+        return OnlineDataManager.create(getActivity());
+    }
 
-        if (named instanceof EventBase) {
-            EventBase eventBase = (EventBase) named;
-            if (eventBase.getStartDate() != null) {
-                return eventBase.getStartDate();
-            }
+    Loader<DataLoaderResult<Collection<T>>> initLoader() {
+        return getLoaderManager().initLoader(0, null, createLoaderCallbacks(getDataManager()));
+    }
+
+    Loader<DataLoaderResult<Collection<T>>> restartLoader() {
+        return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
+    }
+
+    private void loadItems() {
+        final Loader<DataLoaderResult<Collection<T>>> loader = initLoader();
+        if (isForceLoad()) {
+            loader.forceLoad();
         }
-        return new MillisecondsTimePoint(0);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt("position", mSelectedIndex);
-
-        super.onSaveInstanceState(outState);
-    }
-
-    public void setupLoader() {
-        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())))
-                .forceLoad();
+    private boolean isForceLoad() {
+        return getArguments() != null && getArguments().getBoolean(AppConstants.ACTION_EXTRA_FORCED);
     }
 
     private void showLoadFailedDialog(String message) {
@@ -257,10 +224,19 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
 
-    private void showProgressBar(boolean visible) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.setProgressBarIndeterminateVisibility(visible);
+    void showProgressBar(boolean visible) {
+        footerView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    protected void selectItem(T eventBase, boolean notify) {
+        final int position = namedList.indexOf(eventBase);
+        listAdapter.setCheckedPosition(position);
+        listAdapter.notifyDataSetChanged();
+
+        mSelectedIndex = position;
+        getListView().setSelection(position);
+        if (notify) {
+            listener.itemSelected(this, eventBase);
         }
     }
 }

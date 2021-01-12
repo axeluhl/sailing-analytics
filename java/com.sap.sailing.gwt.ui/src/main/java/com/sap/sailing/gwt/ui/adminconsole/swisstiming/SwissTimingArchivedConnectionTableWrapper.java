@@ -113,15 +113,15 @@ public class SwissTimingArchivedConnectionTableWrapper extends
             });
         });
         final EditOwnershipDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, dto -> refreshConnectionList(),
+                .create(userService.getUserManagementWriteService(), type, dto -> refreshConnectionList(),
                         stringMessages);
         final EditACLDialog.DialogConfig<SwissTimingArchiveConfigurationWithSecurityDTO> configACL = EditACLDialog
                 .create(
-                userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, dto -> dto.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterSwissTimingAchivedConnections()),
                 new ArrayList<SwissTimingArchiveConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

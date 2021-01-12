@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
@@ -75,7 +75,7 @@ public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSet
     
     public static String createLeaderboardEditingLink(String leaderboardName) {
         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                LEADERBOARD_EDITING_PATH, new LeaderboardEditContextDefinition(leaderboardName));
+                LEADERBOARD_EDITING_PATH, new EditableLeaderboardContextDefinition(leaderboardName));
         return linkWithSettingsGenerator.createUrl();
     }
 

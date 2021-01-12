@@ -19,7 +19,7 @@ public class DetailedBoatClassJsonSerializer extends BoatClassJsonSerializer {
     @Override
     public JSONObject serialize(BoatClass boatClass) {
         JSONObject result = super.serialize(boatClass);
-        result.put(DISPLAY_NAME, boatClass.getDisplayName());
+        result.put(DISPLAY_NAME, boatClass.getName());
         result.put(HULL_LENGTH_IN_METERS, boatClass.getHullLength().getMeters());
         result.put(HULL_BEAM_IN_METERS, boatClass.getHullBeam().getMeters());
         result.put(HULL_TYPE, boatClass.getHullType().toString());

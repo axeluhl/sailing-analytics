@@ -56,6 +56,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -301,7 +302,7 @@ public class StructureImporter {
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
-        URLConnection connection = new URL(url).openConnection();
+        URLConnection connection = HttpUrlConnectionHelper.redirectConnection(new URL(url));
         return connection.getInputStream();
     }
 }

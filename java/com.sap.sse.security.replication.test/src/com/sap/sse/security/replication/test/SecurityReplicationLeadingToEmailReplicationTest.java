@@ -22,6 +22,7 @@ import com.sap.sse.replication.testsupport.AbstractServerWithMultipleServicesRep
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
@@ -51,7 +52,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private class SecurityServerReplicationTestSetUp extends
             AbstractSecurityReplicationTest.SecurityServerReplicationTestSetUp {
         @Override
-        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserGroupManagementException, UserManagementException {
+        protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException, UserStoreManagementException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(masterMailService).when(trackerMock).getService();
@@ -65,7 +66,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserGroupManagementException, UserManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewReplica() throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
             @SuppressWarnings("unchecked")
             ServiceTracker<MailService, MailService> trackerMock = mock(ServiceTracker.class);
             doReturn(replicaMailService).when(trackerMock).getService();

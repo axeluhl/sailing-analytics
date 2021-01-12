@@ -10,5 +10,7 @@
     			class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemtwitter}"></a>
     	<a ui:field="facebook" title="{i18n.sharingFacebookTooltip}" target="_blank"
     			class="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemfacebook}"></a>
+    	<g:Button ui:field="copyToClipBoard" title="{i18n.sharingCopyToClipBoardTooltip}"
+    			addStyleNames="{local_res.css.eventheader_sharing_item} {local_res.css.eventheader_sharing_itemcopytoclipboard}"></g:Button>
   	</g:HTMLPanel>
 </ui:UiBinder> 

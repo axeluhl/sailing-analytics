@@ -62,18 +62,21 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
-        buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
+        Button createUserButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),
                 () -> new CreateUserDialog(stringMessages, userManagementWriteService, userCreatedHandlers, userService)
                         .show());
+        createUserButton.ensureDebugId("CreateUserButton");
         userNameTextbox = buttonPanel.addUnsecuredTextBox(stringMessages.username());
+        userNameTextbox.ensureDebugId("UserNameTextbox");
         final Button editRolesAndPermissionsForUserButton = buttonPanel.addUnsecuredAction(
                 stringMessages.editRolesAndPermissionsForUser(""),
                 () -> showRolesAndPermissionsEditDialog(userService, tableResources, errorReporter));
+        editRolesAndPermissionsForUserButton.ensureDebugId("EditRolesAndPermissionsForUserButton");
         userNameTextbox.addKeyUpHandler(
                 e -> editRolesAndPermissionsForUserButton.setEnabled(!userNameTextbox.getText().isEmpty()));
         editRolesAndPermissionsForUserButton.setEnabled(false);
         userSelectionModel = userList.getSelectionModel();
-        buttonPanel.addRemoveAction(stringMessages.remove(), userSelectionModel, false, () -> {
+        final Button removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), userSelectionModel, false, () -> {
             assert userSelectionModel.getSelectedSet().size() > 0;
             final Set<UserDTO> usersToDelete = new HashSet<>();
             final Set<String> usernamesToDelete = new HashSet<>();
@@ -105,6 +108,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 });
             }
         });
+        removeButton.ensureDebugId("DeleteUserButton");
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());

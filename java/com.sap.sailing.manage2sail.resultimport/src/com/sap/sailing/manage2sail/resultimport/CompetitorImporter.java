@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,15 +33,20 @@ import com.sap.sailing.xrr.schema.RaceResult;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class CompetitorImporter extends AbstractManage2SailProvider implements CompetitorProvider {
     private static final long serialVersionUID = 7389956404604333931L;
     private static final Logger logger = Logger.getLogger(CompetitorImporter.class.getName());
+    private final static String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     private final CompetitorDocumentProvider documentProvider;
+    private final ResourceBundleStringMessages stringMessages;
 
     public CompetitorImporter(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
         super(parserFactory, resultUrlRegistry);
         documentProvider = new CompetitorDocumentProvider(this);
+        stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
     }
     
     @Override
@@ -195,5 +201,10 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
 
     protected CompetitorDocumentProvider getDocumentProvider() {
         return documentProvider;
+    }
+
+    @Override
+    public String getHint(Locale locale) {
+        return stringMessages.get(locale, "CompetitorImporterHint");
     }
 }

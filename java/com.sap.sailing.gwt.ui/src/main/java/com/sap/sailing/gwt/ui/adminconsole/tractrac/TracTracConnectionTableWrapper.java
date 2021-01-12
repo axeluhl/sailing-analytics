@@ -125,14 +125,14 @@ public class TracTracConnectionTableWrapper extends
             });
         });
         final EditOwnershipDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, dto -> refreshTracTracConnectionList(),
+                .create(userService.getUserManagementWriteService(), type, dto -> refreshTracTracConnectionList(),
                         stringMessages);
         final EditACLDialog.DialogConfig<TracTracConfigurationWithSecurityDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, dto -> dto.getAccessControlList(), stringMessages);
+                userService.getUserManagementWriteService(), type, dto -> dto.getAccessControlList(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openACLDialog(u));
+                u -> configACL.openDialog(u));
         filterField = new LabeledAbstractFilterablePanel<TracTracConfigurationWithSecurityDTO>(
                 new Label(stringMessages.filterTracTracConnections()),
                 new ArrayList<TracTracConfigurationWithSecurityDTO>(), dataProvider, stringMessages) {

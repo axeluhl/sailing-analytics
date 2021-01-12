@@ -70,8 +70,8 @@ public class ORCPerformanceCurveImpl implements Serializable, ORCPerformanceCurv
     /**
      * This PolynomialSplineFunction is created with the array of course specific allowances for the boat which this
      * ORCPerformanceCurve belongs to. This function contains subfunctions for each interval between two given
-     * calculated points. The input for the function is the value of the implied wind (speed in kts) and the output an
-     * allowance in sec/nm.
+     * calculated points. The input for the function is the implied wind speed in knots and the output the expected
+     * average speed over ground in knots.
      */
     private final UnivariateDifferentiableFunction functionImpliedWindInKnotsToAverageSpeedInKnotsForCourse;
     

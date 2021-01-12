@@ -358,7 +358,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, READ,
                 this::openPairingListEntryPoint);
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 new Consumer<StrippedLeaderboardDTOWithSecurity>() {
@@ -368,13 +368,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     }
         });
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type,
+                userService.getUserManagementWriteService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 new Consumer<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void accept(StrippedLeaderboardDTOWithSecurity t) {
-                        configACL.openACLDialog(t);
+                        configACL.openDialog(t);
                     }
         });
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());

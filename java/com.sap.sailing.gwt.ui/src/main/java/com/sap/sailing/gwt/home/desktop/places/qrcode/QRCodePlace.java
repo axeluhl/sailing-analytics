@@ -78,9 +78,9 @@ public class QRCodePlace extends AbstractBasePlace {
         super(token);
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
+            targetServer = Window.Location.getParameter(PARAM_SERVER);
             if (mode.isPublicInvite()) {
                 // alternative direct link version
-                targetServer = Window.Location.getParameter(PARAM_SERVER);
                 publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
                 regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
                 if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {
