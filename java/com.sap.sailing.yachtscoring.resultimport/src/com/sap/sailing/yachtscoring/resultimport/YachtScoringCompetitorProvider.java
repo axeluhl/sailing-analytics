@@ -188,25 +188,13 @@ public class YachtScoringCompetitorProvider extends AbstractYachtScoringProvider
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
-        UUID competitorUUID;
-        try {
-            competitorUUID = UUID.fromString(team.getTeamID());
-        } catch (IllegalArgumentException e) {
-            competitorUUID = null;
-        }
-        UUID boatUUID;
-        try {
-            boatUUID = UUID.fromString(boat.getBoatID());
-        } catch (IllegalArgumentException e) {
-            boatUUID = null;
-        }
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
                             event == null ? null : event.getTitle(),
                             division == null ? null : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
-                            race != null ? race.getRaceName() : null, /* fleetName */ null, competitorUUID, /* name */ team.getTeamName(),
+                            race != null ? race.getRaceName() : null, /* fleetName */ null, team.getTeamID(), /* name */ team.getTeamName(),
                             /* short name */ null, /* team name */ team.getTeamName(), persons, 
                             teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
-                            /* timeOnDistanceAllowancePerNauticalMile */ null, boatUUID, boat.getBoatName(), boatClassName, sailNumber);
+                            /* timeOnDistanceAllowancePerNauticalMile */ null, boat.getBoatID(), boat.getBoatName(), boatClassName, sailNumber);
         return competitorDescriptor;
     }
 

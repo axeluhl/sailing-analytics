@@ -1723,24 +1723,24 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final Action action = () -> competitorsForSaving
                     .add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
             final Boat existingBoat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatById(competitorDescriptor.getBoatUUID());
+                    .getExistingBoatById(competitorDescriptor.getBoatId());
             final Action actionIncludingBoatSecurityCheck;
             if (existingBoat == null) {
                 actionIncludingBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.BOAT,
-                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()),
+                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatId()),
                                 competitorDescriptor.getBoatName(), action);
             } else {
                 actionIncludingBoatSecurityCheck = action;
             }
             final Competitor existingCompetitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+                    .getExistingCompetitorById(competitorDescriptor.getCompetitorId());
             final Action actionIncludingCompetitorAndBoatSecurityCheck;
             if (existingCompetitor == null) {
                 actionIncludingCompetitorAndBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.COMPETITOR,
                                 CompetitorImpl
-                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()),
+                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorId()),
                                 competitorDescriptor.getName(), actionIncludingBoatSecurityCheck);
             } else {
                 actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;

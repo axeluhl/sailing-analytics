@@ -27,14 +27,14 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
         streamWriter.writeString(instance.getRegattaName());
         streamWriter.writeString(instance.getRaceName());
         streamWriter.writeString(instance.getFleetName());
-        streamWriter.writeObject(instance.getCompetitorUUID());
+        streamWriter.writeObject(instance.getCompetitorId());
         streamWriter.writeString(instance.getName());
         streamWriter.writeString(instance.getShortName());
         streamWriter.writeString(instance.getTeamName());
         streamWriter.writeObject(instance.getCountryCode());
         streamWriter.writeObject(instance.getTimeOnTimeFactor());
         streamWriter.writeObject(instance.getTimeOnDistanceAllowancePerNauticalMile());
-        streamWriter.writeObject(instance.getBoatUUID());
+        streamWriter.writeObject(instance.getBoatId());
         streamWriter.writeString(instance.getBoatName());
         streamWriter.writeString(instance.getBoatClassName());
         streamWriter.writeString(instance.getSailNumber());
