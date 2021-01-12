@@ -10,10 +10,15 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
@@ -61,11 +66,37 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
     @Override
     public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
-        super.onLoadSucceeded(data, isCached);
+        final List<EventBase> list = new ArrayList<>(data.size());
+        list.addAll(data);
+        final Comparator<EventBase> namedComparator = new NaturalNamedComparator<>();
+        Collections.sort(list, (event, anotherEvent) -> {
+            if (event.getEndDate() != null) {
+                if (anotherEvent.getEndDate() != null) {
+                    return event.getEndDate().compareTo(anotherEvent.getEndDate());
+                }
+                return -1;
+            }
+            if (event.getStartDate() != null) {
+                if (anotherEvent.getStartDate() != null) {
+                    return event.getStartDate().compareTo(anotherEvent.getStartDate());
+                }
+                return -1;
+            }
+            if (anotherEvent.getStartDate() != null || anotherEvent.getEndDate() != null) {
+                return 1;
+            }
+            final int value = namedComparator.compare(event, anotherEvent);
+            if (value != 0) {
+                return value;
+            }
+            return event.getId().toString().compareToIgnoreCase(anotherEvent.getId().toString());
+        });
+        Collections.reverse(list);
+        super.onLoadSucceeded(list, isCached);
         final Bundle arguments = getArguments();
         if (arguments != null && mSelectedIndex == -1) {
             final String id = arguments.getString(AppConstants.EXTRA_EVENT_ID);
-            for (EventBase event : data) {
+            for (EventBase event : list) {
                 if (event.getId().toString().equals(id)) {
                     selectItem(event, !loadMore);
                     break;

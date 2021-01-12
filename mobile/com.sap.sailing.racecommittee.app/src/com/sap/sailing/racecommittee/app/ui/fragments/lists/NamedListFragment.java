@@ -24,7 +24,6 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
@@ -34,7 +33,6 @@ import com.sap.sse.common.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -146,7 +144,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator<>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
@@ -164,24 +161,46 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private String getEventSubText(Named named) {
         String subText = null;
         if (named instanceof EventBase) {
-            EventBase eventBase = (EventBase) named;
+            final EventBase eventBase = (EventBase) named;
             String dateString;
             if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
-                Locale locale = getResources().getConfiguration().locale;
-                Calendar startDate = Calendar.getInstance();
+                final Locale locale = getResources().getConfiguration().locale;
+                final int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                final Calendar startDate = Calendar.getInstance();
                 startDate.setTime(eventBase.getStartDate().asDate());
-                Calendar endDate = Calendar.getInstance();
+                final Calendar endDate = Calendar.getInstance();
                 endDate.setTime(eventBase.getEndDate().asDate());
-                String start = String.format("%s %s", startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
-                        startDate.get(Calendar.DATE));
-                String end = "";
-                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
-                    end = endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+                final int startYear = startDate.get(Calendar.YEAR);
+                String start;
+                if (startYear == currentYear) {
+                    start = String.format(
+                            "%s %s",
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
+                } else {
+                    start = String.format(
+                            "%s %s %s",
+                            startYear,
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
                 }
-                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)
-                        || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
-                    end += " " + endDate.get(Calendar.DATE);
+                final StringBuilder builder = new StringBuilder();
+                if (startYear != endDate.get(Calendar.YEAR)) {
+                    builder.append(endDate.get(Calendar.YEAR))
+                            .append(" ")
+                            .append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
+                    builder.append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                    builder.append(endDate.get(Calendar.DATE));
                 }
+                final String end = builder.toString();
                 dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
                 subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(),
                         (!TextUtils.isEmpty(dateString) ? ", " : ""),
