@@ -1,7 +1,6 @@
 package com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -59,23 +58,22 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
         String regattaName = streamReader.readString();
         String raceName = streamReader.readString();
         String fleetName = streamReader.readString();
-        UUID competitorUUID = (UUID) streamReader.readObject();
+        String competitorId = (String) streamReader.readObject();
         String fullName = streamReader.readString();
         String shortName = streamReader.readString();
         String teamName = streamReader.readString();
         CountryCode countryCode = (CountryCode) streamReader.readObject();
         Double timeOnTimeFactor = (Double) streamReader.readObject();
         Duration timeOnDistanceAllowancePerNauticalMile = (Duration) streamReader.readObject();
-        UUID boatUUID = (UUID) streamReader.readObject();
+        String boatId = (String) streamReader.readObject();
         String boatName = streamReader.readString();
         String boatClassName = streamReader.readString();
         String sailNumber = streamReader.readString();
-              
         return new CompetitorDescriptor(eventName, regattaName,
-                raceName, fleetName, competitorUUID,
+                raceName, fleetName, competitorId,
                 fullName, shortName, teamName,
                 persons, countryCode, timeOnTimeFactor,
-                timeOnDistanceAllowancePerNauticalMile, boatUUID, boatName, boatClassName, sailNumber);
+                timeOnDistanceAllowancePerNauticalMile, boatId, boatName, boatClassName, sailNumber);
     }
 
     @Override
