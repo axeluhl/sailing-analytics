@@ -23,6 +23,7 @@ import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.orchestration.StartHost;
+import com.sap.sse.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -270,7 +271,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
             mongoProcess = new MongoProcessImpl(getHost());
         } else {
             // the host may not yet be in state RUNNING; we'd like to wait for this:
-            boolean running = Util.wait(()->getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
+            boolean running = Wait.wait(()->getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
                     optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for host "+getHost().getInstanceId()+" to be in state RUNNING");
             if (!running) {
                 throw new IllegalStateException("The host launched did not reach state RUNNING"+optionalTimeout.map(d->" within timeout "+d).orElse(""));

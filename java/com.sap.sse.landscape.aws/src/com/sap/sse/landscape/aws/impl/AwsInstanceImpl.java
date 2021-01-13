@@ -31,6 +31,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
+import com.sap.sse.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
@@ -187,7 +188,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
                 " to instance with ID "+getInstanceId());
         Channel result;
         try {
-            result = Util.wait(()->{
+            result = Wait.wait(()->{
                     Session session = null;
                     try {
                         session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
