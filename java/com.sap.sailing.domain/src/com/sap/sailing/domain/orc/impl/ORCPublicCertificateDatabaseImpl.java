@@ -391,10 +391,10 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
         final Set<ORCPublicCertificateDatabase.CountryOverview> result = new HashSet<>();
         final HttpClient client = HttpClientBuilder.create().build();
         final List<NameValuePair> params = new ArrayList<>();
-        final HttpPost postRequest = new HttpPost(COUNTRY_OVERVIEW_URL);
-        addAuthorizationHeader(postRequest);
+        final HttpGet getRequest = new HttpGet(COUNTRY_OVERVIEW_URL);
+        addAuthorizationHeader(getRequest);
         logger.fine(()->"Searching for "+params+"...");
-        final HttpResponse processorResponse = client.execute(postRequest);
+        final HttpResponse processorResponse = client.execute(getRequest);
         final InputStream content = processorResponse.getEntity().getContent();
         final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         final Document document = builder.parse(content);
