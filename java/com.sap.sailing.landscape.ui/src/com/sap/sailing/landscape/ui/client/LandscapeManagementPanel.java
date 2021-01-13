@@ -194,7 +194,8 @@ public class LandscapeManagementPanel extends VerticalPanel {
                     mongoEndpointsTable.getDataProvider().getList().clear();
                 }
             });
-        // TODO support SSH key management: show existing keys, allow user to paste an encrypted private key for storage in MongoDB; allow user to upload public key and choose for launch and login procedures
+        // TODO support SSH key management: show existing keys, allow user to paste an encrypted private key for storage in MongoDB; allow user to upload public key and choose for launch and login procedures;
+        // TODO SSH keys: allow user to provide pass phrase for the decryption of a private key only in the browser
         // TODO upon region selection show AppServer clusters, and upgradable AMIs in region
         // TODO try to identify archive servers
         // TODO support creating a new app server cluster
