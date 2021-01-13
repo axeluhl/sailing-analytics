@@ -56,19 +56,33 @@ public interface Host {
      * output. You will usually want to use either a {@link ByteArrayInputStream} to provide a set of predefined
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
-     * @see #createSshChannel(String, Optional)
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * 
+     * @see #createSshChannel(String, Optional, byte[])
      */
-    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
-    
-    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException;
 
-    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    /**
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException;
+
+    /**
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException;
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the

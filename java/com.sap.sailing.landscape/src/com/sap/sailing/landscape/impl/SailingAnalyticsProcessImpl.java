@@ -32,9 +32,10 @@ implements SailingAnalyticsProcess<ShardingKey> {
     /**
      * Tries to obtain the port from the {@code env.sh} file found in the {@code serverDirectory}
      */
-    public SailingAnalyticsProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout)
+    public SailingAnalyticsProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase)
             throws NumberFormatException, JSchException, IOException, InterruptedException {
-        super(host, serverDirectory, optionalTimeout);
+        super(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
@@ -60,7 +61,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
      * information about server name as well as availability and replication status can be obtained.
      */
     @Override
-    public String getServerName(Optional<Duration> optionalTimeout)
+    public String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
             throws JSchException, IOException, InterruptedException, SftpException, ParseException {
         String result = null;
         final TimePoint start = TimePoint.now();

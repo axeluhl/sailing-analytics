@@ -45,16 +45,19 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     /**
      * Absolute path in the file system of the host on which this process is running and that represents
      * this process's working directory. This directory is expected to contain a file named {@link #ENV_SH}
-     * whose contents can be obtained using the {@link #getEnvSh(Optional)} method.
+     * whose contents can be obtained using the {@link #getEnvSh(Optional, byte[])} method.
      */
     private final String serverDirectory;
 
     /**
-     * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the {@link #ENV_SH env.sh} file
-     * located on the {@code host} in the {@code serverDirectory} specified.
+     * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
+     * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
-        this(readPortFromDirectory(host, serverDirectory, optionalTimeout), host, serverDirectory);
+    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws NumberFormatException, JSchException, IOException, InterruptedException {
+        this(readPortFromDirectory(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase), host, serverDirectory);
     }
     
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
@@ -62,14 +65,20 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverDirectory = serverDirectory;
     }
 
-    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(), optionalTimeout));
+    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase)
+            throws NumberFormatException, JSchException, IOException, InterruptedException {
+        return Integer.parseInt(
+                getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(),
+                        optionalTimeout, privateKeyEncryptionPassphrase));
     }
     
     @Override
-    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
+    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase)
+            throws JSchException, IOException, SftpException, InterruptedException {
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
-        final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout));
+        final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, privateKeyEncryptionPassphrase));
         final Release result;
         if (matcher.find()) {
             result = new ReleaseImpl(matcher.group(1), releaseRepository);
@@ -80,14 +89,18 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     /**
-     * Under the path {@code configuration/jetty/version.txt} each release is expected to present a version string in the
-     * format <tt>{commitId}-{releaseName} System: {mongoDbUriWithoutSchemaOrHostPortDBName}-{expeditionPort}-{replicationHost}:{replicationPort}/{replicationChannel} Started: {yyyyMMddHHmm}</tt>.
-     * With this it is possible to infer the release that will be run upon the next process start, which is also the
-     * one running now if this process is currently running and no other release has been deployed since the process
-     * has started.
+     * Under the path {@code configuration/jetty/version.txt} each release is expected to present a version string in
+     * the format
+     * <tt>{commitId}-{releaseName} System: {mongoDbUriWithoutSchemaOrHostPortDBName}-{expeditionPort}-{replicationHost}:{replicationPort}/{replicationChannel} Started: {yyyyMMddHHmm}</tt>.
+     * With this it is possible to infer the release that will be run upon the next process start, which is also the one
+     * running now if this process is currently running and no other release has been deployed since the process has
+     * started.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    private String getVersionTxt(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
-        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout);
+    private String getVersionTxt(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, SftpException, InterruptedException {
+        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -97,8 +110,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException {
-        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout));
+    public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException {
+        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
+                privateKeyEncryptionPassphrase));
     }
     
     /**
@@ -106,12 +121,15 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
      */
     @Override
-    public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout);
+    public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     
-    protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
+    protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
+            Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            throws JSchException, IOException, InterruptedException {
+        final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
                                                 "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
         return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
@@ -122,8 +140,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * in the evaluated {@code env.sh} file.
      */
     @Override
-    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return getEnvShValueFor(variable.name(), optionalTimeout);
+    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+        return getEnvShValueFor(variable.name(), optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -140,18 +158,18 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getServerName(Optional<Duration> optionalTimeout) throws Exception {
-        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout);
+    public String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException {
-        return getFileContents(getEnvShPath(), optionalTimeout);
+    public String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, SftpException, InterruptedException {
+        return getFileContents(getEnvShPath(), optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
-    protected String getFileContents(String path, Optional<Duration> optionalTimeout)
+    protected String getFileContents(String path, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
             throws JSchException, IOException, SftpException, InterruptedException {
-        final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout);
+        final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
         sftpChannel.get(path, bos);

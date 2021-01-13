@@ -52,29 +52,33 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /index.html} landing page for the application replica set provided.
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException;
+    void setPlainRedirect(String hostname, ProcessT applicationProcess, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * {@code /gwt/Home.html} landing page for the application replica set provided.
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException;
+    void setHomeRedirect(String hostname, ProcessT applicationProcess, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the
      * event page for the event with ID {@code eventId} that is expected to be hosted by the
      * application replica set provided.
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException;
+    void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
 
     /**
      * Configures a redirect in this reverse proxy such that requests for it will go to the event series page for the
      * event series identified by the UUID of the leaderboard group that represents the series and which is expected to
      * be hosted by the application replica set provided.
+     * @param privateKeyEncryptionPassphrase TODO
      */
     void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException;
+            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
     
     /**
      * Configures a rule for requests for anything from within {@code scope} such that those requests
@@ -84,16 +88,18 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     
     /**
      * Creates a mapping for the {@code /internal-server-status} path using the host's generic external ec2 host name 
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException;
+    void createInternalStatusRedirect(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping
      * exists, the method does nothing.
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    void removeRedirect(String hostname) throws InterruptedException, JSchException, IOException;
+    void removeRedirect(String hostname, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, JSchException, IOException;
     
-    void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException;
+    void removeRedirect(Scope<ShardingKey> scope, byte[] privateKeyEncryptionPassphrase) throws IOException, InterruptedException, JSchException;
     
     /**
      * {@link AwsLandscape#terminate(AwsInstance) Terminates} all {@link #getHosts() hosts} that form this reverse

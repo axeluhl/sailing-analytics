@@ -157,12 +157,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
     
-    /**
-     * Used for the symmetric encryption / decryption of private SSH keys. See also
-     * {@link #getDecryptedPrivateKey(SSHKeyPair)}.
-     */
-    private final byte[] privateKeyEncryptionPassphrase;
-    
     public AwsLandscapeImpl() {
         this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
              System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
@@ -177,7 +171,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
             DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
-        this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
@@ -203,7 +196,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) {
+    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException {
+        assert !keyPairWithDecryptedPrivateKey.isEncrypted();
         addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
                 getPrivateKeyBytes(keyPairWithDecryptedPrivateKey)));
     }
@@ -214,7 +208,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public SSHKeyPair createKeyPair(com.sap.sse.landscape.Region region, String keyName) throws JSchException {
+    public SSHKeyPair createKeyPair(com.sap.sse.landscape.Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final CreateKeyPairResponse keyPairResponse = getEc2Client(getRegion(region))
                 .createKeyPair(CreateKeyPairRequest.builder().keyName(keyName).build());
         final String keyMaterial = keyPairResponse.keyMaterial();
@@ -609,7 +603,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException {
+    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException {
         final String keyId = getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
                 .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build()).keyPairId();
         Object principal;
@@ -620,7 +614,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
             principal = null;
         }
         final SSHKeyPair keyPair = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
-                TimePoint.now(), keyName, publicKey, unencryptedPrivateKey, privateKeyEncryptionPassphrase);
+                TimePoint.now(), keyName, publicKey, encryptedPrivateKey);
         addSSHKeyPair(keyPair);
         return keyId;
     }
@@ -631,7 +625,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException {
+    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
         return bos.toByteArray();
@@ -1033,13 +1027,13 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
-            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout) throws Exception {
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
-            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout)) {
-                final String serverName = applicationProcess.getServerName(optionalTimeout);
+            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, privateKeyEncryptionPassphrase)) {
+                final String serverName = applicationProcess.getServerName(optionalTimeout, privateKeyEncryptionPassphrase);
                 final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
                 if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
                     // then applicationProcess is a replica in the serverName cluster:

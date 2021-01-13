@@ -1,11 +1,13 @@
 package com.sap.sse.gwt.client.celltable;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -14,6 +16,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
@@ -124,6 +127,20 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         column.setSortable(true);
         boatColumnListHandler.setComparator(column, comparator);
         addColumn(column, header);
+    }
+    
+    /**
+     * Adds a sortable {@link TextColumn} whose {@link TextColumn#getValue(Object)} method is based on the {@code valueMapper}
+     * and whose sorting is based on a {@link NaturalComparator}.
+     */
+    public void addColumn(Function<T, String> valueMapper, String header) {
+        final TextColumn<T> textColumn = new TextColumn<T>() {
+            @Override
+            public String getValue(T object) {
+                return valueMapper.apply(object);
+            }
+        };
+        addColumn(textColumn, header, Comparator.comparing(t->textColumn.getValue(t), new NaturalComparator()));
     }
 
     public void setEmptyTableWidget(Widget widget) {

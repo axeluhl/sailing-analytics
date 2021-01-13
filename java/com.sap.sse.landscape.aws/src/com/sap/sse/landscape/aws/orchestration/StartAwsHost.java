@@ -16,6 +16,7 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Region;
@@ -56,6 +57,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     private final Iterable<SecurityGroup> securityGroups;
     private final Optional<Tags> tags;
     private final HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
+    private final byte[] privateKeyEncryptionPassphrase;
     private HostT host;
     
     /**
@@ -89,7 +91,19 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setAvailabilityZone(AwsAvailabilityZone availabilityZone);
 
+        /**
+         * Tells the name of the SSH key stored in the AWS landscape that is to be used to launch the instance; the
+         * respective public key will be added so that an owner of the corresponding private key can
+         * {@link Host#createSshChannel(String, Optional, byte[]) SSH} into the resulting host.<p>
+         * 
+         * Make sure to also provide the {@link #setPrivateKeyEncryptionPassphrase(byte[]) private key pass phrase}
+         * that is required to decrypt the pass phrase of the private key belonging to the public key identified
+         * by {@code keyName}. This private key is expected to be stored together with the entire key pair in the
+         * "landscape" persistently.
+         */
         BuilderT setKeyName(String keyName);
+        
+        BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
 
         BuilderT setSecurityGroups(Iterable<SecurityGroup> securityGroups);
         
@@ -120,6 +134,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private AwsRegion region;
         private String instanceName;
         private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
+        private byte[] privateKeyEncryptionPassphrase;
         
         protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
             return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
@@ -233,6 +248,16 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             this.hostSupplier = hostSupplier;
             return self();
         }
+        
+        @Override
+        public BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase) {
+            this.privateKeyEncryptionPassphrase = privateKeyEncryptionPassphrase;
+            return self();
+        }
+        
+        protected byte[] getPrivateKeyEncryptionPassphrase() {
+            return privateKeyEncryptionPassphrase;
+        }
     }
     
     protected StartAwsHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) {
@@ -247,6 +272,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         this.tags = Optional.of(builder.getTags().orElse(Tags.empty()).and(NAME_TAG_NAME, builder.getInstanceName()));
         this.securityGroups = builder.getSecurityGroups();
         this.hostSupplier = builder.getHostSupplier();
+        this.privateKeyEncryptionPassphrase = builder.getPrivateKeyEncryptionPassphrase();
     }
     
     protected static <ShardingKey,
@@ -350,10 +376,14 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             }
         }
     }
+    
+    protected byte[] getPrivateKeyEncryptionPassphrase() {
+        return privateKeyEncryptionPassphrase;
+    }
 
     protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
             throws JSchException, IOException, InterruptedException {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout);
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, getPrivateKeyEncryptionPassphrase());
         final String sailingUserSsh = "/home/" + username + "/.ssh";
         final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";
         logger.info("Appended root's authorized_keys also to " + username + "'s authorized_keys. stdout: "

@@ -259,6 +259,4 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
             mongoProcess = new MongoProcessInReplicaSetImpl(replicaSet, MongoProcess.DEFAULT_PORT, instance);
         }
     }
-
-    
 }

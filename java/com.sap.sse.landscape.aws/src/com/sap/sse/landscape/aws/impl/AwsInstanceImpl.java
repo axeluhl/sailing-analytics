@@ -120,23 +120,27 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createRootSshSession() throws JSchException {
-        return createSshSession(ROOT_USER_NAME);
+    public com.jcraft.jsch.Session createRootSshSession(byte[] privateKeyEncryptionPassphrase) throws JSchException {
+        return createSshSession(ROOT_USER_NAME, privateKeyEncryptionPassphrase);
     }
     
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createSshSession(String sshUserName) throws JSchException {
+    public com.jcraft.jsch.Session createSshSession(String sshUserName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final String keyName = getInstance().keyName(); // the SSH key pair name that can be used to log on
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
-        jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair), keyPair.getPublicKey(), /* passphrase */ null);
+        jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase), keyPair.getPublicKey(), /* passphrase */ null);
         final InetAddress address = getPublicAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");
@@ -146,12 +150,15 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * 
-     * @see #createSshChannel(String, Optional)
+     * @see #createSshChannel(String, Optional, byte[])
      */
     @Override
-    public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return createSshChannel(ROOT_USER_NAME, optionalTimeout);
+    public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+        return createSshChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     
     /**
@@ -161,22 +168,28 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      * output stream} to which the server will send its output. You will usually want to use either a
      * {@link ByteArrayInputStream} to provide a set of predefined commands to sent to the server, and a
      * {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which you set to the channel.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
     @Override
-    public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout));
+    public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout, privateKeyEncryptionPassphrase));
 
     }
     
-    private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
+    private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
         final TimePoint start = TimePoint.now();
-        logger.info("Creating SSH "+channelType+" channel for SSH user "+sshUserName+
+        logger.info(
+                "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
                 " to instance with ID "+getInstanceId());
         Channel channel = null;
         while (channel == null && (!optionalTimeout.isPresent() || start.until(TimePoint.now()).compareTo(optionalTimeout.get()) < 0)) {
             Session session = null;
             try {
-                session = createSshSession(sshUserName);
+                session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
                 session.setUserInfo(new YesUserInfo());
                 session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
                 channel = session.openChannel(channelType);
@@ -200,13 +213,16 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     }
     
     @Override
-    public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout);
+    public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+        return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout,
+                privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException {
-        return createSftpChannel(ROOT_USER_NAME, optionalTimeout);
+    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            throws JSchException, IOException, InterruptedException {
+        return createSftpChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
     @Override

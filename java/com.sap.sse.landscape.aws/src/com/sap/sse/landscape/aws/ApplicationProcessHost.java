@@ -32,8 +32,9 @@ extends AwsInstance<ShardingKey, MetricsT> {
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
      * @param optionalTimeout TODO
+     * @param privateKeyEncryptionPassphrase TODO
      */
-    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException;
+    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws SftpException, JSchException, IOException, InterruptedException;
     
     AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
 }

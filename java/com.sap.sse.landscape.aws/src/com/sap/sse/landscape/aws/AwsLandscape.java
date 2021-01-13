@@ -221,24 +221,33 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     /**
      * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair ID
      */
-    String importKeyPair(Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException;
+    String importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
-    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
+    /**
+     * Assumes that the {@code keyPair}'s private key has been encrypted using this landscape's default encryption passphrase
+     * and uses that to decrypt it.
+     */
+    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
-    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey);
+    /**
+     * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
+     * and stores it persistently also in the local server's database with the private key encrypted.
+     */
+    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
     /**
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
      * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
-     * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key.
+     * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
+     * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.
      * 
      * @return the key ID as string, usually starting with the prefix "key-"
      */
-    SSHKeyPair createKeyPair(Region region, String keyName) throws JSchException;
+    SSHKeyPair createKeyPair(Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
 
@@ -487,19 +496,19 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     /**
      * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
      * specified by {@code tagName} and discovers all application server processes configured on it. These are then
-     * grouped by {@link ApplicationProcess#getServerName(Optional) server name}, and using
+     * grouped by {@link ApplicationProcess#getServerName(Optional, byte[]) server name}, and using
      * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
      * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
-     * 
      * @param processFactoryFromHostAndServerDirectory
      *            takes the host and the server directory as arguments and is expected to produce an
      *            {@link ApplicationProcess} object of some sort.
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
+     * @param privateKeyEncryptionPassphrase TODO
      */
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
-            Optional<Duration> optionalTimeout) throws Exception;
+            Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
 }

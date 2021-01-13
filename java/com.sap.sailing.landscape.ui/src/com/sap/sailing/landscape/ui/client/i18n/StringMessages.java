@@ -17,4 +17,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String awsCredentials();
     String awsAccessKey();
     String awsSecret();
+    String creator();
+    String creationTime();
+    String sshKeys();
 }

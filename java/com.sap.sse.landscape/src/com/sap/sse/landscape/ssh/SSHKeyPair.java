@@ -8,6 +8,7 @@ import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.landscape.Host;
 
 /**
  * Region ID and key name together form a unique key for AWS key pairs. The private key is always stored in an encrypted form,
@@ -55,13 +56,19 @@ public class SSHKeyPair extends NamedImpl implements Named {
     }
 
     /**
+     * Returns a {@link KeyPair} with decrypted private key that can be used to initiate an SSH session, e.g., using
+     * {@link Host#createSshChannel(String, java.util.Optional, byte[])}.
+     * 
      * @param passphrase
      *            used to {@link KeyPair#decrypt(byte[]) decrypt} the encrypted private key so that the resulting key
-     *            pair can be used to initiate sessions.
+     *            pair can be used to initiate sessions. Has to equal the passphrase used when encrypting the private key,
+     *            e.g., when calling {@link #SSHKeyPair(String, String, TimePoint, String, byte[], byte[], byte[])}.
      */
     public KeyPair getKeyPair(JSch jsch, byte[] passphrase) throws JSchException {
         final KeyPair result = KeyPair.load(jsch, getEncryptedPrivateKey(), getPublicKey());
-        result.decrypt(passphrase);
+        if (!result.decrypt(passphrase)) {
+            throw new IllegalStateException("Could not decrypt private key of "+this+"; probably incorrect passphrase?");
+        }
         return result;
     }
     

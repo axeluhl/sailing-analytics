@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -70,8 +71,10 @@ public class LandscapeManagementPanel extends VerticalPanel {
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
         landscapeManagementService = initAndRegisterLandscapeManagementService();
+        final HorizontalPanel awsCredentialsAndSshKeys = new HorizontalPanel();
+        add(awsCredentialsAndSshKeys);
         final CaptionPanel awsCredentialsPanel = new CaptionPanel(stringMessages.awsCredentials());
-        add(awsCredentialsPanel);
+        awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         final Grid awsCredentialsGrid = new Grid(2, 2);
         awsCredentialsPanel.add(awsCredentialsGrid);
         awsCredentialsGrid.setWidget(0, 0, new Label(stringMessages.awsAccessKey()));
@@ -101,6 +104,10 @@ public class LandscapeManagementPanel extends VerticalPanel {
         awsCredentialsGrid.setWidget(1, 0, new Label(stringMessages.awsSecret()));
         awsSecretPasswordTextBox = new PasswordTextBox();
         awsCredentialsGrid.setWidget(1, 1, awsSecretPasswordTextBox);
+        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService, landscapeManagementService, tableResources, errorReporter);
+        final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
+        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
+        sshKeysCaptionPanel.add(sshKeyManagementPanel);
         regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -164,6 +171,8 @@ public class LandscapeManagementPanel extends VerticalPanel {
         add(mongoEndpointsBusy);
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
             {
+                sshKeyManagementPanel.showKeysInRegion(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
+                            regionsTable.getSelectionModel().getSelectedObject());
                 mongoEndpointsTable.getDataProvider().getList().clear();
                 if (regionsTable.getSelectionModel().getSelectedObject() != null) {
                     mongoEndpointsBusy.setBusy(true);
@@ -185,16 +194,17 @@ public class LandscapeManagementPanel extends VerticalPanel {
                     mongoEndpointsTable.getDataProvider().getList().clear();
                 }
             });
-        // TODO region could be a drop-down maybe
-        // TODO upon region selection show MongoDB, RabbitMQ, AppServer and Central Reverse Proxy clusters, and upgradable AMIs in region
+        // TODO support SSH key management: show existing keys, allow user to paste an encrypted private key for storage in MongoDB; allow user to upload public key and choose for launch and login procedures
+        // TODO upon region selection show AppServer clusters, and upgradable AMIs in region
         // TODO try to identify archive servers
         // TODO support creating a new app server cluster
         // TODO support AMI upgrade
-        // TODO support archiving and dismantling of an application server cluster
         // TODO support archive server upgrade
         // TODO support upgrading all app server instances in a region
+        // TODO region could be a drop-down maybe, and it could remember its last selection
+        // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+        // TODO support archiving and dismantling of an application server cluster
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
-        // TODO support SSH key management: show existing keys, allow user to paste an encrypted private key for storage in MongoDB; allow user to upload public key and choose for launch and login procedures
     }
     
     private LandscapeManagementWriteServiceAsync initAndRegisterLandscapeManagementService() {
