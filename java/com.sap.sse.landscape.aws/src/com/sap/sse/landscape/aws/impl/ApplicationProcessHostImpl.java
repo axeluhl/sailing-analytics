@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -11,8 +10,6 @@ import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -60,7 +57,7 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     @Override
     public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
             byte[] privateKeyEncryptionPassphrase)
-            throws SftpException, JSchException, IOException, InterruptedException {
+            throws Exception {
         final Set<ProcessT> result = new HashSet<>();
         final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         if (optionalTimeout.isPresent()) {

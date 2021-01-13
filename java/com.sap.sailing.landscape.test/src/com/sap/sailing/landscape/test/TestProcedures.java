@@ -164,7 +164,7 @@ public class TestProcedures {
                     landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, (theHost, dir)->{
                         try {
                             return new SailingAnalyticsProcessImpl<String>(theHost, dir, optionalTimeout, privateKeyEncryptionPassphrase);
-                        } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                     }, optionalTimeout, privateKeyEncryptionPassphrase);

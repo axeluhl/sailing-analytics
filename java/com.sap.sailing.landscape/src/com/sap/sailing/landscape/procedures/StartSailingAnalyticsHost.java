@@ -1,10 +1,8 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
@@ -94,7 +92,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                         (host, serverDirectory)->{
                             try {
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), getPrivateKeyEncryptionPassphrase());
-                            } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });

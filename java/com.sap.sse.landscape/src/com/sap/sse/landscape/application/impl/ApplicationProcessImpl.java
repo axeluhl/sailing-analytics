@@ -19,8 +19,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
@@ -56,7 +54,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws NumberFormatException, JSchException, IOException, InterruptedException {
+    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
         this(readPortFromDirectory(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase), host, serverDirectory);
     }
     
@@ -67,7 +65,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
             byte[] privateKeyEncryptionPassphrase)
-            throws NumberFormatException, JSchException, IOException, InterruptedException {
+            throws Exception {
         return Integer.parseInt(
                 getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(),
                         optionalTimeout, privateKeyEncryptionPassphrase));
@@ -76,7 +74,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     @Override
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             byte[] privateKeyEncryptionPassphrase)
-            throws JSchException, IOException, SftpException, InterruptedException {
+            throws Exception {
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
         final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, privateKeyEncryptionPassphrase));
         final Release result;
@@ -99,7 +97,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    private String getVersionTxt(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, SftpException, InterruptedException {
+    private String getVersionTxt(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
@@ -111,7 +109,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
-            throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException {
+            throws Exception {
         return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
                 privateKeyEncryptionPassphrase));
     }
@@ -122,13 +120,13 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      */
     @Override
     public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
             Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
-            throws JSchException, IOException, InterruptedException {
+            throws Exception {
         final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
                                                 "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
@@ -140,7 +138,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * in the evaluated {@code env.sh} file.
      */
     @Override
-    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getEnvShValueFor(variable.name(), optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
@@ -163,12 +161,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, SftpException, InterruptedException {
+    public String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getFileContents(getEnvShPath(), optionalTimeout, privateKeyEncryptionPassphrase);
     }
 
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
-            throws JSchException, IOException, SftpException, InterruptedException {
+            throws Exception {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 

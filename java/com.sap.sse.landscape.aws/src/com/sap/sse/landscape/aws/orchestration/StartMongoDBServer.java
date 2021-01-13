@@ -3,8 +3,11 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.logging.Level;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -21,6 +24,7 @@ import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.orchestration.StartHost;
 
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
@@ -57,6 +61,8 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
     private MongoProcess mongoProcess;
     
     private final String replicaSetName;
+
+    private final  Optional<Duration> optionalTimeout;
     
     /**
      * In order to launch a standalone instance, call {@link #setReplicaSetName(String)} with {@code null} as a
@@ -220,6 +226,14 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
             }
             return new StartMongoDBServer<>(this);
         }
+        
+        /**
+         * Re-expose the method declared protected in a different package to the local procedure
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, ProcessT>,ShardingKey, MetricsT extends ApplicationProcessMetrics,
@@ -239,6 +253,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
         }
         addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIORITY, Integer.toString(builder.getReplicaSetPriority()));
         addUserData(MongoDBReplicaSetUserData.REPLICA_SET_VOTES, Integer.toString(builder.getReplicaSetVotes()));
+        this.optionalTimeout = builder.getOptionalTimeout();
     }
 
     /**
@@ -254,6 +269,12 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
         if (replicaSetName == null) {
             mongoProcess = new MongoProcessImpl(getHost());
         } else {
+            // the host may not yet be in state RUNNING; we'd like to wait for this:
+            boolean running = Util.wait(()->getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
+                    optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for host "+getHost().getInstanceId()+" to be in state RUNNING");
+            if (!running) {
+                throw new IllegalStateException("The host launched did not reach state RUNNING"+optionalTimeout.map(d->" within timeout "+d).orElse(""));
+            }
             final MongoReplicaSet replicaSet = getLandscape().getDatabaseConfigurationForReplicaSet(getHost().getRegion(), replicaSetName);
             final Host instance = Util.stream(replicaSet.getInstances()).filter(replica->replica.getHost().equals(getHost())).map(replica->replica.getHost()).findAny().get();
             mongoProcess = new MongoProcessInReplicaSetImpl(replicaSet, MongoProcess.DEFAULT_PORT, instance);

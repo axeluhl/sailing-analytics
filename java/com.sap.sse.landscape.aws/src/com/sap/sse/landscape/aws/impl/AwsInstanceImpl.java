@@ -1,14 +1,15 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
@@ -157,7 +158,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
         return createSshChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     
@@ -174,54 +175,52 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
         return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout, privateKeyEncryptionPassphrase));
 
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
-        final TimePoint start = TimePoint.now();
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
                 "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
                 " to instance with ID "+getInstanceId());
-        Channel channel = null;
-        while (channel == null && (!optionalTimeout.isPresent() || start.until(TimePoint.now()).compareTo(optionalTimeout.get()) < 0)) {
-            Session session = null;
-            try {
-                session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
-                session.setUserInfo(new YesUserInfo());
-                session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
-                channel = session.openChannel(channelType);
-            } catch (JSchException | IllegalStateException e) {
-                if (session != null) {
-                    session.disconnect();
-                }
-                logger.info(e.getMessage()
-                        + " while trying to connect. Probably timeout trying early SSH connection.");
-                Thread.sleep(5000); // wait a bit for the service to become available
-            }
-            if (channel == null) {
-                if (optionalTimeout.isPresent()) {
-                    logger.info("Retrying until "+start.plus(optionalTimeout.get()));
-                } else {
-                    logger.info("Retrying forever");
-                }
-            }
+        Channel result;
+        try {
+            result = Util.wait(()->{
+                    Session session = null;
+                    try {
+                        session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
+                        session.setUserInfo(new YesUserInfo());
+                        session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
+                        return session.openChannel(channelType);
+                    } catch (JSchException | IllegalStateException e) {
+                        if (session != null) {
+                            session.disconnect();
+                        }
+                        throw e;
+                    }
+                },
+                channel->channel != null,
+                /* retryOnException */ true, optionalTimeout,
+                Duration.ONE_SECOND.times(5), Level.INFO,
+                "Trying to connect to " + getInstanceId() + " with user " + sshUserName + " using SSH");
+        } catch (TimeoutException timeout) {
+            result = null;
         }
-        return channel;
+        return result;
     }
     
     @Override
     public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException, IOException, InterruptedException {
+            byte[] privateKeyEncryptionPassphrase) throws Exception {
         return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout,
                 privateKeyEncryptionPassphrase);
     }
 
     @Override
     public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
-            throws JSchException, IOException, InterruptedException {
+            throws Exception {
         return createSftpChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
     }
 

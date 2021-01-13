@@ -1,6 +1,5 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -8,8 +7,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -125,8 +122,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                         ap->{
                             try {
                                 return ap.getTelnetPortToOSGiConsole(getOptionalTimeout(), privateKeyEncryptionPassphrase);
-                            } catch (NumberFormatException | JSchException | IOException | SftpException
-                                    | InterruptedException e) {
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         }));
@@ -137,8 +133,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                         ap->{
                             try {
                                 return ap.getExpeditionUdpPort(getOptionalTimeout(), privateKeyEncryptionPassphrase);
-                            } catch (NumberFormatException | JSchException | IOException | InterruptedException
-                                    | SftpException e) {
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         }));
@@ -232,7 +227,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     }
     
     @Override
-    public void run() throws IOException, InterruptedException, JSchException, SftpException {
+    public void run() throws Exception {
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {

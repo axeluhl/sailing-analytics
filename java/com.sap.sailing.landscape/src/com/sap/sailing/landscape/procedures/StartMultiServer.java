@@ -1,12 +1,10 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
@@ -97,7 +95,7 @@ implements StartFromSailingAnalyticsImage {
                     new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, serverDirectory)->{
                         try {
                             return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), getPrivateKeyEncryptionPassphrase());
-                        } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                     });

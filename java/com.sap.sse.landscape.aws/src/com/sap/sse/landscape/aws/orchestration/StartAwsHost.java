@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.orchestration;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
@@ -382,7 +380,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     }
 
     protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
-            throws JSchException, IOException, InterruptedException {
+            throws Exception {
         final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, getPrivateKeyEncryptionPassphrase());
         final String sailingUserSsh = "/home/" + username + "/.ssh";
         final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";

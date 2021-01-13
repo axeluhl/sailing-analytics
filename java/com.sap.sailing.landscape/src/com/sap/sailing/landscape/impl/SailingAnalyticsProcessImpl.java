@@ -34,7 +34,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
      */
     public SailingAnalyticsProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
             byte[] privateKeyEncryptionPassphrase)
-            throws NumberFormatException, JSchException, IOException, InterruptedException {
+            throws Exception {
         super(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase);
     }
     

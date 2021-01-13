@@ -30,7 +30,6 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
@@ -87,7 +86,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     
     //@Ignore("Fill in key details for the key used to launch the central reverse proxy in the test landscape")
     @Test
-    public void readAndStoreSSHKey() throws JSchException, IOException, InterruptedException {
+    public void readAndStoreSSHKey() throws Exception {
         final String AXELS_KEY_NAME = "Axel";
         final String PATH_TO_YOUR_PRIVATE_KEY = "c:/Users/d043530/.ssh/id_rsa";
         landscape.deleteKeyPair(region, AXELS_KEY_NAME);
@@ -149,7 +148,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
      * Requires the key that was used for launching the central reverse proxy for the test landscape to be known in the {@link #landscape}.
      */
     @Test
-    public void testApacheProxyBasics() throws InterruptedException, JSchException, IOException, SftpException {
+    public void testApacheProxyBasics() throws Exception {
         final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
         final AwsInstance<String, SailingAnalyticsMetrics> proxyHost = proxy.getHosts().iterator().next();
@@ -315,21 +314,21 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
     
     @Test
-    public void testSshConnectWithCreatedKey() throws JSchException, InterruptedException, IOException {
+    public void testSshConnectWithCreatedKey() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         testSshConnectWithKey(keyName);
     }
 
     @Test
-    public void testSshConnectWithImportedKey() throws JSchException, InterruptedException, IOException {
+    public void testSshConnectWithImportedKey() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         final KeyPair keyPair = KeyPair.genKeyPair(new JSch(), KeyPair.RSA, 4096);
         landscape.importKeyPair(region, getPublicKeyBytes(keyPair), getDecryptedPrivateKeyBytes(keyPair, /* passphrase */ null), keyName);
         testSshConnectWithKey(keyName);
     }
 
-    private void testSshConnectWithKey(final String keyName) throws InterruptedException, JSchException, IOException {
+    private void testSshConnectWithKey(final String keyName) throws Exception {
         final AwsInstance<String, SailingAnalyticsMetrics> host = landscape.launchHost(getLatestSailingImage(),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"), /* tags */ Optional.empty());
         try {
