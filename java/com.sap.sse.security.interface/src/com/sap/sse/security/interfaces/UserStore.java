@@ -82,7 +82,9 @@ public interface UserStore extends BasicUserStore {
 
     /**
      * Replaces all existing contents by those provided by the <code>newUserStore</code>. This has no impact on the persistent
-     * representation of this store and is meant for use on a replica only; the replica's database state is undefined.
+     * representation of this store and is meant for use on a replica only; the replica's database state is undefined. For all
+     * {@link User} objects copied from {@code newUserStore} to this store, their {@link User#getUserGroupProvider()} field
+     * will be updated to point to this store.
      */
     void replaceContentsFrom(UserStore newUserStore);
     

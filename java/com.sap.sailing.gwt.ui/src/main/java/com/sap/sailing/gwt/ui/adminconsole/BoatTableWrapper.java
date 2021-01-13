@@ -67,7 +67,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 });
         this.sailingServiceWrite = sailingServiceWrite;
         ListHandler<BoatDTO> boatColumnListHandler = getColumnSortHandler();
-        
         // boats table
         TextColumn<BoatDTO> boatNameColumn = new TextColumn<BoatDTO>() {
             @Override
@@ -83,7 +82,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return comparator.compare(o1.getName(), o2.getName());
             }
         });
-
         TextColumn<BoatDTO> boatClassColumn = new TextColumn<BoatDTO>() {
             @Override
             public String getValue(BoatDTO competitor) {
@@ -98,7 +96,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return comparator.compare(o1.getBoatClass().getName(), o2.getBoatClass().getName());
             }
         });
-        
         Column<BoatDTO, SafeHtml> sailIdColumn = new Column<BoatDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
             public SafeHtml getValue(BoatDTO competitor) {
@@ -115,7 +112,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return comparator.compare(o1.getSailId(), o2.getSailId());
             }
         });
-
         Column<BoatDTO, SafeHtml> boatColorColumn = new ColorColumn<>(new ColorRetriever<BoatDTO>() {
             @Override
             public Color getColor(BoatDTO t) {
@@ -137,7 +133,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return o1.getColor().getAsHtml().compareTo(o2.getColor().getAsHtml());
             }
         });
-        
         TextColumn<BoatDTO> boatIdColumn = new TextColumn<BoatDTO>() {
             @Override
             public String getValue(BoatDTO boat) {
@@ -151,7 +146,6 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 return new NaturalComparator(false).compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
                 new ArrayList<BoatDTO>(), dataProvider, stringMessages) {
             @Override
@@ -179,7 +173,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
-                userService.getUserManagementWriteService(), SecuredDomainType.BOAT, boatDTO -> refresh(Collections.singleton(boatDTO)), stringMessages);
+                userService.getUserManagementWriteService(), SecuredDomainType.BOAT, boatDTO -> getFilterField().filter(), stringMessages);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<BoatDTO> configACL = EditACLDialog

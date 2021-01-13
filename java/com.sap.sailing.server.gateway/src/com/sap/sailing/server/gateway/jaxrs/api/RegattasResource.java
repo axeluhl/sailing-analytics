@@ -1251,7 +1251,12 @@ public class RegattasResource extends AbstractSailingServerResource {
      * 
      * @param regattaName
      *            the name of the regatta
-     * @return -1 if not enough polar data or no wind information is available
+     * @param timeasmillis
+     *            a hypothetical time point for the start of the race; this will be used to determine
+     *            the mark positions and wind field at the respective time, while carrying forward
+     *            the calculated estimated leg durations, adding the previous leg's duration to
+     *            obtain an estimated start time point for the next leg.
+     * @return 404 response status if not enough polar data or no wind information is available
      */
     @GET
     @Produces("application/json;charset=UTF-8")

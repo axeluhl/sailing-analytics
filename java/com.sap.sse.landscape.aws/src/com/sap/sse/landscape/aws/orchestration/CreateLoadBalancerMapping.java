@@ -10,10 +10,8 @@ import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -73,13 +71,12 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
  * @author Axel Uhl (D043530)
  */
 public abstract class CreateLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
     protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
-    private final ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
+    private final ProcessT process;
     private final String hostname;
     private TargetGroup<ShardingKey, MetricsT> masterTargetGroupCreated;
     private TargetGroup<ShardingKey, MetricsT> publicTargetGroupCreated;
@@ -88,38 +85,37 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
     /**
      * Default rules implemented by this builder:
      * <ul>
+     * <li>The {@link #setServerName(String) server name} property will be obtained from the {@link #setProcess(ApplicationProcess) process}'s
+     * {@code SERVER_NAME} environment setting if not provided explicitly.</li>
      * <li>The timeout for looking up the process's server name defaults to no timeout.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        BuilderT setProcess(ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process);
+    extends ProcedureWithTargetGroup.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+        BuilderT setProcess(ProcessT process);
         BuilderT setHostname(String hostname);
         BuilderT setTimeout(Duration timeout);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends ProcedureWithTargetGroup.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends ProcedureWithTargetGroup.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
+    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         private String hostname;
-        private ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process;
+        private ProcessT process;
         private Optional<Duration> optionalTimeout = Optional.empty();
 
         @Override
-        public BuilderT setProcess(
-                ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
+        public BuilderT setProcess(ProcessT process) {
             this.process = process;
             return self();
         }
@@ -130,11 +126,11 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
             return self();
         }
 
-        public String getHostname() {
+        protected String getHostname() {
             return hostname;
         }
 
-        public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
+        protected ProcessT getProcess() {
             return process;
         }
 
@@ -144,12 +140,12 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
             return self();
         }
 
-        public Optional<Duration> getOptionalTimeout() {
+        protected Optional<Duration> getOptionalTimeout() {
             return optionalTimeout;
         }
 
         @Override
-        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
             final String result;
             if (super.getServerName() != null) {
                 result = super.getServerName();
@@ -159,7 +155,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
             return result;
         }
 
-        protected void waitUntilLoadBalancerProvisioned(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer) throws InterruptedException {
+        protected void waitUntilLoadBalancerProvisioned(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer) throws InterruptedException {
             final TimePoint startingToPollForReady = TimePoint.now();
             while (landscape.getApplicationLoadBalancerStatus(loadBalancer).code() == LoadBalancerStateEnum.PROVISIONING
                     && (!getOptionalTimeout().isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(getOptionalTimeout().get()) <= 0)) {
@@ -169,15 +165,15 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
         super(builder);
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();
     }
     
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
-        return (AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>) super.getLandscape();
+    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+        return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
     }
 
     @Override
@@ -237,7 +233,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaP
         return rulesAdded;
     }
 
-    public ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getProcess() {
+    public ProcessT getProcess() {
         return process;
     }
 

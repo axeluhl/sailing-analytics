@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoggableDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +120,15 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             case R.id.event_header:
                 mCourseAreaContainer.close();
                 mPositionContainer.close();
-                mEventContainer.toggle();
+                final boolean expanded = mEventContainer.toggle();
+                final Fragment fragment = requireFragmentManager().findFragmentById(R.id.event_fragment);
+                if (fragment instanceof EventListFragment) {
+                    if (expanded) {
+                        ((EventListFragment) fragment).onExpanded();
+                    } else {
+                        ((EventListFragment) fragment).onCollapsed();
+                    }
+                }
                 break;
 
             case R.id.area_header:
@@ -174,7 +184,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             mAppUtils = AppUtils.with(getActivity());
         }
 
-        public void toggle() {
+        public boolean toggle() {
             final int[] pos = new int[2];
 
             if (mFrame != null && mFrame.getLayoutParams() != null) {
@@ -194,10 +204,12 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                     mFrame.getLayoutParams().height = ScreenHelper.on(getActivity()).getScreenHeight() - pos[1];
                     mFrame.requestLayout();
                     setVisibility(mText, View.GONE);
+                    return true;
                 } else {
                     close();
                 }
             }
+            return false;
         }
 
         public void close() {
