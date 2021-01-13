@@ -5804,27 +5804,29 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     public String openRegattaRegistrationQrCode(String url) {
-        String result = "";
+        String result;
         try {
-            createEncodedQRCodeFromUrl(url, 600);
+            result = createEncodedQRCodeFromUrl(url, 600);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error while generating QR code for open regatta", e);
+            result = null;
         }
         return result;
     }
     
     public String createRaceBoardLinkQrCode(String url) {
-        String result = "";
+        String result;
         try {
             result = createEncodedQRCodeFromUrl(url, 400);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error while generating QR code for RaceBoard sharing", e);
+            result = null;
         }
         return result;
     }
     
     public String createEncodedQRCodeFromUrl(String url, int size) throws Exception {
-        String result = "";
+        final String result;
         DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, size, "H"));
         byte[] targetArray = new byte[imageIs.available()];
         imageIs.readFully(targetArray);

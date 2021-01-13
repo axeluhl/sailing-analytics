@@ -245,7 +245,7 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             public void cancel() { 
             }
         });
-        competitorsFilterSetsDialog .show();
+        competitorsFilterSetsDialog.show();
     }
 
     private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {

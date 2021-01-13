@@ -861,7 +861,7 @@ public class RaceBoardPanel
             activeCompetitorsFilterSetName = initialSettings.getActiveCompetitorsFilterSetName();
         }
         final Set<String> selectedCompetitorIds = new HashSet<>();
-        Duration newInitialDurationAfterRaceStartInReplay;
+        final Duration newInitialDurationAfterRaceStartInReplay;
         if (timer != null && racetimePanel != null) {
             final Date currentTimerDate = timer.getTime();
             final Date startOfRace = racetimePanel.getLastRaceTimesInfo().startOfRace;
@@ -870,7 +870,7 @@ public class RaceBoardPanel
         } else {
             newInitialDurationAfterRaceStartInReplay = initialSettings.getInitialDurationAfterRaceStartInReplay();
         }
-        for (CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
+        for (final CompetitorDTO competitorDTO : getCompetitorSelectionProvider().getSelectedCompetitors()) {
             selectedCompetitorIds.add(competitorDTO.getIdAsString());
         }
         final Pair<Date, Date> timeZoom = timeRangeWithZoomModel.getTimeZoom();
