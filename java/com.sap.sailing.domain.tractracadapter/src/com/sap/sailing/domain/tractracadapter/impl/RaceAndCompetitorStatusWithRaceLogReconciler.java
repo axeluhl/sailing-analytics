@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -58,6 +59,7 @@ import com.tractrac.model.lib.api.event.RaceStatusType;
  *
  */
 public class RaceAndCompetitorStatusWithRaceLogReconciler {
+    private static final Logger logger = Logger.getLogger(RaceAndCompetitorStatusWithRaceLogReconciler.class.getName());
     private final DomainFactory domainFactory;
     private final RaceLogResolver raceLogResolver;
     private final LogEventAuthorImpl raceLogEventAuthor;
@@ -331,6 +333,8 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();
+        logger.info("Received a status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+": officialRank: " + officialRank
+                + ", officialFinishingTime: " + officialFinishingTime + ", statusTime: " + timePointForStatusEvent);
         if (timePointForStatusEvent != 0) {
             // there is an official result for the competitor on TracTrac's side
             // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
@@ -363,7 +367,16 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
                         raceLogEventAuthor,
                         UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
+                logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
+                        + " for competitor " + raceCompetitor + ": " + resultForRaceLog);
+            } else {
+                logger.info("Did not produce a new competitor result for competitor " + raceCompetitor + " in race "
+                        + trackedRace.getRaceIdentifier() + " because existing result "
+                        + resultFromRaceLogAndItsCreationTimePoint + " was not older than status time "
+                        + officialResultTime + " or was an equal result");
             }
+        } else {
+            logger.info("Ignoring status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+" because the status time was 0");
         }
     }
 
