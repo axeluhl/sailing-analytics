@@ -3,7 +3,10 @@ package com.sap.sailing.domain.orc;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -75,7 +78,14 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
                 try {
                     Iterable<CertificateHandle> certificateHandles = db.search(countryWithMostValidCertificates.getIssuingCountry(),
                             countryWithMostValidCertificates.getVPPYear(), null, null, null, null, /* includeInvalid */ false);
-                    Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
+                    final Set<CertificateHandle> firstTen = new HashSet<>();
+                    int i=0;
+                    final Iterator<CertificateHandle> certificateHandlesIterator = certificateHandles.iterator();
+                    while (i<10 && certificateHandlesIterator.hasNext()) {
+                        firstTen.add(certificateHandlesIterator.next());
+                        i++;
+                    }
+                    Iterable<ORCCertificate> orcCertificates = db.getCertificates(firstTen);
                     orcCertificates.forEach(availableCerts::add);
                     if (orcCertificates.iterator().hasNext()) {
                         certificateExists = true;
