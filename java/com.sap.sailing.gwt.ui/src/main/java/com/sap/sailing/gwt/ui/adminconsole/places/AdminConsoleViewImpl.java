@@ -113,9 +113,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
+import com.sap.sse.landscape.common.SecuredLandscapeTypes;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.LandscapeActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -484,7 +484,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<LandscapeManagementPanel>(landscapeManagementPanelSupplier),
                 stringMessages.landscape(), new LandscapeManagementPlace((String) null /* no place token */),
-                SecuredSecurityTypes.LANDSCAPE.getPermission(LandscapeActions.MANAGE));
+                SecuredLandscapeTypes.LANDSCAPE.getPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(stringMessages.courseCreation(), COURSE_CREATION);

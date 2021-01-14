@@ -22,6 +22,8 @@ Require-Bundle: com.sap.sse.common,
  com.sap.sse.landscape,
  org.json.simple,
  org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
- org.apache.httpcomponents.httpclient;bundle-version="4.5.5"
+ org.apache.httpcomponents.httpclient;bundle-version="4.5.5",
+ com.sap.sse.security.common,
+ com.sap.sse.landscape.common
 Import-Package: com.sap.sse.concurrent,
  com.sap.sse.util

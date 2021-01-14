@@ -18,7 +18,8 @@ Require-Bundle: com.sap.sse.gwt,
  com.sap.sailing.landscape,
  com.sap.sse.landscape,
  com.sap.sse.landscape.aws,
- com.amazon.aws.aws-java-api
+ com.amazon.aws.aws-java-api,
+ com.sap.sse.landscape.common
 Export-Package: com.sap.sailing.landscape.ui.client,
  com.sap.sailing.landscape.ui.server,
  com.sap.sailing.landscape.ui.shared

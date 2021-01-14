@@ -9,6 +9,11 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.common.SecuredLandscapeTypes;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * Region ID and key name together form a unique key for AWS key pairs. The private key is always stored in an encrypted form,
@@ -18,7 +23,7 @@ import com.sap.sse.landscape.Host;
  * @author Axel Uhl (D043530)
  *
  */
-public class SSHKeyPair extends NamedImpl implements Named {
+public class SSHKeyPair extends NamedImpl implements Named, WithQualifiedObjectIdentifier {
     private static final long serialVersionUID = 2877813132246472243L;
     private final String regionId;
     private final String creatorName;
@@ -90,5 +95,15 @@ public class SSHKeyPair extends NamedImpl implements Named {
 
     public byte[] getEncryptedPrivateKey() {
         return encryptedPrivateKey;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getRegionId(), getName()));
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredLandscapeTypes.SSH_KEY;
     }
 }

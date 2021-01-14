@@ -1,4 +1,4 @@
-package com.sap.sailing.landscape.common;
+package com.sap.sse.landscape.common;
 
 import java.util.Collections;
 import java.util.HashSet;

@@ -79,6 +79,7 @@
       <modules>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+        <module>com.sap.sse.landscape.common</module>
 	<module>com.sap.sse.landscape</module>
         <module>com.sap.sse.landscape.aws</module>
         <module>com.sap.sse.landscape.aws.test</module>
