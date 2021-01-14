@@ -1,11 +1,15 @@
 package com.sap.sailing.domain.orc;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -13,9 +17,8 @@ import org.junit.runners.model.Statement;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle;
+import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CountryOverview;
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
-import com.sap.sse.common.CountryCode;
-import com.sap.sse.common.CountryCodeFactory;
 
 /***
  * A IgnoreInvalidOrcCerticatesRule is an implementation of TestRule. This class execution depends on
@@ -32,8 +35,9 @@ import com.sap.sse.common.CountryCodeFactory;
  * @author Usman Ali
  *
  */
+
 public class FailIfNoValidOrcCertificateRule implements TestRule {
-    private final static Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
+    private static final Logger logger = Logger.getLogger(FailIfNoValidOrcCertificateRule.class.getName());
     private ORCPublicCertificateDatabase db = new ORCPublicCertificateDatabaseImpl();
     
     private List<ORCCertificate> availableCerts;
@@ -56,7 +60,7 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
             this.description = description;
             availableCerts = new ArrayList<>();
         }
-
+        
         /***
          * This method executes for every test case having {@link TestRule} annotation of
          * {@link FailIfNoValidOrcCertificateRule} class. Assume statement at the end of this method evaluates whether
@@ -67,20 +71,28 @@ public class FailIfNoValidOrcCertificateRule implements TestRule {
             boolean certificateExists = true;
             FailIfNoValidOrcCertificates annotation = description.getAnnotation(FailIfNoValidOrcCertificates.class);
             if (annotation != null) {
-                int year = LocalDate.now().getYear();
+                final CountryOverview countryWithMostValidCertificates = StreamSupport
+                        .stream(db.getCountriesWithValidCertificates().spliterator(), /* parallel */ false)
+                        .max((c1, c2) -> c1.getCertCount() - c2.getCertCount()).get();
                 certificateExists = false;
-                for (CountryCode cc : CountryCodeFactory.INSTANCE.getAll()) {
-                    try {
-                        Iterable<CertificateHandle> certificateHandles = db.search(cc, year, null, null, null, null, /* includeInvalid */ false);
-                        Iterable<ORCCertificate> orcCertificates = db.getCertificates(certificateHandles);
-                        orcCertificates.forEach(availableCerts::add);
-                        if (orcCertificates.iterator().hasNext()) {
-                            certificateExists = true;
-                            break; // Note: this stops after the first valid certificates for a country have been read!
-                        }
-                    } catch (Exception ex) {
-                        // Exceptions are ignored because we are searching for any country's ORC certificate availability.
+                try {
+                    Iterable<CertificateHandle> certificateHandles = db.search(countryWithMostValidCertificates.getIssuingCountry(),
+                            countryWithMostValidCertificates.getVPPYear(), null, null, null, null, /* includeInvalid */ false);
+                    final Set<CertificateHandle> firstTen = new HashSet<>();
+                    int i=0;
+                    final Iterator<CertificateHandle> certificateHandlesIterator = certificateHandles.iterator();
+                    while (i<10 && certificateHandlesIterator.hasNext()) {
+                        firstTen.add(certificateHandlesIterator.next());
+                        i++;
                     }
+                    Iterable<ORCCertificate> orcCertificates = db.getCertificates(firstTen);
+                    orcCertificates.forEach(availableCerts::add);
+                    if (orcCertificates.iterator().hasNext()) {
+                        certificateExists = true;
+                    }
+                } catch (Exception ex) {
+                    logger.log(Level.WARNING, "Problem trying to fetch certificates for country "+countryWithMostValidCertificates.getIssuingCountry()+
+                            " and year "+countryWithMostValidCertificates.getVPPYear());
                 }
             }
             if (certificateExists) {
