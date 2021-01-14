@@ -152,7 +152,6 @@ public class TestORCPublicCertificateDatabase {
 
     @FailIfNoValidOrcCertificates
     @Test
-    @Ignore("Until the blacklisting of eu-west-1 by the ORC database server has been resolved... 2021-01-14")
     public void testGetCertificate() throws Exception {        
         Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
