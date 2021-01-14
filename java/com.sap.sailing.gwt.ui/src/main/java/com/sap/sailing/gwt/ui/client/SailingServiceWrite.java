@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -207,8 +208,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
 
-    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO)
-            throws DoesNotHaveRegattaLogException, NotFoundException;
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, String raceColumnName, String fleetName,
+            MarkDTO markDTO) throws DoesNotHaveRegattaLogException, MarkAlreadyUsedInRaceException;
 
     void fillRaceLogsFromPairingListTemplate(final String leaderboardName, final int flightMultiplier,
             final List<String> selectedFlightNames, final PairingListDTO pairingListDTO)
@@ -484,7 +485,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws UnauthorizedException, DoesNotHaveRegattaLogException;
 
     void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration)
-            throws UnauthorizedException;
+            throws UnauthorizedException, IllegalStateException;
 
     BoatDTO addOrUpdateBoat(BoatDTO boat) throws UnauthorizedException, Exception;
 

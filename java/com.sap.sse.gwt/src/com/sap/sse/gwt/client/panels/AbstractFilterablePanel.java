@@ -319,18 +319,4 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public ListDataProvider<T> getAllListDataProvider() {
         return all;
     }
-
-    /**
-     * This method can be used to set the CellTable, when the {@link CellTable} on which this Panel should work is
-     * created after this Panel. When the table isn't set correctly the order of elements, could be wrong after
-     * filtering the data.
-     * 
-     * @param table
-     *            {@link AbstractCellTable} on which this panel works.
-     */
-    /*
-    public void setTable(AbstractCellTable<T> table) {
-        display = table;
-    }
-    */
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.coursetemplate.impl;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkProperties;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -10,10 +11,10 @@ public class FreestyleMarkConfigurationImpl<P> extends MarkConfigurationImpl<P> 
     private static final long serialVersionUID = 8167307943855869321L;
 
     private final MarkProperties optionalMarkProperties;
-    private final CommonMarkProperties freestyleProperties;
+    private final FreestyleMarkProperties freestyleProperties;
 
     public FreestyleMarkConfigurationImpl(MarkTemplate optionalMarkTemplate, MarkProperties optionalMarkProperties,
-            CommonMarkProperties freestyleProperties, P annotation) {
+            FreestyleMarkProperties freestyleProperties, P annotation) {
         super(optionalMarkTemplate, annotation);
         this.optionalMarkProperties = optionalMarkProperties;
         this.freestyleProperties = freestyleProperties;
@@ -35,7 +36,7 @@ public class FreestyleMarkConfigurationImpl<P> extends MarkConfigurationImpl<P> 
     }
 
     @Override
-    public CommonMarkProperties getFreestyleProperties() {
+    public FreestyleMarkProperties getFreestyleProperties() {
         return freestyleProperties;
     }
 

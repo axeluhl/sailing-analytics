@@ -170,9 +170,10 @@ import com.sap.sse.gwt.shared.DebugConstants;
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
     /* Line colors */
-    static final String ADVANTAGE_LINE_COLOR = "#ff9900"; // orange
-    static final String START_LINE_COLOR = "#ffffff";
-    static final String FINISH_LINE_COLOR = "#000000";
+    static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d"); // selected by Larry Rosenfeld...
+    static final Color ADVANTAGE_LINE_COLOR = new RGBColor("#ff9900"); // orange
+    static final Color START_LINE_COLOR = Color.WHITE;
+    static final Color FINISH_LINE_COLOR = Color.BLACK;
     static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     /* Line opacities and stroke weights */
     static final double LOWLIGHTED_TAIL_OPACITY = 0.3;
@@ -772,7 +773,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
-                    Image sapLogo = createSAPLogo();
+                    final Image sapLogo = createSAPLogo();
                     if (ClientConfiguration.getInstance().isBrandingActive()) {
                         rootPanel.add(sapLogo);
                     }
@@ -799,7 +800,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 showLayoutsAfterAnimationFinishes();
                             }
                         }
-
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
                                 && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
@@ -816,7 +816,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 }
                                 zoomingAnimationsInProgress--;
                             }
-
                         }.schedule(500);
                     }
                 });
@@ -1826,7 +1825,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             PolylineOptions options = PolylineOptions.newInstance();
                             options.setClickable(true);
                             options.setGeodesic(true);
-                            options.setStrokeColor(ADVANTAGE_LINE_COLOR);
+                            options.setStrokeColor(ADVANTAGE_LINE_COLOR.getAsHtml());
                             options.setStrokeWeight(1);
                             options.setStrokeOpacity(0.5);
                             
@@ -1968,7 +1967,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) &&
                             (!startLineEqualsFinishLine(courseDTO) || showFinishLineBasedOnCurrentLeg));
             startLine = showOrRemoveOrUpdateLine(startLine, reallyShowStartLine, startLineLeftPosition,
-                    startLineRightPosition, startLineInfoProvider, START_LINE_COLOR, STANDARD_LINE_STROKEWEIGHT,
+                    startLineRightPosition, startLineInfoProvider, START_LINE_COLOR.getAsHtml(), STANDARD_LINE_STROKEWEIGHT,
                     STANDARD_LINE_OPACITY);
             // draw the finish line
             final Position finishLineLeftPosition = numberOfFinishWaypointMarks == 0 ? null : courseDTO.getFinishMarkPositions().get(0);
@@ -1983,7 +1982,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
             }
             finishLine = showOrRemoveOrUpdateLine(finishLine, reallyShowFinishLine, finishLineLeftPosition,
-                    finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR, STANDARD_LINE_STROKEWEIGHT,
+                    finishLineRightPosition, finishLineInfoProvider, FINISH_LINE_COLOR.getAsHtml(), STANDARD_LINE_STROKEWEIGHT,
                     STANDARD_LINE_STROKEWEIGHT);
             // the control point pairs for which we already decided whether or not
             // to show a course middle line for; values tell whether to show the line and for which zero-based
@@ -1995,8 +1994,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boolean showCourseMiddleLine = keysAlreadyHandled.containsKey(key) && keysAlreadyHandled.get(key).getA() ||
                         settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) ||
                         (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)
-                         && courseDTO.currentLegNumber > 0
-                         && courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint);
+                        // show the line for the current leg or for the first leg if we are still before the start
+                         && (courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
+                             courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0);
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
@@ -2070,7 +2070,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         };
         return showOrRemoveOrUpdateLine(lineToShowOrRemoveOrUpdate, showLine, position1DTO, position2DTO,
-                lineInfoProvider, "#2268a0", STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
+                lineInfoProvider, COURSE_MIDDLE_LINE_COLOR.getAsHtml(), STANDARD_LINE_STROKEWEIGHT, STANDARD_LINE_OPACITY);
     }
 
     /**
@@ -3231,7 +3231,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         sapLogo.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("https://www.sap.com/sponsorships", "_blank", null);
+                Window.open(stringMessages.sapAnalyticsURL(), "_blank", null);
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");

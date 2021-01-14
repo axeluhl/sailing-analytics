@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia.MutualExclusionPlayHandler;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoPlayer;
 
@@ -24,14 +25,20 @@ public class MainMediaVideo extends Composite {
     @UiField SpanElement videoTitle;
     @UiField Element videoTitleWrapper;
     @UiField SimplePanel videoHolderUi;
-    
-    final VideoPlayer vJs = new VideoPlayer();
+
+    final VideoPlayer vJs;
 
     public MainMediaVideo(SailingVideoDTO video) {
         this(video, false);
     }
-    
+
+    // TODO cleanup unused constructors (GH 16.10.2020) 
     public MainMediaVideo(SailingVideoDTO video, boolean showInfo) {
+        this(video,null);
+    }
+
+    public MainMediaVideo(SailingVideoDTO video, MutualExclusionPlayHandler exclusionPlayHandler) {
+        vJs = exclusionPlayHandler == null ? new VideoPlayer() : new VideoPlayer(exclusionPlayHandler);
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         

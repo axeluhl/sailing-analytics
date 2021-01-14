@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.orc;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Date;
@@ -8,6 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -128,6 +135,36 @@ public interface ORCPublicCertificateDatabase {
             return familyById.get(familyId);
         }
     }
+    
+    /**
+     * Data about valid certificates in a country, as obtained, e.g., from http://data.orc.org/public/WPub.dll/RMS. Such a
+     * record, in its original XML representation, looks like this:
+     * 
+     * <pre>
+      &lt;CountryId&gt;AUS&lt;/CountryId&gt;
+      &lt;Family&gt;&lt;/Family&gt;
+      &lt;CertType&gt;3&lt;/CertType&gt;
+      &lt;VPPYear&gt;2020&lt;/VPPYear&gt;
+      &lt;CertCount&gt;161&lt;/CertCount&gt;
+      &lt;CountryName&gt;Australia&lt;/CountryName&gt;
+      &lt;LastUpdate&gt;2021-01-08T08:12:57.000Z&lt;/LastUpdate&gt;
+      &lt;CertName&gt;Club&lt;/CertName&gt;
+      &lt;RMSCode&gt;CLUB&lt;/RMSCode&gt;
+     * </pre>
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public interface CountryOverview {
+        CountryCode getIssuingCountry();
+        CertificateFamily getFamily();
+        Integer getCertType();
+        Integer getVPPYear();
+        int getCertCount();
+        TimePoint getLastUpdate();
+        String getCertName();
+        String getRMSCode();
+    }
+    
     /**
      * Equality and hash code of such handles is based on the {@link #getReferenceNumber() reference number} only.
      * 
@@ -229,4 +266,7 @@ public interface ORCPublicCertificateDatabase {
     Future<Set<ORCCertificate>> search(String yachtName, String sailNumber, BoatClass boatClass);
     
     Date parseDate(final String dateString) throws DateTimeParseException;
+
+    Iterable<CountryOverview> getCountriesWithValidCertificates()
+            throws SAXException, IOException, ParserConfigurationException, DOMException, ParseException;
 }

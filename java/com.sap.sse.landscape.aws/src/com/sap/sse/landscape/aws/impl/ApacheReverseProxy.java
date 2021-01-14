@@ -1,30 +1,34 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.NamedImpl;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.jcraft.jsch.JSchException;
+import com.sap.sse.common.Duration;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
-import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.ReverseProxy;
-import com.sap.sse.landscape.aws.TargetGroup;
-
-import software.amazon.awssdk.services.ec2.model.InstanceType;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 /**
  * An Apache2-based reverse proxy implementation (httpd) that makes specific assumptions about the availability of an
  * {@link AmazonMachineImage} that can be used to launch and configure such a reverse proxy instance on one or more
  * instances running in one or more {@link AwsAvailabilityZone availability zones}.<p>
+ * 
+ * For each "scope" that has a redirect rule in this reverse proxy, a separate file is maintained under
+ * {@code /etc/httpd/conf.d} that is named after the scope, with the usual {@code .conf} suffix such that
+ * a {@code systemctl reload httpd} will automatically pick those up.<p>
  * 
  * TODO how do we remember the hosts/instances/nodes/processes that together form this {@link ApacheReverseProxy}? DB Persistence? Tags?
  * 
@@ -32,109 +36,165 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  *
  */
 public class ApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends NamedImpl implements ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private static final long serialVersionUID = 8019146973512856147L;
-    private final AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
-    private final AwsRegion region;
-    private final String targetGroupArn;
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
+implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
+    private static final Logger logger = Logger.getLogger(ApacheReverseProxy.class.getName());
     
-    public ApacheReverseProxy(String name, AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, AwsRegion region, Map<AwsAvailabilityZone, Integer> numberOfInstancesPerAz) {
-        super(name);
-        this.landscape = landscape;
-        this.region = region;
-        final TargetGroup<ShardingKey, MetricsT> targetGroup = landscape.createTargetGroup(region, getTargetGroupName(), /* port */ 80,
-                getHealthCheckUrl(), /* health check port */ 80);
-        targetGroupArn = targetGroup.getTargetGroupArn();
-        for (final Entry<AwsAvailabilityZone, Integer> e : numberOfInstancesPerAz.entrySet()) {
-            targetGroup.addTargets(addHosts(getDefaultInstanceType(), e.getKey(), e.getValue()));
-        }
+    /**
+     * five minutes of timeout for most network-related actions
+     */
+    private static final Optional<Duration> TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5)); 
+    
+    /**
+     * The configuration directory where files with extension {@link #CONFIG_FILE_EXTENSION} can be placed which
+     * a {@code reload} will pick up and evaluate.
+     */
+    private static final String CONFIG_PATH = "/etc/httpd/conf.d";
+    
+    /**
+     * Extension for files in the {@link #CONFIG_PATH} folder that will automatically be picked up when reloading
+     * the proxy's configuration.
+     */
+    private static final String CONFIG_FILE_EXTENSION = ".conf";
+    
+    private static final String HOME_REDIRECT_MACRO = "Home-SSL";
+    private static final String PLAIN_REDIRECT_MACRO = "Plain-SSL";
+    private static final String EVENT_REDIRECT_MACRO = "Event-SSL";
+    private static final String SERIES_REDIRECT_MACRO = "Series-SSL"; 
+    private static final String STATUS = "Status";
+    private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
+    
+    private final AwsInstance<ShardingKey, MetricsT> host;
+    
+    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+        super(landscape);
+        this.host = host;
+    }
+    
+    private String getConfigFileNameForScope(Scope<ShardingKey> scope) {
+        return scope.toString()+CONFIG_FILE_EXTENSION;
     }
 
-    private String getHealthCheckUrl() {
-        return "/internal-server-status";
+    private String getConfigFileNameForHostname(String hostname) {
+        return hostname+CONFIG_FILE_EXTENSION;
     }
 
-    private String getTargetGroupName() {
-        return "ReverseProxy-"+getName();
+    private void setRedirect(String configFileNameForHostname, String macroName, String hostname, String... macroArguments) throws InterruptedException, JSchException, IOException {
+        final String command = "echo \"Use "+macroName+" "+hostname+" "+String.join(" ", macroArguments)+"\" >"+getConfigFilePath(configFileNameForHostname)+
+                "; service httpd reload";
+        logger.info("Standard output from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: "+
+                runCommandAndReturnStdoutAndStderr(command, "Standard error from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: ", Level.INFO));
+    }
+    
+    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException {
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT);
+        final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command, stderrLogPrefix, stderrLogLevel);
+        return stdout;
+    }
+    
+    private String getConfigFilePath(String configFileNameForHostname) {
+        return CONFIG_PATH+"/"+configFileNameForHostname;
     }
 
     @Override
-    public void setScopeRedirect(Scope<ShardingKey> scope,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
+    public void setScopeRedirect(Scope<ShardingKey> scope,ProcessT applicationReplicaSet) {
         // TODO Implement ApacheReverseProxy.setScopeRedirect(...)
-        
     }
 
     @Override
-    public void setPlainRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
-        // TODO Implement ReverseProxy.setPlainRedirect(...)
-        
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+        final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
+        final int port = applicationProcess.getPort();
+        setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, host, ""+port);
     }
 
     @Override
-    public void setHomeRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet) {
-        // TODO Implement ReverseProxy.setHomeRedirect(...)
-        
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+        final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
+        final int port = applicationProcess.getPort();
+        setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, host, ""+port);
     }
 
     @Override
-    public void setEventRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet, UUID eventId) {
-        // TODO Implement ReverseProxy.setEventRedirect(...)
-        
+    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException {
+        final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
+        final int port = applicationProcess.getPort();
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, eventId.toString(), host, ""+port);
     }
 
     @Override
-    public void setEventSeriesRedirect(String hostname,
-            ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> applicationReplicaSet,
-            UUID leaderboardGroupId) {
-        // TODO Implement ReverseProxy.setEventSeriesRedirect(...)
-        
+    public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
+            UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
+        final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
+        final int port = applicationProcess.getPort();
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, leaderboardGroupId.toString(), host, ""+port);
     }
 
     @Override
-    public void removeRedirect(String hostname) {
-        // TODO Implement ReverseProxy.removeRedirect(...)
-        
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
+        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), INTERNAL_SERVER_STATUS);
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
-        // TODO Implement ReverseProxy.getHosts(...)
-        return null;
-    }
-
-    @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> addHosts(InstanceType instanceType, AwsAvailabilityZone az, int numberOfHostsToAdd) {
-        // TODO Implement ReverseProxy.addHost(...)
-        return null;
+    public void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException {
+        final String configFilePath = getConfigFilePath(getConfigFileNameForScope(scope));
+        removeRedirect(configFilePath, scope.toString());
     }
     
     @Override
-    public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
-        assert Util.contains(getHosts(), host);
-        if (Util.size(getHosts()) == 1) {
-            throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
-        }
-        landscape.terminate(host);
+    public void removeRedirect(String hostname) throws IOException, InterruptedException, JSchException {
+        final String configFilePath = getConfigFilePath(getConfigFileNameForHostname(hostname));
+        removeRedirect(configFilePath, hostname);
     }
     
+    private void removeRedirect(String configFilePath, String redirectNameForLogOutput) throws IOException, InterruptedException, JSchException {
+        final String command = "rm "+configFilePath+"; service httpd reload";
+        logger.info("Standard output from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: "+
+                runCommandAndReturnStdoutAndStderr(command, "Standard error from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: ", Level.INFO));
+    }
+
     @Override
     public void terminate() {
-        Set<AwsInstance<ShardingKey, MetricsT>> hosts = new HashSet<>();
-        Util.addAll(getHosts(), hosts);
-        for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
-            landscape.terminate(host);
-        }
-        landscape.deleteTargetGroup(getTargetGroup());
+        getLandscape().terminate(host);
     }
 
     @Override
-    public TargetGroup<ShardingKey, MetricsT> getTargetGroup() {
-        return landscape.getTargetGroup(region, getTargetGroupName(), targetGroupArn);
+    public int getPort() {
+        return 443; // TODO currently, we offload SSL only at the reverse proxies; but we should change this to SSL offloading at the load balancer, and then this would have to become 80 (HTTP)
+    }
+
+    /**
+     * Making things more specific: as we're in the AWS universe here, the {@link Host} returned more specifically is an
+     * {@link AwsInstance}.
+     */
+    @Override
+    public AwsInstance<ShardingKey, MetricsT> getHost() {
+        return host;
+    }
+
+    @Override
+    public RotatingFileBasedLog getLog() {
+        // TODO Implement Process<LogT,MetricsT>.getLog(...)
+        return null;
+    }
+
+    @Override
+    public MetricsT getMetrics() {
+        // TODO Implement Process<LogT,MetricsT>.getMetrics(...)
+        return null;
+    }
+
+    @Override
+    public boolean isReady(Optional<Duration> optionalTimeout) {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL(getPort() == 443 ? "https" : "http",
+                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
     }
 }

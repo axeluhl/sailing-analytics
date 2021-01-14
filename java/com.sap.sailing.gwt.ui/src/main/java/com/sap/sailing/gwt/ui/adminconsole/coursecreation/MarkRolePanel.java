@@ -244,7 +244,7 @@ public class MarkRolePanel extends FlowPanel {
                 markRole -> markRole.getAccessControlList(), stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markRole -> configACL.openACLDialog(markRole));
+                markRole -> configACL.openDialog(markRole));
         markRolesTable.addColumn(idColumn, stringMessages.id());
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
     }
