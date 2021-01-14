@@ -1,21 +1,22 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import com.chargebee.ApiResponse;
-import com.sap.sse.security.subscription.AbstractSubscriptionApiRequest;
+import com.sap.sse.security.subscription.SubscriptionApiRequest;
 
 /**
  * Base implementation for Chargebee's API requests
  */
-public abstract class ChargebeeApiRequest extends AbstractSubscriptionApiRequest {
-    protected boolean needResume;
+public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
+    /**
+     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
+     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
+     * ~400ms, and a next request should be made after 400ms from previous request.
+     */
+    public static final long TIME_FOR_API_REQUEST_MS = 400;
 
-    @Override
-    public boolean needResume() {
-        return needResume;
-    }
+    public static final long LIMIT_REACHED_RESUME_DELAY_MS = 65000;
 
     protected boolean isRateLimitReached(ApiResponse response) {
-        needResume = response.httpCode() == 429;
-        return needResume;
+        return response.httpCode() == 429;
     }
 }

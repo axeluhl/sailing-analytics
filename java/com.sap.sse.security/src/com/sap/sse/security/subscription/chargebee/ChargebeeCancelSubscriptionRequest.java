@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import com.chargebee.Result;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.CancelRequest;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
  * Cancel Chargebee subscription request
@@ -19,12 +20,15 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
         void onSubscriptionCancelResult(Subscription subscription);
     }
 
-    private String subscriptionId;
-    private OnResultListener listener;
+    private final SubscriptionApiRequestProcessor requestProcessor;
+    private final String subscriptionId;
+    private final OnResultListener listener;
 
-    public ChargebeeCancelSubscriptionRequest(String subscriptionId, OnResultListener listener) {
+    public ChargebeeCancelSubscriptionRequest(String subscriptionId, OnResultListener listener,
+            SubscriptionApiRequestProcessor requestProcessor) {
         this.subscriptionId = subscriptionId;
         this.listener = listener;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -35,6 +39,8 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
             Result result = request.request();
             if (!isRateLimitReached(result)) {
                 onDone(result.subscription());
+            } else {
+                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);

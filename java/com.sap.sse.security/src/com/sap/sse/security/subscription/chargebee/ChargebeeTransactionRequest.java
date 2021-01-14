@@ -8,25 +8,29 @@ import com.chargebee.filters.enums.SortOrder;
 import com.chargebee.models.Transaction;
 import com.chargebee.models.Transaction.TransactionListRequest;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
  * Fetch Chargebee subscription transaction request
  */
 public class ChargebeeTransactionRequest extends ChargebeeApiRequest {
     private static final Logger logger = Logger.getLogger(ChargebeeTransactionRequest.class.getName());
-    
+
     public static interface OnResultListener {
-        void onTransactionResult(Transaction transaction);
+        void onTransactionResult(String subscriptionId, Transaction transaction);
     }
 
     private User user;
     private String subscriptionId;
     private OnResultListener listener;
+    private final SubscriptionApiRequestProcessor requestProcessor;
 
-    public ChargebeeTransactionRequest(User user, String subscriptionId, OnResultListener listener) {
+    public ChargebeeTransactionRequest(User user, String subscriptionId, OnResultListener listener,
+            SubscriptionApiRequestProcessor requestProcessor) {
         this.user = user;
         this.subscriptionId = subscriptionId;
         this.listener = listener;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -45,6 +49,8 @@ public class ChargebeeTransactionRequest extends ChargebeeApiRequest {
                     transaction = null;
                 }
                 onDone(transaction);
+            } else {
+                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE,
@@ -56,7 +62,7 @@ public class ChargebeeTransactionRequest extends ChargebeeApiRequest {
 
     private void onDone(Transaction transaction) {
         if (listener != null) {
-            listener.onTransactionResult(transaction);
+            listener.onTransactionResult(subscriptionId, transaction);
         }
     }
 }

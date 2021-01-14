@@ -1,59 +1,74 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
-import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptionListRequest.OnResultListener {
     private static final Logger logger = Logger.getLogger(ChargebeeFetchUserSubscriptionsTask.class.getName());
 
     @FunctionalInterface
     public static interface OnResultListener {
-        void onSubsctiptionsResult(Iterable<Subscription> subscriptions);
+        void onSubscriptionsResult(Iterable<Subscription> subscriptions);
     }
 
     private final User user;
-    private final SubscriptionRequestManagementService requestManagementService;
+    private final SubscriptionApiRequestProcessor requestProcessor;
     private final OnResultListener listener;
 
     private List<Subscription> userSubscriptions;
-    private String offset;
 
-    public ChargebeeFetchUserSubscriptionsTask(User user, SubscriptionRequestManagementService requestManagementService,
+    public ChargebeeFetchUserSubscriptionsTask(User user, SubscriptionApiRequestProcessor requestProcessor,
             OnResultListener listener) {
         this.user = user;
-        this.requestManagementService = requestManagementService;
+        this.requestProcessor = requestProcessor;
         this.listener = listener;
     }
 
     public void run() {
-        logger.info(() -> "Schedule fetch Chargebee subscriptions, user: " + user.getName() + ", offset: "
-                + (offset == null ? "" : offset));
-        requestManagementService.scheduleRequest(new ChargebeeSubscriptionListRequest(user, offset, this),
-                ChargebeeApiService.TIME_FOR_API_REQUEST_MS, ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
+        fetchSubscriptionList(null);
     }
 
     @Override
     public void onSubscriptionListResult(Iterable<ChargebeeApiSubscriptionData> subscriptions, String nextOffset) {
-        offset = nextOffset;
         if (subscriptions != null) {
+            List<Subscription> subscriptionList = new ArrayList<Subscription>();
+            for (ChargebeeApiSubscriptionData sub : subscriptions) {
+                subscriptionList.add(sub.toSubscription());
+            }
+            
+            // Sort subscription list by created date, so newest item goes first in the list
+            Collections.sort(subscriptionList, (s1, s2) -> {
+                return s1.getSubscriptionCreatedAt().compareTo(s2.getSubscriptionCreatedAt()) * -1;
+            });
+
             if (userSubscriptions == null) {
                 userSubscriptions = new ArrayList<Subscription>();
             }
-            for (ChargebeeApiSubscriptionData sub : subscriptions) {
-                userSubscriptions.add(sub.toSubscription());
-            }
+            userSubscriptions.addAll(subscriptionList);
         }
-        if (offset == null || offset.isEmpty()) {
-            if (listener != null) {
-                listener.onSubsctiptionsResult(userSubscriptions);
-            }
+        if (nextOffset == null || nextOffset.isEmpty()) {
+            onDone();
         } else {
-            run();
+            fetchSubscriptionList(nextOffset);
+        }
+    }
+
+    private void fetchSubscriptionList(String offset) {
+        logger.info(() -> "Schedule fetch Chargebee subscriptions, user: " + user.getName() + ", offset: "
+                + (offset == null ? "" : offset));
+        requestProcessor.addRequest(new ChargebeeSubscriptionListRequest(user, offset, this, requestProcessor),
+                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
+    }
+
+    private void onDone() {
+        if (listener != null) {
+            listener.onSubscriptionsResult(userSubscriptions);
         }
     }
 }

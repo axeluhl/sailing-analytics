@@ -1,7 +1,6 @@
 package com.sap.sse.security.subscription;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -21,39 +20,35 @@ public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.On
     private static final Logger logger = Logger.getLogger(ProviderSubscriptionUpdateTask.class.getName());
 
     private final SubscriptionApiService apiService;
-    private final Iterator<User> usersIterator;
-    private User currentUser;
+    private final Iterable<User> users;
     private final CompletableFuture<SecurityService> securityService;
 
     public ProviderSubscriptionUpdateTask(SubscriptionApiService apiService, Iterable<User> users,
             CompletableFuture<SecurityService> securityService) {
         this.apiService = apiService;
-        this.usersIterator = users.iterator();
+        this.users = users;
         this.securityService = securityService;
     }
 
     public void run() {
-        if (usersIterator.hasNext()) {
-            currentUser = usersIterator.next();
+        for (User user : users) {
             try {
-                apiService.getUserSubscriptions(currentUser, this);
+                apiService.getUserSubscriptions(user, this);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Fetch subscriptions failed, provider: " + apiService.getProviderName()
-                        + ", user: " + currentUser.getName(), e);
+                        + ", user: " + user.getName(), e);
             }
         }
     }
 
     @Override
-    public void onSubscriptionsResult(Iterable<Subscription> subscriptions) {
+    public void onSubscriptionsResult(User user, Iterable<Subscription> subscriptions) {
         try {
-            checkAndUpdateSubscriptions(currentUser, subscriptions, apiService);
+            checkAndUpdateSubscriptions(user, subscriptions, apiService);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Update user subscriptions failed, provider: " + apiService.getProviderName()
-                    + ", user: " + currentUser.getName(), e);
+                    + ", user: " + user.getName(), e);
         }
-        // continue with next user
-        run();
     }
 
     private void checkAndUpdateSubscriptions(User user, Iterable<Subscription> userSubscriptions,

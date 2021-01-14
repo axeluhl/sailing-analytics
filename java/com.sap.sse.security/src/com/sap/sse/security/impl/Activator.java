@@ -38,9 +38,10 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessorImpl;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionBackgroundUpdater;
-import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -156,10 +157,10 @@ public class Activator implements BundleActivator {
     }
 
     private void createAndRegisterSubscriptionServices() {
-        final SubscriptionRequestManagementService requestManagementService = new SubscriptionRequestManagementService(
+        final SubscriptionApiRequestProcessor subscriptionApiRequestProcessor = new SubscriptionApiRequestProcessorImpl(
                 ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance(),
-                requestManagementService);
+                subscriptionApiRequestProcessor);
         final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
         chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY,
                 chargebeeApiService.getProviderName());
