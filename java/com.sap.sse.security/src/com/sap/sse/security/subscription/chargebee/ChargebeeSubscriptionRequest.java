@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.chargebee.ListResult;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
  * Request to fetch Chargebee subscription by subscription id
@@ -17,12 +18,15 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
         void onSubscriptionResult(Subscription subscription);
     }
 
-    private String subscriptionId;
-    private OnResultListener listener;
+    private final SubscriptionApiRequestProcessor requestProcessor;
+    private final String subscriptionId;
+    private final OnResultListener listener;
 
-    public ChargebeeSubscriptionRequest(String subscriptionId, OnResultListener listener) {
+    public ChargebeeSubscriptionRequest(String subscriptionId, OnResultListener listener,
+            SubscriptionApiRequestProcessor requestProcessor) {
         this.subscriptionId = subscriptionId;
         this.listener = listener;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -40,6 +44,8 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
                     subscription = null;
                 }
                 onDone(subscription);
+            } else {
+                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Fetch Chargebee subscription failed, subscription id: " + subscriptionId, e);

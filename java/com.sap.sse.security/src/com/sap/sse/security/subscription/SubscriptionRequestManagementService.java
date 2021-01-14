@@ -17,12 +17,12 @@ public class SubscriptionRequestManagementService {
      * Schedule a request, and handle resume in case the request needed to be resumed
      */
     public void scheduleRequest(SubscriptionApiRequest request, long delayMs, long resumeDelayMs) {
-        request.setRequestManagementService(this);
-        executor.schedule(() -> {
-            request.run();
-            if (request.needResume()) {
-                scheduleRequest(request, resumeDelayMs, resumeDelayMs);
-            }
-        }, delayMs, TimeUnit.MILLISECONDS);
+//        request.setRequestManagementService(this);
+//        executor.schedule(() -> {
+//            request.run();
+//            if (request.needResume()) {
+//                scheduleRequest(request, resumeDelayMs, resumeDelayMs);
+//            }
+//        }, delayMs, TimeUnit.MILLISECONDS);
     }
 }

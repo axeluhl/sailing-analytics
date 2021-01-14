@@ -4,8 +4,8 @@ import java.util.logging.Logger;
 
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
-import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 
 /**
  * Task to perform canceling a subscription by subscription id
@@ -23,20 +23,20 @@ public class ChargebeeCancelSubscriptionTask
     }
 
     private final String subscriptionId;
-    private final SubscriptionRequestManagementService requestManagementService;
+    private final SubscriptionApiRequestProcessor requestProcessor;
     private OnResultListener listener;
 
-    public ChargebeeCancelSubscriptionTask(String subscriptionId,
-            SubscriptionRequestManagementService requestManagementService, OnResultListener listener) {
+    public ChargebeeCancelSubscriptionTask(String subscriptionId, SubscriptionApiRequestProcessor requestProcessor,
+            OnResultListener listener) {
         this.subscriptionId = subscriptionId;
-        this.requestManagementService = requestManagementService;
+        this.requestProcessor = requestProcessor;
         this.listener = listener;
     }
 
     public void run() {
         logger.info(() -> "Schedule cancel Chargebee subscription, id: " + subscriptionId);
-        requestManagementService.scheduleRequest(new ChargebeeSubscriptionRequest(subscriptionId, this),
-                ChargebeeApiService.TIME_FOR_API_REQUEST_MS, ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
+        requestProcessor.addRequest(new ChargebeeSubscriptionRequest(subscriptionId, this, requestProcessor),
+                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
     }
 
     @Override
@@ -51,8 +51,9 @@ public class ChargebeeCancelSubscriptionTask
             if (sub.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED)) {
                 onDone(new SubscriptionCancelResult(/* success */ true, sub));
             } else {
-                requestManagementService.scheduleRequest(new ChargebeeCancelSubscriptionRequest(subscriptionId, this),
-                        ChargebeeApiService.TIME_FOR_API_REQUEST_MS, ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
+                requestProcessor.addRequest(
+                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor),
+                        ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
             }
         } else {
             onDone(new SubscriptionCancelResult(/* success */false, /* subscription */null, /* deleted */true));

@@ -1,22 +1,19 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.chargebee.ListResult;
-import com.chargebee.ListResult.Entry;
 import com.chargebee.filters.enums.SortOrder;
-import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
-import com.chargebee.models.Transaction;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
-        implements ChargebeeInvoiceRequest.OnResultListener, ChargebeeTransactionRequest.OnResultListener {
+        implements ChargebeeFetchSubscriptionInformationTask.OnResultListener {
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionListRequest.class.getName());
 
@@ -25,20 +22,20 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
         void onSubscriptionListResult(Iterable<ChargebeeApiSubscriptionData> subscriptions, String nextOffset);
     }
 
-    private User user;
-    private String offset;
-    private OnResultListener listener;
-    private Iterator<Entry> resultIterator;
+    private final SubscriptionApiRequestProcessor requestProcessor;
+    private final User user;
+    private final OnResultListener listener;
+    private final String offset;
     private List<ChargebeeApiSubscriptionData> subscriptions;
     private String nextOffset;
+    private int resultSize;
 
-    private Subscription subscription;
-    private Invoice invoice;
-
-    public ChargebeeSubscriptionListRequest(User user, String offset, OnResultListener listener) {
+    public ChargebeeSubscriptionListRequest(User user, String offset, OnResultListener listener,
+            SubscriptionApiRequestProcessor requestProcessor) {
         this.user = user;
         this.offset = offset;
         this.listener = listener;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -54,13 +51,14 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
             ListResult result = request.request();
             if (!isRateLimitReached(result)) {
                 if (result != null && !result.isEmpty()) {
-                    resultIterator = result.iterator();
-                    subscriptions = new ArrayList<ChargebeeApiSubscriptionData>();
+                    resultSize = result.size();
                     nextOffset = result.nextOffset();
-                    processEntry();
+                    processListResult(result);
                 } else {
                     onDone(null, null);
                 }
+            } else {
+                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Fetching subscription list failed, user: " + user.getName() + ", offset: "
@@ -70,40 +68,25 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
     }
 
     @Override
-    public void onInvoiceResult(Invoice invoice) {
-        logger.info(() -> "Invoice result: " + (invoice != null ? invoice.toJson() : "empty"));
-        this.invoice = invoice;
-        getRequestManagementService().scheduleRequest(new ChargebeeTransactionRequest(user, subscription.id(), this),
-                ChargebeeApiService.TIME_FOR_API_REQUEST_MS, ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
-    }
-
-    @Override
-    public void onTransactionResult(Transaction transaction) {
-        logger.info(() -> "Transaction result: " + (transaction != null ? transaction.toJson() : "empty"));
-        subscriptions.add(new ChargebeeApiSubscriptionData(subscription, invoice, transaction));
-
-        processEntry();
-    }
-
-    private void processEntry() {
-        if (!resultIterator.hasNext()) {
+    public void onSubscriptionDataResult(String subscriptionId, ChargebeeApiSubscriptionData subscription) {
+        subscriptions.add(subscription);
+        if (subscriptions.size() == resultSize) {
             onDone(subscriptions, nextOffset);
-        } else {
-            ListResult.Entry entry = resultIterator.next();
-            subscription = entry.subscription();
-            if (subscription != null) {
-                if (!subscription.deleted()) {
-                    getRequestManagementService().scheduleRequest(
-                            new ChargebeeInvoiceRequest(user, subscription.id(), this),
-                            ChargebeeApiService.TIME_FOR_API_REQUEST_MS,
-                            ChargebeeApiService.LIMIT_REACHED_RESUME_DELAY_MS);
-                } else {
-                    subscriptions.add(new ChargebeeApiSubscriptionData(subscription, null, null));
-                    processEntry();
-                }
+        }
+    }
+
+    private void processListResult(ListResult result) {
+        subscriptions = new ArrayList<ChargebeeApiSubscriptionData>();
+        for (ListResult.Entry entry : result) {
+            Subscription subscription = entry.subscription();
+            if (!subscription.deleted()) {
+                new ChargebeeFetchSubscriptionInformationTask(user, subscription, this, requestProcessor).run();
             } else {
-                processEntry();
+                subscriptions.add(new ChargebeeApiSubscriptionData(subscription, null, null));
             }
+        }
+        if (subscriptions.size() == resultSize) {
+            onDone(subscriptions, nextOffset);
         }
     }
 

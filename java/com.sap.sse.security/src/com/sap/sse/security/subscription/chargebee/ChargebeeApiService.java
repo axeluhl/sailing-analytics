@@ -3,33 +3,23 @@ package com.sap.sse.security.subscription.chargebee;
 import com.chargebee.Environment;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionApiService;
 import com.sap.sse.security.subscription.SubscriptionDataHandler;
-import com.sap.sse.security.subscription.SubscriptionRequestManagementService;
 
 public class ChargebeeApiService implements SubscriptionApiService {
-    /**
-     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
-     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
-     * ~400ms, and a next request should be made after 400ms from previous request.
-     */
-    public static final long TIME_FOR_API_REQUEST_MS = 400;
-
-    public static final long LIMIT_REACHED_RESUME_DELAY_MS = 65000;
-
     private final boolean active;
 
-    private SubscriptionRequestManagementService requestManagementService;
+    private final SubscriptionApiRequestProcessor requestProcessor;
 
-    public ChargebeeApiService(ChargebeeConfiguration configuration,
-            SubscriptionRequestManagementService requestManagementService) {
+    public ChargebeeApiService(ChargebeeConfiguration configuration, SubscriptionApiRequestProcessor requestProcessor) {
         if (configuration != null) {
             Environment.configure(configuration.getSite(), configuration.getApiKey());
             active = true;
         } else {
             active = false;
         }
-        this.requestManagementService = requestManagementService;
+        this.requestProcessor = requestProcessor;
     }
 
     @Override
@@ -44,14 +34,14 @@ public class ChargebeeApiService implements SubscriptionApiService {
 
     @Override
     public void getUserSubscriptions(User user, OnSubscriptionsResultListener listener) {
-        new ChargebeeFetchUserSubscriptionsTask(user, requestManagementService,
-                subscriptions->listener.onSubscriptionsResult(subscriptions)).run();
+        new ChargebeeFetchUserSubscriptionsTask(user, requestProcessor,
+                subscriptions -> listener.onSubscriptionsResult(user, subscriptions)).run();
     }
 
     @Override
     public void cancelSubscription(String subscriptionId, OnCancelSubscriptionResultListener listener) {
-        new ChargebeeCancelSubscriptionTask(subscriptionId, requestManagementService,
-                result->listener.onCancelResult(result)).run();
+        new ChargebeeCancelSubscriptionTask(subscriptionId, requestProcessor, result -> listener.onCancelResult(result))
+                .run();
     }
 
     @Override

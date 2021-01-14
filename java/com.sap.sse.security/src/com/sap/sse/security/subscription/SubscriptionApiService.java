@@ -9,7 +9,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 public interface SubscriptionApiService {
     
     public static interface OnSubscriptionsResultListener{
-        void onSubscriptionsResult(Iterable<Subscription> subscriptions);
+        void onSubscriptionsResult(User user, Iterable<Subscription> subscriptions);
     }
     
     public static interface OnCancelSubscriptionResultListener{
