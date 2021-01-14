@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -50,7 +51,10 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Daniel Lisunkin {i505543)
  *
  */
+@Ignore("Until the blacklisting of eu-west-1 by the ORC database server has been resolved... 2021-01-14")
 public class TestORCPerformanceCurve {
+    private static final Logger logger = Logger.getLogger(TestORCPerformanceCurve.class.getName());
+    
     // set true to see all the differences i
     private final boolean collectErrors = true;
     
@@ -97,7 +101,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(15)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
-        alturaCourse = new ORCPerformanceCurveCourseImpl(legs);         //this course is the same course as seen in the Altura "IMS Explanation" sheet
+        alturaCourse = new ORCPerformanceCurveCourseImpl(legs); // this course is the same course as seen in the Altura "IMS Explanation" sheet
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
         importerLocal = new ORCCertificatesJsonImporter().read(new FileInputStream(fileGER));
@@ -109,6 +113,7 @@ public class TestORCPerformanceCurve {
                 .stream(ORCPublicCertificateDatabaseImpl.INSTANCE.getCountriesWithValidCertificates().spliterator(),
                         /* parallel */ false)
                 .max((c1, c2) -> c1.getCertCount() - c2.getCertCount()).get().getIssuingCountry();
+        logger.info("Trying to read country certificates for "+countryWithMostValidCertificates);
         importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId="+
                 countryWithMostValidCertificates.getThreeLetterIOCCode()+"&ext=json").openStream());
     }
