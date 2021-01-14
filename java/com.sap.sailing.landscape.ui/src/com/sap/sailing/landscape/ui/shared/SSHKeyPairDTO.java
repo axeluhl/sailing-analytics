@@ -9,9 +9,12 @@ import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
 public class SSHKeyPairDTO extends NamedSecuredObjectDTO {
     private static final long serialVersionUID = -9174909996567452216L;
-    private final String regionId;
-    private final String creatorName;
-    private final TimePoint creationTime;
+    private String regionId;
+    private String creatorName;
+    private TimePoint creationTime;
+    
+    @Deprecated
+    SSHKeyPairDTO() {} // for GWT RPC serialization only
 
     public SSHKeyPairDTO(String regionId, String name, String creatorName, TimePoint creationTime) {
         super(name);
