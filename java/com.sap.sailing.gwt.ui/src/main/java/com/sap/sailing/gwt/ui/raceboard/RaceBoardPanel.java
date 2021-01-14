@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrackWithSecurityDTO;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
+import com.sap.sailing.gwt.common.client.NavigatorUtil;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
@@ -119,6 +120,7 @@ import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
@@ -143,6 +145,7 @@ import com.sap.sse.security.ui.client.UserService;
 public class RaceBoardPanel
         extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
         implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
+    private static final String RACEBOARD_PATH = "/gwt/RaceBoard.html";
     private final SailingServiceAsync sailingService;
     private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
@@ -256,11 +259,28 @@ public class RaceBoardPanel
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         Runnable shareLinkAction = null;
         if(raceboardContextDefinition != null) {
-            shareLinkAction = () -> {
-                ShareLinkDialog shareLinkDialog = new ShareLinkDialog("/gwt/RaceBoard.html", raceboardContextDefinition, lifecycle,
-                        getSettings(), sailingService, showChartMarkEditMediaButtonsAndVideo, stringMessages);
-                shareLinkDialog.show();
-            };
+            final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
+                    raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
+                    raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                    raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
+            final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
+            if(showChartMarkEditMediaButtonsAndVideo) {
+                shareLinkAction = () -> {
+                    final ShareLinkDialog shareLinkDialog = new ShareLinkDialog(RACEBOARD_PATH, lifecycle,
+                            getSettings(), sailingService, stringMessages, linkWithSettingsGenerator);
+                    shareLinkDialog.show();
+                };
+            }else {
+                if(NavigatorUtil.clientHasNavigatorShareSupport()) {
+                    shareLinkAction = () -> {
+                        NavigatorUtil.shareUrlAndText(linkWithSettingsGenerator.createUrl(getSettings()), stringMessages.raceSharingShortText());
+                    };
+                }else if(NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
+                    shareLinkAction = () ->{
+                        NavigatorUtil.copyToClipboard(stringMessages.sharingLinkCopied());
+                    };
+                }
+            }
         }
         this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
