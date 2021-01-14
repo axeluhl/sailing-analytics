@@ -108,13 +108,4 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the server name
      */
     public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.ALL_ACTIONS);
-    
-    public static enum LandscapeActions implements Action {
-        MANAGE;
-
-        private static final Action[] ALL_ACTIONS = new Action[] { MANAGE,
-                DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL };
-    }
-    
-    public static final HasPermissions LANDSCAPE = new SecuredSecurityTypes("LANDSCAPE", LandscapeActions.ALL_ACTIONS);
 }

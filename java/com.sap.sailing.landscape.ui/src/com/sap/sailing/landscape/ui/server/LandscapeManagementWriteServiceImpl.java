@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.sap.sailing.landscape.common.SecuredLandscapeTypes;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
@@ -19,7 +20,7 @@ import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
@@ -32,7 +33,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public ArrayList<String> getRegions() {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.LANDSCAPE.getStringPermission(SecuredSecurityTypes.LandscapeActions.MANAGE));
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
         return result;
@@ -40,7 +41,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public ArrayList<MongoEndpointDTO> getMongoEndpoints(String awsAccessKey, String awsSecret, String region) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.LANDSCAPE.getStringPermission(SecuredSecurityTypes.LandscapeActions.MANAGE));
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
         final ArrayList<MongoEndpointDTO> result = new ArrayList<>();
         for (final MongoEndpoint mongoEndpoint : AwsLandscape.obtain(awsAccessKey, awsSecret).getMongoEndpoints(new AwsRegion(region))) {
             final MongoEndpointDTO dto;
@@ -77,5 +78,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             }
         }
         return result;
+    }
+
+    @Override
+    public void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair) {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.SSH_KEY.getStringPermission(DefaultActions.DELETE));
+        AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName());
     }
 }

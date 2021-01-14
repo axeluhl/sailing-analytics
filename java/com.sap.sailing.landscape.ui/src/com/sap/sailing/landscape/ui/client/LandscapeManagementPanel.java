@@ -60,7 +60,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Axel Uhl (D043530)
  *
  */
-public class LandscapeManagementPanel extends VerticalPanel {
+public class LandscapeManagementPanel extends VerticalPanel implements AwsAccessKeyProvider {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regionsTable;
     private final TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources> mongoEndpointsTable;
@@ -104,7 +104,8 @@ public class LandscapeManagementPanel extends VerticalPanel {
         awsCredentialsGrid.setWidget(1, 0, new Label(stringMessages.awsSecret()));
         awsSecretPasswordTextBox = new PasswordTextBox();
         awsCredentialsGrid.setWidget(1, 1, awsSecretPasswordTextBox);
-        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService, landscapeManagementService, tableResources, errorReporter);
+        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ this);
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
         sshKeysCaptionPanel.add(sshKeyManagementPanel);
@@ -213,5 +214,15 @@ public class LandscapeManagementPanel extends VerticalPanel {
         EntryPointHelper.registerASyncService((ServiceDefTarget) result,
                 RemoteServiceMappingConstants.landscapeManagementServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         return result;
+    }
+
+    @Override
+    public String getAwsAccessKeyId() {
+        return awsAccessKeyTextBox.getValue();
+    }
+
+    @Override
+    public String getAwsSecret() {
+        return awsSecretPasswordTextBox.getValue();
     }
 }

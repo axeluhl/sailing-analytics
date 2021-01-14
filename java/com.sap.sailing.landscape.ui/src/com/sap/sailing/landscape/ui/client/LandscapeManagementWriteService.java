@@ -14,4 +14,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
     MongoEndpointDTO getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName);
 
     ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId);
+
+    void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair);
 }

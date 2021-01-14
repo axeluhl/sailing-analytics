@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.landscape.common.SecuredLandscapeTypes;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sse.common.Util;
@@ -16,18 +17,24 @@ import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public class SshKeyManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources> sshKeyTable;
     private final BusyIndicator sshKeyLoadingBusy;
     private final ErrorReporter errorReporter;
-
+    
     public SshKeyManagementPanel(StringMessages stringMessages, UserService userService,
             LandscapeManagementWriteServiceAsync landscapeManagementService, AdminConsoleTableResources tableResources,
-            ErrorReporter errorReporter) {
+            ErrorReporter errorReporter, AwsAccessKeyProvider awsAccessKeyProvider) {
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
+        add(buttonPanel);
+        buttonPanel.addCreateAction(stringMessages.add(), ()->{
+            // TODO here goes the add SSH key logic: pop up a dialog for file upload, local generation, generation in AWS, and text areas for pasting keys as text
+        });
         sshKeyTable =
                 new TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, /* enablePager */ true,
                 Optional.of(new EntityIdentityComparator<SSHKeyPairDTO>() {
@@ -55,6 +62,18 @@ public class SshKeyManagementPanel extends VerticalPanel {
         add(sshKeyTable);
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
+        buttonPanel.addRemoveAction(stringMessages.remove(), sshKeyTable.getSelectionModel(), /* withConfirmation */ true, ()->{
+            landscapeManagementService.removeSshKey(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
+                    sshKeyTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {}
+            });
+        });
     }
     
     public void showKeysInRegion(String awsAccessKey, String awsSecret, String regionId) {

@@ -17,4 +17,6 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void getSshKeys(String awsAccessKey, String awsSecret, String regionId,
             AsyncCallback<ArrayList<SSHKeyPairDTO>> callback);
+
+    void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair, AsyncCallback<Void> asyncCallback);
 }
