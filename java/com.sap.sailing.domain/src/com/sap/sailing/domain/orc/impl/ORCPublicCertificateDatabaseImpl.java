@@ -80,7 +80,9 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
     private static final NameValuePair XSLP_PARAM = new BasicNameValuePair(XSLP_PARAM_NAME, XSLP_PARAM_VALUE_LIST_CERT);
     private static final String SEARCH_URL = "http://data.orc.org/public/WPub.dll";
     private static final String COUNTRY_OVERVIEW_URL = SEARCH_URL+"/RMS";
-    private static final String SINGLE_CERTIFICATE_DOWNLOAD_URL = "http://data.orc.org/public/WPub.dll?action=DownBoatRMS";
+    private static final String SINGLE_CERTIFICATE_DOWNLOAD_URL = SEARCH_URL+"?action=DownBoatRMS";
+    // For possible future use: to download all certificates of, e.g., a country in one go, use the following action:
+    // private static final String MANY_CERTIFICATES_DOWNLOAD_URL = SEARCH_URL+"?action=DownRMS";
     private static final String ROOT_ELEMENT = "ROOT";
     private static final String DATA_ELEMENT = "DATA";
     private static final String ROW_ELEMENT = "ROW";
