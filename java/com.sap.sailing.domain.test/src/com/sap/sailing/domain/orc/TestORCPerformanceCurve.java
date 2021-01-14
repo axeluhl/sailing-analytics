@@ -51,7 +51,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Daniel Lisunkin {i505543)
  *
  */
-@Ignore("Until the blacklisting of eu-west-1 by the ORC database server has been resolved... 2021-01-14")
 public class TestORCPerformanceCurve {
     private static final Logger logger = Logger.getLogger(TestORCPerformanceCurve.class.getName());
     
