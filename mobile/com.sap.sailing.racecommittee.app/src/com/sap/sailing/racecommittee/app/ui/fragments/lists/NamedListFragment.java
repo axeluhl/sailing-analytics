@@ -16,7 +16,6 @@ import android.widget.ListView;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -91,7 +90,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onResume() {
         super.onResume();
-        loadItems();
+        initLoader();
     }
 
     @Override
@@ -137,7 +136,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
-        if (isForceLoad() && !isCached) {
+        if (!isCached) {
             listAdapter.setCheckedPosition(-1);
             mSelectedIndex = -1;
         }
@@ -153,7 +152,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             listAdapter.notifyDataSetChanged();
         }
 
-        if (!isForceLoad() || !isCached) {
+        if (!isCached) {
             showProgressBar(false);
         }
     }
@@ -222,17 +221,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
     }
 
-    private void loadItems() {
-        final Loader<DataLoaderResult<Collection<T>>> loader = initLoader();
-        if (isForceLoad()) {
-            loader.forceLoad();
-        }
-    }
-
-    private boolean isForceLoad() {
-        return getArguments() != null && getArguments().getBoolean(AppConstants.ACTION_EXTRA_FORCED);
-    }
-
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
         FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
@@ -253,7 +241,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         listAdapter.notifyDataSetChanged();
 
         mSelectedIndex = position;
-        getListView().setSelection(position);
+        if (mSelectedIndex >= 0) {
+            getListView().setSelection(mSelectedIndex);
+        }
         if (notify) {
             listener.itemSelected(this, eventBase);
         }

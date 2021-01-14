@@ -116,6 +116,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
     private int branchPriority = NO_PRIORITY;
 
     private final ItemSelectedListener<EventBase> eventSelectionListener = (sender, event) -> {
+        final Serializable previousSelectedEventId = mSelectedEventId;
         final Serializable eventId = selectEvent(event);
 
         // FIXME: its weird to have this button setup in here
@@ -127,13 +128,14 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (loginListViews != null) {
             loginListViews.closeAll();
         }
-        addCourseAreaListFragment(eventId);
-
-        if (mSelectedCourseAreaUUID == null && branchCourseAreaUuid == null) {
-            // send intent to open the course area selection list
-            Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
-            intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
-            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+        if (previousSelectedEventId != mSelectedEventId) {
+            addCourseAreaListFragment(eventId);
+            if (branchCourseAreaUuid == null || !mSelectedEventId.toString().equals(branchEventId)) {
+                // send intent to open the course area selection list
+                Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
+                intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_AREA);
+                BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
+            }
         }
     };
     private final ItemSelectedListener<CourseArea> courseAreaSelectionListener = (sender, courseArea) -> {
@@ -149,8 +151,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
             loginListViews.closeAll();
         }
         addAreaPositionListFragment();
-
-        if (positionName == null && branchPriority == NO_PRIORITY) {
+        if (branchPriority == NO_PRIORITY) {
             // send intent to open the position selection list
             Intent intent = new Intent(AppConstants.ACTION_TOGGLE);
             intent.putExtra(AppConstants.EXTRA_DEFAULT, AppConstants.ACTION_TOGGLE_POSITION);
@@ -186,18 +187,12 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private Serializable selectEvent(EventBase event) {
         final Serializable eventId = event.getId();
+        ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
+        mSelectedEventId = eventId;
         eventName = event.getName();
         // TODO: explicitly set the header text of the fragment to this name
-        selectEvent(eventId);
         loginListViews.getEventContainer().setHeaderText(eventName);
         return eventId;
-    }
-
-    // FIXME / DEPRECATED: only use the above setter for the whole event object
-    @Deprecated
-    private void selectEvent(Serializable eventId) {
-        mSelectedEventId = eventId;
-        ExLog.i(LoginActivity.this, LogEvent.EVENT_SELECTED, eventId.toString());
     }
 
     private void resetEvent() {
@@ -246,11 +241,10 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         loginListViews.getPositionContainer().setHeaderText("");
     }
 
-    private void addEventListFragment(boolean force) {
-        ExLog.i(this, TAG, "addEventListFragment(" + force + ")");
+    private void addEventListFragment() {
         resetEvent();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.event_fragment, EventListFragment.newInstance(force, branchEventId));
+        transaction.replace(R.id.event_fragment, EventListFragment.newInstance(branchEventId));
         transaction.commitAllowingStateLoss();
     }
 
@@ -513,6 +507,7 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
 
     private void setupDataManager() {
         showProgressSpinner();
+        dataManager.getDataStore().reset();
         String deviceConfigurationName = AppPreferences.on(getApplicationContext()).getDeviceConfigurationName();
         UUID deviceConfigurationUuid = AppPreferences.on(getApplicationContext()).getDeviceConfigurationUuid();
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(deviceConfigurationName,
@@ -641,10 +636,13 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
      */
     private void resetData(boolean force) {
         if (force) {
+            if (loginListViews != null) {
+                loginListViews.closeAll();
+            }
             setupDataManager();
         }
 
-        slideUpBackdrop(() -> addEventListFragment(force));
+        slideUpBackdrop(this::addEventListFragment);
     }
 
     private class IntentReceiver extends BroadcastReceiver {

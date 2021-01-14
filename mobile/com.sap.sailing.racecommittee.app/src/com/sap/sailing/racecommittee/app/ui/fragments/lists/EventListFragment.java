@@ -26,10 +26,9 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     //Only used in conjunction with a given ID in arguments
     private boolean loadMore;
 
-    public static EventListFragment newInstance(boolean forceLoad, @Nullable final String id) {
+    public static EventListFragment newInstance(@Nullable final String id) {
         final EventListFragment fragment = new EventListFragment();
         final Bundle args = new Bundle();
-        args.putBoolean(AppConstants.ACTION_EXTRA_FORCED, forceLoad);
         if (!TextUtils.isEmpty(id)) {
             args.putString(AppConstants.EXTRA_EVENT_ID, id);
         }
@@ -107,9 +106,8 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
     public void onExpanded() {
         final Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(AppConstants.EXTRA_EVENT_ID)) {
+        if (arguments != null && arguments.containsKey(AppConstants.EXTRA_EVENT_ID) && !loadMore) {
             loadMore = true;
-            arguments.putBoolean(AppConstants.ACTION_EXTRA_FORCED, true);
             showProgressBar(true);
             restartLoader().forceLoad();
         }
