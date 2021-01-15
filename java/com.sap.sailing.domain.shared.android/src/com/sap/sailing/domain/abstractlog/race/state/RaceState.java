@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
@@ -146,7 +147,6 @@ public interface RaceState extends ReadonlyRaceState {
 
     /**
      * Enters a new wind fix for this race.
-     * @param isMagnetic TODO
      */
     void setWindFix(TimePoint now, Wind wind, boolean isMagnetic);
     
@@ -162,4 +162,14 @@ public interface RaceState extends ReadonlyRaceState {
      * forces a RaceStateUpdate
      */
     void forceUpdate();
+
+    /**
+     * Marks the results of the race to which this state belongs as official, using a
+     * {@link RaceLogResultsAreOfficialEvent}.
+     * 
+     * @param timePoint
+     *            the time point at which the results were declared official
+     * @see #isResultsAreOfficial()
+     */
+    void setResultsAreOfficial(TimePoint timePoint);
 }
