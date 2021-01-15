@@ -219,9 +219,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     void deleteKeyPair(Region region, String keyName);
     
     /**
-     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair ID
+     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair.
      */
-    String importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
+    SSHKeyPair importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
@@ -237,7 +237,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
      * and stores it persistently also in the local server's database with the private key encrypted.
      */
-    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
+    SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
     /**
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in

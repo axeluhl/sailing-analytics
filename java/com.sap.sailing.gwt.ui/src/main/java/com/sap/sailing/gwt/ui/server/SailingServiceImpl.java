@@ -470,7 +470,6 @@ import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
@@ -958,7 +957,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         regattaDTO.competitorRegistrationType = regatta.getCompetitorRegistrationType();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), regattaDTO, regatta.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), regattaDTO);
         regattaDTO.registrationLinkSecret = regatta.getRegistrationLinkSecret();
         return regattaDTO;
     }
@@ -1131,7 +1130,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
                     trackedRaceDTO, getService().isRaceBeingTracked(regatta, r), rankingMetricType);
             if (trackedRace != null) {
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO);
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
@@ -1155,7 +1154,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     protected CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
         CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO);
         clearNonPublicFieldsIfCurrentUserHasNoReadPermission(competitor, competitorDTO);
         return competitorDTO;
     }
@@ -1170,10 +1169,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     protected CompetitorWithBoatDTO convertToCompetitorWithBoatDTO(CompetitorWithBoat competitor) {
         CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithBoatDTO(competitor);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO);
         clearNonPublicFieldsIfCurrentUserHasNoReadPermission(competitor, competitorDTO);
         BoatDTO boatDTO = competitorDTO.getBoat();
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, competitor.getBoat().getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO);
         return competitorDTO;
     }
 
@@ -1185,9 +1184,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (final Entry<? extends Competitor, ? extends Boat> c : competitorsAndTheirBoats.entrySet()) {
             CompetitorAndBoatDTO competitorAndBoatDTO = baseDomainFactory.convertToCompetitorAndBoatDTO(c.getKey(), c.getValue());
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getCompetitor(), c.getKey().getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getCompetitor());
             clearNonPublicFieldsIfCurrentUserHasNoReadPermission(c.getKey(), competitorAndBoatDTO.getCompetitor());
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getBoat(), c.getValue().getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorAndBoatDTO.getBoat());
             result.add(competitorAndBoatDTO);
         }
         return result;
@@ -1201,9 +1200,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<CompetitorWithBoatDTO> result = new ArrayList<>();
         for (CompetitorWithBoat c : iterable) {
             CompetitorWithBoatDTO competitorDTO = baseDomainFactory.convertToCompetitorWithBoatDTO(c);
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, c.getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO);
             clearNonPublicFieldsIfCurrentUserHasNoReadPermission(c, competitorDTO);
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO.getBoat(), c.getBoat().getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO.getBoat());
             result.add(competitorDTO);
         }
         return result;
@@ -1217,7 +1216,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         List<BoatDTO> result = new ArrayList<BoatDTO>();
         for (Boat b : iterable) {
             BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(b);
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, b.getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO);
             result.add(boatDTO);
         }
         return result;
@@ -1225,7 +1224,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     
     protected BoatDTO convertToBoatDTO(Boat boat) {
         BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(boat);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, boat.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO);
         return boatDTO;
     }
 
@@ -1264,7 +1263,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         ttConfig.getStoredDataURI()==null?null:ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI()==null?null:ttConfig.getCourseDesignUpdateURI().toString(),
                         ttConfig.getTracTracUsername(), ttConfig.getTracTracPassword(), ttConfig.getCreatorName());
-                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });
     }
@@ -1660,7 +1659,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
                     }
                     raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
-                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, raceDTO.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO);
                     Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
                     final LeaderboardGroup leaderboardGroup;
                     leaderboardGroup = getLeaderboardGroupByIdOrName(leaderboardGroupId, leaderboardGroupName);
@@ -2439,7 +2438,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         StrippedLeaderboardDTOWithSecurity leaderboardDTO = new StrippedLeaderboardDTOWithSecurity(
                 convertToBoatClassDTO(leaderboard.getBoatClass()));
         fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO, leaderboard.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO);
         return leaderboardDTO;
     }
 
@@ -2539,7 +2538,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
                             stConfig.getUpdateUsername(), stConfig.getUpdatePassword(), stConfig.getCreatorName());
-                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });
     }
@@ -3485,7 +3484,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
             groupDTO.setOverallLeaderboardScoringSchemeType(overallLeaderboard.getScoringScheme().getType());
         }
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), groupDTO, leaderboardGroup.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), groupDTO);
         return groupDTO;
     }
 
@@ -3809,7 +3808,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             eventDTO.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
                     windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), eventDTO, event.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), eventDTO);
         return eventDTO;
     }
 
@@ -3967,7 +3966,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion(), ServerInfo.getManageEventsBaseUrl());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
         return result;
     }
 
@@ -4045,13 +4044,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public List<UrlDTO> getResultImportUrls(String resultProviderName) {
         final List<UrlDTO> result = new ArrayList<>();
-            SecurityService securityService = getSecurityService();
+        SecurityService securityService = getSecurityService();
         Iterable<URL> allUrlsReadableBySubject = getService().getResultImportUrls(resultProviderName);
             for (URL url : allUrlsReadableBySubject) {
-                QualifiedObjectIdentifier objId = SecuredDomainType.RESULT_IMPORT_URL.getQualifiedObjectIdentifier(
-                    new TypeRelativeObjectIdentifier(resultProviderName, url.toString()));
-                UrlDTO urlDTO = new UrlDTO(url.toString());
-                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO, objId);
+                UrlDTO urlDTO = new UrlDTO(resultProviderName, url.toString());
+                SecurityDTOUtil.addSecurityInformation(securityService, urlDTO);
                 result.add(urlDTO);
             }
         return result;
@@ -4105,7 +4102,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 stArchiveConfig -> {
                     SwissTimingArchiveConfigurationWithSecurityDTO config = new SwissTimingArchiveConfigurationWithSecurityDTO(
                             stArchiveConfig.getJsonURL(), stArchiveConfig.getCreatorName());
-                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     return config;
                 });
     }
@@ -4593,7 +4590,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (configuration.getRegattaConfiguration() != null) {
             dto.regattaConfiguration = convertToRegattaConfigurationDTO(configuration.getRegattaConfiguration());
         }
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), dto, configuration.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), dto);
         return dto;
     }
 
@@ -4754,7 +4751,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final String name = user.getFirstName() + " " + user.getSurname();
         final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name,
                 igtimiAccount.getCreatorName());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount, igtimiAccount.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount);
         return securedAccount;
     }
 
@@ -5439,7 +5436,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
                 if (subject.isPermitted(config.getIdentifier().getStringPermission(DefaultActions.READ))) {
-                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config, config.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(getSecurityService(), config);
                     result.add(config);
                 }
             }
@@ -6132,7 +6129,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         : markTemplate.getShortName(),
                 markTemplate.getColor(), markTemplate.getShape(), markTemplate.getPattern(), markTemplate.getType());
 
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO, markTemplate.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markTemplateDTO);
         return markTemplateDTO;
     }
 
@@ -6169,7 +6166,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             return "DEVICE";
                         }
                     }));
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto, markProperties.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markPropertiesDto);
         return markPropertiesDto;
     }
 
@@ -6201,7 +6198,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 convertedDefaultMarkRolesForMarkTemplates, convertedDefaultMarkTemplatesForMarkRoles, optionalImageURL,
                 courseTemplate.getTags(),
                 convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()), courseTemplate.getDefaultNumberOfLaps());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, courseTemplate.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
         return result;
     }
 
@@ -6243,7 +6240,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {
         final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO, markRole.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO);
         return markRoleDTO;
     }
 

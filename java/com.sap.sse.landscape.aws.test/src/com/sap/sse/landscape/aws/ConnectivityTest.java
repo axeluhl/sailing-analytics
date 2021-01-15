@@ -281,8 +281,8 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 4096);
         final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
         final byte[] privKeyBytes = getDecryptedPrivateKeyBytes(keyPair, /* passphrase */ null);
-        final String keyId = landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, testKeyName);
-        assertTrue(keyId.startsWith("key-"));
+        final SSHKeyPair key = landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, testKeyName);
+        assertTrue(key.getName().equals(testKeyName));
         final KeyPairInfo awsKeyPairInfo = landscape.getKeyPairInfo(region, testKeyName);
         assertNotNull(awsKeyPairInfo);
         landscape.deleteKeyPair(region, testKeyName);

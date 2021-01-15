@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.client;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 
@@ -16,4 +17,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId);
 
     void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair);
+
+    SSHKeyPairDTO generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String privateKeyEncryptionPassphrase);
+
+    SSHKeyPairDTO addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
+            String encryptedPrivateKey) throws JSchException;
 }

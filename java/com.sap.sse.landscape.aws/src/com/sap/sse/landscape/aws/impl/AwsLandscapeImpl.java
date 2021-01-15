@@ -196,10 +196,12 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException {
+    public SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException {
         assert !keyPairWithDecryptedPrivateKey.isEncrypted();
-        addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
-                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey)));
+        final SSHKeyPair result = new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
+                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey));
+        addSSHKeyPair(result);
+        return result;
     }
     
     private void addSSHKeyPair(SSHKeyPair keyPair) {
@@ -603,9 +605,12 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException {
-        final String keyId = getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
-                .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build()).keyPairId();
+    public SSHKeyPair importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException {
+        if (!KeyPair.load(new JSch(), encryptedPrivateKey, publicKey).isEncrypted()) {
+            throw new IllegalArgumentException("Expected an encrypted private key");
+        }
+        getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
+                .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build());
         Object principal;
         try {
             principal = SessionUtils.getPrincipal();
@@ -616,7 +621,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         final SSHKeyPair keyPair = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
                 TimePoint.now(), keyName, publicKey, encryptedPrivateKey);
         addSSHKeyPair(keyPair);
-        return keyId;
+        return keyPair;
     }
 
     @Override

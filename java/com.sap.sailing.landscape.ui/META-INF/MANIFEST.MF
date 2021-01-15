@@ -19,8 +19,11 @@ Require-Bundle: com.sap.sse.gwt,
  com.sap.sse.landscape,
  com.sap.sse.landscape.aws,
  com.amazon.aws.aws-java-api,
- com.sap.sse.landscape.common
+ com.sap.sse.landscape.common,
+ com.jcraft.jsch;bundle-version="0.1.54"
 Export-Package: com.sap.sailing.landscape.ui.client,
  com.sap.sailing.landscape.ui.server,
  com.sap.sailing.landscape.ui.shared
 Bundle-ActivationPolicy: lazy
+Import-Package: org.osgi.framework;version="1.8.0"
+Bundle-Activator: com.sap.sailing.landscape.ui.impl.Activator

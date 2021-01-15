@@ -4,10 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+import org.osgi.framework.BundleContext;
 
+import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
+import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
@@ -20,15 +25,30 @@ import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
+    
+    private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
     public LandscapeManagementWriteServiceImpl() {
+        BundleContext context = Activator.getDefault();
+        securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+    }
+    
+    protected SecurityService getSecurityService() {
+        try {
+            return securityServiceTracker.getInitializedService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
@@ -65,7 +85,42 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public MongoEndpointDTO getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName) {
         return getMongoEndpoints(awsAccessKey, awsSecret, region).stream().filter(mep->Util.equalsWithNull(mep.getReplicaSetName(), replicaSetName)).findAny().orElse(null);
     }
+    
+    @Override
+    public SSHKeyPairDTO generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String privateKeyEncryptionPassphrase) {
+        final Subject subject = SecurityUtils.getSubject();
+        final SSHKeyPair dummyKeyPairForSecurityCheck = new SSHKeyPair(regionId, subject.getPrincipal().toString(), 
+                TimePoint.now(), keyName, /* publicKey */ null, /* encryptedPrivateKey */ null);
+        final SSHKeyPair keyPair = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(dummyKeyPairForSecurityCheck.getPermissionType(),
+                dummyKeyPairForSecurityCheck.getIdentifier().getTypeRelativeObjectIdentifier(), keyName,
+                        ()->{
+                            return AwsLandscape.obtain(awsAccessKey, awsSecret)
+                                    .createKeyPair(new AwsRegion(regionId), keyName, privateKeyEncryptionPassphrase.getBytes());
+                });
+        return convertToSSHKeyPairDTO(keyPair);
+    }
    
+    @Override
+    public SSHKeyPairDTO addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName,
+            String publicKey, String encryptedPrivateKey) throws JSchException {
+        final Subject subject = SecurityUtils.getSubject();
+        final SSHKeyPair dummyKeyPairForSecurityCheck = new SSHKeyPair(regionId, subject.getPrincipal().toString(), 
+                TimePoint.now(), keyName, /* publicKey */ null, /* encryptedPrivateKey */ null);
+        final SSHKeyPair keyPair = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(dummyKeyPairForSecurityCheck.getPermissionType(),
+                dummyKeyPairForSecurityCheck.getIdentifier().getTypeRelativeObjectIdentifier(), keyName,
+                        ()->{
+                            return AwsLandscape.obtain(awsAccessKey, awsSecret)
+                                    .importKeyPair(new AwsRegion(regionId), publicKey.getBytes(), encryptedPrivateKey.getBytes(), keyName);
+                });
+        return convertToSSHKeyPairDTO(keyPair);
+    }
+   
+    private SSHKeyPairDTO convertToSSHKeyPairDTO(SSHKeyPair keyPair) {
+        final SSHKeyPairDTO result = new SSHKeyPairDTO(keyPair.getRegionId(), keyPair.getName(), keyPair.getCreatorName(), keyPair.getCreationTime());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
+        return result;
+    }
+
     @Override
     public ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId) {
         final ArrayList<SSHKeyPairDTO> result = new ArrayList<>();
@@ -73,7 +128,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId);
         for (final KeyPairInfo keyPairInfo : landscape.getAllKeyPairInfos(region)) {
             final SSHKeyPair key = landscape.getSSHKeyPair(region, keyPairInfo.keyName());
-            if (key != null) {
+            if (key != null && SecurityUtils.getSubject().isPermitted(key.getPermissionType().getStringPermission(DefaultActions.READ))) {
                 result.add(new SSHKeyPairDTO(key.getRegionId(), key.getName(), key.getCreatorName(), key.getCreationTime()));
             }
         }
@@ -82,7 +137,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair) {
-        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.SSH_KEY.getStringPermission(DefaultActions.DELETE));
-        AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName());
+        SecurityUtils.getSubject().checkPermission(
+                SecuredLandscapeTypes.SSH_KEY.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
+                        keyPair.getTypeRelativeObjectIdentifier()));
+        AwsLandscape
+                .obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName());
     }
 }

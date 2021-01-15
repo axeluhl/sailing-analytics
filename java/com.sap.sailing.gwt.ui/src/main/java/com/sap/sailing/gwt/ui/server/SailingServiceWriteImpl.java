@@ -1615,13 +1615,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             if (competitor.hasBoat()) {
                 final CompetitorWithBoatDTO competitorWithBoat = addOrUpdateCompetitorWithBoat(
                         (CompetitorWithBoatDTO) competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat,
-                        competitorWithBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat);
                 result.add(competitorWithBoat);
             } else {
                 final CompetitorDTO competitorWithoutBoat = addOrUpdateCompetitorWithoutBoat(competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat,
-                        competitorWithoutBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat);
                 result.add(competitorWithoutBoat);
             }
         }
