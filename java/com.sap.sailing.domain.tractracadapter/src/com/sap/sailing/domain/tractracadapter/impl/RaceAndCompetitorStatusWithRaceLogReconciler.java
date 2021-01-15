@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -27,7 +28,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -58,11 +61,13 @@ import com.tractrac.model.lib.api.event.RaceStatusType;
  *
  */
 public class RaceAndCompetitorStatusWithRaceLogReconciler {
+    private static final Logger logger = Logger.getLogger(RaceAndCompetitorStatusWithRaceLogReconciler.class.getName());
     private final DomainFactory domainFactory;
     private final RaceLogResolver raceLogResolver;
     private final LogEventAuthorImpl raceLogEventAuthor;
     private final IRace tractracRace;
     private final Map<Pair<TrackedRace, RaceLog>, RaceLogListener> raceLogListeners;
+    private OfficialCompetitorUpdateProvider officialCompetitorUpdateProvider;
     private final static Map<RaceStatusType, Flags> flagForRaceStatus;
     
     static {
@@ -207,7 +212,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      */
     public void reconcileRaceStatus(IRace tractracRace, TrackedRace trackedRace) {
         final RaceStatusType raceStatus = tractracRace.getStatus();
-        final MillisecondsTimePoint raceStatusUpdateTime = new MillisecondsTimePoint(tractracRace.getStatusTime());
+        final TimePoint raceStatusUpdateTime = TimePoint.of(tractracRace.getStatusTime());
         RaceLogFlagEvent abortingFlagEvent = null;
         for (final RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             if (abortingFlagEvent == null) {
@@ -216,6 +221,14 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
+        if (raceStatus == RaceStatusType.OFFICIAL && !ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial()) {
+            final Runnable setResultsAreOfficial = ()->RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+            if (officialCompetitorUpdateProvider != null) {
+                officialCompetitorUpdateProvider.runWhenNoMoreOfficialCompetitorUpdatesPending(setResultsAreOfficial);
+            } else {
+                setResultsAreOfficial.run();
+            }
+        }
         if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         } else if (isAbortedState(raceStatus) &&
@@ -227,7 +240,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         }
     }
 
-    protected void startNewPass(final MillisecondsTimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
+    protected void startNewPass(final TimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
         raceLog.add(new RaceLogPassChangeEventImpl(timePointForStartOfNewPass, raceLogEventAuthor, raceLog.getCurrentPassId() + 1));
     }
 
@@ -331,6 +344,8 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();
+        logger.info("Received a status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+": officialRank: " + officialRank
+                + ", officialFinishingTime: " + officialFinishingTime + ", statusTime: " + timePointForStatusEvent);
         if (timePointForStatusEvent != 0) {
             // there is an official result for the competitor on TracTrac's side
             // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
@@ -363,7 +378,16 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
                         new LogEventAuthorImpl("Official TracTrac Result Provider", 1), // equally important as race officer on water
                         UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
+                logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
+                        + " for competitor " + raceCompetitor + ": " + resultForRaceLog);
+            } else {
+                logger.info("Did not produce a new competitor result for competitor " + raceCompetitor + " in race "
+                        + trackedRace.getRaceIdentifier() + " because existing result "
+                        + resultFromRaceLogAndItsCreationTimePoint + " was not older than status time "
+                        + officialResultTime + " or was an equal result");
             }
+        } else {
+            logger.info("Ignoring status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+" because the status time was 0");
         }
     }
 
@@ -383,5 +407,16 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         return resultFromRaceLogAndItsCreationTimePoint;
+    }
+
+    /**
+     * To be called by the object later calling {@link #reconcileCompetitorStatus(IRaceCompetitor, TrackedRace)}. This
+     * way, this object can tell when the race is to be {@link RaceState#setResultsAreOfficial(TimePoint) moved to
+     * OFFICIAL state} whether any updates are pending and defer the race state transition to that moment.
+     * 
+     * @see OfficialCompetitorUpdateProvider#runWhenNoMoreOfficialCompetitorUpdatesPending(Runnable)
+     */
+    public void setOfficialCompetitorUpdateProvider(OfficialCompetitorUpdateProvider officialCompetitorUpdateProvider) {
+        this.officialCompetitorUpdateProvider = officialCompetitorUpdateProvider;
     }
 }

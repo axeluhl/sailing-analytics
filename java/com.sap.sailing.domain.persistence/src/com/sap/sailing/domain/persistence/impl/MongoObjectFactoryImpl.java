@@ -53,6 +53,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -940,6 +941,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
         return result;
     }
+    
+    public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogResultsAreOfficialEvent event) {
+        Document result = new Document();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogResultsAreOfficialEvent(event));
+        return result;
+    }
 
     public Document storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDenoteForTrackingEvent event) {
         Document result = new Document();
@@ -1142,6 +1150,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (event.getToInclusive() != null) {
             storeTimePoint(event.getToInclusive(), result, toField);
         }
+    }
+    
+    private Object storeRaceLogResultsAreOfficialEvent(RaceLogResultsAreOfficialEvent event) {
+        Document result = new Document();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogResultsAreOfficialEvent.class.getSimpleName());
+        // currently there are no further properties; the event speaks for itself
+        return result;
     }
 
     private Object storeRaceLogDenoteForTrackingEvent(RaceLogDenoteForTrackingEvent event) {

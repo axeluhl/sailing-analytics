@@ -846,20 +846,26 @@ public class Util {
     }
 
     /**
-     * Checks if the given map is null, and if, returns an empty map.
+     * Checks if the given map is null, and if so, returns an empty map.
      */
     public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        final Map<K, V> result;
         if (map == null) {
-            return Collections.emptyMap();
+            result = Collections.emptyMap();
+        } else {
+            result = map;
         }
-        return map;
+        return result;
     }
 
     public static String toStringOrNull(Object toStringOrNull) {
+        final String result;
         if (toStringOrNull == null) {
-            return null;
+            result = null;
+        } else {
+            result = toStringOrNull.toString();
         }
-        return toStringOrNull.toString();
+        return result;
     }
     
     public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {

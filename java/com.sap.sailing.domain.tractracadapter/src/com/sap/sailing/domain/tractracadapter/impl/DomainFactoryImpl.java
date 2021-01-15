@@ -583,7 +583,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, raceAndCompetitorStatusWithRaceLogReconciler,
                 ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA);
+                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA, ReceiverType.COMPETITOR);
     }
     
     @Override
