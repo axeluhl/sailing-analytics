@@ -16,8 +16,8 @@ public class ChargebeeConfiguration {
 
     private static ChargebeeConfiguration instance;
 
-    private String site;
-    private String apiKey;
+    private final String site;
+    private final String apiKey;
 
     protected ChargebeeConfiguration(String site, String apiKey) {
         this.site = site;

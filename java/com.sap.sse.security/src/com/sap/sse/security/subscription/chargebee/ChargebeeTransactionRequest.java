@@ -20,9 +20,9 @@ public class ChargebeeTransactionRequest extends ChargebeeApiRequest {
         void onTransactionResult(String subscriptionId, Transaction transaction);
     }
 
-    private User user;
-    private String subscriptionId;
-    private OnResultListener listener;
+    private final User user;
+    private final String subscriptionId;
+    private final OnResultListener listener;
     private final SubscriptionApiRequestProcessor requestProcessor;
 
     public ChargebeeTransactionRequest(User user, String subscriptionId, OnResultListener listener,

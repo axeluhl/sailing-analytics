@@ -24,7 +24,7 @@ public class ChargebeeCancelSubscriptionTask
 
     private final String subscriptionId;
     private final SubscriptionApiRequestProcessor requestProcessor;
-    private OnResultListener listener;
+    private final OnResultListener listener;
 
     public ChargebeeCancelSubscriptionTask(String subscriptionId, SubscriptionApiRequestProcessor requestProcessor,
             OnResultListener listener) {

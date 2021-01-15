@@ -7,9 +7,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 
 public class ChargebeeApiSubscriptionData {
-    private Subscription subscription;
-    private Invoice invoice;
-    private Transaction transaction;
+    private final Subscription subscription;
+    private final Invoice invoice;
+    private final Transaction transaction;
 
     public ChargebeeApiSubscriptionData(com.chargebee.models.Subscription subscription, Invoice invoice,
             Transaction transaction) {

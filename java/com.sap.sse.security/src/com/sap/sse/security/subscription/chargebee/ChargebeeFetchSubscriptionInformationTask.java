@@ -8,6 +8,10 @@ import com.chargebee.models.Transaction;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
+/**
+ * Fetch subscription invoice and transaction data. Result will be notified by
+ * {@code ChargebeeFetchSubscriptionInformationTask.OnResultListener}
+ */
 public class ChargebeeFetchSubscriptionInformationTask
         implements ChargebeeInvoiceRequest.OnResultListener, ChargebeeTransactionRequest.OnResultListener {
 
@@ -21,6 +25,7 @@ public class ChargebeeFetchSubscriptionInformationTask
     private final Subscription subscription;
     private final OnResultListener listener;
     private final SubscriptionApiRequestProcessor requestProcessor;
+    
     private boolean hasInvoice;
     private boolean hasTransaction;
     private Invoice invoice;

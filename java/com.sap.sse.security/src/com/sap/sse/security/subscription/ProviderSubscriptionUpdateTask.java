@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
- * Perform fetch and update user subscriptions of a provider service
+ * Perform fetching and updating user subscriptions of a provider service
  */
 public class ProviderSubscriptionUpdateTask implements SubscriptionApiService.OnSubscriptionsResultListener {
     private static final Logger logger = Logger.getLogger(ProviderSubscriptionUpdateTask.class.getName());

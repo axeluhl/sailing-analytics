@@ -1,7 +1,7 @@
 package com.sap.sse.security.subscription;
 
 /**
- * Subscription provider API request interface. A request needs to be scheduled by
+ * Subscription provider API request interface. A request needs to be queued and scheduled by
  * {@code SubscriptionApiRequestProcessor}
  */
 public interface SubscriptionApiRequest {

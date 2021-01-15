@@ -23,9 +23,9 @@ public class ChargebeeInvoiceRequest extends ChargebeeApiRequest {
         void onInvoiceResult(String subscriptionId, Invoice invoice);
     }
 
-    private User user;
-    private String subscriptionId;
-    private OnResultListener listener;
+    private final User user;
+    private final String subscriptionId;
+    private final OnResultListener listener;
     private final SubscriptionApiRequestProcessor requestProcessor;
 
     public ChargebeeInvoiceRequest(User user, String subscriptionId, OnResultListener listener,

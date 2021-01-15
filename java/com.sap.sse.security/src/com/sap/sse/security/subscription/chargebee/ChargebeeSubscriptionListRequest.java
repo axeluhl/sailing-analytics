@@ -12,6 +12,10 @@ import com.chargebee.models.Subscription.SubscriptionListRequest;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
+/**
+ * Fetch user subscription list page (by offset), as well as each subscription invoice and transaction data. Results
+ * will be notified by {@code ChargebeeSubscriptionListRequest.OnResultListener}
+ */
 public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
         implements ChargebeeFetchSubscriptionInformationTask.OnResultListener {
 
@@ -26,6 +30,7 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
     private final User user;
     private final OnResultListener listener;
     private final String offset;
+    
     private List<ChargebeeApiSubscriptionData> subscriptions;
     private String nextOffset;
     private int resultSize;
