@@ -22,13 +22,13 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
-public class SharingButtons extends Composite {
+public class EventHeaderSharingButtons extends Composite {
 
-    private static SharingButtonsUiBinder uiBinder = GWT.create(SharingButtonsUiBinder.class);
+    private static EventHeaderSharingButtonsUiBinder uiBinder = GWT.create(EventHeaderSharingButtonsUiBinder.class);
     
     private static String SHARING_URL_PREFIX = "/sailingserver/shared/home";
 
-    interface SharingButtonsUiBinder extends UiBinder<Widget, SharingButtons> {
+    interface EventHeaderSharingButtonsUiBinder extends UiBinder<Widget, EventHeaderSharingButtons> {
     }
     
     @UiField HTMLPanel htmlPanel;
@@ -37,8 +37,8 @@ public class SharingButtons extends Composite {
     @UiField AnchorElement facebook;
     @UiField Button copyToClipBoard;
 
-    public SharingButtons() {
-        SharingButtonsResources.INSTANCE.css().ensureInjected();
+    public EventHeaderSharingButtons() {
+        EventHeaderSharingButtonsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             htmlPanel.getElement().getStyle().setDisplay(NONE);

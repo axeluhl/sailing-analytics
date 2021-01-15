@@ -16,7 +16,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.NavigatorUtil;
-import com.sap.sailing.gwt.home.mobile.partials.sharing.SharingButtonsResources.LocalCss;
+import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
+import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sse.gwt.shared.ClientConfiguration;
@@ -39,7 +40,7 @@ public class SharingButtons extends Composite {
     Button copyToClipBoard;
 
     public SharingButtons() {
-        SharingButtonsResources.INSTANCE.css().ensureInjected();
+        FloatingSharingButtonsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             htmlPanel.getElement().getStyle().setDisplay(NONE);
@@ -78,19 +79,19 @@ public class SharingButtons extends Composite {
             shareButton.setVisible(false);
             copyToClipBoard.setVisible(false);
         }
-        final LocalCss css = SharingButtonsResources.INSTANCE.css();
+        final LocalCss css = FloatingSharingButtonsResources.INSTANCE.css();
         Timer fadeOutSharingButtonsTimer = new Timer() {
             @Override
             public void run() {
-                htmlPanel.removeStyleName(css.eventheader_sharing_faded_in());
-                htmlPanel.addStyleName(css.eventheader_sharing_faded_out());
+                htmlPanel.removeStyleName(css.sharing_faded_in());
+                htmlPanel.addStyleName(css.sharing_faded_out());
             }
         };
         Window.addWindowScrollHandler(new ScrollHandler() {
             @Override
             public void onWindowScroll(ScrollEvent event) {
-                htmlPanel.removeStyleName(css.eventheader_sharing_faded_out());
-                htmlPanel.addStyleName(css.eventheader_sharing_faded_in());
+                htmlPanel.removeStyleName(css.sharing_faded_out());
+                htmlPanel.addStyleName(css.sharing_faded_in());
                 fadeOutSharingButtonsTimer.schedule(1500);
             }
         });
