@@ -102,6 +102,11 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * Gets the races overall status.
      */
     RaceLogRaceStatus getStatus();
+    
+    /**
+     * Tells if the results found for this race have been confirmed officially.
+     */
+    boolean isResultsAreOfficial();
 
     /**
      * If there is a start time set for the current pass, returns it. Otherwise <code>null</code>.
