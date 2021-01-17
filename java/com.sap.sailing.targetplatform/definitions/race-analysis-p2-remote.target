@@ -59,14 +59,8 @@
 <unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
 <unit id="com.jcraft.jsch" version="0.1.54.v20170116-1932"/>
 <unit id="com.jcraft.jsch.source" version="0.1.54.v20170116-1932"/>
-<unit id="javax.servlet.jsp" version="2.2.0.v201112011158"/>
-<unit id="javax.servlet.jsp.jstl" version="1.2.0.v201105211821"/>
-<unit id="javax.servlet.jsp.jstl.impl" version="1.2.0.v201210211230"/>
-<unit id="javax.servlet.jsp.jstl.impl.source" version="1.2.0.v201210211230"/>
-<unit id="javax.servlet.jsp.jstl.source" version="1.2.0.v201105211821"/>
-<unit id="javax.servlet.jsp.source" version="2.2.0.v201112011158"/>
-<unit id="org.apache.jasper.glassfish" version="2.2.2.v201501141630"/>
-<unit id="org.apache.jasper.glassfish.source" version="2.2.2.v201501141630"/>
+<unit id="org.apache.xalan" version="2.7.1.v201005080400"/>
+<unit id="org.apache.xml.serializer" version="2.7.1.v201005080400"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <!--
@@ -90,8 +84,6 @@
 <unit id="org.eclipse.equinox.event" version="1.4.0.v20170105-1446"/>
 <unit id="org.eclipse.equinox.http.jetty" version="3.4.0.v20170503-2025"/>
 <unit id="org.eclipse.equinox.http.registry" version="1.1.400.v20150715-1528"/>
-<unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
-<unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
 <unit id="org.eclipse.equinox.http.servletbridge" version="1.0.300.v20130327-1442"/>
 <unit id="org.eclipse.equinox.io" version="1.1.100.v20150430-1834"/>
 <unit id="org.eclipse.equinox.ip" version="1.1.400.v20161007-1324"/>
@@ -137,8 +129,6 @@
 <plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
-<plugin id="javax.servlet"/>
-<plugin id="javax.servlet.source"/>
 <plugin id="javax.validation"/>
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
@@ -281,17 +271,9 @@
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
-<plugin id="org.apache.jasper.glassfish"/>
-<plugin id="org.apache.jasper.glassfish.source"/>
-<plugin id="javax.servlet.jsp"/>
-<plugin id="javax.servlet.jsp.jstl"/>
-<plugin id="javax.servlet.jsp.jstl.impl"/>
-<plugin id="javax.servlet.jsp.jstl.impl.source"/>
-<plugin id="javax.servlet.jsp.jstl.source"/>
-<plugin id="javax.servlet.jsp.source"/>
     <plugin id="org.eclipse.equinox.event"/>
     <plugin id="org.eclipse.equinox.event.source"/>
-    <plugin id="org.eclipse.jetty.jndi" version="9.4.35.v20201120"/>
+    <plugin id="org.eclipse.jetty.jndi"/>
     <plugin id="org.eclipse.jetty.jndi.source"/>
     <plugin id="org.eclipse.jetty.plus"/>
     <plugin id="org.eclipse.jetty.plus.source"/>
@@ -301,6 +283,21 @@
     <plugin id="org.objectweb.asm.commons"/>
     <plugin id="org.objectweb.asm.tree"/>
     <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
+    <plugin id="org.mortbay.jasper.apache-el"/>
+    <plugin id="org.mortbay.jasper.apache-jsp"/>
+    <plugin id="org.eclipse.jetty.apache-jsp"/>
+    <plugin id="org.eclipse.jdt.core.compiler.batch"/>
+    <plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
+    <plugin id="org.apache.taglibs.standard-impl"/>
+    <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
+    <plugin id="org.apache.xalan"/>
+    <plugin id="org.apache.xml.serializer"/>
+    <plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
+    <plugin id="org.mortbay.jasper.apache-jsp.source"/>
+    <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
+    <plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
+    <plugin id="javax.servlet"/>
+    <plugin id="org.eclipse.jetty.schemas"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
