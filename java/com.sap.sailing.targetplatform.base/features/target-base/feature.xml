@@ -223,6 +223,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.mortbay.apache.apache-jsp.source"
+         download-size="0"
+         install-size="0"
+         version="8.5.54"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.apache-jsp"
          download-size="0"
          install-size="0"
@@ -231,6 +238,13 @@
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.jsp"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.jsp.source"
          download-size="0"
          install-size="0"
          version="9.4.35.v20201120"
