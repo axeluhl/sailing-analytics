@@ -36,12 +36,6 @@ public class TestORCCertificateImporterRMS extends AbstractORCCertificateImporte
         assertEquals(500.0, runAllowanceAtTenKnots.asSeconds(), 0.01);
     }
     
-    @FailIfNoValidOrcCertificates
-    @Test
-    public void testSimpleOnlineRMSFileRead() throws IOException, ParseException, InterruptedException {
-        testSimpleOnlineFileRead("rms");
-    }
-    
     @Test
     public void testLocalRMSFileReadWithIdenticalSailnumbers() throws IOException, ParseException {
         // additional test to ensure certificates with same sailnumbers but different ids are equally parsed and saved
