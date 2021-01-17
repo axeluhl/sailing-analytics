@@ -105,7 +105,6 @@
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
 <unit id="org.eclipse.equinox.event" version="1.4.0.v20170105-1446"/>
 <unit id="org.eclipse.equinox.cm" version="1.2.0.v20170105-1446"/>
-<!-- unit id="org.eclipse.equinox.weaving.hook" version="1.2.0.v20160929-1449"/ -->
 <repository location="https://download.eclipse.org/releases/oxygen/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -271,33 +270,31 @@
 <plugin id="org.apache.xmlbeans.source"/>
 <plugin id="org.dom4j.source"/>
 <plugin id="com.amazon.aws.aws-java-api.source"/>
-    <plugin id="org.eclipse.equinox.event"/>
-    <plugin id="org.eclipse.equinox.event.source"/>
-    <plugin id="org.eclipse.jetty.jndi"/>
-    <plugin id="org.eclipse.jetty.jndi.source"/>
-    <plugin id="org.eclipse.jetty.plus"/>
-    <plugin id="org.eclipse.jetty.plus.source"/>
-    <plugin id="javax.annotation-api"/>
-    <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
-    <plugin id="org.objectweb.asm" version="7.0.0"/>
-    <plugin id="org.objectweb.asm.commons"/>
-    <plugin id="org.objectweb.asm.tree"/>
-    <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
-    <plugin id="org.mortbay.jasper.apache-el"/>
-    <plugin id="org.mortbay.jasper.apache-jsp"/>
-    <plugin id="org.eclipse.jetty.apache-jsp"/>
-    <plugin id="org.eclipse.jdt.core.compiler.batch"/>
-    <plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
-    <plugin id="org.apache.taglibs.standard-impl"/>
-    <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
-    <plugin id="org.apache.xalan"/>
-    <plugin id="org.apache.xml.serializer"/>
-    <plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
-    <plugin id="org.mortbay.jasper.apache-jsp.source"/>
-    <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
-    <plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
-    <plugin id="javax.servlet"/>
-    <plugin id="org.eclipse.jetty.schemas"/>
+<plugin id="org.eclipse.equinox.event"/>
+<plugin id="org.eclipse.equinox.event.source"/>
+<plugin id="org.eclipse.jetty.jndi"/>
+<plugin id="org.eclipse.jetty.jndi.source"/>
+<plugin id="org.eclipse.jetty.plus"/>
+<plugin id="org.eclipse.jetty.plus.source"/>
+<plugin id="javax.annotation-api"/>
+<plugin id="org.apache.aries.spifly.dynamic.bundle"/>
+<plugin id="org.objectweb.asm" version="7.0.0"/>
+<plugin id="org.objectweb.asm.commons"/>
+<plugin id="org.objectweb.asm.tree"/>
+<plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
+<plugin id="org.mortbay.jasper.apache-el"/>
+<plugin id="org.mortbay.jasper.apache-jsp"/>
+<plugin id="org.eclipse.jetty.apache-jsp"/>
+<plugin id="org.eclipse.jdt.core.compiler.batch"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
+<plugin id="org.apache.taglibs.standard-impl"/>
+<plugin id="org.apache.taglibs.taglibs-standard-spec"/>
+<plugin id="org.apache.xalan"/>
+<plugin id="org.apache.xml.serializer"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
+<plugin id="org.mortbay.jasper.apache-jsp.source"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
