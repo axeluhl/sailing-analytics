@@ -33,33 +33,43 @@
     <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%false%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%true%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <setAttribute key="selected_target_bundles">
-        <setEntry value="com.sun.mail.javax.mail@8:default"/>
-        <setEntry value="javax.annotation-api@6:default"/>
-        <setEntry value="javax.servlet@default:default"/>
+        <setEntry value="com.sun.mail.javax.mail@default:default"/>
+        <setEntry value="javax.annotation-api@default:default"/>
+        <setEntry value="javax.ws.rs@default:default"/>
         <setEntry value="javax.xml@default:default"/>
         <setEntry value="org.apache.aries.spifly.dynamic.bundle@default:default"/>
+        <setEntry value="org.apache.commons.io@default:default"/>
         <setEntry value="org.apache.felix.gogo.command@default:default"/>
         <setEntry value="org.apache.felix.gogo.runtime@default:default"/>
         <setEntry value="org.apache.felix.gogo.shell@default:default"/>
         <setEntry value="org.apache.felix.shell.remote@0:true"/>
         <setEntry value="org.apache.felix.shell@0:true"/>
-        <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@7:default"/>
+        <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
+        <setEntry value="org.apache.httpcomponents.httpcore@default:default"/>
         <setEntry value="org.apache.shiro.core.source"/>
         <setEntry value="org.apache.shiro.ehcache.source"/>
         <setEntry value="org.apache.shiro.web.source"/>
+        <setEntry value="org.apache.taglibs.standard-impl@default:default"/>
+        <setEntry value="org.apache.taglibs.taglibs-standard-spec@default:default"/>
+        <setEntry value="org.apache.xalan@default:default"/>
+        <setEntry value="org.apache.xml.serializer@default:default"/>
         <setEntry value="org.eclipse.equinox.cm@default:default"/>
-        <setEntry value="org.eclipse.equinox.common@2:true"/>
+        <setEntry value="org.eclipse.equinox.common@default:true"/>
         <setEntry value="org.eclipse.equinox.console@default:default"/>
         <setEntry value="org.eclipse.equinox.event@default:default"/>
         <setEntry value="org.eclipse.equinox.launcher@default:default"/>
-        <setEntry value="org.eclipse.equinox.simpleconfigurator@1:true"/>
+        <setEntry value="org.eclipse.equinox.simpleconfigurator@default:true"/>
         <setEntry value="org.eclipse.equinox.util@default:default"/>
-        <setEntry value="org.eclipse.jetty.annotations@11:default"/>
+        <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
+        <setEntry value="org.eclipse.jetty.annotations@default:default"/>
+        <setEntry value="org.eclipse.jetty.apache-jsp@default:default"/>
         <setEntry value="org.eclipse.jetty.deploy@default:default"/>
         <setEntry value="org.eclipse.jetty.http@default:default"/>
         <setEntry value="org.eclipse.jetty.io@default:default"/>
         <setEntry value="org.eclipse.jetty.jmx@default:default"/>
         <setEntry value="org.eclipse.jetty.jndi@9:default"/>
+        <setEntry value="org.eclipse.jetty.osgi-servlet-api@default:default"/>
+        <setEntry value="org.eclipse.jetty.osgi.boot.jsp@default:false"/>
         <setEntry value="org.eclipse.jetty.osgi.boot@default:default"/>
         <setEntry value="org.eclipse.jetty.plus@10:default"/>
         <setEntry value="org.eclipse.jetty.security@default:default"/>
@@ -73,14 +83,19 @@
         <setEntry value="org.eclipse.osgi.util@1:default"/>
         <setEntry value="org.eclipse.osgi@-1:true"/>
         <setEntry value="org.mongodb.mongo-java-driver.source"/>
-        <setEntry value="org.objectweb.asm.commons@4:default"/>
-        <setEntry value="org.objectweb.asm.tree@5:default"/>
-        <setEntry value="org.objectweb.asm@3:default"/>
+        <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
+        <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
+        <setEntry value="org.objectweb.asm.commons@default:default"/>
+        <setEntry value="org.objectweb.asm.tree@default:default"/>
+        <setEntry value="org.objectweb.asm@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="slf4j.jdk14@default:false"/>
     </setAttribute>
-    <setAttribute key="selected_workspace_bundles"/>
-    <booleanAttribute key="show_selected_only" value="true"/>
+    <setAttribute key="selected_workspace_bundles">
+        <setEntry value="com.sap.sailing.www@default:default"/>
+        <setEntry value="com.sap.sse.debranding@default:default"/>
+    </setAttribute>
+    <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>
     <booleanAttribute key="useDefaultConfigArea" value="false"/>
