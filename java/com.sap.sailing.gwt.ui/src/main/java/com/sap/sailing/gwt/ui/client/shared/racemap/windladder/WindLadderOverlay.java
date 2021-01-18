@@ -11,10 +11,10 @@ import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnAddHandl
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
+import com.sap.sailing.gwt.ui.client.shared.racemap.ManeuverAngleCache;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
-import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
 import com.sap.sse.common.Bearing;
 
@@ -32,6 +32,7 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
 
     protected WindDTO windFix;
 
+    private final ManeuverAngleCache maneuverAngleCache;
     private Position legEnd;
     private Position legStart;
     private Point center;
@@ -40,8 +41,10 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
     private int height;
     private double rotation;
 
-    public WindLadderOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+    public WindLadderOverlay(ManeuverAngleCache maneuverAngleCache, MapWidget map, int zIndex,
+            CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
+        this.maneuverAngleCache = maneuverAngleCache;
     }
 
     public void update(WaypointDTO legStart, WaypointDTO legEnd, WindDTO windFix) {
@@ -55,23 +58,24 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
     }
 
     private Position averageMarkPositions(Iterable<MarkDTO> marks) {
-        double sumLat = 0d;
-        double sumLng = 0d;
         long size = marks.spliterator().getExactSizeIfKnown();
         if (size == -1) {
             size = 0;
-            for (@SuppressWarnings("unused") MarkDTO mark : marks) {
+            for (@SuppressWarnings("unused") MarkDTO mark : marks) { //TODO Integrate into loop below
                 size++;
             }
         }
-        if (size == 0) {
-            return null;
+        Position result = null;
+        if (size > 0) {
+            double sumLat = 0d;
+            double sumLng = 0d;
+            for (MarkDTO mark : marks) {
+                sumLat += mark.position.getLatRad();
+                sumLng += mark.position.getLngRad();
+            }
+            result = new RadianPosition(sumLat / size, sumLng / size);
         }
-        for (MarkDTO mark : marks) {
-            sumLat += mark.position.getLatRad();
-            sumLng += mark.position.getLngRad();
-        }
-        return new RadianPosition(sumLat / size, sumLng / size);
+        return result;
     }
 
     private void calculateMaskSize(Position pos1, Position pos2) {

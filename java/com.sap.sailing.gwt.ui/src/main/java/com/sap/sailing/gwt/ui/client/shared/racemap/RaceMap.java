@@ -319,6 +319,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final Map<String, HandlerRegistration> courseMarkClickHandlers;
 
+    private final ManeuverAngleCache maneuverAngleCache;
+
     private WindLadderOverlay windLadderOverlay;
 
     /**
@@ -624,6 +626,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
+        this.maneuverAngleCache = new ManeuverAngleCache(sailingService,
+                new DegreeBearingImpl(raceMapSettings.getWindLadderManeuverAngle()),
+                raceMapSettings.isWindLadderOverride());
         this.competitorSelection = competitorSelection;
         this.raceCompetitorSet = raceCompetitorSet;
         competitorSelection.addCompetitorSelectionChangeListener(this);
@@ -1879,30 +1884,34 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void showWindLadder(RaceMapDataDTO raceMapDataDTO) {
         // TODO Check settings
         if (map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
-            CompetitorDTO leadingCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(
-                    raceMapDataDTO.boatPositions.keySet()).getB();
-            List<GPSFixDTOWithSpeedWindTackAndLegType> fixes = raceMapDataDTO.boatPositions.get(leadingCompetitor);
-            final LegType legType = fixes != null && !fixes.isEmpty() ? fixes.get(fixes.size() - 1).legType : null;
-            if (legType == LegType.UPWIND || legType == LegType.DOWNWIND) { //TODO Get LegType from course config / mark highlight
-                final CoursePositionsDTO courseDTO = raceMapDataDTO.coursePositions;
-                final int legNumber = courseDTO.currentLegNumber; // One-based //TODO checks
-                WaypointDTO legStart = courseDTO.course.waypoints.get(legNumber - 1);
-                WaypointDTO legEnd = courseDTO.course.waypoints.get(legNumber);
-                WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(legNumber - 1);
-                WindDTO windFix = null;
-                if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
-                    windFix = windTrackDTO.windFixes.get(0); //TODO Average or get more stable source?
+            Pair<Integer, CompetitorDTO> bestVisibleCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(
+                    raceMapDataDTO.boatPositions.keySet());
+            if (bestVisibleCompetitor != null) {
+                CompetitorDTO leadingCompetitor = bestVisibleCompetitor.getB();
+                List<GPSFixDTOWithSpeedWindTackAndLegType> fixes = raceMapDataDTO.boatPositions.get(leadingCompetitor);
+                final LegType legType = fixes != null && !fixes.isEmpty() ? fixes.get(fixes.size() - 1).legType : null;
+                if (legType == LegType.UPWIND || legType == LegType.DOWNWIND) { //TODO Get LegType from course config / mark highlight
+                    final CoursePositionsDTO courseDTO = raceMapDataDTO.coursePositions;
+                    final int legNumber = courseDTO.currentLegNumber; // One-based //TODO checks
+                    WaypointDTO legStart = courseDTO.course.waypoints.get(legNumber - 1);
+                    WaypointDTO legEnd = courseDTO.course.waypoints.get(legNumber);
+                    WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(legNumber - 1);
+                    WindDTO windFix = null;
+                    if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
+                        windFix = windTrackDTO.windFixes.get(0);
+                    }
+                    if (windLadderOverlay == null) {
+                        windLadderOverlay = new WindLadderOverlay(maneuverAngleCache, map, 0 /* TODO z-index */,
+                                coordinateSystem);
+                        windLadderOverlay.addToMap();
+                    }
+                    windLadderOverlay.update(legStart, legEnd, windFix);
+                    if (!windLadderOverlay.isVisible()) {
+                        windLadderOverlay.setVisible(true);
+                    }
+                } else if (windLadderOverlay != null && windLadderOverlay.isVisible()) {
+                    windLadderOverlay.setVisible(false);
                 }
-                if (windLadderOverlay == null) {
-                    windLadderOverlay = new WindLadderOverlay(map, 0 /* TODO */, coordinateSystem);
-                    windLadderOverlay.addToMap();
-                }
-                windLadderOverlay.update(legStart, legEnd, windFix);
-                if (!windLadderOverlay.isVisible()) {
-                    windLadderOverlay.setVisible(true);
-                }
-            } else if (windLadderOverlay != null && windLadderOverlay.isVisible()) {
-                windLadderOverlay.setVisible(false);
             }
         }
     }
