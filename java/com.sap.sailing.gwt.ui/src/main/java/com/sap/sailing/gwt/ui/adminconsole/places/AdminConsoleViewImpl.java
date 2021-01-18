@@ -345,7 +345,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
 
         /* RACE COMMITTEE APP */
         final HorizontalTabLayoutPanel raceCommitteeTabPanel = adminConsolePanel.addVerticalTab(getStringMessages().raceCommitteeApp(), RACE_COMMITEE);
-        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(
+        final DeviceConfigurationPanel deviceConfigurationUserPanel = new DeviceConfigurationPanel(eventManagementPanel, 
                 sailingService, userService, getStringMessages(), errorReporter);
         adminConsolePanel.addToTabPanel(raceCommitteeTabPanel,
                 new DefaultRefreshableAdminConsolePanel<DeviceConfigurationPanel>(deviceConfigurationUserPanel),
