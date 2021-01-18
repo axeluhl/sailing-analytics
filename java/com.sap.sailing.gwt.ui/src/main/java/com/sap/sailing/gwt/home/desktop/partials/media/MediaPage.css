@@ -20,3 +20,44 @@
 	
 }
 
+.media_settings_button,
+.media_add_button {
+  display: inline-block;
+  width: 2.666666666666667em;
+  height: 2.666666666666667em;
+  margin: 0 0 0 0.666666666666667em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50%;
+}
+.media_settings {
+  display: inline-block;
+  text-align: right;
+  font-size: 0;
+}
+
+.media_settings * {
+  font-size: 1rem;
+}
+
+.media_settings_button {
+  background-color: #9f9f9f;
+  background-image: resourceUrl("settings");
+}
+
+.media_add_button {
+  background-color: #9f9f9f;
+  background-image: resourceUrl("plusTransparent");
+}
+
+.media_settings_button.active {
+    background-color: #A40000;
+}
+
+.thumbnail_edit_button {
+    background-image: resourceUrl("settings");
+}
+
+.thumbnail_delete_button {
+    background-image: resourceUrl("close");
+}

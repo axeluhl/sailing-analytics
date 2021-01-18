@@ -2428,4 +2428,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String shoreControl();
     String demoMode();
     String includeAccessTokenForYourAccount();
+    String manage();
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -7,9 +9,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -49,11 +54,67 @@ public class MediaPage extends Composite {
     DivElement photoSectionUi;
     @UiField
     FlowPanel photoListOuterBoxUi;
+    
+    @UiField
+    Anchor videoSettingsAnchor;
+    @UiField
+    Anchor videoAddAnchor;
+    @UiField
+    Anchor photoSettingsAnchor;
+    @UiField
+    Anchor photoAddAnchor;
     @UiField
     StringMessages i18n;
+    
+    private boolean manageVideos;
     private final SimplePanel contentPanel;
+    private ManagePhotosDialog managePhotosDialog;
     private VideoWithLowerThird videoDisplayUi;
+    private Collection<SailingImageDTO> photos;
 
+    @UiHandler("videoSettingsAnchor")
+    public void handleVideoSettingsButtonClick(ClickEvent e) {
+        manageVideos = !manageVideos;
+        if (manageVideos) {
+            videoSettingsAnchor.addStyleName(local_res.css().active());
+            for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
+                if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
+                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
+                    thumb.setManageable(manageVideos);
+                }
+            }
+        } else {
+            videoSettingsAnchor.removeStyleName(local_res.css().active());
+            for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
+                if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
+                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
+                    thumb.setManageable(manageVideos);
+                }
+            }
+        }
+    }
+
+    @UiHandler("videoAddAnchor")
+    public void handleVideoAddButtonClick(ClickEvent e) {
+    }
+
+    @UiHandler("photoSettingsAnchor")
+    public void handlePhotoSettingsButtonClick(ClickEvent e) {
+        for (int i = 0; i < photoListOuterBoxUi.getWidgetCount(); i++) {
+            if (photoListOuterBoxUi.getWidget(i) instanceof GalleryImageHolder) {
+                GalleryImageHolder gih = (GalleryImageHolder) photoListOuterBoxUi.getWidget(i);
+                gih.setVisible(!gih.isVisible());
+            }
+        }
+    }
+
+    @UiHandler("photoAddAnchor")
+    public void handlePhotoAddButtonClick(ClickEvent e) {
+        managePhotosDialog = new ManagePhotosDialog(i18n, res, local_res);
+        RootPanel.get().add(managePhotosDialog);
+        managePhotosDialog.show(photos);
+    }
+    
     public MediaPage(IsWidget initialView) {
         MediaPageResources.INSTANCE.css().ensureInjected();
         contentPanel = new SimplePanel();
@@ -64,6 +125,7 @@ public class MediaPage extends Composite {
     public void setMedia(final MediaDTO media) {
         Widget mediaUi = uiBinder.createAndBindUi(this);
         int photosCount = media.getPhotos().size();
+        photos = media.getPhotos();
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;
@@ -130,7 +192,9 @@ public class MediaPage extends Composite {
                     thumbnail.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            putVideoOnDisplay(videoCandidateInfo, true);
+                            if (!manageVideos) {
+                                putVideoOnDisplay(videoCandidateInfo, true);
+                            }
                         }
                     });
                     videosListUi.add(thumbnail);

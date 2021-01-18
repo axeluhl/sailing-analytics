@@ -73,9 +73,15 @@
 	<g:HTMLPanel>
 		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
 			<div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-					<h1><ui:text from='{i18n.videos}' /></h1>
+				<div class="{res.mediaCss.small6} {res.mediaCss.columns}">
+					<h1>
+                        <ui:text from='{i18n.videos}' />
+                    </h1>
 				</div>
+                <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.media_settings}">
+                    <g:Anchor ui:field="videoSettingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.media_settings_button}" />
+                    <g:Anchor ui:field="videoAddAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.media_add_button}" />
+                </div>
 				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns}">
 					<div class="{style.videoPlayerBox}">
 						<g:SimplePanel ui:field="videoDisplayHolderUi" addStyleNames="{style.videoPlayer}" />
@@ -88,9 +94,15 @@
 		</div>
 		<div ui:field="photoSectionUi" style="display: none;"
 			class="{res.mediaCss.grid} {local_res.css.media}">
-			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-				<h1><ui:text from='{i18n.photos}' /></h1>
+			<div class="{res.mediaCss.small6} {res.mediaCss.columns}">
+				<h1 style="width: auto">
+                    <ui:text from='{i18n.photos}' />
+                </h1>
 			</div>
+            <div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.media_settings}">
+                <g:Anchor ui:field="photoSettingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.media_settings_button}" />
+                <g:Anchor ui:field="photoAddAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.media_add_button}" />
+            </div>
 		</div>
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
 			<g:FlowPanel addStyleNames="{style.photolist}" ui:field="photoListOuterBoxUi" />

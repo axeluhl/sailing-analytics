@@ -2,24 +2,33 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public class VideoThumbnail extends Widget implements HasClickHandlers {
+public class VideoThumbnail extends Composite implements HasClickHandlers {
 
     private static VideoThumbnailUiBinder uiBinder = GWT.create(VideoThumbnailUiBinder.class);
+    
+    @UiField
+    SharedResources res;
+    @UiField
+    MediaPageResources local_res;
 
-    interface VideoThumbnailUiBinder extends UiBinder<Element, VideoThumbnail> {
+    interface VideoThumbnailUiBinder extends UiBinder<Widget, VideoThumbnail> {
     }
 
     @UiField
@@ -27,9 +36,18 @@ public class VideoThumbnail extends Widget implements HasClickHandlers {
 
     @UiField
     ImageElement thumbnailUi;
-
+    
+    @UiField
+    Anchor deleteAnchor;
+    @UiField
+    Anchor editAnchor;
+    @UiField
+    DivElement overlay;
+    
     public VideoThumbnail(VideoDTO video) {
-        setElement(uiBinder.createAndBindUi(this));
+        MediaPageResources.INSTANCE.css().ensureInjected();
+        initWidget(uiBinder.createAndBindUi(this));
+        //setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");
         captionUi.setInnerText(video.getTitle());
         if (video.getThumbnailRef() == null) {
@@ -51,6 +69,14 @@ public class VideoThumbnail extends Widget implements HasClickHandlers {
     @Override
     public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addDomHandler(handler, ClickEvent.getType());
+    }
+    
+    public void setManageable(boolean manageable) {
+        if (manageable) {
+            overlay.getStyle().setDisplay(Display.BLOCK);
+        } else {
+            overlay.getStyle().setDisplay(Display.NONE);
+        }
     }
 
 }
