@@ -109,7 +109,16 @@
 <unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.57"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
-<location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<repository location="https://p2.sapsailing.com/p2/sailing/"/>
+</location>
+<!-- local update site -->
+<!-- location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/ -->
 <!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up.
 <location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
 -->
