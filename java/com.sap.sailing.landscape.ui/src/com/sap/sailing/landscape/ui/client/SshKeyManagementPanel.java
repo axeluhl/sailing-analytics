@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.landscape.common.SecuredLandscapeTypes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -33,7 +34,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
         buttonPanel.addCreateAction(stringMessages.add(), ()->{
-            // TODO here goes the add SSH key logic: pop up a dialog for file upload, local generation, generation in AWS, and text areas for pasting keys as text
+            openAddSshKeyDialog(stringMessages);
         });
         sshKeyTable =
                 new TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, /* enablePager */ true,
@@ -76,6 +77,20 @@ public class SshKeyManagementPanel extends VerticalPanel {
         });
     }
     
+    private void openAddSshKeyDialog(StringMessages stringMessages) {
+        new AddSshKeyDialog(stringMessages.sshKeys(), stringMessages.sshKeys(), stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
+                new DialogCallback<SSHKeyPairDTO>() {
+                    @Override
+                    public void ok(SSHKeyPairDTO editedObject) {
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                        // TODO Implement Type1610991600832.cancel(...)
+                    }
+                }).show();
+    }
+
     public void showKeysInRegion(String awsAccessKey, String awsSecret, String regionId) {
         sshKeyTable.getDataProvider().getList().clear();
         if (regionId != null) {

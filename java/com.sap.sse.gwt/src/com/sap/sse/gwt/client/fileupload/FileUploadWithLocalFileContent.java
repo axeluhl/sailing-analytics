@@ -53,6 +53,6 @@ public class FileUploadWithLocalFileContent {
     }
     
     private HTMLInputElement getFileUploadAsHtmlInputElement() {
-        return (HTMLInputElement) (Object) fileUpload;
+        return (HTMLInputElement) (Object) fileUpload.getElement();
     }
 }
