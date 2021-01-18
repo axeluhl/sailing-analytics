@@ -72,6 +72,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -95,6 +96,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogResultsAreOfficialEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
@@ -1661,6 +1663,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogORCScratchBoatEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogORCImpliedWindSourceEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogORCSetImpliedWindEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogResultsAreOfficialEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogResultsAreOfficialEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -1685,6 +1689,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             impliedWindSource = new ImpliedWindSourceDeserializer().deserialize(json);
         }
         return new RaceLogORCImpliedWindSourceEventImpl(createdAt, logicalTimePoint, author, id, passId, impliedWindSource);
+    }
+    
+    private RaceLogEvent loadRaceLogResultsAreOfficialEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId,
+            List<Competitor> competitors, Document dbObject) throws JsonDeserializationException, ParseException {
+        return new RaceLogResultsAreOfficialEventImpl(createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,

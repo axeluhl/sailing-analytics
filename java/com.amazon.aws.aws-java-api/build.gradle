@@ -5,8 +5,9 @@ repositories {
 }
 
 dependencies {
-    implementation platform('software.amazon.awssdk:bom:2.15.16')
+    implementation platform('software.amazon.awssdk:bom:2.15.57')
     implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:lambda'
     implementation 'software.amazon.awssdk:ec2'
     implementation 'software.amazon.awssdk:route53'
     implementation 'software.amazon.awssdk:cloudwatch'
@@ -17,6 +18,7 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 'aws-core', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'auth', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 's3', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'lambda', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'ec2', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'regions', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'profiles', classifier: 'sources'

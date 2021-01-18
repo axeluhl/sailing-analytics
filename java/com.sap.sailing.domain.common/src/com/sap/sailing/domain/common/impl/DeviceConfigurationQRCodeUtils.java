@@ -7,12 +7,21 @@ import java.util.UUID;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
- * {@link URLEncoder} to help us with the encoding.
+ * {@link URLEncoder} to help us with the encoding.<p>
+ * 
+ * Example URL:<pre>
+ * https://racemanager-app.sapsailing.com/invite?server_url=https://dev.sapsailing.com/&device_config_identifier=D-Labs+Test&device_config_uuid=6fb0e2e3-23e6-4d2e-b66a-77d98feb7fdd&token=KY5G48LdOiTysCCiRfvFIVO87Ljbfzo3a4%2Bal63H%2Fvw%3D&event_id=8c3bdd16-a3d1-4a38-bf82-29d98ce18bec&course_area_uuid=fe96623a-d570-4dc5-8cc4-7fe8c5e7e2c0&priority=2
+ * </pre>
  */
 public class DeviceConfigurationQRCodeUtils {
-    public static final String deviceIdentifierKey = "identifier";
+    private static final String BASE_INVITATION_URL = "https://racemanager-app.sapsailing.com/invite";
+    public static final String serverUrl = "server_url";
+    public static final String eventId = "event_id";
+    public static final String courseAreaId = "course_area_uuid";
+    public static final String priority = "priority";
+    public static final String deviceIdentifierKey = "device_config_identifier";
+    public static final String deviceUuidKey = "device_config_uuid";
     public static final String accessTokenKey = "token";
-    public static final String deviceUuidKey = "uuid";
 
     public static class DeviceConfigurationDetails {
         private final String url;
@@ -45,9 +54,17 @@ public class DeviceConfigurationQRCodeUtils {
         String decode(String encodedURL);
     }
 
-    public static String composeQRContent(String urlEncodedDeviceConfigName, String url, String accessToken, String urlEncodedDeviceIdAsString) {
-        return url + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName + "&" + deviceUuidKey + "="
-                + urlEncodedDeviceIdAsString + "&" + accessTokenKey + "=" + accessToken;
+    public static String composeQRContent(String serverUrlWithoutFinalSlash, String urlEncodedDeviceConfigName,
+            String urlEncodedDeviceIdAsString, UUID eventId, UUID courseAreaId, Integer priority,
+            String accessToken) {
+        return BASE_INVITATION_URL
+                + "?"+serverUrl+"="+serverUrlWithoutFinalSlash
+                + "&" + deviceIdentifierKey + "=" + urlEncodedDeviceConfigName
+                + "&" + deviceUuidKey + "=" + urlEncodedDeviceIdAsString
+                + (eventId != null ? ("&" + DeviceConfigurationQRCodeUtils.eventId + "=" + eventId) : "")
+                + (courseAreaId != null ? ("&" + DeviceConfigurationQRCodeUtils.courseAreaId + "=" + courseAreaId) : "")
+                + (priority != null ? ("&" + DeviceConfigurationQRCodeUtils.priority + "=" + priority) : "")
+                + (accessToken != null ? ("&" + accessTokenKey + "=" + accessToken) : "");
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent, URLDecoder urlDecoder) {
