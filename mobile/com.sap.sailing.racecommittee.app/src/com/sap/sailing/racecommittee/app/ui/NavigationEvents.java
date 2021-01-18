@@ -8,27 +8,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public enum NavigationEvents {
     INSTANCE;
 
-    public void detach(Fragment startTimeFragment) {
+    public void attach(Fragment fragment) {
         for (NavigationListener navigationListener : fragmentAttachListeners) {
-            navigationListener.onFragmentDetach(startTimeFragment);
+            navigationListener.onFragmentAttach(fragment);
         }
     }
 
-    public void attach(Fragment startTimeFragment) {
+    public void detach(Fragment fragment) {
         for (NavigationListener navigationListener : fragmentAttachListeners) {
-            navigationListener.onFragmentAttach(startTimeFragment);
-        }
-    }
-
-    public void resume(Fragment raceFragment) {
-        for (NavigationListener navigationListener : fragmentAttachListeners) {
-            navigationListener.onFragmentResume(raceFragment);
-        }
-    }
-
-    public void pause(Fragment raceFragment) {
-        for (NavigationListener navigationListener : fragmentAttachListeners) {
-            navigationListener.onFragmentPause(raceFragment);
+            navigationListener.onFragmentDetach(fragment);
         }
     }
 
@@ -36,10 +24,6 @@ public enum NavigationEvents {
         void onFragmentAttach(Fragment fragment);
 
         void onFragmentDetach(Fragment fragment);
-
-        void onFragmentResume(Fragment fragment);
-
-        void onFragmentPause(Fragment fragment);
     }
 
     private final List<NavigationListener> fragmentAttachListeners = new CopyOnWriteArrayList<>();

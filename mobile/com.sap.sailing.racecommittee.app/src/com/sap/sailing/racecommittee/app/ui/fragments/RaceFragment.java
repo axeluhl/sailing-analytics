@@ -138,10 +138,6 @@ public abstract class RaceFragment extends LoggableFragment {
         }
     }
 
-    public boolean isFragmentUIActive() {
-        return isAdded() && !isDetached() && !isRemoving();
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -261,20 +257,10 @@ public abstract class RaceFragment extends LoggableFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        NavigationEvents.INSTANCE.resume(this);
-    }
-
-    @Override
-    public void onPause() {
-        NavigationEvents.INSTANCE.pause(this);
-        super.onPause();
-    }
-
-    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.attach(this);
 
         if (context instanceof BaseActivity) {
             BaseActivity baseActivity = (BaseActivity) context;
@@ -282,15 +268,12 @@ public abstract class RaceFragment extends LoggableFragment {
         } else {
             preferences = AppPreferences.on(context);
         }
-
-        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
-        NavigationEvents.INSTANCE.attach(this);
     }
 
     @Override
     public void onDetach() {
+        super.onDetach();
         ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
         NavigationEvents.INSTANCE.detach(this);
-        super.onDetach();
     }
 }

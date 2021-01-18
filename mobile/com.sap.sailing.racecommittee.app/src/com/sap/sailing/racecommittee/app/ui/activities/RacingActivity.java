@@ -572,8 +572,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                     if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                         content = RaceFlagViewerFragment.newInstance();
                     } else {
-                        boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED,
-                                false);
+                        boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED, false);
                         if (forced) {
                             content = RaceFinishingFragment.newInstance();
                         } else {

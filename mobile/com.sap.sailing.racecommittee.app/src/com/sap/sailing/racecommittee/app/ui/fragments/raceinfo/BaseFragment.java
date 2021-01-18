@@ -1,14 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 import android.support.v4.app.FragmentTransaction;
 
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 import java.lang.annotation.Retention;
@@ -65,20 +62,6 @@ public class BaseFragment extends RaceFragment {
         } else {
             sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
-        NavigationEvents.INSTANCE.attach(this);
-    }
-
-    @Override
-    public void onDetach() {
-        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
-        NavigationEvents.INSTANCE.detach(this);
-        super.onDetach();
     }
 
     public boolean onBackPressed() {

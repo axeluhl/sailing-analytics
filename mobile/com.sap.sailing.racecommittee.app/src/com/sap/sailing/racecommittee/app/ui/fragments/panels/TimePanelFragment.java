@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -47,7 +46,6 @@ import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
-import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -57,7 +55,6 @@ import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFi
 public class TimePanelFragment extends BasePanelFragment implements NavigationEvents.NavigationListener {
 
     private final static String TOGGLED = "toggled";
-    private final static String COMPETITOR_TOGGLE_STATE_ON = "competitor-toggle-state-on";
 
     private TimePanelHeaderLayout mRaceHeader;
     private PanelButton mCompetitorList;
@@ -71,7 +68,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     private Boolean mLinkedRace = null;
 
     private TimePoint mLastFinishingTime = null;
-    private boolean mCompetitorToggleOn;
 
     public TimePanelFragment() {
     }
@@ -126,9 +122,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
             mCompetitorList.setVisibility(View.VISIBLE);
             checkWarnings(getRaceState());
         }
-        if (savedInstanceState != null) {
-            mCompetitorToggleOn = savedInstanceState.getBoolean(COMPETITOR_TOGGLE_STATE_ON, false);
-        }
     }
 
     @Override
@@ -138,10 +131,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         checkStatus();
 
         getRaceState().addChangedListener(stateChangedListener);
-
-        if (mCompetitorToggleOn) {
-            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
-        }
     }
 
     @Override
@@ -258,19 +247,11 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
 
     @Override
     public void onFragmentAttach(Fragment fragment) {
-        if (fragment instanceof RaceFlagViewerFragment) {
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
-        }
         if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
-            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
-            mCompetitorToggleOn = false;
         }
         if (fragment instanceof PenaltyFragment || fragment instanceof TrackingListFragment) {
             mCompetitorList.setMarkerLevel(PanelButton.LEVEL_TOGGLED);
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorToggleOn = true;
         }
         handlePanelTimeVisibility(fragment);
 
@@ -280,28 +261,9 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
     public void onFragmentDetach(Fragment fragment) {
         if (fragment instanceof StartTimeFragment) {
             setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
-        }
-        if (fragment instanceof PenaltyFragment) {
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorList.setMarkerLevel(LEVEL_NORMAL);
-        }
-    }
-
-    @Override
-    public void onFragmentPause(Fragment fragment) {
-
-    }
-
-    @Override
-    public void onFragmentResume(Fragment fragment) {
-        if (fragment instanceof StartTimeFragment) {
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_TOGGLED);
-            mCompetitorList.setMarkerLevel(PanelButton.LEVEL_NORMAL);
         }
         if (fragment instanceof PenaltyFragment || fragment instanceof TrackingListFragment) {
-            setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
-            mCompetitorList.setMarkerLevel(LEVEL_TOGGLED);
+            mCompetitorList.setMarkerLevel(LEVEL_NORMAL);
         }
     }
 
@@ -374,7 +336,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         @Override
         public void onClick(PanelButton view) {
             final int toggle = view.toggleMarker();
-            mCompetitorToggleOn = toggle == PanelButton.LEVEL_TOGGLED;
             switch (toggle) {
                 case PanelButton.LEVEL_NORMAL:
                     Intent intent = new Intent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
@@ -405,12 +366,6 @@ public class TimePanelFragment extends BasePanelFragment implements NavigationEv
         public void onChangedSwitch(PanelButton view, boolean isChecked) {
             // no-op
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(COMPETITOR_TOGGLE_STATE_ON, mCompetitorToggleOn);
     }
 
     private void setPanelTimeVisibility(final boolean visible) {
