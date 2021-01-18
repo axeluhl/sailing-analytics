@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="164">
+<target name="Race Analysis Target" sequenceNumber="170">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -62,7 +62,7 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.8.201802270002"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -100,13 +100,6 @@
 <unit id="org.eclipse.equinox.useradmin" version="1.1.400.v20130327-1442"/>
 <unit id="org.eclipse.equinox.util" version="1.0.500.v20130404-1337"/>
 <unit id="org.eclipse.equinox.wireadmin" version="1.0.600.v20150715-1528"/>
-<unit id="org.eclipse.jetty.continuation" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
-<unit id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
 <unit id="org.eclipse.osgi" version="3.12.100.v20180210-1608"/>
 <unit id="org.eclipse.osgi.services" version="3.6.0.v20170228-1906"/>
 <unit id="org.eclipse.osgi.util" version="3.4.0.v20170111-1608"/>
@@ -211,12 +204,13 @@
 <plugin id="org.eclipse.jetty.annotations.source"/>
 <plugin id="org.eclipse.jetty.client"/>
 <plugin id="org.eclipse.jetty.client.source"/>
+<plugin id="org.eclipse.jetty.continuation" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.deploy"/>
 <plugin id="org.eclipse.jetty.deploy.source"/>
-<plugin id="org.eclipse.jetty.http" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.http.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.io" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.io.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.http" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.http.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.io" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.io.source" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.jaas"/>
 <plugin id="org.eclipse.jetty.jmx"/>
 <plugin id="org.eclipse.jetty.jmx.source"/>
@@ -227,17 +221,16 @@
 <plugin id="org.eclipse.jetty.proxy"/>
 <plugin id="org.eclipse.jetty.rewrite"/>
 <plugin id="org.eclipse.jetty.rewrite.source"/>
-<plugin id="org.eclipse.jetty.security" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.security.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.server" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.server.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlet" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlet.source" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.servlets.source"/>
-<plugin id="org.eclipse.jetty.util" version="9.4.8.v20171121"/>
-<plugin id="org.eclipse.jetty.util.ajax"/>
-<plugin id="org.eclipse.jetty.util.ajax.source"/>
-<plugin id="org.eclipse.jetty.util.source" version="9.4.8.v20171121"/>
+<plugin id="org.eclipse.jetty.security" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.security.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.server" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.server.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.servlet" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.servlet.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.ajax" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.util.ajax.source" version="9.4.35.v20201120"/>
 <plugin id="org.eclipse.jetty.webapp"/>
 <plugin id="org.eclipse.jetty.webapp.source"/>
 <plugin id="org.eclipse.jetty.websocket.api"/>
@@ -273,6 +266,7 @@
 <plugin id="org.objenesis"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
+<plugin id="com.chargebee.chargebee-java"/>
 <plugin id="slf4j.jdk14"/>
 <plugin id="com.amazon.aws.aws-java-api"/>
 <plugin id="com.jcraft.jsch"/>

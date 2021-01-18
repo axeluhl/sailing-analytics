@@ -25,11 +25,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogResultsAreOfficialEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
@@ -120,6 +122,15 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertEquals(upperFlag, actualEvent.getUpperFlag());
         assertEquals(lowerFlag, actualEvent.getLowerFlag());
         assertEquals(isDisplayed, actualEvent.isDisplayed());
+    }
+    
+    @Test
+    public void testStoreAndLoadResultsAreOfficialEvent() {
+        RaceLogResultsAreOfficialEvent expectedEvent = new RaceLogResultsAreOfficialEventImpl(MillisecondsTimePoint.now(), expectedEventTime,
+                author, expectedId, expectedPassId);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        RaceLogResultsAreOfficialEvent actualEvent = loadEvent(dbObject);
+        assertBaseFields(expectedEvent, actualEvent);
     }
 
     @Test

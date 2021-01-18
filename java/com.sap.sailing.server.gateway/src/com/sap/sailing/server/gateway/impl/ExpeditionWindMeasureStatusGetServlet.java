@@ -24,7 +24,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 
-public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServletWithPostBasedConrentReplacing implements ExpeditionListener {
+public class ExpeditionWindMeasureStatusGetServlet extends SailingServerHttpServletWithPostBasedContentReplacing implements ExpeditionListener {
     private static final long serialVersionUID = -6791613843435009810L;
 
     private Map<Integer, ExpeditionMessageInfo> lastMessageInfosPerBoat;

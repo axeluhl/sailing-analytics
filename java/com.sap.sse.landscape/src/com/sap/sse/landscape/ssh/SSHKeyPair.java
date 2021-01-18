@@ -53,7 +53,7 @@ public class SSHKeyPair extends NamedImpl implements Named {
         this.publicKey = publicKey;
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
-    
+
     /**
      * @param passphrase
      *            used to {@link KeyPair#decrypt(byte[]) decrypt} the encrypted private key so that the resulting key

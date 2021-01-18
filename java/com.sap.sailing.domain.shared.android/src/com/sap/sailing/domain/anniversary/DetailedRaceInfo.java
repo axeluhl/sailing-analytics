@@ -17,20 +17,18 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
     private final String eventName;
     private final String leaderboardDisplayName;
     private final String leaderboardName;
-    private final UUID eventID;
     private EventType eventType;
 
     public DetailedRaceInfo(RegattaAndRaceIdentifier identifier, String leaderboardName, String leaderboardDisplayName,
             TimePoint timePoint, UUID eventId, String eventName, EventType eventType,
             URL remoteUrl) {
-        super(identifier, timePoint, remoteUrl);
+        super(identifier, timePoint, remoteUrl, eventId);
         if (leaderboardName == null || eventId == null) {
             throw new IllegalStateException("DetailedRaceInfo Data is not allowed to contain any null values!");
         }
         this.leaderboardName = leaderboardName;
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.eventName = eventName;
-        this.eventID = eventId;
         this.eventType = eventType;
     }
 
@@ -52,10 +50,6 @@ public class DetailedRaceInfo extends SimpleRaceInfo {
 
     public String getLeaderboardName() {
         return leaderboardName;
-    }
-
-    public UUID getEventID() {
-        return eventID;
     }
 
     @Override

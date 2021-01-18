@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +35,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDeterminator {
     private static final Logger logger = Logger.getLogger(AnniversaryRaceDeterminatorImpl.class.getName());
-
     private final ConcurrentHashMap<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries;
     private final CopyOnWriteArrayList<AnniversaryChecker> checkers;
     private final RacingEventService racingEventService;
@@ -44,6 +44,7 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
 
     private volatile Pair<Integer, AnniversaryType> nextAnniversary;
     private volatile int currentRaceCount;
+    private final boolean enabled;
 
     /**
      * Interface for checker classes which are passed to the {@link AnniversaryRaceDeterminatorImpl}'s constructor in order to
@@ -66,6 +67,7 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
             checkers.add(toAdd);
         }
         raceChangedListener = this::update;
+        enabled = Boolean.parseBoolean(System.getProperty(ANNIVERSARY_FLAG, "false"));
         start();
     }
 
@@ -81,7 +83,12 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
                     result.getA().forEach(race -> allRaces.put(race.getIdentifier(), race));
                 }
             });
-            allRaces.putAll(racingEventService.getLocalRaceList());
+            racingEventService.getLocalRaceList((uuid)->true)
+                .values()
+                .stream()
+                .flatMap(Set::stream)
+                .forEach(race -> allRaces.put(race.getIdentifier(), race)); 
+            //flatten here and count every race only once even if it is in multiple events (GH 9.11.2020)
             if (allRaces.size() != currentRaceCount) {
                 checkForNewAnniversaries(allRaces);
             }
@@ -203,8 +210,11 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
     
     @Override
     public void start() {
-        isStarted.set(true);
-        remoteSailingServerSet.addRemoteRaceResultReceivedCallback(raceChangedListener);
+        logger.config("system property " + ANNIVERSARY_FLAG + " is " + enabled);
+        isStarted.set(enabled);
+        if (enabled) {
+            remoteSailingServerSet.addRemoteRaceResultReceivedCallback(raceChangedListener);
+        }
     }
     
     @Override
@@ -219,5 +229,10 @@ public class AnniversaryRaceDeterminatorImpl implements AnniversaryRaceDetermina
         knownAnniversaries.clear();
         nextAnniversary = null;
         currentRaceCount = 0;
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }

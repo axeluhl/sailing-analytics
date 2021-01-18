@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
+import com.sap.sailing.gwt.ui.client.EventsRefresherAndProvider;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -26,7 +26,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag (C5163974)
  * @author Axel Uhl (d043530)
  */
-public class EventManagementPanel extends SimplePanel implements EventsRefresher, LeaderboardGroupsDisplayer {
+public class EventManagementPanel extends SimplePanel implements EventsRefresherAndProvider, LeaderboardGroupsDisplayer {
     private EventListComposite eventListComposite;
     private EventDetailsComposite eventDetailsComposite;
     private final CaptionPanel eventsPanel;
@@ -73,6 +73,11 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     @Override
     public void fillEvents() {
         eventListComposite.fillEvents();
+    }
+
+    @Override
+    public Iterable<EventDTO> getAllEvents() {
+        return eventListComposite.getAllEvents();
     }
 
     @Override

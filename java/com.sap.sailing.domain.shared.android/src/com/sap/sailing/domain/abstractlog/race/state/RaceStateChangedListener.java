@@ -18,5 +18,5 @@ public interface RaceStateChangedListener {
     void onCourseDesignChanged(ReadonlyRaceState state);
     void onWindFixChanged(ReadonlyRaceState state);
     void onTagEventsChanged(ReadonlyRaceState state);
-
+    void onResultsAreOfficialChanged(ReadonlyRaceState state);
 }
