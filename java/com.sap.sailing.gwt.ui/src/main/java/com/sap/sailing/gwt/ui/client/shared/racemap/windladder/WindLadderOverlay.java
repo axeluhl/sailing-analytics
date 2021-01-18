@@ -27,8 +27,9 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
     protected static final double PADDING_MULT = 1.2d;
     protected static final double TEXTURE_ALPHA = 0.8d;
 
-    protected static WindLadderMaskGenerator maskGen = new EdgeFeatherMaskGenerator(0.2d);
-    protected static ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture());
+    protected WindLadderMaskGenerator maskGen = new EdgeFeatherMaskGenerator(0.2d);
+    protected LaylineClipper laylineClipper = new LaylineClipper();
+    protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture());
 
     protected WindDTO windFix;
 
@@ -50,6 +51,7 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
     public void update(WaypointDTO legStart, WaypointDTO legEnd, WindDTO windFix) {
         this.legStart = averageMarkPositions(legStart.controlPoint.getMarks());
         this.legEnd = averageMarkPositions(legEnd.controlPoint.getMarks());
+        this.laylineClipper.update(legEnd);
         if (windFix != null) {
             this.windFix = windFix;
         }
@@ -121,8 +123,9 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
         final int canvasHeight = getMap().getDiv().getClientHeight();
         final double patternScale = calculatePatternScale(tileGen.getHeight());
         Context2d ctx = getCanvas().getContext2d();
-        // Move to area of interest
+        // Transpose to area of interest
         ctx.save();
+        ctx.fillRect(100, 100, 100, 100); //TODO Clip here
         ctx.translate(center.getX() + canvasWidth / 2, center.getY() + canvasHeight / 2);
         ctx.rotate(rotation);
         ctx.translate(-width / 2, -height / 2);
@@ -133,12 +136,14 @@ public class WindLadderOverlay extends MovingCanvasOverlay { //TODO Or FullCanva
         ctx.save();
         ctx.setGlobalAlpha(TEXTURE_ALPHA);
         ctx.setGlobalCompositeOperation(Composite.SOURCE_IN);
-        // Draw pattern onto mask
+        // Prepare pattern texture
         ctx.setFillStyle(ctx.createPattern(tileGen.getTile(), Repetition.REPEAT));
         ctx.rect(0, 0, canvasWidth, canvasHeight); //TODO Find a way to reduce the fill size
+        // Transpose to pattern fix point
         ctx.translate(patternFixPoint.getX() + canvasWidth / 2, patternFixPoint.getY() + canvasHeight / 2);
         ctx.rotate(Math.toRadians(windFix.trueWindFromDeg));
         ctx.scale(patternScale, patternScale);
+        // Draw pattern onto mask
         ctx.fill();
         ctx.restore();
 
