@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.fullscreen;
 
+import java.util.stream.Stream;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -94,6 +96,12 @@ public class FullscreenContainer<T extends Widget> {
      */
     protected void showBorder() {
         contentUi.addStyleName(style.contentBorder());
+    }
+    
+    protected Widget createPanel(final Widget... contentWidgets) {
+        final FlowPanel panel = new FlowPanel();
+        Stream.of(contentWidgets).forEach(panel::add);
+        return panel;
     }
     
     @UiHandler("closeActionUi")
