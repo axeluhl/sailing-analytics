@@ -2,11 +2,13 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sse.common.Bearing;
@@ -14,14 +16,14 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * 
+ * Cache for maneuver angles for different boat classes, maneuver types and wind speeds.
  *
  * @author Tim Hessenmüller (D062243)
  */
 public class ManeuverAngleCache {
     private static final Long TTL_MILLIS = 600_000L;
-    private static final Integer WIND_BUCKET_RESOLUTION = 5;
-    private static final Integer WIND_BUCKET_INITIAL_KTS = 30;
+    private static final Integer WIND_BUCKET_RESOLUTION = 3;
+    private static final Integer WIND_BUCKET_INITIAL_CAP = 8;
 
     private final class Key {
         public final BoatClassDTO boatClass;
@@ -61,6 +63,13 @@ public class ManeuverAngleCache {
 
     private final SailingServiceAsync sailingService;
     private final HashMap<Key, List<Triple<Long, Bearing, Double>>> cache = new HashMap<>();
+    /**
+     * Set of request that have been sent and are still being processed.
+     */
+    private final HashSet<Triple<BoatClassDTO, ManeuverType, Integer>> requestSet = new HashSet<>();
+    /**
+     * Maneuver angle to return when no data is available or {@link #overrideAngle} is set.
+     */
     private Bearing defaultAngle;
     private boolean overrideAngle;
 
@@ -94,14 +103,14 @@ public class ManeuverAngleCache {
                 }
                 if (entry == null || entry.getA() < System.currentTimeMillis()) {
                     // We have no data or it has expired
-                    callGetManeuverAngle(boatClass, maneuverType, windSpeed);
+                    callGetManeuverAngle(boatClass, maneuverType, index);
                 }
                 if (entry == null) {
                     // Try to find the closest cached value to return now while we wait for the server
-                    entry = getClosestEntry(windBuckets, windSpeed);
+                    entry = getClosestEntry(windBuckets, index);
                 }
             } else {
-                callGetManeuverAngle(boatClass, maneuverType, windSpeed);
+                callGetManeuverAngle(boatClass, maneuverType, bucketIndex(windSpeed));
             }
         }
         Bearing result = defaultAngle;
@@ -118,12 +127,11 @@ public class ManeuverAngleCache {
      * @return the closest entry or {@code null} if no other value exists
      */
     private Triple<Long, Bearing, Double> getClosestEntry(List<Triple<Long, Bearing, Double>> windBuckets,
-            Speed windSpeed) {
+            int bucketIndex) {
         final int size = windBuckets.size();
-        final int initialIndex = bucketIndex(windSpeed);
         Triple<Long, Bearing, Double> result = null;
-        int downIndex = initialIndex - 1;
-        int upIndex = initialIndex + 1;
+        int downIndex = bucketIndex - 1;
+        int upIndex = bucketIndex + 1;
         while (downIndex >= 0 && upIndex < size) {
             if (downIndex >= 0 && downIndex < size) {
                 result = windBuckets.get(downIndex);
@@ -143,32 +151,58 @@ public class ManeuverAngleCache {
         return result;
     }
 
-    //TODO Inhibit redundant calls
-    private void callGetManeuverAngle(BoatClassDTO boatClass, ManeuverType maneuverType, Speed windSpeed) {
-        sailingService.getManeuverAngle(boatClass, maneuverType, windSpeed,
-                new AsyncCallback<BearingWithConfidenceDTO>() {
-                    @Override
-                    public void onSuccess(BearingWithConfidenceDTO result) {
-                        if (result != null) {
-                            final Key key = new Key(boatClass, maneuverType);
-                            final List<Triple<Long, Bearing, Double>> windBuckets = cache.computeIfAbsent(key,
-                                    k -> new ArrayList<>(WIND_BUCKET_INITIAL_KTS / WIND_BUCKET_RESOLUTION));
-                            final int index = bucketIndex(windSpeed);
-                            final long expiry = System.currentTimeMillis() + TTL_MILLIS; // TODO Adjust TTL by
-                                                                                         // confidence
-                            windBuckets.set(index, new Triple<>(expiry, result.getBearing(), result.getConfidence()));
+    /**
+     * Performs the request to the server if there is no identical request already on the way.
+     * @param boatClass {@link BoatClassDTO}
+     * @param maneuverType {@link ManeuverType}
+     * @param windSpeedBucket {@code int} index of bucket
+     */
+    private void callGetManeuverAngle(BoatClassDTO boatClass, ManeuverType maneuverType, int windSpeedBucket) {
+        final Triple<BoatClassDTO, ManeuverType, Integer> requestKey = new Triple<>(boatClass, maneuverType, windSpeedBucket);
+        if (!requestSet.contains(requestKey)) {
+            final Speed windSpeed = bucketAvgSpeed(windSpeedBucket);
+            sailingService.getManeuverAngle(boatClass, maneuverType, windSpeed,
+                    new AsyncCallback<BearingWithConfidenceDTO>() {
+                        @Override
+                        public void onSuccess(BearingWithConfidenceDTO result) {
+                            if (result != null) {
+                                final Key key = new Key(boatClass, maneuverType);
+                                final List<Triple<Long, Bearing, Double>> windBuckets = cache.computeIfAbsent(key,
+                                        k -> new ArrayList<>(WIND_BUCKET_INITIAL_CAP));
+                                final int index = bucketIndex(windSpeed);
+                                final long expiry = System.currentTimeMillis() + TTL_MILLIS; // TODO Adjust TTL by
+                                                                                             // confidence
+                                windBuckets.set(index, new Triple<>(expiry, result.getBearing(), result.getConfidence()));
+                            }
+                            requestSet.remove(requestKey);
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO Auto-generated method stub
+                            requestSet.remove(requestKey);
+                        }
+                    });
+            requestSet.add(requestKey);
+        }
     }
 
+    /**
+     * Calculates the bucket index from a wind speed.
+     * @param windSpeed {@link Speed} wind speed
+     * @return {@code int} bucket index
+     */
     private static int bucketIndex(Speed windSpeed) {
         return ((int) Math.round(windSpeed.getKnots())) / WIND_BUCKET_RESOLUTION;
+    }
+
+    /**
+     * Calculates the wind speed for the middle of a bucket.
+     * @param bucketIndex {@code int} bucket index
+     * @return {@link Speed} middle wind speed
+     */
+    private static Speed bucketAvgSpeed(int bucketIndex) {
+        double speed = bucketIndex * WIND_BUCKET_RESOLUTION + WIND_BUCKET_RESOLUTION / 2.0;
+        return new KnotSpeedImpl(speed);
     }
 }
