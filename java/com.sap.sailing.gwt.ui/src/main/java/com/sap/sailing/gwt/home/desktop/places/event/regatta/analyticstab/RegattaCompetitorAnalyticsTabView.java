@@ -25,7 +25,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -54,7 +53,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
 
     @UiField(provided = true)
     protected OldCompetitorCharts competitorCharts = new OldCompetitorCharts(
-            ExperimentalFeatures.SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER ? new OldCompetitorChartsDelegateFullscreenViewer() : null);
+            new OldCompetitorChartsDelegateFullscreenViewer());
 
     @Override
     public Class<RegattaCompetitorAnalyticsPlace> getPlaceClassForActivation() {

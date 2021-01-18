@@ -6,10 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public interface ExperimentalFeatures {
 
     /**
-     * Provide button to show the competitor analytics in fullscreen view (work in progress)
-     */
-    public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
-    /**
      * Provide buttons for user management login via social services like facebook or google.
      */
     public static final boolean SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT = false;
