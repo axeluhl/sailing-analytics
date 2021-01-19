@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
                     }
                     @Override
                     protected CompetitorProvider configureCompetitorProvider(ResultUrlRegistry resultUrlRegistry) {
-                        final CompetitorProvider service = new CompetitorImporter(ParserFactory.INSTANCE,
+                        final CompetitorProvider service = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE,
                                 resultUrlRegistry);
                         return service;
                     }

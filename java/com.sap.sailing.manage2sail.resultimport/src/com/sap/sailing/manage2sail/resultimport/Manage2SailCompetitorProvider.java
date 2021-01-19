@@ -15,7 +15,7 @@ import com.sap.sailing.xrr.resultimport.impl.CompetitorResolver;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class CompetitorImporter extends AbstractManage2SailProvider implements CompetitorProvider {
+public class Manage2SailCompetitorProvider extends AbstractManage2SailProvider implements CompetitorProvider {
     private static final long serialVersionUID = 7389956404604333931L;
     private final static String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     private final static String ID_PREFIX = "Manage2Sail";
@@ -23,7 +23,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
     private final ResourceBundleStringMessages stringMessages;
     private final CompetitorResolver competitorResolver;
 
-    public CompetitorImporter(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+    public Manage2SailCompetitorProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
         super(parserFactory, resultUrlRegistry);
         documentProvider = new CompetitorDocumentProvider(this);
         competitorResolver = new CompetitorResolver(documentProvider, parserFactory, ID_PREFIX);
