@@ -41,14 +41,10 @@ public class OldCompetitorCharts extends Composite {
     @UiField DivElement competitorSelectionStateUi;
     
     private final List<DetailType> availableDetailsTypes;
-    private MultiCompetitorLeaderboardChart multiCompetitorChart;
     private final CompetitorChartsDelegate delegate;
+    private MultiCompetitorLeaderboardChart multiCompetitorChart;
     
-    public OldCompetitorCharts() {
-        this(null);
-    }
-
-    public OldCompetitorCharts(CompetitorChartsDelegate delegate) {
+    public OldCompetitorCharts(final CompetitorChartsDelegate delegate) {
         this.availableDetailsTypes = new ArrayList<DetailType>();
         this.multiCompetitorChart = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
@@ -78,7 +74,6 @@ public class OldCompetitorCharts extends Composite {
             public void onChange(ChangeEvent event) {
                 synchronizeChartTypeSelection(delegate.getChartTypeSelectionControl(), chartTypeSelectionListBox);
                 OldCompetitorCharts.this.updateChartType();
-                multiCompetitorChart.forceMaximumChartSize();
             }
         });
     }

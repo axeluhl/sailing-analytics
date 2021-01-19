@@ -20,6 +20,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogResultsAreOfficialEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
@@ -134,6 +135,11 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
                 RaceLogRaceStatus.FINISHED));
         // ensure caches are synched
         forceUpdate();
+    }
+    
+    @Override
+    public void setResultsAreOfficial(TimePoint timePoint) {
+        raceLog.add(new RaceLogResultsAreOfficialEventImpl(timePoint, author, raceLog.getCurrentPassId()));
     }
 
     @Override
