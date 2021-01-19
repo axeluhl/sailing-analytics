@@ -43,6 +43,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
             openAddSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
         addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+        final Button generateButton = buttonPanel.addCreateAction(stringMessages.generate(), ()->{
+            openGenerateSshKeyDialog(stringMessages, awsAccessKeyProvider);
+        });
+        generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
         sshKeyTable =
                 new TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, /* enablePager */ true,
                 Optional.of(new EntityIdentityComparator<SSHKeyPairDTO>() {
@@ -88,9 +92,37 @@ public class SshKeyManagementPanel extends VerticalPanel {
             showKeysInRegion(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
                     regionSelectionModel.getSelectedObject());
             addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
         });
     }
     
+    private void openGenerateSshKeyDialog(StringMessages stringMessages, AwsAccessKeyProvider awsAccessKeyProvider) {
+        new GenerateSshKeyDialog(stringMessages,
+                new DialogCallback<Triple<String, String, String>>() {
+                    @Override
+                    public void ok(Triple<String, String, String> keyPairNameAndPassphrases) {
+                        landscapeManagementService.generateSshKeyPair(awsAccessKeyProvider.getAwsAccessKeyId(),
+                                awsAccessKeyProvider.getAwsSecret(), regionSelectionModel.getSelectedObject(),
+                                keyPairNameAndPassphrases.getA(), keyPairNameAndPassphrases.getB(),
+                                new AsyncCallback<SSHKeyPairDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(SSHKeyPairDTO result) {
+                                sshKeyTable.add(result);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+            }).show();
+    }
+
     private void openAddSshKeyDialog(StringMessages stringMessages, AwsAccessKeyProvider awsAccessKeyProvider) {
         new AddSshKeyDialog(stringMessages,
                 new DialogCallback<Triple<String, String, String>>() {
@@ -114,7 +146,6 @@ public class SshKeyManagementPanel extends VerticalPanel {
                     
                     @Override
                     public void cancel() {
-                        // TODO Implement Type1610991600832.cancel(...)
                     }
                 }).show();
     }

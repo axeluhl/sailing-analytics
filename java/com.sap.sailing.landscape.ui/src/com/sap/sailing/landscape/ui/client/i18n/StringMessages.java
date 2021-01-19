@@ -25,4 +25,8 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String pleaseProvidePublicKey();
     String pleaseProvidePrivateKey();
     String pleaseProvideKeyPairName();
+    String generate();
+    String pleaseProvidePassphrase();
+    String pleaseRepeatPassphrase();
+    String passphrasesDontMatch();
 }
