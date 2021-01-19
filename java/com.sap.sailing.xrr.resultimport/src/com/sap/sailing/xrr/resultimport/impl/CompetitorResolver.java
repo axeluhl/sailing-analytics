@@ -26,6 +26,7 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.IFNationCode;
 import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.Race;
 import com.sap.sailing.xrr.schema.RaceResult;
@@ -176,6 +177,17 @@ public class CompetitorResolver {
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
+        if(teamNationality[0] == null && sailNumber!= null && sailNumber.length() > 3) {
+            // if the team nationality could not directly be inferred, try to extract it from the sail number.
+            try {
+                final String substring = sailNumber.substring(0, 3);
+                final IFNationCode nationalityCode = IFNationCode.fromValue(substring);
+                teamNationality[0] = new NationalityImpl(nationalityCode.name());
+                System.out.println("hit with: " + sailNumber);
+            }catch (Exception e) {
+                logger.log(Level.WARNING, "Could not infer team nationality from sail number: " + sailNumber + ". Nationality will be nulled");
+            }
+        }
         Serializable competitorId;
         try {
             competitorId = UUID.fromString(team.getTeamID());
