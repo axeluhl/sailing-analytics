@@ -59,13 +59,9 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
+    private final OldLeaderboardDelegate delegate;
     private MultiRaceLeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
-    private final OldLeaderboardDelegate delegate;
-    
-    public OldLeaderboard() {
-        this(null);
-    }
     
     public OldLeaderboard(final OldLeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
