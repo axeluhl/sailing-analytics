@@ -62,9 +62,9 @@ public class RoleDefinitionTableWrapper extends
                 dto -> dto.getA().getName(), userColumnListHandler);
         final AccessControlledActionsColumn<Pair<StrippedRoleDefinitionDTO, Boolean>, RoleDefinitionImagesBarCell> actionsColumn = AccessControlledActionsColumn
                 .create(new RoleDefinitionImagesBarCell(stringMessages), userService,
-                        role -> TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel));
+                        role -> TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel));
         actionsColumn.addAction(RoleDefinitionImagesBarCell.ACTION_UPDATE, UPDATE, rolePair -> {
-            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
             final boolean value = !rolePair.getB().booleanValue();
             if (selectedObject != null) {
                 userService.getUserManagementWriteService().putRoleDefintionToUserGroup(selectedObject.getId().toString(),
@@ -84,7 +84,7 @@ public class RoleDefinitionTableWrapper extends
             }
         });
         actionsColumn.addAction(RoleDefinitionImagesBarCell.ACTION_DELETE, UPDATE, rolePair -> {
-            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+            final UserGroupDTO selectedObject = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
             if (selectedObject != null) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(rolePair.getA().getName()))) {
                     userService.getUserManagementWriteService().removeRoleDefinitionFromUserGroup(
@@ -143,7 +143,7 @@ public class RoleDefinitionTableWrapper extends
     }
 
     public void refreshRoleList() {
-        UserGroupDTO selectedObject = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+        UserGroupDTO selectedObject = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
         if (selectedObject != null) {
             filterField.updateAll(selectedObject.getRoleDefinitions());
         }

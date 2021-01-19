@@ -104,11 +104,6 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         awsCredentialsGrid.setWidget(1, 0, new Label(stringMessages.awsSecret()));
         awsSecretPasswordTextBox = new PasswordTextBox();
         awsCredentialsGrid.setWidget(1, 1, awsSecretPasswordTextBox);
-        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ this);
-        final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
-        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
-        sshKeysCaptionPanel.add(sshKeyManagementPanel);
         regionsTable = new TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -119,6 +114,11 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
                 return Collections.singleton(t);
             }
         };
+        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ this, regionsTable.getSelectionModel());
+        final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
+        awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
+        sshKeysCaptionPanel.add(sshKeyManagementPanel);
         regionsTable.addColumn(new TextColumn<String>() {
             @Override
             public String getValue(String s) {

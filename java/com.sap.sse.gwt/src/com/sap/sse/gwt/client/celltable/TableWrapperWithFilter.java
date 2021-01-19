@@ -91,9 +91,25 @@ extends TableWrapper<T, S, SM, TR> {
         mainPanel.insert(filterPanel, 0);
     }
     
+    
     @Override
     public void refresh(Iterable<T> newItems) {
         getFilterPanel().updateAll(newItems);
+    }
+
+    @Override
+    public void add(T t) {
+        getFilterPanel().add(t);
+    }
+
+    @Override
+    public void remove(T t) {
+        getFilterPanel().remove(t);
+    }
+
+    @Override
+    public void clear() {
+        getFilterPanel().removeAll();
     }
 
     protected LabeledAbstractFilterablePanel<T> getFilterPanel() {

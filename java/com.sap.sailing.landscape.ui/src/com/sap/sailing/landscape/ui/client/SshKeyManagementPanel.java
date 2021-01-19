@@ -5,13 +5,16 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -25,17 +28,21 @@ public class SshKeyManagementPanel extends VerticalPanel {
     private final TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources> sshKeyTable;
     private final BusyIndicator sshKeyLoadingBusy;
     private final ErrorReporter errorReporter;
+    private final RefreshableSingleSelectionModel<String> regionSelectionModel;
     
     public SshKeyManagementPanel(StringMessages stringMessages, UserService userService,
             LandscapeManagementWriteServiceAsync landscapeManagementService, AdminConsoleTableResources tableResources,
-            ErrorReporter errorReporter, AwsAccessKeyProvider awsAccessKeyProvider) {
+            ErrorReporter errorReporter, AwsAccessKeyProvider awsAccessKeyProvider,
+            RefreshableSingleSelectionModel<String> regionSelectionModel) {
+        this.regionSelectionModel = regionSelectionModel;
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
-        buttonPanel.addCreateAction(stringMessages.add(), ()->{
-            openAddSshKeyDialog(stringMessages);
+        final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
+            openAddSshKeyDialog(stringMessages, awsAccessKeyProvider);
         });
+        addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
         sshKeyTable =
                 new TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources>(stringMessages, errorReporter, /* enablePager */ true,
                 Optional.of(new EntityIdentityComparator<SSHKeyPairDTO>() {
@@ -72,16 +79,37 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 }
 
                 @Override
-                public void onSuccess(Void result) {}
+                public void onSuccess(Void result) {
+                    sshKeyTable.remove(sshKeyTable.getSelectionModel().getSelectedObject());
+                }
             });
+        });
+        regionSelectionModel.addSelectionChangeHandler(e->{
+            showKeysInRegion(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
+                    regionSelectionModel.getSelectedObject());
+            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
         });
     }
     
-    private void openAddSshKeyDialog(StringMessages stringMessages) {
-        new AddSshKeyDialog(stringMessages.sshKeys(), stringMessages.sshKeys(), stringMessages.ok(), stringMessages.cancel(), /* validator */ null,
-                new DialogCallback<SSHKeyPairDTO>() {
+    private void openAddSshKeyDialog(StringMessages stringMessages, AwsAccessKeyProvider awsAccessKeyProvider) {
+        new AddSshKeyDialog(stringMessages,
+                new DialogCallback<Triple<String, String, String>>() {
                     @Override
-                    public void ok(SSHKeyPairDTO editedObject) {
+                    public void ok(Triple<String, String, String> keyPairNameAndPublicAndPrivateKey) {
+                        landscapeManagementService.addSshKeyPair(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
+                                regionSelectionModel.getSelectedObject(), keyPairNameAndPublicAndPrivateKey.getA(),
+                                keyPairNameAndPublicAndPrivateKey.getB(), keyPairNameAndPublicAndPrivateKey.getC(),
+                                new AsyncCallback<SSHKeyPairDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(SSHKeyPairDTO result) {
+                                        sshKeyTable.add(result);
+                                    }
+                        });
                     }
                     
                     @Override

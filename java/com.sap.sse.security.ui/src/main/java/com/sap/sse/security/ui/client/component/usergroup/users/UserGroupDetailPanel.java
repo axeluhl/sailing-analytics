@@ -120,7 +120,7 @@ public class UserGroupDetailPanel extends Composite
         final VerticalPanel addUserToGroupPanel = new VerticalPanel();
         final Widget buttonPanel = createButtonPanel(userService, stringMessages);
         this.userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            buttonPanel.setVisible(userService.hasPermission(TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel), UPDATE));
+            buttonPanel.setVisible(userService.hasPermission(TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel), UPDATE));
         });
         addUserToGroupPanel.add(buttonPanel);
         addUserToGroupPanel.add(filterPanel);
@@ -146,7 +146,7 @@ public class UserGroupDetailPanel extends Composite
         final Button addButton = buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
             final String selectedUsername = suggestUser.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
-                final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+                final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
                 if (selectedUserGroup != null) {
                     userManagementService.addUserToUserGroup(selectedUserGroup.getId().toString(), selectedUsername,
                             new AsyncCallback<Void>() {
@@ -242,7 +242,7 @@ public class UserGroupDetailPanel extends Composite
 
     private List<String> getSelectedUserGroupUsernames() {
         final List<String> result;
-        final UserGroupDTO tenant = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+        final UserGroupDTO tenant = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
         if (tenant != null) {
             result = Util.asList(tenant.getUsers()).stream().map(StrippedUserDTO::getName).collect(Collectors.toList());
         } else {

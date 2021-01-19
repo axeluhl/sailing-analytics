@@ -20,4 +20,9 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String creator();
     String creationTime();
     String sshKeys();
+    String publicKey();
+    String privateKey();
+    String pleaseProvidePublicKey();
+    String pleaseProvidePrivateKey();
+    String pleaseProvideKeyPairName();
 }

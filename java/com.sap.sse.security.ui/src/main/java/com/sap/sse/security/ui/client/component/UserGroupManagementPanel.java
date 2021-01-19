@@ -140,7 +140,7 @@ public class UserGroupManagementPanel extends Composite {
         listsWrapper.add(roleCaption);
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
-                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedUserGroup(userGroupTableWrapper.getSelectionModel()) != null));
+                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedObjectOrNull(userGroupTableWrapper.getSelectionModel()) != null));
         return listsWrapper;
     }
 

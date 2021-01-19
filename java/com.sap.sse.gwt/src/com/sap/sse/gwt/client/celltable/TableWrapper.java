@@ -155,6 +155,18 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         return dataProvider;
     }
     
+    public void add(T t) {
+        getDataProvider().getList().add(t);
+    }
+    
+    public void remove(T t) {
+        getDataProvider().getList().remove(t);
+    }
+    
+    public void clear() {
+        getDataProvider().getList().clear();
+    }
+    
     public void refresh(Iterable<T> newItems) {
         dataProvider.getList().clear();
         Util.addAll(newItems, dataProvider.getList());
@@ -209,7 +221,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      * @return {@code null} if no or multiple objects are currently selected; the single selected object otherwise; this
      *         can be useful if certain actions are enabled with this table only if a single object is selected.
      */
-    public static <X> X getSingleSelectedUserGroup(MultiSelectionModel<X> selectionModel) {
+    public static <X> X getSingleSelectedObjectOrNull(MultiSelectionModel<X> selectionModel) {
         return selectionModel.getSelectedSet() != null && selectionModel.getSelectedSet().size() == 1 ?
                 selectionModel.getSelectedSet().iterator().next() : null;
     }
