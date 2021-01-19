@@ -1,11 +1,11 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -15,13 +15,12 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
 
-import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
-import com.sap.sailing.resultimport.ResultUrlRegistry;
+import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
@@ -33,26 +32,27 @@ import com.sap.sailing.xrr.schema.RaceResult;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
-import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class CompetitorImporter extends AbstractManage2SailProvider implements CompetitorProvider {
-    private static final long serialVersionUID = 7389956404604333931L;
-    private static final Logger logger = Logger.getLogger(CompetitorImporter.class.getName());
-    private final static String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private final CompetitorDocumentProvider documentProvider;
-    private final ResourceBundleStringMessages stringMessages;
+public class CompetitorResolver {
+    
+    private static final Logger logger = Logger.getLogger(CompetitorResolver.class.getName());
 
-    public CompetitorImporter(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
-        super(parserFactory, resultUrlRegistry);
-        documentProvider = new CompetitorDocumentProvider(this);
-        stringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
+    private static final String ID_CONNECTOR_SYMBOL = "-";
+    
+    private final ResultDocumentProvider documentProvider;
+    private final ParserFactory parserFactory;
+    
+    private final String idPrefix;
+
+    public CompetitorResolver(ResultDocumentProvider documentProvider, ParserFactory parserFactory, String idPrefix) {
+        this.documentProvider = documentProvider;
+        this.parserFactory = parserFactory;
+        this.idPrefix = idPrefix;
     }
     
-    @Override
     public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException {
         Map<String, Set<String>> result = new HashMap<>();
-        for (ResultDocumentDescriptor resultDocDescr : getDocumentProvider().getResultDocumentDescriptors()) {
+        for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             final String eventName = resultDocDescr.getEventName();
             final String regattaName = resultDocDescr.getRegattaName();
             Set<String> set = result.get(eventName);
@@ -64,21 +64,15 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
         }
         return result;
     }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
+    
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
         final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>(); // keys are the teamID
-        for (ResultDocumentDescriptor resultDocDescr : getDocumentProvider().getResultDocumentDescriptors()) {
+        for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             if (resultDocDescr.getEventName().equals(eventName) &&
                     (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
-                final Parser parser = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
+                final Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 try {
                     final RegattaResults regattaResults = parser.parse();
                     // If teams are found outside of a Division context then no boat class would be assigned to the
@@ -149,7 +143,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
         }
         return result;
     }
-
+    
     private CompetitorDescriptor createCompetitorDescriptor(Team team, final Parser parser, Event event,
             Division division, String raceID) {
         final Boat boat = parser.getBoat(team.getBoatID());
@@ -159,9 +153,11 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
             // use that of team; if not defined for team, use first nationality of a team member that has one defined
             team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
         };
-        String boatClassName = parser.getBoatClassName(division);
+        final String boatClassName;
         if(division != null) {
             boatClassName = parser.getBoatClassName(division);
+        }else {
+            boatClassName = null;
         }
         List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
                 Person xrrPerson = parser.getPerson(crew.getPersonID());
@@ -180,36 +176,27 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
-        UUID competitorUUID;
+        Serializable competitorId;
         try {
-            competitorUUID = UUID.fromString(team.getTeamID());
+            competitorId = UUID.fromString(team.getTeamID());
         } catch (IllegalArgumentException e) {
-            competitorUUID = null;
+            competitorId = idPrefix + ID_CONNECTOR_SYMBOL + team.getTeamID();
         }
-        UUID boatUUID;
+        Serializable boatId;
         try {
-            boatUUID = UUID.fromString(boat.getBoatID());
+            boatId = UUID.fromString(boat.getBoatID());
         } catch (IllegalArgumentException e) {
-            boatUUID = null;
+            boatId = idPrefix + ID_CONNECTOR_SYMBOL + boat.getBoatID();
         }
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
                 event == null ? null : event.getTitle(),
                 division == null ? null
                         : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
-                race != null ? race.getRaceName() : null, /* fleetName */ null, competitorUUID,
+                race != null ? race.getRaceName() : null, /* fleetName */ null, competitorId,
                 /* name */ team.getTeamName(), /* short name */ null, /* team name */ team.getTeamName(), persons,
                 teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null, boatUUID, boat.getBoatName(), boatClassName,
+                /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boat.getBoatName(), boatClassName,
                 sailNumber);
         return competitorDescriptor;
-    }
-
-    protected CompetitorDocumentProvider getDocumentProvider() {
-        return documentProvider;
-    }
-
-    @Override
-    public String getHint(Locale locale) {
-        return stringMessages.get(locale, "CompetitorImporterHint");
     }
 }
