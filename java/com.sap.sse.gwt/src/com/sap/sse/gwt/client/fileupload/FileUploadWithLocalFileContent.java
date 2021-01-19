@@ -47,10 +47,14 @@ public class FileUploadWithLocalFileContent {
         final File file = fileList.item((double) i);
         final Promise<ArrayBuffer> arrayBufferPromise = file.arrayBuffer();
         arrayBufferPromise.then(arrayBuffer->{
-            callback.fileContentsRead((byte[]) (Object) new Uint8Array(arrayBuffer));
+            callback.fileContentsRead(uint8ArrayBufferToByteArray(new Uint8Array(arrayBuffer)));
             return null;
         });
     }
+    
+    public static native byte[] uint8ArrayBufferToByteArray(Uint8Array buffer) /*-{
+        return buffer;
+    }-*/;
     
     private HTMLInputElement getFileUploadAsHtmlInputElement() {
         return (HTMLInputElement) (Object) fileUpload.getElement();
