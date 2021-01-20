@@ -1,6 +1,7 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,10 @@ import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
 import com.sap.sse.common.Util;
 
+/**
+ * Used to resolve CompetitorDescriptors from a given ResultDocumentProvider using a given ParserFactory. 
+ * Additionally, a given id prefix will be used to enhance uniqueness of non UUID ids in the document.
+ */
 public class CompetitorResolver {
     private static final Logger logger = Logger.getLogger(CompetitorResolver.class.getName());
     private static final String ID_CONNECTOR_SYMBOL = "-";
@@ -50,6 +55,11 @@ public class CompetitorResolver {
         this.idPrefix = idPrefix;
     }
     
+    /**
+     * Evaluates the given result document, with which the CompetitorResolver has been created and gives coarse information about the results..
+     * @return A Map, with sets of Regatta names as values, keyed by the events they belong to
+     * @throws IOException
+     */
     public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException {
         Map<String, Set<String>> result = new HashMap<>();
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
@@ -65,6 +75,14 @@ public class CompetitorResolver {
         return result;
     }
     
+    /**
+     * Resolves CompetitorDescriptors inside of the given ResultDocument, restricted to an Event. Can optionally also be restricted by a Regatta name
+     * @param eventName
+     * @param optional regattaName
+     * @return A List of CompetitorDescriptors competing in a specified Event and Regatta
+     * @throws JAXBException
+     * @throws IOException
+     */
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
