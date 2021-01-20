@@ -1,15 +1,15 @@
 package com.sap.sailing.gwt.common.client.sharing;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle.Source;
+import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
 
-public interface FloatingSharingButtonsResources {
+public interface FloatingSharingButtonsResources extends ClientBundle {
     public static final FloatingSharingButtonsResources INSTANCE = GWT.create(FloatingSharingButtonsResources.class);
 
-    @Source("SharingButtons.gss")
+    @Source("FloatingSharingButtons.gss")
     LocalCss css();
     
     public interface LocalCss extends CssResource {
@@ -21,11 +21,11 @@ public interface FloatingSharingButtonsResources {
         String sharing_faded_in();
     }
     
-    @Source("../../ui/client/images/share.svg")
+    @Source("../../../ui/client/images/share.svg")
     @MimeType("image/svg+xml")
     DataResource sharingIcon();
     
-    @Source("../../ui/client/images/flat_copy.svg")
+    @Source("../../../ui/client/images/flat_copy.svg")
     @MimeType("image/svg+xml")
     DataResource copyIcon();
 
