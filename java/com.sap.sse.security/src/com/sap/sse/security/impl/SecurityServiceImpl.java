@@ -862,6 +862,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public Iterable<User> getUsersWithPermissions(WildcardPermission permission) {
+        if (Util.size(permission.getQualifiedObjectIdentifiers()) != 1) {
+            throw new IllegalArgumentException("Permission needs to specify exactly one object identifier");
+        }
+        final Set<User> result = new HashSet<>();
+        final User allUser = store.getUserByName(SecurityService.ALL_USERNAME);
+        for (final User user : getUserList()) {
+            final QualifiedObjectIdentifier objectIdentifier = permission.getQualifiedObjectIdentifiers().iterator().next();
+            final OwnershipAnnotation ownership = accessControlStore.getOwnership(objectIdentifier);
+            final AccessControlListAnnotation acl = accessControlStore.getAccessControlList(objectIdentifier);
+            if (PermissionChecker.isPermitted(permission, user, allUser,
+                    ownership == null ? null : ownership.getAnnotation(), acl == null ? null : acl.getAnnotation())) {
+                result.add(user);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser)
             throws UserManagementException, MailException, UserGroupManagementException {

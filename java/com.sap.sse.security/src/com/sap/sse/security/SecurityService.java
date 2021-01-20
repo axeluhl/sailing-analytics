@@ -147,6 +147,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     User getUserByName(String username);
 
     User getUserByEmail(String email);
+    
+    /**
+     * Finds all users that have the {@code permission}. This doesn't have to be an explicit permission assignment on
+     * the {@link User} object (see {@link User#getPermissions()}) but can also be implied, e.g., by a
+     * {@link User#getRoles() role assignment} that the user has, or by a group membership of the user where the group
+     * {@link UserGroup#getRoleDefinitionMap() has roles assigned for members of the group}.
+     */
+    Iterable<User> getUsersWithPermissions(WildcardPermission permission);
 
     User getCurrentUser();
 
