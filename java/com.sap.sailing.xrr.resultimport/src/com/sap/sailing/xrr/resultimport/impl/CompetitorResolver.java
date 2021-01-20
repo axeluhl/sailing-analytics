@@ -38,13 +38,13 @@ import com.sap.sailing.xrr.schema.Team;
 import com.sap.sse.common.Util;
 
 /**
- * Used to resolve CompetitorDescriptors from a given ResultDocumentProvider using a given ParserFactory. 
- * Additionally, a given id prefix will be used to enhance uniqueness of non UUID ids in the document.
+ * Used to resolve CompetitorDescriptors from a given ResultDocumentProvider using a given ParserFactory. Additionally,
+ * a given id prefix will be used to enhance uniqueness of non UUID ids in the document.
  */
 public class CompetitorResolver {
     private static final Logger logger = Logger.getLogger(CompetitorResolver.class.getName());
     private static final String ID_CONNECTOR_SYMBOL = "-";
-    
+
     private final ResultDocumentProvider documentProvider;
     private final ParserFactory parserFactory;
     private final String idPrefix;
@@ -54,9 +54,11 @@ public class CompetitorResolver {
         this.parserFactory = parserFactory;
         this.idPrefix = idPrefix;
     }
-    
+
     /**
-     * Evaluates the given result document, with which the CompetitorResolver has been created and gives coarse information about the results..
+     * Evaluates the given result document, with which the CompetitorResolver has been created and gives coarse
+     * information about the results..
+     * 
      * @return A Map, with sets of Regatta names as values, keyed by the events they belong to
      * @throws IOException
      */
@@ -74,23 +76,28 @@ public class CompetitorResolver {
         }
         return result;
     }
-    
+
     /**
-     * Resolves CompetitorDescriptors inside of the given ResultDocument, restricted to an Event. Can optionally also be restricted by a Regatta name
+     * Resolves CompetitorDescriptors inside of the given ResultDocument, restricted to an Event. Can optionally also be
+     * restricted by a Regatta name
+     * 
      * @param eventName
-     * @param optional regattaName
+     * @param optional
+     *            regattaName
      * @return A List of CompetitorDescriptors competing in a specified Event and Regatta
      * @throws JAXBException
      * @throws IOException
      */
-    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
+    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName)
+            throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
         final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>(); // keys are the teamID
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-            if (resultDocDescr.getEventName().equals(eventName) &&
-                    (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
-                final Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
+            if (resultDocDescr.getEventName().equals(eventName)
+                    && (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
+                final Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(),
+                        resultDocDescr.getEventName());
                 try {
                     final RegattaResults regattaResults = parser.parse();
                     // If teams are found outside of a Division context then no boat class would be assigned to the
@@ -136,21 +143,26 @@ public class CompetitorResolver {
                         }
                     }
                     for (final Team teamOutsideOfDivision : teamsOutsideOfDivision) {
-                        if (divisions.size() == 1) { // exactly one Division; use as default for teams outside of division that were not assigned to a division later
+                        if (divisions.size() == 1) { // exactly one Division; use as default for teams outside of
+                                                     // division that were not assigned to a division later
                             if (!resultsByTeamID.containsKey(teamOutsideOfDivision.getTeamID())) {
                                 final CompetitorDescriptor competitorDescriptor = createCompetitorDescriptor(
-                                        teamOutsideOfDivision, parser, divisions.values().iterator().next(), divisions.keySet().iterator().next(), /* raceID */ null);
+                                        teamOutsideOfDivision, parser, divisions.values().iterator().next(),
+                                        divisions.keySet().iterator().next(), /* raceID */ null);
                                 resultsByTeamID.put(teamOutsideOfDivision.getTeamID(), competitorDescriptor);
                                 result.add(competitorDescriptor);
                             }
                         } else {
                             teamsWithoutRaceAssignments.put(teamOutsideOfDivision.getTeamID(),
-                                    createCompetitorDescriptor(teamOutsideOfDivision, parser, /* event */ null, /* division */ null, /* raceID */ null));
+                                    createCompetitorDescriptor(teamOutsideOfDivision, parser, /* event */ null,
+                                            /* division */ null, /* raceID */ null));
                         }
                     }
                 } catch (JAXBException e) {
-                    logger.log(Level.WARNING, "Exception trying to read competitors for event "+resultDocDescr.getEventName()+
-                            ", regatta "+resultDocDescr.getRegattaName()+" from document "+resultDocDescr.getDocumentName(), e);
+                    logger.log(Level.WARNING,
+                            "Exception trying to read competitors for event " + resultDocDescr.getEventName()
+                                    + ", regatta " + resultDocDescr.getRegattaName() + " from document "
+                                    + resultDocDescr.getDocumentName(), e);
                 }
             }
         }
@@ -161,16 +173,16 @@ public class CompetitorResolver {
         }
         return result;
     }
-    
+
     private CompetitorDescriptor createCompetitorDescriptor(Team team, final Parser parser, Event event,
             Division division, String raceID) {
         final Boat boat = parser.getBoat(team.getBoatID());
         final String sailNumber = boat.getSailNumber();
         final Race race = parser.getRace(raceID);
         final Nationality[] teamNationality = new Nationality[] {
-            // use that of team; if not defined for team, use first nationality of a team member that has one defined
-            team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
-        };
+                // use that of team; if not defined for team, use first nationality of a team member that has one
+                // defined
+                team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name()) };
         final String boatClassName;
         if (division != null) {
             boatClassName = parser.getBoatClassName(division);
@@ -178,26 +190,27 @@ public class CompetitorResolver {
             boatClassName = null;
         }
         final Set<String> skipperNames = new HashSet<String>();
-        List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
-                final Person xrrPerson = parser.getPerson(crew.getPersonID());
-                final String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
-                final Nationality nationality;
-                if (xrrPerson.getNOC() == null) {
-                    nationality = null;
-                } else {
-                    nationality = new NationalityImpl(xrrPerson.getNOC().name());
-                    if (teamNationality[0] == null) {
-                        teamNationality[0] = nationality;
+        List<PersonDTO> persons = team.getCrew().stream()
+                .sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew) -> {
+                    final Person xrrPerson = parser.getPerson(crew.getPersonID());
+                    final String name = xrrPerson.getGivenName() + " " + xrrPerson.getFamilyName();
+                    final Nationality nationality;
+                    if (xrrPerson.getNOC() == null) {
+                        nationality = null;
+                    } else {
+                        nationality = new NationalityImpl(xrrPerson.getNOC().name());
+                        if (teamNationality[0] == null) {
+                            teamNationality[0] = nationality;
+                        }
                     }
-                }
-                if(crew.getPosition() == CrewPosition.S) {
-                    skipperNames.add(xrrPerson.getFamilyName());
-                }
-                final PersonDTO person = new PersonDTO(
-                        name, /* dateOfBirth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name(),
-                                nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
-                return person;
-        }).collect(Collectors.toList());
+                    if (crew.getPosition() == CrewPosition.S) {
+                        skipperNames.add(xrrPerson.getFamilyName());
+                    }
+                    final PersonDTO person = new PersonDTO(name, /* dateOfBirth */ null,
+                            /* description */ xrrPerson.getGender() == null ? null : xrrPerson.getGender().name(),
+                            nationality == null ? null : nationality.getCountryCode().getThreeLetterIOCCode());
+                    return person;
+                }).collect(Collectors.toList());
         if (teamNationality[0] == null && sailNumber != null && sailNumber.length() > 3) {
             // if the team nationality could not directly be inferred, try to extract it from the sail number.
             try {
@@ -205,7 +218,8 @@ public class CompetitorResolver {
                 final IFNationCode nationalityCode = IFNationCode.fromValue(substring);
                 teamNationality[0] = new NationalityImpl(nationalityCode.name());
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Could not infer team nationality from sail number: " + sailNumber + ". Nationality will be nulled");
+                logger.log(Level.WARNING, "Could not infer team nationality from sail number: " + sailNumber
+                        + ". Nationality will be nulled");
             }
         }
         Serializable competitorId;
@@ -225,7 +239,8 @@ public class CompetitorResolver {
                 division == null ? null
                         : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                 race != null ? race.getRaceName() : null, /* fleetName */ null, competitorId,
-                /* name */ getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), /* short name */ null, getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), persons,
+                /* name */ getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), /* short name */ null,
+                getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), persons,
                 teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boat.getBoatName(), boatClassName,
                 sailNumber);
@@ -236,15 +251,14 @@ public class CompetitorResolver {
         final String result;
         if (Util.hasLength(team.getTeamName())) {
             result = team.getTeamName();
-        } else if(boat.getBoatName() != null){
+        } else if (boat.getBoatName() != null) {
             result = boat.getBoatName();
-        }else if(skipperNames.size() > 0) {
+        } else if (skipperNames.size() > 0) {
             result = skipperNames.iterator().next();
-        }else {
+        } else {
             result = null;
         }
         return result;
     }
-    
-    
+
 }
