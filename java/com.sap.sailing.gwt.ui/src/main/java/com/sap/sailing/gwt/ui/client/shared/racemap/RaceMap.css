@@ -30,6 +30,15 @@ body {
 	cursor: pointer;
 }
 
+.raceMapShareLinkButton {
+    margin-right: 10px;
+    margin-bottom: 110px;
+    z-index: 1;
+    border-color: white;
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer;
+}
 .combinedWindPanel {}
 
 .trueNorthIndicatorPanel {

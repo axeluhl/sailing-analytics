@@ -86,6 +86,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
@@ -495,6 +496,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
+    private final FloatingSharingButtonsResources floatingSharingButtonsResources;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -608,6 +610,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
+        floatingSharingButtonsResources = FloatingSharingButtonsResources.INSTANCE;
+        floatingSharingButtonsResources.css().ensureInjected();
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -920,16 +924,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
-                if (showMapControls || shareLinkAction != null) {
+                if (shareLinkAction != null) {
+                    final Button shareLinkButton = createShareLinkButton(map);
+                    map.setControls(ControlPosition.RIGHT_BOTTOM, shareLinkButton);
+                }
+                if (showMapControls) {
                     final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
-                    if (showMapControls) {
-                        final Button settingsButton = createSettingsButton(map);
-                        settingsCotrolFlowPanel.add(settingsButton);
-                    }
-                    if(shareLinkAction != null) {
-                        final Button shareLinkButton = createShareLinkButton(map);
-                        settingsCotrolFlowPanel.add(shareLinkButton);
-                    }
+                    final Button settingsButton = createSettingsButton(map);
+                    settingsCotrolFlowPanel.add(settingsButton);
                     map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 }
                 // Data has been initialized
@@ -1015,7 +1017,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private Button createShareLinkButton(MapWidget map) {
         Button shareLinkButton = new Button();
-        shareLinkButton.setStyleName("gwt-ShareLinkButton");
+        shareLinkButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
+        shareLinkButton.addStyleName(floatingSharingButtonsResources.css().sharing_itemshare());
+        shareLinkButton.addStyleName(raceMapStyle.raceMapShareLinkButton());
         shareLinkButton.ensureDebugId("raceMapShareLink");
         shareLinkButton.setTitle(stringMessages.shareTheLink());
         shareLinkButton.addClickHandler(new ClickHandler() {
