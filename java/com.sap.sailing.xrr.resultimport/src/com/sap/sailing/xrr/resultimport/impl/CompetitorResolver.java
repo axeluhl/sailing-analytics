@@ -24,6 +24,7 @@ import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
+import com.sap.sailing.xrr.schema.CrewPosition;
 import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Event;
 import com.sap.sailing.xrr.schema.IFNationCode;
@@ -158,9 +159,10 @@ public class CompetitorResolver {
         } else {
             boatClassName = null;
         }
+        final Set<String> skipperNames = new HashSet<String>();
         List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
-                Person xrrPerson = parser.getPerson(crew.getPersonID());
-                String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
+                final Person xrrPerson = parser.getPerson(crew.getPersonID());
+                final String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
                 final Nationality nationality;
                 if (xrrPerson.getNOC() == null) {
                     nationality = null;
@@ -170,7 +172,10 @@ public class CompetitorResolver {
                         teamNationality[0] = nationality;
                     }
                 }
-                PersonDTO person = new PersonDTO(
+                if(crew.getPosition() == CrewPosition.S) {
+                    skipperNames.add(xrrPerson.getFamilyName());
+                }
+                final PersonDTO person = new PersonDTO(
                         name, /* dateOfBirth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name(),
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
@@ -202,20 +207,26 @@ public class CompetitorResolver {
                 division == null ? null
                         : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                 race != null ? race.getRaceName() : null, /* fleetName */ null, competitorId,
-                /* name */ getCompetitorNameFromTeamAndBoat(team, boat), /* short name */ null, getCompetitorNameFromTeamAndBoat(team, boat), persons,
+                /* name */ getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), /* short name */ null, getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), persons,
                 teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boat.getBoatName(), boatClassName,
                 sailNumber);
         return competitorDescriptor;
     }
 
-    private String getCompetitorNameFromTeamAndBoat(Team team, Boat boat) {
+    private String getCompetitorNameFromTeamAndBoat(Team team, Boat boat, Set<String> skipperNames) {
         final String result;
         if (Util.hasLength(team.getTeamName())) {
             result = team.getTeamName();
-        } else {
+        } else if(boat.getBoatName() != null){
             result = boat.getBoatName();
+        }else if(skipperNames.size() > 0) {
+            result = skipperNames.iterator().next();
+        }else {
+            result = null;
         }
         return result;
     }
+    
+    
 }
