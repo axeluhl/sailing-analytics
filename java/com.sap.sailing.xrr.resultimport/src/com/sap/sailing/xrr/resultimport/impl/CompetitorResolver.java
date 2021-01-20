@@ -35,14 +35,11 @@ import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
 
 public class CompetitorResolver {
-    
     private static final Logger logger = Logger.getLogger(CompetitorResolver.class.getName());
-
     private static final String ID_CONNECTOR_SYMBOL = "-";
     
     private final ResultDocumentProvider documentProvider;
     private final ParserFactory parserFactory;
-    
     private final String idPrefix;
 
     public CompetitorResolver(ResultDocumentProvider documentProvider, ParserFactory parserFactory, String idPrefix) {
@@ -155,9 +152,9 @@ public class CompetitorResolver {
             team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
         };
         final String boatClassName;
-        if(division != null) {
+        if (division != null) {
             boatClassName = parser.getBoatClassName(division);
-        }else {
+        } else {
             boatClassName = null;
         }
         List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
@@ -177,14 +174,14 @@ public class CompetitorResolver {
                                 nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
-        if(teamNationality[0] == null && sailNumber!= null && sailNumber.length() > 3) {
+        if (teamNationality[0] == null && sailNumber != null && sailNumber.length() > 3) {
             // if the team nationality could not directly be inferred, try to extract it from the sail number.
             try {
                 final String substring = sailNumber.substring(0, 3);
                 final IFNationCode nationalityCode = IFNationCode.fromValue(substring);
                 teamNationality[0] = new NationalityImpl(nationalityCode.name());
                 System.out.println("hit with: " + sailNumber);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 logger.log(Level.WARNING, "Could not infer team nationality from sail number: " + sailNumber + ". Nationality will be nulled");
             }
         }
