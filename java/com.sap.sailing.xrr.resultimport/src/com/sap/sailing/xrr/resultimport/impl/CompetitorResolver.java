@@ -33,6 +33,7 @@ import com.sap.sailing.xrr.schema.RaceResult;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
+import com.sap.sse.common.Util;
 
 public class CompetitorResolver {
     private static final Logger logger = Logger.getLogger(CompetitorResolver.class.getName());
@@ -180,7 +181,6 @@ public class CompetitorResolver {
                 final String substring = sailNumber.substring(0, 3);
                 final IFNationCode nationalityCode = IFNationCode.fromValue(substring);
                 teamNationality[0] = new NationalityImpl(nationalityCode.name());
-                System.out.println("hit with: " + sailNumber);
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Could not infer team nationality from sail number: " + sailNumber + ". Nationality will be nulled");
             }
@@ -202,10 +202,20 @@ public class CompetitorResolver {
                 division == null ? null
                         : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                 race != null ? race.getRaceName() : null, /* fleetName */ null, competitorId,
-                /* name */ team.getTeamName(), /* short name */ null, /* team name */ team.getTeamName(), persons,
+                /* name */ getCompetitorNameFromTeamAndBoat(team, boat), /* short name */ null, getCompetitorNameFromTeamAndBoat(team, boat), persons,
                 teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boat.getBoatName(), boatClassName,
                 sailNumber);
         return competitorDescriptor;
+    }
+
+    private String getCompetitorNameFromTeamAndBoat(Team team, Boat boat) {
+        final String result;
+        if (Util.hasLength(team.getTeamName())) {
+            result = team.getTeamName();
+        } else {
+            result = boat.getBoatName();
+        }
+        return result;
     }
 }

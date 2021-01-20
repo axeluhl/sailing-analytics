@@ -13,7 +13,7 @@ public abstract class AbstractYachtScoringProvider extends AbstractResultUrlProv
     
     public static final String NAME = "YachtScoring XRR Result Importer";
     public static final String EVENT_ID_REGEX = "^\\d+$";
-    public static final String EVENT_ID_TEMPLATE = "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
+    public static final String EVENT_ID_TEMPLATE = "https://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
     protected final ParserFactory parserFactory;
     
     protected AbstractYachtScoringProvider(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
@@ -37,7 +37,7 @@ public abstract class AbstractYachtScoringProvider extends AbstractResultUrlProv
 
     @Override
     public String getOptionalSampleURL() {
-        return "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=1220";
+        return String.format(EVENT_ID_TEMPLATE, /* event ID */ "1220");
     }
 
 }
