@@ -7,6 +7,7 @@ import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -18,6 +19,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@Ignore("2021-01-20: Due to scheduled system maintenance, ngdc.noaa.gov services will be unavailable from Wednesday 2021-01-20 16:00 MT until Friday 2021-01-22 12:00 MT.")
 public abstract class SimpleDeclinationTest<I extends DeclinationImporter> extends AbstractDeclinationTest<I> {
     @Test
     public void testSimpleCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
