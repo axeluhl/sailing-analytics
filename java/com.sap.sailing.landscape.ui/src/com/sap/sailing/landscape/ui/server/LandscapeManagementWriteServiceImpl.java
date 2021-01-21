@@ -128,8 +128,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId);
         for (final KeyPairInfo keyPairInfo : landscape.getAllKeyPairInfos(region)) {
             final SSHKeyPair key = landscape.getSSHKeyPair(region, keyPairInfo.keyName());
-            if (key != null && SecurityUtils.getSubject().isPermitted(key.getPermissionType().getStringPermission(DefaultActions.READ))) {
-                result.add(new SSHKeyPairDTO(key.getRegionId(), key.getName(), key.getCreatorName(), key.getCreationTime()));
+            if (key != null && SecurityUtils.getSubject().isPermitted(key.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                final SSHKeyPairDTO sshKeyPairDTO = new SSHKeyPairDTO(key.getRegionId(), key.getName(), key.getCreatorName(), key.getCreationTime());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), sshKeyPairDTO);
+                result.add(sshKeyPairDTO);
             }
         }
         return result;

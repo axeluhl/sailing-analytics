@@ -225,4 +225,9 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         return selectionModel.getSelectedSet() != null && selectionModel.getSelectedSet().size() == 1 ?
                 selectionModel.getSelectedSet().iterator().next() : null;
     }
+
+    public void refresh() {
+        // TODO Implement TableWrapper.refresh(...)
+        
+    }
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.landscape.ui.client;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -20,15 +23,17 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.landscape.common.SecuredLandscapeTypes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * A panel with a table that allows the user to manage a set of SSH key pairs for the landscape.
- * 
- * TODO add ownership columns
- * TODO add action column with remove, change ownership and edit ACL actions
- * TODO add filter based on can UPDATE check
  * 
  * @author Axel Uhl (D043530)
  *
@@ -71,7 +76,8 @@ public class SshKeyManagementPanel extends VerticalPanel {
                         return (t.getRegionId() == null ? 0 : t.getRegionId().hashCode()) ^
                                (t.getName() == null ? 0 : t.getName().hashCode());
                     }
-                }), tableResources, Optional.empty(), /* filter label */ Optional.empty(), /* filter checkbox label */ null) {
+                }), tableResources, Optional.of(sshKey -> userService.hasPermission(sshKey, DefaultActions.UPDATE)),
+                /* filter label */ Optional.empty(), /* filter checkbox label */ stringMessages.hideElementsWithoutUpdateRights()) {
                     @Override
                     protected Iterable<String> getSearchableStrings(SSHKeyPairDTO t) {
                         return Arrays.asList(t.getName(), t.getRegionId(), t.getCreatorName());
@@ -81,6 +87,32 @@ public class SshKeyManagementPanel extends VerticalPanel {
         sshKeyTable.addColumn(object->object.getName(), stringMessages.name());
         sshKeyTable.addColumn(object->object.getCreatorName(), stringMessages.creator());
         sshKeyTable.addColumn(object->object.getCreationTime().toString(), stringMessages.creationTime());
+        SecuredDTOOwnerColumn.configureOwnerColumns(sshKeyTable.getTable(), sshKeyTable.getColumnSortHandler(), stringMessages);
+        final AccessControlledActionsColumn<SSHKeyPairDTO, SshKeyPairImagesBarCell> sshKeyPairActionColumn = create(
+                new SshKeyPairImagesBarCell(stringMessages), userService);
+        final DialogConfig<SSHKeyPairDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementWriteService(), SecuredLandscapeTypes.SSH_KEY,
+                competitorDTO -> sshKeyTable.refresh(), stringMessages);
+        sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                editOwnerShipDialog::openOwnershipDialog);
+        final EditACLDialog.DialogConfig<SSHKeyPairDTO> configACL = EditACLDialog
+                .create(userService.getUserManagementWriteService(), SecuredLandscapeTypes.SSH_KEY, null, stringMessages);
+        sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
+        sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE,
+                sshKeyPairDTO->landscapeManagementService.removeSshKey(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
+                        sshKeyPairDTO, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                sshKeyTable.remove(sshKeyPairDTO);
+                            }
+                    
+                }));
+        sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
