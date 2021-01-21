@@ -27,3 +27,4 @@ Require-Bundle: com.sap.sse.common,
  com.sap.sse.landscape.common
 Import-Package: com.sap.sse.concurrent,
  com.sap.sse.util
+Bundle-ActivationPolicy: lazy

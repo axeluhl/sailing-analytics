@@ -1,9 +1,6 @@
 package com.sap.sse.shared.json;
 
-
-
 public abstract class ExtensionJsonSerializer<ParentType, ExtensionType> {
-
     public abstract String getExtensionFieldName();
 
     public abstract Object serializeExtension(ParentType parent);
@@ -17,5 +14,4 @@ public abstract class ExtensionJsonSerializer<ParentType, ExtensionType> {
     protected Object serialize(ExtensionType extensionObject) {
         return extensionSerializer.serialize(extensionObject);
     }
-
 }

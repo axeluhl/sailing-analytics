@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -627,6 +628,11 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         return sshKeyPairs.get(new Pair<>(region.getId(), keyName));
+    }
+    
+    @Override
+    public Iterable<SSHKeyPair> getSSHKeyPairs() {
+        return Collections.unmodifiableCollection(sshKeyPairs.values());
     }
 
     @Override

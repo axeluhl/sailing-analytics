@@ -42,14 +42,14 @@
 
   <servlet>
     <servlet-name>Jersey REST API</servlet-name>
-    <servlet-class>com.sap.sailing.polars.jaxrs.RestServletContainer</servlet-class>
+    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
     <init-param>
       <param-name>javax.ws.rs.Application</param-name>
       <param-value>com.sap.sse.landscape.aws.restapi.RestApiApplication</param-value>
     </init-param>
     <init-param>
       <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-      <param-value>com.sap.sse.landscape.aws.restapi.AccessControlAndEncodingResponseFilter</param-value>
+      <param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
     </init-param>
     <init-param>
       <param-name>com.sun.jersey.config.property.packages</param-name>

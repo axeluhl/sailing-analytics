@@ -18,3 +18,4 @@ Require-Bundle: com.sap.sse.landscape,
 Export-Package: com.sap.sailing.landscape,
  com.sap.sailing.landscape.impl,
  com.sap.sailing.landscape.procedures
+Bundle-ActivationPolicy: lazy

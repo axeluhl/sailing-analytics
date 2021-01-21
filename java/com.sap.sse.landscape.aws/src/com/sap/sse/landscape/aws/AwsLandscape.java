@@ -234,6 +234,11 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
     /**
+     * Obtains all SSH key pairs known by this landscape. Clients shall check the {@code READ} permission before handing out those keys.
+     */
+    Iterable<SSHKeyPair> getSSHKeyPairs();
+
+    /**
      * Assumes that the {@code keyPair}'s private key has been encrypted using this landscape's default encryption passphrase
      * and uses that to decrypt it.
      */
@@ -518,7 +523,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
-     * @param privateKeyEncryptionPassphrase TODO
      */
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
