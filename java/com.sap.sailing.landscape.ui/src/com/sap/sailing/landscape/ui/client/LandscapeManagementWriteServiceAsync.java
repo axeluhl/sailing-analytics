@@ -15,14 +15,28 @@ public interface LandscapeManagementWriteServiceAsync {
     void getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName,
             AsyncCallback<MongoEndpointDTO> callback);
 
+    /**
+     * The calling subject will see only those keys for which it has the {@code READ} permission.
+     */
     void getSshKeys(String awsAccessKey, String awsSecret, String regionId,
             AsyncCallback<ArrayList<SSHKeyPairDTO>> callback);
 
+    /**
+     * The calling subject must have {@code DELETE} permission for the key requested.
+     */
     void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair, AsyncCallback<Void> asyncCallback);
 
+    /**
+     * The calling subject must have {@code CREATE} permission for the key name and region requested as well as the
+     * {@link CREATE_OBJECT} permission on the server on which this is called.
+     */
     void generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName,
             String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
 
+    /**
+     * The calling subject must have {@code CREATE} permission for the key requested as well as the
+     * {@link CREATE_OBJECT} permission on the server on which this is called.
+     */
     void addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
             String encryptedPrivateKey, AsyncCallback<SSHKeyPairDTO> callback);
 }

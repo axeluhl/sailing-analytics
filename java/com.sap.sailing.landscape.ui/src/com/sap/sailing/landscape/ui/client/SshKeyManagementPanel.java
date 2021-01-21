@@ -23,6 +23,16 @@ import com.sap.sse.landscape.common.SecuredLandscapeTypes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
+/**
+ * A panel with a table that allows the user to manage a set of SSH key pairs for the landscape.
+ * 
+ * TODO add ownership columns
+ * TODO add action column with remove, change ownership and edit ACL actions
+ * TODO add filter based on can UPDATE check
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class SshKeyManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources> sshKeyTable;

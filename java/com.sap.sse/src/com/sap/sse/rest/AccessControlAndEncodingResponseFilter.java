@@ -1,4 +1,4 @@
-package com.sap.sse.threadmanager;
+package com.sap.sse.rest;
 
 import javax.ws.rs.core.MultivaluedMap;
 

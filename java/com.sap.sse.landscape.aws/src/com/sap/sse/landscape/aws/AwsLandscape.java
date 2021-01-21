@@ -221,14 +221,15 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     /**
      * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair.<p>
      * 
-     * The calling subject must have CREATE permission for the key.
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
      */
     SSHKeyPair importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
     /**
-     * The calling subject must have READ permission for the key requested.
+     * The calling subject must have {@code READ} permission for the key requested.
      */
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
@@ -240,9 +241,11 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     /**
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
-     * and stores it persistently also in the local server's database with the private key encrypted.<p>
+     * and stores it persistently also in the local server's database with the private key encrypted.
+     * <p>
      * 
-     * The calling subject must have CREATE permission for the key.
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
      */
     SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
@@ -252,7 +255,8 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
      * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.<p>
      * 
-     * The calling subject must have CREATE permission for the key.
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
      * 
      * @return the key ID as string, usually starting with the prefix "key-"
      */
