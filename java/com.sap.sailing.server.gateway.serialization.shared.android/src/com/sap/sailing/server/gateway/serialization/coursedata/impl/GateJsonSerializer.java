@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class GateJsonSerializer extends BaseControlPointJsonSerializer implements JsonSerializer<ControlPoint> {
     public static final String VALUE_CLASS = ControlPointWithTwoMarks.class.getSimpleName();

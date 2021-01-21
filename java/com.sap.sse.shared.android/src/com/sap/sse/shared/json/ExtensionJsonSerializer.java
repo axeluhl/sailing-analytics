@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization;
+package com.sap.sse.shared.json;
 
 
 
