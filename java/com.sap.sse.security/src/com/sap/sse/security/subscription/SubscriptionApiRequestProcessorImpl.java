@@ -1,10 +1,9 @@
 package com.sap.sse.security.subscription;
 
+import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,47 +18,62 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
     private final Queue<RequestQueueEntry> requestQueue;
     private final ScheduledExecutorService executor;
 
-    private AtomicBoolean processing = new AtomicBoolean(false);
+    private boolean processing = false;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
-        requestQueue = new ConcurrentLinkedQueue<RequestQueueEntry>();
+        requestQueue = new LinkedList<RequestQueueEntry>();
         this.executor = executor;
     }
 
     @Override
     public void process() {
-        processNextRequest();
+        processNextRequestIfAvailable();
     }
 
     @Override
-    public void addRequest(SubscriptionApiRequest request, long delayMs) {
+    public synchronized void addRequest(SubscriptionApiRequest request, long delayMs) {
         if (request != null) {
-            requestQueue.add(new RequestQueueEntry(request, delayMs));
-            if (!processing.get()) {
-                processNextRequest();
+            boolean isProcessing = addNewRequestAndDetermineIsProcessing(new RequestQueueEntry(request, delayMs));
+            if (!isProcessing) {
+                processNextRequestIfAvailable();
             }
         }
     }
 
-    private void processNextRequest() {
-        if (!requestQueue.isEmpty()) {
-            processing.set(true);
-            RequestQueueEntry entry = requestQueue.poll();
+    private void processNextRequestIfAvailable() {
+        RequestQueueEntry entry = getNextRequestIfAvailable();
+        if (entry != null) {
             executor.schedule(() -> {
                 try {
                     entry.getRequest().run();
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Process subscription API request error", e);
                 } finally {
-                    if (requestQueue.isEmpty()) {
-                        processing.set(false);
-                    } else {
-                        processNextRequest();
-                    }
+                    processNextRequestIfAvailable();
                 }
             }, entry.getDelayMs(), TimeUnit.MILLISECONDS);
-        } else {
-            processing.set(false);
+        }
+    }
+
+    private RequestQueueEntry getNextRequestIfAvailable() {
+        final RequestQueueEntry entry;
+
+        synchronized (requestQueue) {
+            if (!requestQueue.isEmpty()) {
+                processing = true;
+                entry = requestQueue.poll();
+            } else {
+                processing = false;
+                entry = null;
+            }
+            return entry;
+        }
+    }
+
+    private boolean addNewRequestAndDetermineIsProcessing(RequestQueueEntry entry) {
+        synchronized (requestQueue) {
+            requestQueue.add(entry);
+            return processing;
         }
     }
 

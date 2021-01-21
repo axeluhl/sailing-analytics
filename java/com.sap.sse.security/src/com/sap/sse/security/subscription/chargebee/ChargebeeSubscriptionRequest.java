@@ -18,40 +18,39 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
         void onSubscriptionResult(Subscription subscription);
     }
 
-    private final SubscriptionApiRequestProcessor requestProcessor;
     private final String subscriptionId;
     private final OnResultListener listener;
 
     public ChargebeeSubscriptionRequest(String subscriptionId, OnResultListener listener,
             SubscriptionApiRequestProcessor requestProcessor) {
+        super(requestProcessor);
         this.subscriptionId = subscriptionId;
         this.listener = listener;
-        this.requestProcessor = requestProcessor;
     }
 
     @Override
-    public void run() {
+    protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Fetch Chargebee subscription, subscription id: " + subscriptionId);
         SubscriptionListRequest request = Subscription.list().limit(1).id().is(subscriptionId).includeDeleted(false);
+        return new ChargebeeInternalApiRequestWrapper(request);
+    }
 
-        try {
-            ListResult result = request.request();
-            if (!isRateLimitReached(result)) {
-                final Subscription subscription;
-                if (result != null && !result.isEmpty()) {
-                    subscription = result.get(0).subscription();
-                } else {
-                    subscription = null;
-                }
-                onDone(subscription);
-            } else {
-                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Fetch Chargebee subscription failed, subscription id: " + subscriptionId, e);
-            onDone(null);
+    @Override
+    protected void processResult(ChargebeeInternalApiRequestWrapper request) {
+        ListResult result = request.getListResult();
+        final Subscription subscription;
+        if (result != null && !result.isEmpty()) {
+            subscription = result.get(0).subscription();
+        } else {
+            subscription = null;
         }
+        onDone(subscription);
+    }
 
+    @Override
+    protected void handleError(Exception e) {
+        logger.log(Level.SEVERE, "Fetch Chargebee subscription failed, subscription id: " + subscriptionId, e);
+        onDone(null);
     }
 
     private void onDone(Subscription subscription) {
