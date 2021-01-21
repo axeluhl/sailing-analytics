@@ -137,10 +137,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair) {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredLandscapeTypes.SSH_KEY.getStringPermissionForTypeRelativeIdentifier(DefaultActions.DELETE,
-                        keyPair.getTypeRelativeObjectIdentifier()));
-        AwsLandscape
-                .obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName());
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(keyPair,
+            ()->AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName()));
     }
 }
