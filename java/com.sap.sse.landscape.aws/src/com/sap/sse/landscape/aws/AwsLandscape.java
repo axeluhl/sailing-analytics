@@ -219,12 +219,17 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     void deleteKeyPair(Region region, String keyName);
     
     /**
-     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair.
+     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair.<p>
+     * 
+     * The calling subject must have CREATE permission for the key.
      */
     SSHKeyPair importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
+    /**
+     * The calling subject must have READ permission for the key requested.
+     */
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
     /**
@@ -235,7 +240,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     /**
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
-     * and stores it persistently also in the local server's database with the private key encrypted.
+     * and stores it persistently also in the local server's database with the private key encrypted.<p>
+     * 
+     * The calling subject must have CREATE permission for the key.
      */
     SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
@@ -243,7 +250,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
      * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
      * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
-     * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.
+     * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.<p>
+     * 
+     * The calling subject must have CREATE permission for the key.
      * 
      * @return the key ID as string, usually starting with the prefix "key-"
      */
