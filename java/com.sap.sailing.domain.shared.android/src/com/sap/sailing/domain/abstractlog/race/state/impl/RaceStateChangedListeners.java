@@ -118,4 +118,11 @@ public class RaceStateChangedListeners extends HashSet<RaceStateChangedListener>
             listener.onTagEventsChanged(state);
         }
     }
+
+    @Override
+    public void onResultsAreOfficialChanged(ReadonlyRaceState state) {
+        for (RaceStateChangedListener listener : getWorkingCopyOfListeners()) {
+            listener.onResultsAreOfficialChanged(state);
+        }
+    }
 }

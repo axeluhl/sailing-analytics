@@ -10,6 +10,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
@@ -20,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -31,7 +37,9 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveCourseImpl;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.orc.impl.ORCCertificatesJsonImporter;
 import com.sap.sailing.domain.orc.impl.ORCPerformanceCurveImpl;
+import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -44,6 +52,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  *
  */
 public class TestORCPerformanceCurve {
+    private static final Logger logger = Logger.getLogger(TestORCPerformanceCurve.class.getName());
+    
     // set true to see all the differences i
     private final boolean collectErrors = true;
     
@@ -81,7 +91,8 @@ public class TestORCPerformanceCurve {
     }
     
     @BeforeClass
-    public static void initialize() throws IOException, ParseException {
+    public static void initialize() throws IOException, ParseException, DOMException, SAXException,
+            ParserConfigurationException, java.text.ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(2.23), new DegreeBearingImpl(10)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(2.00), new DegreeBearingImpl(170)));
@@ -89,7 +100,7 @@ public class TestORCPerformanceCurve {
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(15)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.03), new DegreeBearingImpl(165)));
         legs.add(new ORCPerformanceCurveLegImpl(new NauticalMileDistance(1.17), new DegreeBearingImpl(180)));
-        alturaCourse = new ORCPerformanceCurveCourseImpl(legs);         //this course is the same course as seen in the Altura "IMS Explanation" sheet
+        alturaCourse = new ORCPerformanceCurveCourseImpl(legs); // this course is the same course as seen in the Altura "IMS Explanation" sheet
         // Local File:
         File fileGER = new File(RESOURCES + "GER2019.json");
         importerLocal = new ORCCertificatesJsonImporter().read(new FileInputStream(fileGER));
@@ -97,7 +108,13 @@ public class TestORCPerformanceCurve {
         File fileWithSpecificBins = new File(RESOURCES + "newFormatCertificate.json");
         importerWithSpecificBins = new ORCCertificatesJsonImporter().read(new FileInputStream(fileWithSpecificBins));
         // Online File:
-        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId=GER&ext=json").openStream());
+        final CountryCode countryWithMostValidCertificates = StreamSupport
+                .stream(ORCPublicCertificateDatabaseImpl.INSTANCE.getCountriesWithValidCertificates().spliterator(),
+                        /* parallel */ false)
+                .max((c1, c2) -> c1.getCertCount() - c2.getCertCount()).get().getIssuingCountry();
+        logger.info("Trying to read country certificates for "+countryWithMostValidCertificates);
+        importerOnline = new ORCCertificatesJsonImporter().read(new URL("https://data.orc.org/public/WPub.dll?action=DownBoatRMS&CountryId="+
+                countryWithMostValidCertificates.getThreeLetterIOCCode()+"&ext=json").openStream());
     }
     
     @Test

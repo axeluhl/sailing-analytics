@@ -989,10 +989,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionDeviceConfiguration(UUID deviceUuid);
     
     /**
+     * Constructs a Bearer token for a given remote Server, either using a given username and password, or a given
+     * bearer token. If neither of those are provided the current user will be used to create a bearer token. Provide
+     * only username and password or bearer token, not the three of them.
+     */
+    String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken);
+    
+    /**
      * Returns the number of tracked races that are not {@link TrackedRace#hasFinishedLoading() done with loading}.
      */
     int getNumberOfTrackedRacesStillLoading();
-
     /**
      * Returns the number of tracked races restored during server start-up that are
      * {@link TrackedRace#hasFinishedLoading() done with loading}.

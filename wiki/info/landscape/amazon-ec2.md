@@ -215,6 +215,23 @@ SERVER_STARTUP_NOTIFY=you@email.com
 
 This will automatically start replication from your master which is assumed to be reachable at `${SERVER_NAME}.sapsailing.com`. Adjust `REPLICATE_MASTER_SERVLET_HOST` and `REPLICATE_MASTER_SERVLET_PORT` accordingly if this is not the case. The RabbitMQ exchange to subscribe to is also defaulted with the `${SERVER_NAME}`, just like is the case for the outbound side on the master, defining this exchange. Each replica gets its own outbound RabbitMQ exchange by default, using the `${SERVER_NAME}` to which the replica's Amazon instance ID is appended, in case transitive replication should become a need. The database connection string (`MONGODB_URI`) defaults to master's DB with the database name extended by the suffix `-replica`.
 
+#### Upgrading an application server replica set with Auto-Scaling Group and Launch Configuration in Place
+
+* prepare local `/etc/hosts` (on Windows `c:/windows/system32/drivers/etc/hosts`) entries for master and replica with an `.sapsailing.com` suffix in order to allow for logging in to the respective server's admin console
+* if your master will need to reload a lot of tracking data from MongoDB, spin up MongoDB replicas as needed and wait for them to leave the `STARTUP2` phase, becoming `SECONDARY` replicas in their replica set
+* remove master from public target group
+* ssh to master, invoke `refreshInstance.sh` to prepare for master upgrade
+* remove master from master target group
+* log on to replica's `/gwt/AdminConsole.html` page, go to "Advanced" / "Replication" and stop replication; to this manually for all replicas in this application server replica set
+* restart the master's application process (`./stop; sleep 5; ./start`)
+* while your master spins up, follow its `/gwt/status` page
+* while your master spins up, prepare a new Launch Configuration for the replicas that uses the new release; for this, find out which release your new master is running (e.g., `build-202012211912`), copy your existing Launch Configuration to one with a new name that reflects the new release, and edit the new Launch Configuration's "User Data" section, adjusting the `INSTALL_FROM_RELEASE` variable to the new release name. You find the "User Data" in the section "Additional configuration - optional" after expanding the "Advanced details" drop-down. Acknowledge your key at the bottom and save the new launch configuration.
+* as your new master's `/gwt/status` response tells you that the new master process is available again, add it to the master target group and the public target group again; in times of low load where you may afford going to zero replicas in your public target group, remove all replicas from the public target group; otherwise, before this step you would first need to spin up one or more replicas for your new release to replace all old replicas in the public target group in one transaction.
+* update the Auto-Scaling Group so it uses your new Launch Configuration
+* you may want to wait until your master's `/gwt/status` shows it has finished loading all races before starting new replicas on it; this way you can avoid huge numbers of replication operations that would be necessary to replicate the loading process fix by fix from the master to all replicas; it is a lot more efficient to transfer the result of loading all races in one sweep during the initial load process when a replica attaches after loading has completed
+* terminate all existing replicas running the old release; the Auto-Scaling Group will launch as many replicas as you configured after a minute or two and will automatically assign them to the public target group
+* don't forget to terminate the MongoDB replicas again that you spun up before specifically for this process
+
 #### Setting up a new image (AMI) from scratch (more or less)
 
 See [here](/wiki/creating-ec2-image-from-scratch)
