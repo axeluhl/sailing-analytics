@@ -22,11 +22,11 @@ import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseTemplateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkRoleJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkTemplateJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class CourseTemplateJsonDeserializer implements JsonDeserializer<CourseTemplate> {
 

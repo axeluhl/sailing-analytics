@@ -10,12 +10,12 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogORCImpliedWindSourceEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCImpliedWindSourceEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ORCSetImpliedWindSourceEventSerializerTest extends AbstractEventSerializerTest<RaceLogORCImpliedWindSourceEvent> {
 

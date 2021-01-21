@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.deserialization;
+package com.sap.sse.shared.json;
 
 import org.json.simple.JSONObject;
 
