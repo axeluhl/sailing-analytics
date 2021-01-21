@@ -7,11 +7,11 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.header.HeaderResources" />
 
     <g:HTMLPanel tag="header" addStyleNames="{local_res.style.header}">
-        <a ui:field="logoAnchor" class="{res.mediaCss.hideonsmall} {local_res.style.logo}" target="_blank"></a>
+        <a ui:field="logoAnchor" class="{res.mediaCss.hideonsmall} {local_res.style.logo}" target="_blank" />
         <g:FlowPanel tag="nav" ui:field="desktopMenu" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
         <div ui:field="actions" class="{local_res.style.actions}">
             <g:Anchor ui:field="userDetails" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.account}" />
-            <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.iconNavigation} {local_res.style.navigation}"/>
+            <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.icon} {app_res.icons.iconNavigation}"/>
             <nav ui:field="mobileMenu" class="{res.mediaCss.showonsmall} {local_res.style.menuMobile}">
                 <g:FlowPanel ui:field="mobileMenuActions" />
                 <div class="{local_res.style.separator}" />

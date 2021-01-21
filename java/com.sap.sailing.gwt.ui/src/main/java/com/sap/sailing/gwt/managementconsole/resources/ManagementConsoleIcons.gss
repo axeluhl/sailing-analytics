@@ -1,66 +1,75 @@
 @charset "UTF-8";
 
 .icon {
-    background-size: contain;
-    background-position: left;
-    background-repeat: no-repeat;
-    display: inline-block;
-    margin: 6px;
+    position: relative;
+    width: 2rem;
+    height: 2rem;
 }
 
-a.icon:hover {
+.icon::before {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 1.5rem;
+}
+
+.icon:hover {
     text-decoration: none;
 }
 
-.icon-location {
-    background-image: resourceUrl("iconLocation");
-    width: 10px;
-    height: 15px;
-    margin: 0;
+.icon-location, .icon-location::before {
+    width: 1rem;
+    height: 1rem;
 }
 
-.icon-back {
+.icon-location::before {
+    background-image: resourceUrl("iconLocation");
+}
+
+.icon-back::before {
     background-image: resourceUrl("iconBack");
 }
 
-.icon-close {
+.icon-close::before {
     background-image: resourceUrl("iconClose");
 }
 
-.icon-dropdown-chev {
+.icon-dropdown-chev::before {
     background-image: resourceUrl("iconLocation");
 }
 
-.icon-add {
+.icon-add::before {
     background-image: resourceUrl("iconAdd");
-    width: 20px;
-    height: 22px;
 }
 
-.icon-filter {
+.icon-filter::before {
     background-image: resourceUrl("iconFilter");
-    width: 24px;
 }
 
-.icon-search {
+.icon-search::before {
     background-image: resourceUrl("iconSearch");
-    width: 20px;
+    height: 1.25rem;
 }
 
-.icon-apply {
+.icon-apply::before {
     background-image: resourceUrl("iconApply");
 }
 
-.icon-previous {
+.icon-previous::before {
     background-image: resourceUrl("iconPrevious");
 }
 
-.icon-navigation {
+.icon-navigation::before {
     background-image: resourceUrl("iconNavigation");
 }
 
-.icon-elipse {
+.icon-elipse::before {
     background-image: resourceUrl("iconElipse");
-    min-width: 19px;
-    height: 16px;
+    height: 1rem;
 }

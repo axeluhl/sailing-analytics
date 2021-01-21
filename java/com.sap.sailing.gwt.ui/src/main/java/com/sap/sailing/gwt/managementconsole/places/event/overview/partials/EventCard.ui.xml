@@ -9,20 +9,16 @@
     <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.cardPanel}">
         <div class="{local_res.style.eventCard}" ui:field="card">
             <div class="{local_res.style.eventCardContainer}">
-                <div class="{app_res.style.oneLineContainer}">
-                    <div class="{app_res.style.oneLineAutoWidthItem}">
-                        <h1>
-                            <span ui:field="title"></span>
-                        </h1>
-                        <div class="{app_res.style.oneLineContainer}">
-                            <div class="{app_res.style.oneLineItem} {app_res.icons.icon} {app_res.icons.iconLocation}">&#160;</div>
-                            <h2 ui:field="subTitle" class="{app_res.style.oneLineAutoWidthItem}"/>
+                <div class="{app_res.style.flexContainer}">
+                    <div class="{app_res.style.flexItemAutoWidth}">
+                        <h1 ui:field="title" />
+                        <div class="{app_res.style.flexContainer}">
+                            <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
+                            <h2 ui:field="subTitle" class="{app_res.style.flexItemAutoWidth}"/>
                         </div>
                     </div>
-                    <div>
-                        <g:Anchor href="javascript:;" ui:field="advancedSettingsEventAnchor" 
-                            styleName="{app_res.style.oneLineItem} {app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
-                    </div>                
+                    <g:Anchor ui:field="advancedSettingsEventAnchor" 
+                            styleName="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
                 </div>
             </div>
         </div>

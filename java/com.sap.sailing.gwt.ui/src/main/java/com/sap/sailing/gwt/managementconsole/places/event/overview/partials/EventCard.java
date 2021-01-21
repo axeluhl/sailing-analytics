@@ -1,11 +1,7 @@
 package com.sap.sailing.gwt.managementconsole.places.event.overview.partials;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -22,30 +18,22 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class EventCard extends Composite {
 
-    Logger logger = Logger.getLogger(this.getClass().getName());
+    interface EventCardUiBinder extends UiBinder<Widget, EventCard> {
+    }
 
-    private final EventDTO event;
-    private final Presenter presenter;
+    private static EventCardUiBinder uiBinder = GWT.create(EventCardUiBinder.class);
 
     @UiField
     EventOverviewResources local_res;
 
     @UiField
-    DivElement card;
-
-    @UiField
-    SpanElement title;
-
-    @UiField
-    HeadingElement subTitle;
+    Element card, title, subTitle;
 
     @UiField
     Anchor advancedSettingsEventAnchor;
 
-    interface EventCardUiBinder extends UiBinder<Widget, EventCard> {
-    }
-
-    private static EventCardUiBinder uiBinder = GWT.create(EventCardUiBinder.class);
+    private final EventDTO event;
+    private final Presenter presenter;
 
     public EventCard(final EventDTO event, final Presenter presenter) {
         initWidget(uiBinder.createAndBindUi(this));

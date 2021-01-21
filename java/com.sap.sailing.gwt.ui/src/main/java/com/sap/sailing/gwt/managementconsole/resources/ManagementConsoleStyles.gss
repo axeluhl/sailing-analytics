@@ -6,7 +6,6 @@ html, body {
 }
 
 html, .backdropImage {
-    background:  no-repeat center center fixed;
     background-image: resourceUrl("backdropGeneralSized");
     background-position: center center ;
     background-repeat: no-repeat;
@@ -103,23 +102,6 @@ input::-ms-input-placeholder { /* Microsoft Edge */
     color: TEXT_COLOR_SECONDARY;
 }
 
-.header-line {
-    font-size: 28px;
-    position: fixed;
-    top: 3px;
-    width: calc(100% - 36px);
-}
-
-.ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.right {
-    float: right;
-}
-
 .primaryButton {
     background-color: BUTTON_COLOR_PRIMARY;
     border-color: BUTTON_COLOR_PRIMARY;
@@ -146,17 +128,32 @@ input::-ms-input-placeholder { /* Microsoft Edge */
     padding: 0;
 }
 
-.one-line-container {
+.page-header {
+    font-size: 28px;
+    position: fixed;
+    top: -4px;
+    width: calc(100% - 36px);
+    margin: 1rem 0;
+}
+
+.flex-container {
     display: flex; 
     flex-wrap: nowrap; 
     align-items: center;
 }
 
-.one-line-item {
+.flex-container .flex-item--fixed-width {
+    flex-shrink: 0;
 }
 
-.one-line-auto-width-item {
+.flex-container .flex-item--auto-width {
     flex-grow: 1;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 @media (min-width: 45em) {
@@ -164,7 +161,7 @@ input::-ms-input-placeholder { /* Microsoft Edge */
        background-image: resourceUrl("backdropGeneral");
     }
 
-    .header-line {
+    .page-header {
         position: relative;
         top: 0;
         width: 100%;

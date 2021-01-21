@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.managementconsole.places.event.overview;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -16,8 +15,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventOverviewViewImpl extends Composite implements EventOverviewView {
 
-    Logger logger = Logger.getLogger(this.getClass().getName());
-    
     private Presenter presenter;
 
     interface EventOverviewViewImplUiBinder extends UiBinder<Widget, EventOverviewViewImpl> {
@@ -33,15 +30,9 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
 
     @UiField
     FlowPanel cards;
-    
+
     @UiField
-    Anchor addEventAnchor;
-    
-    @UiField
-    Anchor filterEventAnchor;
-    
-    @UiField
-    Anchor searchEventAnchor;
+    Anchor addEventAnchor, filterEventAnchor, searchEventAnchor;
 
     public EventOverviewViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -50,17 +41,14 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
     }
 
     @Override
-    public void renderEvents(List<EventDTO> events) {
-        cards.clear();
-        for (EventDTO event : events) {
-            EventCard card = new EventCard(event, presenter);
-            cards.add(card);
-        }
+    public void setPresenter(final Presenter presenter) {
+        this.presenter = presenter;
     }
 
     @Override
-    public void setPresenter(Presenter presenter) {
-        this.presenter = presenter;
+    public void renderEvents(final List<EventDTO> events) {
+        cards.clear();
+        events.stream().map(event -> new EventCard(event, presenter)).forEach(cards::add);
     }
 
 }

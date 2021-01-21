@@ -14,16 +14,14 @@
 
     <g:HTMLPanel addStyleNames="{style.mainContent}">
         <div class="{res.mediaCss.grid}">
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.headerLine} {app_res.style.oneLineContainer}">
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.pageHeader} {app_res.style.flexContainer}">
                 <h1 class="{app_res.style.ellipsis}">
                     <ui:text from='{i18n.events}' />
                 </h1>
-                <g:Anchor href="javascript:;" ui:field="addEventAnchor" 
-                    styleName="{app_res.icons.iconAdd} {app_res.icons.icon} {app_res.style.oneLineAutoWidthItem}">&#160;</g:Anchor>
-                <g:Anchor href="javascript:;" ui:field="filterEventAnchor" 
-                    styleName="{app_res.icons.iconFilter} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
-                <g:Anchor href="javascript:;" ui:field="searchEventAnchor" 
-                    styleName="{app_res.icons.iconSearch} {app_res.icons.icon} {app_res.style.right}">&#160;</g:Anchor>
+                <g:Anchor ui:field="addEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+                <div class="{app_res.style.flexItemAutoWidth}" />
+                <g:Anchor ui:field="filterEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconFilter} {app_res.style.flexItemFixedWidth}" />
+                <g:Anchor ui:field="searchEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconSearch} {app_res.style.flexItemFixedWidth}" />
             </div>
         </div>
         <div class="{res.mediaCss.grid} ">

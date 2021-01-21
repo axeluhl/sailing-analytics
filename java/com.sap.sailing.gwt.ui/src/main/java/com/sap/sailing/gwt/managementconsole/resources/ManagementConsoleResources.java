@@ -81,22 +81,19 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         String secondaryCtaButton();
 
-        @ClassName("header-line")
-        String headerLine();
+        @ClassName("page-header")
+        String pageHeader();
 
-        String right();
+        @ClassName("flex-container")
+        String flexContainer();
 
-        @ClassName("one-line-container")
-        String oneLineContainer();
+        @ClassName("flex-item--fixed-width")
+        String flexItemFixedWidth();
 
-        @ClassName("one-line-item")
-        String oneLineItem();
-
-        @ClassName("one-line-auto-width-item")
-        String oneLineAutoWidthItem();
+        @ClassName("flex-item--auto-width")
+        String flexItemAutoWidth();
 
         String ellipsis();
-
     }
 
     interface Icons extends CssResource {
@@ -135,6 +132,5 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-elipse")
         String iconElipse();
-
     }
 }

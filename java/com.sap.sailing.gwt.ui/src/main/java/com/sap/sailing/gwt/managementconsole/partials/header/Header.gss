@@ -58,22 +58,13 @@
     margin: 1.5em .75rem .75rem;
 }
 
-.header .actions .account,
-.header .actions .navigation {
+.header .actions .account {
+    background-image: resourceUrl('loggedout');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-}
-
-.header .actions .account {
-    background-image: resourceUrl('loggedout');
     width: 4rem;
     height: 3rem;
-}
-
-.header .actions .navigation {
-    width: 2rem;
-    height: 1.5rem;
 }
 
 @media (min-width: 45em) {

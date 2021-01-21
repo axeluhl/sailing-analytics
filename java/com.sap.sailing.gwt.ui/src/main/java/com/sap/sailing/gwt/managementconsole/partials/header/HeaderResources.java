@@ -16,7 +16,7 @@ public interface HeaderResources extends AuthenticationResources {
     @Source("../../resources/sap-logo.png")
     ImageResource sapLogo();
 
-    public interface Style extends CssResource {
+    interface Style extends CssResource {
         String header();
 
         String logo();
@@ -31,8 +31,6 @@ public interface HeaderResources extends AuthenticationResources {
         String actions();
 
         String account();
-
-        String navigation();
 
         String separator();
 
