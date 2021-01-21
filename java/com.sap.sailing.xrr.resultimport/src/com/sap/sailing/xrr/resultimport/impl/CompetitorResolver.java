@@ -1,7 +1,6 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
-import com.sap.sailing.xrr.schema.CrewPosition;
 import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.Event;
 import com.sap.sailing.xrr.schema.IFNationCode;
@@ -189,11 +187,13 @@ public class CompetitorResolver {
         } else {
             boatClassName = null;
         }
-        final Set<String> skipperNames = new HashSet<String>();
+        final Set<String> crewFamilyNames = new HashSet<String>();
         List<PersonDTO> persons = team.getCrew().stream()
                 .sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew) -> {
                     final Person xrrPerson = parser.getPerson(crew.getPersonID());
-                    final String name = xrrPerson.getGivenName() + " " + xrrPerson.getFamilyName();
+                    final String familyName = xrrPerson.getFamilyName();
+                    crewFamilyNames.add(familyName);
+                    final String name = xrrPerson.getGivenName() + " " + familyName;
                     final Nationality nationality;
                     if (xrrPerson.getNOC() == null) {
                         nationality = null;
@@ -202,9 +202,6 @@ public class CompetitorResolver {
                         if (teamNationality[0] == null) {
                             teamNationality[0] = nationality;
                         }
-                    }
-                    if (crew.getPosition() == CrewPosition.S) {
-                        skipperNames.add(xrrPerson.getFamilyName());
                     }
                     final PersonDTO person = new PersonDTO(name, /* dateOfBirth */ null,
                             /* description */ xrrPerson.getGender() == null ? null : xrrPerson.getGender().name(),
@@ -239,22 +236,30 @@ public class CompetitorResolver {
                 division == null ? null
                         : (division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                 race != null ? race.getRaceName() : null, /* fleetName */ null, competitorId,
-                /* name */ getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), /* short name */ null,
-                getCompetitorNameFromTeamAndBoat(team, boat, skipperNames), persons,
+                /* name */ getCompetitorNameFromTeamAndBoat(team, boat, crewFamilyNames), /* short name */ null,
+                getCompetitorNameFromTeamAndBoat(team, boat, crewFamilyNames), persons,
                 teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), /* timeOnTimeFactor */ null,
                 /* timeOnDistanceAllowancePerNauticalMile */ null, boatId, boat.getBoatName(), boatClassName,
                 sailNumber);
         return competitorDescriptor;
     }
 
-    private String getCompetitorNameFromTeamAndBoat(Team team, Boat boat, Set<String> skipperNames) {
+    private String getCompetitorNameFromTeamAndBoat(Team team, Boat boat, Set<String> crewFamilyNames) {
         final String result;
         if (Util.hasLength(team.getTeamName())) {
             result = team.getTeamName();
         } else if (boat.getBoatName() != null) {
             result = boat.getBoatName();
-        } else if (skipperNames.size() > 0) {
-            result = skipperNames.iterator().next();
+        } else if (crewFamilyNames.size() > 0) {
+            String concatenatedTeamName = null;
+            for(String familyName : crewFamilyNames) {
+                if(concatenatedTeamName != null) {
+                    concatenatedTeamName += "+" + familyName;
+                }else {
+                    concatenatedTeamName = familyName;
+                }
+            }
+            result = concatenatedTeamName;
         } else {
             result = null;
         }
