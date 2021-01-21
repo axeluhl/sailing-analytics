@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
     public static final String MANEUVER_TYPE = "maneuverType";

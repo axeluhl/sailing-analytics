@@ -17,8 +17,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class VenueJsonSerializerTest {
     

@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class MarkJsonSerializer extends BaseControlPointJsonSerializer implements JsonSerializer<ControlPoint> {
     public static final String VALUE_CLASS = Mark.class.getSimpleName();
