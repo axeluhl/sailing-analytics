@@ -19,7 +19,7 @@ public class SSHKeyPairJsonSerializer implements JsonSerializer<SSHKeyPair> {
         result.put(REGION_ID_FIELD, object.getRegionId());
         result.put(CREATOR_NAME_FIELD, object.getCreatorName());
         result.put(CREATION_TIME_MILLIS_FIELD, object.getCreationTime().asMillis());
-        result.put(PUBLIC_KEY_FIELD, new String(object.getPublicKey()));
+        result.put(PUBLIC_KEY_FIELD, object.getPublicKey() == null ? null : new String(object.getPublicKey()));
         return result;
     }
 }
