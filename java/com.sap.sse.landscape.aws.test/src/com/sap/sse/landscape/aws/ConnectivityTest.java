@@ -259,6 +259,24 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
     
     @Test
+    public void generatePublicSshKeyFromPrivateSshKey() throws JSchException, FileNotFoundException, IOException {
+        final String publicKeyComment = "Test Key";
+        final JSch jsch = new JSch();
+        final KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 4096);
+        final String keyFileBaseName = "test_key";
+        keyPair.writePrivateKey(keyFileBaseName, keyPass);
+        try {
+            final KeyPair keyPairReadFromFile = KeyPair.load(jsch, keyFileBaseName, null);
+            keyPairReadFromFile.decrypt(keyPass);
+            keyPairReadFromFile.writePublicKey(keyFileBaseName+".pub", publicKeyComment);
+            assertTrue(new File(keyFileBaseName+".pub").length() > 0);
+        } finally {
+            new File(keyFileBaseName).delete();
+            new File(keyFileBaseName+".pub").delete();
+        }
+    }
+    
+    @Test
     public void generateSshKeyPairWithArrays() throws JSchException, FileNotFoundException, IOException {
         final String publicKeyComment = "Test Key";
         final JSch jsch = new JSch();
@@ -280,7 +298,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final JSch jsch = new JSch();
         final KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, 4096);
         final byte[] pubKeyBytes = getPublicKeyBytes(keyPair);
-        final byte[] privKeyBytes = getDecryptedPrivateKeyBytes(keyPair, /* passphrase */ null);
+        final byte[] privKeyBytes = getPrivateKeyBytes(keyPair, keyPass);
         final SSHKeyPair key = landscape.importKeyPair(region, pubKeyBytes, privKeyBytes, testKeyName);
         assertTrue(key.getName().equals(testKeyName));
         final KeyPairInfo awsKeyPairInfo = landscape.getKeyPairInfo(region, testKeyName);
@@ -324,7 +342,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     public void testSshConnectWithImportedKey() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         final KeyPair keyPair = KeyPair.genKeyPair(new JSch(), KeyPair.RSA, 4096);
-        landscape.importKeyPair(region, getPublicKeyBytes(keyPair), getDecryptedPrivateKeyBytes(keyPair, /* passphrase */ null), keyName);
+        landscape.importKeyPair(region, getPublicKeyBytes(keyPair), getPrivateKeyBytes(keyPair, keyPass), keyName);
         testSshConnectWithKey(keyName);
     }
 
