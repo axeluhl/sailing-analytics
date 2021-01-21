@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.jaxrs;
+package com.sap.sse.rest;
 
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -7,7 +7,6 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
 public class AccessControlAndEncodingResponseFilter implements ContainerResponseFilter {
-
     @Override
     public ContainerResponse filter(ContainerRequest request, ContainerResponse response) {
         MultivaluedMap<String, Object> httpHeaders = response.getHttpHeaders();
