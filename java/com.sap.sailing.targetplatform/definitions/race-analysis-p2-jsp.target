@@ -72,11 +72,11 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <!-- location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location -->
 <!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up. -->
-<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
+<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.36.v20210114\jetty.bundles.repo\target\site" type="Directory"/>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
 <unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
@@ -307,7 +307,7 @@
 <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.36.v20210114"/>
 <plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>

@@ -35,14 +35,14 @@
          id="org.eclipse.jetty.osgi.boot"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.warurl"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
@@ -99,98 +99,98 @@
          id="org.eclipse.jetty.deploy"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.http"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.io"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.jmx"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.security"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.server"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.servlet"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.util"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.util.ajax"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.webapp"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.api"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.client"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.websocket.common"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.xml"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
@@ -357,7 +357,7 @@
          id="org.eclipse.jetty.client"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
@@ -510,14 +510,14 @@
          id="org.eclipse.jetty.apache-jsp"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.osgi.boot.jsp"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          fragment="true"
          unpack="false"/>
 
@@ -525,7 +525,7 @@
          id="org.eclipse.jetty.osgi.boot.jsp.source"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
@@ -630,21 +630,21 @@
          id="org.eclipse.jetty.annotations"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.jndi"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.jetty.plus"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
 </feature>
