@@ -43,7 +43,7 @@ public class UserGroupManagementPanel extends Composite {
     private UserGroupDetailPanel userGroupDetailPanel;
     private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
-    private final UserGroupTableWrapper userGroupTableWrapper;
+    protected final UserGroupTableWrapper userGroupTableWrapper;
 
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
@@ -153,7 +153,6 @@ public class UserGroupManagementPanel extends Composite {
     }
 
     public void refreshSuggests() {
-        userGroupDetailPanel.refreshSuggest();
         userGroupRoleDefinitionPanel.refreshSuggest();
     }
 }

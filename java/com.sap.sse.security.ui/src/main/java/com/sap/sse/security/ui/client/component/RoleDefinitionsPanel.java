@@ -70,7 +70,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final UserManagementWriteServiceAsync userManagementWriteService;
     private final ListDataProvider<RoleDefinitionDTO> rolesListDataProvider;
     private final StringMessages stringMessages;
-    private final LabeledAbstractFilterablePanel<RoleDefinitionDTO> filterablePanelRoleDefinitions;
+    protected final LabeledAbstractFilterablePanel<RoleDefinitionDTO> filterablePanelRoleDefinitions;
     private final RefreshableMultiSelectionModel<? super RoleDefinitionDTO> refreshableRoleDefinitionMultiSelectionModel;
     
     public RoleDefinitionsPanel(StringMessages stringMessages, UserService userService,

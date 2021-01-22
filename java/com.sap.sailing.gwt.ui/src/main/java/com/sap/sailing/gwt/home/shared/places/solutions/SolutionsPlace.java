@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
@@ -67,7 +68,7 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
     }
 
     public SolutionsPlace(SolutionsNavigationTabs navigationTab) {
-        super(PARAM_NAVIGATION_TAB, navigationTab.name());
+        super(Util.<String, String>mapBuilder().put(PARAM_NAVIGATION_TAB, navigationTab.name()).build());
         this.navigationTab = navigationTab;
         this.invokedFromCalendar = false;
     }

@@ -32,6 +32,7 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
     }
 
     private ErrorPlace(final boolean reloadedError, final String errorMessageDetail) {
+        super("");
         this.errorMessageDetail = errorMessageDetail;
         this.reloadedError = reloadedError;
     }

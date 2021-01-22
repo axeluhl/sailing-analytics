@@ -570,4 +570,5 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
     }
+
 }
