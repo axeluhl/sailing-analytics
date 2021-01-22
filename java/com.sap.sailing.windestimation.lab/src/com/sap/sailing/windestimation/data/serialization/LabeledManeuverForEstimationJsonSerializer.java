@@ -2,10 +2,10 @@ package com.sap.sailing.windestimation.data.serialization;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DetailedBoatClassJsonSerializer;
 import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class LabeledManeuverForEstimationJsonSerializer implements JsonSerializer<LabeledManeuverForEstimation> {
 

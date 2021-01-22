@@ -6,7 +6,7 @@ import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class PositioningJsonSerializer implements JsonSerializer<Positioning> {
     public static final String FIELD_POSITION = "position";

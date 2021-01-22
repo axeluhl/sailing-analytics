@@ -20,9 +20,9 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTest {
     private static final String RACELOG_TEST_COLLECTION = "racelog_test_collection";

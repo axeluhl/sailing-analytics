@@ -53,6 +53,23 @@
          ]
       },
       {
+         "collectionName":"YachtScoringImport",
+         "folders":[  
+            {  
+               "startingFolderPath":"java/com.sap.sailing.yachtscoring.resultimport/resources/stringmessages",
+               "sourceFilters":[  
+                  "**/StringMessages*.properties"
+               ],
+               "excludedSourceFilters":[
+               	"**/*_zh.properties"
+               	],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
          "collectionName":"RacelogTracking",
          "folders":[  
             {  

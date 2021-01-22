@@ -5,8 +5,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.gateway.dto.MarkContext;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class MarkContextJsonSerializer implements JsonSerializer<MarkContext> {
     public static final String FIELD_MARK_KEY = "mark";

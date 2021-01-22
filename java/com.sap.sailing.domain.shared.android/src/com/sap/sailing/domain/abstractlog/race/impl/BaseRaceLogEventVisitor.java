@@ -17,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
@@ -172,6 +173,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogORCImpliedWindSourceEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogResultsAreOfficialEvent event) {
         
     }
 }

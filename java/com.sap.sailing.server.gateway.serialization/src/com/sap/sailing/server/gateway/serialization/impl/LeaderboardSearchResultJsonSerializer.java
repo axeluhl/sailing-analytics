@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<LeaderboardSearchResult> {
     public static final String FIELD_SERVER_BASE_URL = "serverBaseURL";
