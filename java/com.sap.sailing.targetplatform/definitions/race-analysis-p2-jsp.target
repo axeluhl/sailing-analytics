@@ -14,6 +14,7 @@
 <unit id="org.objectweb.asm.commons.source" version="9.0.0.v20201001-1419"/>
 <unit id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
 <unit id="org.objectweb.asm.tree.source" version="9.0.0.v20201001-1419"/>
+<unit id="javax.annotation" version="1.3.5.v20200909-1856"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20201130205003/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -70,10 +71,12 @@
 <unit id="org.apache.xml.serializer" version="2.7.1.v201005080400"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<!-- location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
-</location>
+</location -->
+<!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up. -->
+<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
 <unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
@@ -116,10 +119,16 @@
 <unit id="com.amazon.aws.aws-java-api.feature.group" version="2.15.57"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
+<!-- location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<repository location="https://p2.sapsailing.com/p2/sailing/"/>
+</location -->
+<!-- local update site -->
 <location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/>
-<!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up.
-<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
--->
 </locations>
 <includeBundles>
 <plugin id="com.rabbitmq.client"/>
@@ -298,13 +307,14 @@
 <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
 <plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objectweb.asm.tree.source"/>
 <plugin id="org.objectweb.asm.commons.source"/>
+<plugin id="javax.annotation" version="1.3.5.v20200909-1856"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
