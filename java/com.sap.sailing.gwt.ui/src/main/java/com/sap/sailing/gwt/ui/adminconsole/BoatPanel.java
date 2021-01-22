@@ -35,13 +35,10 @@ public class BoatPanel extends SimplePanel implements FilterablePanelProvider<Bo
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(), BOAT);
         mainPanel.add(buttonPanel);
-
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::refreshBoatList);
         refreshButton.ensureDebugId("RefreshButton");
-
         allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
                 () -> boatTable.allowUpdate(refreshableBoatSelectionModel.getSelectedSet()));
         refreshableBoatSelectionModel.addSelectionChangeHandler(new Handler() {

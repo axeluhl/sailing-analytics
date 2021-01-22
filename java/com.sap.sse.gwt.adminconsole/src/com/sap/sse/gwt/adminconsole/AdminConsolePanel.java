@@ -585,7 +585,6 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         if (placeVerticalTabName != null && verticalTabNameToTitleMap.containsKey(placeVerticalTabName)) {
             verticalTabTitle = verticalTabNameToTitleMap.get(placeVerticalTabName);
         }
-        
         for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> panelWidgetName : roleSpecificTabs) {
             VerticalOrHorizontalTabLayoutPanel panel = panelWidgetName.getA();
             Widget currentWidget = panelWidgetName.getB();
