@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="170">
+<target name="Race Analysis Target" sequenceNumber="171">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -75,6 +75,8 @@
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.35.v20201120"/>
 <repository location="https://download.eclipse.org/jetty/updates/jetty-bundles-9.x/"/>
 </location>
+<!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up. -->
+<!-- location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/ -->
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="0.10.0.v201209301215"/>
 <unit id="org.apache.felix.gogo.runtime" version="0.10.0.v201209301036"/>
@@ -127,9 +129,6 @@
 </location>
 <!-- local update site -->
 <!-- location path="C:\repository\java\com.sap.sailing.targetplatform.base\target\repository" type="Directory"/ -->
-<!-- use this location to avoid long running refreshes during development, TODO: remove when everything is set up.
-<location path="C:\Users\georg\Documents\Business\Kunden\OIO\SAPsailing\Jetty-bundles-repository-9.4.35.v20201120\jetty.bundles.repo\target\site" type="Directory"/>
--->
 </locations>
 <includeBundles>
 <plugin id="com.rabbitmq.client"/>
