@@ -38,14 +38,11 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     }
 
     public void reloadAndCallFillOnly(Displayer<T> fillOnlyDisplayer, Displayer<T> fillAdditionally) {
-        final boolean isDisplayerRegistered = displayers.contains(fillAdditionally);
         AsyncCallback<Iterable<T>> callback = new AsyncCallback<Iterable<T>>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error trying to obtain list from server " + caught.getMessage());
             }
-
             @Override
             public void onSuccess(Iterable<T> result) {
                 if (fillOnlyDisplayer != null) {
@@ -53,7 +50,7 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 } else {
                     callAllFill(result, null);
                 }
-                if (!isDisplayerRegistered) {
+                if (fillAdditionally != null && !displayers.contains(fillAdditionally)) {
                     fill(result, fillAdditionally);
                 }
             }
@@ -75,7 +72,6 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     public void callFillAndReloadInitially(Displayer<T> displayer) {
         if (dtos == null) {
             reloadAndCallFillOnly(null, displayer);
-            ;
         } else if (displayer != null) {
             fill(dtos, displayer);
         } else {
@@ -97,5 +93,4 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
     public void fill(Iterable<T> dtos, Displayer<T> displayer) {
         displayer.fill(dtos);
     }
-
 }

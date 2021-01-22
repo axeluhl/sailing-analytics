@@ -108,7 +108,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             fillLeaderboardGroups(result);
         }
     };
-
+    
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
         SafeHtml cell(SafeUri url, String displayName);

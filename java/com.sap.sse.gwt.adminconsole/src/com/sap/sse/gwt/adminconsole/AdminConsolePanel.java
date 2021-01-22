@@ -588,12 +588,13 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
             if (isWidgetForPlace(place, panelWidgetName, verticalTabTitle)) {
                 int index = panel.getWidgetIndex(currentWidget);
                 currentPlace = place;
-                panel.selectTab(index, fireEvent);
-                filterAndSelect(place, unwrapScrollPanel(currentWidget));
-                refreshDataFor(currentWidget);
+                panel.selectTab(index, fireEvent);      
                 if (currentWidget instanceof PanelSupplierScollPanel) {
                     PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentWidget;
-                    supplierScollPanel.activate(t -> {});
+                    supplierScollPanel.activate(t -> {filterAndSelect(place, unwrapScrollPanel(t)); refreshDataFor(t);});
+                } else {
+                    filterAndSelect(place, unwrapScrollPanel(currentWidget));
+                    refreshDataFor(currentWidget);
                 }
             }
         }

@@ -198,8 +198,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                //presenter.loadEvents();
-                //presenter.loadLeaderboardGroups();
+                presenter.getEventsRefresher().callFillAndReloadInitially(getWidget().getEventsDisplayer());
             }
         }, stringMessages.events(), new EventsPlace((String) null /* no place token */), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
         /* REGATTAS */
@@ -207,7 +206,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                //presenter.loadRegattas();
+                presenter.getRegattasRefresher().callFillAndReloadInitially(getWidget().getRegattasDisplayer());
             }
         }, stringMessages.regattas(), new RegattasPlace((String) null /* no place token */), SecuredDomainType.REGATTA.getPermission(DefaultActions.MUTATION_ACTIONS));
         /* LEADERBOARDS */
@@ -221,7 +220,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 if (getWidget() != null) {
                     presenter.getLeaderboardsRefresher().callFillAndReloadInitially(getWidget().getLeaderboardsDisplayer());
                 }
-                //presenter.loadLeaderboards();
             }
         }, stringMessages.leaderboards(), new LeaderboardsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
         /* Leaderboard Group */
@@ -230,8 +228,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                //presenter.loadLeaderboards();
-                //presenter.loadLeaderboardGroups();
+                presenter.getLeaderboardGroupsRefresher().callFillAndReloadInitially(getWidget().getLeaderboardGroupsDisplayer());
             }
         }, stringMessages.leaderboardGroups(), new LeaderboardGroupsPlace((String) null /* no place token */), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
         /* RACES */
@@ -242,7 +239,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        //presenter.loadRegattas();
+                        presenter.getRegattasRefresher().callFillAndReloadInitially(getWidget().getRegattasDisplayer());
                     }
                 }, stringMessages.trackedRaces(), new TrackedRacesPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(TrackedRaceActions.MUTATION_ACTIONS));
@@ -275,7 +272,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<RaceCourseManagementPanel>(raceCourseManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        //presenter.loadRegattas();
+                        presenter.getRegattasRefresher().callFillAndReloadInitially(getWidget().getRegattasDisplayer());
                     }
                 }, stringMessages.courseLayout(), new CourseLayoutPlace((String) null /* no place token */),
                 SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
@@ -284,7 +281,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanelSupplier) {
             @Override
             public void refreshAfterBecomingVisible() {
-                //presenter.loadRegattas();
+                presenter.getRegattasRefresher().callFillAndReloadInitially(getWidget().getRegattasDisplayer());
             }
         }, stringMessages.wind(), new WindPlace((String) null /* no place token */), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.UPDATE));
         /* Media */
@@ -344,8 +341,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         trackingEventManagementPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        //presenter.loadLeaderboards();
-                        //presenter.loadRegattas();
+                        presenter.getLeaderboardsRefresher().callFillAndReloadInitially(getWidget().getLeaderboardsDisplayer());
+                        presenter.getRegattasRefresher().callFillAndReloadInitially(getWidget().getRegattasDisplayer());
                     }
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
