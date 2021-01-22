@@ -1,8 +1,6 @@
-package com.sap.sailing.server.gateway.deserialization;
+package com.sap.sse.shared.json;
 
-import org.json.simple.JSONObject;
-
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sse.common.TransformationException;
 
 /**
  * Exception thrown on deserialization error from JSON data.
@@ -11,7 +9,7 @@ public class JsonDeserializationException extends TransformationException {
     private static final long serialVersionUID = -6725762788023063937L;
 
     public JsonDeserializationException() {
-        super(JSONObject.class, null, null);
+        super();
     }
 
     public JsonDeserializationException(String message, Throwable innerException) {

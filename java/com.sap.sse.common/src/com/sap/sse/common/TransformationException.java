@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.racelog.tracking;
+package com.sap.sse.common;
 
 import java.io.IOException;
 import java.io.Serializable;

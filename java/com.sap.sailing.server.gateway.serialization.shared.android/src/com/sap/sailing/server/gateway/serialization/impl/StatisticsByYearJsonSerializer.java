@@ -3,8 +3,8 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.statistics.Statistics;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class StatisticsByYearJsonSerializer implements JsonSerializer<Pair<Integer, Statistics>> {
 
