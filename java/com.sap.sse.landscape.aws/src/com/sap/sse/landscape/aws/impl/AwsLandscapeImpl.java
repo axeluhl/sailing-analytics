@@ -616,8 +616,21 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         if (!KeyPair.load(new JSch(), encryptedPrivateKey, publicKey).isEncrypted()) {
             throw new IllegalArgumentException("Expected an encrypted private key");
         }
-        getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
-                .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build());
+        try {
+            getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
+                    .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build());
+        } catch (Exception e) {
+            // this didn't work; if it didn't work because a key by that name already exists, let's still try to import the
+            // key into this Landscape, only making this Landscape aware of the key pair for which the public key had been
+            // uploaded to AWS earlier.
+            if (e.getMessage().contains("The keypair '"+keyName+"' already exists")) {
+                logger.info("A key named " + keyName + " already exists in the AWS region " + region.getId()
+                        + ". No problem; trying to import into this landscape.");
+            } else {
+                logger.info("Error trying to import a public key into the landscape: "+e.getMessage());
+                throw e;
+            }
+        }
         Object principal;
         try {
             principal = SessionUtils.getPrincipal();
