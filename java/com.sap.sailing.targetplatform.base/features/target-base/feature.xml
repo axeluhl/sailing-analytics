@@ -216,6 +216,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.apache-jsp.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.35.v20201120"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.osgi.boot.jsp"
          download-size="0"
          install-size="0"
@@ -237,7 +244,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.taglibs.taglibs-standard-impl"
+         id="org.apache.taglibs.standard-impl"
          download-size="0"
          install-size="0"
          version="1.2.5"
