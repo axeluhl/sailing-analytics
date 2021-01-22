@@ -167,3 +167,25 @@
   background-image: resourceUrl('audio');
   background-size: 1.5rem;
 }
+.button {
+    display: inline-block;
+    height: 1.5em;
+    width: 1.5em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 90%;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4em;
+}
+.button:hover {
+    background-color: rgb(237, 160, 5)
+}
+.button:hover.active {
+    background-color: #A40000;
+}
+.iconManage {
+  background-color: #9f9f9f;
+  background-image: resourceUrl('settings');
+  background-size: 1.5rem;
+}

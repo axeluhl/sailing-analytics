@@ -11,10 +11,12 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -32,6 +34,7 @@ import com.sap.sse.gwt.client.LinkUtil;
 public class SectionHeaderContent extends Composite {
 
     protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
+    protected static final String ACTIVE_STYLE = SectionHeaderResources.INSTANCE.css().active();
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
@@ -50,6 +53,7 @@ public class SectionHeaderContent extends Composite {
     @UiField DivElement actionArrowUi;
     @UiField SimplePanel widgetContainerUi;
     @UiField HTMLPanel headerContentUi;
+    @UiField Button manageButtonUi;
 
     private boolean expanded = false;;
 
@@ -179,6 +183,19 @@ public class SectionHeaderContent extends Composite {
 
     public boolean isExpanded() {
         return expanded;
+    }
+    
+    public void addManageButtonClickHandler(ClickHandler handler) {
+        manageButtonUi.addClickHandler(handler);
+        manageButtonUi.setVisible(true);
+    }
+    
+    public void setManageButtonActive(boolean active) {
+        if (active) {
+            manageButtonUi.addStyleName(ACTIVE_STYLE);
+        } else {
+            manageButtonUi.removeStyleName(ACTIVE_STYLE);
+        }
     }
 
 }

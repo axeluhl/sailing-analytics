@@ -25,12 +25,37 @@ public class ImageGallery extends Composite {
     @UiField FlowPanel firstColumnUi;
     @UiField FlowPanel secondColumnUi;
     private final MobileSection mobileSection;
+    private boolean managed;
     
     public ImageGallery() {
+        //photoUploadUi.getElement().setAttribute("capture", "camera");
         ImageGalleryResources.INSTANCE.css().ensureInjected();
         initWidget(mobileSection = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.images());
         sectionHeaderUi.initCollapsibility(mobileSection.getContentContainerElement(), true);
+        sectionHeaderUi.addManageButtonClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                managed = !managed;
+                for (int i = 0; i < firstColumnUi.getWidgetCount(); i++) {
+                    ImageGalleryItem item = (ImageGalleryItem) firstColumnUi.getWidget(i);
+                    item.manageMedia(managed);
+                }
+                for (int i = 0; i < secondColumnUi.getWidgetCount(); i++) {
+                    ImageGalleryItem item = (ImageGalleryItem) secondColumnUi.getWidget(i);
+                    item.manageMedia(managed);
+                }
+                sectionHeaderUi.setManageButtonActive(managed);
+                event.stopPropagation();
+            }
+        });
+    }
+    
+    @Override
+    protected void onLoad() {
+        // TODO Auto-generated method stub        
+        super.onLoad();
     }
     
     public void setImages(final Collection<SailingImageDTO> images) {
@@ -48,6 +73,15 @@ public class ImageGallery extends Composite {
                 }
             });
             container.add(imageGalleryItem);
+        }
+    }
+    
+    public void addImage(SailingImageDTO image) {
+        ImageGalleryItem imageGalleryItem = new ImageGalleryItem(image);
+        if (firstColumnUi.getWidgetCount() < secondColumnUi.getWidgetCount()) {
+            firstColumnUi.add(imageGalleryItem);
+        } else {
+            secondColumnUi.add(imageGalleryItem);
         }
     }
     

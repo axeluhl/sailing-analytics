@@ -15,6 +15,8 @@
                     <h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
                     <div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;"
                         ui:field="labelUi"></div>
+                        
+                    <g:Button addStyleNames="{local_res.css.button} {local_res.css.iconManage}" ui:field="manageButtonUi"></g:Button>
                 </div>
 	                <div>
 	                    <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}"

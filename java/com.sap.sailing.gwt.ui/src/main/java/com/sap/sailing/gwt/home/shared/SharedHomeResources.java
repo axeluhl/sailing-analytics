@@ -83,6 +83,14 @@ public interface SharedHomeResources extends CommonIcons {
     @Source("../../ui/client/images/flat_copy.svg")
     @MimeType("image/svg+xml")
     DataResource copyIcon();
+    
+    @Source("add-media.svg")
+    @MimeType("image/svg+xml")
+    DataResource addMedia();
+    
+    @Source("edit.svg")
+    @MimeType("image/svg+xml")
+    DataResource edit();
 
     @Source("plus_transparent.png")
     ImageResource plusTransparent();

@@ -20,13 +20,11 @@ public class ManagePhotosDialog extends DialogBoxExt {
     private final FlowPanel contentPanel;
     private final SharedResources res;
     private final MediaPageResources local_res;
-    private final StringMessages stringMessages;
 
     public ManagePhotosDialog(StringMessages stringMessages, SharedResources res, MediaPageResources local_res) {
         super(new FlowPanel(), "Manage Photos", true);
         this.res = res;
         this.local_res = local_res;
-        this.stringMessages = stringMessages;
         setTitle("Hello");
         setText("Hello");
         setWidth("100%");

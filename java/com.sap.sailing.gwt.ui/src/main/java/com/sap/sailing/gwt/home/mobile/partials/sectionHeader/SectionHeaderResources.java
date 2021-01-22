@@ -35,5 +35,8 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String iconHeaderWind();
         String iconHeaderVideo();
         String iconHeaderAudio();
+        String iconManage();
+        String button();
+        String active();
     }
 }
