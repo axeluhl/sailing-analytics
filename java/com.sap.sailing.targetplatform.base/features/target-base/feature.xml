@@ -202,7 +202,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.mortbay.apache.apache-jsp.source"
+         id="org.mortbay.jasper.apache-jsp.source"
          download-size="0"
          install-size="0"
          version="8.5.54"
