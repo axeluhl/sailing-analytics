@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogStartOfTrackingEventSerializer extends BaseRaceLogEventSerializer implements
         JsonSerializer<RaceLogEvent> {

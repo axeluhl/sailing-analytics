@@ -9,8 +9,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdentifierWithGPSFixesDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class DeviceAndSessionIdentifierWithGPSFixesSerializer<D extends DeviceIdentifier, F extends GPSFix> implements
         JsonSerializer<Util.Triple<D, Serializable, List<F>>> {

@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CountryCodeJsonSerializer implements JsonSerializer<CountryCode> {
     public static final String TWO_LETTER_ISO_CODE = "twoLetterIsoCode";

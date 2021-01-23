@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.RepeatablePart;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseTemplateJsonSerializer implements JsonSerializer<CourseTemplate> {
 

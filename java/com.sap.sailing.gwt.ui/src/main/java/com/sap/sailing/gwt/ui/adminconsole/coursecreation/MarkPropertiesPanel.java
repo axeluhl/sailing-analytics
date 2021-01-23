@@ -47,12 +47,14 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -64,7 +66,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkPropertiesPanel extends FlowPanel {
+public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelProvider<MarkPropertiesDTO>{
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     private static final AbstractImagePrototype positionImagePrototype = AbstractImagePrototype
@@ -526,5 +528,10 @@ public class MarkPropertiesPanel extends FlowPanel {
                     new ImageSpec(ACTION_UNSET_POSITION, stringMessages.unsetPosition(), resources.removePing()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkPropertiesDTO> getFilterablePanel() {
+        return filterableMarkProperties;
     }
 }

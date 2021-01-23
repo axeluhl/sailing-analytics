@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,8 +50,6 @@ public class UserGroupDetailPanel extends Composite
     private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
     private final UserGroupUsersTableWrapper tenantUsersTable;
     private final TenantUsersListDataProvider tenantUsersListDataProvider;
-
-    private UserGroupSuggestOracle oracle;
 
     private class TenantUsersListDataProvider extends AbstractDataProvider<StrippedUserDTO> {
         private final TextBox filterBox;
@@ -134,17 +131,15 @@ public class UserGroupDetailPanel extends Composite
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
         final UserManagementWriteServiceAsync userManagementService = userService.getUserManagementWriteService();
-        // setup suggest
-        this.oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
-        final SuggestBox suggestUser = new SuggestBox(oracle);
-        suggestUser.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
-        suggestUser.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
-        suggestUser.ensureDebugId("UserSuggestion");
+        final TextBox userBox = new TextBox();
+        userBox.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
+        userBox.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
+        userBox.ensureDebugId("UserSuggestion");
         // add suggest
-        buttonPanel.insertWidgetAtPosition(suggestUser, 0);
+        buttonPanel.insertWidgetAtPosition(userBox, 0);
         // add add button
         final Button addButton = buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
-            final String selectedUsername = suggestUser.getValue();
+            final String selectedUsername = userBox.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
                 final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
                 if (selectedUserGroup != null) {
@@ -160,7 +155,7 @@ public class UserGroupDetailPanel extends Composite
                                 public void onSuccess(Void result) {
                                     selectedUserGroup.add(new StrippedUserDTO(selectedUsername));
                                     updateUserList();
-                                    suggestUser.setText("");
+                                    userBox.setText("");
                                 }
                             });
                 }
@@ -233,11 +228,6 @@ public class UserGroupDetailPanel extends Composite
 
     public void updateUserList() {
         tenantUsersListDataProvider.updateDisplays();
-        oracle.resetAndRemoveExistingUsers(getSelectedUserGroupUsernames());
-    }
-
-    public void refreshSuggest() {
-        oracle.refresh();
     }
 
     private List<String> getSelectedUserGroupUsernames() {

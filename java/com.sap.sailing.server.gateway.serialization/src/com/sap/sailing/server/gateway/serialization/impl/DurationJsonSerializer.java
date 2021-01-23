@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class DurationJsonSerializer implements JsonSerializer<Duration> {
 

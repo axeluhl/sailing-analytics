@@ -6,14 +6,14 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MongoDbFriendlyPositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.RaceWithWindSources;
 import com.sap.sailing.windestimation.data.WindSourceMetadata;
 import com.sap.sailing.windestimation.data.WindSourceWithFixes;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceWithWindSourcesDeserializer implements JsonDeserializer<RaceWithWindSources> {
 
