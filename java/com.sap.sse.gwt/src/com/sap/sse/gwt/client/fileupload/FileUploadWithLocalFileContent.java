@@ -29,6 +29,7 @@ import elemental2.promise.Promise;
 public class FileUploadWithLocalFileContent {
     private final FileUpload fileUpload;
 
+    @FunctionalInterface
     public static interface FileContentCallback {
         void fileContentsRead(byte[] fileContents);
     }
