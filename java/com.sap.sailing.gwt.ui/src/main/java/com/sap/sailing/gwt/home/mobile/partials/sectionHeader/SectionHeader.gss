@@ -169,23 +169,29 @@
 }
 .button {
     display: inline-block;
-    height: 1.5em;
-    width: 1.5em;
+    height: 28px;
+    width: 28px;
+    background-color: #9f9f9f;
     background-repeat: no-repeat;
     background-position: center center;
-    background-size: 90%;
+    background-size: contain;
     border: none;
     border-radius: 6px;
-    padding: 0.4em;
+    padding: 7px;
+    margin-left: 6px;
+    margin-top: -5px
+}
+.button {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 75%;
 }
 .button:hover {
-    background-color: rgb(237, 160, 5)
+    background-color: #9f9f9f
 }
-.button:hover.active {
+.button.active {
     background-color: #A40000;
 }
 .iconManage {
-  background-color: #9f9f9f;
-  background-image: resourceUrl('settings');
-  background-size: 1.5rem;
+    background-image: resourceUrl('edit');
 }

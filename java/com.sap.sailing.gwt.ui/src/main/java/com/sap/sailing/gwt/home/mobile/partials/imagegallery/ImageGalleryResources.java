@@ -16,5 +16,9 @@ public interface ImageGalleryResources extends ClientBundle {
         String imagegallery_columnfirst();
         String imagegallery_columnsecond();
         String imagegallery_column_item();
+        String button();
+        String overlay();
+        String deleteButton();
+        String editButton();
     }
 }

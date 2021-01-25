@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.imagegallery;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -11,23 +9,27 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class ImageGalleryItem extends Widget implements HasClickHandlers {
+public class ImageGalleryItem extends Composite implements HasClickHandlers {
 
     private static ImageGalleryItemUiBinder uiBinder = GWT.create(ImageGalleryItemUiBinder.class);
     
-    interface ImageGalleryItemUiBinder extends UiBinder<Element, ImageGalleryItem> {
+    interface ImageGalleryItemUiBinder extends UiBinder<Widget, ImageGalleryItem> {
     }
     
     @UiField DivElement imageUi;
-    @UiField AnchorElement test;
+    @UiField DivElement overlayUi;
+    @UiField Button editButtonUi;
+    @UiField Button deleteButtonUi;
     
     public ImageGalleryItem(ImageDTO image) {
-        setElement(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + image.getSourceRef() + "')");
-        test.getStyle().setVisibility(Visibility.HIDDEN);
+        overlayUi.getStyle().setVisibility(Visibility.HIDDEN);
     }
     
     @Override
@@ -37,9 +39,9 @@ public class ImageGalleryItem extends Widget implements HasClickHandlers {
     
     public void manageMedia(boolean managed) {
         if (managed) {
-            test.getStyle().setVisibility(Visibility.VISIBLE);
+            overlayUi.getStyle().setVisibility(Visibility.VISIBLE);
         } else {
-            test.getStyle().setVisibility(Visibility.HIDDEN);
+            overlayUi.getStyle().setVisibility(Visibility.HIDDEN);
         }
     }
 

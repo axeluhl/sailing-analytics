@@ -16,7 +16,7 @@
                     <div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;"
                         ui:field="labelUi"></div>
                         
-                    <g:Button addStyleNames="{local_res.css.button} {local_res.css.iconManage}" ui:field="manageButtonUi"></g:Button>
+                    <g:Button addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.iconManage}" visible="false" ui:field="manageButtonUi"></g:Button>
                 </div>
 	                <div>
 	                    <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}"

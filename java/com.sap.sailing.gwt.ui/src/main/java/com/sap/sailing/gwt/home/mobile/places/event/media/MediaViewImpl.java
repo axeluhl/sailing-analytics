@@ -43,6 +43,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
             @Override
             public void onClick(ClickEvent event) {
                 mediaUploadPopup.show();
+                mediaUploadPopup.openFileUpload();
             }
         });
 

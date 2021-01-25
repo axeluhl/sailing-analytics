@@ -9,10 +9,15 @@
         type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGalleryResources" />
-    <div style="position: relative;">
-        <div class="{local_res.css.imagegallery_column_item}"
-            ui:field="imageUi" style="position:relative"></div>
-        <a ui:field="test" onclick="event.stopPropagation();"
-            style="position:absolute;background-color:grey;opacity:0.5;width:100%;height:100%;display:block;top:0;"></a>
-    </div>
+        
+    <g:HTMLPanel>
+        <div  style="position: relative;">
+            <div class="{local_res.css.imagegallery_column_item}"
+                ui:field="imageUi" style="position:relative"></div>
+            <div ui:field="overlayUi" onclick="event.stopPropagation();" class="{local_res.css.overlay}">
+                <g:Button addStyleNames="{local_res.css.button} {local_res.css.editButton}" ui:field="editButtonUi"></g:Button>
+                <g:Button addStyleNames="{local_res.css.button} {local_res.css.deleteButton}" ui:field="deleteButtonUi"></g:Button>
+            </div>
+        </div>
+    </g:HTMLPanel>
 </ui:UiBinder>
