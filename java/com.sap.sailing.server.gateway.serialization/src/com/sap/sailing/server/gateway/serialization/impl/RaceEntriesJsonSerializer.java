@@ -9,11 +9,11 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceEntriesJsonSerializer implements JsonSerializer<RaceDefinition> {
     public static final String FIELD_NAME = "name";

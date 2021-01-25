@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.home.client.place.event.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class RegattaPlace extends AbstractBasePlace {
@@ -35,8 +36,13 @@ public class RegattaPlace extends AbstractBasePlace {
     }
 
     public RegattaPlace(String eventUuidAsString, RegattaNavigationTabs navigationTab, String leaderboardIdAsNameString, Boolean showRaceDetails, Boolean showSettings) {
-        super(PARAM_EVENTID, eventUuidAsString, PARAM_NAVIGATION_TAB, navigationTab.name(), PARAM_LEADERBOARD_NAME, leaderboardIdAsNameString, 
-                PARAM_SHOW_RACE_DETAILS, String.valueOf(showRaceDetails), PARAM_SHOW_SETTINGS,  String.valueOf(showSettings));
+        super(Util.<String, String>mapBuilder()
+                .put(PARAM_EVENTID, eventUuidAsString)
+                .put(PARAM_NAVIGATION_TAB, navigationTab.name())
+                .put(PARAM_LEADERBOARD_NAME, leaderboardIdAsNameString)
+                .put(PARAM_SHOW_RACE_DETAILS, String.valueOf(showRaceDetails))
+                .put(PARAM_SHOW_SETTINGS, String.valueOf(showSettings))
+                .build());
         this.eventUuidAsString = eventUuidAsString;
         this.navigationTab = navigationTab;
         this.leaderboardIdAsNameString = leaderboardIdAsNameString;

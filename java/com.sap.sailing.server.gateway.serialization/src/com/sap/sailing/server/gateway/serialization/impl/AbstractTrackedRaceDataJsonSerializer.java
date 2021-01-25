@@ -1,7 +1,7 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class AbstractTrackedRaceDataJsonSerializer implements JsonSerializer<TrackedRace>{
 

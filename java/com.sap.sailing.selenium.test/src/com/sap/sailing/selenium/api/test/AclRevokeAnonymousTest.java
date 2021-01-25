@@ -48,6 +48,7 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
     @Test
     public void test() {
         EventConfigurationPanelPO eventPanel = adminConsole.goToEvents();
+        eventPanel.refreshEvents();
         EventEntryPO eventEntry = eventPanel.getEventEntry(EVENT_NAME);
         AclPopupPO aclPopup = eventEntry.openAclPopup();
         aclPopup.addUserGroup(""); // add empty user group -> anonymous group

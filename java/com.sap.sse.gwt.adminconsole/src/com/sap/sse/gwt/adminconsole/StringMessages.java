@@ -1,11 +1,13 @@
 package com.sap.sse.gwt.adminconsole;
 
-import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 
-public interface StringMessages extends Messages {
+@DefaultLocale("en")
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
+    public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
+    
     String upload();
-
-    String remove();
 
     String removeResult(String status, String message);
 

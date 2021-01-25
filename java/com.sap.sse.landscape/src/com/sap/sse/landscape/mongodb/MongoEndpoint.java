@@ -41,6 +41,18 @@ public interface MongoEndpoint {
     MongoDatabase importDatabase(MongoDatabase from);
 
     boolean isInReplicaSet() throws URISyntaxException;
+    
+    default boolean isReplicaSet() {
+        return this instanceof MongoReplicaSet;
+    }
+    
+    default MongoProcess asMongoProcess() {
+        return (MongoProcess) this;
+    }
+
+    default MongoReplicaSet asMongoReplicaSet() {
+        return (MongoReplicaSet) this;
+    }
 
     /**
      * When invoked on a {@link MongoProcess} that is not currently equipped with a public IP address, a

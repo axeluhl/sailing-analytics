@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class DeviceConfigurationJsonSerializer implements JsonSerializer<DeviceConfiguration> {
     public static final String FIELD_ID_AS_STRING = "idAsString";

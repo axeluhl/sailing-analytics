@@ -317,7 +317,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
             Duration minGPH = new MillisecondsDurationImpl(Long.MAX_VALUE);
             Boat boatWithMinGPH = null;
             for (final Entry<Boat, ORCCertificate> e : certificates.entrySet()) {
-                if (e.getValue().getGPH().compareTo(minGPH) < 0) {
+                if (e.getValue().getGPH() != null && e.getValue().getGPH().compareTo(minGPH) < 0) {
                     boatWithMinGPH = e.getKey();
                     minGPH = e.getValue().getGPH();
                 }

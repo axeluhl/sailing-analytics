@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.panels;
 
+import java.util.List;
+
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
@@ -30,6 +32,12 @@ public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterab
     public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered,
             StringMessages stringMessages) {
         super(all, filtered, stringMessages);
+        insert(label, 0);
+    }
+
+    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered,
+            StringMessages stringMessages, String filterCheckboxLabel) {
+        super(all, filtered, stringMessages, filterCheckboxLabel);
         insert(label, 0);
     }
 }

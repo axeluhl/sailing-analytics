@@ -23,6 +23,31 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">January 2021</h2>
+                    <ul class="bulletList">
+                        <li>A new competitor import plug-in is available now for YachtScoring (see <a href="https://www.yachtscoring.com/">https://www.yachtscoring.com/</a>).
+                            You can simply enter your YachtScoring event ID (e.g., 13062 for the Bacardi Invitational Winter Series)
+                            and start importing your entries from YachtScoring into the SAP Sailing Analytics.</li>
+                        <li>The <tt>/gwt/status</tt> output now contains additional attributes describing the server name and more
+                            details about the replication status.</li>
+                        <li>The <tt>/sailingserver/api/v1/status</tt> servlet has been removed; should you have used it, please use
+                            <tt>/gwt/status</tt> from now on.</li>
+                        <li>The administration console has undergone
+                            some technical improvement. Panels including their code and data
+                            are loaded only when needed, significantly reducing initial code
+                            and data download. Furthermore, all panels can now be navigated
+                            to by a fragment identifier. Example: <a
+                            href="https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:">https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:</a>.
+                            These places become part of the browsing history, so the back/forward navigation in the browser is now
+                            aware of the click path and how it went through the panels which turns out to be particularly useful
+                            when leaving the AdminConsole through a link opening another URL in the same tab. Note, that furthermore
+                            it is now possible to construct AdminConsole links that have a filter and/or selection in place for the
+                            main table in the panel (should there be such a "main table"). Example:
+                            <a href="https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:filter=Trave">https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:filter=Trave</a>
+                            which shows only regattas containing the string "Trave", or
+                            <a href="https://dev.sapsailing.com/gwt/AdminConsole.html#LeaderboardGroupsPlace:select=0b7e71c5-f944-4650-bf09-f902ce76c3d3&filter=0b7e71c5-f944-4650-bf09-f902ce76c3d3">https://dev.sapsailing.com/gwt/AdminConsole.html#LeaderboardGroupsPlace:select=0b7e71c5-f944-4650-bf09-f902ce76c3d3&filter=0b7e71c5-f944-4650-bf09-f902ce76c3d3</a>
+                            which selects and filters for a single leaderboard group.</li>
+                    </ul>
                     <h2 class="articleSubheadline">December 2020</h2>
                     <ul class="bulletList">
                         <li>On replicas, user group memberships did not always update correctly, due to a reference to a stale
@@ -32,6 +57,15 @@
                             "Officer on vessel" or "Shore control". The QR-code and link produced are in a new format that is
                             understood starting with Race Manager App version 1.4.91 and which supports installing the app
                             and still recognizing the configuration upon the first app start ("deep link support").</li>
+                        <li>In the Master Data Import panel under the Advanced category we changed the default setting for
+                            the checkbox that enables the transport of the tracking parameters required to track all races
+                            imported on the importing server again. This includes, e.g., the TracTrac JSON URLs and all other
+                            connectivity parameters. As an effect, by default after the Master Data Import completes, all
+                            races of the event(s) imported will automatically be loaded on the importing side.</li>
+                        <li>When changing competitor or boat ownerships from within a registration list at race or regatta
+                            level and then saving the list again, due to a bug only the single record whose ownership data
+                            was modified was still considered registered, and all other objects from the list got de-registered.
+                            This has now been fixed.</li>
                     </ul>
                     <h2 class="articleSubheadline">November 2020</h2>
                     <ul class="bulletList">

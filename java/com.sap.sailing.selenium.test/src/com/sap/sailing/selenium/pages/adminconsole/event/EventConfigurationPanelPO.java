@@ -152,4 +152,10 @@ public class EventConfigurationPanelPO extends PageArea {
         return regattaOverviewLink;
     }
     
+    public EventConfigurationPanelPO refreshEvents() {
+        refreshEventsButton.click();
+        waitForAjaxRequests();
+        return this;
+    }
+    
 }

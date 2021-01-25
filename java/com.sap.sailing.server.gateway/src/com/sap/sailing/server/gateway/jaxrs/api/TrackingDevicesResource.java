@@ -16,9 +16,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.shared.json.JsonSerializer;
 
 @Path("/v1/tracking_devices")
 public class TrackingDevicesResource extends AbstractSailingServerResource {

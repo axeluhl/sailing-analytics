@@ -43,7 +43,7 @@ public class UserGroupManagementPanel extends Composite {
     private UserGroupDetailPanel userGroupDetailPanel;
     private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
-    private final UserGroupTableWrapper userGroupTableWrapper;
+    protected final UserGroupTableWrapper userGroupTableWrapper;
 
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
@@ -140,7 +140,7 @@ public class UserGroupManagementPanel extends Composite {
         listsWrapper.add(roleCaption);
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
-                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedUserGroup(userGroupTableWrapper.getSelectionModel()) != null));
+                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedObjectOrNull(userGroupTableWrapper.getSelectionModel()) != null));
         return listsWrapper;
     }
 
@@ -153,7 +153,6 @@ public class UserGroupManagementPanel extends Composite {
     }
 
     public void refreshSuggests() {
-        userGroupDetailPanel.refreshSuggest();
         userGroupRoleDefinitionPanel.refreshSuggest();
     }
 }

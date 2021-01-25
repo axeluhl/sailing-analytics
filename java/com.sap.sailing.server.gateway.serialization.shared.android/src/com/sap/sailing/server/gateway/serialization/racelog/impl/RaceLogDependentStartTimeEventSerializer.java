@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogDependentStartTimeEventSerializer extends RaceLogRaceStatusEventSerializer implements JsonSerializer<RaceLogEvent> {
 
