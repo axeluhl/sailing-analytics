@@ -82,6 +82,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
             editSeriesMedals.pressOk();
             trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+            leaderboard.refreshLeaderboard();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
             
             for(int i = 1; i<=11; i++) {

@@ -11,6 +11,14 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 public interface Landscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
+     * The {@link Landscape#getLatestImageWithTag(Region, String, String)} method is
+     * used to obtain default images for specific host starting procedures that subclass this class. The
+     * Machine Images for this are then expected to be tagged with a tag named as specified by this
+     * constant ("image-type"). The tag value then must match what the subclass wants.
+     */
+    String IMAGE_TYPE_TAG_NAME = "image-type";
+
+    /**
      * Tells which scope currently lives where
      */
     Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes();
@@ -46,4 +54,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     Iterable<Region> getRegions();
     
     MachineImage getLatestImageWithTag(Region region, String tagName, String tagValue);
+
+    MachineImage getLatestImageWithType(Region region, String imageType);
 }

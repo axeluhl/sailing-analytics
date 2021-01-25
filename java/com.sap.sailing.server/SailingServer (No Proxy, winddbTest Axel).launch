@@ -184,7 +184,9 @@
 <setEntry value="com.sap.sailing.shared.server@5:true"/>
 <setEntry value="com.sap.sailing.shared.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.shared.persistence@default:default"/>
-<setEntry value="com.sap.sse.debranding@default:default"/>
+<setEntry value="com.sap.sailing.landscape@default:default"/>
+<setEntry value="com.sap.sailing.landscape.common@default:default"/>
+<setEntry value="com.sap.sailing.landscape.ui@default:default"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
@@ -213,11 +215,13 @@
 <setEntry value="com.sap.sse.replication.interfaces@default:default"/>
 <setEntry value="com.sap.sse.security.persistence@default:default"/>
 <setEntry value="com.sap.sse.security.interface@default:default"/>
-<setEntry value="com.sap.sse.jettyextensions@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>
+<setEntry value="com.sap.sse.landscape.common@default:default"/>
 <setEntry value="com.sap.sse.landscape@default:default"/>
-<setEntry value="com.sap.sse.landscape.aws@default:default"/>
+<setEntry value="com.sap.sse.landscape.aws@4:true"/>
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
+<setEntry value="com.sap.sse.debranding@default:default"/>
+<setEntry value="elemental2@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.test.support@default:default"/>
 
 </setAttribute>

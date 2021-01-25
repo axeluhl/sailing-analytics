@@ -6,23 +6,32 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.Release;
 
+/**
+ * A replica set with master and zero or more replicas. Temporarily, e.g., during an upgrade procedure, even the master
+ * process may disappear. The replica set's name is also considered to be the "server name" of the processes
+ * constituting it.
+ * 
+ * @author Axel Uhl (D043530)
+ */
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Named {
     /**
      * The application version that the nodes in this replica set are currently running. During an
-     * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
+     * {@link #upgrade(Release)} things may temporarily seem inconsistent.
      */
-    ApplicationVersion getVersion();
+    Release getVersion();
     
     /**
      * Upgrades this replica set to a new version. Things may temporarily seem inconsistent; e.g., a master
      * process may be stopped, upgraded to the new version, and then replica processes may be fired up against the new
      * master, and when enough replicas have reached an available state they will replace the previous replicas.
      */
-    void upgrade(ApplicationVersion newVersion);
+    void upgrade(Release newVersion);
     
     ProcessT getMaster();
     

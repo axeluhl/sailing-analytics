@@ -90,20 +90,16 @@ public class UserGroupTableWrapper extends
                         });
             }
         });
-
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementWriteService(), type,
                 user -> refreshUserList(null), stringMessages);
-
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(),
                 stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
         filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
                 new ArrayList<UserGroupDTO>(), dataProvider, stringMessages) {
             @Override
@@ -120,7 +116,6 @@ public class UserGroupTableWrapper extends
         };
         filterField.setUpdatePermissionFilterForCheckbox(userGroup -> userService.hasPermission(userGroup, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());

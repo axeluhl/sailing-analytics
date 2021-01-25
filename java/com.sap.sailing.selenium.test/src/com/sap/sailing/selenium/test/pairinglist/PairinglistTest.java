@@ -71,6 +71,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
             editSeriesMedals.pressOk();
             LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
                     .goToLeaderboardConfiguration();
+            leaderboardConfigurationPanelPO.refreshLeaderboard();
             LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
                     .getEntry(REGATTA_49ER_WITH_SUFFIX);
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
@@ -93,6 +94,7 @@ public class PairinglistTest extends AbstractSeleniumTest {
             AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsolePage
                     .goToLeaderboardConfiguration();
+            leaderboardConfigurationPanelPO.refreshLeaderboard();
             LeaderboardEntryPO leaderboardEntryPO = leaderboardConfigurationPanelPO.getLeaderboardTable()
                     .getEntry(REGATTA_49ER_WITH_SUFFIX);
             PairingListCreationSetupDialogPO dialog = leaderboardEntryPO.getLeaderboardPairingListCreationSetupDialog();
