@@ -158,7 +158,6 @@ public class ExpeditionAllInOneImportPanel extends Composite {
                         response.getRaceEntries(), response.getGpsDeviceIds(), response.getSensorDeviceIds(),
                         response.getSensorFixImporterType(), response.getStartTimes(), presenter.getSailingService(), 
                         presenter.getUserService(), presenter.getErrorReporter(), stringMessages);
-                //presenter.getRegattasRefresher().loadRegattas();
             } else {
                 ExpeditionDataImportResultsDialog.showResults(response);
             }

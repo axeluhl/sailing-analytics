@@ -208,8 +208,6 @@ public class EventListComposite extends Composite {
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
-        //presenter.getEventsRefresher().reloadAndCallFill(null);
-        //eventRefresher.loadEvents();
         initWidget(panel);
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
@@ -643,7 +641,6 @@ public class EventListComposite extends Composite {
 
                     @Override
                     public void onSuccess(EventDTO result) {
-                        //eventRefresher.loadEvents();
                         final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
                         int i = 0;
                         for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
