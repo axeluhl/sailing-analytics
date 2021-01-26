@@ -9,6 +9,10 @@ import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ImprintPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
+    public ImprintPlace(String token) {
+        super(token);
+    }
+
     @Override
     public String getLocationTitle() {
         return StringMessages.INSTANCE.impressum();
@@ -22,8 +26,8 @@ public class ImprintPlace extends AbstractBasePlace implements HasLocationTitle,
         }
 
         @Override
-        public ImprintPlace getPlace(String url) {
-            return new ImprintPlace();
+        public ImprintPlace getPlace(String token) {
+            return new ImprintPlace(token);
         }
     }
 }

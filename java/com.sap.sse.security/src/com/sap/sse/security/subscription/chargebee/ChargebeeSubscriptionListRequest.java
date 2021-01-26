@@ -26,50 +26,20 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
         void onSubscriptionListResult(Iterable<ChargebeeApiSubscriptionData> subscriptions, String nextOffset);
     }
 
-    private final SubscriptionApiRequestProcessor requestProcessor;
     private final User user;
     private final OnResultListener listener;
     private final String offset;
-    
+
     private List<ChargebeeApiSubscriptionData> subscriptions;
     private String nextOffset;
     private int resultSize;
 
     public ChargebeeSubscriptionListRequest(User user, String offset, OnResultListener listener,
             SubscriptionApiRequestProcessor requestProcessor) {
+        super(requestProcessor);
         this.user = user;
         this.offset = offset;
         this.listener = listener;
-        this.requestProcessor = requestProcessor;
-    }
-
-    @Override
-    public void run() {
-        logger.info(() -> "Fetching subscription list, user: " + user.getName() + ", offset: "
-                + (offset == null ? "" : offset));
-        SubscriptionListRequest request = Subscription.list().limit(100).customerId().is(user.getName())
-                .includeDeleted(false).sortByCreatedAt(SortOrder.DESC);
-        if (offset != null && !offset.isEmpty()) {
-            request.offset(offset);
-        }
-        try {
-            ListResult result = request.request();
-            if (!isRateLimitReached(result)) {
-                if (result != null && !result.isEmpty()) {
-                    resultSize = result.size();
-                    nextOffset = result.nextOffset();
-                    processListResult(result);
-                } else {
-                    onDone(null, null);
-                }
-            } else {
-                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Fetching subscription list failed, user: " + user.getName() + ", offset: "
-                    + (offset == null ? "" : offset));
-            onDone(null, null);
-        }
     }
 
     @Override
@@ -80,12 +50,43 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
         }
     }
 
+    @Override
+    protected ChargebeeInternalApiRequestWrapper createRequest() {
+        logger.info(() -> "Fetching subscription list, user: " + user.getName() + ", offset: "
+                + (offset == null ? "" : offset));
+        SubscriptionListRequest request = Subscription.list().limit(100).customerId().is(user.getName())
+                .includeDeleted(false).sortByCreatedAt(SortOrder.DESC);
+        if (offset != null && !offset.isEmpty()) {
+            request.offset(offset);
+        }
+        return new ChargebeeInternalApiRequestWrapper(request);
+    }
+
+    @Override
+    protected void processResult(ChargebeeInternalApiRequestWrapper request) {
+        ListResult result = request.getListResult();
+        if (result != null && !result.isEmpty()) {
+            resultSize = result.size();
+            nextOffset = result.nextOffset();
+            processListResult(result);
+        } else {
+            onDone(null, null);
+        }
+    }
+
+    @Override
+    protected void handleError(Exception e) {
+        logger.log(Level.SEVERE, "Fetching subscription list failed, user: " + user.getName() + ", offset: "
+                + (offset == null ? "" : offset));
+        onDone(null, null);
+    }
+
     private void processListResult(ListResult result) {
         subscriptions = new ArrayList<ChargebeeApiSubscriptionData>();
         for (ListResult.Entry entry : result) {
             Subscription subscription = entry.subscription();
             if (!subscription.deleted()) {
-                new ChargebeeFetchSubscriptionInformationTask(user, subscription, this, requestProcessor).run();
+                new ChargebeeFetchSubscriptionInformationTask(user, subscription, this, getRequestProcessor()).run();
             } else {
                 subscriptions.add(new ChargebeeApiSubscriptionData(subscription, null, null));
             }

@@ -9,7 +9,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.impl.User;
 
 /**
  * Task to perform fetching, checking and updating user subscriptions from payment service providers registered with the
@@ -31,7 +30,8 @@ public class SubscriptionUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker.getServiceReferences()) {
+        for (final ServiceReference<SubscriptionApiService> serviceReference : subscriptionApiServiceTracker
+                .getServiceReferences()) {
             final SubscriptionApiService apiService = subscriptionApiServiceTracker.getService(serviceReference);
             if (apiService != null && apiService.isActive()) {
                 fetchAndUpdateProviderSubscriptions(apiService);
@@ -40,8 +40,7 @@ public class SubscriptionUpdateTask implements Runnable {
     }
 
     private void fetchAndUpdateProviderSubscriptions(SubscriptionApiService apiService) {
-        Iterable<User> users = getSecurityService().getUserList();
-        new ProviderSubscriptionUpdateTask(apiService, users, securityService).run();
+        new ProviderSubscriptionUpdateTask(apiService, getSecurityService().getUserList(), securityService).run();
     }
 
     private SecurityService getSecurityService() {

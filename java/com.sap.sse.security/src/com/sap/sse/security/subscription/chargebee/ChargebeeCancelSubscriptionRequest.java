@@ -20,32 +20,37 @@ public class ChargebeeCancelSubscriptionRequest extends ChargebeeApiRequest {
         void onSubscriptionCancelResult(Subscription subscription);
     }
 
-    private final SubscriptionApiRequestProcessor requestProcessor;
     private final String subscriptionId;
     private final OnResultListener listener;
 
     public ChargebeeCancelSubscriptionRequest(String subscriptionId, OnResultListener listener,
             SubscriptionApiRequestProcessor requestProcessor) {
+        super(requestProcessor);
         this.subscriptionId = subscriptionId;
         this.listener = listener;
-        this.requestProcessor = requestProcessor;
     }
 
     @Override
-    public void run() {
+    protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Cancel Chargebee subscription, subscription id: " + subscriptionId);
         CancelRequest request = cancel(subscriptionId);
-        try {
-            Result result = request.request();
-            if (!isRateLimitReached(result)) {
-                onDone(result.subscription());
-            } else {
-                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);
+        return new ChargebeeInternalApiRequestWrapper(request);
+    }
+
+    @Override
+    protected void processResult(ChargebeeInternalApiRequestWrapper request) {
+        Result result = request.getResult();
+        if (result != null) {
+            onDone(result.subscription());
+        } else {
             onDone(null);
         }
+    }
+
+    @Override
+    protected void handleError(Exception e) {
+        logger.log(Level.SEVERE, "Cancel Chargebee subscription failed, subscription id: " + subscriptionId, e);
+        onDone(null);
     }
 
     private void onDone(Subscription subscription) {

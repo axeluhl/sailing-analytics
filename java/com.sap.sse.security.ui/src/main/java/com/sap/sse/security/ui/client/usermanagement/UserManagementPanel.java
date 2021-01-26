@@ -42,7 +42,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
 
-    private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
+    protected final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
     private final TextBox userNameTextbox;
     private final UserRoleDefinitionPanel userRoleDefinitionPanel;

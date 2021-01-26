@@ -26,40 +26,40 @@ public class ChargebeeInvoiceRequest extends ChargebeeApiRequest {
     private final User user;
     private final String subscriptionId;
     private final OnResultListener listener;
-    private final SubscriptionApiRequestProcessor requestProcessor;
 
     public ChargebeeInvoiceRequest(User user, String subscriptionId, OnResultListener listener,
             SubscriptionApiRequestProcessor requestProcessor) {
+        super(requestProcessor);
         this.user = user;
         this.subscriptionId = subscriptionId;
         this.listener = listener;
-        this.requestProcessor = requestProcessor;
     }
 
     @Override
-    public void run() {
+    protected ChargebeeInternalApiRequestWrapper createRequest() {
         logger.info(() -> "Fetch Chargebee invoice, user: " + user.getName() + ", subscription id: " + subscriptionId);
         InvoiceListRequest request = Invoice.list().limit(1).subscriptionId().is(subscriptionId).customerId()
                 .is(user.getName()).sortByDate(SortOrder.DESC);
-        try {
-            ListResult result = request.request();
-            if (!isRateLimitReached(result)) {
-                final Invoice invoice;
-                if (result != null && !result.isEmpty()) {
-                    invoice = result.get(0).invoice();
-                } else {
-                    invoice = null;
-                }
-                onDone(invoice);
-            } else {
-                requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE,
-                    "Fetch Chargebee invoice failed, user: " + user.getName() + ", subscription id: " + subscriptionId,
-                    e);
-            onDone(null);
+        return new ChargebeeInternalApiRequestWrapper(request);
+    }
+
+    @Override
+    protected void processResult(ChargebeeInternalApiRequestWrapper request) {
+        ListResult result = request.getListResult();
+        final Invoice invoice;
+        if (result != null && !result.isEmpty()) {
+            invoice = result.get(0).invoice();
+        } else {
+            invoice = null;
         }
+        onDone(invoice);
+    }
+
+    @Override
+    protected void handleError(Exception e) {
+        logger.log(Level.SEVERE,
+                "Fetch Chargebee invoice failed, user: " + user.getName() + ", subscription id: " + subscriptionId, e);
+        onDone(null);
     }
 
     private void onDone(Invoice invoice) {

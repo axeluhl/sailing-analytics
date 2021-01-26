@@ -169,7 +169,6 @@ public class SwissTimingArchivedConnectionTableWrapper extends
                     @Override
                     public void onSuccess(List<SwissTimingArchiveConfigurationWithSecurityDTO> result) {
                         filterField.updateAll(result);
-
                     }
                 });
     }
