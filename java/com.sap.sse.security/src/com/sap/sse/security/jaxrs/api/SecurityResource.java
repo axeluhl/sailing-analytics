@@ -63,7 +63,9 @@ public class SecurityResource extends AbstractSecurityResource {
             final Iterable<User> usersWithPermission = getService().getUsersWithPermissions(wildcardPermission);
             final JSONArray usernames = new JSONArray();
             for (final User userWithPermission : usersWithPermission) {
-                usernames.add(userWithPermission.getName());
+                if (getService().hasCurrentUserReadPermission(userWithPermission)) {
+                    usernames.add(userWithPermission.getName());
+                }
             }
             logger.info("Request for users with permission took "+start.until(TimePoint.now()));
             return Response.status(Status.OK).entity(streamingOutput(usernames)).build();

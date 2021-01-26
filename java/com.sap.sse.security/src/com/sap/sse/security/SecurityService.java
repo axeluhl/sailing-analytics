@@ -302,12 +302,18 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Gets all preference objects resolving to a certain key. Always returns a valid map. May be empty.
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> Map<String, T> getPreferenceObjectsByKey(String key);
 
     /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
-
+    
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
      * authenticated using the token. Any access token previously created for same user will be invalidated by this
