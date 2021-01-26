@@ -15,9 +15,14 @@ import java.util.logging.Logger;
 public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiRequestProcessor {
     private static final Logger logger = Logger.getLogger(SubscriptionApiRequestProcessorImpl.class.getName());
 
-    private final Queue<RequestQueueEntry> requestQueue;
     private final ScheduledExecutorService executor;
 
+    /**
+     * Access to this queue in conjunction with access to the {@link #processing} field has to be {@code synchronized}
+     * on this queue. When no thread is holding this queue's monitor (outside any related {@code synchronized} block)
+     * the TODO @Tu, please fill this in accordingly, specifying precisely the semantics and invariants of this construct!
+     */
+    private final Queue<RequestQueueEntry> requestQueue;
     private boolean processing = false;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
@@ -57,7 +62,6 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
 
     private RequestQueueEntry getNextRequestIfAvailable() {
         final RequestQueueEntry entry;
-
         synchronized (requestQueue) {
             if (!requestQueue.isEmpty()) {
                 processing = true;
@@ -94,5 +98,4 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
             return delayMs;
         }
     }
-
 }
