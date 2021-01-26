@@ -246,6 +246,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
@@ -938,6 +940,37 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (anniversaryRaceDeterminator.isEnabled()) {
             this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         }
+    }
+
+    /**
+     * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup, 
+     * since it does manipulate Preference Objects directly, outside of the preferenceLock in the UserStoreImpl.
+     */
+    public void migrateCompetitorNotificationPreferencesWithCompetitorNames() {
+        logger.log(Level.INFO, "Migrating Competitor names for CompetitorNotificationPreferences");
+        final SecurityService securityService = getSecurityService();
+        final Map<String, CompetitorNotificationPreferences> competitorNotificationPreferencesByUser = securityService
+                .getPreferenceObjectsByKey(CompetitorNotificationPreferences.PREF_NAME);
+        competitorNotificationPreferencesByUser.forEach((user, preferences) -> {
+            boolean missingCompetitorNameInSavedPreferences = false;
+            final Iterable<CompetitorNotificationPreference> competitors = preferences.getCompetitors();
+            for (CompetitorNotificationPreference competitor : competitors) {
+                if (competitor.getCompetitorName() == null) {
+                    DynamicCompetitor existingCompetitor = competitorAndBoatStore
+                            .getExistingCompetitorByIdAsString(competitor.getCompetitorIdAsString());
+                    if (existingCompetitor != null) {
+                        final String competitorName = existingCompetitor.getName() == null
+                                ? existingCompetitor.getShortName()
+                                : existingCompetitor.getName();
+                        missingCompetitorNameInSavedPreferences = true;
+                        competitor.setCompetitorName(competitorName);
+                    }
+                }
+            }
+            if (missingCompetitorNameInSavedPreferences) {
+                securityService.setPreferenceObject(user, CompetitorNotificationPreferences.PREF_NAME, preferences);
+            }
+        });
     }
 
     private void populateBoatClasses(DomainFactory baseDomainFactory) {

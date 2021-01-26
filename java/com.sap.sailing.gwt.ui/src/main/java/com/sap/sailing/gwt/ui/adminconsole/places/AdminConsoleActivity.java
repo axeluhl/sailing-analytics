@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -45,7 +46,6 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        
         leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>(clientFactory.getErrorReporter()) {
             @Override
             public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {

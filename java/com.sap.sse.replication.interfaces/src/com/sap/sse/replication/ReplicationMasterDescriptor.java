@@ -12,10 +12,6 @@ import com.rabbitmq.client.QueueingConsumer;
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
  * 
- * TODO bug 2465: add the set of {@link Replicable}s that are replicated from the master represented by this descriptor,
- * considering that this may be a subset only of the replicables running on this instance or the master server. Example:
- * replicating only the SecurityService from some other server but being a master regarding all other Replicables.
- * 
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */

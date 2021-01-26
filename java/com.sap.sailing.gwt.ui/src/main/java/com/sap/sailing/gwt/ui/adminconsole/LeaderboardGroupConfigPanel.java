@@ -190,9 +190,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         final Widget createLeaderboardsGUI = createLeaderboardsGUI(tableRes);
         this.permissionRestrictedComponent.add(createLeaderboardsGUI);
         splitPanel.add(createLeaderboardsGUI);
-
-        //Load Data
-        //leaderboardGroupsRefresher.loadLeaderboardGroups();
     }
 
     private Widget createSwitchLeaderboardsGUI() {
@@ -937,7 +934,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 .collect(Collectors.toMap(StrippedLeaderboardDTO::getName, Function.identity()));
         selectedGroup.getLeaderboards().stream().map(StrippedLeaderboardDTO::getName).forEach(allExceptOf::remove);
         leaderboardsFilterablePanel.updateAll(allExceptOf.values());
-        // leaderboardsProvider.getList().addAll(allExceptOf);
     }
 
     private void moveToLeaderboards() {

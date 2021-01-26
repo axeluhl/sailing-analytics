@@ -100,8 +100,8 @@ public class SecurityDTOFactory {
         userDTO.setDefaultTenantForCurrentServer(createStrippedUserGroupDTOFromUserGroup(
                 securityService.getDefaultTenantForCurrentUser(),
                 fromOriginalToStrippedDownUserGroup));
-        SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier(),
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+        SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup);
         return userDTO;
     }
 
@@ -113,8 +113,7 @@ public class SecurityDTOFactory {
                     .getQualifiedObjectIdentifier(PermissionAndRoleAssociation.get(permission, user));
             WildcardPermissionWithSecurityDTO securedPermission = new WildcardPermissionWithSecurityDTO(
                     permission.toString(), identifier);
-
-            SecurityDTOUtil.addSecurityInformation(securityService, securedPermission, identifier);
+            SecurityDTOUtil.addSecurityInformation(securityService, securedPermission);
             securedPermissions.add(securedPermission);
         }
         return securedPermissions;
@@ -143,7 +142,7 @@ public class SecurityDTOFactory {
                 createUserDTOFromUser(role.getQualifiedForUser(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
                 identifier);
-        SecurityDTOUtil.addSecurityInformation(securityService, mappedRole, identifier);
+        SecurityDTOUtil.addSecurityInformation(securityService, mappedRole);
         return mappedRole;
     }
     
@@ -158,8 +157,8 @@ public class SecurityDTOFactory {
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         final RoleDefinitionDTO roleDefDTO = new RoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName(),
                 roleDefinition.getPermissions());
-        SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, roleDefinition.getIdentifier(),
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+        SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup);
         return roleDefDTO;
     }
 
@@ -242,8 +241,8 @@ public class SecurityDTOFactory {
                             fromOriginalToStrippedDownUserGroup),
                     createUserGroupRoleDefinitionDTOs(userGroup.getRoleDefinitionMap(),
                             fromOriginalToStrippedDownUserGroup));
-            SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
-                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+            SecurityDTOUtil.addSecurityInformation(this, securityService, result, fromOriginalToStrippedDownUser,
+                    fromOriginalToStrippedDownUserGroup);
         }
         return result;
     }

@@ -21,7 +21,7 @@ import com.sap.sse.security.interfaces.UserStore;
  */
 public abstract class AbstractCompetitorNotificationSet
         extends PreferenceObjectBasedNotificationSet<CompetitorNotificationPreferences, String> {
-    public AbstractCompetitorNotificationSet(UserStore userStore, CompetitorAndBoatStore competitorAndBoatStore) {
+    public AbstractCompetitorNotificationSet(UserStore userStore) {
         super(CompetitorNotificationPreferences.PREF_NAME, userStore);
     }
 

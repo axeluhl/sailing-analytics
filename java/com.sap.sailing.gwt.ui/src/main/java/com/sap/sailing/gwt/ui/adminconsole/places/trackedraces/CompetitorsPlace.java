@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole.places.trackedraces;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
 public class CompetitorsPlace extends AbstractFilterablePlace {
     public CompetitorsPlace(Map<String, String> paramKeysAndValues) {

@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.whatsnew;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class WhatsNewPlace extends AbstractBasePlace {
     public enum WhatsNewNavigationTabs { SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, TrainingDiary, SailingSimulator };

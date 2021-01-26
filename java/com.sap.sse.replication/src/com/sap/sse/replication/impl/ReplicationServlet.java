@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -170,7 +169,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     channel.getConnection().close();
                 }
             case STATUS:
-                checkReplicatorPermission(ServerActions.READ_REPLICATOR);
+                // no permission check to read status; the same is available, e.g., through /gwt/status
                 try {
                     reportStatus(resp);
                 } catch (IllegalAccessException e) {
@@ -202,37 +201,8 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * inbound operations not yet processed. The JSON document is printed to the response object's writer.
      */
     private void reportStatus(HttpServletResponse resp) throws IllegalAccessException, IOException {
-        final JSONObject result = new JSONObject();
-        final JSONArray replicablesJSON = new JSONArray();
         final ReplicationStatus status = getReplicationService().getStatus();
-        result.put("replica", status.isReplica());
-        result.put("replicationstarting", status.isReplicationStarting());
-        result.put("suspended", status.isSuspended());
-        result.put("stopped", status.isStopped());
-        result.put("messagequeuelength", status.getMessageQueueLength());
-        final JSONArray operationQueueLengths = new JSONArray();
-        result.put("operationqueuelengths", operationQueueLengths);
-        for (final String replicableIdAsString : status.getReplicableIdsAsStrings()) {
-            Integer queueLength = status.getOperationQueueLengthsByReplicableIdAsString(replicableIdAsString);
-            if (queueLength != null) {
-                final JSONObject queueLengthJSON = new JSONObject();
-                queueLengthJSON.put("id", replicableIdAsString);
-                queueLengthJSON.put("length", queueLength);
-                operationQueueLengths.add(queueLengthJSON);
-            }
-        }
-        result.put("totaloperationqueuelength", status.getTotalOperationQueueLength());
-        for (final String replicableIdAsString : status.getReplicableIdsAsStrings()) {
-            Boolean initialLoadRunning = status.isInitialLoadRunning(replicableIdAsString);
-            if (initialLoadRunning != null) {
-                final JSONObject replicableJSON = new JSONObject();
-                replicableJSON.put("id", replicableIdAsString);
-                replicableJSON.put("initialloadrunning", initialLoadRunning);
-                replicablesJSON.add(replicableJSON);
-            }
-        }
-        result.put("replicables", replicablesJSON);
-        result.put("available", status.isAvailable());
+        final JSONObject result = status.toJSONObject();
         resp.setContentType("application/json;charset=UTF-8");
         result.writeJSONString(resp.getWriter());
         if (status.isAvailable()) {

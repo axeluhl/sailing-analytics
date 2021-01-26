@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
 import java.util.function.Function;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
 public class IgtimiAccountsPlace extends AbstractFilterablePlace {
 

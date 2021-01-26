@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
 import com.sap.sailing.gwt.ui.adminconsole.places.DefaultPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 

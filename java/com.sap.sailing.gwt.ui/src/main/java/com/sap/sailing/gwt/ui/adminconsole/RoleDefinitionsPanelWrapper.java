@@ -10,7 +10,6 @@ import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionsPanelWrapper extends RoleDefinitionsPanel implements FilterablePanelProvider<RoleDefinitionDTO> {
-
     public RoleDefinitionsPanelWrapper(StringMessages stringMessages, UserService userService,
             CellTableWithCheckboxResources tableResources, ErrorReporter errorReporter) {
         super(stringMessages, userService, tableResources, errorReporter);
@@ -20,5 +19,4 @@ public class RoleDefinitionsPanelWrapper extends RoleDefinitionsPanel implements
     public AbstractFilterablePanel<RoleDefinitionDTO> getFilterablePanel() {
         return filterablePanelRoleDefinitions;
     }
-
 }

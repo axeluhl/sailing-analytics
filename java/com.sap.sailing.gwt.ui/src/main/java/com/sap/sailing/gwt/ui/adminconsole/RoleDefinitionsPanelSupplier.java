@@ -9,7 +9,6 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 
 public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<RoleDefinitionsPanel> {
-
     private final Presenter presenter;
     private final AdminConsoleTableResources tableResources;
 
@@ -31,7 +30,6 @@ public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<Role
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -44,5 +42,4 @@ public class RoleDefinitionsPanelSupplier extends AdminConsolePanelSupplier<Role
             }
         });
     }
-
 }

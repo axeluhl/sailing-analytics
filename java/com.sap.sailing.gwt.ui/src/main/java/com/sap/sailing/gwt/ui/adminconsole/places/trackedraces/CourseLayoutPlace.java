@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole.places.trackedraces;
 
 import java.util.function.Function;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
 public class CourseLayoutPlace extends AbstractFilterablePlace {
     public CourseLayoutPlace(String token) {

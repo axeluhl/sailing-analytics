@@ -12,16 +12,6 @@ public abstract class StartHost<ShardingKey,
                        HostT extends Host>
 extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT>
 implements Procedure<ShardingKey, MetricsT, ProcessT> {
-    /**
-     * The {@link AwsLandscape#getLatestImageWithTag(com.sap.sse.landscape.Region, String, String)} method is
-     * used to obtain default images for specific AWS host starting procedures that subclass this class. The
-     * Amazon Machine Images (AMIs) for this are then expected to be tagged with a tag named as specified by this
-     * constant ("image-type"). The tag value then must match what the subclass wants.
-     * 
-     * @see #getLatestImageOfType(String)
-     */
-    protected final static String IMAGE_TYPE_TAG_NAME = "image-type";
-
     private final MachineImage machineImage;
     
     /**
@@ -51,7 +41,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         private String imageType;
         
         protected MachineImage getMachineImage() {
-            return machineImage == null ? getLandscape().getLatestImageWithTag(getRegion(), IMAGE_TYPE_TAG_NAME, getImageType()) : machineImage;
+            return machineImage == null ? getLandscape().getLatestImageWithType(getRegion(), getImageType()) : machineImage;
         }
 
         protected Region getRegion() {
