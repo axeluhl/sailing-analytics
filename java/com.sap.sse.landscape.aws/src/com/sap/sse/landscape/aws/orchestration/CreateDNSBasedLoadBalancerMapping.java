@@ -12,10 +12,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -32,29 +30,26 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @author Axel Uhl (D043530)
  */
 public class CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
 HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>
+implements Procedure<ShardingKey, MetricsT, ProcessT> {
     private static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
     private static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
     
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
+    T extends CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
+    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>
+    implements Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         
         @Override
@@ -74,7 +69,7 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
          * @throws InterruptedException 
          */
         private ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateDNSMappedLoadBalancer(
-                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, Region region) throws InterruptedException {
+                AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, Region region) throws InterruptedException {
             ApplicationLoadBalancer<ShardingKey, MetricsT> result = null;
             final Set<String> loadBalancerNames = new HashSet<>();
             for (final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer : landscape.getLoadBalancers(region)) {
@@ -111,20 +106,19 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         }
 
         @Override
-        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
-            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>(this);
+        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws Exception {
+            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>(this);
         }
     }
     
     public static <ShardingKey, MetricsT extends ApplicationProcessMetrics, 
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>,
-    BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>>
-    Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>,
+    BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>>
+    Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder() {
         return new BuilderImpl<>();
     }
 
-    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
     }
 

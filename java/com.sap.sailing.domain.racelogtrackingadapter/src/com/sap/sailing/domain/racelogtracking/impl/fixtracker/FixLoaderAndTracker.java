@@ -35,7 +35,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -63,6 +62,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -693,7 +693,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private TimeRange getTrackingTimeRange() {
         final TimePoint startOfTracking = trackedRace.getStartOfTracking();
-        final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+        // in case (erroneously) startOfTracking is *after* endOfTracking, return an empty interval starting and ending
+        // at startOfTracking (see also bug 5354).
+        final TimePoint endOfTracking = startOfTracking != null && trackedRace.getEndOfTracking() != null &&
+                startOfTracking.after(trackedRace.getEndOfTracking()) ? startOfTracking : trackedRace.getEndOfTracking();
         return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
                 endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }

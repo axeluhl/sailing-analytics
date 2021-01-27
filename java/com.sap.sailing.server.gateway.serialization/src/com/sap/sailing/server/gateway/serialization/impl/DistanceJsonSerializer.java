@@ -2,8 +2,8 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Distance;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class DistanceJsonSerializer implements JsonSerializer<Distance> {
     

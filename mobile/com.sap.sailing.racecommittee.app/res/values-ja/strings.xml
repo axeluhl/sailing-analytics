@@ -187,7 +187,7 @@
     <string name="confirm_tracking_list">@string/publish_button_empty</string>
     <string name="snap">"スナップ"</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">"新規ユーザとしてログアウトとログインを行いますか。指定しているレースはすべて引き続き監視されます。"</string>
+    <string name="logout_dialog_message">"新規ユーザとしてログアウトとログインを行いますか。"</string>
     <string name="change_dialog_title">"レガッタ変更"</string>
     <string name="change_dialog_message">"レガッタやエリアを変更しますか。現在監視しているレースは接続が切られます。"</string>
     <string name="logout">"ログアウト"</string>
@@ -430,7 +430,6 @@
     <string name="events_waiting_to_be_sent">"現在 %1$d イベントの送信が待機中です。\n前回の送信は %2$s に行われました。"</string>
     <string name="no_event_to_be_sent">"現在送信を待機中のイベントはありません。"</string>
     <string name="never">"なし"</string>
-    <string name="connected_to_wp">"接続先: %1$s\n%2$s\nBoundService:%3$s"</string>
     <string name="theme_changed_title">"テーマ変更"</string>
     <string name="theme_changed_message">"テーマに加えた変更はアプリが再起動した後に有効になります。"</string>
     <string name="url_refresh_title">"サーバ URL が変更されました"</string>

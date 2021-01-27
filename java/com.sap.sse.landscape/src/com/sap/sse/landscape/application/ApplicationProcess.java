@@ -1,30 +1,27 @@
 package com.sap.sse.landscape.application;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
-    /**
-     * @return the replica set to which this process belongs<p>
-     * 
-     *         TODO define this more precisely; an instance can be replica with regards to the SecurityService and
-     *         SharedSailingData replicables and at the same time be master for RacingEventService and all the other
-     *         replicables. What then is "the" replica set of the process?
-     */
-    ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
+    static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
+    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
     
     /**
      * @param releaseRepository
@@ -32,7 +29,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -49,7 +46,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
     
-    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
@@ -64,9 +61,9 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
-    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -75,4 +72,66 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * else in case it's not.
      */
     String getHealthCheckPath();
+
+    String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * in the evaluated {@code env.sh} file.
+     * @throws Exception 
+     */
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     */
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
+
+    /**
+     * Tells whether this process is ready to accept requests. Use this for a health check in a target group
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
+     */
+    default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout)
+                            .openConnection();
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
+    }
+
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(getHealthCheckPath(), optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
+        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+    }
+    
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
+        final TimePoint startingToPollForReady = TimePoint.now();
+        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
+            if (optionalTimeout.isPresent()) {
+                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
+                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
+            } else {
+                logger.info(""+this+" not yet ready; waiting forever...");
+            }
+            Thread.sleep(5000);
+        }
+        return isReady(optionalTimeout);
+    }
 }

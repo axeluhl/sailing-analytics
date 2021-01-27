@@ -2,9 +2,11 @@ package com.sap.sailing.server.gateway.deserialization;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public abstract class TypeBasedJsonDeserializer<T> implements JsonDeserializer<T> {
     public static final String FIELD_TYPE = "type";

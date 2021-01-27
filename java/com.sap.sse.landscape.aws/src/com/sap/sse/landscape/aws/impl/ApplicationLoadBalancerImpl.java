@@ -33,9 +33,9 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
 
     private final Region region;
 
-    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey, MetricsT, ?> landscape;
     
-    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
+    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<ShardingKey, MetricsT, ?> landscape) {
         this.region = region;
         this.loadBalancer = loadBalancer;
         this.landscape = landscape;

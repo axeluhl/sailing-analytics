@@ -9,8 +9,8 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 /**
  * A place that can be used to display QR codes that direct users to branch.io using deep links which then point to an
@@ -78,9 +78,9 @@ public class QRCodePlace extends AbstractBasePlace {
         super(token);
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
+            targetServer = Window.Location.getParameter(PARAM_SERVER);
             if (mode.isPublicInvite()) {
                 // alternative direct link version
-                targetServer = Window.Location.getParameter(PARAM_SERVER);
                 publicRegattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
                 regattaRegistrationLinkSecret = Window.Location.getParameter(PARAM_REGATTA_SECRET);
                 if (publicRegattaName == null || regattaRegistrationLinkSecret == null || targetServer == null) {

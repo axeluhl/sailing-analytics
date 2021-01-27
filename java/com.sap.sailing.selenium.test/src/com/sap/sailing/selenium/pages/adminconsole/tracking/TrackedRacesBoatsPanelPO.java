@@ -1,11 +1,14 @@
 package com.sap.sailing.selenium.pages.adminconsole.tracking;
 
+import static org.junit.Assert.assertEquals;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatTablePO.BoatEntry;
 
 public class TrackedRacesBoatsPanelPO extends PageArea {    
     @FindBy(how = BySeleniumId.class, using = "RefreshButton")
@@ -38,5 +41,21 @@ public class TrackedRacesBoatsPanelPO extends PageArea {
     
     public TrackedRacesBoatTablePO getBoatsTable() {
         return new TrackedRacesBoatTablePO(this.driver, this.boatsTable);
+    }
+    
+    public void waitForBoatEntry(String name, String sailId, String boatClassName) {
+        waitUntil(() -> {
+            boolean boatFound = false;
+            for (final BoatEntry it : getBoatsTable().getEntries()) {
+                String itName = it.getName();
+                if (itName.equals(name)) {
+                    boatFound = true;
+                    // found a candidate:
+                    assertEquals(sailId, it.getSailId());
+                    assertEquals(boatClassName, it.getBoatClassName());
+                }
+            }
+            return boatFound;
+        });
     }
 }

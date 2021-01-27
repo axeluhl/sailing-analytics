@@ -26,7 +26,6 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFinishPositioningConfirmedEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -40,6 +39,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class RaceLogFinishPositioningConfirmedEventSerializerTest {
 

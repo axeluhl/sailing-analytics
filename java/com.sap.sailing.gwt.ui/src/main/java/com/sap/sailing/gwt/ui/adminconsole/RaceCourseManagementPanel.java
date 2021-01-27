@@ -11,15 +11,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
@@ -32,11 +29,10 @@ import com.sap.sse.security.ui.client.UserService;
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CourseManagementWidget courseManagementWidget;
 
-    public RaceCourseManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages, final UserService userService) {
-        super(sailingServiceWrite, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
-        courseManagementWidget = new CourseManagementWidget(sailingServiceWrite, errorReporter, stringMessages,
-                userService, ()->selectedRaceHasOrcPcsRankingMetric()) {
+    public RaceCourseManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
+        super(presenter, /* actionButtonsEnabled */ false, stringMessages);
+        courseManagementWidget = new CourseManagementWidget(presenter, stringMessages,
+                () -> selectedRaceHasOrcPcsRankingMetric()) {
             @Override
             protected void save() {
                 sailingServiceWrite.updateRaceCourse(singleSelectedRace, createWaypointPairs(), new AsyncCallback<Void>() {
@@ -130,7 +126,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             });
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
-            saveBtn.setVisible(userService.hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
+            saveBtn.setVisible(presenter.getUserService().hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
         });
         buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);

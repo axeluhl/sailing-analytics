@@ -42,7 +42,6 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
@@ -95,6 +94,7 @@ import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -219,7 +219,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     Iterable<String> tags = Collections.emptySet();
                     if (effectiveProperties instanceof FreestyleMarkProperties) {
                         tags = ((FreestyleMarkProperties) effectiveProperties).getTags();
-                    }else {
+                    } else {
                         tags = Collections.emptySet();
                     }
                     // If no mark properties exist yet, a new one is created

@@ -261,6 +261,15 @@
 		<servlet-name>Jersey REST SPI</servlet-name>
 		<url-pattern>/spi/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <url-pattern>/subscription/hooks/*</url-pattern>
+    </servlet-mapping>
 
 	<servlet>
 		<servlet-name>SharingApi</servlet-name>
@@ -271,7 +280,7 @@
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+			<param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

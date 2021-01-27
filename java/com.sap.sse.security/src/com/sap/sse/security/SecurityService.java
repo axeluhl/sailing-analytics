@@ -43,6 +43,7 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
+import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
@@ -146,6 +147,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     User getUserByName(String username);
 
     User getUserByEmail(String email);
+    
+    /**
+     * Finds all users that have the {@code permission}. This doesn't have to be an explicit permission assignment on
+     * the {@link User} object (see {@link User#getPermissions()}) but can also be implied, e.g., by a
+     * {@link User#getRoles() role assignment} that the user has, or by a group membership of the user where the group
+     * {@link UserGroup#getRoleDefinitionMap() has roles assigned for members of the group}.
+     */
+    Iterable<User> getUsersWithPermissions(WildcardPermission permission);
 
     User getCurrentUser();
 
@@ -293,12 +302,18 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Gets all preference objects resolving to a certain key. Always returns a valid map. May be empty.
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> Map<String, T> getPreferenceObjectsByKey(String key);
 
     /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
-
+    
     /**
      * Issues a new access token and remembers it so that later the user identified by <code>username</code> can be
      * authenticated using the token. Any access token previously created for same user will be invalidated by this
@@ -656,4 +671,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void registerCustomizer(SecurityInitializationCustomizer customizer);
 
+    /**
+     * Persist user subscription data
+     */
+    void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
 }

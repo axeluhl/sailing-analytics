@@ -6,13 +6,13 @@ import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util.Triple;
 
 

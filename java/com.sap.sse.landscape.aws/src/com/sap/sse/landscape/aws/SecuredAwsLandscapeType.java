@@ -33,20 +33,8 @@ public class SecuredAwsLandscapeType extends HasPermissionsImpl {
         return Collections.unmodifiableSet(allInstances);
     }
 
-    public static final HasPermissions LANDSCAPE = new SecuredAwsLandscapeType("LANDSCAPE", LandscapeActions.ALL_ACTIONS);
     public static final HasPermissions REGION = new SecuredAwsLandscapeType("REGION");
     public static final HasPermissions INSTANCE = new SecuredAwsLandscapeType("INSTANCE");
     public static final HasPermissions LOAD_BALANCER = new SecuredAwsLandscapeType("LOAD_BALANCER");
-    public static final HasPermissions SSH_KEY_PAIR = new SecuredAwsLandscapeType("SSH_KEY_PAIR");
-    
-    public static enum LandscapeActions implements Action {
-        DUMMY_READ_LANDSCAPE_ACTION, DUMMY_WRITE_LANDSCAPE_ACTION;
-
-        private static final Action[] ALL_ACTIONS = DefaultActions.plus(DUMMY_READ_LANDSCAPE_ACTION);
-
-        public static final Action[] MUTATION_ACTIONS = new Action[] { DUMMY_WRITE_LANDSCAPE_ACTION, DefaultActions.DELETE,
-                DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
-                DefaultActions.CHANGE_ACL };
-    }
 }
 

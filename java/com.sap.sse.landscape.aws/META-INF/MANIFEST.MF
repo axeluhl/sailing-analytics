@@ -13,9 +13,18 @@ Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.13.50",
  com.sap.sse.landscape.aws.persistence,
  com.sap.sse.security,
  com.sap.sse.mongodb,
- com.sap.sse.shared.android
-Import-Package: org.osgi.framework;version="1.8.0"
+ com.sap.sse.shared.android,
+ com.sun.jersey,
+ javax.ws.rs,
+ com.sap.sse,
+ org.json.simple,
+ org.apache.shiro.web;bundle-version="1.2.2",
+ org.apache.shiro.core
+Web-ContextPath: /landscape
+Import-Package: org.apache.shiro;version="1.2.2",
+ org.osgi.framework;version="1.8.0"
 Bundle-Activator: com.sap.sse.landscape.aws.impl.Activator
 Export-Package: com.sap.sse.landscape.aws,
  com.sap.sse.landscape.aws.impl,
  com.sap.sse.landscape.aws.orchestration
+Bundle-ActivationPolicy: lazy

@@ -15,6 +15,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
 
@@ -41,11 +42,14 @@ public class StatusServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // TODO bug4811: add more detailed replication info that allows clients to see which replicable is actually replicated from which replica set
         final ServletContext servletContext = req.getServletContext();
         final JSONObject result = new JSONObject();
         final RacingEventService service = getService(servletContext);
         final String waitUntilRacesLoadedString = req.getParameter(WAIT_UNTIL_RACES_LOADED);
         boolean waitUntilRacesLoaded = Boolean.valueOf(waitUntilRacesLoadedString);
+        result.put("servername", ServerInfo.getName());
+        result.put("buildversion", ServerInfo.getBuildVersion());
         final long numberOfTrackedRacesToRestore = service.getNumberOfTrackedRacesToRestore();
         result.put("numberofracestorestore", numberOfTrackedRacesToRestore);
         final int numberOfTrackedRacesRestored = service.getNumberOfTrackedRacesRestored();

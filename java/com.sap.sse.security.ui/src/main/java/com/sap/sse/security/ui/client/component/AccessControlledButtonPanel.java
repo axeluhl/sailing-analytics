@@ -141,8 +141,8 @@ public class AccessControlledButtonPanel extends Composite {
         if (selectionModel == null) {
             throw new IllegalArgumentException("Selection model for a remove action must not be null");
         }
-        ClickHandler handler = wrap(removePermissionCheck, callback);
-        Button button = withConfirmation
+        final ClickHandler handler = wrap(removePermissionCheck, callback);
+        final Button button = withConfirmation
                 ? new SelectedElementsCountingButton<T>(text, selectionModel, StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                         handler)
                 : new SelectedElementsCountingButton<T>(text, selectionModel, handler);

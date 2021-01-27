@@ -1,10 +1,12 @@
 package com.sap.sse.security.interfaces;
 
+import java.util.Map;
+
 import com.sap.sse.security.shared.BasicUserStore;
-import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -68,6 +70,11 @@ public interface UserStore extends BasicUserStore {
     <T> T getPreferenceObject(String username, String key);
     
     /**
+     * Gets all preference objects resolving to a certain key mapped by the users they belong to. Always returns a valid map. Might be empty
+     */
+    <T> Map<String, T> getPreferenceObjectsByKey(String key);
+    
+    /**
      * Sets a preference as Object. This converts the given Object to a preference {@link String} using a
      * {@link PreferenceConverter} that was registered through
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
@@ -82,7 +89,9 @@ public interface UserStore extends BasicUserStore {
 
     /**
      * Replaces all existing contents by those provided by the <code>newUserStore</code>. This has no impact on the persistent
-     * representation of this store and is meant for use on a replica only; the replica's database state is undefined.
+     * representation of this store and is meant for use on a replica only; the replica's database state is undefined. For all
+     * {@link User} objects copied from {@code newUserStore} to this store, their {@link User#getUserGroupProvider()} field
+     * will be updated to point to this store.
      */
     void replaceContentsFrom(UserStore newUserStore);
     

@@ -1,7 +1,6 @@
 package com.sap.sse.landscape;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
@@ -9,7 +8,6 @@ import java.util.Optional;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -56,21 +54,33 @@ public interface Host {
      * output. You will usually want to use either a {@link ByteArrayInputStream} to provide a set of predefined
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
-     * @see #createSshChannel(String, Optional)
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * 
+     * @see #createSshChannel(String, Optional, byte[])
      */
-    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
-    
-    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException;
+    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException;
-    
-    Iterable<? extends Process<? extends Log, ? extends Metrics>> getRunningProcesses();
+    /**
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the

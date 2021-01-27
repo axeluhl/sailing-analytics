@@ -2,9 +2,9 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.LabeledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.serialization.LabeledManeuverForEstimationJsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public abstract class AbstractTransformedManeuversForEstimationPersistenceManager
         extends AbstractTransformedManeuversPersistenceManager<LabeledManeuverForEstimation> {

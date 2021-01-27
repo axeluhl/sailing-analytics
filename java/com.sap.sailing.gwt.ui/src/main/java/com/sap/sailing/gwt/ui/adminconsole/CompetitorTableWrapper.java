@@ -302,7 +302,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     }
         });
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), dataProvider, stringMessages) {
+                Collections.emptySet(), dataProvider, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -326,12 +326,12 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         // CompetitorTableEditFeatures
         final HasPermissions type = SecuredDomainType.COMPETITOR;
-        AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = create(
+        final AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = create(
                 new CompetitorConfigImagesBarCell(getStringMessages()), userService);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementWriteService(), SecuredDomainType.COMPETITOR,
-                competitorDTO -> refresh(Collections.singleton(competitorDTO)), stringMessages);
+                competitorDTO -> getFilterField().filter(), stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openOwnershipDialog);
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
@@ -570,4 +570,5 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         };
     }
+
 }

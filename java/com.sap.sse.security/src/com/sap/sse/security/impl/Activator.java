@@ -25,12 +25,12 @@ import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
-import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -38,6 +38,10 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.subscription.SubscriptionApiService;
+import com.sap.sse.security.subscription.SubscriptionBackgroundUpdate;
+import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
+import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -93,6 +97,12 @@ public class Activator implements BundleActivator {
      */
     private final String baseUrlForCrossDomainStorage;
     
+    /**
+     * Handling fetching and update user subscriptions from providers. Call
+     * {@code SubscriptionBackgroundUpdate#start(CompletableFuture)} to schedule a task to run in background thread
+     */
+    private SubscriptionBackgroundUpdate subscriptionBackgroundUpdate;
+    
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
         testAccessControlStore = theTestAccessControlStore;
@@ -135,6 +145,11 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
+        subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate(context);
+        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance());
+        final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
+        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
+        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService, chargebeeProviderProperties);
         if (testUserStore != null && testAccessControlStore != null) {
             createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
         } else {
@@ -240,6 +255,7 @@ public class Activator implements BundleActivator {
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
+                    startSubscriptionDataUpdateTask();
                 } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
@@ -311,5 +327,13 @@ public class Activator implements BundleActivator {
             registration.unregister();
         }
         Activator.context = null;
+    }
+    
+    /**
+     * Schedule background task to fetch and update user subscriptions from provider. Requires the {@link #securityService} to
+     * be set.
+     */
+    private void startSubscriptionDataUpdateTask() {
+        subscriptionBackgroundUpdate.start(securityService);
     }
 }

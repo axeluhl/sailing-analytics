@@ -84,6 +84,37 @@ public class LoginTest {
     }
 
     @Test
+    public void testGetUsersWithPermission() throws UserManagementException, UserGroupManagementException, MailException {
+        final String username = "TheNewUser";
+        final String specialUserGroupName1 = "TheSpecialUserGroup1";
+        final String specialUserGroupName2 = "TheSpecialUserGroup2";
+        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final TypeRelativeObjectIdentifier myServerTypeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier("myserver");
+        final WildcardPermission createObjectPermissionOnMyserver = SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
+                myServerTypeRelativeObjectIdentifier);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.addPermissionForUser(username, createObjectPermissionOnMyserver);
+        assertTrue(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.removePermissionFromUser(username, createObjectPermissionOnMyserver);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
+        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission");
+        roleGrantingPermission.setPermissions(Collections.singleton(createObjectPermissionOnMyserver));
+        securityService.updateRoleDefinition(roleGrantingPermission);
+        specialUserGroup1.put(roleGrantingPermission, /* forAll */ false);
+        final QualifiedObjectIdentifier myServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(myServerTypeRelativeObjectIdentifier);
+        securityService.setOwnership(myServerObjectIdentifier, /* user */ null, specialUserGroup1);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.addUserToUserGroup(specialUserGroup1, user);
+        // now since the user belongs to the group and the group implies the permission and the myserver objetc is owned by the group, this shall imply the permission for user
+        assertTrue(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        final UserGroup specialUserGroup2 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName2);
+        // change group ownership to a group that doesn't imply the permission:
+        securityService.setOwnership(myServerObjectIdentifier, /* user */ null, specialUserGroup2);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+    }
+    
+    @Test
     public void testDeleteUser() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         final String specialUserGroupName1 = "TheSpecialUserGroup1";

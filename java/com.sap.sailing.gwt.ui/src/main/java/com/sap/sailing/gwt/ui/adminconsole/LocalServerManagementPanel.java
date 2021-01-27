@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
@@ -54,11 +55,10 @@ public class LocalServerManagementPanel extends SimplePanel {
         }
     };
 
-    public LocalServerManagementPanel(final SailingServiceAsync sailingService, final UserService userService,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
-        this.sailingService = sailingService;
-        this.userService = userService;
-        this.errorReporter = errorReporter;
+    public LocalServerManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingService = presenter.getSailingService();
+        this.userService = presenter.getUserService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         final Panel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -148,7 +148,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    void refreshServerConfiguration() {
+    public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
 

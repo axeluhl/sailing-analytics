@@ -6,11 +6,11 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceWithEstimationDataDeserializer<T> implements JsonDeserializer<RaceWithEstimationData<T>> {
 

@@ -23,12 +23,12 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
