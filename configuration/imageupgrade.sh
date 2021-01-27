@@ -44,6 +44,11 @@ clean_startup_logs() {
   rm "${REBOOT_INDICATOR}"
 }
 
+clean_root_ssh_dir() {
+  echo "Cleaning up /root/.ssh" >>/var/log/sailing.err
+  rm -rf /root/.ssh/*
+}
+
 run_yum_update
 run_git_pull
 run_refresh_instance_install_release
@@ -54,8 +59,10 @@ clean_startup_logs
 
 # Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
 if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
-  echo "Shutdown disabled by no-shutdown option in user data"
+  echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
   touch /tmp/image-upgrade-finished
 else
+  # Only clean root's .ssh directory if the next step is shutdown / image creation
+  clean_root_ssh_dir
   shutdown -h now &
 fi
