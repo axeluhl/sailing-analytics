@@ -48,6 +48,7 @@ public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint 
     @Override
     protected void doOnModuleLoad() {
         SharedResources.INSTANCE.mediaCss().ensureInjected();
+        ManagementConsoleResources.INSTANCE.fonts().ensureInjected();
         ManagementConsoleResources.INSTANCE.icons().ensureInjected();
         ManagementConsoleResources.INSTANCE.style().ensureInjected();
 

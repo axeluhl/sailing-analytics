@@ -11,8 +11,3 @@
 .file-select > input.filename:focus {
     text-overflow: initial;
 }
-
-.file-select button.control {
-    background-color: BACKGROUND_COLOR;
-    border-color: BACKGROUND_COLOR;
-}

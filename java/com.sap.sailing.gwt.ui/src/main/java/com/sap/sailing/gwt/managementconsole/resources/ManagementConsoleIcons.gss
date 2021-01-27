@@ -1,9 +1,8 @@
 @charset "UTF-8";
 
 .icon {
-    position: relative;
-    width: 2rem;
-    height: 2rem;
+    width: LINE_HEIGHT_XXLARGE;
+    line-height: LINE_HEIGHT_XXLARGE;
 }
 
 .icon::before {
@@ -11,10 +10,8 @@
     background-position: center;
     background-repeat: no-repeat;
     content: '';
-    display: block;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    display: inline-block;
+    vertical-align: middle;
     width: 2rem;
     height: 1.5rem;
 }
@@ -23,7 +20,13 @@
     text-decoration: none;
 }
 
-.icon-location, .icon-location::before {
+
+.icon-location {
+    width: LINE_HEIGHT_XXSMALL;
+    line-height: LINE_HEIGHT_XXSMALL;
+}
+
+.icon-location::before {
     width: 1rem;
     height: 1rem;
 }

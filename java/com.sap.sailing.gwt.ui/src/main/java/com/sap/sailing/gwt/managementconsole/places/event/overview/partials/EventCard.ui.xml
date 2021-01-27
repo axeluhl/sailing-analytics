@@ -11,14 +11,14 @@
             <div class="{local_res.style.eventCardContainer}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">
-                        <h1 ui:field="title" />
+                        <div ui:field="title" class="{local_res.style.title}" />
                         <div class="{app_res.style.flexContainer}">
                             <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
-                            <h2 ui:field="subTitle" class="{app_res.style.flexItemAutoWidth}"/>
+                            <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {local_res.style.details}"/>
                         </div>
                     </div>
                     <g:Anchor ui:field="advancedSettingsEventAnchor" 
-                            styleName="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
+                            addStyleNames="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
                 </div>
             </div>
         </div>

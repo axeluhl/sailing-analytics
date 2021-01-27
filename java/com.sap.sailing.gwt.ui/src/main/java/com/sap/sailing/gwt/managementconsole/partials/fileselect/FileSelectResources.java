@@ -18,7 +18,5 @@ public interface FileSelectResources extends AuthenticationResources {
         String fileSelect();
 
         String filename();
-
-        String control();
     }
 }

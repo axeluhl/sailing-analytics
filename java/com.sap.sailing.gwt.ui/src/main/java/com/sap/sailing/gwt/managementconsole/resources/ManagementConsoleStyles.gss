@@ -1,4 +1,5 @@
 @charset "UTF-8";
+@external gwt-TextBox, gwt-PasswordTextBox;
 
 html, body {
     height: 100%;
@@ -6,38 +7,20 @@ html, body {
 }
 
 html, .backdropImage {
+    background-color: BACKGROUND_COLOR_LIGHT;
     background-image: resourceUrl("backdropGeneralSized");
-    background-position: center center ;
+    background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    background-color: BACKGROUND_COLOR;
-}
-
-body {
-    font-family: 'Open Sans', sans-serif;
-    color: TEXT_COLOR_SECONDARY;
-}
-
-h1 {
     color: TEXT_COLOR_PRIMARY;
-    font-size: 28px;
-    font-weight: bold;
-    margin: 0;
-    text-align: left;
-    display: inline-block;
 }
 
-h2, p, span {
-    color: TEXT_COLOR_SECONDARY;
-    font-size: 12px;
-    font-weight: normal;
-    margin: 0;
-    text-align: left;
-    display: inline-block;
+body * {
+    font-family: 'Open Sans', sans-serif;
 }
 
 a, a:visited {
@@ -45,94 +28,103 @@ a, a:visited {
     -webkit-tap-highlight-color: transparent;
 }
 
-button {
-    font-weight: bold;
-    font-size: 16px;
-    border-radius: 10px;
-    width: 100%;
-    padding: 16px;
-    border: 1px;
-    border-style: solid;
+label, .label {
+    font-size: FONT_SIZE_XXSMALL;
+    font-weight: FONT_WEIGHT_BOLD;
+    line-height: LINE_HEIGHT_XXSMALL;
     outline: none;
     color: TEXT_COLOR_PRIMARY;
-    margin: 1rem 0;
-    cursor: pointer;
-}
-
-label {
-    color: TEXT_COLOR_PRIMARY;
-    font-size: 12px;
-    font-weight: bold;
-    line-height: 16px;
     margin: 10px 0 20px 0;
     width: 100%;
-    display: inline-block;
-    outline: none;
     text-transform: uppercase;
+    display: inline-block;
 }
 
-input {
+input, .gwt-TextBox, .gwt-PasswordTextBox {
     color: TEXT_COLOR_PRIMARY;
     font-style: italic;
-    font-size: 18px;
-    border-bottom: 1px;
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    border-bottom-style: solid;
-    border-bottom-color: TEXT_COLOR_PRIMARY;
-    padding: 0 0 16px 0;
-    margin: 0 0 30px 0;
+    font-size: FONT_SIZE_LARGE;
+    line-height: LINE_HEIGHT_LARGE;
+    border-width: 0 0 BORDER_WIDTH_NORMAL;
+    border-style: solid;
+    border-color: TEXT_COLOR_PRIMARY;
+    padding: 0 0 .75rem;
+    margin: 0 0 2rem;
     width: 100%;
     background: none;
     display: inline-block;
     outline: none;
 }
 
-input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: TEXT_COLOR_SECONDARY;
+input::placeholder,
+.gwt-TextBox::placeholder,
+.gwt-PasswordTextBox::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: TEXT_COLOR_INPUTS;
     opacity: 1; /* Firefox */
 }
 
-input:-ms-input-placeholder { /* Internet Explorer 10-11 */
-    color: TEXT_COLOR_SECONDARY;
+input:-ms-input-placeholder,
+.gwt-TextBox:-ms-input-placeholder,
+.gwt-PasswordTextBox:-ms-input-placeholder,   /* Internet Explorer 10-11 */
+input::-ms-input-placeholder,
+.gwt-TextBox::-ms-input-placeholder,
+.gwt-PasswordTextBox::-ms-input-placeholder { /* Microsoft Edge */
+    color: TEXT_COLOR_INPUTS;
 }
 
-input::-ms-input-placeholder { /* Microsoft Edge */
-    color: TEXT_COLOR_SECONDARY;
+.button, .button:active, .button:hover {
+    font-weight: FONT_WEIGHT_MEDIUM;
+    font-size: FONT_SIZE_MEDIUM;
+    line-height: LINE_HEIGHT_MEDIUM;
+    border-radius: 10px;
+    outline: none;
+    color: TEXT_COLOR_PRIMARY;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-width: BORDER_WIDTH_NORMAL;
+    border-style: solid;
+    background: BUTTON_BACKGROUND_COLOR_SECONDARY;
+    border-color: BUTTON_BORDER_COLOR_SECONDARY;
 }
 
-.primaryButton {
-    background-color: BUTTON_COLOR_PRIMARY;
-    border-color: BUTTON_COLOR_PRIMARY;
+.button.primary, .button.primary:hover {
+    background-color: BUTTON_BACKGROUND_COLOR_PRIMARY;
+    border-color: BUTTON_BORDER_COLOR_PRIMARY;
 }
 
-.secondaryButton {
-    background: none;
-    border-color: BORDER_COLOR_HIGHLIGHT;
+.button.highlighted, .button.highlighted:hover {
+    border-color: GENERIC_COLOR_HIGHLIGHT;
 }
 
-.secondaryCtaButton div {
-    width: 100%
-}
-
-.secondaryCtaButton button {
-    text-align: right;
-    font-size: 14px;
-    color: TEXT_COLOR_HIGHLIGHT;
+.anchor, .anchor:visited, .anchor:hover {
+    font-weight: FONT_WEIGHT_NORMAL;
+    font-size: FONT_SIZE_LARGE;
+    line-height: LINE_HEIGHT_LARGE;
+    outline: none;
+    color: TEXT_COLOR_PRIMARY;
+    text-decoration: none;
+    cursor: pointer;
+    width: auto;
+    padding: 0;
     border: none;
     background: none;
-    width: auto;
-    float: right;
-    outline: none;
-    padding: 0;
+}
+
+.anchor.highlighted, .anchor.highlighted:hover {
+    font-weight: FONT_WEIGHT_MEDIUM;
+    font-size: FONT_SIZE_SMALL;
+    line-height: LINE_HEIGHT_SMALL;
+    color: GENERIC_COLOR_HIGHLIGHT;
+    text-transform: uppercase;
 }
 
 .page-header {
-    font-size: 28px;
     position: fixed;
-    top: -4px;
-    width: calc(100% - 36px);
+    top: 0;
+    width: calc(100% - 2.25rem);
     margin: 1rem 0;
 }
 

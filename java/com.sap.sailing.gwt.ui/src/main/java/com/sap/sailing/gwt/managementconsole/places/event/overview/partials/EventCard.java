@@ -27,7 +27,7 @@ public class EventCard extends Composite {
     EventOverviewResources local_res;
 
     @UiField
-    Element card, title, subTitle;
+    Element card, title, details;
 
     @UiField
     Anchor advancedSettingsEventAnchor;
@@ -60,7 +60,7 @@ public class EventCard extends Composite {
         }
 
         this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(title));
-        this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
+        this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
 
         if (imageUrl != null) {
             this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')");

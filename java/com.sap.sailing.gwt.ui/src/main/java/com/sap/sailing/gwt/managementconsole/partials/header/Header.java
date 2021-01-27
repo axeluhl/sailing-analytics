@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.common.client.DropdownHandler;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
@@ -26,6 +27,9 @@ public class Header extends Composite implements NeedsAuthenticationContext {
     }
 
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
+
+    @UiField
+    ManagementConsoleResources app_res;
 
     @UiField
     HeaderResources local_res;
@@ -62,11 +66,11 @@ public class Header extends Composite implements NeedsAuthenticationContext {
     }
 
     public HasVisibility addMenuItem(final String text, final ClickHandler handler) {
-        final Anchor desktopItem = new Anchor(text);
+        final Anchor desktopItem = createMenuItem(text);
         desktopItem.addClickHandler(handler);
         desktopMenu.add(desktopItem);
 
-        final Anchor mobileItem = new Anchor(text);
+        final Anchor mobileItem = createMenuItem(text);
         mobileItem.addClickHandler(new CloseMenuClickHandler(handler));
         mobileMenuActions.add(mobileItem);
 
@@ -82,6 +86,13 @@ public class Header extends Composite implements NeedsAuthenticationContext {
     public HasVisibility initSignOutItem(final ClickHandler handler) {
         signOutMobile.addClickHandler(new CloseMenuClickHandler(handler));
         return new MenuItem(signOutMobile);
+    }
+
+    private Anchor createMenuItem(final String text) {
+        final Anchor item = new Anchor(text);
+        item.addStyleName(app_res.style().anchor());
+        item.addStyleName(local_res.style().item());
+        return item;
     }
 
     private class CloseMenuClickHandler implements ClickHandler {

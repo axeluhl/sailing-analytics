@@ -4,8 +4,8 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.fileselect.FileSelectResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <g:FlowPanel addStyleNames="{local_res.style.fileSelect}">
-        <g:TextBox readOnly="true" styleName="{local_res.style.filename}" ui:field="selectedFilename"/>
-        <g:Button styleName="{local_res.style.control}" ui:field="selectFileControl">
+        <g:TextBox readOnly="true" addStyleNames="{local_res.style.filename}" ui:field="selectedFilename"/>
+        <g:Button addStyleNames="{app_res.style.button} {app_res.style.primary}" ui:field="selectFileControl">
             <ui:text from="{i18n.upload}" />
         </g:Button>
         <g:FileUpload visible="false" ui:field="fileUpload"/>

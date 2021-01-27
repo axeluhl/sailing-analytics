@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.partials.authentication.AuthenticationResources;
-import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class SignInViewImpl implements SignInView {
@@ -23,8 +22,6 @@ public class SignInViewImpl implements SignInView {
 
     private static SignInViewImplUiBinder uiBinder = GWT.create(SignInViewImplUiBinder.class);
 
-    @UiField
-    ManagementConsoleResources app_res;
     @UiField
     AuthenticationResources local_res;
     @UiField

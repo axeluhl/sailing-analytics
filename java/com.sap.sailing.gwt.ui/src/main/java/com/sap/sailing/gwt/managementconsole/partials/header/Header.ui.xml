@@ -11,12 +11,14 @@
         <g:FlowPanel tag="nav" ui:field="desktopMenu" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.menu}" />
         <div ui:field="actions" class="{local_res.style.actions}">
             <g:Anchor ui:field="userDetails" addStyleNames="{res.mediaCss.hideonsmall} {local_res.style.account}" />
-            <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.icon} {app_res.icons.iconNavigation}"/>
+            <a ui:field="navigationAnchor" class="{res.mediaCss.showonsmall} {app_res.icons.icon} {app_res.icons.iconNavigation}" />
             <nav ui:field="mobileMenu" class="{res.mediaCss.showonsmall} {local_res.style.menuMobile}">
                 <g:FlowPanel ui:field="mobileMenuActions" />
                 <div class="{local_res.style.separator}" />
-                <g:Anchor ui:field="userDetailsMobile" text="{i18n.userDetails}" />
-                <g:Anchor ui:field="signOutMobile" text="{i18n.signOut}" addStyleNames="{local_res.style.highlighted}"/>
+                <g:Anchor ui:field="userDetailsMobile" text="{i18n.userDetails}"
+                    addStyleNames="{app_res.style.anchor} {local_res.style.item}" />
+                <g:Anchor ui:field="signOutMobile" text="{i18n.signOut}"
+                    addStyleNames="{app_res.style.anchor} {app_res.style.highlighted} {local_res.style.item}" />
             </nav>
         </div>
     </g:HTMLPanel>

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.managementconsole.resources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
@@ -10,15 +11,20 @@ import com.google.gwt.resources.client.ImageResource;
 public interface ManagementConsoleResources extends ClientBundle {
 
     String COLORS = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleColors.gss";
+    String FONTS = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleFonts.gss";
     String ICONS = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleIcons.gss";
+    String SIZES = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleSizes.gss";
     String STYLES = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleStyles.gss";
 
     ManagementConsoleResources INSTANCE = GWT.create(ManagementConsoleResources.class);
 
-    @Source({ COLORS, STYLES })
+    @Source({ COLORS, SIZES, STYLES })
     Style style();
 
-    @Source(ICONS)
+    @Source({ COLORS, FONTS, SIZES })
+    Fonts fonts();
+
+    @Source({ ICONS, SIZES })
     Icons icons();
 
     @Source("images/Image-BackdropGeneral.png")
@@ -75,11 +81,15 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         String backdropImage();
 
-        String primaryButton();
+        String anchor();
 
-        String secondaryButton();
+        String button();
 
-        String secondaryCtaButton();
+        String label();
+
+        String primary();
+
+        String highlighted();
 
         @ClassName("page-header")
         String pageHeader();
@@ -94,6 +104,32 @@ public interface ManagementConsoleResources extends ClientBundle {
         String flexItemAutoWidth();
 
         String ellipsis();
+    }
+
+    @Shared
+    interface Fonts extends CssResource {
+        String title();
+
+        @ClassName("page-title")
+        String pageTitle();
+
+        String subtitle();
+
+        String text();
+
+        String xxlarge();
+
+        String xlarge();
+
+        String large();
+
+        String medium();
+
+        String small();
+
+        String xsmall();
+
+        String xxsmall();
     }
 
     interface Icons extends CssResource {

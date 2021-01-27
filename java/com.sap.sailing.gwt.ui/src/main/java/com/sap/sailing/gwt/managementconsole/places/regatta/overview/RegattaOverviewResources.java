@@ -1,15 +1,11 @@
 package com.sap.sailing.gwt.managementconsole.places.regatta.overview;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
-import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseResources;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 
 public interface RegattaOverviewResources extends ClientBundle {
-
-    ShowcaseResources INSTANCE = GWT.create(ShowcaseResources.class);
 
     @Source({ ManagementConsoleResources.COLORS, "RegattaOverview.gss" })
     Style style();

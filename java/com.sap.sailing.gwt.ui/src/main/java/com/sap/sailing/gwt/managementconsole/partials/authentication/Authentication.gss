@@ -1,13 +1,3 @@
-.notLoggedIn .message {
-    font-size: 1.5rem;
-    line-height: 2rem;
-    font-weight: bold;
-    padding: 1rem 0;
-}
-
-.notLoggedIn .control {
-}
-
 .signIn {
     position: absolute;
     top: 0;
@@ -36,5 +26,6 @@
 }
 
 .signIn .link {
-    margin: -2rem 0 2rem
+    margin: -1rem 0 2rem;
+    text-align: right;
 }

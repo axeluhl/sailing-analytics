@@ -4,19 +4,18 @@
              
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <h1>
+                <div class="{app_res.fonts.title}">
                     Example Page
-                </h1>
+                </div>
             </div>
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <p>
+            <div class="{res.mediaCss.column} {res.mediaCss.small12}">
+                <div class="{app_res.fonts.text}">
                     Based on new UI design.
-                </p>
+                </div>
             </div>
         </div>
         <div class="{res.mediaCss.grid}">
@@ -34,112 +33,20 @@
             </div>
         </div>
         <div class="{res.mediaCss.grid}">
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.mediumoffset4} {res.mediaCss.medium4} {res.mediaCss.largeoffset6} {res.mediaCss.large3}">
-                <g:Button ui:field="settingsButton"
-                    text="{i18n.releaseNotes}"
-                    styleName="{app_res.style.primaryButton}" />
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4}">
+                <g:Button text="{i18n.save}" addStyleNames="{app_res.style.button} {app_res.style.primary}" />
             </div>
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.large3}">
-                <g:Button ui:field="createRegattaLeaderboardButton"
-                    text="{i18n.ok}"
-                    styleName="{app_res.style.secondaryButton}" />
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4}">
+                <g:Button text="{i18n.create}" addStyleNames="{app_res.style.button} {app_res.style.highlighted}" />
             </div>
-            <div class="{res.mediaCss.column} {res.mediaCss.small12}">
-                <div class="{app_res.style.secondaryCtaButton}">
-                    <g:Button ui:field="forgotPasswordButton"
-                        text="{i18n.forgotPassword}" />
-                </div>
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4}">
+                <g:Button text="{i18n.cancel}" addStyleNames="{app_res.style.button}" />
             </div>
-        </div>
-        <div class="{res.mediaCss.grid}">
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4}">
-                <div class="{local_res.style.eventCard}">
-                    <div class="{res.mediaCss.grid} {local_res.style.eventCardContainer}">
-                        <div class="{res.mediaCss.column} {res.mediaCss.hideonsmall} {res.mediaCss.medium4}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h1 class="{res.mediaCss.column} {res.mediaCss.small8} {res.mediaCss.medium12}">
-                            LYC Mittwochsregatta YS 2020
-                        </h1>
-                        <div class="{res.mediaCss.column} {res.mediaCss.small4} {res.mediaCss.showonsmall}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h2 class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.icons.icon} {app_res.icons.iconLocation} {local_res.style.location}">
-                            Travemünde, May 6 - October 31, 2020
-                        </h2>
-                    </div>
-                </div>
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.mediumoffset4} {res.mediaCss.medium4}" style="text-align: center">
+                <g:Button text="{i18n.goBack}" addStyleNames="{app_res.style.anchor}" />
             </div>
-            <div
-                class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4}">
-                <div class="{local_res.style.eventCard}">
-                    <div class="{res.mediaCss.grid} {local_res.style.eventCardContainer}">
-                        <div class="{res.mediaCss.column} {res.mediaCss.hideonsmall} {res.mediaCss.medium4}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h1 class="{res.mediaCss.column} {res.mediaCss.small8} {res.mediaCss.medium12}">
-                            LYC Mittwochsregatta YS 2020
-                        </h1>
-                        <div class="{res.mediaCss.column} {res.mediaCss.small4} {res.mediaCss.showonsmall}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h2 class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.icons.icon} {app_res.icons.iconLocation} {local_res.style.location}">
-                            Travemünde, May 6 - October 31, 2020
-                        </h2>
-                    </div>
-                </div>
-            </div>
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4}">
-                <div class="{local_res.style.eventCard}">
-                    <div class="{res.mediaCss.grid} {local_res.style.eventCardContainer}">
-                        <div class="{res.mediaCss.column} {res.mediaCss.hideonsmall} {res.mediaCss.medium4}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h1 class="{res.mediaCss.column} {res.mediaCss.small8} {res.mediaCss.medium12}">
-                            LYC Mittwochsregatta YS 2020
-                        </h1>
-                        <div class="{res.mediaCss.column} {res.mediaCss.small4} {res.mediaCss.showonsmall}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h2 class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.icons.icon} {app_res.icons.iconLocation} {local_res.style.location}">
-                            Travemünde, May 6 - October 31, 2020
-                        </h2>
-                    </div>
-                </div>
-            </div>
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4}">
-                <div class="{local_res.style.eventCard}">
-                    <div class="{res.mediaCss.grid} {local_res.style.eventCardContainer}">
-                        <div class="{res.mediaCss.column} {res.mediaCss.hideonsmall} {res.mediaCss.medium4}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h1 class="{res.mediaCss.column} {res.mediaCss.small8} {res.mediaCss.medium12}">
-                            LYC Mittwochsregatta YS 2020
-                        </h1>
-                        <div class="{res.mediaCss.column} {res.mediaCss.small4} {res.mediaCss.showonsmall}">
-                            <div class="{local_res.style.featuredMarker}">
-                                Featured
-                            </div>
-                        </div>
-                        <h2 class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.icons.icon} {app_res.icons.iconLocation} {local_res.style.location}">
-                            Travemünde, May 6 - October 31, 2020
-                        </h2>
-                    </div>
-                </div>
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4}" style="text-align: right">
+                <g:Button text="{i18n.forgotPassword}" addStyleNames="{app_res.style.anchor} {app_res.style.highlighted}" />
             </div>
         </div>
     </g:HTMLPanel>

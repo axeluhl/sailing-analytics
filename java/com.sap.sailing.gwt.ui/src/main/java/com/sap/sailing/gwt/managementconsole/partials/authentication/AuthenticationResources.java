@@ -18,12 +18,6 @@ public interface AuthenticationResources extends ClientBundle {
 
     public interface Style extends CssResource {
 
-        String notLoggedIn();
-
-        String message();
-
-        String control();
-
         String signIn();
 
         String content();

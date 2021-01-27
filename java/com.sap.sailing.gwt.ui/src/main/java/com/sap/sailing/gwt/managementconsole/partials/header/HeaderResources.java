@@ -30,10 +30,11 @@ public interface HeaderResources extends AuthenticationResources {
 
         String actions();
 
+        String item();
+
         String account();
 
         String separator();
 
-        String highlighted();
     }
 }

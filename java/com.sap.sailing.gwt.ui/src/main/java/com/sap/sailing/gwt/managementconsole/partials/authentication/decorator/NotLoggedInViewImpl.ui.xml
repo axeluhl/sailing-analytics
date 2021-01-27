@@ -4,12 +4,13 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.authentication.AuthenticationResources" />
 
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.columns} {local_res.style.notLoggedIn}">
-            <div ui:field="messageUi" class="{res.mediaCss.small12} {local_res.style.message}" />
-            <g:Button ui:field="controlUi" styleName="{res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.large3} {app_res.style.primaryButton} {local_res.style.control}"/>
+        <div class="{res.mediaCss.columns}">
+            <div ui:field="messageUi" class="{res.mediaCss.small12} {app_res.fonts.pageTitle}" />
+            <div class="{res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.large3}">
+                <g:Button ui:field="controlUi" addStyleNames="{app_res.style.button} {app_res.style.primary}"/>
+            </div>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>

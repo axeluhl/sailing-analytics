@@ -12,18 +12,21 @@
             </div>
             <div class="{res.mediaCss.column}">
                 <label class="{res.mediaCss.small12}"><ui:text from="{i18n.username}" /></label>
-                <g:TextBox styleName="{res.mediaCss.small12}" ui:field="username" />
+                <g:TextBox addStyleNames="{res.mediaCss.small12}" ui:field="username" />
             </div>
             <div class="{res.mediaCss.column}">
                 <label class="{res.mediaCss.small12}"><ui:text from="{i18n.password}" /></label>
-                <g:PasswordTextBox styleName="{res.mediaCss.small12}" ui:field="password" />
+                <g:PasswordTextBox addStyleNames="{res.mediaCss.small12}" ui:field="password" />
             </div>
-            <div class="{res.mediaCss.column} {app_res.style.secondaryCtaButton} {local_res.style.link}">
-                <g:Button ui:field="forgotPassword" text="{i18n.forgotPassword}" styleName="{res.mediaCss.small12}" />
+            <div class="{res.mediaCss.column} {local_res.style.link}">
+                <g:Button ui:field="forgotPassword" text="{i18n.forgotPassword}"
+                    addStyleNames="{res.mediaCss.small12} {app_res.style.anchor} {app_res.style.highlighted}" />
             </div>
             <div class="{res.mediaCss.column}">
-                <g:Button ui:field="signIn" text="{i18n.signIn}" styleName="{res.mediaCss.small12} {app_res.style.primaryButton}" />
-                <g:Button ui:field="createAccount" text="{i18n.signUp}" styleName="{res.mediaCss.small12} {app_res.style.secondaryButton}" /> 
+                <g:Button ui:field="signIn" text="{i18n.signIn}"
+                    addStyleNames="{res.mediaCss.small12} {app_res.style.button} {app_res.style.primary}" />
+                <g:Button ui:field="createAccount" text="{i18n.signUp}"
+                    addStyleNames="{res.mediaCss.small12} {app_res.style.button} {app_res.style.highlighted}" />
             </div>
         </div>
     </g:HTMLPanel>

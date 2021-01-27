@@ -1,17 +1,13 @@
 package com.sap.sailing.gwt.managementconsole.places.event.overview;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
-import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcaseResources;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 
 public interface EventOverviewResources  extends ClientBundle {
 
-    ShowcaseResources INSTANCE = GWT.create(ShowcaseResources.class);
-
-    @Source({ ManagementConsoleResources.COLORS, "EventOverview.gss" })
+    @Source({ ManagementConsoleResources.COLORS, ManagementConsoleResources.SIZES, "EventOverview.gss" })
     Style style();
 
     @Source("../../../resources/images/Image-EventBackdrop.png")
@@ -30,12 +26,12 @@ public interface EventOverviewResources  extends ClientBundle {
         @ClassName("event-card")
         String eventCard();
 
+        String title();
+
         String details();
 
         @ClassName("event-card-container")
         String eventCardContainer();
-
-        String location();
 
         @ClassName("custom-teaser")
         String customTeaser();

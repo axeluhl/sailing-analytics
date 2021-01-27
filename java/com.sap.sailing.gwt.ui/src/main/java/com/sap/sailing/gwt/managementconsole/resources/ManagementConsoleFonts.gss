@@ -1,0 +1,51 @@
+@charset "UTF-8";
+
+.title {
+    font-size: FONT_SIZE_TITLE;
+    line-height: LINE_HEIGHT_TITLE;
+    font-weight: FONT_WEIGHT_BOLD;
+}
+
+.subtitle, .text {
+    font-size: FONT_SIZE_XXSMALL;
+    line-height: LINE_HEIGHT_XXSMALL;
+    font-weight: FONT_WEIGHT_NORMAL;
+    color: TEXT_COLOR_SECONDARY;
+}
+
+.page-title, .xxlarge {
+    font-size: FONT_SIZE_XXLARGE;
+    line-height: LINE_HEIGHT_XXLARGE;
+    font-weight: FONT_WEIGHT_BOLD;
+}
+
+.xlarge {
+    font-size: FONT_SIZE_XLARGE;
+    line-height: LINE_HEIGHT_XLARGE;
+    font-weight: FONT_WEIGHT_BOLD;
+}
+
+.large {
+    font-size: FONT_SIZE_LARGE;
+    line-height: LINE_HEIGHT_LARGE;
+}
+
+.medium {
+    font-size: FONT_SIZE_MEDIUM;
+    line-height: LINE_HEIGHT_MEDIUM;
+}
+
+.small {
+    font-size: FONT_SIZE_SMALL;
+    line-height: LINE_HEIGHT_SMALL;
+}
+
+.xsmall {
+    font-size: FONT_SIZE_XSMALL;
+    line-height: LINE_HEIGHT_XSMALL;
+}
+
+.xxsmall {
+    font-size: FONT_SIZE_XXSMALL;
+    line-height: LINE_HEIGHT_XXSMALL;
+}
