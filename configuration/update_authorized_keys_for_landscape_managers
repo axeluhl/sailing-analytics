@@ -11,6 +11,6 @@ if [ ! -f /root/.ssh/authorized_keys.org ]; then
   cp ${SSH_DIR}/authorized_keys ${SSH_DIR}/authorized_keys.org
 fi
 # Start out with the original AWS-generated authorized_keys file
-cp ${SSH_DIR}/authorized_keys.org ${SSH_DIR}/authorized_keys
-# Now append the public SSH keys of all users having LANDSCAPE:MANAGE:AWS permission:
-echo "${public_keys}" >>${SSH_DIR}/authorized_keys
+# and append the public SSH keys of all users having LANDSCAPE:MANAGE:AWS permission:
+echo "$( cat ${SSH_DIR}/authorized_keys.org )
+${public_keys}" | sort -u >${SSH_DIR}/authorized_keys
