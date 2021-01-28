@@ -6,16 +6,14 @@ package com.sap.sse.security.subscription;
  */
 public interface SubscriptionApiRequestProcessor {
     /**
-     * Process requests {@code SubscriptionApiRequest}
+     * Add request to this processor and make sure it will be scheduled for execution as soon as possible,
+     * respecting the service's rate limits.
      */
-    void process();
-
+    void addRequest(SubscriptionApiRequest request);
+    
     /**
-     * Add request to this processor, and schedule it
-     * 
-     * @param delayMs
-     *            delay time in milliseconds before start running the request, this is important to prevent API rate
-     *            limit error
+     * When a request bounced due to the service's rate limit exceeded, this method can be called, passing the
+     * request that failed, to re-schedule it after an appropriate delay.
      */
-    void addRequest(SubscriptionApiRequest request, long delayMs);
+    void rescheduleRequestAfterRateLimitExceeded(SubscriptionApiRequest request);
 }

@@ -43,10 +43,8 @@ public class ChargebeeFetchSubscriptionInformationTask
         logger.info(() -> "Fetch Chargebee subscription information, user: " + user.getName() + ", subscription "
                 + subscription.id());
 
-        requestProcessor.addRequest(new ChargebeeInvoiceRequest(user, subscription.id(), this, requestProcessor),
-                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
-        requestProcessor.addRequest(new ChargebeeTransactionRequest(user, subscription.id(), this, requestProcessor),
-                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
+        requestProcessor.addRequest(new ChargebeeInvoiceRequest(user, subscription.id(), this, requestProcessor));
+        requestProcessor.addRequest(new ChargebeeTransactionRequest(user, subscription.id(), this, requestProcessor));
     }
 
     @Override

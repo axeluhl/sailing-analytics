@@ -5,18 +5,16 @@ import com.sap.sse.security.subscription.SubscriptionApiRequest;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
- * Base implementation for Chargebee's API requests
+ * Base implementation for Chargebee's API requests. Implementations are expected to be able to {@link #createRequest()
+ * create a request}, {@link #processResult(ChargebeeInternalApiRequestWrapper) process results}, and
+ * {@link #handleError(Exception) handle errors that occur while executing the request}. This class provides the
+ * {@link #run()} implementation which {@link #createRequest() creates the request},
+ * {@link ChargebeeInternalApiRequestWrapper#request() executes the request}, checks whether the
+ * {@link #isRateLimitReached(ApiResponse) API's rate limit is reached}, and if so, re-schedules the request with a
+ * delay of {@link #LIMIT_REACHED_RESUME_DELAY_MS} milliseconds, or otherwise
+ * {@link #processResult(ChargebeeInternalApiRequestWrapper) processes the results}.
  */
 public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
-    /**
-     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
-     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
-     * ~400ms, and a next request should be made after 400ms from previous request.
-     */
-    public static final long TIME_FOR_API_REQUEST_MS = 400;
-
-    public static final long LIMIT_REACHED_RESUME_DELAY_MS = 65000;
-
     private final SubscriptionApiRequestProcessor requestProcessor;
 
     protected ChargebeeApiRequest(SubscriptionApiRequestProcessor requestProcessor) {
@@ -32,7 +30,7 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
                 if (!isRateLimitReached(request.getResponse())) {
                     processResult(request);
                 } else {
-                    requestProcessor.addRequest(this, LIMIT_REACHED_RESUME_DELAY_MS);
+                    requestProcessor.rescheduleRequestAfterRateLimitExceeded(this);
                 }
             } catch (Exception e) {
                 handleError(e);

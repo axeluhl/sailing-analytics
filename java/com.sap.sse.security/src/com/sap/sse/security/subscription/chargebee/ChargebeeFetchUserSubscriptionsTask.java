@@ -62,8 +62,7 @@ public class ChargebeeFetchUserSubscriptionsTask implements ChargebeeSubscriptio
     private void fetchSubscriptionList(String offset) {
         logger.info(() -> "Schedule fetch Chargebee subscriptions, user: " + user.getName() + ", offset: "
                 + (offset == null ? "" : offset));
-        requestProcessor.addRequest(new ChargebeeSubscriptionListRequest(user, offset, this, requestProcessor),
-                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
+        requestProcessor.addRequest(new ChargebeeSubscriptionListRequest(user, offset, this, requestProcessor));
     }
 
     private void onDone() {

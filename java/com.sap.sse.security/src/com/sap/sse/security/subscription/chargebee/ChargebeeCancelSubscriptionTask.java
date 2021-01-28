@@ -35,8 +35,7 @@ public class ChargebeeCancelSubscriptionTask
 
     public void run() {
         logger.info(() -> "Schedule cancel Chargebee subscription, id: " + subscriptionId);
-        requestProcessor.addRequest(new ChargebeeSubscriptionRequest(subscriptionId, this, requestProcessor),
-                ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
+        requestProcessor.addRequest(new ChargebeeSubscriptionRequest(subscriptionId, this, requestProcessor));
     }
 
     @Override
@@ -52,8 +51,7 @@ public class ChargebeeCancelSubscriptionTask
                 onDone(new SubscriptionCancelResult(/* success */ true, sub));
             } else {
                 requestProcessor.addRequest(
-                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor),
-                        ChargebeeApiRequest.TIME_FOR_API_REQUEST_MS);
+                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor));
             }
         } else {
             onDone(new SubscriptionCancelResult(/* success */false, /* subscription */null, /* deleted */true));
