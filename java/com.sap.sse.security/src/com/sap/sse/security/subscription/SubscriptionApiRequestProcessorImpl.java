@@ -30,6 +30,14 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
 
     private final ScheduledExecutorService executor;
 
+    /**
+     * The latest time point for which a request was scheduled by this processor using the {@link #executor}.
+     * {@code null} means that no request has been scheduled yet. Reading and updating this field needs to
+     * be thread safe and must be done while holding this object's monitor ({@code synchronized}). See the
+     * {@link #getDelayToNextRequestStartTimePoint()} and {@link #getDelayWhenRateLimitWasExceeded()}
+     * methods which implement this for regular requests and for requests that have to be re-scheduled
+     * after the rate limit has been exceeded (despite our attempts done here to respect the rate limits).
+     */
     private TimePoint startOfLatestRequest;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
@@ -47,7 +55,10 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
     }
     
     /**
-     * @param entry can be {@code null} which makes this call a no-op
+     * Schedules the {@code request} with the {@link #executor} for execution after the {@code delay} has passed. If the
+     * request fails with an exception, a {@link Level#SEVERE} log message is produced, but the request is not
+     * re-scheduled. Note that the request itself may choose to handle exceptions such as exceeding the rate limit and
+     * may choose to {@link #rescheduleRequestAfterRateLimitExceeded(SubscriptionApiRequest) reschedule itself}.
      */
     private void scheduleRequest(SubscriptionApiRequest request, Duration delay) {
         assert request != null;
