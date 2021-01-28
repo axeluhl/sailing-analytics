@@ -17,17 +17,11 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
 
     private final ScheduledExecutorService executor;
 
-    /**
-     * Access to this queue in conjunction with access to the {@link #processing} field has to be {@code synchronized}
-     * on this queue. When no thread is holding this queue's monitor (outside any related {@code synchronized} block)
-     * the TODO @Tu, please fill this in accordingly, specifying precisely the semantics and invariants of this construct!
-     */
-    private final Queue<RequestQueueEntry> requestQueue;
-    private boolean processing = false;
+    private final RequestQueue requestQueue;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
-        requestQueue = new LinkedList<RequestQueueEntry>();
         this.executor = executor;
+        this.requestQueue = new RequestQueue();
     }
 
     @Override
@@ -36,17 +30,20 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
     }
 
     @Override
-    public synchronized void addRequest(SubscriptionApiRequest request, long delayMs) {
+    public void addRequest(SubscriptionApiRequest request, long delayMs) {
         if (request != null) {
-            boolean isProcessing = addNewRequestAndDetermineIsProcessing(new RequestQueueEntry(request, delayMs));
-            if (!isProcessing) {
-                processNextRequestIfAvailable();
-            }
+            RequestQueueEntry entry = requestQueue
+                    .addAndGetNextRequestIfNotProcessing(new RequestQueueEntry(request, delayMs));
+            scheduleRequest(entry);
         }
     }
 
     private void processNextRequestIfAvailable() {
-        RequestQueueEntry entry = getNextRequestIfAvailable();
+        RequestQueueEntry entry = requestQueue.getNextRequestIfAvailable();
+        scheduleRequest(entry);
+    }
+
+    private void scheduleRequest(RequestQueueEntry entry) {
         if (entry != null) {
             executor.schedule(() -> {
                 try {
@@ -60,24 +57,36 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
         }
     }
 
-    private RequestQueueEntry getNextRequestIfAvailable() {
-        final RequestQueueEntry entry;
-        synchronized (requestQueue) {
+    private static class RequestQueue {
+        private final Queue<RequestQueueEntry> requestQueue;
+        private boolean entryProcessing;
+
+        public RequestQueue() {
+            requestQueue = new LinkedList<RequestQueueEntry>();
+            entryProcessing = false;
+        }
+
+        public synchronized RequestQueueEntry getNextRequestIfAvailable() {
+            final RequestQueueEntry entry;
             if (!requestQueue.isEmpty()) {
-                processing = true;
+                entryProcessing = true;
                 entry = requestQueue.poll();
             } else {
-                processing = false;
+                entryProcessing = false;
                 entry = null;
             }
             return entry;
         }
-    }
 
-    private boolean addNewRequestAndDetermineIsProcessing(RequestQueueEntry entry) {
-        synchronized (requestQueue) {
-            requestQueue.add(entry);
-            return processing;
+        public synchronized RequestQueueEntry addAndGetNextRequestIfNotProcessing(RequestQueueEntry request) {
+            requestQueue.add(request);
+            final RequestQueueEntry entry;
+            if (!entryProcessing) {
+                entry = getNextRequestIfAvailable();
+            } else {
+                entry = null;
+            }
+            return entry;
         }
     }
 
