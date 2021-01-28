@@ -32,7 +32,6 @@ public class RestApiApplication extends Application {
         classes.add(WindResource.class);
         classes.add(MarkResource.class);
         classes.add(TagsResource.class);
-        classes.add(StatusResource.class);
         classes.add(TrackedEventsResource.class);
         classes.add(TrackingDevicesResource.class);
         classes.add(CourseConfigurationResource.class);

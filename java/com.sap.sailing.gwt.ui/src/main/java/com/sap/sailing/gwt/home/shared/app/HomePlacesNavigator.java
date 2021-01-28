@@ -62,7 +62,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
-        return createGlobalPlaceNavigation(new ImprintPlace());
+        return createGlobalPlaceNavigation(new ImprintPlace((String) null /* empty place token */));
     }
 
     public PlaceNavigation<EventDefaultPlace> getEventNavigation(String eventUuidAsString, String baseUrl,

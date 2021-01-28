@@ -2,9 +2,9 @@ package com.sap.sailing.windestimation.data.serialization;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.SingleDimensionBasedTwdTransition;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class SingleDimensionBasedTwdTransitionJsonDeserializer
         implements JsonDeserializer<SingleDimensionBasedTwdTransition> {

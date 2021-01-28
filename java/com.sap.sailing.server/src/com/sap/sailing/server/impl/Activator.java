@@ -162,7 +162,7 @@ public class Activator implements BundleActivator {
         // it's okay to re-use the properties Dictionary for several registrations because the registry clones its contents
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, CompetitorNotificationPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)),
+                new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences()),
                 properties));
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, BoatClassNotificationPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
@@ -331,6 +331,7 @@ public class Activator implements BundleActivator {
         // registry because this will require the SecurityService and that can only become available once the initial
         // load has been finished in case this is a replica with auto-replication.
         racingEventService.ensureOwnerships();
+        racingEventService.migrateCompetitorNotificationPreferencesWithCompetitorNames();
     }
 
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements

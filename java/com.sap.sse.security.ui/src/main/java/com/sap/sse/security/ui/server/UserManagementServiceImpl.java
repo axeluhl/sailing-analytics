@@ -100,7 +100,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     protected ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion(), ServerInfo.getManageEventsBaseUrl());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
         return result;
     }
 

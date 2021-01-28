@@ -34,6 +34,9 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     
     void updateUserGroup(UserGroup userGroup);
     
+    /**
+     * A new, non-live copy, as a snapshot, of the set of users known to this user store
+     */
     Iterable<User> getUsers();
     
     boolean hasUsers();

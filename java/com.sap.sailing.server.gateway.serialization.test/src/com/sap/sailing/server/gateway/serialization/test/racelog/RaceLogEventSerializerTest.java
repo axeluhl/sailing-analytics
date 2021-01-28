@@ -39,10 +39,10 @@ import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogEventSerializerTest {
 

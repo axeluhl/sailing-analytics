@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class BoatClassJsonSerializer implements JsonSerializer<BoatClass> {
     public static final String FIELD_NAME = "name";

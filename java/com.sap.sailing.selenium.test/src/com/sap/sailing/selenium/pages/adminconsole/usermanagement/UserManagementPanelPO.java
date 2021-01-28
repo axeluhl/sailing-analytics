@@ -39,7 +39,7 @@ public class UserManagementPanelPO extends PageArea {
     public DataEntryPO findUser(final String username) {
         final CellTablePO<DataEntryPO> table = getUserTable();
         for (DataEntryPO entry : table.getEntries()) {
-            final String name = entry.getColumnContent("Username");
+            final String name = entry.getColumnContent("User name");
             if (username.equals(name)) {
                 return entry;
             }

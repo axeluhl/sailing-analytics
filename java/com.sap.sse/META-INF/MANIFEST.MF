@@ -25,7 +25,8 @@ Require-Bundle: com.sap.sse.common,
  org.apache.servicemix.bundles.zxing;bundle-version="3.1.0",
  org.json.simple;bundle-version="1.1.0",
  org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore;bundle-version="4.4.9"
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
+ com.sun.jersey
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  javax.ws.rs.core;version="1.1.1",

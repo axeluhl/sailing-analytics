@@ -6,9 +6,9 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.GateStartConfigurationJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 
 public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements JsonDeserializer<RacingProcedureConfiguration> {

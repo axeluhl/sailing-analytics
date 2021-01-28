@@ -6,7 +6,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
 public class AwsRegion implements Region {
-    private AwsLandscape<?, ?, ?> landscape;
+    private AwsLandscape<?, ?, ?> landscape; // FIXME this is broken; it shall be final and has to be initialized by the constructors if getAvailabilityZones and getSecurityGroups is expected to do anything useful
     private final String id;
     
     public AwsRegion(String id) {

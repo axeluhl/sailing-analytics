@@ -162,7 +162,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         this.raceLogResolver = raceLogResolver;
         this.tractracRace = tractracRace;
         raceLogListeners = Collections.synchronizedMap(new HashMap<>());
-        raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1);
+        raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1); // equally important as race officer on water
     }
     
     public void raceLogAttached(TrackedRace trackedRace, RaceLog raceLog) {
@@ -376,7 +376,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 resultsForRaceLog.add(resultForRaceLog);
                 final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
                 defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
-                        new LogEventAuthorImpl("Official TracTrac Result Provider", 1), // equally important as race officer on water
+                        raceLogEventAuthor,
                         UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
                 logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
                         + " for competitor " + raceCompetitor + ": " + resultForRaceLog);

@@ -7,9 +7,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**

@@ -18,7 +18,6 @@ import com.mongodb.client.model.UpdateOptions;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
@@ -32,6 +31,7 @@ import com.sap.sailing.shared.persistence.MongoObjectFactory;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sailing.shared.persistence.device.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 

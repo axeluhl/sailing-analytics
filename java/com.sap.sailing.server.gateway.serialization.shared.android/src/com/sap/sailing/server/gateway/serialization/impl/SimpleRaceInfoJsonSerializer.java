@@ -7,10 +7,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class SimpleRaceInfoJsonSerializer implements JsonSerializer<SimpleRaceInfo> {
 
