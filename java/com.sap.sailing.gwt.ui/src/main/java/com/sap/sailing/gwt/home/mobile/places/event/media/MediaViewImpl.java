@@ -36,7 +36,6 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         mediaUploadPopup = new MediaUploadPopup();
-        //RootPanel.get().add(mediaUploadPopup);
 
         addMediaButtonUi.addClickHandler(new ClickHandler() {
             

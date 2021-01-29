@@ -42,7 +42,7 @@
 
 .media_settings_button {
   background-color: #9f9f9f;
-  background-image: resourceUrl("edit");
+  background-image: resourceUrl("manageBlack");
 }
 
 .media_add_button {
@@ -55,7 +55,7 @@
 }
 
 .thumbnail_edit_button {
-    background-image: resourceUrl("edit");
+    background-image: resourceUrl("editWhite");
 }
 
 .thumbnail_delete_button {

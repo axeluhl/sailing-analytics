@@ -3,6 +3,7 @@
   		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials"> 
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="media_res" type="com.sap.sailing.gwt.home.mobile.places.event.media.MediaViewResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGalleryResources" />
 	<g:HTMLPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.videogallery_video}">
 		<div class="{local_res.css.video}">
@@ -12,5 +13,9 @@
 			<div class="{local_res.css.videogallery_video_info_title}" ui:field="videoTitleUi"></div>
 			<div class="{local_res.css.videogallery_video_info_subtitle}" ui:field="videoCreateDateUi"></div>
 		</div>
+        <div ui:field="overlayUi" class="{media_res.css.overlay}">
+            <g:Button addStyleNames="{media_res.css.button} {media_res.css.editButton}" ui:field="editButtonUi"></g:Button>
+            <g:Button addStyleNames="{media_res.css.button} {media_res.css.deleteButton}" ui:field="deleteButtonUi"></g:Button>
+        </div>
 	</g:HTMLPanel>
 </ui:UiBinder>

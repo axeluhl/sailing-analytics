@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.places.event.media.MediaViewResources;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class ImageGalleryItem extends Composite implements HasClickHandlers {
@@ -27,9 +28,22 @@ public class ImageGalleryItem extends Composite implements HasClickHandlers {
     @UiField Button deleteButtonUi;
     
     public ImageGalleryItem(ImageDTO image) {
+        MediaViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + image.getSourceRef() + "')");
         overlayUi.getStyle().setVisibility(Visibility.HIDDEN);
+        editButtonUi.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                event.stopPropagation();
+            }
+        });
+        deleteButtonUi.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                event.stopPropagation();
+            }
+        });
     }
     
     @Override

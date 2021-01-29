@@ -7,6 +7,8 @@
         type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res"
         type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="media_res" 
+        type="com.sap.sailing.gwt.home.mobile.places.event.media.MediaViewResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGalleryResources" />
         
@@ -14,9 +16,9 @@
         <div  style="position: relative;">
             <div class="{local_res.css.imagegallery_column_item}"
                 ui:field="imageUi" style="position:relative"></div>
-            <div ui:field="overlayUi" onclick="event.stopPropagation();" class="{local_res.css.overlay}">
-                <g:Button addStyleNames="{local_res.css.button} {local_res.css.editButton}" ui:field="editButtonUi"></g:Button>
-                <g:Button addStyleNames="{local_res.css.button} {local_res.css.deleteButton}" ui:field="deleteButtonUi"></g:Button>
+            <div ui:field="overlayUi" class="{media_res.css.overlay}">
+                <g:Button addStyleNames="{media_res.css.button} {media_res.css.editButton}" ui:field="editButtonUi"></g:Button>
+                <g:Button addStyleNames="{media_res.css.button} {media_res.css.deleteButton}" ui:field="deleteButtonUi"></g:Button>
             </div>
         </div>
     </g:HTMLPanel>

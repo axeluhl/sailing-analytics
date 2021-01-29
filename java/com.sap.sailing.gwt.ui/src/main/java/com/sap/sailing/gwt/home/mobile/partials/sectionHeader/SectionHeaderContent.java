@@ -35,6 +35,8 @@ public class SectionHeaderContent extends Composite {
 
     protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
     protected static final String ACTIVE_STYLE = SectionHeaderResources.INSTANCE.css().active();
+    protected static final String HIDE_ICON_STYLE = SectionHeaderResources.INSTANCE.css().hideIcon();
+    
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
@@ -111,6 +113,15 @@ public class SectionHeaderContent extends Composite {
                 expanded = collapsed;
                 UIObject.setStyleName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
                 animation.animate(collapsed);
+                if (collapsed) {
+                    manageButtonUi.addStyleName("gwt-Button");
+                    manageButtonUi.removeStyleName(HIDE_ICON_STYLE);
+                    manageButtonUi.setEnabled(true);
+                } else {
+                    manageButtonUi.removeStyleName("gwt-Button");
+                    manageButtonUi.addStyleName(HIDE_ICON_STYLE);
+                    manageButtonUi.setEnabled(false);
+                }
                 accordionListeners.forEach(l -> l.onExpansionChange(!collapsed));
             }
         });

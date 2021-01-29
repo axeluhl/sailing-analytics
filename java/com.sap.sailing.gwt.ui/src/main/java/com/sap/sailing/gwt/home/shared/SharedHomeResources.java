@@ -88,9 +88,25 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource addMedia();
     
-    @Source("edit.svg")
+    @Source("edit_white.svg")
     @MimeType("image/svg+xml")
-    DataResource edit();
+    DataResource editWhite();
+    
+    @Source("edit_black.svg")
+    @MimeType("image/svg+xml")
+    DataResource editBlack();
+    
+    @Source("gear.svg")
+    @MimeType("image/svg+xml")
+    DataResource manageBlack();
+    
+    @Source("gear_white.svg")
+    @MimeType("image/svg+xml")
+    DataResource manageWhite();
+    
+    @Source("trash.svg")
+    @MimeType("image/svg+xml")
+    DataResource trash();
 
     @Source("plus_transparent.png")
     ImageResource plusTransparent();

@@ -15,7 +15,6 @@
                     <h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
                     <div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;"
                         ui:field="labelUi"></div>
-                        
                     <g:Button addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.iconManage}" visible="false" ui:field="manageButtonUi"></g:Button>
                 </div>
 	                <div>

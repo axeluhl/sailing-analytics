@@ -2,10 +2,10 @@
 
 .addButton {
     position: absolute;
-    top: 5px;
+    top: 0px;
     right: 15px;
-    width: 30px;
-    height: 30px;
+    width: 38px;
+    height: 38px;
     margin: 0;
     padding: 0;
 }
@@ -13,10 +13,10 @@
 .addButton:after {
     content: "";
     position: absolute;
-    width: 75%;
-    height: 75%;
-    top: 10%;
-    left: 15%;
+    width: 50%;
+    height: 50%;
+    top: 25%;
+    left: 30%;
     background-image: resourceUrl("addMedia");
     background-size: contain;
     background-position: center;
@@ -58,4 +58,55 @@
     background-size: contain;
     background-position: center center;
     background-repeat: no-repeat;
+}
+
+.overlay {
+    position: absolute;
+    background-color: rgba(0, 143, 204, 0.5);
+    width: 100%;
+    height: 100%;
+    display: block;
+    top: 0;
+}
+
+.button {
+    background-color: #008fcc;
+    border: none;
+    border-radius: 6px;
+}
+
+.button:after {
+    content: "";
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.deleteButton {
+    position: absolute;
+    top: 10px;
+    right: 60px;
+    height: 40px;
+    width: 40px;
+}
+
+.deleteButton:after {
+    background-image: resourceUrl("trash");
+}
+
+.editButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 40px;
+    width: 40px;
+}
+
+.editButton:after {
+    background-image: resourceUrl("editWhite");
 }

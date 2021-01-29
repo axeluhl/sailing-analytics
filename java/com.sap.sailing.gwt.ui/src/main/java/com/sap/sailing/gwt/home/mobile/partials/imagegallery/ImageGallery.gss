@@ -2,58 +2,32 @@
 * An image gallery
 */
 .imagegallery {
-  font-size: 1rem;
+    font-size: 1rem;
 }
+
 .imagegallery_column {
-  padding: 0;
-  margin: 0;
+    padding: 0;
+    margin: 0;
 }
+
 .imagegallery_columnfirst {
-  padding-right: 0.333333333333333em;
+    padding-right: 0.333333333333333em;
 }
+
 .imagegallery_columnsecond {
-  padding-left: 0.333333333333333em;
+    padding-left: 0.333333333333333em;
 }
+
 .imagegallery_column_item {
-  cursor: pointer;
-  margin-bottom: 0.666666666666667em;
-  background-size: cover;
-  width: 100%;
-  padding-top: 100%;
+    cursor: pointer;
+    margin-bottom: 0.666666666666667em;
+    background-size: cover;
+    width: 100%;
+    padding-top: 100%;
 }
+
 .imagegallery_column_item img {
-  width: 100%;
-  height: auto;
-  vertical-align: bottom;
-}
-
-.overlay {
-    position: absolute;
-    background-color:rgba(55,55,55,0.5);
-    width:100%;
-    height:100%;
-    display:block;
-    top:0;
-}
-
-.button {
-    background-color: grey;
-    border: none;
-    border-radius: 6px;
-}
-
-.deleteButton {
-  position: absolute;
-  top: 10px;
-  right: 60px;
-  height: 40px;
-  width: 40px;
-}
-
-.editButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  height: 40px;
-  width: 40px;
+    width: 100%;
+    height: auto;
+    vertical-align: bottom;
 }

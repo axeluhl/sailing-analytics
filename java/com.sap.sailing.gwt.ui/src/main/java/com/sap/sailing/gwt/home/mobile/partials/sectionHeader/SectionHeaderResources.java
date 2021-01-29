@@ -38,5 +38,6 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String iconManage();
         String button();
         String active();
+        String hideIcon();
     }
 }

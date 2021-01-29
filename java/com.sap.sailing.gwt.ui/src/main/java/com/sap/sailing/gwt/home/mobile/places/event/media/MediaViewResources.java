@@ -12,8 +12,12 @@ public interface MediaViewResources extends SharedHomeResources {
     LocalCss css();
     
     public interface LocalCss extends CssResource {
-        String addButton();
         String popup();
+        String overlay();
+        String button();
+        String addButton();
+        String deleteButton();
+        String editButton();
     }
     
 }

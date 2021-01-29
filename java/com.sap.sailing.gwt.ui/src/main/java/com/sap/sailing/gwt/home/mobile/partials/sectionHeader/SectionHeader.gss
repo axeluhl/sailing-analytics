@@ -169,29 +169,39 @@
 }
 .button {
     display: inline-block;
-    height: 28px;
-    width: 28px;
-    background-color: #9f9f9f;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
+    height: 38px;
+    width: 38px;
     border: none;
     border-radius: 6px;
     padding: 7px;
-    margin-left: 6px;
-    margin-top: -5px
-}
-.button {
+    margin-left: 5px;
+    position: absolute;
+    top: 5px;
+    background-color: #9f9f9f;
     background-repeat: no-repeat;
     background-position: center center;
-    background-size: 75%;
+    background-size: 66.6%;  
 }
 .button:hover {
     background-color: #9f9f9f
 }
-.button.active {
-    background-color: #A40000;
+.iconManage:hover {
+    background-color: #fff;
+}
+.button.active, .button.active:hover {
+    background-color: #008fcc;
+    background-image: resourceUrl('manageWhite');
 }
 .iconManage {
-    background-image: resourceUrl('edit');
+    background-image: resourceUrl('manageBlack');
+    background-color: #fff;  
+    opacity: 1;
+    -webkit-transition: opacity 2s ease-out;
+       -moz-transition: opacity 2s ease-out;
+        -ms-transition: opacity 2s ease-out;
+         -o-transition: opacity 2s ease-out;
+            transition: opacity 2s ease-out;
+}
+.iconManage.hideIcon {
+    opacity: 0;
 }
