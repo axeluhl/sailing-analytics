@@ -3,7 +3,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
     version="3.1">
-	
+    <listener>
+        <listener-class>com.sap.sse.debranding.ClientConfigurationListener</listener-class>
+    </listener>
 	<servlet>
 		<servlet-name>default</servlet-name>
 		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
@@ -17,15 +19,10 @@
 		<filter-name>CORSFilter</filter-name>
 		<filter-class>com.sap.sailing.www.CORSFilter</filter-class>
 	</filter>
-    <filter>
-        <display-name>ClientConfigurationFilter</display-name>
-        <filter-name>ClientConfigurationFilter</filter-name>
-        <filter-class>com.sap.sse.debranding.ClientConfigurationFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>ClientConfigurationFilter</filter-name>
+    <servlet-mapping>
+        <servlet-name>jsp</servlet-name>
         <url-pattern>*.html</url-pattern>
-    </filter-mapping>
+    </servlet-mapping>
 	<filter-mapping>
 		<filter-name>CORSFilter</filter-name>
 		<url-pattern>/fonts/*</url-pattern>
