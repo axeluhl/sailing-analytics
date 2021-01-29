@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -474,9 +475,9 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
     }
     
     /**
-     * Remembers in which tab panel the <code>panelToAdd</code> is to be displayed and for which feature; additionally, remembers adds
-     * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
-     * method can be called.
+     * Remembers in which tab panel the <code>panelToAdd</code> is to be displayed and for which feature; additionally,
+     * adds a hook so that when the <code>panelToAdd</code>'s widget is selected then the
+     * {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()} method can be called.
      */
     private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget>
     panelToAdd, String tabTitle, BooleanSupplier permissionCheck, T place) {
@@ -509,12 +510,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
         final Set<BooleanSupplier> permissionChecksAsSet = new HashSet<>(Arrays.asList(permissionCheck));
         permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionChecksAsSet);
-        Set<BooleanSupplier> permissionsForTabPanel = permissionsAnyOfWhichIsRequiredToSeeWidget.get(tabPanel.getPanel());
-        if (permissionsForTabPanel == null) {
-            permissionsForTabPanel = new HashSet<>();
-            permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
-        }
-        permissionsForTabPanel.add(permissionCheck);
+        Util.addToValueSet(permissionsAnyOfWhichIsRequiredToSeeWidget, tabPanel.getPanel(), permissionCheck);
         if (place != null) { // for horizontal tabs
             widgetPlacesMap.put(widgetToAdd, place);
         }

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
 
 import java.util.function.Function;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
 public class RemoteServerInstancesPlace extends AbstractFilterablePlace {
     public RemoteServerInstancesPlace(String token) {

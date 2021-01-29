@@ -77,7 +77,7 @@
       <plugin id="com.sap.sse.security.userstore.mongodb" autoStart="true" startLevel="4" />
       <plugin id="javax.annotation" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="1" />
-      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="com.sap.sse.landscape.aws" autoStart="true" startLevel="4" />      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.osgi" autoStart="true" startLevel="-1" />

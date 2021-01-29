@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -11,8 +10,6 @@ import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -51,13 +48,18 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
 
     /**
      * The implementation scans the {@link ApplicationProcessHost#DEFAULT_SERVERS_PATH application server deployment
-     * folder} for sub-folders. In those sub-folders, the configuration file is analyzed for the port number to instantiate
-     * an {@link ApplicationProcess} object for each one.
+     * folder} for sub-folders. In those sub-folders, the configuration file is analyzed for the port number to
+     * instantiate an {@link ApplicationProcess} object for each one.
+     * 
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException {
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
+            byte[] privateKeyEncryptionPassphrase)
+            throws Exception {
         final Set<ProcessT> result = new HashSet<>();
-        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout);
+        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
         if (optionalTimeout.isPresent()) {
             sftpChannel.connect((int) optionalTimeout.get().asMillis());
         } else {

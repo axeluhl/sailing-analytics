@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.client.place.event.legacy;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class SeriesPlace extends AbstractBasePlace {

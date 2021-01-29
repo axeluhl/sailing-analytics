@@ -99,7 +99,6 @@ public class ResultImportUrlsListComposite extends Composite {
         Grid providerGrid = new Grid(1, 2);
         providerGrid.setWidget(0, 0, new Label(stringMessages.urlProviders()));
         providerGrid.setWidget(0, 1, urlProviderListBox);
-
         panel.add(providerGrid);
         panel.add(buttonPanel);
         panel.add(urlSample);

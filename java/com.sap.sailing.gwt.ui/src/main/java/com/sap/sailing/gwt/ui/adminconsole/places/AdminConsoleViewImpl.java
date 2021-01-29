@@ -101,6 +101,10 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
+import com.sap.sailing.landscape.ui.client.LandscapeManagementPanel;
+import com.sap.sailing.landscape.ui.client.LandscapeManagementPanelSupplier;
+import com.sap.sailing.landscape.ui.client.LandscapeManagementPlace;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
@@ -109,6 +113,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
+import com.sap.sse.landscape.common.SecuredLandscapeTypes;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -471,6 +476,12 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 stringMessages.fileStorage(), new FileStoragePlace(null),
                 SecuredSecurityTypes.SERVER.getPermissionForObject(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo));
+        /* Landscape Management */
+        final LandscapeManagementPanelSupplier landscapeManagementPanelSupplier = new LandscapeManagementPanelSupplier(presenter, tableResources);
+        adminConsolePanel.addToTabPanel(advancedTabPanel,
+                new DefaultRefreshableAdminConsolePanel<LandscapeManagementPanel>(landscapeManagementPanelSupplier),
+                stringMessages.landscape(), new LandscapeManagementPlace((String) null /* no place token */),
+                SecuredLandscapeTypes.LANDSCAPE.getPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
         /* COURSE CREATION */
         final HorizontalTabLayoutPanel courseCreationTabPanel = adminConsolePanel
                 .addVerticalTab(stringMessages.courseCreation(), COURSE_CREATION);

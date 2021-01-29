@@ -19,7 +19,6 @@ import com.sap.sse.common.Named;
  * @author Dmitry Bilyk
  *
  */
-
 public class SelectedElementsCountingButton<T extends Named> extends Button {
     /**
      * Constructs the button without a confirmation callback installed. The {@code clickHandler}

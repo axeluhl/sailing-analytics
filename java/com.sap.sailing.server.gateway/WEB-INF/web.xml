@@ -279,7 +279,7 @@
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+			<param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

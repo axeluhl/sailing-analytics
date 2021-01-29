@@ -43,7 +43,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractFilterablePlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.places.leaderboards.LeaderboardGroupsPlace;
 import com.sap.sailing.gwt.ui.client.Displayer;
@@ -59,6 +58,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -208,8 +208,6 @@ public class EventListComposite extends Composite {
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
-        //presenter.getEventsRefresher().reloadAndCallFill(null);
-        //eventRefresher.loadEvents();
         initWidget(panel);
         filterTextbox.setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
@@ -643,7 +641,6 @@ public class EventListComposite extends Composite {
 
                     @Override
                     public void onSuccess(EventDTO result) {
-                        //eventRefresher.loadEvents();
                         final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
                         int i = 0;
                         for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {

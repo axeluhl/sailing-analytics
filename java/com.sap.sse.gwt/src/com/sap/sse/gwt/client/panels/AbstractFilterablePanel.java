@@ -28,9 +28,9 @@ import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
- * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to the
- * constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the
- * {@link AbstractListFilter#applyFilter(String, List)} and then sorting the table again according the the sorting
+ * This Panel contains a text box and optionally a check box. Text entered into the text box filters the
+ * {@link CellTable} passed to the constructor by adjusting the cell table's {@link ListDataProvider}'s contents using
+ * the {@link AbstractListFilter#applyFilter(String, List)} and then sorting the table again according the the sorting
  * criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be known to an
  * instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be defined, which
  * gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or boatClass. The cell
@@ -38,13 +38,23 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
  * {@link #updateAll(Iterable)} which then runs the filter over the new selection.
  * <p>
  * 
+ * If a filter function has been {@link #setUpdatePermissionFilterForCheckbox(Function) set}, an additional checkbox
+ * will be displayed which toggles the application of the filter function. It is intended to be used as a
+ * permission-based filter, toggling between showing only objects the user can change (UPDATE permission) and all
+ * objects the user can READ. This assumption is currently encoded in the default
+ * {@link StringMessages#hideElementsWithoutUpdateRights() text label used for the checkbox}, but there are currently no
+ * constraints regarding the actual implementation of the filter function.
+ * <p>
+ * 
  * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free to
  * position the table wherever they want, not necessarily related to the text box provided by this panel in any specific
- * way.<p>
+ * way.
+ * <p>
  * 
  * It is recommended to use the {@link #getAllListDataProvider()} as the data provider for the table's selection model.
  * This way, when the filter reduces the elements displayed in the table the selection will still refer to all elements
  * and will not be modified solely by the act of filtering.
+ * <p>
  * 
  * Provides methods for filtering and selection of table items.
  * 
@@ -56,12 +66,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
-    protected final CheckBox showOnlyObjectsWithUpdatePermissionCheckbox;
+    protected final CheckBox showOnlyObjectsWithUpdatePermissionCheckBox;
     
     private final Set<Filter<T>> filters = new HashSet<>();
     private final CheckboxEnablableFilter<T> checkboxFilterForUpdatableObjectsOnly;
 
-    private boolean added = false;
+    /**
+     * Tells whether the {@link #showOnlyObjectsWithUpdatePermissionCheckBox} has already been added to this panel
+     */
+    private boolean showOnlyObjectsWithUpdatePermissionCheckBoxAdded = false;
     
     private List<String> select;
     private String selectExact;
@@ -69,7 +82,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     private boolean executeSelect;
 
     static class CheckboxEnablableFilter<T> implements Filter<T> {
-
         private final CheckBox checkbox;
         private Filter<T> filterToApply;
 
@@ -79,13 +91,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
         @Override
         public boolean matches(T object) {
+            final boolean result;
             if (filterToApply == null) {
-                return true;
+                result = true;
+            } else if (!this.checkbox.getValue()) {
+                result = true;
+            } else {
+                result = filterToApply.matches(object);
             }
-            if (!this.checkbox.getValue()) {
-                return true;
-            }
-            return filterToApply.matches(object);
+            return result;
         }
 
         @Override
@@ -96,7 +110,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         public void setFilterToApply(Filter<T> filterToApply) {
             this.filterToApply = filterToApply;
         }
-
     }
 
     protected final AbstractKeywordFilter<T> filterer = new AbstractKeywordFilter<T>() {
@@ -128,12 +141,16 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            This way, subclasses may choose to add other filter elements before the default text filter box.
      *            Filtering will still use the text box contents, even if the box is ultimately not shown; but under
      *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
-     * @param executeSelectionOnRefresh 
-     *            Used for table items selection by URL-parameters. If true, the table items will wait to be selected 
+     * @param executeSelectionOnRefresh
+     *            Used for table items selection by URL-parameters. If true, the table items will wait to be selected
      *            until the table list items have been refreshed.
+     * @param filterCheckboxLabel
+     *            The text to use for the label of the filter checkbox which will be displayed if a
+     *            {@link #setUpdatePermissionFilterForCheckbox(Function) filter is set}.
      */
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
-            boolean drawTextBox, final StringMessages stringMessages, boolean executeSelectOnRefresh) {
+            boolean drawTextBox, final StringMessages stringMessages, boolean executeSelectOnRefresh,
+            String filterCheckboxLabel) {
         this.executeSelectOnRefresh = executeSelectOnRefresh;
         filters.add(filterer);
         setSpacing(5);
@@ -141,15 +158,24 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
-        this.showOnlyObjectsWithUpdatePermissionCheckbox = new CheckBox(stringMessages.hideElementsWithoutUpdateRights());
-        showOnlyObjectsWithUpdatePermissionCheckbox.setValue(true);
-        checkboxFilterForUpdatableObjectsOnly = new CheckboxEnablableFilter<>(showOnlyObjectsWithUpdatePermissionCheckbox);
+        this.showOnlyObjectsWithUpdatePermissionCheckBox = new CheckBox(filterCheckboxLabel);
+        showOnlyObjectsWithUpdatePermissionCheckBox.setValue(true);
+        checkboxFilterForUpdatableObjectsOnly = new CheckboxEnablableFilter<>(showOnlyObjectsWithUpdatePermissionCheckBox);
         filters.add(checkboxFilterForUpdatableObjectsOnly);
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         if (drawTextBox) {
             addDefaultTextBox();
         }       
+    }
+
+    /**
+     * Like {@link #AbstractFilterablePanel(Iterable, ListDataProvider, boolean, StringMessages, boolean)}, but
+     * defaults the {@code filterCheckboxLabel} parameter to {@link StringMessages#hideElementsWithoutUpdateRights()}.
+     */
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
+            boolean drawTextBox, final StringMessages stringMessages, boolean executeSelectOnRefresh) {
+        this(all, filtered, drawTextBox, stringMessages, executeSelectOnRefresh, stringMessages.hideElementsWithoutUpdateRights());
     }
 
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
@@ -159,12 +185,17 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             final StringMessages stringMessages) {
-        this(all, filtered, stringMessages, true);
+        this(all, filtered, stringMessages, /* selectOnRefresh */ true);
     }
     
     public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             final StringMessages stringMessages, boolean selectOnRefresh) {
         this(all, filtered, /* show default filter text box */ true, stringMessages, selectOnRefresh);
+    }
+
+    public AbstractFilterablePanel(Iterable<T> all, ListDataProvider<T> filtered, StringMessages stringMessages,
+            String filterCheckboxLabel) {
+        this(all, filtered, /* draw text box */ true, stringMessages, /* selectOnRefresh */ true, filterCheckboxLabel);
     }
 
     private void setAll(Iterable<? extends T> all) {
@@ -473,11 +504,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         });
     }
 
-    public void addDefaultCheckBoxIfNecessary() {
-        if (!added) {
-            add(getCheckBox());
-            getCheckBox().addClickHandler(e -> filter());
-            added = true;
+    public void addShowOnlyObjectsWithUpdatePermissionCheckBoxIfNecessary() {
+        if (!showOnlyObjectsWithUpdatePermissionCheckBoxAdded) {
+            add(getShowOnlyObjectsWithUpdatePermissionCheckBox());
+            getShowOnlyObjectsWithUpdatePermissionCheckBox().addClickHandler(e -> filter());
+            showOnlyObjectsWithUpdatePermissionCheckBoxAdded = true;
         }
     }
 
@@ -491,12 +522,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         return textBox;
     }
 
-    public CheckBox getCheckBox() {
-        return showOnlyObjectsWithUpdatePermissionCheckbox;
+    public CheckBox getShowOnlyObjectsWithUpdatePermissionCheckBox() {
+        return showOnlyObjectsWithUpdatePermissionCheckBox;
     }
 
     /**
-     * Defines the filter function to apply when the {@link #showOnlyObjectsWithUpdatePermissionCheckbox} checkbox is
+     * Defines the filter function to apply when the {@link #showOnlyObjectsWithUpdatePermissionCheckBox} checkbox is
      * ticked.
      */
     public void setUpdatePermissionFilterForCheckbox(Function<T, Boolean> filterFunction) {
@@ -511,7 +542,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
                 return "Update Permission Filter";
             }
         });
-        addDefaultCheckBoxIfNecessary();
+        addShowOnlyObjectsWithUpdatePermissionCheckBoxIfNecessary();
     }
 
     public Iterable<T> getAll() {

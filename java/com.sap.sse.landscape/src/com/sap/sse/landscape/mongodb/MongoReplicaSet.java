@@ -15,7 +15,7 @@ import com.sap.sse.common.Named;
 public interface MongoReplicaSet extends Named, MongoEndpoint {
     static Logger logger = Logger.getLogger(MongoReplicaSet.class.getName());
     
-    Iterable<MongoProcess> getInstances();
+    Iterable<MongoProcessInReplicaSet> getInstances();
     
     /**
      * The {@code "mongodb://..."} URI that application use to connect to this replica set; not specific
@@ -59,7 +59,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
         return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPublicAddress(timeoutEmptyMeansForever));
     }
     
-    void addReplica(MongoProcess newReplica);
+    void addReplica(MongoProcessInReplicaSet newReplica);
     
-    void removeReplica(MongoProcess replicaToRemove);
+    void removeReplica(MongoProcessInReplicaSet replicaToRemove);
 }
