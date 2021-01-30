@@ -1,6 +1,7 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import com.chargebee.ApiResponse;
+import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.SubscriptionApiRequest;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
@@ -36,6 +37,11 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
                 handleError(e);
             }
         }
+    }
+    
+    @Override
+    public String getProviderName() {
+        return ChargebeeSubscriptionProvider.PROVIDER_NAME;
     }
 
     protected abstract ChargebeeInternalApiRequestWrapper createRequest();

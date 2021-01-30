@@ -1,5 +1,6 @@
 package com.sap.sse.security.subscription;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -31,27 +32,29 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
     private final ScheduledExecutorService executor;
 
     /**
-     * The latest time point for which a request was scheduled by this processor using the {@link #executor}.
-     * {@code null} means that no request has been scheduled yet. Reading and updating this field needs to
-     * be thread safe and must be done while holding this object's monitor ({@code synchronized}). See the
-     * {@link #getDelayToNextRequestStartTimePoint()} and {@link #getDelayWhenRateLimitWasExceeded()}
-     * methods which implement this for regular requests and for requests that have to be re-scheduled
-     * after the rate limit has been exceeded (despite our attempts done here to respect the rate limits).
+     * The latest time point for which a request was scheduled by this processor using the {@link #executor}, keyed by
+     * the provider name (see {@link SubscriptionApiService#getProviderName()}). {@code null} means that no request has
+     * been scheduled yet. Reading and updating this field needs to be thread safe and must be done while holding this
+     * object's monitor ({@code synchronized}). See the {@link #getDelayToNextRequestStartTimePoint(String)} and
+     * {@link #getDelayWhenRateLimitWasExceeded(String)} methods which implement this for regular requests and for requests
+     * that have to be re-scheduled after the rate limit has been exceeded (despite our attempts done here to respect
+     * the rate limits).
      */
-    private TimePoint startOfLatestRequest;
+    private ConcurrentHashMap<String, TimePoint> startOfLatestRequestByProviderName;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
         this.executor = executor;
+        this.startOfLatestRequestByProviderName = new ConcurrentHashMap<>();
     }
 
     @Override
     public void addRequest(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayToNextRequestStartTimePoint());
+        scheduleRequest(request, getDelayToNextRequestStartTimePoint(request.getProviderName()));
     }
 
     @Override
     public void rescheduleRequestAfterRateLimitExceeded(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayWhenRateLimitWasExceeded());
+        scheduleRequest(request, getDelayWhenRateLimitWasExceeded(request.getProviderName()));
     }
     
     /**
@@ -71,25 +74,27 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
         }, delay.asMillis(), TimeUnit.MILLISECONDS);
     }
     
-    private Duration getDelayWhenRateLimitWasExceeded() {
+    private Duration getDelayWhenRateLimitWasExceeded(String providerName) {
         final TimePoint now = TimePoint.now();
         synchronized (this) {
-            startOfLatestRequest = now.plus(LIMIT_REACHED_RESUME_DELAY);
+            startOfLatestRequestByProviderName.put(providerName, now.plus(LIMIT_REACHED_RESUME_DELAY));
         }
         return LIMIT_REACHED_RESUME_DELAY;
     }
 
-    private Duration getDelayToNextRequestStartTimePoint() {
+    private Duration getDelayToNextRequestStartTimePoint(String providerName) {
         final TimePoint now = TimePoint.now();
+        TimePoint startOfLatestRequest;
         synchronized (this) {
-            if (startOfLatestRequest == null) {
+            if (!startOfLatestRequestByProviderName.containsKey(providerName)) {
                 startOfLatestRequest = now;
             } else {
-                startOfLatestRequest = startOfLatestRequest.plus(TIME_BETWEEN_API_REQUEST_START);
+                startOfLatestRequest = startOfLatestRequestByProviderName.get(providerName).plus(TIME_BETWEEN_API_REQUEST_START);
                 if (startOfLatestRequest.before(now)) {
                     startOfLatestRequest = now;
                 }
             }
+            startOfLatestRequestByProviderName.put(providerName, startOfLatestRequest);
         }
         return now.until(startOfLatestRequest);
     }
