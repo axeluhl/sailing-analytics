@@ -10,6 +10,7 @@ import com.chargebee.filters.enums.SortOrder;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
@@ -35,8 +36,8 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
     private int resultSize;
 
     public ChargebeeSubscriptionListRequest(User user, String offset, OnResultListener listener,
-            SubscriptionApiRequestProcessor requestProcessor) {
-        super(requestProcessor);
+            SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
+        super(requestProcessor, chargebeeApiServiceParams);
         this.user = user;
         this.offset = offset;
         this.listener = listener;
@@ -86,7 +87,7 @@ public class ChargebeeSubscriptionListRequest extends ChargebeeApiRequest
         for (ListResult.Entry entry : result) {
             Subscription subscription = entry.subscription();
             if (!subscription.deleted()) {
-                new ChargebeeFetchSubscriptionInformationTask(user, subscription, this, getRequestProcessor()).run();
+                new ChargebeeFetchSubscriptionInformationTask(user, subscription, this, getRequestProcessor(), getSubscriptionApiBaseService()).run();
             } else {
                 subscriptions.add(new ChargebeeApiSubscriptionData(subscription, null, null));
             }

@@ -10,8 +10,5 @@ public interface SubscriptionApiRequest {
      */
     void run();
     
-    /**
-     * The subscription provider name, as in {@link SubscriptionApiService#getProviderName()}
-     */
-    String getProviderName();
+    SubscriptionApiBaseService getSubscriptionApiBaseService();
 }

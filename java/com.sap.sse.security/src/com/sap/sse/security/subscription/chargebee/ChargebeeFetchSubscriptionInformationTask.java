@@ -6,6 +6,7 @@ import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Transaction;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
@@ -30,21 +31,22 @@ public class ChargebeeFetchSubscriptionInformationTask
     private boolean hasTransaction;
     private Invoice invoice;
     private Transaction transaction;
+    private final SubscriptionApiBaseService chargebeeApiServiceParams;
 
     public ChargebeeFetchSubscriptionInformationTask(User user, Subscription subscription, OnResultListener listener,
-            SubscriptionApiRequestProcessor requestProcessor) {
+            SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
         this.user = user;
         this.subscription = subscription;
         this.listener = listener;
         this.requestProcessor = requestProcessor;
+        this.chargebeeApiServiceParams = chargebeeApiServiceParams;
     }
 
     public void run() {
         logger.info(() -> "Fetch Chargebee subscription information, user: " + user.getName() + ", subscription "
                 + subscription.id());
-
-        requestProcessor.addRequest(new ChargebeeInvoiceRequest(user, subscription.id(), this, requestProcessor));
-        requestProcessor.addRequest(new ChargebeeTransactionRequest(user, subscription.id(), this, requestProcessor));
+        requestProcessor.addRequest(new ChargebeeInvoiceRequest(user, subscription.id(), this, requestProcessor, chargebeeApiServiceParams));
+        requestProcessor.addRequest(new ChargebeeTransactionRequest(user, subscription.id(), this, requestProcessor, chargebeeApiServiceParams));
     }
 
     @Override

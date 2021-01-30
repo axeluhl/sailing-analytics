@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import com.chargebee.ListResult;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Subscription.SubscriptionListRequest;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
@@ -22,8 +23,8 @@ public class ChargebeeSubscriptionRequest extends ChargebeeApiRequest {
     private final OnResultListener listener;
 
     public ChargebeeSubscriptionRequest(String subscriptionId, OnResultListener listener,
-            SubscriptionApiRequestProcessor requestProcessor) {
-        super(requestProcessor);
+            SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
+        super(requestProcessor, chargebeeApiServiceParams);
         this.subscriptionId = subscriptionId;
         this.listener = listener;
     }

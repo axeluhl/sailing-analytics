@@ -17,17 +17,6 @@ import com.sap.sse.common.TimePoint;
  */
 public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiRequestProcessor {
     private static final Logger logger = Logger.getLogger(SubscriptionApiRequestProcessorImpl.class.getName());
-    /**
-     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
-     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
-     * ~400ms, and a next request should be made after 400ms from previous request.
-     */
-    private static final Duration TIME_BETWEEN_API_REQUEST_START = Duration.ONE_MILLISECOND.times(400);
-
-    /**
-     * The delay after which to re-schedule a request that failed for having exceeded the service's rate limit
-     */
-    private static final Duration LIMIT_REACHED_RESUME_DELAY = Duration.ONE_MILLISECOND.times(65000);
 
     private final ScheduledExecutorService executor;
 
@@ -49,12 +38,12 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
 
     @Override
     public void addRequest(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayToNextRequestStartTimePoint(request.getProviderName()));
+        scheduleRequest(request, getDelayToNextRequestStartTimePoint(request.getSubscriptionApiBaseService()));
     }
 
     @Override
     public void rescheduleRequestAfterRateLimitExceeded(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayWhenRateLimitWasExceeded(request.getProviderName()));
+        scheduleRequest(request, getDelayWhenRateLimitWasExceeded(request.getSubscriptionApiBaseService()));
     }
     
     /**
@@ -74,27 +63,29 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
         }, delay.asMillis(), TimeUnit.MILLISECONDS);
     }
     
-    private Duration getDelayWhenRateLimitWasExceeded(String providerName) {
+    private Duration getDelayWhenRateLimitWasExceeded(SubscriptionApiBaseService subscriptionApiBaseService) {
         final TimePoint now = TimePoint.now();
         synchronized (this) {
-            startOfLatestRequestByProviderName.put(providerName, now.plus(LIMIT_REACHED_RESUME_DELAY));
+            startOfLatestRequestByProviderName.put(subscriptionApiBaseService.getProviderName(),
+                    now.plus(subscriptionApiBaseService.getLimitReachedResumeDelay()));
         }
-        return LIMIT_REACHED_RESUME_DELAY;
+        return subscriptionApiBaseService.getLimitReachedResumeDelay();
     }
 
-    private Duration getDelayToNextRequestStartTimePoint(String providerName) {
+    private Duration getDelayToNextRequestStartTimePoint(SubscriptionApiBaseService subscriptionApiBaseService) {
         final TimePoint now = TimePoint.now();
         TimePoint startOfLatestRequest;
         synchronized (this) {
-            if (!startOfLatestRequestByProviderName.containsKey(providerName)) {
+            if (!startOfLatestRequestByProviderName.containsKey(subscriptionApiBaseService.getProviderName())) {
                 startOfLatestRequest = now;
             } else {
-                startOfLatestRequest = startOfLatestRequestByProviderName.get(providerName).plus(TIME_BETWEEN_API_REQUEST_START);
+                startOfLatestRequest = startOfLatestRequestByProviderName
+                        .get(subscriptionApiBaseService.getProviderName()).plus(subscriptionApiBaseService.getTimeBetweenApiRequestStart());
                 if (startOfLatestRequest.before(now)) {
                     startOfLatestRequest = now;
                 }
             }
-            startOfLatestRequestByProviderName.put(providerName, startOfLatestRequest);
+            startOfLatestRequestByProviderName.put(subscriptionApiBaseService.getProviderName(), startOfLatestRequest);
         }
         return now.until(startOfLatestRequest);
     }

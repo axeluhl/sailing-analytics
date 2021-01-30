@@ -8,6 +8,7 @@ import com.chargebee.filters.enums.SortOrder;
 import com.chargebee.models.Transaction;
 import com.chargebee.models.Transaction.TransactionListRequest;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
@@ -25,8 +26,8 @@ public class ChargebeeTransactionRequest extends ChargebeeApiRequest {
     private final OnResultListener listener;
 
     public ChargebeeTransactionRequest(User user, String subscriptionId, OnResultListener listener,
-            SubscriptionApiRequestProcessor requestProcessor) {
-        super(requestProcessor);
+            SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
+        super(requestProcessor, chargebeeApiServiceParams);
         this.user = user;
         this.subscriptionId = subscriptionId;
         this.listener = listener;
