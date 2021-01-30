@@ -187,6 +187,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
      */
     private void internalAddKeyPair(SSHKeyPair keyPair) {
         sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
+        // TODO update the time stamp read by clients interested in the latest set of SSH keys of those users with LANDSCAPE:MANAGE:AWS permission
     }
     
     

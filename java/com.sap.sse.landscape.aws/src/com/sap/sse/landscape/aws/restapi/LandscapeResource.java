@@ -22,6 +22,12 @@ import com.sap.sse.shared.json.JsonSerializer;
 public class LandscapeResource extends StreamingOutputUtil {
     private static final JsonSerializer<SSHKeyPair> sshKeyPairJsonSerializer = new SSHKeyPairJsonSerializer();
     
+    /**
+     * Obtains the SSH key pairs whose {@link SSHKeyPair#getCreatorName() creator name} equals that of any of the
+     * {@code usernames} passed in any of the {@code username[]} query parameters. The requesting user must have the
+     * {@link DefaultActions#READ} permission for the respective SSH keys, otherwise the key won't be added to the
+     * response.
+     */
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("/get_ssh_keys_owned_by_user")
@@ -36,4 +42,7 @@ public class LandscapeResource extends StreamingOutputUtil {
         }
         return Response.ok(streamingOutput(sshKeysAsJsonArray)).build();
     }
+    
+    // TODO add a method that publishes the last time point the set of SSH keys (ideally constrained to the set of users with LANDSCAPE:MANAGE:AWS permission) changed, or users gained/lost the LANDSCAPE:MANAGE:AWS permission
+    // TODO this service should require a permission that we can attach to the ssh-key-reader user's set of permissions
 }
