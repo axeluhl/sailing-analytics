@@ -2559,10 +2559,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalUpdateSubscription(String username, Subscription newSubscription)
             throws UserManagementException {
-        User user = getUserByName(username);
+        final User user = getUserByName(username);
         if (user != null) {
-            String newSubscriptionPlanId = newSubscription.getPlanId();
-            Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            final String newSubscriptionPlanId = newSubscription.getPlanId();
+            final Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
             if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
                 logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
                 logger.info(() -> "Current user plan subscription: "
@@ -2572,7 +2572,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
                     updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
                 }
-                Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                final Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
                 if (newSubscriptions != null) {
                     user.setSubscriptions(newSubscriptions);
                 }
