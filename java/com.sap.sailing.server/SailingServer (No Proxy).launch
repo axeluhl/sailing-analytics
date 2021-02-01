@@ -97,7 +97,6 @@
         <setEntry value="org.eclipse.equinox.event@default:default"/>
         <setEntry value="org.eclipse.equinox.launcher@default:default"/>
         <setEntry value="org.eclipse.equinox.simpleconfigurator@2:true"/>
-        <setEntry value="org.eclipse.equinox.util@default:default"/>
         <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
         <setEntry value="org.eclipse.jetty.annotations@default:default"/>
         <setEntry value="org.eclipse.jetty.apache-jsp@default:default"/>
