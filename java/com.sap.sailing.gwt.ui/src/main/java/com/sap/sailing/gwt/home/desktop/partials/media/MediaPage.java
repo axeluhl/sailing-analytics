@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -14,13 +12,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.MediaUploadPopup;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -67,9 +65,8 @@ public class MediaPage extends Composite {
     private boolean manageVideos;
     private boolean managePhotos;
     private final SimplePanel contentPanel;
-    private ManagePhotosDialog managePhotosDialog;
+    private final FlowPanel popupHolder;
     private VideoWithLowerThird videoDisplayUi;
-    private Collection<SailingImageDTO> photos;
 
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
@@ -104,10 +101,14 @@ public class MediaPage extends Composite {
     }
 
     @UiHandler("mediaAddButton")
-    public void handlePhotoAddButtonClick(ClickEvent e) {
-        managePhotosDialog = new ManagePhotosDialog(i18n, res, local_res);
-        RootPanel.get().add(managePhotosDialog);
-        managePhotosDialog.show(photos);
+    public void handleMediaAddButtonClick(ClickEvent e) {
+        popupHolder.clear();
+        //ManageMediaDialog manageMediaDialog = new ManageMediaDialog(i18n, res, local_res);
+        MediaUploadPopup popup = new MediaUploadPopup();
+        //popupHolder.add(manageMediaDialog);
+        popupHolder.add(popup);
+        popup.center();
+        popup.openFileUpload();
     }
     
     public MediaPage(IsWidget initialView) {
@@ -115,12 +116,12 @@ public class MediaPage extends Composite {
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
+        popupHolder = new FlowPanel();
     }
 
     public void setMedia(final MediaDTO media) {
         Widget mediaUi = uiBinder.createAndBindUi(this);
         int photosCount = media.getPhotos().size();
-        photos = media.getPhotos();
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;

@@ -1,3 +1,4 @@
+@external table, Caption, chartCloseButton, gwt-HTML;
 .media {
   font-size: 15px;
   font-size: 1rem;
@@ -134,4 +135,41 @@
     background-image: resourceUrl("addMedia");
     top: -1px;
     left: 3px;
+}
+
+.mediaUploadPopup {
+    position: fixed!important;
+    z-index: 1000;
+    width: auto;
+    height: auto;
+    background-color: #ffffff;
+}
+
+.mediaUploadPopup table {
+    width: auto;
+}
+
+.mediaUploadPopup .Caption {
+    background-color: #333;
+    font-size: 1rem;
+    height: 3.333333333333333em;
+    border-bottom: .2em solid #efaa00;
+}
+
+.mediaUploadPopup .Caption .gwt-HTML {
+    font-size: .933333333333333em;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 3.357142857142857em;
+    margin: 0;
+    text-align: center;
+}
+
+.mediaUploadPopup .chartCloseButton {
+    height: 30px;
+    margin: 10px;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
