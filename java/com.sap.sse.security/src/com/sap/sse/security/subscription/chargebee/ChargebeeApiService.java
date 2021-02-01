@@ -25,8 +25,6 @@ public class ChargebeeApiService implements SubscriptionApiService {
      */
     private static final Duration LIMIT_REACHED_RESUME_DELAY = Duration.ONE_MILLISECOND.times(65000);
 
-
-
     public ChargebeeApiService(ChargebeeConfiguration configuration, SubscriptionApiRequestProcessor requestProcessor) {
         if (configuration != null) {
             Environment.configure(configuration.getSite(), configuration.getApiKey());
