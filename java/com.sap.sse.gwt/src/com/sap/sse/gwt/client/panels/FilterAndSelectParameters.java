@@ -5,6 +5,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+/**
+ * FilterAndSelectParameters defines the url-parameters that can be used for filtering in tables and for selecting table items.<br/>
+ * All parameters can be used combined by using the ampersand. Use url-Encoding for combining parameters.
+ * Value characters have to be url-encoded, so the url for filtering for 'Worlds 2017' looks like this:<br/>
+ * https://dev.sapsailing.com/gwt/AdminConsole.html#EventsPlace:filter=Worlds%202017<br/><br/>
+ * 
+ * See <a href="https://www.urlencoder.org/">Url Encoder</a> for a full list of url-encoded characters (scroll down to the table "reserved characters after percent-encoding").<br/><br/>
+ * 
+ * The filter-parameter and the select-parameter both find always the same list of lineItems in the table.<br/>
+ * So when used both are used with the same value like this:<br/>
+ * https://dev.sapsailing.com/gwt/AdminConsole.html#EventsPlace:filter=World%26select=World<br/>
+ * Then all filtered table items will also be selected. Instead of using both parameters with the same value, you can instead use filterAndSelect.
+ * It will be the same outcome.<br/><br/>
+ * 
+ * If the filter and the filterAndSelect-parameters are combined, values of both will be set into the search-box above the table 
+ * and used for filtering.<br/><br/>
+ * 
+ * The selectExact-parameter works slightly different from the select-parameter.<br/>
+ * Less line items will be selected when it is used because it matches with the whole column value, not just parts of it (like filter and select-parameters do).<br/>
+ * When using different select-parameters like select and selectExact as url-parameters, 
+ * the selection result will be disjoint, which means that all given select-values must match a table-line item to be selected.<br/><br/>
+ * 
+ * When the table is a singleSelection-table, the first selectExact-match will be selected. When there is no selectExact-value given, 
+ * the first select or filterAndSelect-match will be selected if there is one.
+ * 
+ * @author sdohren
+ *
+ */
 public class FilterAndSelectParameters implements Serializable {
 
     private static final long serialVersionUID = 8498346319001912273L;
@@ -27,6 +55,10 @@ public class FilterAndSelectParameters implements Serializable {
         return select;
     }  
 
+    /**
+     * When the table is a singleSelection-table, the first selectExact-Match will be selected. When theres no selectExact-value given, the first select/filterAndSelect match will be selected if there is one
+     * @return selectExact parameter
+     */
     public String getSelectExact() {
         return selectExact;
     }

@@ -75,9 +75,7 @@ public abstract class AbstractFilterablePlace extends AbstractAdminConsolePlace 
 
         @Override
         public P getPlace(String token) {
-            P place = getPlaceFactory().apply(token);   
-            place.extractUrlParams(token);
-            return place;
+            return getPlaceFactory().apply(token);
         }
 
         /**

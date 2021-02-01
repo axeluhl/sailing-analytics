@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.sap.sse.gwt.client.AbstractBasePlace;
 
-public abstract class AbstractAdminConsolePlace extends AbstractBasePlace implements AdminConsolePlace  {
+public abstract class AbstractAdminConsolePlace extends AbstractBasePlace implements AdminConsolePlace {
     protected AbstractAdminConsolePlace(String placeParamsFromUrlFragment) {
         super(placeParamsFromUrlFragment);
     }
