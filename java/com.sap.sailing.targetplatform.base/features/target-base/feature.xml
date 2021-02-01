@@ -236,6 +236,36 @@
          version="9.4.35.v20201120"
          unpack="false"/>
 
+<!-- 9.4.36 -->
+   <plugin
+         id="org.eclipse.jetty.apache-jsp"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.apache-jsp.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.jsp"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.osgi.boot.jsp.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+<!-- 9.4.36 ende -->
+
    <plugin
          id="org.eclipse.jdt.core.compiler.batch"
          download-size="0"
