@@ -4,7 +4,5 @@ import com.sap.sailing.gwt.ui.client.subscription.SubscriptionWriteServiceAsync;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 
-public interface ChargebeeSubscriptionWriteServiceAsync
-        extends SubscriptionWriteServiceAsync<PrepareCheckoutDTO, FinishCheckoutDTO> {
-
+public interface ChargebeeSubscriptionWriteServiceAsync extends ChargebeeSubscriptionServiceAsync, SubscriptionWriteServiceAsync<PrepareCheckoutDTO, FinishCheckoutDTO> {
 }
