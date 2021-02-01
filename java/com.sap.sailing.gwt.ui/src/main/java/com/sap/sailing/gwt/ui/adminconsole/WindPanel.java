@@ -220,7 +220,6 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
                 }
             });
         });
-
         timeColumn = new TextColumn<WindDTO>() {
             @Override
             public String getValue(WindDTO object) {
@@ -265,7 +264,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         rawWindFixesTable.addColumnSortHandler(columnSortHandler);
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
-
+        // Expedition import
         expeditionImportPanel = createExpeditionWindImportPanel();
         gribImportPanel = createGribWindImportPanel();
         nmeaImportPanel = createNmeaWindImportPanel();
@@ -276,14 +275,12 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         mainPanel.add(nmeaImportPanel);
         mainPanel.add(bravoImportPanel);
         mainPanel.add(igtimiImportPanel);
-
+        // Expedition all in one import
         final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(presenter);
         expeditionAllInOneImporterPanel = expeditionAllInOneRootAndImportPanel.getA();
         mainPanel.add(expeditionAllInOneImporterPanel);
         containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB().getRegattasDisplayer());
-
         updateVisibilityStateForPanels();
-
         this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -601,7 +598,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
 
             @Override
             public void ok(final WindDTO result) {
-                        addWindFix(result, race);
+                addWindFix(result, race);
             }
         });
         windSettingDialog.show();
@@ -623,12 +620,10 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     }
     
     private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-
         @Override
         public void fill(Iterable<RegattaDTO> result) {
             fillRegattas(result);
         }
-        
     };
     
     public Displayer<RegattaDTO> getRegattasDisplayer() {
@@ -652,7 +647,6 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
                     addWindFixButton.setVisible(userHasPermission);
                     raceIsKnownToStartUpwindBox.setEnabled(userHasPermission);
                     windSourcesToExcludeSelectorPanel.setEnabled(userHasPermission);
-
                     // load the raw wind fixes
                     sailingServiceWrite.getRawWindFixes(raceIdentifier, null, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
@@ -671,7 +665,6 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
                             errorReporter.reportError(stringMessages.errorReadingWindFixes(caught.getMessage()));
                         }
                     });
-
                 } else {
                     // no wind sources known for untracked race
                     clearWindSources();
@@ -797,17 +790,14 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private void updateWindDisplay() {
         final RegattaAndRaceIdentifier selectedRace = getSelectedRace();
         final RaceDTO race = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
-
         if (selectedRace != null && race != null && race.trackedRace != null) {
             windCaptionPanel.setVisible(true);
             windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + race.getName());
-
             showWind(selectedRace, race);
             showWindFixesList(selectedRace, race);
         } else {
             windCaptionPanel.setVisible(false);
             windCaptionPanel.setCaptionText(stringMessages.wind());
-
             clearWindSources();
             clearWindFixes();
         }

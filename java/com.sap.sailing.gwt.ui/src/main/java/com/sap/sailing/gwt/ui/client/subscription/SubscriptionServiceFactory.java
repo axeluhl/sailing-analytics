@@ -87,6 +87,7 @@ public class SubscriptionServiceFactory {
     }
 
     private void registerProviders() {
+        // TODO turn this into an OSGi registry pattern; this would then allow us to add other providers also in other bundles
         registerSubscriptionProvider(new ChargebeeSubscriptionClientProvider());
     }
 

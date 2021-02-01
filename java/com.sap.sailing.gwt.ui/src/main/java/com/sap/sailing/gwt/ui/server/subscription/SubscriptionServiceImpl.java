@@ -136,10 +136,16 @@ public abstract class SubscriptionServiceImpl extends RemoteServiceServlet {
     }
 
     protected SubscriptionApiService getApiService() {
-        ServiceReference<SubscriptionApiService>[] serviceReferences = subscriptionApiServiceTracker.getServiceReferences();
+        ServiceReference<SubscriptionApiService>[] serviceReferences = subscriptionApiServiceTracker
+                .getServiceReferences();
         for (final ServiceReference<SubscriptionApiService> serviceReference : serviceReferences) {
-            if (Util.equalsWithNull(serviceReference.getProperty(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY), getProviderName())) {
-                return context.getService(serviceReference);
+            if (Util.equalsWithNull(
+                    serviceReference.getProperty(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY),
+                    getProviderName())) {
+                SubscriptionApiService service = context.getService(serviceReference);
+                if (service.isActive()) {
+                    return service;
+                }
             }
         }
         return null;
