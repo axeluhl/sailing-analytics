@@ -576,7 +576,7 @@ public class UserStoreImpl implements UserStore {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
                 final Set<User> usersHavingRoleWithRoleDefiniton = roleDefinitionsToUsers.get(roleDefinition);
-                if(usersHavingRoleWithRoleDefiniton != null) {
+                if (usersHavingRoleWithRoleDefiniton != null) {
                     for (User user : usersHavingRoleWithRoleDefiniton) {
                         for (Role role : user.getRoles()) {
                             if (role.getRoleDefinition().equals(roleDefinition)) {
@@ -588,7 +588,7 @@ public class UserStoreImpl implements UserStore {
                     roleDefinitionsToUsers.remove(roleDefinition);
                 }
                 final Set<UserGroup> userGroupsHavingRoleWithRoleDefinition = roleDefinitionsToUserGroups.get(roleDefinition);
-                if(userGroupsHavingRoleWithRoleDefinition != null) {
+                if (userGroupsHavingRoleWithRoleDefinition != null) {
                     for (UserGroup userGroup : userGroupsHavingRoleWithRoleDefinition) {
                         if (userGroup.getRoleAssociation(roleDefinition)) {
                             userGroup.remove(roleDefinition);

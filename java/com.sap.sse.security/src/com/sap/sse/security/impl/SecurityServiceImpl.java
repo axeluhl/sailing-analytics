@@ -247,7 +247,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private final AclResolver<AccessControlList, Ownership> aclResolver;
     
-    private final ConcurrentHashMap<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionChangeListeners;
+    private final PermissionChangeListeners permissionChangeListeners;
     
     static {
         shiroConfiguration = new Ini();
@@ -296,7 +296,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Initializing Security Service with user store " + userStore);
         this.currentlyFillingFromInitialLoad = false;
         this.currentlyFillingFromInitialLoad = false;
-        this.permissionChangeListeners = new ConcurrentHashMap<>();
+        this.permissionChangeListeners = new PermissionChangeListeners();
         operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
@@ -568,6 +568,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
         return null;
     }
@@ -593,7 +594,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 actionsToSet = entry.getValue();
             }
-            
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
             apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
@@ -603,6 +603,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
         return null;
     }
@@ -622,8 +623,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
-        accessControlStore.addAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
     }
 
@@ -631,13 +633,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
+    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String permission) {
         final AccessControlList result;
-        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
+        if (getAccessControlList(idOfAccessControlledObject) != null) {
             final UUID groupId = group == null ? null : group.getId();
-            apply(new AclRemovePermissionOperation(idOfAccessControlledObjectAsString, groupId, permission));
-            result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
+            apply(new AclRemovePermissionOperation(idOfAccessControlledObject, groupId, permission));
+            result = accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
         } else {
             result = null;
         }
@@ -645,57 +647,61 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
-        accessControlStore.removeAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+    public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.removeAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
     }
 
     @Override
-    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
-        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            apply(new DeleteAclOperation(idOfAccessControlledObjectAsString));
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        if (getAccessControlList(idOfAccessControlledObject) != null) {
+            apply(new DeleteAclOperation(idOfAccessControlledObject));
         }
     }
 
     @Override
-    public Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObjectAsString);
+    public Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
         return null;
     }
 
     @Override
-    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+    public Ownership setOwnership(QualifiedObjectIdentifier objectId, User userOwner,
             UserGroup tenantOwner) {
-        return setOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+        return setOwnership(objectId, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+    public Ownership setOwnership(QualifiedObjectIdentifier objectId, User userOwner,
             UserGroup tenantOwner, String displayNameOfOwnedObject) {
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
+        return apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
     
     @Override
-    public Ownership internalSetOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        return accessControlStore.setOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+    public Ownership internalSetOwnership(QualifiedObjectIdentifier objectId, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        permissionChangeListeners.ownershipChanged(objectId);
+        return accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
     }
 
     @Override
-    public void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        if (getOwnership(idOfOwnedObjectAsString) != null) {
-            apply(new DeleteOwnershipOperation(idOfOwnedObjectAsString));
+    public void deleteOwnership(QualifiedObjectIdentifier objectId) {
+        if (getOwnership(objectId) != null) {
+            apply(new DeleteOwnershipOperation(objectId));
         }
     }
 
     @Override
-    public Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        accessControlStore.removeOwnership(idOfOwnedObjectAsString);
+    public Void internalDeleteOwnership(QualifiedObjectIdentifier objectId) {
+        permissionChangeListeners.ownershipChanged(objectId);
+        accessControlStore.removeOwnership(objectId);
         return null;
     }
 
@@ -754,7 +760,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddUserToUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.add(getUserByName(username));
+        final User user = getUserByName(username);
+        userGroup.add(user);
+        permissionChangeListeners.userAddedToOrRemovedFromGroup(user, userGroup);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -762,7 +770,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.remove(getUserByName(username));
+        final User user = getUserByName(username);
+        permissionChangeListeners.userAddedToOrRemovedFromGroup(user, userGroup);
+        userGroup.remove(user);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -787,7 +797,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
             throws UserGroupManagementException {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.put(getRoleDefinition(roleDefinitionId), forAll);
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        permissionChangeListeners.roleAddedToOrRemovedFromGroup(userGroup, roleDefinition);
+        userGroup.put(roleDefinition, forAll);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -802,7 +814,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
             throws UserGroupManagementException {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.remove(getRoleDefinition(roleDefinitionId));
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        permissionChangeListeners.roleAddedToOrRemovedFromGroup(userGroup, roleDefinition);
+        userGroup.remove(roleDefinition);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -819,6 +833,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userGroup == null) {
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
+            permissionChangeListeners.userGroupDeleted(userGroup);
             accessControlStore.removeAllOwnershipsFor(userGroup);
             store.deleteUserGroup(userGroup);
         }
@@ -1171,8 +1186,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalDeleteRoleDefinition(UUID roleId) {
-        final RoleDefinition role = store.getRoleDefinition(roleId);
-        store.removeRoleDefinition(role);
+        final RoleDefinition roleDefinition = store.getRoleDefinition(roleId);
+        permissionChangeListeners.roleDefinitionRemoved(roleDefinition);
+        store.removeRoleDefinition(roleDefinition);
         return null;
     }
 
@@ -1186,6 +1202,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final RoleDefinition role = store.getRoleDefinition(roleWithNewProperties.getId());
         role.setName(roleWithNewProperties.getName());
         store.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
+        permissionChangeListeners.permissionAddedToOrRemovedFromRoleDefinition(role, role.getPermissions(), roleWithNewProperties.getPermissions());
         role.setPermissions(roleWithNewProperties.getPermissions());
         store.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
         return null;
@@ -1223,8 +1240,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        store.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        final Role role = new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+        permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
+        store.addRoleForUser(username, role);
         return null;
     }
 
@@ -1244,8 +1263,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        final Role role = new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+        permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
+        store.removeRoleFromUser(username, role);
         return null;
     }
 
@@ -1256,6 +1277,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
+        permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToRemove);
         store.removePermissionFromUser(username, permissionToRemove);
         return null;
     }
@@ -1267,6 +1289,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
+        permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToAdd);
         store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
@@ -1284,6 +1307,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalDeleteUser(String username) throws UserManagementException {
         User userToDelete = store.getUserByName(username);
         if (userToDelete != null) {
+            permissionChangeListeners.userDeleted(userToDelete);
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
             store.deleteUser(username);
@@ -2866,27 +2890,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void addPermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
-        for (final Set<String> partParts : permission.getParts()) {
-            if (partParts.contains(WildcardPermission.WILDCARD_TOKEN)) {
-                throw new IllegalArgumentException("PermissionChangeListener can not be registered for wildcard permission "+permission+
-                        ". Use specific type(s), operation(s), and object ID(s).");
-            }
-        }
-        synchronized (permissionChangeListeners) { // sychronization required despite ConcurrentHashMap; see removePermissionChangeListener
-            permissionChangeListeners.computeIfAbsent(permission, p->new ConcurrentHashMap<>()).put(listener, true);
-        }
+        permissionChangeListeners.addPermissionChangeListener(permission, listener);
     }
 
     @Override
     public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
-        synchronized (permissionChangeListeners) { // required despite ConcurrentHashMap as we're first reading, then writing conditionally
-            final ConcurrentHashMap<PermissionChangeListener, Boolean> listenersForPermission = permissionChangeListeners.get(permission);
-            if (listenersForPermission != null) {
-                listenersForPermission.remove(listener);
-                if (listenersForPermission.isEmpty()) {
-                    permissionChangeListeners.remove(permission);
-                }
-            }
-        }
+        permissionChangeListeners.removePermissionChangeListener(permission, listener);
     }
 }
