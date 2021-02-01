@@ -118,7 +118,6 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
             String subscriptionId) {
         CompletableFuture<SubscriptionCancelResult> result = new CompletableFuture<SubscriptionCancelResult>();
         apiService.cancelSubscription(subscriptionId, new SubscriptionApiService.OnCancelSubscriptionResultListener() {
-
             @Override
             public void onCancelResult(SubscriptionCancelResult cancelResult) {
                 result.complete(cancelResult);
