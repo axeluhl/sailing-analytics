@@ -10,7 +10,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -56,59 +56,54 @@ public class MediaPage extends Composite {
     FlowPanel photoListOuterBoxUi;
     
     @UiField
-    Anchor videoSettingsAnchor;
+    Button videoSettingsButton;
     @UiField
-    Anchor videoAddAnchor;
+    Button photoSettingsButton;
     @UiField
-    Anchor photoSettingsAnchor;
-    @UiField
-    Anchor photoAddAnchor;
+    Button mediaAddButton;
     @UiField
     StringMessages i18n;
     
     private boolean manageVideos;
+    private boolean managePhotos;
     private final SimplePanel contentPanel;
     private ManagePhotosDialog managePhotosDialog;
     private VideoWithLowerThird videoDisplayUi;
     private Collection<SailingImageDTO> photos;
 
-    @UiHandler("videoSettingsAnchor")
+    @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
         manageVideos = !manageVideos;
         if (manageVideos) {
-            videoSettingsAnchor.addStyleName(local_res.css().active());
-            for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
-                if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
-                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
-                    thumb.setManageable(manageVideos);
-                }
-            }
+            videoSettingsButton.addStyleName(local_res.css().active());
         } else {
-            videoSettingsAnchor.removeStyleName(local_res.css().active());
-            for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
-                if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
-                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
-                    thumb.setManageable(manageVideos);
-                }
+            videoSettingsButton.removeStyleName(local_res.css().active());
+        }
+        for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
+            if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
+                VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
+                thumb.setManageable(manageVideos);
             }
         }
     }
 
-    @UiHandler("videoAddAnchor")
-    public void handleVideoAddButtonClick(ClickEvent e) {
-    }
-
-    @UiHandler("photoSettingsAnchor")
+    @UiHandler("photoSettingsButton")
     public void handlePhotoSettingsButtonClick(ClickEvent e) {
+        managePhotos = !managePhotos;
+        if (managePhotos) {
+            photoSettingsButton.addStyleName(local_res.css().active());
+        } else {
+            photoSettingsButton.removeStyleName(local_res.css().active());
+        }
         for (int i = 0; i < photoListOuterBoxUi.getWidgetCount(); i++) {
             if (photoListOuterBoxUi.getWidget(i) instanceof GalleryImageHolder) {
                 GalleryImageHolder gih = (GalleryImageHolder) photoListOuterBoxUi.getWidget(i);
-                gih.setVisible(!gih.isVisible());
+                gih.setManageable(managePhotos);
             }
         }
     }
 
-    @UiHandler("photoAddAnchor")
+    @UiHandler("mediaAddButton")
     public void handlePhotoAddButtonClick(ClickEvent e) {
         managePhotosDialog = new ManagePhotosDialog(i18n, res, local_res);
         RootPanel.get().add(managePhotosDialog);
@@ -165,7 +160,9 @@ public class MediaPage extends Composite {
                     gih.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            new SailingFullscreenViewer().show(holder, media.getPhotos());
+                            if (!managePhotos) {
+                                new SailingFullscreenViewer().show(holder, media.getPhotos());
+                            }
                         }
                     });
                 }

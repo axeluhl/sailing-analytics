@@ -30,6 +30,7 @@
   background-position: center center;
   background-size: 50%;
 }
+
 .media_settings {
   display: inline-block;
   text-align: right;
@@ -55,9 +56,82 @@
 }
 
 .thumbnail_edit_button {
-    background-image: resourceUrl("editWhite");
+    right: 10px;
+    top:10px;
 }
 
 .thumbnail_delete_button {
-    background-image: resourceUrl("close");
+    right: 60px;
+    top: 10px;
+}
+
+.thumbnail_edit_button:after {
+    background-image: resourceUrl("editWhite");
+}
+
+.thumbnail_delete_button:after {
+    background-image: resourceUrl("trash");
+}
+
+.overlay {
+    position: absolute;
+    background-color: rgba(0, 143, 204, 0.5);
+    width: 100%;
+    height: 100%;
+    display: block;
+    top: 0;
+}
+
+.button, .button:focus  {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    background-color: #2b2a2a;
+    position: absolute;
+    outline: none;
+}
+
+.button:after {
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.manageMedia, .manageMedia:focus {
+    background-color: white;
+    top:25px;
+    margin-left: 5px;
+}
+.manageMedia:after {
+    background-image: resourceUrl("manageBlack");
+}
+.manageMedia.active, .manageMedia.active:focus {
+    background-color: #008fcc;
+}
+.manageMedia.active:after {
+    background-image: resourceUrl("manageWhite");
+}
+.manageMedia:hover {
+    background-color: #d79900;
+}
+
+.addButton, .addButton:focus {
+    top: 25px;
+    right: 15px;
+    background-color: #efaa00;
+}
+
+.addButton:after {
+    background-image: resourceUrl("addMedia");
+    top: -1px;
+    left: 3px;
 }

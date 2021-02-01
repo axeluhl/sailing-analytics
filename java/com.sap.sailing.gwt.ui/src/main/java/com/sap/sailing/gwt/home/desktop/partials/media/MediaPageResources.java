@@ -24,5 +24,9 @@ public interface MediaPageResources extends SharedDesktopResources {
         String thumbnail_delete_button();
         
         String active();
+        String button();
+        String manageMedia();
+        String overlay();
+        String addButton();
     }
 }

@@ -51,14 +51,14 @@
     </ui:style>
     <g:HTMLPanel>
         <div class="{style.holder}">
-            <div class="{style.thumbnail_overlay}"
+            <div class="{local_res.css.overlay}"
                 ui:field="overlay" style="display:none;">
                 <g:Anchor ui:field="deleteAnchor"
                     href="javascript:;"
-                    styleName="{style.thumbnail_button} {style.thumbnail_edit_button} {res.mainCss.button}" />
+                    styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_edit_button}" />
                 <g:Anchor ui:field="editAnchor"
                     href="javascript:;"
-                    styleName="{style.thumbnail_button} {style.thumbnail_delete_button} {res.mainCss.button}" />
+                    styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_delete_button}" />
             </div>
             <img class="{style.thumbnail}" ui:field="thumbnailUi" />
             <div class="{style.caption}" ui:field="captionUi" />
