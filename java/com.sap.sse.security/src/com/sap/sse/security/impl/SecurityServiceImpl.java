@@ -99,6 +99,7 @@ import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.PermissionChangeListener;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
@@ -246,6 +247,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private final AclResolver<AccessControlList, Ownership> aclResolver;
     
+    private final ConcurrentHashMap<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionChangeListeners;
+    
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
@@ -293,6 +296,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Initializing Security Service with user store " + userStore);
         this.currentlyFillingFromInitialLoad = false;
         this.currentlyFillingFromInitialLoad = false;
+        this.permissionChangeListeners = new ConcurrentHashMap<>();
         operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
@@ -2858,5 +2862,31 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
         }
         return result;
+    }
+
+    @Override
+    public void addPermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
+        for (final Set<String> partParts : permission.getParts()) {
+            if (partParts.contains(WildcardPermission.WILDCARD_TOKEN)) {
+                throw new IllegalArgumentException("PermissionChangeListener can not be registered for wildcard permission "+permission+
+                        ". Use specific type(s), operation(s), and object ID(s).");
+            }
+        }
+        synchronized (permissionChangeListeners) { // sychronization required despite ConcurrentHashMap; see removePermissionChangeListener
+            permissionChangeListeners.computeIfAbsent(permission, p->new ConcurrentHashMap<>()).put(listener, true);
+        }
+    }
+
+    @Override
+    public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
+        synchronized (permissionChangeListeners) { // required despite ConcurrentHashMap as we're first reading, then writing conditionally
+            final ConcurrentHashMap<PermissionChangeListener, Boolean> listenersForPermission = permissionChangeListeners.get(permission);
+            if (listenersForPermission != null) {
+                listenersForPermission.remove(listener);
+                if (listenersForPermission.isEmpty()) {
+                    permissionChangeListeners.remove(permission);
+                }
+            }
+        }
     }
 }

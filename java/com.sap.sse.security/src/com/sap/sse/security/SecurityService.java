@@ -43,9 +43,9 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
-import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -675,4 +675,27 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Persist user subscription data
      */
     void updateUserSubscription(String username, Subscription subscription) throws UserManagementException;
+    
+    /**
+     * Adds a listener that will be invoked each time the set of users having {@code permission} may have changed. When
+     * the {@code listener}'s
+     * {@link PermissionChangeListener#setOfUsersWithPermissionChanged(WildcardPermission, Iterable)
+     * setOfUsersWithPermissionChanged} is called, the listener can invoke
+     * {@link #getUsersWithPermissions(WildcardPermission)} to check whether there actually was a change relevant to the
+     * listener. There is a possibility of "false positive" listener invocations, but each time the set of users having
+     * {@code permission} changes, the listener <em>will</em> be notified.
+     * 
+     * @param permission
+     *            must have a valid, non-empty {@link WildcardPermission#getQualifiedObjectIdentifiers() set of object
+     *            identifiers}, therefore identifying one or more permissions on a non-empty list of specific objects.
+     *            No {@link WildcardPermission#WILDCARD_TOKEN wildcards} are allowed in any part of the permission.
+     */
+    void addPermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener);
+    
+    /**
+     * Removes the {@code listener} from this service if it was registered for a permission equal to {@code permission}
+     * before with the {@link #addPermissionChangeListener(WildcardPermission, PermissionChangeListener)} method. Otherwise,
+     * invoking the method has no effect.
+     */
+    void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener);
 }
