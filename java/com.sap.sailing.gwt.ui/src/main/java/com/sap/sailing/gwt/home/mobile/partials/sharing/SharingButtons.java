@@ -61,7 +61,7 @@ public class SharingButtons extends Composite {
             shareButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    NavigatorUtil.shareUrlAndText(urlToShare, provider.getShortText());
+                    NavigatorUtil.shareUrl(urlToShare, provider.getShortText());
                 }
             });
         } else if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {

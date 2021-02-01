@@ -24,16 +24,21 @@ public class NavigatorUtil {
         }
     }
     
+    
     /**
      * Note that this method will check whether the browser does support the sharing feature first 
      * and will display a warning notification if it does not, to prevent JS error messages in the console.
      * Please use {@link clientHasNavigatorShareSupport} to check for browser support, if case specific handling is required.
      * @param String url: URL to share.
-     * @param String text: Text to share.
+     * @param String text: Optional text to share.
      */
-    public static void shareUrlAndText(String url, String text) {
+    public static void shareUrl(String url, String text) {
         if(nativeClientHasNavigatorShareSupport()) {
-            nativeShare(url, text);
+            if(text != null) {
+                nativeShareUrlAndText(url, text);
+            }else {
+                nativeShareUrl(url);
+            }
         }else {
             GWT.log("This browser does not support native sharing");
             Notification.notify(StringMessages.INSTANCE.browserDoesNotSupportNativeSharing(), NotificationType.WARNING);
@@ -53,7 +58,14 @@ public class NavigatorUtil {
         navigator.clipboard.writeText(text);
     }-*/;
 
-    private static native void nativeShare(String url, String text) /*-{
+    private static native void nativeShareUrl(String url) /*-{
+        window.focus();
+        navigator.share({
+            url : url,
+        });
+    }-*/;
+    
+    private static native void nativeShareUrlAndText(String url, String text) /*-{
         window.focus();
         navigator.share({
             url : url,

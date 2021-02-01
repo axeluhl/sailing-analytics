@@ -273,11 +273,11 @@ public class RaceBoardPanel
             }else {
                 if(NavigatorUtil.clientHasNavigatorShareSupport()) {
                     shareLinkAction = () -> {
-                        NavigatorUtil.shareUrlAndText(linkWithSettingsGenerator.createUrl(getSettings()), stringMessages.raceSharingShortText());
+                        NavigatorUtil.shareUrl(linkWithSettingsGenerator.createUrl(getSettings()), null);
                     };
                 }else if(NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
                     shareLinkAction = () ->{
-                        NavigatorUtil.copyToClipboard(stringMessages.sharingLinkCopied());
+                        NavigatorUtil.copyToClipboard(linkWithSettingsGenerator.createUrl(getSettings()));
                     };
                 }
             }
