@@ -1,6 +1,7 @@
 package com.sap.sse.security.subscription.chargebee;
 
 import com.chargebee.ApiResponse;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequest;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
@@ -16,9 +17,11 @@ import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
  */
 public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
     private final SubscriptionApiRequestProcessor requestProcessor;
+    private final SubscriptionApiBaseService chargebeeApiServiceParams;
 
-    protected ChargebeeApiRequest(SubscriptionApiRequestProcessor requestProcessor) {
+    protected ChargebeeApiRequest(SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
         this.requestProcessor = requestProcessor;
+        this.chargebeeApiServiceParams = chargebeeApiServiceParams;
     }
 
     @Override
@@ -37,8 +40,13 @@ public abstract class ChargebeeApiRequest implements SubscriptionApiRequest {
             }
         }
     }
-
+    
     protected abstract ChargebeeInternalApiRequestWrapper createRequest();
+
+    @Override
+    public SubscriptionApiBaseService getSubscriptionApiBaseService() {
+        return chargebeeApiServiceParams;
+    }
 
     protected abstract void processResult(ChargebeeInternalApiRequestWrapper request);
 

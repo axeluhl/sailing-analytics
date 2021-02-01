@@ -1,5 +1,6 @@
 package com.sap.sse.security.subscription;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -16,42 +17,33 @@ import com.sap.sse.common.TimePoint;
  */
 public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiRequestProcessor {
     private static final Logger logger = Logger.getLogger(SubscriptionApiRequestProcessorImpl.class.getName());
-    /**
-     * Chargebee has API rate limits Threshold value for test site: ~750 API calls in 5 minutes. Threshold value for
-     * live site: ~150 API calls per site per minute. So to prevent the limit would be reached, a request has a frame of
-     * ~400ms, and a next request should be made after 400ms from previous request.
-     */
-    private static final Duration TIME_BETWEEN_API_REQUEST_START = Duration.ONE_MILLISECOND.times(400);
-
-    /**
-     * The delay after which to re-schedule a request that failed for having exceeded the service's rate limit
-     */
-    private static final Duration LIMIT_REACHED_RESUME_DELAY = Duration.ONE_MILLISECOND.times(65000);
 
     private final ScheduledExecutorService executor;
 
     /**
-     * The latest time point for which a request was scheduled by this processor using the {@link #executor}.
-     * {@code null} means that no request has been scheduled yet. Reading and updating this field needs to
-     * be thread safe and must be done while holding this object's monitor ({@code synchronized}). See the
-     * {@link #getDelayToNextRequestStartTimePoint()} and {@link #getDelayWhenRateLimitWasExceeded()}
-     * methods which implement this for regular requests and for requests that have to be re-scheduled
-     * after the rate limit has been exceeded (despite our attempts done here to respect the rate limits).
+     * The latest time point for which a request was scheduled by this processor using the {@link #executor}, keyed by
+     * the provider name (see {@link SubscriptionApiService#getProviderName()}). {@code null} means that no request has
+     * been scheduled yet. Reading and updating this field needs to be thread safe and must be done while holding this
+     * object's monitor ({@code synchronized}). See the {@link #getDelayToNextRequestStartTimePoint(String)} and
+     * {@link #getDelayWhenRateLimitWasExceeded(String)} methods which implement this for regular requests and for requests
+     * that have to be re-scheduled after the rate limit has been exceeded (despite our attempts done here to respect
+     * the rate limits).
      */
-    private TimePoint startOfLatestRequest;
+    private ConcurrentHashMap<String, TimePoint> startOfLatestRequestByProviderName;
 
     public SubscriptionApiRequestProcessorImpl(ScheduledExecutorService executor) {
         this.executor = executor;
+        this.startOfLatestRequestByProviderName = new ConcurrentHashMap<>();
     }
 
     @Override
     public void addRequest(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayToNextRequestStartTimePoint());
+        scheduleRequest(request, getDelayToNextRequestStartTimePoint(request.getSubscriptionApiBaseService()));
     }
 
     @Override
     public void rescheduleRequestAfterRateLimitExceeded(SubscriptionApiRequest request) {
-        scheduleRequest(request, getDelayWhenRateLimitWasExceeded());
+        scheduleRequest(request, getDelayWhenRateLimitWasExceeded(request.getSubscriptionApiBaseService()));
     }
     
     /**
@@ -71,25 +63,29 @@ public class SubscriptionApiRequestProcessorImpl implements SubscriptionApiReque
         }, delay.asMillis(), TimeUnit.MILLISECONDS);
     }
     
-    private Duration getDelayWhenRateLimitWasExceeded() {
+    private Duration getDelayWhenRateLimitWasExceeded(SubscriptionApiBaseService subscriptionApiBaseService) {
         final TimePoint now = TimePoint.now();
         synchronized (this) {
-            startOfLatestRequest = now.plus(LIMIT_REACHED_RESUME_DELAY);
+            startOfLatestRequestByProviderName.put(subscriptionApiBaseService.getProviderName(),
+                    now.plus(subscriptionApiBaseService.getLimitReachedResumeDelay()));
         }
-        return LIMIT_REACHED_RESUME_DELAY;
+        return subscriptionApiBaseService.getLimitReachedResumeDelay();
     }
 
-    private Duration getDelayToNextRequestStartTimePoint() {
+    private Duration getDelayToNextRequestStartTimePoint(SubscriptionApiBaseService subscriptionApiBaseService) {
         final TimePoint now = TimePoint.now();
+        TimePoint startOfLatestRequest;
         synchronized (this) {
-            if (startOfLatestRequest == null) {
+            if (!startOfLatestRequestByProviderName.containsKey(subscriptionApiBaseService.getProviderName())) {
                 startOfLatestRequest = now;
             } else {
-                startOfLatestRequest = startOfLatestRequest.plus(TIME_BETWEEN_API_REQUEST_START);
+                startOfLatestRequest = startOfLatestRequestByProviderName
+                        .get(subscriptionApiBaseService.getProviderName()).plus(subscriptionApiBaseService.getTimeBetweenApiRequestStart());
                 if (startOfLatestRequest.before(now)) {
                     startOfLatestRequest = now;
                 }
             }
+            startOfLatestRequestByProviderName.put(subscriptionApiBaseService.getProviderName(), startOfLatestRequest);
         }
         return now.until(startOfLatestRequest);
     }

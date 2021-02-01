@@ -8,6 +8,7 @@ import com.chargebee.filters.enums.SortOrder;
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Invoice.InvoiceListRequest;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 
 /**
@@ -28,8 +29,8 @@ public class ChargebeeInvoiceRequest extends ChargebeeApiRequest {
     private final OnResultListener listener;
 
     public ChargebeeInvoiceRequest(User user, String subscriptionId, OnResultListener listener,
-            SubscriptionApiRequestProcessor requestProcessor) {
-        super(requestProcessor);
+            SubscriptionApiRequestProcessor requestProcessor, SubscriptionApiBaseService chargebeeApiServiceParams) {
+        super(requestProcessor, chargebeeApiServiceParams);
         this.user = user;
         this.subscriptionId = subscriptionId;
         this.listener = listener;

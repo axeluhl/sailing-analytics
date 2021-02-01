@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
+import com.sap.sse.security.subscription.SubscriptionApiBaseService;
 import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
 import com.sap.sse.security.subscription.SubscriptionCancelResult;
 
@@ -25,17 +26,19 @@ public class ChargebeeCancelSubscriptionTask
     private final String subscriptionId;
     private final SubscriptionApiRequestProcessor requestProcessor;
     private final OnResultListener listener;
+    private final SubscriptionApiBaseService chargebeeApiServiceParams;
 
     public ChargebeeCancelSubscriptionTask(String subscriptionId, SubscriptionApiRequestProcessor requestProcessor,
-            OnResultListener listener) {
+            OnResultListener listener, SubscriptionApiBaseService chargebeeApiServiceParams) {
         this.subscriptionId = subscriptionId;
         this.requestProcessor = requestProcessor;
         this.listener = listener;
+        this.chargebeeApiServiceParams = chargebeeApiServiceParams;
     }
 
     public void run() {
         logger.info(() -> "Schedule cancel Chargebee subscription, id: " + subscriptionId);
-        requestProcessor.addRequest(new ChargebeeSubscriptionRequest(subscriptionId, this, requestProcessor));
+        requestProcessor.addRequest(new ChargebeeSubscriptionRequest(subscriptionId, this, requestProcessor, chargebeeApiServiceParams));
     }
 
     @Override
@@ -51,7 +54,7 @@ public class ChargebeeCancelSubscriptionTask
                 onDone(new SubscriptionCancelResult(/* success */ true, sub));
             } else {
                 requestProcessor.addRequest(
-                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor));
+                        new ChargebeeCancelSubscriptionRequest(subscriptionId, this, requestProcessor, chargebeeApiServiceParams));
             }
         } else {
             onDone(new SubscriptionCancelResult(/* success */false, /* subscription */null, /* deleted */true));

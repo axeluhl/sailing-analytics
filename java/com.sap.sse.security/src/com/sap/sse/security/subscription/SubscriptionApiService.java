@@ -6,7 +6,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 /**
  * Service interface for provider API requests
  */
-public interface SubscriptionApiService {
+public interface SubscriptionApiService extends SubscriptionApiBaseService {
     
     public static interface OnSubscriptionsResultListener{
         void onSubscriptionsResult(User user, Iterable<Subscription> subscriptions);
@@ -16,17 +16,6 @@ public interface SubscriptionApiService {
         void onCancelResult(SubscriptionCancelResult cancelResult);
     }
     
-    /**
-     * The OSGi registry property name under which to look up a specific implementation of this API.
-     */
-    String PROVIDER_NAME_OSGI_REGISTRY_KEY = "provider-name";
-
-    /**
-     * The name used for the {@link #PROVIDER_NAME_OSGI_REGISTRY_KEY} key during registration of this service with the
-     * OSGi service registry.
-     */
-    String getProviderName();
-
     /**
      * Fetch user subscriptions from payment service provider. The logic of fetching subscriptions should be done in
      * background.
