@@ -31,25 +31,21 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
                         && !hostedPage.getHostedPageJSONString().isEmpty()) {
                     Chargebee.getInstance().openCheckout(CheckoutOption.create(hostedPage.getHostedPageJSONString(),
                             new CheckoutOption.SuccessCallback() {
-
                                 @Override
                                 public void call(String hostedPageId) {
                                     requestFinishingPlanUpdating(hostedPageId, view);
                                 }
                             }, new CheckoutOption.ErrorCallback() {
-
                                 @Override
                                 public void call(String error) {
                                     view.onOpenCheckoutError(error);
                                 }
                             }, new CheckoutOption.CloseCallback() {
-
                                 @Override
                                 public void call() {
                                     view.onCloseCheckoutModal();
                                 }
                             }));
-                    ;
                 } else {
                     view.onOpenCheckoutError(StringMessages.INSTANCE.failGeneratingHostedPageObject());
                 }
@@ -65,8 +61,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     private void requestFinishingPlanUpdating(String hostedPageId, UserSubscriptionView view) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
-        writeService.finishCheckout(null, data, new AsyncCallback<SubscriptionDTO>() {
-
+        writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
             @Override
             public void onSuccess(SubscriptionDTO result) {
                 view.updateView(result);
