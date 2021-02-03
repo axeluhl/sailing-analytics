@@ -296,7 +296,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Initializing Security Service with user store " + userStore);
         this.currentlyFillingFromInitialLoad = false;
         this.currentlyFillingFromInitialLoad = false;
-        this.permissionChangeListeners = new PermissionChangeListeners();
+        this.permissionChangeListeners = new PermissionChangeListeners(this);
         operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
@@ -341,6 +341,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         logger.info("Loaded "+count+" sessions");
         return result;
+    }
+    
+    @Override
+    public Iterable<HasPermissions> getAllHasPermissions() {
+        return hasPermissionsProvider.getAllHasPermissions();
     }
 
     @Override

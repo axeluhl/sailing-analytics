@@ -7,7 +7,9 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.SecuredAwsLandscapeType;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 
 public class Activator implements BundleActivator {
     private final static Logger logger = Logger.getLogger(Activator.class.getName());
@@ -31,6 +33,7 @@ public class Activator implements BundleActivator {
                     PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                     PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
         }
+        context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
     }
     
     public static Activator getInstance() {

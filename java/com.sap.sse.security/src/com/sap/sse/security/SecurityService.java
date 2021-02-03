@@ -17,6 +17,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -27,6 +28,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -698,4 +700,23 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * invoking the method has no effect.
      */
     void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener);
+
+    /**
+     * Obtains all {@link HasPermissions} secured types managed by this security service. In an OSGi environment, those
+     * are obtained from all {@link HasPermissionsProvider}s registered as an OSGi service by any active bundle.
+     */
+    Iterable<HasPermissions> getAllHasPermissions();
+    
+    /**
+     * Tries to find a {@link HasPermissions secured type} in the {@link #getAllHasPermissions() set of secured types
+     * known by this security service} based on its name, like it is used in the first
+     * {@link WildcardPermission#getParts() part} of a permission specification, as in {@code USER:READ:*}.
+     * 
+     * @param securedTypeName
+     *            must not be {@code null}
+     * @return may be {@code null} in case a secured type by that {@link HasPermissions#getName() name} is not found
+     */
+    default HasPermissions getHasPermissionsByName(String securedTypeName) {
+        return Util.first(Util.filter(getAllHasPermissions(), hp->hp.getName().equals(securedTypeName)));
+    }
 }

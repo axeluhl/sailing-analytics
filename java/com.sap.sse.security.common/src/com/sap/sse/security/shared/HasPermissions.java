@@ -1,5 +1,8 @@
 package com.sap.sse.security.shared;
 
+import java.util.Arrays;
+
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
@@ -26,6 +29,14 @@ public interface HasPermissions {
      *         passed that is not contained in the array returned by this method.
      */
     Action[] getAvailableActions();
+    
+    /**
+     * The {@link Action} from {@link #getAvailableActions()} whose {@link Action#name() name} equals that provided by parameter
+     * {@code actionName}, or {@code null} if no such action exists
+     */
+    default Action getActionByName(String actionName) {
+        return Util.first(Util.filter(Arrays.asList(getAvailableActions()), action->action.name().equals(actionName)));
+    }
 
     /**
      * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their
