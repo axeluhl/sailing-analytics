@@ -46,6 +46,7 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -157,6 +158,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
+    private final Set<SSHKeyPairListener> sshKeyPairListeners;
     
     public AwsLandscapeImpl() {
         this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
@@ -177,6 +179,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.mongoObjectFactory = mongoObjectFactory;
         this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
+        this.sshKeyPairListeners = new HashSet<>();
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
@@ -187,7 +190,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
      */
     private void internalAddKeyPair(SSHKeyPair keyPair) {
         sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
-        // TODO update the time stamp read by clients interested in the latest set of SSH keys of those users with LANDSCAPE:MANAGE:AWS permission
     }
     
     
@@ -207,6 +209,9 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     private void addSSHKeyPair(SSHKeyPair keyPair) {
+        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
+            sshKeyPairListener.sshKeyPairAdded(keyPair);
+        }
         internalAddKeyPair(keyPair);
         mongoObjectFactory.storeSSHKeyPair(keyPair);
     }
@@ -609,7 +614,16 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
+        final SSHKeyPair removedKeyPair = sshKeyPairs.remove(new Pair<>(region.getId(), keyName));
+        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
+            sshKeyPairListener.sshKeyPairRemoved(removedKeyPair);
+        }
         mongoObjectFactory.removeSSHKeyPair(region.getId(), keyName);
+    }
+
+    @Override
+    public void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> listeners) {
+        Util.addAll(listeners, this.sshKeyPairListeners);
     }
 
     @Override

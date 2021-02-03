@@ -10,6 +10,7 @@ import com.sap.sse.security.shared.impl.User;
  * @author Axel Uhl (D043530)
  *
  */
+@FunctionalInterface
 public interface PermissionChangeListener {
     void setOfUsersWithPermissionChanged(WildcardPermission permission, Iterable<User> usersNowHavingPermission);
 }
