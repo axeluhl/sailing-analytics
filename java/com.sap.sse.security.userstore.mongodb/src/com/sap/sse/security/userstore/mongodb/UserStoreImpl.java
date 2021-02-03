@@ -707,6 +707,13 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
+    public Iterable<UserGroup> getUserGroupsWithRole(RoleDefinition roleDefinition) {
+        return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
+            return roleDefinition == null ? null : new HashSet<>(roleDefinitionsToUserGroups.get(roleDefinition));
+        });
+    }
+
+    @Override
     public UserGroup getUserGroup(UUID id) {
         return LockUtil.executeWithReadLockAndResult(userGroupsLock, () -> {
             return id == null ? null : userGroups.get(id);

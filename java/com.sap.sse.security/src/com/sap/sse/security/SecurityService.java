@@ -27,6 +27,7 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.BasicUserStore;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -126,6 +127,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Iterable<UserGroup> getUserGroupList();
 
+    /**
+     * @see BasicUserStore#getUserGroupsWithRoleDefinition(RoleDefinition)
+     */
+    Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition);
+    
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);

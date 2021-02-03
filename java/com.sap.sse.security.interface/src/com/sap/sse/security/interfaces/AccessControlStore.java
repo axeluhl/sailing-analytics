@@ -82,4 +82,12 @@ public interface AccessControlStore extends Named {
      * {@code group}.
      */
     Map<UserGroup, Set<QualifiedObjectIdentifier>> getAccessControlListsWithDenials(String typeIdentifier);
+
+    /**
+     * Obtains all ownership annotations whose {@link Ownership#getTenantOwner() group owner} equals the
+     * {@code owningUserGroup} passed.
+     * 
+     * @return an unmodifiable, always valid but potentially empty collection
+     */
+    Iterable<OwnershipAnnotation> getOwnerhipsWithGroupOwner(UserGroup owningUserGroup);
 }

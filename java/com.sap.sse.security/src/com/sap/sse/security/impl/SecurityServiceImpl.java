@@ -716,6 +716,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition) {
+        return store.getUserGroupsWithRoleDefinition(roleDefinition);
+    }
+
+    @Override
     public UserGroup getUserGroup(UUID id) {
         return store.getUserGroup(id);
     }
@@ -838,7 +843,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userGroup == null) {
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
-            permissionChangeListeners.userGroupDeleted(userGroup);
+            for (final OwnershipAnnotation ownershipWithGroupAsOwner : accessControlStore.getOwnerhipsWithGroupOwner(userGroup)) {
+                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
+            }
             accessControlStore.removeAllOwnershipsFor(userGroup);
             store.deleteUserGroup(userGroup);
         }
@@ -898,7 +905,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final ScheduledExecutorService foregroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
         final int numberOfJobs = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
         final ConcurrentMap<User, Boolean> result = new ConcurrentHashMap<>();
-        final User allUser = store.getUserByName(SecurityService.ALL_USERNAME);
+        final User allUser = getAllUser();
         final ConcurrentLinkedDeque<User> userList = new ConcurrentLinkedDeque<>();
         Util.addAll(getUserList(), userList);
         final Set<Future<?>> futures = new HashSet<>();
