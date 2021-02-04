@@ -9,4 +9,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.security.common,
  com.sap.sse.common
-Export-Package: com.sap.sse.landscape.aws.common
+Export-Package: com.sap.sse.landscape.aws.common.shared

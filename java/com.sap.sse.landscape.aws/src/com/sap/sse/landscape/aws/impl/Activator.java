@@ -10,7 +10,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.common.SecuredAwsLandscapeType;
+import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
 import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.ssh.SSHKeyPair;

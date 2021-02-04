@@ -5,7 +5,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.common.Util;
-import com.sap.sse.landscape.aws.common.SecuredAwsLandscapeType;
+import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
 
 public class SecuredAwsLandscapeType_CustomFieldSerializer extends CustomFieldSerializer<SecuredAwsLandscapeType> {
 
