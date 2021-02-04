@@ -514,10 +514,6 @@ public class UserService {
         return anonymousUser;
     }
     
-    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
-        Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
