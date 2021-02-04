@@ -216,6 +216,7 @@
 <setEntry value="com.sap.sse.landscape.common@default:default"/>
 <setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws@4:true"/>
+<setEntry value="com.sap.sse.landscape.aws.common@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>

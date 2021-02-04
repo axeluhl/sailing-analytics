@@ -17,7 +17,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
  */
 public class SecuredLandscapeTypes extends HasPermissionsImpl {
     private static final long serialVersionUID = -5052828472297142038L;
-    private static Set<HasPermissions> allInstances = new HashSet<>();
+    private static Set<SecuredLandscapeTypes> allInstances = new HashSet<>();
     
     public SecuredLandscapeTypes(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -29,7 +29,7 @@ public class SecuredLandscapeTypes extends HasPermissionsImpl {
         allInstances.add(this);
     }
 
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredLandscapeTypes> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 

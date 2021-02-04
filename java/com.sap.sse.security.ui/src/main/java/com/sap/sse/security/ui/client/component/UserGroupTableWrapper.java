@@ -40,9 +40,9 @@ public class UserGroupTableWrapper extends
     private final LabeledAbstractFilterablePanel<UserGroupDTO> filterField;
     private final UserService userService;
 
-    public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
-            StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
-            CellTableWithCheckboxResources tableResources, Runnable refresher) {
+    public UserGroupTableWrapper(UserService userService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean enablePager, CellTableWithCheckboxResources tableResources,
+            Runnable refresher) {
         super(stringMessages, errorReporter, /* multi selection */ true, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
             @Override
             public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {

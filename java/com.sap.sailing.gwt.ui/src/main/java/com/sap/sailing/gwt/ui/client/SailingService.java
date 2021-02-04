@@ -102,6 +102,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
@@ -414,7 +415,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     SerializationDummy serializationDummy(PersonDTO dummy, CountryCode ccDummy,
             PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
-            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl) throws UnauthorizedException;
+            SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl,
+            HasPermissions hasPermissions) throws UnauthorizedException;
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) throws UnauthorizedException;
 

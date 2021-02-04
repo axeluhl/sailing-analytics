@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
@@ -67,7 +68,8 @@ public interface UserManagementServiceAsync {
      */
     void getOrCreateAccessToken(String username, AsyncCallback<String> callback);
 
-    void serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, AsyncCallback<TypeRelativeObjectIdentifier> callback);
+    void serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions,
+            AsyncCallback<SerializationDummy> callback);
 
     void getRolesAndPermissionsForUser(String username, AsyncCallback<RolesAndPermissionsForUserDTO> callback);
 
@@ -85,4 +87,6 @@ public interface UserManagementServiceAsync {
     void login(String username, String password, AsyncCallback<SuccessInfo> callback);
 
     void logout(AsyncCallback<SuccessInfo> callback);
+
+    void getAllHasPermissions(AsyncCallback<ArrayList<HasPermissions>> callback);
 }

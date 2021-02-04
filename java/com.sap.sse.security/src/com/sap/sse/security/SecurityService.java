@@ -540,7 +540,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void migrateServerObject();
     
-    void checkMigration(Iterable<HasPermissions> allInstances);
+    void checkMigration(Iterable<? extends HasPermissions> allInstances);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
     
@@ -711,7 +711,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Obtains all {@link HasPermissions} secured types managed by this security service. In an OSGi environment, those
      * are obtained from all {@link HasPermissionsProvider}s registered as an OSGi service by any active bundle.
      */
-    Iterable<HasPermissions> getAllHasPermissions();
+    Iterable<? extends HasPermissions> getAllHasPermissions();
     
     /**
      * Tries to find a {@link HasPermissions secured type} in the {@link #getAllHasPermissions() set of secured types

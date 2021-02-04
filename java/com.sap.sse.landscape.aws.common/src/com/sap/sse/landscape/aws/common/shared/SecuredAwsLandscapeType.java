@@ -1,4 +1,4 @@
-package com.sap.sse.landscape.aws;
+package com.sap.sse.landscape.aws.common.shared;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import com.sap.sse.security.shared.impl.HasPermissionsImpl;
  */
 public class SecuredAwsLandscapeType extends HasPermissionsImpl {
     private static final long serialVersionUID = -7072719056136061490L;
-    private static final Set<HasPermissions> allInstances = new HashSet<>();
+    private static final Set<SecuredAwsLandscapeType> allInstances = new HashSet<>();
     
     public SecuredAwsLandscapeType(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -29,7 +29,7 @@ public class SecuredAwsLandscapeType extends HasPermissionsImpl {
         allInstances.add(this);
     }
     
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredAwsLandscapeType> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 
