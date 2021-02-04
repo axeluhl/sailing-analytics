@@ -13,14 +13,14 @@
         <inherits name="com.sap.sailing.landscape.Landscape" />
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
-		<!-- Google Maps API -->
+	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
 	<inherits name='com.google.gwt.maps.Maps' />
 	<!-- GWT JSON Support -->
 	<inherits name='com.google.gwt.json.JSON' />
 
 	<!-- module containing locale configuration -->
-    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
+        <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
