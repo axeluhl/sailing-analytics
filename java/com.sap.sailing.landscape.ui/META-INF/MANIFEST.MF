@@ -21,8 +21,11 @@ Require-Bundle: com.sap.sse.gwt,
  com.amazon.aws.aws-java-api,
  com.sap.sse.landscape.common,
  com.jcraft.jsch;bundle-version="0.1.54",
- elemental2;bundle-version="1.1.0"
-Export-Package: com.sap.sailing.landscape.ui.client,
+ elemental2;bundle-version="1.1.0",
+ com.sap.sse.landscape.aws.common
+Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.aws,
+ com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.common.shared,
+ com.sap.sailing.landscape.ui.client,
  com.sap.sailing.landscape.ui.server,
  com.sap.sailing.landscape.ui.shared
 Bundle-ActivationPolicy: lazy

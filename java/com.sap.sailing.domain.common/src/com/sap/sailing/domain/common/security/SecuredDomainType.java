@@ -18,7 +18,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
  */
 public class SecuredDomainType extends HasPermissionsImpl {
     private static final long serialVersionUID = -7072719056136061490L;
-    private static final Set<HasPermissions> allInstances = new HashSet<>();
+    private static final Set<SecuredDomainType> allInstances = new HashSet<>();
     
     public SecuredDomainType(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -30,7 +30,7 @@ public class SecuredDomainType extends HasPermissionsImpl {
         allInstances.add(this);
     }
     
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredDomainType> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 

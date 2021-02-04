@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
@@ -25,8 +24,7 @@ public class UserManagementPanelSupplier
     public UserManagementPanel<AdminConsoleTableResources> init() {
         logger.info("Create UserManagementPanel");
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanelWrapper(
-                presenter.getUserService(), StringMessages.INSTANCE,
-                SecuredDomainType.getAllInstances(), presenter.getErrorReporter(), tableResources);
+                presenter.getUserService(), StringMessages.INSTANCE, presenter.getErrorReporter(), tableResources);
         userManagementPanel.ensureDebugId("UserManagementPanel");
         return userManagementPanel;
     }

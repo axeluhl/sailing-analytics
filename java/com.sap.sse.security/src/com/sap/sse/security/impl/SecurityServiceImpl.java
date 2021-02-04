@@ -344,7 +344,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Iterable<HasPermissions> getAllHasPermissions() {
+    public Iterable<? extends HasPermissions> getAllHasPermissions() {
         return hasPermissionsProvider.getAllHasPermissions();
     }
 
@@ -2333,7 +2333,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void checkMigration(Iterable<HasPermissions> allInstances) {
+    public void checkMigration(Iterable<? extends HasPermissions> allInstances) {
         Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
         boolean allChecksSucessful = true;
         for (HasPermissions shouldBeMigrated : allInstances) {

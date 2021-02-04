@@ -24,7 +24,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
@@ -44,24 +43,21 @@ public class GroupRoleDefinitionPanel extends Composite
     private final RoleDefinitionSuggestOracle oracle;
 
     public GroupRoleDefinitionPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
-            CellTableWithCheckboxResources tableResources,
+            ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources,
             final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel,
             UserGroupListDataProvider userGroupListDataProvider) {
         this.userGroupSelectionModel = userGroupSelectionModel;
         final VerticalPanel mainPanel = new VerticalPanel();
         oracle = new RoleDefinitionSuggestOracle(userService.getUserManagementService(), stringMessages);
-        suggestRole = new SuggestBox(
-                oracle);
+        suggestRole = new SuggestBox(oracle);
         userGroupRoleResources.css().ensureInjected();
         suggestRole.addStyleName(userGroupRoleResources.css().roleDefinitionSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
         suggestRole.ensureDebugId("RoleSuggestion");
         // create UserGroup Table
         userGroupListDataProvider.addChangeHandler(this);
-        roleDefinitionTableWrapper = new RoleDefinitionTableWrapper(userService, additionalPermissions, stringMessages,
-                errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups(),
-                userGroupSelectionModel);
+        roleDefinitionTableWrapper = new RoleDefinitionTableWrapper(userService, stringMessages, errorReporter,
+                /* enablePager */ true, tableResources, () -> updateUserGroups(), userGroupSelectionModel);
         // create button bar
         final Widget buttonPanel = createButtonPanel(userService, stringMessages);
         this.userGroupSelectionModel.addSelectionChangeHandler(event -> {

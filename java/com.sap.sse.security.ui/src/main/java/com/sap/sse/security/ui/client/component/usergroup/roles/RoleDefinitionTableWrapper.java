@@ -20,7 +20,6 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.StrippedRoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -37,10 +36,9 @@ public class RoleDefinitionTableWrapper extends
     private final LabeledAbstractFilterablePanel<Pair<StrippedRoleDefinitionDTO, Boolean>> filterField;
     private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
 
-    public RoleDefinitionTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
-            StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
-            CellTableWithCheckboxResources tableResources, Runnable refresher,
-            MultiSelectionModel<UserGroupDTO> userGroupSelectionModel) {
+    public RoleDefinitionTableWrapper(UserService userService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean enablePager, CellTableWithCheckboxResources tableResources,
+            Runnable refresher, MultiSelectionModel<UserGroupDTO> userGroupSelectionModel) {
         super(stringMessages, errorReporter, false, enablePager,
                 new EntityIdentityComparator<Pair<StrippedRoleDefinitionDTO, Boolean>>() {
                     @Override
