@@ -538,6 +538,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void setTemporaryDefaultTenant(final UUID tenantGroupId) {
+        if (tenantGroupId != null || getCurrentUser() == null) {
+            final UserGroup tenantGroup = getUserGroup(tenantGroupId);
+            if (tenantGroup == null) {
+                temporaryDefaultTenant.remove();
+            } else {
+                if (Util.contains(getUserGroupsOfUser(getCurrentUser()), tenantGroup)) {
+                    temporaryDefaultTenant.set(tenantGroup);
+                } else {
+                    logger.warning("User " + getCurrentUser().getName()
+                            + " tried to set foreign temporary default tenant group " + tenantGroupId.toString());
+                }
+            }
+        } else {
+            temporaryDefaultTenant.remove();
+        }
+    }
+
+    @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
         return store.getRoleDefinition(idOfRoleDefinition);
     }
