@@ -126,6 +126,7 @@ public class UserService {
 
             @Override
             public void onSuccess(ArrayList<HasPermissions> result) {
+                GWT.log("Loaded secured types "+result);
                 allKnownHasPermissions.addAll(result);
             }
         });

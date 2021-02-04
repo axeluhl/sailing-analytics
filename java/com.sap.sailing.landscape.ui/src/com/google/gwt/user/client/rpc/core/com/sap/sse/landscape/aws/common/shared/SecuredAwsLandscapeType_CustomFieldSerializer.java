@@ -1,4 +1,4 @@
-package com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.aws;
+package com.google.gwt.user.client.rpc.core.com.sap.sse.landscape.aws.common.shared;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
