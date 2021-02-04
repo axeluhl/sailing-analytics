@@ -3,7 +3,7 @@ BEARER_TOKEN="$1"
 BASE_URL="$2"
 LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys
 # Uncomment the following for production use, with no error output
-last_change_millis=$( curl -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null | jq -r '.timePointOfLastChangeOfSetOfLandscapeManagers-millis' )
+last_change_millis=$( curl -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null | jq -r '."timePointOfLastChangeOfSetOfLandscapeManagers-millis"' )
 # Uncomment the following for test use with stderr
 #last_change_millis=$( curl -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" | jq -r '.timePointOfLastChangeOfSetOfLandscapeManagers-millis' )
 # The following as fallback when the REST API isn't available
