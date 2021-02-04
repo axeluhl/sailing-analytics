@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client.subscription.chargebee;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.subscription.BaseUserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionViewPresenter;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
@@ -21,7 +21,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
     }
 
     @Override
-    public void startCheckout(String planId, UserSubscriptionView view) {
+    public void startCheckout(String planId, BaseUserSubscriptionView view) {
         service.prepareCheckout(planId, new AsyncCallback<PrepareCheckoutDTO>() {
             @Override
             public void onSuccess(PrepareCheckoutDTO hostedPage) {
@@ -58,7 +58,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
         });
     }
 
-    private void requestFinishingPlanUpdating(String hostedPageId, UserSubscriptionView view) {
+    private void requestFinishingPlanUpdating(String hostedPageId, BaseUserSubscriptionView view) {
         final FinishCheckoutDTO data = new FinishCheckoutDTO();
         data.setHostedPageId(hostedPageId);
         writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
