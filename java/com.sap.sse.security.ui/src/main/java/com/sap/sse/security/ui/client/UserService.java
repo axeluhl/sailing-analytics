@@ -533,10 +533,7 @@ public class UserService {
     }
 
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
-            return false;
-        }
-        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
+        return hasServerPermission(ServerActions.CREATE_OBJECT) && hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
     }
     
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
@@ -552,5 +549,4 @@ public class UserService {
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }
-
 }

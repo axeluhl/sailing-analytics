@@ -185,14 +185,17 @@ public class PermissionChangeListeners {
                 // filter by type if provided; for type wildcard, all listener registrations will have to be scanned
                 final Iterable<String> typesToScan = getTypesToScan(permission);
                 for (final String typeName : typesToScan) {
-                    for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionAndListener : permissionChangeListenersByType.get(typeName).entrySet()) {
-                        // all listener registrations' permissions have been expanded into single permissions upon registration:
-                        final QualifiedObjectIdentifier objectId = permissionAndListener.getKey().getQualifiedObjectIdentifiers().iterator().next();
-                        final OwnershipAnnotation ownershipAnnotation = securityService.getOwnership(objectId);
-                        if (ownershipAnnotation == null || matchesQualification(ownershipAnnotation.getAnnotation(), role.getQualifiedForTenant(), role.getQualifiedForUser())) {
-                            if (permission.implies(permissionAndListener.getKey())) {
-                                notifyListeners(permissionAndListener.getKey(), permissionAndListener.getValue().keySet());
-                                break outer;
+                    final ConcurrentHashMap<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionChangeListenersForType = permissionChangeListenersByType.get(typeName);
+                    if (permissionChangeListenersForType != null) {
+                        for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionAndListener : permissionChangeListenersForType.entrySet()) {
+                            // all listener registrations' permissions have been expanded into single permissions upon registration:
+                            final QualifiedObjectIdentifier objectId = permissionAndListener.getKey().getQualifiedObjectIdentifiers().iterator().next();
+                            final OwnershipAnnotation ownershipAnnotation = securityService.getOwnership(objectId);
+                            if (ownershipAnnotation == null || matchesQualification(ownershipAnnotation.getAnnotation(), role.getQualifiedForTenant(), role.getQualifiedForUser())) {
+                                if (permission.implies(permissionAndListener.getKey())) {
+                                    notifyListeners(permissionAndListener.getKey(), permissionAndListener.getValue().keySet());
+                                    break outer;
+                                }
                             }
                         }
                     }
@@ -243,11 +246,14 @@ public class PermissionChangeListeners {
         LockUtil.executeWithReadLock(lock, () -> {
             // filter by type if provided; for type wildcard, all listener registrations will have to be scanned
             outer: for (final String typeName : getTypesToScan(permission)) {
-                for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionAndListener : permissionChangeListenersByType.get(typeName).entrySet()) {
-                    // all listener registrations' permissions have been expanded into single permissions upon registration:
-                    if (permission.implies(permissionAndListener.getKey())) {
-                        notifyListeners(permissionAndListener.getKey(), permissionAndListener.getValue().keySet());
-                        break outer;
+                final ConcurrentHashMap<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionChangeListenersForType = permissionChangeListenersByType.get(typeName);
+                if (permissionChangeListenersForType != null) {
+                    for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionAndListener : permissionChangeListenersForType.entrySet()) {
+                        // all listener registrations' permissions have been expanded into single permissions upon registration:
+                        if (permission.implies(permissionAndListener.getKey())) {
+                            notifyListeners(permissionAndListener.getKey(), permissionAndListener.getValue().keySet());
+                            break outer;
+                        }
                     }
                 }
             }
@@ -289,8 +295,11 @@ public class PermissionChangeListeners {
      */
     void aclChanged(QualifiedObjectIdentifier objectId) {
         LockUtil.executeWithReadLock(lock, () -> {
-            for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> listenersForObject : permissionChangeListenersByObject.get(objectId).entrySet()) {
-                notifyListeners(listenersForObject.getKey(), listenersForObject.getValue().keySet());
+            final ConcurrentHashMap<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> permissionChangeListenersForObject = permissionChangeListenersByObject.get(objectId);
+            if (permissionChangeListenersForObject != null) {
+                for (final Entry<WildcardPermission, ConcurrentHashMap<PermissionChangeListener, Boolean>> listenersForObject : permissionChangeListenersForObject.entrySet()) {
+                    notifyListeners(listenersForObject.getKey(), listenersForObject.getValue().keySet());
+                }
             }
         });
     }
