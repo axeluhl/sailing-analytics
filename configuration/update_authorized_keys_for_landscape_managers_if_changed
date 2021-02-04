@@ -1,0 +1,20 @@
+#!/bin/bash
+BEARER_TOKEN="$1"
+BASE_URL="https://security-service.sapsailing.com"
+LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys
+# Uncomment the following for production use, with no error output
+last_change_millis=$( curl -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null | jq -r '.timePointOfLastChangeOfSetOfLandscapeManagers-millis' )
+# Uncomment the following for test use with stderr
+#last_change_millis=$( curl -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" | jq -r '.timePointOfLastChangeOfSetOfLandscapeManagers-millis' )
+# The following as fallback when the REST API isn't available
+#last_change_millis=123
+if [ -f "${LAST_CHANGE_FILE}" ]; then
+  PREVIOUS_CHANGE=$(cat "${LAST_CHANGE_FILE}")
+else
+  PREVIOUS_CHANGE=0
+fi
+if [ ${PREVIOUS_CHANGE} -lt ${last_change_millis} ]; then
+  echo "New SSH key changes for landscape managers (${last_change_millis} newer than ${PREVIOUS_CHANGE})" >>/var/log/sailing.err
+  update_authorized_keys_for_landscape_managers "${BEARER_TOKEN}"
+fi
+echo ${last_change_millis} >${LAST_CHANGE_FILE}
