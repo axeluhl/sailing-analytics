@@ -59,6 +59,9 @@ public interface UserManagementServiceAsync {
 
     void getPreferences(String username, List<String> keys, final AsyncCallback<Map<String, String>> callback);
 
+    /**
+     * Preferences whose key starts with an underscore ({@code _}) are removed from the result.
+     */
     void getAllPreferences(String username, final AsyncCallback<Map<String, String>> callback);
 
     /**
