@@ -68,7 +68,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.commons.lang;bundle-version="2.6.0",
  com.sap.sailing.landscape.ui,
  com.sap.sailing.landscape.common,
- com.sap.sse.landscape.common
+ com.sap.sse.landscape.common,
+ com.sap.sse.landscape.aws.common
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

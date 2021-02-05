@@ -235,7 +235,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermission(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
+            Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership, aclResolver);
     }
     
@@ -258,7 +258,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermissionWithOwnershipResolution(
-            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            WildcardPermission permission, Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser,
             Function<QualifiedObjectIdentifier, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
             final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
@@ -282,7 +282,7 @@ public class PermissionChecker {
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermissionInternal(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser,
             Function<WildcardPermission, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
@@ -363,7 +363,7 @@ public class PermissionChecker {
      *            {@link WildcardPermission}.
      */
     private static Set<WildcardPermission> expandSingleWildcardPermissionToDistinctPermissions(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
+            Iterable<? extends HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -445,7 +445,7 @@ public class PermissionChecker {
      * we need to check the permission for any possibly existing object ID.
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
-    boolean hasUserAnyPermission(WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+    boolean hasUserAnyPermission(WildcardPermission permission, Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sse.security.ui.client.AbstractSecureEntryPoint;
 
@@ -10,7 +9,6 @@ public abstract class AbstractSailingEntryPoint<T extends SailingServiceAsync> e
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
 
     /**
