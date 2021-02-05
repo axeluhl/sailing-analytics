@@ -246,6 +246,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
@@ -940,6 +942,37 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
     }
 
+    /**
+     * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup, 
+     * since it does manipulate Preference Objects directly, outside of the preferenceLock in the UserStoreImpl.
+     */
+    public void migrateCompetitorNotificationPreferencesWithCompetitorNames() {
+        logger.log(Level.INFO, "Migrating Competitor names for CompetitorNotificationPreferences");
+        final SecurityService securityService = getSecurityService();
+        final Map<String, CompetitorNotificationPreferences> competitorNotificationPreferencesByUser = securityService
+                .getPreferenceObjectsByKey(CompetitorNotificationPreferences.PREF_NAME);
+        competitorNotificationPreferencesByUser.forEach((user, preferences) -> {
+            boolean missingCompetitorNameInSavedPreferences = false;
+            final Iterable<CompetitorNotificationPreference> competitors = preferences.getCompetitors();
+            for (CompetitorNotificationPreference competitor : competitors) {
+                if (competitor.getCompetitorName() == null) {
+                    DynamicCompetitor existingCompetitor = competitorAndBoatStore
+                            .getExistingCompetitorByIdAsString(competitor.getCompetitorIdAsString());
+                    if (existingCompetitor != null) {
+                        final String competitorName = existingCompetitor.getName() == null
+                                ? existingCompetitor.getShortName()
+                                : existingCompetitor.getName();
+                        missingCompetitorNameInSavedPreferences = true;
+                        competitor.setCompetitorName(competitorName);
+                    }
+                }
+            }
+            if (missingCompetitorNameInSavedPreferences) {
+                securityService.setPreferenceObject(user, CompetitorNotificationPreferences.PREF_NAME, preferences);
+            }
+        });
+    }
+
     private void populateBoatClasses(DomainFactory baseDomainFactory) {
         for (final String boatClassName : BoatClassMasterdata.getAllBoatClassNames(/* includeAlternativeNames */ false)) {
             baseDomainFactory.getOrCreateBoatClass(boatClassName);
@@ -1049,6 +1082,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
+        }
+        // TODO bug5288 replace with call of clearState() in ExpeditionTrackerFactory
+        for (WindTrackerFactory factory : getWindTrackerFactories()) {
+            if (factory instanceof ExpeditionTrackerFactory) {
+                ((ExpeditionTrackerFactory)factory).clearState();
+            }
         }
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
@@ -5001,13 +5040,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
                         : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
-        UUID competitorUUID = competitorDescriptor.getCompetitorUUID() != null ? competitorDescriptor.getCompetitorUUID() : UUID.randomUUID();
-        UUID boatUUID = competitorDescriptor.getBoatUUID() != null ? competitorDescriptor.getBoatUUID() : UUID.randomUUID();
+        Serializable competitorId = competitorDescriptor.getCompetitorId() != null ? competitorDescriptor.getCompetitorId() : UUID.randomUUID();
+        Serializable boatId = competitorDescriptor.getBoatId() != null ? competitorDescriptor.getBoatId() : UUID.randomUUID();
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
-        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatUUID,
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatId,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);

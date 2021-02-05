@@ -32,12 +32,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -48,7 +50,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkRolePanel extends FlowPanel {
+public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<MarkRoleDTO>{
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -281,5 +283,10 @@ public class MarkRolePanel extends FlowPanel {
                 });
         dialog.ensureDebugId("MarkRoleEditDialog");
         dialog.show();
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkRoleDTO> getFilterablePanel() {
+        return filterableMarkRoles;
     }
 }

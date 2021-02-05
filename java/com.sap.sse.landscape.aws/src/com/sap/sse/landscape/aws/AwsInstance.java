@@ -18,6 +18,9 @@ public interface AwsInstance<ShardingKey, MetricsT extends ApplicationProcessMet
     void terminate();
 
     @Override
+    AwsAvailabilityZone getAvailabilityZone();
+
+    @Override
     default AwsRegion getRegion() {
         return (AwsRegion) Host.super.getRegion();
     }

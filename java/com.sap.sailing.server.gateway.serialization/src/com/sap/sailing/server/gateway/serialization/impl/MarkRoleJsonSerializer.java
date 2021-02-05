@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.MarkRole;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class MarkRoleJsonSerializer implements JsonSerializer<MarkRole> {
     public static final String FIELD_ID = "id";

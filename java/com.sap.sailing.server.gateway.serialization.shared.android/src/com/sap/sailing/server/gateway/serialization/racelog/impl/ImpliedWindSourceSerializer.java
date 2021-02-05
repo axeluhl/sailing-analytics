@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ImpliedWindSourceVisitor;
 import com.sap.sailing.domain.common.orc.OtherRaceAsImpliedWindSource;
 import com.sap.sailing.domain.common.orc.OwnMaxImpliedWind;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ImpliedWindSourceSerializer implements JsonSerializer<ImpliedWindSource> {
     public static final String ORC_FIXED_IMPLIED_WIND_SPEED_IN_KNOTS = "impliedWindInKnots";

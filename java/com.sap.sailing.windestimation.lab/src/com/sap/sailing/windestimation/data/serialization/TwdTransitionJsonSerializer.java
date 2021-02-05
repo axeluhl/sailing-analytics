@@ -2,8 +2,8 @@ package com.sap.sailing.windestimation.data.serialization;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.windestimation.data.LabeledTwdTransition;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class TwdTransitionJsonSerializer implements JsonSerializer<LabeledTwdTransition> {
 

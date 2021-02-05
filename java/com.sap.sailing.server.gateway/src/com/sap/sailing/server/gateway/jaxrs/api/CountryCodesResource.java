@@ -8,10 +8,10 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CountryCodeJsonSerializer;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.CountryCodeFactory;
+import com.sap.sse.shared.json.JsonSerializer;
 
 @Path("/v1/countrycodes")
 public class CountryCodesResource extends AbstractSailingServerResource {

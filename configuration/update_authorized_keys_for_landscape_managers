@@ -1,0 +1,5 @@
+#!/bin/bash
+public_keys=$( for user in `curl -H 'Authorization: Bearer vyIlGJTuzTqS25IiS2cLHDFulJ9NgJto3apwV/D9Q0k=' "https://security-service.sapsailing.com/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS" 2>/dev/null | jq -r '.[]'`; do
+  curl -H 'Authorization: Bearer vyIlGJTuzTqS25IiS2cLHDFulJ9NgJto3apwV/D9Q0k=' "https://security-service.sapsailing.com/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=${user}" 2>/dev/null | jq -r '.[].publicKey'
+done | sort -u )
+echo "${public_keys}"

@@ -24,8 +24,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -175,6 +179,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
 
@@ -524,6 +529,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void setTemporaryDefaultTenant(final UUID tenantGroupId) {
+        if (tenantGroupId != null || getCurrentUser() == null) {
+            final UserGroup tenantGroup = getUserGroup(tenantGroupId);
+            if (tenantGroup == null) {
+                temporaryDefaultTenant.remove();
+            } else {
+                if (Util.contains(getUserGroupsOfUser(getCurrentUser()), tenantGroup)) {
+                    temporaryDefaultTenant.set(tenantGroup);
+                } else {
+                    logger.warning("User " + getCurrentUser().getName()
+                            + " tried to set foreign temporary default tenant group " + tenantGroupId.toString());
+                }
+            }
+        } else {
+            temporaryDefaultTenant.remove();
+        }
+    }
+
+    @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
         return store.getRoleDefinition(idOfRoleDefinition);
     }
@@ -859,6 +883,50 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
+    }
+
+    @Override
+    public Iterable<User> getUsersWithPermissions(WildcardPermission permission) {
+        if (Util.size(permission.getQualifiedObjectIdentifiers()) != 1) {
+            throw new IllegalArgumentException("Permission needs to specify exactly one object identifier");
+        }
+        final ScheduledExecutorService foregroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+        final int numberOfJobs = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
+        final ConcurrentMap<User, Boolean> result = new ConcurrentHashMap<>();
+        final User allUser = store.getUserByName(SecurityService.ALL_USERNAME);
+        final ConcurrentLinkedDeque<User> userList = new ConcurrentLinkedDeque<>();
+        Util.addAll(getUserList(), userList);
+        final Set<Future<?>> futures = new HashSet<>();
+        final QualifiedObjectIdentifier objectIdentifier = permission.getQualifiedObjectIdentifiers().iterator().next();
+        final OwnershipAnnotation ownership = accessControlStore.getOwnership(objectIdentifier);
+        final AccessControlListAnnotation acl = accessControlStore.getAccessControlList(objectIdentifier);
+        // create as many jobs as we expect the thread pool size to be and have each of them
+        // keep polling User objects and check whether that user has the permission sought; if so,
+        // add the User to the result.
+        // result and userList are thread-safe data structures
+        for (int i=0; i<numberOfJobs; i++) {
+            futures.add(foregroundExecutor.submit(()->{
+                User user;
+                int usersHandled = 0;
+                while ((user=userList.poll()) != null) {
+                    usersHandled++;
+                    if (PermissionChecker.isPermitted(permission, user, allUser,
+                            ownership == null ? null : ownership.getAnnotation(), acl == null ? null : acl.getAnnotation())) {
+                        result.put(user, true);
+                    }
+                }
+                final int finalUsersHandled = usersHandled;
+                logger.fine(()->"Handled "+finalUsersHandled+" users in job "+this);
+            }));
+        }
+        for (final Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.WARNING, "Exception while trying to wait for user permission check", e);
+            }
+        }
+        return result.keySet();
     }
 
     @Override
@@ -2380,6 +2448,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T getPreferenceObject(String username, String key) {
         return store.getPreferenceObject(username, key);
     }
+    
+    @Override
+    public <T> Map<String, T> getPreferenceObjectsByKey(String key) {
+        return store.getPreferenceObjectsByKey(key);
+    }
 
     @Override
     public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
@@ -2505,10 +2578,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalUpdateSubscription(String username, Subscription newSubscription)
             throws UserManagementException {
-        User user = getUserByName(username);
+        final User user = getUserByName(username);
         if (user != null) {
-            String newSubscriptionPlanId = newSubscription.getPlanId();
-            Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            final String newSubscriptionPlanId = newSubscription.getPlanId();
+            final Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
             if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
                 logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
                 logger.info(() -> "Current user plan subscription: "
@@ -2518,7 +2591,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
                     updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
                 }
-                Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                final Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
                 if (newSubscriptions != null) {
                     user.setSubscriptions(newSubscriptions);
                 }
