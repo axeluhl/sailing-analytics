@@ -1,14 +1,5 @@
 package com.sap.sailing.android.shared.util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -17,6 +8,15 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.sap.sailing.android.shared.R;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class TimeUtils {
 
@@ -237,5 +237,14 @@ public class TimeUtils {
         time.set(Calendar.SECOND, secondPicker == null ? 0 : secondPicker.getValue());
         time.set(Calendar.MILLISECOND, 0);
         return new MillisecondsTimePoint(time.getTime());
+    }
+
+    public static TimePoint getTime(final int year, final int month, final int dayOfMonth, final TimePicker timePicker,
+                                    @Nullable final NumberPicker secondPicker) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        final int second = secondPicker == null ? 0 : secondPicker.getValue();
+        calendar.set(year, month, dayOfMonth, timePicker.getCurrentHour(), timePicker.getCurrentMinute(), second);
+        return new MillisecondsTimePoint(calendar.getTime());
     }
 }

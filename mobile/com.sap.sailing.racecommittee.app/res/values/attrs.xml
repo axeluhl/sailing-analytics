@@ -114,4 +114,8 @@
     <attr name="flags_postpone" format="reference" />
     <attr name="flags_recall" format="reference" />
 
+    <declare-styleable name="FlagTimeView">
+        <attr name="flagSize" format="integer" />
+    </declare-styleable>
+
 </resources>

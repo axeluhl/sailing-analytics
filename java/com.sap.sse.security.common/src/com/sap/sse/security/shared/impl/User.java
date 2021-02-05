@@ -7,6 +7,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroupProvider;
@@ -111,4 +112,14 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     UserGroupProvider getUserGroupProvider();
 
     String createRandomSecret();
+
+    Iterable<Subscription> getSubscriptions();
+    
+    boolean hasActiveSubscription();
+    
+    void setSubscriptions(Subscription[] subscriptions);
+    
+    Subscription getSubscriptionByPlan(String planId);
+    
+    Subscription getSubscriptionById(String subscriptionId);
 }

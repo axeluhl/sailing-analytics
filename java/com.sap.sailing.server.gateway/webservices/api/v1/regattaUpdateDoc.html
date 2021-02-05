@@ -38,6 +38,9 @@ All slashes contained within the {name} parameter must be replaced by "__" (doub
                 <li>buoyZoneRadiusInHullLengths: Double to set buoy zone value or null to unset</li>
                 <li>useStartTimeInference: Only one of useStartTimeInference and controlTrackingFromStartAndFinishTimes may be true</li>
                 <li>controlTrackingFromStartAndFinishTimes: Only one of useStartTimeInference and controlTrackingFromStartAndFinishTimes may be true</li>
+                <li>autoRestartTrackingUponCompetitorSetChange: If set, changes in the competitor registrations trigger removing and re-tracking of the tracked races affected
+                    to reflect the changes in the set of competitors. Note that this has the effect that until the race(s) is/are re-loaded, users may see incorrect
+                    or incomplete states.</li>
             </ul>
         </td>
 	</tr>

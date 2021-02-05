@@ -59,7 +59,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
     protected Pair<RaceLogRaceStatus, TimePoint> performAnalysis() {
         ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(
                 RaceLogRaceStatusEventComparator.INSTANCE);
-        for (RaceLogEvent event : getPassEvents()) {
+        for (RaceLogEvent event : getPassUnrevokedEvents()) {
             if (event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }

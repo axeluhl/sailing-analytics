@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
 import com.sap.sailing.gwt.home.shared.partials.dialog.DialogFactory;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -53,17 +54,15 @@ public final class WhatsNewDialogFactory {
      */
     private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
             PlaceController placeController) {
-        if (isUserNotified) {
+        if (isUserNotified || !ClientConfiguration.getInstance().isBrandingActive()) {
             return;
         }
         final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()
                 .getText().length();
         userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
-
             @Override
             public void onSuccess(String result) {
                 SettingsToJsonSerializerGWT settingsToJsonSerializerGWT = new SettingsToJsonSerializerGWT();
-
                 DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
                     @Override
                     public void ok(Void editedObject) {
@@ -76,11 +75,9 @@ public final class WhatsNewDialogFactory {
                         updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
                     }
                 };
-
                 if (result != null) {
                     // deserialize whats-new-setting
                     WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
-
                     if (pref.getNumberOfCharsOnLastLogin() > charactersInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
                         // check if length change is over threshold
                         WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
@@ -102,7 +99,6 @@ public final class WhatsNewDialogFactory {
                 String serializedSetting = settingsToJsonSerializerGWT
                         .serializeToString(new WhatsNewSettings(charactersInWhatsChangedDocument));
                 userService.setPreference(WhatsNewSettings.PREF_NAME, serializedSetting, new AsyncCallback<Void>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         LOG.log(Level.SEVERE, caught.getMessage(), caught);
@@ -115,5 +111,4 @@ public final class WhatsNewDialogFactory {
             }
         });
     }
-
 }

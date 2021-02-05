@@ -12,8 +12,12 @@ public interface HasLeaderboardContext {
     Leaderboard getLeaderboard();
 
     @Dimension(messageKey="Leaderboard", ordinal=1)
-    String getName();
+    default String getName() {
+        return getLeaderboard().getName();
+    }
     
     @Connector(messageKey="BoatClass", ordinal=2)
-    BoatClass getBoatClass();
+    default BoatClass getBoatClass() {
+        return getLeaderboard().getBoatClass();
+    }
 }

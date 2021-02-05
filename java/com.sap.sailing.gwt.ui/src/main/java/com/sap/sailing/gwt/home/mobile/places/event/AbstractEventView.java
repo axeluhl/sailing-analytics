@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,8 +47,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         @UiField(provided = true) WindfinderControl windfinderUi;
         @UiField SimplePanel viewContentUi;
         
-        private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
-            this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
+        private AbstractEventViewLayout(EventContext eventContext, EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
+            this.eventHeaderUi = new EventHeader(eventContext, event, regattaName, logoNavigation);
             this.windfinderUi = new WindfinderControl(SpotDTO::getCurrentlyMostAppropriateUrl);
         }
     }
@@ -62,14 +63,16 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         this(presenter, showRegattaName, enableLogoNavigation, true);
     }
     
-    public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation, boolean supportsRefresh) {
+    public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation,
+            boolean supportsRefresh) {
         this.currentPresenter = presenter;
         String regattaName = showRegattaName ? currentPresenter.getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
-        this.layout = new AbstractEventViewLayout(currentPresenter.getEventDTO(), regattaName, logoNavigation);
+        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx(), currentPresenter.getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
-        if(supportsRefresh) {
-            this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
+        if (supportsRefresh) {
+            this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi,
+                    currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         } else {
             this.refreshManager = null;
             layout.viewContentUi.setWidget(contentRoot);
@@ -92,11 +95,13 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         return currentPresenter.isMultiRegattaEvent();
     }
     
-    protected void setQuickFinderValues(Quickfinder quickfinder, Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+    protected void setQuickFinderValues(Quickfinder quickfinder,
+            Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
-    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName,
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
     
@@ -118,7 +123,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     }
 
     @Override
-    public final void setQuickFinderValues(String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
+    public final void setQuickFinderValues(String seriesName,
+            Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         setQuickFinderValues(layout.quickFinderUi, seriesName, eventsOfSeries);
     }
     

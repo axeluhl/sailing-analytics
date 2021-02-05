@@ -329,7 +329,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
     public Competitor updateCompetitor(String idAsString, String newName, String newShortName, Color newDisplayColor, String newEmail,
             Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
             Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String newSearchTag, boolean storePersistently) {
-        DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
+        final DynamicCompetitor competitor = getExistingCompetitorByIdAsString(idAsString);
         if (competitor != null) {
             LockUtil.lockForWrite(lock);
             try {
@@ -647,7 +647,7 @@ public class TransientCompetitorAndBoatStoreImpl implements CompetitorAndBoatSto
                 boatDTO = weakBoatDTOCache.get(b);
                 if (boatDTO == null) {
                     BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), 
-                            b.getBoatClass().getDisplayName(), b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
+                            b.getBoatClass().getHullLength(), b.getBoatClass().getHullBeam());
                     boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());
                     weakBoatDTOCache.put(b, boatDTO);
                 }

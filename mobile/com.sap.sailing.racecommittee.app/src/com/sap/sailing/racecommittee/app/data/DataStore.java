@@ -1,9 +1,6 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
+import android.content.Context;
 
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.CourseArea;
@@ -14,11 +11,12 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
-import android.content.Context;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 
 public interface DataStore {
-
-    void setContext(Context context);
 
     void reset();
 
@@ -46,7 +44,7 @@ public interface DataStore {
 
     void addRace(int index, ManagedRace race);
 
-    void removeRace(ManagedRace race);
+    void removeRace(Context context, ManagedRace race);
 
     ManagedRace getRace(String id);
 
@@ -56,7 +54,9 @@ public interface DataStore {
 
     boolean hasRace(SimpleRaceLogIdentifier id);
 
-    void registerRaces(Collection<ManagedRace> races);
+    void registerRaces(Context context, Collection<ManagedRace> races);
+
+    void clearRaces(Context context);
 
     Collection<Mark> getMarks(RaceGroup raceGroup);
 
@@ -78,8 +78,12 @@ public interface DataStore {
 
     void setEventUUID(Serializable uuid);
 
-    UUID getCourseUUID();
+    /**
+     * The ID of the course area to which the user has logged on. Used as filter when
+     * loading regattas / race groups, and used in start time events when scheduling
+     * a race, assuming that this is the course area where the start will happen.
+     */
+    UUID getCourseAreaId();
 
-    void setCourseUUID(UUID uuid);
-
+    void setCourseAreaId(UUID uuid);
 }

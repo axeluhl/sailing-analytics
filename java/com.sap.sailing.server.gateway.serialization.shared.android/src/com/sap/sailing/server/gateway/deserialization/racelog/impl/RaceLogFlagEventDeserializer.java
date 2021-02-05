@@ -11,9 +11,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFlagEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
     

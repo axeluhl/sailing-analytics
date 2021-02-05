@@ -389,18 +389,27 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         }
         Set<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
-        RaceLog raceLog = getRaceLog(fleet);
-        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent) {
-                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (competitorSet.contains(registerEvent.getCompetitor())) {
-                    try {
-                        raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event,
-                                "unregistering competitor because no longer selected for registration");
-                    } catch (NotRevokableException e) {
-                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+        final RaceLog raceLog = getRaceLog(fleet);
+        final Set<RaceLogEvent> competitorRegistrationEventsToRevoke = new HashSet<>();
+        raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+                if (event instanceof RegisterCompetitorEvent) {
+                    RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                    if (competitorSet.contains(registerEvent.getCompetitor())) {
+                        competitorRegistrationEventsToRevoke.add(event);
                     }
                 }
+            }
+        } finally {
+            raceLog.unlockAfterRead();
+        }
+        for (final RaceLogEvent eventToRevoke : competitorRegistrationEventsToRevoke) {
+            try {
+                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, eventToRevoke,
+                        "unregistering competitor because no longer selected for registration");
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
             }
         }
     }

@@ -12,4 +12,5 @@ Require-Bundle: com.sap.sse.gwt,
 Automatic-Module-Name: com.sap.sailing.expeditionconnector.common
 Import-Package: com.sap.sse,
  com.sap.sse.security.shared,
+ com.sap.sse.security.shared.dto,
  com.sap.sse.security.shared.impl

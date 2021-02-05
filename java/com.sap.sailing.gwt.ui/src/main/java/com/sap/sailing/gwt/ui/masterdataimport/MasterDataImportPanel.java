@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,15 +30,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
-import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.impl.KeywordMatcher;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -49,18 +47,16 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox hostBox;
     private Button importLeaderboardGroupsButton;
     private Button fetchIdsButton;   
-
-    private List<String> allLeaderboardGroupNames;
+    /**
+     * A map containing a leaderboardgroup UUID as key and the name of that leaderboard group as value.
+     */
+    private Map<String, String> allLeaderboardGroupsNameAndIdsMap;
 
     private final StringMessages stringMessages;
     private String currentHost;
-    private SailingServiceAsync sailingService;
+    private SailingServiceWriteAsync sailingServiceWrite;
     private CheckBox overrideSwitch;
-    private final RegattaRefresher regattaRefresher;
-    private final EventsRefresher eventRefresher;
-    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
-    private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
-    private final MediaTracksRefresher mediaTracksRefresher;
+    private final Presenter presenter;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
@@ -69,18 +65,10 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox usernameBox;
     private TextBox passwordBox;
 
-    public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
-            LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
-        this.sailingService = sailingService;
+    public MasterDataImportPanel(final Presenter presenter, StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
         this.stringMessages = stringMessages;
-        this.regattaRefresher = regattaRefresher;
-        this.eventRefresher = eventsRefresher;
-        this.leaderboardsRefresher = leaderboardsRefresher;
-        this.leaderboardGroupsRefresher = leaderboardGroupsRefresher;
-        this.mediaTracksRefresher = mediaTracksRefresher;
-
+        this.presenter = presenter;
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
@@ -106,35 +94,27 @@ public class MasterDataImportPanel extends VerticalPanel {
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         DialogUtils.linkEnterToButton(fetchIdsButton, usernameBox);
         DialogUtils.linkEnterToButton(fetchIdsButton, passwordBox);
-
         this.add(serverAddressPanel);
         this.add(userContextInformation);
         this.add(usernamePanel);
         this.add(passwordPanel);
         this.add(fetchIdsButton);
-
         ScrollPanel scrollPanel = new ScrollPanel();
         this.add(scrollPanel);
-
         VerticalPanel contentPanel = new VerticalPanel();
         scrollPanel.setWidget(contentPanel);
-
         addContentToLeftPanel(contentPanel);
-
         setListeners();
     }
 
     private void setListeners() {
         fetchIdsButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 fireIdRequestsAndFillLists();
             }
         });
-
         hostBox.addKeyDownHandler(new KeyDownHandler() {
-
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -142,9 +122,7 @@ public class MasterDataImportPanel extends VerticalPanel {
                 }
             }
         });
-
         importLeaderboardGroupsButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 importLeaderboardGroups();
@@ -153,7 +131,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     protected void importLeaderboardGroups() {
-        String[] groupNames = createLeaderBoardGroupNamesFromListBox();
+        UUID[] leaderboardGroupIds = createLeaderboardGroupIdsFromListBox();
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final CustomProgressBar overallProgressBar = CustomProgressBar.determinate();
@@ -163,16 +141,15 @@ public class MasterDataImportPanel extends VerticalPanel {
         this.add(subProgressName);
         final CustomProgressBar subProgressBar = CustomProgressBar.determinate();
         this.add(subProgressBar);
-        if (groupNames.length >= 1) {
+        if (leaderboardGroupIds.length >= 1) {
             disableAllButtons();
             boolean override = overrideSwitch.getValue();
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             boolean exportTrackedRacesAndStartTracking = exportTrackedRacesAndStartTrackingSwitch.getValue();
-            sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
+            sailingServiceWrite.importMasterData(currentHost, leaderboardGroupIds, override, compress, exportWind,
                     exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), exportTrackedRacesAndStartTracking, new AsyncCallback<UUID>() {
-
                 @Override
                 public void onFailure(Throwable caught) {
                     showErrorAlert(caught.getLocalizedMessage());
@@ -181,12 +158,10 @@ public class MasterDataImportPanel extends VerticalPanel {
                 @Override
                 public void onSuccess(final UUID resultId) {
                     final Timer timer = new Timer() {
-
                         @Override
                         public void run() {
-                            sailingService.getImportOperationProgress(resultId,
+                            sailingServiceWrite.getImportOperationProgress(resultId,
                                     new AsyncCallback<DataImportProgress>() {
-
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             showErrorAlert(stringMessages.importServerError());
@@ -242,19 +217,19 @@ public class MasterDataImportPanel extends VerticalPanel {
         int mediaTracksImported = creationCount.getMediaTrackCount();
         int trackedRacesImported = creationCount.getTrackedRacesCount();
         if (regattasCreated > 0) {
-            regattaRefresher.fillRegattas();
+            presenter.getRegattasRefresher().reloadAndCallFillAll();
         }
         if (eventsCreated > 0) {
-            eventRefresher.fillEvents();
+            presenter.getEventsRefresher().reloadAndCallFillAll();
         }
         if (leaderboardGroupsCreated > 0) {
-            leaderboardGroupsRefresher.fillLeaderboardGroups();
+            presenter.getLeaderboardGroupsRefresher().reloadAndCallFillAll();
         }
         if (leaderboardsCreated > 0) {
-            leaderboardsRefresher.fillLeaderboards();
+            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
         }
         if (mediaTracksImported > 0) {
-            mediaTracksRefresher.loadMediaTracks();
+            presenter.getMediaTracksRefresher().reloadAndCallFillAll();
         }
         Set<String> overwrittenRegattas = creationCount.getOverwrittenRegattaNames();
         showSuccessAlert(leaderboardsCreated, leaderboardGroupsCreated, eventsCreated, regattasCreated,
@@ -305,14 +280,14 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     }
 
-    private String[] createLeaderBoardGroupNamesFromListBox() {
-        List<String> names = new ArrayList<String>();
+    private UUID[] createLeaderboardGroupIdsFromListBox() {
+        List<UUID> uuids = new ArrayList<UUID>();
         for (int i = 0; i < leaderboardgroupListBox.getItemCount(); i++) {
             if (leaderboardgroupListBox.isItemSelected(i)) {
-                names.add(leaderboardgroupListBox.getValue(i));
+                uuids.add(UUID.fromString(leaderboardgroupListBox.getValue(i)));
             }
         }
-        return names.toArray(new String[names.size()]);
+        return uuids.toArray(new UUID[uuids.size()]);
     }
 
     protected void fireIdRequestsAndFillLists() {
@@ -325,32 +300,25 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        // FIXME what about login here?
-        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
-                new AsyncCallback<List<String>>() {
+        sailingServiceWrite.getLeaderboardGroupNamesAndIdsAsStringsFromRemoteServer(host, usernameBox.getValue(),
+                passwordBox.getValue(), new AsyncCallback<Map<String, String>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
+                        changeButtonStateAccordingToApplicationState();
+                    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                showErrorAlert(stringMessages.importGetLeaderboardsFailed(host, caught.getMessage()));
-                changeButtonStateAccordingToApplicationState();
-            }
-
-            @Override
-            public void onSuccess(List<String> result) {
-                clearListBox();
-                Collections.sort(result);
-                allLeaderboardGroupNames = result;
-                leaderboardgroupListBox.setVisibleItemCount(result.size());
-                for (String lgName : result) {
-                    leaderboardgroupListBox.addItem(lgName);
-                }
-                changeButtonStateAccordingToApplicationState();
-                if (!filterBox.getValue().isEmpty()) {
-                    filterLeaderboardGroupList();
-                }
-            }
-
-        });
+                    @Override
+                    public void onSuccess(Map<String, String> result) {
+                        clearListBox();
+                        allLeaderboardGroupsNameAndIdsMap = result;
+                        fillLeaderboardGroupListBox(allLeaderboardGroupsNameAndIdsMap);
+                        changeButtonStateAccordingToApplicationState();
+                        if (!filterBox.getValue().isEmpty()) {
+                            filterLeaderboardGroupList();
+                        }
+                    }
+                });
     }
 
     private void showErrorAlert(String string) {
@@ -359,49 +327,38 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
         contentPanel.add(new Label(stringMessages.availableLeaderboardGroups()));
-        
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.add(new Label(stringMessages.filterName() + ":"));
         filterBox = new TextBox();
         setFilterHandler(filterBox);
         filterPanel.add(filterBox);
         contentPanel.add(filterPanel);
-
         leaderboardgroupListBox = new ListBox();
         leaderboardgroupListBox.ensureDebugId("LeaderBoardGroupListBox");
         leaderboardgroupListBox.setMultipleSelect(true);
-
         addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
-        
         overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
         overrideSwitch.ensureDebugId("overrideExisting");
         overrideSwitch.setValue(false);
         contentPanel.add(overrideSwitch);
-        
         compressSwitch = new CheckBox(stringMessages.compress());
         compressSwitch.setTitle(stringMessages.compressTooltip());
         compressSwitch.setValue(true);
         contentPanel.add(compressSwitch);
-
         exportWindSwitch = new CheckBox(stringMessages.importWind());
         exportWindSwitch.setTitle(stringMessages.importWindTooltip());
         exportWindSwitch.setValue(true);
         exportWindSwitch.ensureDebugId("wind");
         contentPanel.add(exportWindSwitch);
-        
         exportDeviceConfigsSwitch = new CheckBox(stringMessages.importDeviceConfigurations());
         exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
         exportDeviceConfigsSwitch.setValue(false);
         contentPanel.add(exportDeviceConfigsSwitch);
-        
         exportTrackedRacesAndStartTrackingSwitch = new CheckBox(stringMessages.exportTrackedRacesAndStartTracking());
         exportTrackedRacesAndStartTrackingSwitch.setTitle(stringMessages.exportTrackedRacesAndStartTrackingTooltip());
-        exportTrackedRacesAndStartTrackingSwitch.setValue(false);
-        //TODO: Remove after bug5245 is fixed.
-        exportTrackedRacesAndStartTrackingSwitch.setVisible(false);
+        exportTrackedRacesAndStartTrackingSwitch.setValue(true);
         contentPanel.add(exportTrackedRacesAndStartTrackingSwitch);
-
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.ensureDebugId("import");
         importLeaderboardGroupsButton.setEnabled(false);
@@ -436,7 +393,6 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private void filterLeaderboardGroupList() {
         clearListBox();
-        int visibleNameCount = 0;
         Iterable<String> filterTexts = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterBox.getText());
         final KeywordMatcher<String> matcher = new KeywordMatcher<String>() {
             @Override
@@ -444,18 +400,26 @@ public class MasterDataImportPanel extends VerticalPanel {
                 return Collections.singleton(t);
             } 
         };
-        for (String name : allLeaderboardGroupNames) {
-            if (matcher.matches(filterTexts, name)) {
-                leaderboardgroupListBox.addItem(name);
-                visibleNameCount++;
-            }
-        }
-        leaderboardgroupListBox.setVisibleItemCount(visibleNameCount);
+        Map<String, String> filteredMap = allLeaderboardGroupsNameAndIdsMap.entrySet().stream()
+                .filter(entry -> matcher.matches(filterTexts, entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        fillLeaderboardGroupListBox(filteredMap);
         changeButtonStateAccordingToApplicationState();
+    }
+
+    private void fillLeaderboardGroupListBox(Map<String, String> leaderboardGroupsMap) {
+        final List<Pair<String, String>> list = new ArrayList<>();
+        for (final String key : leaderboardGroupsMap.keySet()) {
+            list.add(new Pair<>(leaderboardGroupsMap.get(key), key));
+        }
+        Collections.sort(list, (a, b)->a.getA().compareTo(b.getA()));
+        for (final Pair<String, String> pair : list) {
+            leaderboardgroupListBox.addItem(pair.getA(), pair.getB());
+        }
+        leaderboardgroupListBox.setVisibleItemCount(list.size());
     }
 
     private void deleteProgressIndication(IsWidget... widgetsToRemove) {
         Arrays.asList(widgetsToRemove).forEach(this::remove);
     }
-
 }

@@ -14,11 +14,11 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.shared.json.JsonSerializer;
 
 /**
  * Serializes a {@link Competitor} or {@link CompetitorWithBoat} object. If a {@link CompetitorWithBoat} object,
@@ -117,6 +117,9 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         }
         result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
         result.put(CompetitorJsonConstants.FIELD_SHORT_NAME, competitor.getShortName());
+        if (competitor.hasBoat()) {
+            result.put(CompetitorJsonConstants.FIELD_SAIL_ID, ((CompetitorWithBoat) competitor).getBoat().getSailID());
+        }
         Color color = getColor(competitor);
         result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         if (serializeNonPublicFields) {

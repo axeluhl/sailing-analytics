@@ -48,12 +48,12 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                 final URL remoteServerUrl = RemoteServerUtil.createBaseUrl(remoteServerUrlAsString);
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_REMOTE_INSTANCES);
                 final RemoteSailingServerReference serverRef = getService()
-                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl));
+                        .apply(new AddRemoteSailingServerReference(remoteServerName, remoteServerUrl, true));
                 final JSONObject jsonResponse = new JSONObject();
                 jsonResponse.put("remoteServerNameAdded", serverRef.getName());
                 jsonResponse.put("remoteServerUrlAdded", serverRef.getURL().toString());
                 jsonResponse.put("remoteServerEventsAdded", getRemoteEventsList(serverRef));
-                response = Response.ok(jsonResponse.toJSONString())
+                response = Response.ok(streamingOutput(jsonResponse))
                         .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (UnauthorizedException e) {
                 response = returnUnauthorized(e);
@@ -91,7 +91,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
                     jsonResponse.put("remoteServerNameRemoved", serverRef.getName());
                     jsonResponse.put("remoteServerUrlRemoved", serverRef.getURL().toString());
                     jsonResponse.put("remoteServerEventsRemoved", remoteEventList);
-                    response = Response.ok(jsonResponse.toJSONString())
+                    response = Response.ok(streamingOutput(jsonResponse))
                             .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                 }
             } catch (UnauthorizedException e) {
@@ -105,7 +105,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
 
     private List<String> getRemoteEventsList(RemoteSailingServerReference serverRef) {
         final Pair<Iterable<EventBase>, Exception> remoteServerEventsAndExceptions = getService()
-                .updateRemoteServerEventCacheSynchronously(serverRef);
+                .updateRemoteServerEventCacheSynchronously(serverRef, false);
         final List<String> remoteEventsList = new LinkedList<>();
         for (EventBase event : remoteServerEventsAndExceptions.getA()) {
             remoteEventsList.add(event.getName());

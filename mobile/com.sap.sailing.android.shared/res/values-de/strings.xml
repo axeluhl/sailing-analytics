@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
+<resources>
     <string name="options_menu_live">Verbindungsinformationen</string>
     <string name="remove">Entfernen</string>
     <string name="enter_new_item">Neues Element eingeben</string>
@@ -50,6 +49,7 @@
     <string name="enable_gps">GPS ist nicht aktiviert. Diese App erfordert GPS Positionen. Möchten Sie GPS in den Einstellungen aktivieren?</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">Verbunden mit: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="sending_waiting">%1$d Events konnten noch nicht gesendet werden.\nLetzter erfolgreicher Versand fand statt %2$s</string>
     <string name="sending_no_waiting">Derzeit keine unversendeten Events.</string>
 

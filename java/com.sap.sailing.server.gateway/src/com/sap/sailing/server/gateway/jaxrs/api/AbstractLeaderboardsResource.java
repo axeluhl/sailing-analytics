@@ -10,6 +10,8 @@ import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ResultsAreOfficialFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
@@ -178,6 +180,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 final JSONObject fleetJson = new JSONObject();
                 fleetsJson.add(fleetJson);
                 fleetJson.put("name", fleet.getName());
+                fleetJson.put("resultsAreOfficial", isResultsAreOfficial(raceColumn, fleet));
                 final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 final JSONObject trackedRaceInfo;
                 if (trackedRace == null) {
@@ -201,6 +204,11 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 fleetJson.put("trackedRace", trackedRaceInfo);
             }
         }
+    }
+
+    private boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        return new ResultsAreOfficialFinder(raceLog).analyze() != null;
     }
 
     protected TimePoint calculateTimePointForResultState(Leaderboard leaderboard, ResultStates resultState) {
@@ -253,18 +261,20 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
     protected abstract JSONObject getLeaderboardJson(Leaderboard leaderboard, TimePoint resultTimePoint,
             ResultStates resultState, Integer maxCompetitorsCount, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret, boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException;
 
     protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
             TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
             List<String> raceDetailNames, boolean competitorAndBoatIdsOnly,
-            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret)
+            List<String> showOnlyActiveRacesForCompetitorIds, boolean userPresentedValidRegattaSecret,
+            boolean showOnlyCompetitorsWithIdsProvided)
             throws NoWindException, InterruptedException, ExecutionException {
         final JSONObject jsonLeaderboard;
         if (timePoint != null || resultState == ResultStates.Live) {
             jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
-                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds, userPresentedValidRegattaSecret);
+                    raceColumnNames, raceDetailNames, competitorAndBoatIdsOnly, showOnlyActiveRacesForCompetitorIds,
+                    userPresentedValidRegattaSecret, showOnlyCompetitorsWithIdsProvided);
         } else {
             jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount, userPresentedValidRegattaSecret);
         }

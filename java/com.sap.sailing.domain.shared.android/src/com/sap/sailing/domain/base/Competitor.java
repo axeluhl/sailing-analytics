@@ -54,6 +54,7 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     /**
      * Adds a listener to this competitor. The listener is also added to the boat and the team for changes.
      * Adding a listener that is already part of this competitor's listeners set remains without effect.
+     * The listeners added here will not be serialized together with this {@link Competitor} instance.
      */
     void addCompetitorChangeListener(CompetitorChangeListener listener);
     

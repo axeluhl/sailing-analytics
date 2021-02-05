@@ -814,4 +814,16 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public void runWhenDoneLoading(Runnable runnable) {
+    }
+
+    @Override
+    public void runSynchronizedOnStatus(Runnable runnable) {
+    }
+
+    @Override
+    public boolean hasFinishedLoading() {
+        return false;
+    }
 }

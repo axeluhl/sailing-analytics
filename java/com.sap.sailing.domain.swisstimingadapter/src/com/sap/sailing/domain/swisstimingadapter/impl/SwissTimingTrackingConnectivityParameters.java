@@ -37,12 +37,15 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
     private final String updateURL;
     private final String updateUsername;
     private final String updatePassword;
+    private final String eventName;
+    private final String manage2SailEventUrl;
     
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword) {
+            boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername,
+            String updatePassword, String eventName, String manage2SailEventUrl) {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.hostname = hostname;
         this.port = port;
@@ -60,6 +63,8 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
         this.updateURL = updateURL;
         this.updateUsername = updateUsername;
         this.updatePassword = updatePassword;
+        this.eventName = eventName;
+        this.manage2SailEventUrl = manage2SailEventUrl;
     }
     
     @Override
@@ -135,6 +140,14 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
 
     public boolean isUseInternalMarkPassingAlgorithm() {
         return useInternalMarkPassingAlgorithm;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public String getManage2SailEventUrl() {
+        return manage2SailEventUrl;
     }
 
     @Override

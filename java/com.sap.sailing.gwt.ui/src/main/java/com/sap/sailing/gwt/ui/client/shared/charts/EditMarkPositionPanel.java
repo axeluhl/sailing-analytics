@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.BaseChart;
@@ -82,6 +83,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
@@ -107,7 +109,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
+public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler, HasAvailabilityCheck {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
     private final SingleRaceLeaderboardPanel leaderboardPanel;
@@ -135,18 +137,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     protected boolean nonTrackingWarningWasDisplayed;
 
     private final Set<MarkDTO> marksCurrentlyRequestedViaRemoteCall = new HashSet<>();
+    private final SailingServiceWriteAsync sailingServiceWrite;
 
     public EditMarkPositionPanel(Component<?> parent, ComponentContext<?> context, final RaceMap raceMap,
             final SingleRaceLeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
-        this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
+        this.markPositionService = new MarkPositionServiceForSailingService(sailingServiceWrite);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.polylines = new HashMap<>();
         this.marksPanel = new MarksPanel(this, context, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
@@ -1078,5 +1082,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     @Override
     public String getId() {
         return "EditMarkPositionPanel";
+    }
+
+    @Override
+    public void checkBackendAvailability(Consumer<Boolean> callback) {
+        HasAvailabilityCheck.validateBackendAvailabilityAndExecuteBusinessLogic(sailingServiceWrite, callback,
+                stringMessages);
     }
 }

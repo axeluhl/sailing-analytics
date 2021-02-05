@@ -17,7 +17,9 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
         void onChangeUsername(String newValue);
         
         void onChangeFullName(String newValue);
-        
+
+        void onChangeLocale(String newValue);
+
         void onChangeCompany(String newValue);
         
         void onChangePassword(String newValue);

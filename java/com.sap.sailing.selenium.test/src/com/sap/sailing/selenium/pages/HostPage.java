@@ -2,6 +2,9 @@ package com.sap.sailing.selenium.pages;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.StringJoiner;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -40,19 +43,52 @@ public abstract class HostPage extends PageObject {
             throw new IllegalArgumentException(exc);
         }
     }
-    
+
     private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
-        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost(); 
-        String path = uri.getPath(), query = getGWTCodeServerAndLocale(), fragment = uri.getFragment();
+        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost();
+        String path = uri.getPath(),
+                query = getGWTCodeServerAndLocale() + (uri.getQuery() != null ? "&" + uri.getQuery() : ""),
+                fragment = uri.getFragment();
         driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
     }
     
+    protected final static <T extends HostPage> T goToPlace(HostPageSupplier<T> supplier, WebDriver driver, String url, String place, String... parameters) {
+        try {
+            URI uri = new URI(url);
+            String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost();
+            String placeParameters = parameters == null ? ":" : getUrlParametersAsString(parameters);
+            String path = uri.getPath(),
+                    query = getGWTCodeServerAndLocale() + (uri.getQuery() != null ? "&" + uri.getQuery() : ""),
+                    fragment = uri.getFragment();
+            driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString() + "#" + place + placeParameters);
+            return supplier.get(driver); 
+        } catch (URISyntaxException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
+
+    private static String getUrlParametersAsString(String... parameters) {
+        Iterator<String> iterableParameters = Arrays.asList(parameters).iterator();
+        StringJoiner placeParameters = new StringJoiner("&", ":", "");
+        while (iterableParameters.hasNext()) {          
+            String key = iterableParameters.next();
+            String keyValuePair = key;
+            if (iterableParameters.hasNext()) {
+                keyValuePair += "=" + iterableParameters.next();
+            }
+            placeParameters.add(keyValuePair);
+        }
+        return placeParameters.toString();
+    }
+    
     /**
-     * <p>Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in
-     *   which the code for the application is executed, whereby the page is represented by the web driver.</p>
+     * <p>
+     * Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in which
+     * the code for the application is executed, whereby the page is represented by the web driver.
+     * </p>
      * 
      * @param driver
-     *   The web driver to use.
+     *            The web driver to use.
      */
     public HostPage(WebDriver driver) {
         super(driver);

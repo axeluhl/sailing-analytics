@@ -149,11 +149,13 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     }
 
     @Override
-    public void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String raceName, String raceID,
-            String boatClassName, TrackerManager trackerManager, TrackedRegattaRegistry trackedRegattaRegistry,
-            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+    public void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
+            String raceID, String boatClassName, TrackerManager trackerManager,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
-        trackerManager.addRace(regattaToAddTo, new SwissTimingReplayConnectivityParameters(link, raceName, raceID,
-                boatClassName, useInternalMarkPassingAlgorithm, domainFactory, this, raceLogStore, regattaLogStore), /* timeout */ -1);
+        trackerManager
+                .addRace(regattaToAddTo, new SwissTimingReplayConnectivityParameters(link, swissTimingUrl, raceName,
+                raceID, boatClassName, useInternalMarkPassingAlgorithm, domainFactory, this, raceLogStore, regattaLogStore), /* timeout */ -1);
     }
 }

@@ -262,17 +262,26 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
      * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more
-     * legs ahead, it's the competitor's winward distance to go plus the windward distance between the marks of all legs
-     * that the leader completed after this competitor's leg plus the windard distance between the leader and the
+     * legs ahead, it's the competitor's windward distance to go plus the windward distance between the marks of all
+     * legs that the leader completed after this competitor's leg plus the windward distance between the leader and the
      * leader's leg's start.
      * <p>
      * 
      * If the leg is neither an {@link LegType#UPWIND upwind} nor a {@link LegType#DOWNWIND downwind} leg, the geometric
      * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
-     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance to go} which is
-     * used for ranking.
+     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint, WindPositionMode) distance
+     * to go} which is used for ranking.
+     * <p>
      * 
-     * @param rankingInfo materialized ranking information that is pre-calculated to avoid expensive redundant work
+     * If at {@code timePoint} the {@link #getCompetitor() competitor} is not yet sailing in the {@link #getLeg() leg},
+     * {@code null} will result. If at {@code timePoint} the {@link #getCompetitor() competitor} has already finished the
+     * {@link #getLeg() leg}, the time point at which the competitor finished the leg is used as basis for the calculation
+     * instead of {@code timePoint}. In particular, the leader is then determined for that finishing time point, and the
+     * leader's position is determined for that finishing time point, too. This way, the result will---apart from any
+     * out of order fix deliveries or course changes---remain constant for any later time point.
+     * 
+     * @param rankingInfo
+     *            materialized ranking information that is pre-calculated to avoid expensive redundant work
      */
     Distance getWindwardDistanceToCompetitorFarthestAhead(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo);
 

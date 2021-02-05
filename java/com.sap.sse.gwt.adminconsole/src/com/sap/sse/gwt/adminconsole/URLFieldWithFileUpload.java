@@ -113,7 +113,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<List<S
         mainPanel.add(uploadFormPanel);
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
-        if(initiallyEnableUpload) {
+        if (initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
         uploadFormPanel.setAction("/sailingserver/fileupload");

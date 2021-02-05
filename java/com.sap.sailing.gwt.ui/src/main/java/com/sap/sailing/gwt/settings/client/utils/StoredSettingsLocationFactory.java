@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.utils;
 
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
@@ -18,6 +19,7 @@ public class StoredSettingsLocationFactory {
 
     private static final String RACEBOARD = "Raceboard";
     private static final String LEADERBOARD = "Leaderboard";
+    private static final String EDITABLE_LEADERBOARD = "EditableLeaderboard";
     private static final String REGATTA_OVERVIEW = "RegattaOverview";
     private static final String EVENT_REGATTA_LEADERBOARD = "EventRegattaLeaderboard";
     private static final String SERIES_OVERALL_LEADERBOARD = "SeriesOverallLeaderboard";
@@ -26,11 +28,12 @@ public class StoredSettingsLocationFactory {
     public static final StoredSettingsLocation createStoredSettingsLocatorForRaceBoard(
             RaceboardContextDefinition raceboardContextDefinition, String raceBoardModeName) {
         String userSettingsIdPart = RACEBOARD;
-        if(raceBoardModeName != null) {
+        if (raceBoardModeName != null) {
             userSettingsIdPart += "." + raceBoardModeName;
         }
-        String documentSettingsIdPart = StoredSettingsLocation.buildDocumentSettingsIdPart(raceboardContextDefinition.getRegattaName(),
-                raceboardContextDefinition.getRaceName(), raceboardContextDefinition.getLeaderboardName());
+        String documentSettingsIdPart = StoredSettingsLocation.buildDocumentSettingsIdPart(
+                raceboardContextDefinition.getRegattaName(), raceboardContextDefinition.getRaceName(),
+                raceboardContextDefinition.getLeaderboardName());
 
         return new SailingStoredSettingsLocation(userSettingsIdPart, documentSettingsIdPart);
     }
@@ -41,23 +44,32 @@ public class StoredSettingsLocationFactory {
                 StoredSettingsLocation.buildDocumentSettingsIdPart(leaderboardContextDefinition.getLeaderboardName()));
     }
 
+    public static final StoredSettingsLocation createStoredSettingsLocatorForEditableLeaderboard(
+            EditableLeaderboardContextDefinition editableLeaderboardContextDefinition) {
+        return new SailingStoredSettingsLocation(EDITABLE_LEADERBOARD,
+                StoredSettingsLocation.buildDocumentSettingsIdPart(editableLeaderboardContextDefinition.getLeaderboardName()));
+    }
+
     public static final StoredSettingsLocation createStoredSettingsLocatorForRegattaOverview(
             RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
-        return new SailingStoredSettingsLocation(REGATTA_OVERVIEW,
-                StoredSettingsLocation.buildDocumentSettingsIdPart(regattaOverviewContextDefinition.getEvent().toString()));
+        return new SailingStoredSettingsLocation(REGATTA_OVERVIEW, StoredSettingsLocation
+                .buildDocumentSettingsIdPart(regattaOverviewContextDefinition.getEvent().toString()));
     }
-    
-    public static final StoredSettingsLocation createStoredSettingsLocatorForEventRegattaLeaderboard(String leaderboardName) {
+
+    public static final StoredSettingsLocation createStoredSettingsLocatorForEventRegattaLeaderboard(
+            String leaderboardName) {
         return new SailingStoredSettingsLocation(EVENT_REGATTA_LEADERBOARD,
                 StoredSettingsLocation.buildDocumentSettingsIdPart(leaderboardName));
     }
-    
-    public static final StoredSettingsLocation createStoredSettingsLocatorForSeriesOverallLeaderboard(String leaderboardName) {
+
+    public static final StoredSettingsLocation createStoredSettingsLocatorForSeriesOverallLeaderboard(
+            String leaderboardName) {
         return new SailingStoredSettingsLocation(SERIES_OVERALL_LEADERBOARD,
                 StoredSettingsLocation.buildDocumentSettingsIdPart(leaderboardName));
     }
-    
-    public static final StoredSettingsLocation createStoredSettingsLocatorForSeriesRegattaLeaderboards(String leaderboardName) {
+
+    public static final StoredSettingsLocation createStoredSettingsLocatorForSeriesRegattaLeaderboards(
+            String leaderboardName) {
         return new SailingStoredSettingsLocation(SERIES_REGATTA_LEADERBOARDS,
                 StoredSettingsLocation.buildDocumentSettingsIdPart(leaderboardName));
     }

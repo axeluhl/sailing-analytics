@@ -41,12 +41,12 @@ public class UserGroupUsersTableWrapper extends
                 StrippedUserDTO::getName, getColumnSortHandler());
         final AccessControlledActionsColumn<StrippedUserDTO, UserGroupUsersImagesBarCell> actionColumns = AccessControlledActionsColumn
                 .create(new UserGroupUsersImagesBarCell(stringMessages), userService,
-                        user -> getSingleSelectedUserGroup(userGroupSelectionModel));
+                        user -> getSingleSelectedObjectOrNull(userGroupSelectionModel));
         actionColumns.addAction(UserGroupUsersImagesBarCell.ACTION_DELETE, UPDATE, user -> {
-            final UserGroupDTO tenant = getSingleSelectedUserGroup(userGroupSelectionModel);
+            final UserGroupDTO tenant = getSingleSelectedObjectOrNull(userGroupSelectionModel);
             if (tenant != null) {
                 final String username = user.getName();
-                userService.getUserManagementService().removeUserFromUserGroup(tenant.getId().toString(), username,
+                userService.getUserManagementWriteService().removeUserFromUserGroup(tenant.getId().toString(), username,
                         new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -72,6 +72,7 @@ public class UserGroupUsersTableWrapper extends
             }
         });
         table.addColumn(usernameColumn, stringMessages.username());
+        table.ensureDebugId("UserGroupUserDTOTable");
         table.addColumn(actionColumns);
     }
 

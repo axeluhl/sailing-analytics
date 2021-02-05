@@ -59,7 +59,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
         checkTimer.schedule(UPDATE_STATE_TIMER);
         final UUID eventUUID = cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId();
         cf.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
-
             @Override
             public void onSuccess(final EventDTO event) {
                 if (firstTimeEventLoaded) {
@@ -90,7 +89,6 @@ public abstract class RootNodeBase extends BaseCompositeNode {
     private void _doCheck() {
         final RegattaAndRaceIdentifier currentPreLiveRace = cf.getAutoPlayCtxSignalError().getPreLiveRace();
         final RegattaAndRaceIdentifier currentLiveRace = cf.getAutoPlayCtxSignalError().getLiveRace();
-
         this.leaderBoardName = cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName();
         AutoplayHelper.getLiveRace(cf.getSailingService(), cf.getErrorReporter(), cf.getAutoPlayCtxSignalError().getEvent(),
                 leaderBoardName, cf.getDispatch(), getWaitTimeAfterRaceEndInMillis(),
@@ -98,12 +96,9 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                     @Override
                     public void onSuccess(Pair<Long, RegattaAndRaceIdentifier> result) {
                         errorCount = 0;
-
                         // we have no race, or we have one, and had a different one in the past
                         if (result == null || result.getB() == null) {
-
                             boolean comingFromLiveRace = currentLiveRace != null || currentPreLiveRace != null;
-
                             if (comingFromLiveRace) {
                                 log("No live race found, coming from live race");
                                 setCurrentState(false, null, RootNodeState.AFTER_LIVE, currentState);
@@ -111,22 +106,18 @@ public abstract class RootNodeBase extends BaseCompositeNode {
                                 setCurrentState(false, null, RootNodeState.IDLE, currentState);
                             }
                         } else {
-
                             final Long timeToRaceStartInMs = result.getA();
                             final RegattaAndRaceIdentifier loadedLiveRace = result.getB();
-
                             boolean isPreLiveRace = timeToRaceStartInMs > LIVE_SWITCH_DELAY;
                             // exit
                             if (currentLiveRace != null && !loadedLiveRace.equals(currentLiveRace)) {
                                 log("Received different live race, hard switching to AFTER_LIVE race");
                                 setCurrentState(isPreLiveRace, loadedLiveRace, RootNodeState.AFTER_LIVE, currentState);
                             } else {
-                                log("New " + (isPreLiveRace ? "live " : "pre live") + " race found: " + loadedLiveRace
+                                log("New " + (isPreLiveRace ? "live" : "pre live") + " race found: " + loadedLiveRace
                                         + " starting in " + (timeToRaceStartInMs / 1000) + "s");
-
                                 setCurrentState(isPreLiveRace, loadedLiveRace,
                                         isPreLiveRace ? RootNodeState.PRE_RACE : RootNodeState.LIVE, currentState);
-
                             }
                         }
                     }

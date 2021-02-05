@@ -34,7 +34,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
@@ -51,6 +50,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -174,7 +174,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         });
         assertNull(trackedRace.getStartOfRace());
         final TimePoint newStartOfRace = MillisecondsTimePoint.now();
-        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace));
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace, /* courseAreaId */ null));
         assertNull(oldAndNewStartTimeNotifiedByRace[0]);
         assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
         assertEquals(newStartOfRace, trackedRace.getStartOfRace());
@@ -381,7 +381,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         });
         assertNull(trackedRace.getStartOfRace());
         final TimePoint newStartOfRace = MillisecondsTimePoint.now();
-        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace));
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace, /* courseAreaId */ null));
         assertNull(oldAndNewStartTimeNotifiedByRace[0]);
         assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
         assertEquals(newStartOfRace, trackedRace.getStartOfRace());

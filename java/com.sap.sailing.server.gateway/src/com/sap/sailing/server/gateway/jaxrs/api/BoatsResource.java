@@ -44,9 +44,7 @@ public class BoatsResource extends AbstractSailingServerResource {
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
             }
             BoatJsonSerializer boatJsonSerializer = BoatJsonSerializer.create();
-            String jsonString = boatJsonSerializer.serialize(boat).toJSONString();
-            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                    .build();
+            response = Response.ok(streamingOutput(boatJsonSerializer.serialize(boat))).build();
         }
         return response;
     }

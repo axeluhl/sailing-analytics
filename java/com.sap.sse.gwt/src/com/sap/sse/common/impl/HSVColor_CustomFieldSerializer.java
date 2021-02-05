@@ -4,7 +4,6 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
-import com.sap.sse.common.impl.HSVColor;
 
 public class HSVColor_CustomFieldSerializer extends CustomFieldSerializer<HSVColor> {
     public static void serialize(SerializationStreamWriter streamWriter, HSVColor instance) throws SerializationException {

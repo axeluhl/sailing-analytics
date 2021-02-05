@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -97,7 +97,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
     }
     
     public void setDefaultRegattas(Iterable<RaceGroupDTO> defaultRaceGroups) {
-        if(defaultRaceGroups == null) {
+        if (defaultRaceGroups == null) {
             defaultRaceGroups = Collections.emptySet();
         }
         Set<String> regattaIds = new HashSet<>();

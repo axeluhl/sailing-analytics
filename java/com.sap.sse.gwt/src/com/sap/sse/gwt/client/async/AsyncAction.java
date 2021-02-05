@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  *            The type of the returned value of the call
  * @author c5163874
  */
+@FunctionalInterface
 public interface AsyncAction<Result> {
-    public void execute(AsyncCallback<Result> callback);
+    void execute(AsyncCallback<Result> callback);
 }

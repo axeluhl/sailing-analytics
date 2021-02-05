@@ -4,6 +4,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.resultimport.impl.ResultUrlRegistryServiceTrackerCustomizer;
@@ -16,7 +17,6 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         resultUrlRegistryServiceTracker = new ServiceTracker<>(bundleContext, ResultUrlRegistry.class,
                 new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
-
                     @Override
                     protected ScoreCorrectionProvider configureScoreCorrectionProvider(
                             ResultUrlRegistry resultUrlRegistry) {
@@ -24,8 +24,13 @@ public class Activator implements BundleActivator {
                                 ParserFactory.INSTANCE, resultUrlRegistry);
                         return service;
                     }
+                    @Override
+                    protected CompetitorProvider configureCompetitorProvider(ResultUrlRegistry resultUrlRegistry) {
+                        final CompetitorProvider service = new YachtScoringCompetitorProvider(ParserFactory.INSTANCE,
+                                resultUrlRegistry);
+                        return service;
+                    }
                 });
-
         resultUrlRegistryServiceTracker.open();
     }
 

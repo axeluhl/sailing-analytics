@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.api.regatta;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -32,8 +33,8 @@ public class Regatta extends JsonWrapper {
         return get("scoringSystem");
     }
 
-    public String getCourseAreaId() {
-        return get("courseAreaId");
+    public JSONArray getCourseAreaId() {
+        return get("courseAreaIds");
     }
 
     public Boolean canBoatsOfCompetitorsChangePerRace() {

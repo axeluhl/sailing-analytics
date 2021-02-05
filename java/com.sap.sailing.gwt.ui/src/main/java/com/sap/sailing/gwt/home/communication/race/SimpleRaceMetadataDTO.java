@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.race;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -67,6 +68,7 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     private String leaderboardName;
     private String leaderboardGroupName;
+    private UUID leaderboardGroupId;
     private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String raceName;
     private Date start;
@@ -102,6 +104,14 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     
     public void setLeaderboardGroupName(String leaderboardGroupName) {
         this.leaderboardGroupName = leaderboardGroupName;
+    }
+    
+    public UUID getLeaderboardGroupId() {
+        return leaderboardGroupId;
+    }
+    
+    public void setLeaderboardGroupId(UUID leaderboardGroupId) {
+        this.leaderboardGroupId = leaderboardGroupId;
     }
     
     public Date getStart() {

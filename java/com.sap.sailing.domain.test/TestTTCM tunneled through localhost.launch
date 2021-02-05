@@ -11,6 +11,7 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ttcmtester.TestTTCM"/>
+<stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="com.sap.sailing.domain.test"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="http://simulation.tracdev.dk/simulateconf/j80race12.txt&#13;&#10;tcp://localhost:4411&#13;&#10;tcp://localhost:4410"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.domain.test"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080"/>

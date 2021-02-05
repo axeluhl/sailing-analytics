@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,8 @@ public class UserService {
     protected static final Duration SUPRESSION_DELAY = Duration.ONE_WEEK;
     
     private final UserManagementServiceAsync userManagementService;
+    
+    private final UserManagementWriteServiceAsync userManagementWriteService;
 
     private final Set<UserStatusEventHandler> handlers;
 
@@ -104,14 +107,29 @@ public class UserService {
      */
     private final DelegatingCrossDomainStorageFuture crossDomainStorage;
 
-    public UserService(UserManagementServiceAsync userManagementService) {
+    public UserService(UserManagementServiceAsync userManagementService, UserManagementWriteServiceAsync userManagementWriteService) {
         this.id = UUID.randomUUID().toString();
         this.userManagementService = userManagementService;
+        this.userManagementWriteService = userManagementWriteService;
         handlers = new HashSet<>();
         allKnownHasPermissions = new HashSet<>();
         crossDomainStorage = new DelegatingCrossDomainStorageFuture();
         initializeCrossDomainStorage();
-        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
+        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions); // to start with...
+        // ...but the server may know more because HasPermissionsProviders can register in the OSGi registry
+        // dynamically, and the SecurityService exposes the results:
+        userManagementService.getAllHasPermissions(new AsyncCallback<ArrayList<HasPermissions>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error trying to obtain secured types: "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<HasPermissions> result) {
+                GWT.log("Loaded secured types "+result);
+                allKnownHasPermissions.addAll(result);
+            }
+        });
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
@@ -275,7 +293,7 @@ public class UserService {
         userInitiallyLoaded = true;
         logger.info("User changed to "
                 + (currentUser == null ? "No User" : (currentUser.getName() + " roles: " + currentUser.getRoles())));
-        logger.info("User anonymous changed to " + anonymousUser.getName() + " roles: " + anonymousUser.getRoles());
+        logger.info("User anonymous changed to " + (anonymousUser == null ? "No User" : (anonymousUser.getName() + " roles: " + anonymousUser.getRoles())));
         notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
@@ -317,6 +335,10 @@ public class UserService {
         return userManagementService;
     }
     
+    public UserManagementWriteServiceAsync getUserManagementWriteService() {
+        return userManagementWriteService;
+    }
+    
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
      * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
@@ -354,13 +376,13 @@ public class UserService {
      */
     public void setPreference(String key, String serializedSettings, final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName();
-        getUserManagementService().setPreference(username, key, serializedSettings, callback);
+        userManagementWriteService.setPreference(username, key, serializedSettings, callback);
     }
     
     public void setPreferences(Map<String, String> keyValuePairs,
             final AsyncCallback<Void> callback) {
         String username = getCurrentUser().getName();
-        getUserManagementService().setPreferences(username, keyValuePairs, callback);
+        userManagementWriteService.setPreferences(username, keyValuePairs, callback);
     }
     
     /**
@@ -373,7 +395,7 @@ public class UserService {
      */
     public void unsetPreference(String key) {
         String username = getCurrentUser().getName();
-        getUserManagementService().unsetPreference(username, key, new AsyncCallback<Void>() {
+        userManagementWriteService.unsetPreference(username, key, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(caught.getMessage(), NotificationType.ERROR);
@@ -493,15 +515,6 @@ public class UserService {
         return anonymousUser;
     }
     
-    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
-        Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-    
-    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
-        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
-                anonymousUser, ownership);
-    }
-
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
@@ -520,10 +533,7 @@ public class UserService {
     }
 
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
-            return false;
-        }
-        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
+        return hasServerPermission(ServerActions.CREATE_OBJECT) && hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
     }
     
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
@@ -539,5 +549,4 @@ public class UserService {
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }
-
 }

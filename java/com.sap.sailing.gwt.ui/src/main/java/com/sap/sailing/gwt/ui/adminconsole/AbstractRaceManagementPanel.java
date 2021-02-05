@@ -9,14 +9,13 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
-public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel {
+public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<RaceDTO>{
     protected RegattaAndRaceIdentifier singleSelectedRace;
     
     protected RaceDTO selectedRaceDTO;
@@ -27,15 +26,8 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     protected final VerticalPanel selectedRaceContentPanel;
     
-    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        this(sailingService, null, errorReporter, regattaRefresher, actionButtonsEnabled, stringMessages);
-    }
-    
-    public AbstractRaceManagementPanel(final SailingServiceAsync sailingService,
-            UserService userService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, userService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
+    public AbstractRaceManagementPanel(final Presenter presenter, boolean actionButtonsEnabled, StringMessages stringMessages) {
+        super(presenter, actionButtonsEnabled, stringMessages);
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -75,4 +67,8 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     }
 
     abstract void refreshSelectedRaceData();
+    
+    public AbstractFilterablePanel<RaceDTO> getFilterablePanel() {
+        return trackedRacesListComposite.filterablePanelRaces;
+    }
 }

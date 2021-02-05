@@ -34,6 +34,7 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -128,6 +129,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     // misc. elements
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final UserService userService;
     private final Timer timer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -168,11 +170,12 @@ public class TaggingPanel extends ComponentWithoutSettings
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
-            StrippedLeaderboardDTOWithSecurity leaderboardDTO) {
+            StrippedLeaderboardDTOWithSecurity leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
         super(parent, context);
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.timer = timer;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -392,7 +395,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                     || imageHeight > MediaTagConstants.TAGGING_IMAGE.getMaxHeight()) {
                                 ArrayList<MediaTagConstants> tags = new ArrayList<MediaTagConstants>();
                                 tags.add(MediaTagConstants.TAGGING_IMAGE);
-                                sailingService.resizeImage(new ImageResizingTaskDTO(imageURL, new Date(), tags),
+                                sailingServiceWrite.resizeImage(new ImageResizingTaskDTO(imageURL, new Date(), tags),
                                         new AsyncCallback<Set<ImageDTO>>() {
                                             @Override
                                             public void onFailure(Throwable caught) {
@@ -445,7 +448,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             final String saveComment = (comment == null ? "" : comment);
             final TimePoint saveRaceTimePoint = (raceTimePoint == null ? new MillisecondsTimePoint(getTimerTime())
                     : raceTimePoint);
-            sailingService.addTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag, saveComment, imageURL,
+            sailingServiceWrite.addTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag, saveComment, imageURL,
                     resizedImageURL, visibleForPublic, saveRaceTimePoint, new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -492,7 +495,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      *            when set to <code>true</code>, only error messages will get displayed to user
      */
     protected void removeTag(TagDTO tag, boolean silent) {
-        sailingService.removeTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
+        sailingServiceWrite.removeTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
                 new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -535,7 +538,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             @Override
             public void onSuccess(String resizedImageURL) {
-                sailingService.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag,
+                sailingServiceWrite.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag,
                         comment, imageURL, resizedImageURL, visibleForPublic, new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {

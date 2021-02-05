@@ -26,7 +26,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
     }
 
     @Test
@@ -106,5 +106,18 @@ public class RoleApiTest extends AbstractSeleniumTest {
         }
 
         roleApi.deleteRole(adminCtx, roleCreated.getId());
+    }
+
+    @Test
+    public void createRoleWithDuplicateNameShouldFailTest() {
+        final String roleName = "DUPLICATE_CHECK_ROLE";
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+        roleApi.createRole(adminCtx, roleName);
+        try {
+            roleApi.createRole(adminCtx, roleName);
+            fail();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

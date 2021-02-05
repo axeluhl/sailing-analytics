@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -25,17 +25,15 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderboardWithEliminationsDialog {
-    public RegattaLeaderboardWithEliminationsEditDialog(SailingServiceAsync sailingService, final UserService userService,
+    public RegattaLeaderboardWithEliminationsEditDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
             LeaderboardDescriptorWithEliminations leaderboardDescriptor, StringMessages stringMessages, ErrorReporter errorReporter,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
-        super(sailingService, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
+        super(sailingServiceWrite, userService, stringMessages.editRegattaLeaderboard(), leaderboardDescriptor,
                 existingRegattas, otherExistingLeaderboards, stringMessages,
                 errorReporter,
                 new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages,
                         otherExistingLeaderboards), callback);
-        nameTextBox.setEnabled(false);
-        nameTextBox.setText(leaderboardDescriptor.getName());
         for (int i=0; i<regattaLeaderboardsListBox.getItemCount(); i++) {
             if (regattaLeaderboardsListBox.getValue(i).equals(leaderboardDescriptor.getRegattaName())) {
                 regattaLeaderboardsListBox.setSelectedIndex(i);
@@ -54,7 +52,7 @@ public class RegattaLeaderboardWithEliminationsEditDialog extends RegattaLeaderb
             if (eliminatedCompetitors != null) {
                 callback.onSuccess(eliminatedCompetitors);
             } else {
-                sailingService.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
+                sailingServiceWrite.getEliminatedCompetitors(nameTextBox.getValue(), new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);

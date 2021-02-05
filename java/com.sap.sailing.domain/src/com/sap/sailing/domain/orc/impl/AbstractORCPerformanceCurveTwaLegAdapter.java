@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.orc.impl;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.orc.AverageWindOnLegCache;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
@@ -7,10 +8,12 @@ import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.NoCachingWindLegTypeAndLegBearingCache;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Abstract base class for adapting a {@link TrackedLeg} to the {@link ORCPerformanceCurveLeg} interface. If wind
@@ -101,7 +104,10 @@ public abstract class AbstractORCPerformanceCurveTwaLegAdapter implements ORCPer
     @Override
     public Bearing getTwa(AverageWindOnLegCache cache) {
         final EqualityByTrackedLegWrapper wrapper = new EqualityByTrackedLegWrapper();
-        final Wind wind = cache.getAverageWind(wrapper, legAdapter->legAdapter.getTrackedLeg().getAverageWind(numParts).getObject());
+        final Wind wind = cache.getAverageWind(wrapper, legAdapter->{
+            final WindWithConfidence<Pair<Position, TimePoint>> averageWind = legAdapter.getTrackedLeg().getAverageWind(numParts);
+            return averageWind == null ? null : averageWind.getObject();
+        });
         final Bearing result;
         if (wind == null) {
             result = null;

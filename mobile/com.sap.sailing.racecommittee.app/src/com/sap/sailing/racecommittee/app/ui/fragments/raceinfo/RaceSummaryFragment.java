@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import java.util.Calendar;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -98,7 +99,15 @@ public class RaceSummaryFragment extends BaseFragment {
                 }
             });
         }
-
+        final View revokeFinish = ViewHelper.get(layout, R.id.flag_finishing_revoke);
+        if (revokeFinish != null) {
+            revokeFinish.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getRace().revokeFinished(preferences.getAuthor());
+                }
+            });
+        }
         return layout;
     }
 
@@ -249,7 +258,7 @@ public class RaceSummaryFragment extends BaseFragment {
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
             showData();
         }
 
@@ -270,7 +279,10 @@ public class RaceSummaryFragment extends BaseFragment {
 
         @Override
         public void onTagEventsChanged(ReadonlyRaceState state) {
-            // TODO: add android support for tags
+        }
+
+        @Override
+        public void onResultsAreOfficialChanged(ReadonlyRaceState state) {
         }
     }
 

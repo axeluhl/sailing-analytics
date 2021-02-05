@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
+
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +26,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
@@ -37,6 +40,8 @@ import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
+import com.sap.sse.datamining.ui.client.DataMiningWriteService;
+import com.sap.sse.datamining.ui.client.DataMiningWriteServiceAsync;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -51,7 +56,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
-public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
+public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
@@ -59,6 +64,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     private static final DataMiningResources dataMiningResources = GWT.create(DataMiningResources.class);
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
+    private final DataMiningWriteServiceAsync dataMiningWriteService = GWT.create(DataMiningWriteService.class);
     private DataMiningSession session;
 
     private QueryDefinitionProviderWithControls queryDefinitionProvider;
@@ -75,12 +81,14 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         super.doOnModuleLoad();
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
-                RemoteServiceMappingConstants.dataMiningServiceRemotePath);
+                RemoteServiceMappingConstants.dataMiningServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningWriteService,
+                RemoteServiceMappingConstants.dataMiningServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().executeWithServerInfo(s -> createDataminingPanel(s, Window.Location.getParameter("q")));
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
-        removeUrlParameter();
+        removeUrlParameter();;
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -118,7 +126,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 if (getUserService().hasServerPermission(ServerActions.DATA_MINING)) {
                     StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
-                            queryDefinitionProvider, dataMiningService, queryRunner);
+                            queryDefinitionProvider, dataMiningService, dataMiningWriteService, queryRunner, getStringMessages());
                     queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 }
 

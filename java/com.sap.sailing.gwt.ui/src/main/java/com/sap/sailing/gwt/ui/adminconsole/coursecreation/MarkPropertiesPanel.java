@@ -10,8 +10,12 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
@@ -25,7 +29,6 @@ import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -38,18 +41,20 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleResources;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -61,7 +66,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkPropertiesPanel extends FlowPanel {
+public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelProvider<MarkPropertiesDTO>{
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     private static final AbstractImagePrototype positionImagePrototype = AbstractImagePrototype
@@ -69,7 +74,7 @@ public class MarkPropertiesPanel extends FlowPanel {
     private static final AbstractImagePrototype setDeviceIdentifierImagePrototype = AbstractImagePrototype
             .create(resources.mapDevices());
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
     private final LabeledAbstractFilterablePanel<MarkPropertiesDTO> filterableMarkProperties;
     private List<MarkPropertiesDTO> allMarkProperties;
     private final ErrorReporter errorReporter;
@@ -78,30 +83,17 @@ public class MarkPropertiesPanel extends FlowPanel {
     private ListDataProvider<MarkPropertiesDTO> markPropertiesListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkPropertiesDTO> refreshableSelectionModel;
 
-    public MarkPropertiesPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public MarkPropertiesPanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
             StringMessages stringMessages, final UserService userService) {
-        this.sailingService = sailingService;
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         AccessControlledButtonPanel buttonAndFilterPanel = new AccessControlledButtonPanel(userService,
                 SecuredDomainType.MARK_TEMPLATE);
         add(buttonAndFilterPanel);
         allMarkProperties = new ArrayList<>();
-        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), new Command() {
-            @Override
-            public void execute() {
-                loadMarkProperties();
-            }
-        });
-        buttonAndFilterPanel.addCreateAction(stringMessages.add(), new Command() {
-            @Override
-            public void execute() {
-                openEditMarkPropertiesDialog(new MarkPropertiesDTO());
-            }
-        });
         Label lblFilterRaces = new Label(stringMessages.filterMarkPropertiesByName() + ":");
         lblFilterRaces.setWordWrap(false);
-        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         this.filterableMarkProperties = new LabeledAbstractFilterablePanel<MarkPropertiesDTO>(lblFilterRaces,
                 allMarkProperties, markPropertiesListDataProvider, stringMessages) {
             @Override
@@ -120,15 +112,38 @@ public class MarkPropertiesPanel extends FlowPanel {
             }
         };
         createMarkPropertiesTable(userService);
+        buttonAndFilterPanel.addUnsecuredAction(stringMessages.refresh(), this::loadMarkProperties);
+        buttonAndFilterPanel.addCreateAction(stringMessages.add(),
+                () -> openEditMarkPropertiesDialog(new MarkPropertiesDTO()));
+        buttonAndFilterPanel.addRemoveAction(stringMessages.remove(), refreshableSelectionModel, true,
+                () -> removeMarkProperties(refreshableSelectionModel.getSelectedSet().stream()
+                        .map(markPropertiesDTO -> markPropertiesDTO.getUuid()).collect(Collectors.toList())));
+        buttonAndFilterPanel.addUnsecuredWidget(lblFilterRaces);
         filterableMarkProperties.getTextBox().ensureDebugId("MarkPropertiesFilterTextBox");
         buttonAndFilterPanel.addUnsecuredWidget(filterableMarkProperties);
         filterableMarkProperties
                 .setUpdatePermissionFilterForCheckbox(event -> userService.hasPermission(event, DefaultActions.UPDATE));
     }
 
+    private void removeMarkProperties(Collection<UUID> markPropertiesUuids) {
+        if (!markPropertiesUuids.isEmpty()) {
+            sailingServiceWrite.removeMarkProperties(markPropertiesUuids, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to remove mark properties:" + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    refreshMarkProperties();
+                }
+            });
+        }
+    }
+
     public void loadMarkProperties() {
         markPropertiesListDataProvider.getList().clear();
-        sailingService.getMarkProperties(new AsyncCallback<List<MarkPropertiesDTO>>() {
+        sailingServiceWrite.getMarkProperties(new AsyncCallback<List<MarkPropertiesDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.toString());
@@ -281,7 +296,6 @@ public class MarkPropertiesPanel extends FlowPanel {
                 return String.join(", ", markProperties.getTags());
             }
         };
-
         Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
                 new AbstractCell<AbstractImagePrototype>() {
 
@@ -302,14 +316,12 @@ public class MarkPropertiesPanel extends FlowPanel {
                 }
             }
         };
-
         nameColumn.setSortable(true);
         sortHandler.setComparator(nameColumn, new Comparator<MarkPropertiesDTO>() {
             public int compare(MarkPropertiesDTO markProperties1, MarkPropertiesDTO markProperties2) {
                 return markProperties1.getName().compareTo(markProperties2.getName());
             }
         });
-
         markPropertiesTable.addColumn(nameColumn, stringMessages.name());
         markPropertiesTable.addColumn(shortNameColumn, stringMessages.shortName());
         markPropertiesTable.addColumn(colorColumn, stringMessages.color());
@@ -318,23 +330,19 @@ public class MarkPropertiesPanel extends FlowPanel {
         markPropertiesTable.addColumn(typeColumn, stringMessages.type());
         markPropertiesTable.addColumn(positioningColumn, stringMessages.position());
         markPropertiesTable.addColumn(tagsColumn, stringMessages.tags());
-
         SecuredDTOOwnerColumn.configureOwnerColumns(markPropertiesTable, sortHandler, stringMessages);
-
         final HasPermissions type = SecuredDomainType.MARK_PROPERTIES;
-
         final AccessControlledActionsColumn<MarkPropertiesDTO, MarkPropertiesImagesbarCell> actionsColumn = create(
                 new MarkPropertiesImagesbarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkPropertiesDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markProperties -> {
-                    /* no refresh action */}, stringMessages);
-
+                .create(userService.getUserManagementWriteService(), type, markProperties -> 
+                    markPropertiesListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkPropertiesDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markProperties -> markProperties.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markProperties -> markProperties.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveMarkProperties(e.getName()))) {
-                sailingService.removeMarkProperties(e.getUuid(), new AsyncCallback<Void>() {
+                sailingServiceWrite.removeMarkProperties(Collections.singletonList(e.getUuid()), new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.couldNotRemoveMarkProperties(caught.getMessage()));
@@ -354,7 +362,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 this::openEditMarkPropertiesPositionDialog);
         actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_UNSET_POSITION,
                 this::unsetPosition);
-        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
@@ -370,7 +378,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 new DialogCallback<MarkPropertiesDTO>() {
                     @Override
                     public void ok(MarkPropertiesDTO markProperties) {
-                        sailingService.addOrUpdateMarkProperties(markProperties,
+                        sailingServiceWrite.addOrUpdateMarkProperties(markProperties,
                                 new AsyncCallback<MarkPropertiesDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -407,7 +415,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 stringMessages, null, new DialogCallback<DeviceIdentifierDTO>() {
                     @Override
                     public void ok(DeviceIdentifierDTO deviceIdentifier) {
-                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(),
+                        sailingServiceWrite.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(),
                                 deviceIdentifier, null, new AsyncCallback<MarkPropertiesDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -440,7 +448,7 @@ public class MarkPropertiesPanel extends FlowPanel {
 
     private void unsetPosition(final MarkPropertiesDTO originalMarkProperties) {
         if (Window.confirm(stringMessages.confirmUnsettingPositionForMarkProperties(originalMarkProperties.getName()))) {
-            sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), /* no tracking device */ null,
+            sailingServiceWrite.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), /* no tracking device */ null,
                     /* and no fixed position either */ null, new AsyncCallback<MarkPropertiesDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -469,7 +477,7 @@ public class MarkPropertiesPanel extends FlowPanel {
                 new DialogCallback<Position>() {
                     @Override
                     public void ok(Position fixedPosition) {
-                        sailingService.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null,
+                        sailingServiceWrite.updateMarkPropertiesPositioning(originalMarkProperties.getUuid(), null,
                                 fixedPosition, new AsyncCallback<MarkPropertiesDTO>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -520,5 +528,10 @@ public class MarkPropertiesPanel extends FlowPanel {
                     new ImageSpec(ACTION_UNSET_POSITION, stringMessages.unsetPosition(), resources.removePing()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkPropertiesDTO> getFilterablePanel() {
+        return filterableMarkProperties;
     }
 }

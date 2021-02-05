@@ -12,10 +12,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCImpliedWindSourceEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 /**
  * Deserializer for {@link RaceLogORCImpliedWindSourceEvent}.
@@ -33,11 +33,7 @@ public class RaceLogORCImpliedWindSourceEventDeserializer extends BaseRaceLogEve
             throws JsonDeserializationException {
         final ImpliedWindSource impliedWindSource = new ImpliedWindSourceDeserializer().deserialize((JSONObject) object.get(RaceLogORCImpliedWindSourceEventSerializer.ORC_IMPLIED_WIND_SOURCE));
         final RaceLogEvent result;
-        if (impliedWindSource == null) {
-            result = null;
-        } else {
-            result = new RaceLogORCImpliedWindSourceEventImpl(createdAt, timePoint, author, id, passId, impliedWindSource);
-        }
+        result = new RaceLogORCImpliedWindSourceEventImpl(createdAt, timePoint, author, id, passId, impliedWindSource);
         return result;
     }
 

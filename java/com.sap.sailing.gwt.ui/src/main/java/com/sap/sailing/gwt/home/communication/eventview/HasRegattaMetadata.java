@@ -46,7 +46,7 @@ public interface HasRegattaMetadata {
 
     boolean isFlexibleLeaderboard();
 
-    String getDefaultCourseAreaId();
+    Iterable<String> getCourseAreaIdsAsStrings();
     
     EventSeriesReferenceDTO getSeriesReference();
 }

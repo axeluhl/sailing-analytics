@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
@@ -186,14 +187,14 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 final String regattaName = competitorImportDialogResult.getRegattaName();
                 busyDisplay.setBusy(true);
                 @SuppressWarnings("unchecked")
-                final Iterable<CompetitorDescriptor>[] competitorDescriptors = (Iterable<CompetitorDescriptor>[]) new Iterable<?>[1];
+                final Pair<List<CompetitorDescriptor>, String>[] competitorDescriptorsAndHint = (Pair<List<CompetitorDescriptor>, String>[]) new Pair<?, ?>[1];
                 @SuppressWarnings("unchecked")
                 final Iterable<CompetitorDTO>[] competitors = (Iterable<CompetitorDTO>[]) new Iterable<?>[1];
-                final ParallelExecutionCallback<List<CompetitorDescriptor>> getCompetitorDescriptorsCallback =
-                        new ParallelExecutionCallback<List<CompetitorDescriptor>>() {
+                final ParallelExecutionCallback<Pair<List<CompetitorDescriptor>, String>> getCompetitorDescriptorsCallback =
+                        new ParallelExecutionCallback<Pair<List<CompetitorDescriptor>, String>>() {
                     @Override
-                    public void onSuccess(List<CompetitorDescriptor> myCompetitorDescriptors) {
-                        competitorDescriptors[0] = myCompetitorDescriptors;
+                    public void onSuccess(Pair<List<CompetitorDescriptor>, String> myCompetitorDescriptors) {
+                        competitorDescriptorsAndHint[0] = myCompetitorDescriptors;
                         super.onSuccess(myCompetitorDescriptors);
                     }
                 };
@@ -210,7 +211,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                     @Override
                     protected void handleSuccess() {
                         busyDisplay.setBusy(false);
-                        matchCompetitorsDialogFactory.createMatchImportedCompetitorsDialog(competitorDescriptors[0], competitors[0]).show();
+                        matchCompetitorsDialogFactory.createMatchImportedCompetitorsDialog(competitorDescriptorsAndHint[0], competitors[0]).show();
                     }
                     
                     @Override
@@ -221,7 +222,8 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                     }
                 };
                 // trigger both calls, allowing for parallel execution, synchronizing with the parallel execution holder above:
-                sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName, new MarkedAsyncCallback<>(getCompetitorDescriptorsCallback));
+                sailingService.getCompetitorDescriptorsAndHint(competitorProviderName, eventName, regattaName,
+                        LocaleInfo.getCurrentLocale().getLocaleName(), new MarkedAsyncCallback<>(getCompetitorDescriptorsCallback));
                 sailingService.getCompetitors(false, false, new MarkedAsyncCallback<>(getCompetitorsCallback));
             }
         }
@@ -240,7 +242,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      */
     public interface MatchImportedCompetitorsDialogFactory {
         MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
-                Iterable<CompetitorDescriptor> competitorDescriptors, Iterable<CompetitorDTO> competitors);
+                Pair<List<CompetitorDescriptor>, String> competitorDescriptorsAndHint, Iterable<CompetitorDTO> competitors);
     }
 
     @Override

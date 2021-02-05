@@ -71,10 +71,10 @@ public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBa
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("Axel", 0);
         final Duration startTimeDiff = Duration.ONE_MINUTE;
         r2RaceLog.add(new RaceLogDependentStartTimeEventImpl(MillisecondsTimePoint.now(), author, /* pass */ 0,
-                new SimpleRaceLogIdentifierImpl(r1.getTrackedRegatta().getRegatta().getName(), "R1", "Default"), startTimeDiff));
+                new SimpleRaceLogIdentifierImpl(r1.getTrackedRegatta().getRegatta().getName(), "R1", "Default"), startTimeDiff, /* courseAreaId */ null));
         assertNull(r2StartTime[0]);
         final TimePoint r1StartTimeToSet = MillisecondsTimePoint.now();
-        r1RaceLog.add(new RaceLogStartTimeEventImpl(r1StartTimeToSet, author, /* pass */ 0, r1StartTimeToSet));
+        r1RaceLog.add(new RaceLogStartTimeEventImpl(r1StartTimeToSet, author, /* pass */ 0, r1StartTimeToSet, /* courseAreaId */ null));
         assertNotNull(r1StartTime[0]);
         assertEquals(r1StartTimeToSet, r1StartTime[0]);
         assertNotNull(r2StartTime[0]);

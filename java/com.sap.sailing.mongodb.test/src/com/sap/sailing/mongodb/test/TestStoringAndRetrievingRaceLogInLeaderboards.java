@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.bson.Document;
@@ -105,7 +106,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
                 DomainFactory.INSTANCE);
         leaderboard = new FlexibleLeaderboardImpl(getRaceLogStore(), getRegattaLogStore(), leaderboardName,
                 new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
-                new LowPoint(), null);
+                new LowPoint(), /* courseAreaIds */ Collections.emptySet());
         leaderboard.addRaceColumn(raceColumnName, /* medalRace */false);
     }
 
@@ -462,7 +463,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogStartTimeEvent() {
 
-        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now);
+        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now, /* courseAreaId */ null);
 
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
 
@@ -558,7 +559,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         final String FLEET = "fleet";
         final SimpleRaceLogIdentifier srli = new SimpleRaceLogIdentifierImpl(PARENT, COLUMN, FLEET);
         RaceLogDependentStartTimeEvent event = new RaceLogDependentStartTimeEventImpl(
-                now, author, 0, srli, Duration.ONE_MINUTE);
+                now, author, 0, srli, Duration.ONE_MINUTE, /* courseAreaId */ null);
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();

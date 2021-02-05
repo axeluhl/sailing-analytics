@@ -31,5 +31,10 @@ public class RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventI
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {
         return timeOnDistanceAllowancePerNauticalMile;
     }
+    
+    @Override
+    public String getShortInfo() {
+        return super.getShortInfo() + ", timeOnDistanceAllowancePerNauticalMile: " + timeOnDistanceAllowancePerNauticalMile;
+    }
 
 }

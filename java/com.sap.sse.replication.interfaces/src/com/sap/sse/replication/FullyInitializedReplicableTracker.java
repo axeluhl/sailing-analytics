@@ -99,22 +99,26 @@ public class FullyInitializedReplicableTracker<R extends Replicable<?, ?>> exten
         if (replicationServiceTracker != null) {
             final CountDownLatch latch = new CountDownLatch(1); // counted down either by the direct check or the listener
             final ReplicationService replicationService = replicationServiceTracker.waitForService(timeoutInMillis);
-            final ReplicationStartingListener replicationStartingListener = newIsReplicationStarting->{
-                if (!newIsReplicationStarting) {
+            if (replicationService != null) {
+                final ReplicationStartingListener replicationStartingListener = newIsReplicationStarting->{
+                    if (!newIsReplicationStarting) {
+                        latch.countDown();
+                    }
+                };
+                replicationService.addReplicationStartingListener(replicationStartingListener);
+                if (!replicationService.isReplicationStarting()) {
                     latch.countDown();
                 }
-            };
-            replicationService.addReplicationStartingListener(replicationStartingListener);
-            if (!replicationService.isReplicationStarting()) {
-                latch.countDown();
-            }
-            if (timeoutInMillis == 0) {
-                latch.await();
-                result = true;
+                if (timeoutInMillis == 0) {
+                    latch.await();
+                    result = true;
+                } else {
+                    result = latch.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+                }
+                replicationService.removeReplicationStartingListener(replicationStartingListener);
             } else {
-                result = latch.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+                result = false; // replication service tracker was set, but the service didn't show up within the timeout period
             }
-            replicationService.removeReplicationStartingListener(replicationStartingListener);
         } else {
             result = true;
         }

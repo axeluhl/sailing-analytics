@@ -102,6 +102,19 @@ public interface RaceColumn extends Named {
     TrackedRace getTrackedRace(Fleet fleet);
     
     /**
+     * Finds the {@link Fleet} from {@link #getFleets()} such that {@link #getTrackedRace(Fleet)} returns {@code trackedRace}
+     * for that fleet and returns it. If no such fleet can be found in this race column, {@code null} is returned.
+     */
+    default Fleet getFleetOfTrackedRace(TrackedRace trackedRace) {
+        for (final Fleet fleet : getFleets()) {
+            if (getTrackedRace(fleet) == trackedRace) {
+                return fleet;
+            }
+        }
+        return null;
+    }
+    
+    /**
      * If a race is associated with this column for the <code>fleet</code>, the respective {@link RaceDefinition} is returned.
      * Otherwise, <code>null</code> is returned.
      */

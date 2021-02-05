@@ -14,7 +14,8 @@ Require-Bundle: com.sun.jersey;bundle-version="1.17.0",
  com.sap.sse.security.common,
  com.sap.sse.security.userstore.mongodb,
  com.sap.sse,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.shared.android
 Import-Package: javax.ws.rs;version="1.1.1",
  javax.ws.rs.core,
  org.osgi.framework;version="1.8.0"
