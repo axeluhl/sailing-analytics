@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoEditDialog extends VideoDialog {
-    public VideoEditDialog(VideoDTO video, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
+    public VideoEditDialog(VideoDTO video, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
         super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
         createdAtLabel = new Label(video.getCreatedAtDate().toString());
         videoURLAndUploadComposite.setURL(video.getSourceRef());

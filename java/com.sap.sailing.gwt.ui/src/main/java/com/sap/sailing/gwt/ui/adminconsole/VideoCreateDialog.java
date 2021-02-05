@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoCreateDialog extends VideoDialog {
 
-    public VideoCreateDialog(String initialTag, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
+    public VideoCreateDialog(String initialTag, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
         super(new Date(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);

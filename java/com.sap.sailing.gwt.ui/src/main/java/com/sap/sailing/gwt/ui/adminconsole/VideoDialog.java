@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -28,7 +29,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements FileStorageServiceConnectionTestObserver {
+public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>> implements FileStorageServiceConnectionTestObserver {
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -41,8 +42,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
     protected IntegerBox lengthIntegerBox;
     protected final URLFieldWithFileUpload thumbnailURLAndUploadComposite;
     protected StringListInlineEditorComposite tagsListEditor;
-    
-    protected static class VideoParameterValidator implements Validator<VideoDTO> {
+
+    protected static class VideoParameterValidator implements Validator<List<VideoDTO>> {
         private StringMessages stringMessages;
 
         public VideoParameterValidator(StringMessages stringMessages) {
@@ -50,19 +51,25 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
         }
 
         @Override
-        public String getErrorMessage(VideoDTO videoToValidate) {
-            String errorMessage = null;
-            
-            if(videoToValidate.getSourceRef() == null || videoToValidate.getSourceRef().isEmpty()) {
-                errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
-            } else if (videoToValidate.getMimeType() == null) {
-                errorMessage = "You must select the mime type for the video.";
+        public String getErrorMessage(List<VideoDTO> videosToValidate) {
+            StringJoiner errorJoiner = new StringJoiner("\n");
+            for (VideoDTO videoToValidate : videosToValidate) {
+                String errorMessage = null;
+
+                if(videoToValidate.getSourceRef() == null || videoToValidate.getSourceRef().isEmpty()) {
+                    errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
+                } else if (videoToValidate.getMimeType() == null) {
+                    errorMessage = "You must select the mime type for the video.";
+                }
+                if (errorMessage != null) {
+                    errorJoiner.add(errorMessage);
+                }
             }
-            return errorMessage;
+            return errorJoiner.toString();
         }
     }
 
-    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
+    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<List<VideoDTO>> callback) {
         super(stringMessages.video(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
@@ -84,7 +91,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
         for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, false);
+        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false, true);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<List<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
@@ -100,19 +107,23 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
     }
 
     @Override
-    protected VideoDTO getResult() {
-        VideoDTO result = new VideoDTO(videoURLAndUploadComposite.getURL(), getSelectedMimeType(), creationDate);
-        result.setTitle(titleTextBox.getValue());
-        result.setSubtitle(subtitleTextBox.getValue());
-        result.setCopyright(copyrightTextBox.getValue());
-        result.setLocale(getSelectedLocale());
-        List<String> tags = new ArrayList<String>();
-        for (String tag: tagsListEditor.getValue()) {
-            tags.add(tag);
+    protected List<VideoDTO> getResult() {
+        List<VideoDTO> results = new ArrayList<VideoDTO>(videoURLAndUploadComposite.getURLs().size());
+        for (String videoURL : videoURLAndUploadComposite.getURLs()) {
+            VideoDTO videoDTO = new VideoDTO(videoURL, getSelectedMimeType(), creationDate);
+            videoDTO.setTitle(titleTextBox.getValue());
+            videoDTO.setSubtitle(subtitleTextBox.getValue());
+            videoDTO.setCopyright(copyrightTextBox.getValue());
+            videoDTO.setLocale(getSelectedLocale());
+            List<String> tags = new ArrayList<String>();
+            for (String tag: tagsListEditor.getValue()) {
+                tags.add(tag);
+            }
+            videoDTO.setTags(tags);
+            videoDTO.setThumbnailRef(thumbnailURLAndUploadComposite.getURL());
+            results.add(videoDTO);
         }
-        result.setTags(tags);
-        result.setThumbnailRef(thumbnailURLAndUploadComposite.getURL());
-        return result;
+        return results;
     }
 
     protected void setSelectedMimeType(MimeType mimeType) {
