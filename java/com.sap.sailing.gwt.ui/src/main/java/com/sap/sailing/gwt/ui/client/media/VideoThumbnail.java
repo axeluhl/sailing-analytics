@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -46,6 +47,7 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
     
     public VideoThumbnail(VideoDTO video) {
         MediaPageResources.INSTANCE.css().ensureInjected();
+        SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         //setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");

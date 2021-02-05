@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
 import com.google.gwt.resources.client.ImageResource;
@@ -10,6 +11,22 @@ import com.sap.sse.gwt.common.CommonIcons;
 public interface SharedHomeResources extends CommonIcons {
     
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
+    
+
+    @Source("SharedHome.gss")
+    LocalCss sharedHomeCss();
+    
+    public interface LocalCss extends CssResource {
+        String primary();
+        String right();
+        String label();
+        String input();
+        String inputGroup();
+        String buttonGroup();
+        String overlay();
+        String uploadButton();
+        String popup();
+    }
     
     @Source("default_event_logo.jpg")
     @ImageOptions(preventInlining = true)
@@ -107,6 +124,14 @@ public interface SharedHomeResources extends CommonIcons {
     @Source("trash.svg")
     @MimeType("image/svg+xml")
     DataResource trash();
+    
+    @Source("folder_black.svg")
+    @MimeType("image/svg+xml")
+    DataResource folderBlack();
+    
+    @Source("folder_white.svg")
+    @MimeType("image/svg+xml")
+    DataResource folderWhite();
 
     @Source("plus_transparent.png")
     ImageResource plusTransparent();

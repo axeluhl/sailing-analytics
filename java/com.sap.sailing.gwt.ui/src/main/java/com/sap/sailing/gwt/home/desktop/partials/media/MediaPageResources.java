@@ -26,9 +26,8 @@ public interface MediaPageResources extends SharedDesktopResources {
         String active();
         String button();
         String manageMedia();
-        String overlay();
         String addButton();
         
-        String mediaUploadPopup();
+        String popup();
     }
 }

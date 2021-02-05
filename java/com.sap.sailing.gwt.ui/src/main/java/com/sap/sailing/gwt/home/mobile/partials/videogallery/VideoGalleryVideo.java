@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoPlayer;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -32,6 +33,7 @@ public class VideoGalleryVideo extends Composite {
     
     public VideoGalleryVideo(VideoDTO video) {
         initWidget(uiBinder.createAndBindUi(this));
+        SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         videoPlayerUi.setVideo(video);
         setTextOrRemove(videoTitleUi, video.getTitle());
         setTextOrRemove(videoCreateDateUi, DateAndTimeFormatterUtil.formatDateAndTime(video.getCreatedAtDate()));

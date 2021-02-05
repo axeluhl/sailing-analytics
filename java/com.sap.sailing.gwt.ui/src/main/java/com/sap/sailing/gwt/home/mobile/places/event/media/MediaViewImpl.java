@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGallery;
-import com.sap.sailing.gwt.home.mobile.partials.uploadpopup.MediaUploadPopup;
+import com.sap.sailing.gwt.home.mobile.partials.uploadpopup.MobileMediaUploadPopup;
 import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 
@@ -29,20 +29,20 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     @UiField ImageGallery imageGalleryUi;
     @UiField Button addMediaButtonUi;
     
-    private MediaUploadPopup mediaUploadPopup;
+    private MobileMediaUploadPopup mobileMediaUploadPopup;
 
     public MediaViewImpl(MediaView.Presenter presenter) {
         super(presenter, false, true, false);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
-        mediaUploadPopup = new MediaUploadPopup();
+        mobileMediaUploadPopup = new MobileMediaUploadPopup();
 
         addMediaButtonUi.addClickHandler(new ClickHandler() {
             
             @Override
             public void onClick(ClickEvent event) {
-                mediaUploadPopup.show();
-                mediaUploadPopup.openFileUpload();
+                mobileMediaUploadPopup.show();
+                mobileMediaUploadPopup.openFileUpload();
             }
         });
 

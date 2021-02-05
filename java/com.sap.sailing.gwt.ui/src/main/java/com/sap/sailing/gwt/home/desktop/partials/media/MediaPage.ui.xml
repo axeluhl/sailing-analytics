@@ -71,9 +71,18 @@
 		.photolist > * {
 			padding: 0 5px;
 		}
+		.addButtonArea {
+            height: 18px;
+        }
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.mediaPage}">
-		<g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" ></g:Button>
+        <div class="{res.mediaCss.grid} {style.addButtonArea}">
+            <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" >
+                    <ui:text from='{i18n.upload}' />
+                </g:Button>
+            </div>
+        </div>
         <div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
 			<div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">

@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
-import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.MediaUploadPopup;
+import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.DesktopMediaUploadPopup;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -104,7 +104,7 @@ public class MediaPage extends Composite {
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
         //ManageMediaDialog manageMediaDialog = new ManageMediaDialog(i18n, res, local_res);
-        MediaUploadPopup popup = new MediaUploadPopup();
+        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup();
         //popupHolder.add(manageMediaDialog);
         popupHolder.add(popup);
         popup.center();

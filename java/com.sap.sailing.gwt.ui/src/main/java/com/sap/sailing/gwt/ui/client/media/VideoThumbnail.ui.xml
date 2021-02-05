@@ -5,6 +5,8 @@
         type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources" />
+    <ui:with field="res_home"
+        type="com.sap.sailing.gwt.home.shared.SharedHomeResources" />
     <ui:style gss="true">
     .holder {
         cursor: pointer;
@@ -51,7 +53,7 @@
     </ui:style>
     <g:HTMLPanel>
         <div class="{style.holder}">
-            <div class="{local_res.css.overlay}"
+            <div class="{res_home.sharedHomeCss.overlay}"
                 ui:field="overlay" style="display:none;">
                 <g:Anchor ui:field="deleteAnchor"
                     href="javascript:;"
