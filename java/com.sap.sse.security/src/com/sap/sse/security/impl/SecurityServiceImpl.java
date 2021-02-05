@@ -2825,7 +2825,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     /**
      * Check and return role qualified user {@code User} for a subscription plan role {@code SubscriptionPlanRole}
-     * definition
+     * definition. If the {@link SubscriptionPlanRole#getUserQualificationMode() user qualification mode} is set to
+     * {@link SubscriptionPlanRole.UserQualificationMode#SUBSCRIBING_USER} then {@code user} is returned. Else, if the
+     * subscription plan role specifies an {@link SubscriptionPlanRole#getExplicitUserQualification() explicit user
+     * qualification}, its user is returned. Otherwise, this method returns {@code null}.
      */
     private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser;
@@ -2843,7 +2846,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     /**
      * Check and return role qualified tenant {@code UserGroup} for a subscription plan role
-     * {@code SubscriptionPlanRole} definition
+     * {@code SubscriptionPlanRole} definition.
      * 
      * @param qualifiedUser
      *            qualified user from

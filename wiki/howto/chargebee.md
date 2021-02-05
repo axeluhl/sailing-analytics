@@ -22,3 +22,26 @@ Press on the "Add webhook" button and fill the popup form. Webhook URL is `{host
 Turn on the "Protect webhook URL with basic authentication" option, fill username and password. We also need to create a user in the application with the same username and password so basic authentication would work correctly. The user for this account requires the permission `USER:ADD_SUBSCRIPTION` on any user the web hook shall be able to manage subscriptions for.
 
 If all configurations are provided then Chargebee service will be active in the application, otherwise it will be inactive.
+
+## Plan Configuration
+See `com.sap.sse.security.shared.subscription.SubscriptionPlan` for the definitions of subscription plans available and the security roles they imply, together with their role qualifications. An example
+can look like this:
+
+```
+    STARTER("starter", "Starter", new SubscriptionPlanRole[] {
+            new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
+                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
+            new SubscriptionPlanRole(PredefinedRoles.mediaeditor.getId(),
+                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) }),
+    PREMIUM("premium", "Premium", new SubscriptionPlanRole[] {
+            new SubscriptionPlanRole(PredefinedRoles.spectator.getId(),
+                    SubscriptionPlanRole.GroupQualificationMode.DEFAULT_QUALIFIED_USER_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER),
+            new SubscriptionPlanRole(PredefinedRoles.moderator.getId(),
+                    SubscriptionPlanRole.GroupQualificationMode.SUBSCRIBING_USER_DEFAULT_TENANT,
+                    SubscriptionPlanRole.UserQualificationMode.NONE) });
+```
+
+Note that the role IDs (the first parameter, such as `"starter"`) is expected to match with a plan ID as specified within the Chargbee web site.
