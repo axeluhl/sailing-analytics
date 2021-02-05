@@ -5,8 +5,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ChargebeeConfigurationDTO implements IsSerializable {
     private String siteName;
 
-    public ChargebeeConfigurationDTO() {
-    }
+    @Deprecated
+    ChargebeeConfigurationDTO() {} // for GWT serialization only
 
     public ChargebeeConfigurationDTO(String siteName) {
         this.siteName = siteName;
@@ -14,9 +14,5 @@ public class ChargebeeConfigurationDTO implements IsSerializable {
 
     public String getSiteName() {
         return siteName;
-    }
-
-    public void setSiteName(String siteName) {
-        this.siteName = siteName;
     }
 }

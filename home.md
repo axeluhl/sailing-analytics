@@ -99,7 +99,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
-* [[Chargebee|wiki/howto/chargebee]]
+* [[Chargebee Payment Integration|wiki/howto/chargebee]]
 
 ### Development
 

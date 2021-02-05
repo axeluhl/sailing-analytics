@@ -35,7 +35,7 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
 
     @Override
     public ChargebeeConfigurationDTO getConfiguration() {
-        ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();
+        final ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();
         final ChargebeeConfigurationDTO result;
         if (configuration != null) {
             result = new ChargebeeConfigurationDTO(configuration.getSite());

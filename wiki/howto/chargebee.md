@@ -1,25 +1,24 @@
 # Chargebee Configuration
 
 ## Site and API Key
-We need to provide these system properties(VM arguments):
+We need to provide these system properties as VM arguments:
 
 - chargebee.site: Site name
 
-For test, it should be "syrf-test". And value should be "syrf" for live site.
+For test, it should be "syrf-test". And value should be "syrf" for a live / production site.
 
 
 - chargebee.apikey: API Key
 
-Go into API Key setting page, from Dashboard -> Settings -> Configure Chargebee -> API Keys (API keys tab)
-If there's no keys yet then Press on Add new key to create a new one.
-Copy value of a key
+Go into API Key setting page at [https://app.chargebee.com/](https://app.chargebee.com/), from Dashboard -> Settings -> Configure Chargebee -> API Keys (API keys tab).
+If there's no keys yet then press on "Add new key" to create a new one.
+Copy the value of the key.
 
 ## Webhook
-Configure webhook to enable Chargebee webhook events listening in application
+Configure a webhook to enable Chargebee webhook events listening in application.
 
-Go to Dashboard -> Settings -> Configure Chargebee -> API Keys (Webhooks tab)
-Press on Add webhook button and fill popup form. Webhook URL is {host}/sailingserver/subscription/hooks/chargebee.
-Turn on "Protect webhook URL with basic authentication" option, fill username, password. We also need to create a user in application with same username and password so basic authentication would work correctly.
+Go to Dashboard -> Settings -> Configure Chargebee -> API Keys (Webhooks tab).
+Press on the "Add webhook" button and fill the popup form. Webhook URL is `{host}/sailingserver/subscription/hooks/chargebee`.
+Turn on the "Protect webhook URL with basic authentication" option, fill username and password. We also need to create a user in the application with the same username and password so basic authentication would work correctly. The user for this account requires the permission `USER:ADD_SUBSCRIPTION` on any user the web hook shall be able to manage subscriptions for.
 
-
-If all configurations are provided then Chargebee service will be active in application, otherwise it will be inactive.
+If all configurations are provided then Chargebee service will be active in the application, otherwise it will be inactive.
