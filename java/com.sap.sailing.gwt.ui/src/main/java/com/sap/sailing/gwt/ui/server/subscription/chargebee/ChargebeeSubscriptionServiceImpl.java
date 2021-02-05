@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.subscription.chargebee.ChargebeeSubscriptio
 import com.sap.sailing.gwt.ui.server.subscription.SubscriptionServiceImpl;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeSubscriptionItem;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.common.Util.Pair;
@@ -20,6 +21,7 @@ import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
+import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 
 /**
  * Back-end implementation of {@link SubscriptionService} remote service interface.
@@ -32,8 +34,15 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
 
     @Override
-    protected String getProviderName() {
-        return ChargebeeSubscriptionProvider.PROVIDER_NAME;
+    public ChargebeeConfigurationDTO getConfiguration() {
+        ChargebeeConfiguration configuration = ChargebeeConfiguration.getInstance();
+        final ChargebeeConfigurationDTO result;
+        if (configuration != null) {
+            result = new ChargebeeConfigurationDTO(configuration.getSite());
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -91,6 +100,11 @@ public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl im
         }
 
         return subscriptionDto;
+    }
+
+    @Override
+    protected String getProviderName() {
+        return ChargebeeSubscriptionProvider.PROVIDER_NAME;
     }
 
     protected boolean isSubscriptionCancelled(Subscription subscription) {
