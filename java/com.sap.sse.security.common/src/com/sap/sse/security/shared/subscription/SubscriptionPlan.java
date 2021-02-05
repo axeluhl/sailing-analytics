@@ -6,7 +6,11 @@ import java.util.Map;
 import com.sap.sse.security.shared.PredefinedRoles;
 
 /**
- * Payment subscription plan
+ * Payment subscription plans. A subscription plan has a name, a {@link String}-based ID, and a set of
+ * {@link SubscriptionPlanRole roles} it grants to a subscribing user. These roles can specify how they are to be
+ * qualified when assigned, regarding user and group qualifications. See
+ * {@link SubscriptionPlanRole.GroupQualificationMode} and {@link SubscriptionPlanRole.UserQualificationMode} for
+ * more details.
  * 
  * @author Tu Tran
  */
@@ -29,17 +33,17 @@ public enum SubscriptionPlan {
     /**
      * Plan name
      */
-    private String name;
+    private final String name;
 
     /**
      * Plan id
      */
-    private String id;
+    private final String id;
 
     /**
      * Roles assigned for this plan, if user subscribe to the plan then the user will be assigned these roles
      */
-    private SubscriptionPlanRole[] roles;
+    private final SubscriptionPlanRole[] roles;
     
     private static final Map<String, SubscriptionPlan> plansById = new HashMap<String, SubscriptionPlan>();
     

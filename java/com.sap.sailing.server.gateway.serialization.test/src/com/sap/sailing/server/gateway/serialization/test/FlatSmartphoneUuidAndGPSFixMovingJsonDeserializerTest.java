@@ -13,12 +13,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {

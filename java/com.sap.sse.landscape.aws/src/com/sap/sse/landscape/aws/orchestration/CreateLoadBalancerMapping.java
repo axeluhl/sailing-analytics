@@ -101,6 +101,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         BuilderT setProcess(ProcessT process);
         BuilderT setHostname(String hostname);
         BuilderT setTimeout(Duration timeout);
+        BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
@@ -113,6 +114,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         private String hostname;
         private ProcessT process;
         private Optional<Duration> optionalTimeout = Optional.empty();
+        private byte[] privateKeyEncryptionPassphrase;
 
         @Override
         public BuilderT setProcess(ProcessT process) {
@@ -143,14 +145,20 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         protected Optional<Duration> getOptionalTimeout() {
             return optionalTimeout;
         }
+        
+        @Override
+        public BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase) {
+            this.privateKeyEncryptionPassphrase = privateKeyEncryptionPassphrase;
+            return self();
+        }
 
         @Override
-        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws Exception {
             final String result;
             if (super.getServerName() != null) {
                 result = super.getServerName();
             } else {
-                result = getProcess().getServerName(getOptionalTimeout());
+                result = getProcess().getServerName(getOptionalTimeout(), privateKeyEncryptionPassphrase);
             }
             return result;
         }
@@ -165,7 +173,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();

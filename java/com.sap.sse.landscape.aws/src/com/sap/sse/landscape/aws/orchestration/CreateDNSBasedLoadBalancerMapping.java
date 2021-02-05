@@ -106,7 +106,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         }
 
         @Override
-        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
+        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws Exception {
             return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>(this);
         }
     }
@@ -118,7 +118,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         return new BuilderImpl<>();
     }
 
-    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
     }
 

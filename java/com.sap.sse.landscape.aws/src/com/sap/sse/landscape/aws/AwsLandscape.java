@@ -3,9 +3,11 @@ package com.sap.sse.landscape.aws;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -15,10 +17,14 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.aws.impl.Activator;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -47,7 +53,10 @@ import software.amazon.awssdk.services.route53.model.RRType;
 /**
  * A simplified view onto the AWS SDK API that is geared towards specific ways and patterns of managing an application
  * and infrastructure landscape. Among others, it uses {@link Ec2Client}, {@link Route53Client},
- * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.
+ * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.<p>
+ * 
+ * An instance of this landscape interface is expected to be created by this bundle's {@link Activator} if the necessary
+ * credentials have been supplied; it is registered with the OSGi service registry under this interface.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -60,8 +69,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
-    
-    String S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.s3bucketforalblogs";
     
     /**
      * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
@@ -96,7 +103,26 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
-
+    
+    SSHKeyPairListeners SSH_KEY_PAIR_LISTENERS = new SSHKeyPairListenersImpl();
+    
+    /**
+     * Listeners added here will be added to each {@link AwsLandscape} object returned by {@link #obtain()} / {@link #obtain(String, String)}
+     * and hence will be notified each time a change occurs to the set of SSH key pairs.
+     */
+    static void addSSHKeyPairListener(SSHKeyPairListener listener) {
+        SSH_KEY_PAIR_LISTENERS.addSSHKeyPairListener(listener);
+    }
+    
+    /**
+     * Listeners removed here will no longer be added to new {@link AwsLandscape} objects returned by {@link #obtain()}
+     * / {@link #obtain(String, String)} and hence will no longer notified of changes to the set of SSH key pairs for new
+     * {@link AwsLandscape} objects.
+     */
+    static void removeSSHKeyPairListener(SSHKeyPairListener listener) {
+        SSH_KEY_PAIR_LISTENERS.removeSSHKeyPairListener(listener);
+    }
+    
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
      * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
@@ -106,9 +132,25 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
-        return new AwsLandscapeImpl<>();
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>();
+        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
+        return result;
     }
     
+    /**
+     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object which
+     * internally has access to the clients for the underlying AWS landscape, such as an EC2 client, a Route53 client,
+     * etc.
+     */
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(accessKey, secret);
+        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
+        return result;
+    }
+    
+    void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> sshKeyPairListeners);
 
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
@@ -160,45 +202,99 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
+    default AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithType(Region region, String imageType) {
+        return getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
+    }
+
+    Iterable<String> getMachineImageTypes(Region region);
+    
     void setSnapshotName(Region region, String snapshotId, String snapshotName);
     
     void deleteSnapshot(Region region, String snapshotId);
     
     /**
-     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}.
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
+     * result includes instances regardless their state; they are not required to be RUNNING.
+     * 
+     * @see #getRunningHostsWithTagValue(Region, String)
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(Region region, String tagName, String tagValue);
 
     /**
-     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value.
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
+     * result includes instances regardless their state; they are not required to be RUNNING.
+     * 
+     * @see #getRunningHostsWithTag(Region, String)
      */
     Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName);
     
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
+     * instances returned have been in state RUNNING at the time of the request.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(Region region, String tagName);
+
+    /**
+     * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
+     * instances returned have been in state RUNNING at the time of the request.
+     */
+    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(Region region, String tagName,
+            String tagValue);
+
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
+
+    Iterable<KeyPairInfo> getAllKeyPairInfos(Region region);
     
     void deleteKeyPair(Region region, String keyName);
     
     /**
-     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair ID
+     * Uploads the public key to AWS under the name "keyName", stores it in this landscape and returns the key pair.<p>
+     * 
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
      */
-    String importKeyPair(Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException;
+    SSHKeyPair importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
     void terminate(AwsInstance<ShardingKey, MetricsT> host);
 
+    /**
+     * The calling subject must have {@code READ} permission for the key requested.
+     */
     SSHKeyPair getSSHKeyPair(Region region, String keyName);
     
-    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException;
+    /**
+     * Obtains all SSH key pairs known by this landscape. Clients shall check the {@code READ} permission before handing out those keys.
+     */
+    Iterable<SSHKeyPair> getSSHKeyPairs();
 
-    void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey);
+    /**
+     * Assumes that the {@code keyPair}'s private key has been encrypted using this landscape's default encryption passphrase
+     * and uses that to decrypt it.
+     */
+    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException;
+
+    /**
+     * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
+     * and stores it persistently also in the local server's database with the private key encrypted.
+     * <p>
+     * 
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
+     */
+    SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
     /**
      * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
      * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
-     * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key.
+     * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
+     * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.<p>
+     * 
+     * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
+     * the current server.
      * 
      * @return the key ID as string, usually starting with the prefix "key-"
      */
-    SSHKeyPair createKeyPair(Region region, String keyName) throws JSchException;
+    SSHKeyPair createKeyPair(Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
 
@@ -410,6 +506,8 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      */
     MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName);
 
+    Iterable<MongoEndpoint> getMongoEndpoints(Region region);
+
     /**
      * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
      * 
@@ -429,4 +527,34 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * is returned. Otherwise, the {@link Optional} returned {@link Optional#isPresent() is not present}.
      */
     Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName);
+
+    /**
+     * Obtains all hosts with a tag named {@code tagName}, regardless the tag's value, and returns them as
+     * {@link ApplicationProcessHost}s. Callers have to provide the bi-function that produces instances of the desired
+     * {@link ApplicationProcess} subtype for each server directory holding a process installation on that host.
+     * 
+     * @param processFactoryFromHostAndServerDirectory
+     *            takes the host and the server directory as arguments and is expected to produce an
+     *            {@link ApplicationProcess} object of some sort.
+     */
+    Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(Region region,
+            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
+
+    /**
+     * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
+     * specified by {@code tagName} and discovers all application server processes configured on it. These are then
+     * grouped by {@link ApplicationProcess#getServerName(Optional, byte[]) server name}, and using
+     * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
+     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
+     * @param processFactoryFromHostAndServerDirectory
+     *            takes the host and the server directory as arguments and is expected to produce an
+     *            {@link ApplicationProcess} object of some sort.
+     * @param optionalTimeout
+     *            an optional timeout for communicating with the application server(s) to try to read the application
+     *            configuration; used, e.g., as timeout during establishing SSH connections
+     */
+    Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
+            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
+            Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
 }

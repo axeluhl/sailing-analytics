@@ -30,6 +30,7 @@ APACHE_CONFIG_DIR=/etc/httpd/conf.d
 APACHE_INTERNALS_CONFIG_FILE="$APACHE_CONFIG_DIR/001-internals.conf"
 EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
 REBOOT_INDICATOR=/var/run/is-rebooted
+SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
@@ -39,6 +40,7 @@ start_tmux() {
 }
 
 start_servers() {
+        /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) 2>&1 >>/var/log/sailing.err
         if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
           echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupgrade.sh

@@ -24,7 +24,6 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
@@ -43,24 +42,23 @@ public class UserGroupManagementPanel extends Composite {
     private UserGroupDetailPanel userGroupDetailPanel;
     private GroupRoleDefinitionPanel userGroupRoleDefinitionPanel;
 
-    private final UserGroupTableWrapper userGroupTableWrapper;
+    protected final UserGroupTableWrapper userGroupTableWrapper;
 
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
-            CellTableWithCheckboxResources tableResources) {
+            ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
         // using write service to enforce round trip going to master for consistency purposes
         final UserManagementWriteServiceAsync userManagementWriteService = userService.getUserManagementWriteService();
         final VerticalPanel mainPanel = new VerticalPanel();
         userGroupListDataProvider = new UserGroupListDataProvider(userManagementWriteService, new TextBox());
-        userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
-                errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups());
+        userGroupTableWrapper = new UserGroupTableWrapper(userService, stringMessages, errorReporter,
+                /* enablePager */ true, tableResources, () -> updateUserGroups());
         mainPanel.add(createButtonPanel(userService, stringMessages, userManagementWriteService, userGroupTableWrapper.getSelectionModel()));
         final LabeledAbstractFilterablePanel<UserGroupDTO> userGroupfilterBox = userGroupTableWrapper.getFilterField();
         userGroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
         mainPanel.add(userGroupfilterBox);
         mainPanel.add(new ScrollPanel(userGroupTableWrapper.asWidget()));
         mainPanel.add(createUserGroupDetailsPanel(stringMessages, userManagementWriteService,
-                userService, additionalPermissions, errorReporter, tableResources));
+                userService, errorReporter, tableResources));
         initWidget(mainPanel);
         this.ensureDebugId(this.getClass().getSimpleName());
     }
@@ -117,30 +115,26 @@ public class UserGroupManagementPanel extends Composite {
      */
     private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
             final UserManagementServiceAsync userManagementService, UserService userService,
-            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
-            CellTableWithCheckboxResources tableResources) {
+            ErrorReporter errorReporter, CellTableWithCheckboxResources tableResources) {
         userGroupDetailPanel = new UserGroupDetailPanel(userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userService, stringMessages, errorReporter, tableResources);
         userGroupRoleDefinitionPanel = new GroupRoleDefinitionPanel(userService,
-                stringMessages, additionalPermissions, errorReporter, tableResources,
-                userGroupTableWrapper.getSelectionModel(), userGroupListDataProvider);
-
+                stringMessages, errorReporter, tableResources, userGroupTableWrapper.getSelectionModel(),
+                userGroupListDataProvider);
         final VerticalPanel userListWrapper = new VerticalPanel();
         userListWrapper.add(userGroupDetailPanel);
         final CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
-
         final VerticalPanel roleWrapper = new VerticalPanel();
         roleWrapper.add(userGroupRoleDefinitionPanel);
         final CaptionPanel roleCaption = new CaptionPanel(stringMessages.roles());
         roleCaption.add(roleWrapper);
-
         final HorizontalPanel listsWrapper = new HorizontalPanel();
         listsWrapper.add(userListCaption);
         listsWrapper.add(roleCaption);
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
-                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedUserGroup(userGroupTableWrapper.getSelectionModel()) != null));
+                h -> listsWrapper.setVisible(TableWrapper.getSingleSelectedObjectOrNull(userGroupTableWrapper.getSelectionModel()) != null));
         return listsWrapper;
     }
 
@@ -153,7 +147,6 @@ public class UserGroupManagementPanel extends Composite {
     }
 
     public void refreshSuggests() {
-        userGroupDetailPanel.refreshSuggest();
         userGroupRoleDefinitionPanel.refreshSuggest();
     }
 }

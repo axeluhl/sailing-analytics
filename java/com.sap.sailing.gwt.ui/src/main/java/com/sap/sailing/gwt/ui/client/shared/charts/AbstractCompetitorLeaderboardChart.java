@@ -31,6 +31,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
@@ -75,6 +76,8 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     private final List<String> raceColumnNamesWithData;
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
+    
+    private final List<Runnable> chartDataUpdateCallbacks = new ArrayList<>();
 
     public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
@@ -106,6 +109,18 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
         
         return chart;
     }
+    
+    /**
+     * Add a {@link Runnable callback} to get notified when the chart data has been updated successfully.
+     * 
+     * @param callback {@link Runnable} to call on chart data update
+     * @return {@link HandlerRegistration} to remove the callback
+     */
+    public HandlerRegistration addChartDataUpdatedHandler(final Runnable callback) {
+        this.chartDataUpdateCallbacks.add(callback);
+        return () -> this.chartDataUpdateCallbacks.remove(callback);
+    }
+
 
     protected boolean isCompetitorVisible(CompetitorDTO competitor) {
         return Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) || competitorSelectionProvider.isSelected(competitor);
@@ -257,6 +272,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
                         // positions (nativeAdjustCheckboxPosition)
                         // in the BaseChart class would not be called
                         chart.redraw();
+                        chartDataUpdateCallbacks.forEach(Runnable::run);
                     }
         
                     @Override

@@ -12,6 +12,7 @@ import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
+import com.sap.sailing.selenium.pages.adminconsole.connectors.ExpeditionDeviceConfigurationsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
@@ -39,7 +40,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
 
     private static final String ROLE_DEFINITIONS_TAB_LABEL = "Roles";
-    private static final String ROLE_DEFINITIONS_TAB_IDENTIFIER = "RoleDefinitionsPanel";
+    private static final String ROLE_DEFINITIONS_TAB_IDENTIFIER = "RoleDefinitionsPanelWrapper";
     
     private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
     private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
@@ -63,7 +64,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String TRACKED_RACES_TAB_IDENTIFIER = "TrackedRacesManagement"; //$NON-NLS-1$
     
     private static final String ADVANCED_USER_GROUP_MANAGEMENT_LABEL = "User Group Management";
-    private static final String ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER = "UserGroupManagementPanel";
+    private static final String ADVANCED_USER_GROUP_MANAGEMENT_IDENTIFIER = "UserGroupManagementPanelWrapper";
     
     private static final String WIND_TAB_LABEL = "Wind"; //$NON-NLS-1$
     private static final String WIND_TAB_IDENTIFIER = "WindPanel"; //$NON-NLS-1$
@@ -89,12 +90,21 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String USER_MANAGEMENT_PANEL_TAB_LABEL = "User Management"; //$NON-NLS-1$
     private static final String USER_MANAGEMENT_PANEL_TAB_IDENTIFIER = "UserManagementPanel"; //$NON-NLS-1$
 
+    private static final String EXPEDITION_DEVICE_CONFIGURATION_PANEL_TAB_LABEL = "Expedition Device Configurations"; //$NON-NLS-1$
+    private static final String EXPEDITION_DEVICE_CONFIGURATION_PANEL_TAB_IDENTIFIER = "ExpeditionDeviceConfigurations"; //$NON-NLS-1$
+    
     private static final String ADVANCED_PARENT_LABEL = "Advanced";
     private static final String ADVANCED_TAB_PARENT_IDENTIFIER = "AdvancedTab";
     private static final String ADVANCED_MASTERDATA_LABEL = "Master Data Import";
     private static final String ADVANCED_MASTERDATA_IDENTIFIER = "MasterDataImport";
     private static final String ADVANCED_LOCAL_SERVER_LABEL = "Local Server";
     private static final String ADVANCED_LOCAL_SERVER_IDENTIFIER = "LocalServer";
+    
+    private static final String LEADERBOARDS_PLACE = "LeaderboardsPlace";
+    private static final String EXPEDITION_DEVICE_CONFIGURATIONS_PLACE = "ExpeditionDeviceConfigurationsPlace";
+    
+    private static final String ADMIN_CONSOLE_PATH = "gwt/AdminConsole.html";
+    
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
      * 
@@ -106,7 +116,25 @@ public class AdminConsolePage extends HostPageWithAuthentication {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        return HostPage.goToUrl(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html");
+        return HostPage.goToUrl(AdminConsolePage::new, driver, root + ADMIN_CONSOLE_PATH);
+    }
+    
+    public static AdminConsolePage goToLeaderboardConfigurationPlace(WebDriver driver, String root, String ...urlParameterKeysAndValues) {
+        return HostPage.goToPlace(AdminConsolePage::new, driver, root + ADMIN_CONSOLE_PATH, LEADERBOARDS_PLACE, urlParameterKeysAndValues);
+    }
+    
+    public static AdminConsolePage goToExpeditionDeviceConfigurationsPlace(WebDriver driver, String root, String ...urlParameterKeysAndValues) {
+        return HostPage.goToPlace(AdminConsolePage::new, driver, root + ADMIN_CONSOLE_PATH, EXPEDITION_DEVICE_CONFIGURATIONS_PLACE, urlParameterKeysAndValues);
+    }
+    
+    public LeaderboardConfigurationPanelPO getLeaderboardConfigurationPanelPO () {
+        WebElement content = waitForWebElement(administrationTabPanel, LEADERBOARD_CONFIGURATION_TAB_IDENTIFIER);
+        return new LeaderboardConfigurationPanelPO(driver, content);       
+    }
+    
+    public ExpeditionDeviceConfigurationsPanelPO getExpeditionDeviceConfigurationsPanelPO () {
+        WebElement content = waitForWebElement(administrationTabPanel, EXPEDITION_DEVICE_CONFIGURATION_PANEL_TAB_IDENTIFIER);
+        return new ExpeditionDeviceConfigurationsPanelPO(driver, content);       
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
@@ -209,7 +237,13 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
                 SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER, false));
     }
-
+    
+    public ExpeditionDeviceConfigurationsPanelPO goToExpeditionDeviceConfigurationsPanel() {
+        goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
+        return new ExpeditionDeviceConfigurationsPanelPO(this.driver, goToTab(EXPEDITION_DEVICE_CONFIGURATION_PANEL_TAB_LABEL,
+                EXPEDITION_DEVICE_CONFIGURATION_PANEL_TAB_IDENTIFIER, false));
+    }
+    
     public LocalServerPO goToLocalServerPanel() {
         goToTab(ADVANCED_PARENT_LABEL, ADVANCED_TAB_PARENT_IDENTIFIER, true);
         return new LocalServerPO(this.driver,

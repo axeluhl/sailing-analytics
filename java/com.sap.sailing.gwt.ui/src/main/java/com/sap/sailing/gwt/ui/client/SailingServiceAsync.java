@@ -103,6 +103,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 /**
@@ -435,7 +436,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
-            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, AsyncCallback<SerializationDummy> callback);
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions,
+            AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName

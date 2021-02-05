@@ -9,12 +9,12 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.tracking.LineDetails;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseWithGeometryJsonSerializer.CourseGeometry;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseBaseWithGeometryJsonSerializer implements JsonSerializer<Triple<CourseBase, CourseGeometry, LineDetails>> {
     public static final String FIELD_TOTAL_DISTANCE_IN_METERS = "totalDistanceInMeters";

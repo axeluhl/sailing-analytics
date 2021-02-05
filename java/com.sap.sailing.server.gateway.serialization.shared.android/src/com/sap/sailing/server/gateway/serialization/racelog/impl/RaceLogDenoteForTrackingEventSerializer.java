@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogDenoteForTrackingEventSerializer extends BaseRaceLogEventSerializer {
     public static final String VALUE_CLASS = RaceLogDenoteForTrackingEvent.class.getSimpleName();

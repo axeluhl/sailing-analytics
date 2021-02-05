@@ -2,23 +2,27 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -31,8 +35,10 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -40,6 +46,7 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -48,6 +55,7 @@ import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
+import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
@@ -150,30 +158,28 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private final MongoObjectFactory mongoObjectFactory;
     private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final String s3BucketForAlbLogs; // TODO this will have to be a bucket-per-Region map eventually...
-    
-    /**
-     * Used for the symmetric encryption / decryption of private SSH keys. See also
-     * {@link #getDecryptedPrivateKey(SSHKeyPair)}.
-     */
-    private final byte[] privateKeyEncryptionPassphrase;
+    private final Set<SSHKeyPairListener> sshKeyPairListeners;
     
     public AwsLandscapeImpl() {
-        this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME),
+        this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
+             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+    }
+    
+    public AwsLandscapeImpl(String accessKeyId, String secretAccessKey) {
+        this(accessKeyId, secretAccessKey,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), System.getProperty(S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME));
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE));
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, String s3BucketForAlbLogs) {
-        this.privateKeyEncryptionPassphrase = ("aw4raif87l"+"098sf;;50").getBytes();
+            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.mongoObjectFactory = mongoObjectFactory;
         this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
-        this.s3BucketForAlbLogs = s3BucketForAlbLogs;
+        this.sshKeyPairListeners = new HashSet<>();
         for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
             internalAddKeyPair(keyPair);
         }
@@ -194,18 +200,24 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public void addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) {
-        addSSHKeyPair(new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
-                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey)));
+    public SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException {
+        assert !keyPairWithDecryptedPrivateKey.isEncrypted();
+        final SSHKeyPair result = new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
+                getPrivateKeyBytes(keyPairWithDecryptedPrivateKey));
+        addSSHKeyPair(result);
+        return result;
     }
     
     private void addSSHKeyPair(SSHKeyPair keyPair) {
+        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
+            sshKeyPairListener.sshKeyPairAdded(keyPair);
+        }
         internalAddKeyPair(keyPair);
         mongoObjectFactory.storeSSHKeyPair(keyPair);
     }
     
     @Override
-    public SSHKeyPair createKeyPair(com.sap.sse.landscape.Region region, String keyName) throws JSchException {
+    public SSHKeyPair createKeyPair(com.sap.sse.landscape.Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final CreateKeyPairResponse keyPairResponse = getEc2Client(getRegion(region))
                 .createKeyPair(CreateKeyPairRequest.builder().keyName(keyName).build());
         final String keyMaterial = keyPairResponse.keyMaterial();
@@ -216,8 +228,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
             logger.severe("Problem determining current user: "+e.getMessage());
             principal = null;
         }
-        final SSHKeyPair result = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
-                TimePoint.now(), keyPairResponse.keyName(), /* public key not known */ null, keyMaterial.getBytes(),
+        final byte[] privKey = keyMaterial.getBytes();
+        final KeyPair keyPair = KeyPair.load(new JSch(), privKey, /* pubkey */ null); // private key is unencrypted so far; public key can be obtained:
+        final String creatorName = principal==null?"":principal.toString();
+        final ByteArrayOutputStream publicKeyBytes = new ByteArrayOutputStream();
+        final TimePoint now = TimePoint.now();
+        keyPair.writePublicKey(publicKeyBytes, "public key "+keyName+" generated by user "+creatorName+" at "+now);
+        final SSHKeyPair result = new SSHKeyPair(region.getId(), creatorName,
+                now, keyPairResponse.keyName(), publicKeyBytes.toByteArray(), privKey,
                 privateKeyEncryptionPassphrase);
         addSSHKeyPair(result);
         return result;
@@ -235,6 +253,19 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
     }
     
+    /**
+     * For legacy reasons our primary region (eu-west-1) uses a special bucket name for ALB log storage.
+     */
+    private String getS3BucketForAlbLogs(com.sap.sse.landscape.Region region) {
+        final String result;
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = "sapsailing-access-logs";
+        } else {
+            result = "sapsailing-access-logs-"+region.getId();
+        }
+        return result;
+    }
+    
     @Override
     public ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
         Region awsRegion = getRegion(region);
@@ -248,7 +279,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         client.modifyLoadBalancerAttributes(b->b.loadBalancerArn(response.loadBalancers().iterator().next().loadBalancerArn()).
                 attributes(
                         LoadBalancerAttribute.builder().key("access_logs.s3.enabled").value("true").build(),
-                        LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(s3BucketForAlbLogs).build(),
+                        LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(getS3BucketForAlbLogs(region)).build(),
                         LoadBalancerAttribute.builder().key("idle_timeout.timeout_seconds").value("4000").build()).build());
         final ApplicationLoadBalancer<ShardingKey, MetricsT> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
         createLoadBalancerListener(result, ProtocolEnum.HTTP);
@@ -484,6 +515,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public Iterable<String> getMachineImageTypes(com.sap.sse.landscape.Region region) {
+        final DescribeImagesResponse response = getEc2Client(getRegion(region))
+                .describeImages(DescribeImagesRequest.builder().filters(
+                        Filter.builder().name("tag-key").values(IMAGE_TYPE_TAG_NAME).build()).build());
+        return Util.map(response.images(), image->image.tags().stream().filter(t->t.key().equals(IMAGE_TYPE_TAG_NAME)).findAny().get().value());
+    }
+
+    @Override
     public void setSnapshotName(com.sap.sse.landscape.Region region, String snapshotId, String snapshotName) {
         getEc2Client(getRegion(region)).createTags(b->b
                 .resources(snapshotId)
@@ -498,14 +537,27 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
-        Filter filter = Filter.builder().name("tag:"+tagName).values(tagValue).build();
-        return getHostsWithFilter(region, filter);
+        Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
+        return getHostsWithFilters(region, filter);
     }
 
-    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilter(com.sap.sse.landscape.Region region,
-            Filter filter) {
+    private Filter.Builder getHostWithTagValueFilter(String tagName, String tagValue) {
+        return Filter.builder().name("tag:"+tagName).values(tagValue);
+    }
+
+    @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue) {
+        return getHostsWithFilters(region, getRunningHostFilter());
+    }
+    
+    private Filter getRunningHostFilter() {
+        return Filter.builder().name("instance-state-name").values("running").build();
+    }
+
+    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
         final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
-        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filter));
+        final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filters));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
                 result.add(getHost(region, i));
@@ -523,9 +575,17 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
+        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
+    }
+    
+    @Override
     public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        Filter filter = Filter.builder().name("tag-key").values(tagName).build();
-        return getHostsWithFilter(region, filter);
+        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName));
+    }
+    
+    private Filter getFilterForHostWithTag(Filter.Builder builder, String tagName) {
+        return builder.name("tag-key").values(tagName).build();
     }
 
     private Comparator<? super Image> getMachineImageCreationDateComparator() {
@@ -546,15 +606,46 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
+    public Iterable<KeyPairInfo> getAllKeyPairInfos(com.sap.sse.landscape.Region region) {
+        return getEc2Client(getRegion(region))
+                .describeKeyPairs(DescribeKeyPairsRequest.builder().build()).keyPairs();
+    }
+
+    @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
+        final SSHKeyPair removedKeyPair = sshKeyPairs.remove(new Pair<>(region.getId(), keyName));
+        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
+            sshKeyPairListener.sshKeyPairRemoved(removedKeyPair);
+        }
         mongoObjectFactory.removeSSHKeyPair(region.getId(), keyName);
     }
 
     @Override
-    public String importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] unencryptedPrivateKey, String keyName) throws JSchException {
-        final String keyId = getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
-                .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build()).keyPairId();
+    public void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> listeners) {
+        Util.addAll(listeners, this.sshKeyPairListeners);
+    }
+
+    @Override
+    public SSHKeyPair importKeyPair(com.sap.sse.landscape.Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException {
+        if (!KeyPair.load(new JSch(), encryptedPrivateKey, publicKey).isEncrypted()) {
+            throw new IllegalArgumentException("Expected an encrypted private key");
+        }
+        try {
+            getEc2Client(getRegion(region)).importKeyPair(ImportKeyPairRequest.builder().keyName(keyName)
+                    .publicKeyMaterial(SdkBytes.fromByteArray(publicKey)).build());
+        } catch (Exception e) {
+            // this didn't work; if it didn't work because a key by that name already exists, let's still try to import the
+            // key into this Landscape, only making this Landscape aware of the key pair for which the public key had been
+            // uploaded to AWS earlier.
+            if (e.getMessage().contains("The keypair '"+keyName+"' already exists")) {
+                logger.info("A key named " + keyName + " already exists in the AWS region " + region.getId()
+                        + ". No problem; trying to import into this landscape.");
+            } else {
+                logger.info("Error trying to import a public key into the landscape: "+e.getMessage());
+                throw e;
+            }
+        }
         Object principal;
         try {
             principal = SessionUtils.getPrincipal();
@@ -563,18 +654,23 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
             principal = null;
         }
         final SSHKeyPair keyPair = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
-                TimePoint.now(), keyName, publicKey, unencryptedPrivateKey, privateKeyEncryptionPassphrase);
+                TimePoint.now(), keyName, publicKey, encryptedPrivateKey);
         addSSHKeyPair(keyPair);
-        return keyId;
+        return keyPair;
     }
 
     @Override
     public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         return sshKeyPairs.get(new Pair<>(region.getId(), keyName));
     }
+    
+    @Override
+    public Iterable<SSHKeyPair> getSSHKeyPairs() {
+        return Collections.unmodifiableCollection(sshKeyPairs.values());
+    }
 
     @Override
-    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair) throws JSchException {
+    public byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         keyPair.getKeyPair(new JSch(), privateKeyEncryptionPassphrase).writePrivateKey(bos);
         return bos.toByteArray();
@@ -721,7 +817,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -870,16 +966,52 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
         final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
-        for (final AwsInstance<ShardingKey, MetricsT> host : getHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME)) {
-            getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
-                for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
-                    final String[] splitByColon = replicaNameWithOptionalPortColonSeparated.split(MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR);
-                    if (splitByColon[0].trim().equals(mongoReplicaSetName.trim())) {
-                        // standalone; no replica set name provided; maybe a port?
-                        final int port = getMongoPort(splitByColon);
-                        result.addReplica(new MongoProcessInReplicaSetImpl(result, port, host));
+        for (final AwsInstance<ShardingKey, MetricsT> host : getMongoDBHosts(region)) {
+            for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(host)) {
+                if (replicaSetNameAndPort.getA().equals(mongoReplicaSetName)) {
+                    result.addReplica(new MongoProcessInReplicaSetImpl(result, replicaSetNameAndPort.getB(), host));
+                }
+            }
+        }
+        return result;
+    }
+
+    private Iterable<AwsInstance<ShardingKey, MetricsT>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
+        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
+    }
+
+    /**
+     * @param host
+     *            assumed to be a host that has the {@link #MONGO_REPLICA_SETS_TAG_NAME} tag set
+     * @return the replica set name / port number pairs extracted from the tag value
+     */
+    private Iterable<Pair<String, Integer>> getMongoEndpointSpecificationsAsReplicaSetNameAndPort(final AwsInstance<ShardingKey, MetricsT> host) {
+        final List<Pair<String, Integer>> result = new ArrayList<>();
+        getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
+            for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
+                final String[] splitByColon = replicaNameWithOptionalPortColonSeparated.split(MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR);
+                final int port = getMongoPort(splitByColon);
+                result.add(new Pair<>(splitByColon[0].trim(), port));
+            }});
+        return result;
+    }
+
+    @Override
+    public Iterable<MongoEndpoint> getMongoEndpoints(com.sap.sse.landscape.Region region) {
+        final Set<MongoEndpoint> result = new HashSet<>();
+        final Set<String> replicaSetsCreated = new HashSet<>();
+        for (final AwsInstance<ShardingKey, MetricsT> mongoDBHost : getMongoDBHosts(region)) {
+            for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(mongoDBHost)) {
+                if (replicaSetNameAndPort.getA() != null && !replicaSetNameAndPort.getA().isEmpty()) { // non-empty replica set name
+                    if (!replicaSetsCreated.contains(replicaSetNameAndPort.getA())) {
+                        replicaSetsCreated.add(replicaSetNameAndPort.getA());
+                        result.add(getDatabaseConfigurationForReplicaSet(region, replicaSetNameAndPort.getA()));
                     }
-                }});
+                } else {
+                    // single instance:
+                    result.add(new MongoProcessImpl(replicaSetNameAndPort.getB(), mongoDBHost));
+                }
+            }
         }
         return result;
     }
@@ -887,7 +1019,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getHostsWithTag(region, RABBITMQ_TAG_NAME);
+        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
         if (rabbitMQHostsInRegion.iterator().hasNext()) {
             final AwsInstance<ShardingKey, MetricsT> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
             result = new RabbitMQEndpoint() {
@@ -924,6 +1056,46 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         }
         return result;
     }
+    
+    @Override
+    public Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+        final List<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> result = new ArrayList<>();
+        for (final AwsInstance<ShardingKey, MetricsT> host : getRunningHostsWithTag(region, tagName)) {
+            final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> applicationProcessHost =
+                    new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(
+                            host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);
+            result.add(applicationProcessHost);
+        }
+        return result;
+    }
+    
+    @Override
+    public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
+        final Map<String, ProcessT> mastersByServerName = new HashMap<>();
+        final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
+        for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
+            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, privateKeyEncryptionPassphrase)) {
+                final String serverName = applicationProcess.getServerName(optionalTimeout, privateKeyEncryptionPassphrase);
+                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
+                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
+                    // then applicationProcess is a replica in the serverName cluster:
+                    Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
+                } else {
+                    mastersByServerName.put(serverName, applicationProcess);
+                }
+            }
+        }
+        final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
+        for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
+            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), serverNameAndMaster.getValue(),
+                    Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
+            result.add(replicaSet);
+        }
+        return result;
+    }
 
     @Override
     public AwsRegion getDefaultRegion() {
@@ -932,6 +1104,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
-        return Util.map(Arrays.asList(Region.EU_WEST_2, Region.CA_CENTRAL_1), AwsRegion::new);
+        return Util.map(Region.regions(), AwsRegion::new);
     }
 }

@@ -39,6 +39,14 @@
     <dispatcher>INCLUDE</dispatcher>
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
+  <filter>
+      <filter-name>DefaultTenantFilter</filter-name>
+      <filter-class>com.sap.sailing.server.gateway.impl.DefaultTenantRequestFilter</filter-class>
+  </filter>
+  <filter-mapping>
+      <filter-name>DefaultTenantFilter</filter-name>
+      <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
 
 	<servlet>
 		<servlet-name>RCConfiguration</servlet-name>
@@ -280,7 +288,7 @@
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
+			<param-value>com.sap.sse.rest.AccessControlAndEncodingResponseFilter</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

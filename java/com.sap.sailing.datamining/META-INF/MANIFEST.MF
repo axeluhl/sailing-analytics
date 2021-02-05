@@ -8,7 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.server.interfaces,
  org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sailing.datamining,
- com.sap.sailing.datamining.data
+ com.sap.sailing.datamining.data,
+ com.sap.sailing.datamining.impl.data;x-friends:="com.sap.sailing.polars.datamining"
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.datamining.shared,
