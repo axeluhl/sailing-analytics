@@ -9,7 +9,7 @@
     <booleanAttribute key="com.sap.jvm.profiling.ui.widgets.allowDebugging" value="false"/>
     <stringAttribute key="configLocation" value="${workspace_loc}/target"/>
     <booleanAttribute key="default" value="true"/>
-    <booleanAttribute key="default_auto_start" value="true"/>
+    <booleanAttribute key="default_auto_start" value="false"/>
     <intAttribute key="default_start_level" value="4"/>
     <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="includeOptional" value="false"/>
@@ -46,7 +46,7 @@
         <setEntry value="jackson-core-asl@default:default"/>
         <setEntry value="jackson-jaxrs@default:default"/>
         <setEntry value="jackson-mapper-asl@default:default"/>
-        <setEntry value="javax.annotation@0:true"/>
+        <setEntry value="javax.annotation@default:default"/>
         <setEntry value="javax.validation@default:default"/>
         <setEntry value="javax.ws.rs@default:default"/>
         <setEntry value="javax.xml.stream@default:default"/>
@@ -55,7 +55,7 @@
         <setEntry value="jaxb-api@default:default"/>
         <setEntry value="jcl.over.slf4j@default:default"/>
         <setEntry value="lz4-java@default:default"/>
-        <setEntry value="org.apache.aries.spifly.dynamic.bundle@1:true"/>
+        <setEntry value="org.apache.aries.spifly.dynamic.bundle@3:true"/>
         <setEntry value="org.apache.commons.beanutils@default:default"/>
         <setEntry value="org.apache.commons.codec@default:default"/>
         <setEntry value="org.apache.commons.collections@default:default"/>
@@ -68,8 +68,8 @@
         <setEntry value="org.apache.felix.gogo.command@default:default"/>
         <setEntry value="org.apache.felix.gogo.runtime@default:default"/>
         <setEntry value="org.apache.felix.gogo.shell@default:default"/>
-        <setEntry value="org.apache.felix.shell.remote@default:default"/>
-        <setEntry value="org.apache.felix.shell@default:default"/>
+        <setEntry value="org.apache.felix.shell.remote@4:true"/>
+        <setEntry value="org.apache.felix.shell@4:true"/>
         <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
         <setEntry value="org.apache.httpcomponents.httpclient@default:default"/>
         <setEntry value="org.apache.httpcomponents.httpcore@default:default"/>
@@ -98,11 +98,11 @@
         <setEntry value="org.eclipse.equinox.launcher@default:default"/>
         <setEntry value="org.eclipse.equinox.simpleconfigurator@2:true"/>
         <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
-        <setEntry value="org.eclipse.jetty.annotations@default:default"/>
-        <setEntry value="org.eclipse.jetty.apache-jsp@default:default"/>
+        <setEntry value="org.eclipse.jetty.annotations@4:true"/>
+        <setEntry value="org.eclipse.jetty.apache-jsp@4:true"/>
         <setEntry value="org.eclipse.jetty.client@default:default"/>
         <setEntry value="org.eclipse.jetty.deploy@default:default"/>
-        <setEntry value="org.eclipse.jetty.http@default:default"/>
+        <setEntry value="org.eclipse.jetty.http@3:true"/>
         <setEntry value="org.eclipse.jetty.io@default:default"/>
         <setEntry value="org.eclipse.jetty.jmx@default:default"/>
         <setEntry value="org.eclipse.jetty.jndi@default:default"/>
