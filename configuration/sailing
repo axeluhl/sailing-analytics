@@ -74,6 +74,11 @@ configure_and_start_server() {
   chown sailing "${SERVERS_DIR}/${conf}"
   chgrp sailing "${SERVERS_DIR}/${conf}"
   local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
+  # If there is a "secret" mail.properties then use it for the default server
+  if [ -f /root/mail.properties ]; then
+    mkdir -p "${SERVERS_DIR}/${conf}/configuration"
+    cp /root/mail.properties "${SERVERS_DIR}/${conf}/configuration"
+  fi
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
   RETVAL=$?
   [ $RETVAL -eq 0 ] && success || failure
