@@ -212,6 +212,7 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=rheinwoche
 SERVER_NAME=rheinwoche2019
 SERVER_PORT=8938
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/rheinwoche2019?replicaSet=live&retryWrites=true"
+#MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/rheinwoche2019?replicaSet=live&retryWrites=true&readPreference=nearest"
+MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/rheinwoche2019"
 EXPEDITION_PORT=2060
 TELNET_PORT=14938
