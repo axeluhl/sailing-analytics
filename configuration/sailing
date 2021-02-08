@@ -55,6 +55,7 @@ start_servers() {
 	  else
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
+            echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
 	    configure_and_start_server "${FIRST_SERVER}"
 	    create_basic_httpd_config "${FIRST_SERVER}"
 	    reload_httpd
@@ -70,6 +71,8 @@ start_servers() {
 configure_and_start_server() {
   conf="$1"
   mkdir -p "${SERVERS_DIR}/${conf}" >/dev/null 2>/dev/null
+  chown sailing "${SERVERS_DIR}/${conf}"
+  chgrp sailing "${SERVERS_DIR}/${conf}"
   local ENV_SH="${SERVERS_DIR}/$conf/env.sh"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
   RETVAL=$?
