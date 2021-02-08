@@ -8,7 +8,7 @@
 <booleanAttribute key="clearConfig" value="false"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/target"/>
 <booleanAttribute key="default" value="true"/>
-<booleanAttribute key="default_auto_start" value="true"/>
+<booleanAttribute key="default_auto_start" value="false"/>
 <intAttribute key="default_start_level" value="4"/>
 <setAttribute key="deselected_workspace_bundles"/>
 <booleanAttribute key="includeOptional" value="true"/>
