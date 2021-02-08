@@ -6,12 +6,16 @@ import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaView;
 import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaViewImpl;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewView;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewViewImpl;
+import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewView;
+import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewViewImpl;
 
 public class ViewFactory {
 
     private EventOverviewView eventOverviewView;
 
     private EventMediaView eventMediaView;
+    
+    private RegattaOverviewView regattaOverviewView;
 
     public EventOverviewView getEventOverviewView() {
         if (eventOverviewView == null) {
@@ -27,6 +31,13 @@ public class ViewFactory {
         return eventMediaView;
     }
 
+    public RegattaOverviewView getRegattaOverviewView() {
+        if (regattaOverviewView == null) {
+            regattaOverviewView = new RegattaOverviewViewImpl();
+        }
+        return regattaOverviewView;
+    }
+    
     public SignInView getSignInView() {
         return new SignInViewImpl();
     }

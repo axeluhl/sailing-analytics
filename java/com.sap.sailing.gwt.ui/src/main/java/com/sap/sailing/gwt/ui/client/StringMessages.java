@@ -111,7 +111,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String startOfTracking();
     String endOfTracking();
     String regatta();
-    String regattas();
     String startTracking();
     String stopTracking();
     String connections();
@@ -231,6 +230,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noSelection();
     String raceIsKnownToStartUpwind();
     String events();
+    String regattas();
     String pairingList();
     String pairingLists();
     String pairingListCreationInfo();

@@ -318,7 +318,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
+    void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);  
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
@@ -646,4 +646,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
+
+    void getRegattasForEvent(UUID eventId, AsyncCallback<List<RegattaDTO>> callback);
 }

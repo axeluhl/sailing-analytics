@@ -267,6 +267,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) throws UnauthorizedException;
+    
+    List<RegattaDTO> getRegattasForEvent(UUID eventId);
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet)
             throws UnauthorizedException, NotFoundException;

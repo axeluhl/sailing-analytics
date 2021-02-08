@@ -12,6 +12,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.managementconsole.mvp.ViewFactory;
 import com.sap.sailing.gwt.managementconsole.partials.authentication.signin.SignInPresenter;
 import com.sap.sailing.gwt.managementconsole.services.EventService;
+import com.sap.sailing.gwt.managementconsole.services.RegattaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -39,6 +40,7 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
     private final PlaceController placeController;;
     private final SailingServiceWriteAsync sailingService;
     private final EventService eventService;
+    private final RegattaService regattaService;
     private final AuthenticationManager authenticationManager;
     private final ViewFactory viewFactory;
 
@@ -49,6 +51,7 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
                 RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
         this.eventService = new EventService(sailingService, errorReporter, eventBus);
+        this.regattaService = new RegattaService(sailingService, errorReporter, eventBus);
         // TODO: Provide URLs for email confirmation and password reset:
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, "", "");
         this.viewFactory = new ViewFactory();
@@ -99,6 +102,11 @@ public class ManagementConsoleClientFactoryImpl implements ManagementConsoleClie
     @Override
     public EventService getEventService() {
         return eventService;
+    }
+    
+    @Override
+    public RegattaService getRegattaService() {
+        return regattaService;
     }
 
     @Override

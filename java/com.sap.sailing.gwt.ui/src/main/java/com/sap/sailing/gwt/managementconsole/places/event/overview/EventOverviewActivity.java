@@ -5,8 +5,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.managementconsole.app.ManagementConsoleClientFactory;
 import com.sap.sailing.gwt.managementconsole.events.EventListResponseEvent;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsoleActivity;
-import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewPlace;
 
 public class EventOverviewActivity extends AbstractManagementConsoleActivity<EventOverviewPlace>
         implements EventOverviewView.Presenter {
@@ -33,7 +33,7 @@ public class EventOverviewActivity extends AbstractManagementConsoleActivity<Eve
 
     @Override
     public void navigateToEvent(final EventDTO event) {
-        getClientFactory().getPlaceController().goTo(new EventMediaPlace(event.id));
+        getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(event.id));
     }
 
 }

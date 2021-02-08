@@ -3833,7 +3833,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 }
             }
         }
-        if (event != null) {
+        if (event != null) {         
             final Set<Leaderboard> leaderboardsAlreadyAddedAsRaceGroup = new HashSet<>();
             for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
                 for (Leaderboard leaderboard : getService().getLeaderboards().values()) {
@@ -3874,6 +3874,30 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             }
         }
         return raceGroups;
+    }
+    
+    @Override
+    public List<RegattaDTO> getRegattasForEvent(UUID eventId) {  
+        List<RegattaDTO> regattas = new ArrayList<>();
+        Event event = getService().getEvent(eventId);
+        if (event != null) {   
+            getSecurityService().checkCurrentUserReadPermission(event);
+            for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+                for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                    if (getSecurityService().hasCurrentUserReadPermission(leaderboard) && leaderboard instanceof RegattaLeaderboard) {
+                        RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                        if (regattaLeaderboard.getRegatta() != null) {
+                            final RegattaDTO regatta = getRegattaByName(regattaLeaderboard.getRegatta().getName());
+                            if (regatta != null) {
+                                regattas.add(regatta);
+                            }
+                        }
+                        // TODO sarah regatten der courseAreas zufügen
+                    }
+                }
+            }
+        }
+        return regattas;
     }
 
     /**

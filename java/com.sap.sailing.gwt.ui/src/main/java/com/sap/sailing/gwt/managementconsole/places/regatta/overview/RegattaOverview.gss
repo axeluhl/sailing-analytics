@@ -1,0 +1,103 @@
+@charset "UTF-8";
+@def EVENT_CARD_BACKGROUND_COLOR #1e2d39;
+
+.cards {
+    padding: 0 6px;
+}
+
+.cards .card-panel {
+    padding: 0 7px;
+}
+
+.event-card {
+    border-style: solid;
+    border-radius: 10px;
+    padding: 0px;
+    border-width: 1px;
+    outline: none;
+    background-color: EVENT_CARD_BACKGROUND_COLOR;
+    border-color: EVENT_CARD_BACKGROUND_COLOR;
+    margin-bottom: 13px;
+    position: relative;
+}
+
+.event-card h1 {
+    margin: 0;
+    padding: 0;
+    font-weight: 600;
+    font-size: 16px;
+    color: TEXT_COLOR_PRIMARY;
+}
+
+.event-card h2 {
+    font-weight: normal;
+    font-size: 11px;
+    color: TEXT_COLOR_SECONDARY;
+    margin-left: 0.5em;
+}
+
+.event-card .featured-marker {
+    font-size: 12px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px;
+    border-style: solid;
+    outline: none;
+    background-color: TEXT_COLOR_HIGHLIGHT;
+    border-color: TEXT_COLOR_HIGHLIGHT;
+    color: TEXT_COLOR_PRIMARY;
+}
+
+.event-card .details {
+}
+
+.event-card .location {
+    padding-left: 2rem;
+    background-position: 1rem 0;
+}
+
+.event-card-container {
+    width: 100%;
+    margin: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 0 13px 13px
+}
+
+@media (max-width: 44.99em) {
+    .event-card {
+        background-image: none!important;
+    }
+}
+
+@media (min-width: 45em) {
+    
+    .event-card {
+        height: 250px;
+        background-image: resourceUrl("eventBackdrop");
+        background-position: center center;
+        background-repeat: no-repeat;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        position: relative;
+    }
+
+    .event-card.custom-teaser:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 10px;
+        background: linear-gradient(to bottom, transparent 60%, black 120%);
+    }
+    
+
+    .event-card .event-card-container {
+        position: absolute;
+        bottom: 0;
+    }
+}
