@@ -28,6 +28,10 @@
     position: relative;
 }
 
+.event-card:hover {
+    border-color: GENERIC_COLOR_HIGHLIGHT;
+}
+
 .event-card .featured-marker {
     font-size: 12px;
     text-align: center;
