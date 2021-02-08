@@ -126,8 +126,9 @@ public class AclEditPanel extends Composite {
                 IconResources.INSTANCE.removeIcon(), actionNames, stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-        permissionsCellListPanelUi.add(deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
-                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable()));
+        deniedActionsContainer = createActionsContainer(stringMessages.deniedActions(),
+                deniedActionsEditor, AclDialogResources.INSTANCE.css().deniedActionsTable());
+        permissionsCellListPanelUi.add(deniedActionsContainer);
 
         userGroupSelectionModel.addSelectionChangeHandler(event -> {
             StrippedUserGroupDTO userGroup = userGroupSelectionModel.getSelectedObject();

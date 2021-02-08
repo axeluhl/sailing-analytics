@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -21,17 +22,17 @@ public class RegattaLogBoatRegistrationDialog extends DataEntryDialog<Set<BoatDT
     protected final boolean canBoatsOfCompetitorsChangePerRace;
     protected final BoatRegistrationsPanel boatRegistrationsPanel;
 
-    public RegattaLogBoatRegistrationDialog(String boatClass, SailingServiceAsync sailingService, final UserService userService,
+    public RegattaLogBoatRegistrationDialog(String boatClass, SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<BoatDTO>> callback) {
         super(stringMessages.registerBoats(), /* messsage */null, stringMessages.save(), stringMessages.cancel(),
                 /* validator */ null, callback);
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
+        this.sailingService = sailingServiceWrite;
         this.leaderboardName = leaderboardName;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.boatRegistrationsPanel = new BoatRegistrationsPanel(sailingService, userService, stringMessages, errorReporter, editable, leaderboardName,
+        this.boatRegistrationsPanel = new BoatRegistrationsPanel(sailingServiceWrite, userService, stringMessages, errorReporter, editable, leaderboardName,
                 canBoatsOfCompetitorsChangePerRace, boatClass, ()->validateAndUpdate(), getRegisteredBoatsRetriever(), /* restrictPoolToLeaderboard */ false);
     }
 

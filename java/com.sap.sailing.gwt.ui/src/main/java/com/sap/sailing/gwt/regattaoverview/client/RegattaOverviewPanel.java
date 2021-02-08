@@ -81,7 +81,6 @@ public class RegattaOverviewPanel extends SimplePanel {
             final ErrorReporter errorReporter, 
             final StringMessages stringMessages, 
             RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
-        
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -91,29 +90,24 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.eventDTO = null;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.userService = userService;
-
         mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
-        
         refreshNowButton = new Anchor(stringMessages.refreshNow());
         refreshNowButton.setStyleName(RES.mainCss().button());
         refreshNowButton.addStyleName(style.button());
-
         refreshNowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 regattaRaceStatesComponent.loadAndUpdateEventLog();
             }
-            
         });
         settingsButton = new Anchor("&nbsp;", true);
         settingsButton.ensureDebugId("RegattaOverviewSettingsButton");
         settingsButton.setStyleName(style.settingsButton());
         settingsButton.addStyleName(RES.mainCss().button());
         settingsButton.addStyleName(style.button());
-
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -123,7 +117,6 @@ public class RegattaOverviewPanel extends SimplePanel {
                                 IgnoreLocalSettings.getIgnoreLocalSettingsFromCurrentUrl())).show();
             }            
         });
-        
         startStopUpdatingButton = new Anchor("&nbsp;", true);
         startStopUpdatingButton.setStyleName(RES.mainCss().button());
         startStopUpdatingButton.addStyleName(style.refreshButton());
@@ -139,10 +132,8 @@ public class RegattaOverviewPanel extends SimplePanel {
                     startStopUpdatingButton.addStyleName(style.refreshButton_live());
                 }
             }
-            
         });
-        
-        //FIXME The chained calls from here are independent from each other and should be implemented with Dispatching Framework
+        // FIXME The chained calls from here are independent from each other and should be implemented with Dispatching Framework
         sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
                 new AsyncCallback<EventDTO>() {
                     @Override
@@ -158,7 +149,6 @@ public class RegattaOverviewPanel extends SimplePanel {
                         continueInitAfterEventRetrieved();
                     }
                 }));
-        
     }
 
     private void continueInitAfterEventRetrieved() {
@@ -198,11 +188,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
                 stringMessages,
                 regattaOverviewContextDefinition.getEvent(), eventDTO, raceGroupDTOs, defaultSettings, uiUpdateTimer);
-        
         regattaRaceStatesComponent.setEntryClickedHandler(entryClickedHandler);
-        
         regattaRaceStatesComponent.setWidth("100%");
-        
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
@@ -211,7 +198,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         });
         this.serverUpdateTimer.play();
         startStopUpdatingButton.addStyleName(style.refreshButton_live());
-
         this.uiUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
@@ -219,29 +205,22 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
         });
         this.uiUpdateTimer.play();
-        
-
         FlowPanel flowPanelLeft = new FlowPanel();
         flowPanelLeft.addStyleName(style.functionBarLeft());
         flowPanelLeft.add(repeatedInfoLabel);
         repeatedInfoLabel.setStyleName(style.repeatedInfoLabel());
         regattaRaceStatesComponent.setRepeatedInfoLabel(repeatedInfoLabel);
-
         FlowPanel flowPanelRight = new FlowPanel();
         flowPanelRight.addStyleName(style.functionBar());
-
         // flexTable.add(refreshNowButton);
         flowPanelRight.add(startStopUpdatingButton);
         flowPanelRight.add(settingsButton);
-
         FlexTable leftRightToolbar = new FlexTable();
         leftRightToolbar.setWidget(0, 1, flowPanelRight);
         leftRightToolbar.setWidget(0, 0, flowPanelLeft);
-
         leftRightToolbar.getElement().getStyle().setWidth(100, Unit.PCT);
         mainPanel.add(leftRightToolbar);
         mainPanel.add(regattaRaceStatesComponent);
-        
         checkToEnableSettingsButton();
     }
 

@@ -7,8 +7,8 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceLogFinishPositioningListChangedEventDeserializer extends RaceLogFinishPositioningEventDeserializer {
     

@@ -9,9 +9,15 @@ import com.google.gwt.dom.client.StyleInjector;
  * @author pgtaboada
  *
  */
-public class CommonControlsCSS {
+public final class CommonControlsCSS {
+    private static boolean isInjected;
+
     public static HighChartsRessource LEGACY = GWT.create(HighChartsRessource.class);
+
     public static void ensureInjected() {
-        StyleInjector.injectAtStart(LEGACY.commonControls().getText(), true);
+        if (!isInjected) {
+            StyleInjector.injectAtStart(LEGACY.commonControls().getText(), true);
+            isInjected = true;
+        }
     }
 }

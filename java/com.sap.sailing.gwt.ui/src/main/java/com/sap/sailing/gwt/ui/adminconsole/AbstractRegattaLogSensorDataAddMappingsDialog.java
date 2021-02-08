@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -40,7 +41,7 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
     private BoatDTO boatToSelect;
     private boolean inInstableTransitionState = false;
 
-    public AbstractRegattaLogSensorDataAddMappingsDialog(final SailingServiceAsync sailingService, final UserService userService,
+    public AbstractRegattaLogSensorDataAddMappingsDialog(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
             DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -52,16 +53,16 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
                     }
                 }, true, callback);
         this.stringMessages = stringMessages;
-        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingServiceWrite, stringMessages, errorReporter);
         deviceIdTable.removeTrackNameColumn();
 
         importWidgetHolder = new SimplePanel();
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(
                 event -> deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject()));
 
-        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingService, userService, stringMessages,
+        boatTable = new BoatTableWrapper<RefreshableSingleSelectionModel<BoatDTO>>(sailingServiceWrite, userService, stringMessages,
                 errorReporter, /* multiSelection */ false, /* enable Pager */ true, /* allowActions */ false);
-        competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter,
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter,
                 /* multiSelection */ false, /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
 
         boatTable.getSelectionModel().addSelectionChangeHandler(event -> {
@@ -74,8 +75,8 @@ public abstract class AbstractRegattaLogSensorDataAddMappingsDialog extends Data
         });
 
         this.leaderboardName = leaderboardName;
-        getBoatRegistrations(sailingService, errorReporter);
-        getCompetitorRegistrations(sailingService, errorReporter);
+        getBoatRegistrations(sailingServiceWrite, errorReporter);
+        getCompetitorRegistrations(sailingServiceWrite, errorReporter);
     }
 
     private void getBoatRegistrations(final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {

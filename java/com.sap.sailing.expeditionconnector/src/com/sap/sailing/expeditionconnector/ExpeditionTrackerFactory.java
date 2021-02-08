@@ -1,6 +1,7 @@
 package com.sap.sailing.expeditionconnector;
 
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,9 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIde
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 
-public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
+public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry, ClearStateTestSupport {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
     
     private static ExpeditionTrackerFactory defaultInstance;
@@ -211,7 +213,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     private void addOrReplaceDeviceConfigurationNoPersistence(ExpeditionDeviceConfiguration deviceConfiguration) {
         if (deviceConfiguration.getExpeditionBoatId() != null &&
                 devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
-                !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
+                !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).getDeviceUuid().equals(deviceConfiguration.getDeviceUuid())) {
             throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+
                             devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()) +
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
@@ -226,12 +228,12 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
         }
     }
 
-    public void removeDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        deviceConfigurations.remove(deviceConfiguration.getDeviceUuid());
-        if (deviceConfiguration.getExpeditionBoatId() != null) {
+    public void removeDeviceConfiguration(UUID deviceConfigurationId) {
+        final ExpeditionDeviceConfiguration deviceConfiguration = deviceConfigurations.remove(deviceConfigurationId);
+        if (deviceConfiguration != null && deviceConfiguration.getExpeditionBoatId() != null) {
             devicesPerBoatId.remove(deviceConfiguration.getExpeditionBoatId());
         }
-        mongoObjectFactory.removeExpeditionDeviceConfiguration(deviceConfiguration);
+        mongoObjectFactory.removeExpeditionDeviceConfiguration(deviceConfigurationId);
     }
 
     @Override
@@ -261,5 +263,12 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     @Override
     public SensorFixStore getSensorFixStore() {
         return sensorFixStore;
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        for (UUID devicesPerBoatId : new ArrayList<UUID>(deviceConfigurations.keySet())) {
+            removeDeviceConfiguration(devicesPerBoatId);
+        }     
     }
 }

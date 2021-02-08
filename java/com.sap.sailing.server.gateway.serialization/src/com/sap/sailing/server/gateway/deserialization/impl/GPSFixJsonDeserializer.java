@@ -8,10 +8,10 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.TypeBasedJsonDeserializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class GPSFixJsonDeserializer extends TypeBasedJsonDeserializer<GPSFix> {
     public static final String TYPE = "GPSFix";

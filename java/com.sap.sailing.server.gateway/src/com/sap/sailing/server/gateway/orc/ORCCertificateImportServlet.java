@@ -70,14 +70,14 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
             final JSONObject errorResponse = new JSONObject();
             errorResponse.put(ORCCertificateUploadConstants.STATUS, "ERROR");
             errorResponse.put(ORCCertificateUploadConstants.MESSAGE, "Error trying to import ORC certificates: "+e.getMessage());
-            resp.getOutputStream().print(errorResponse.toJSONString());
+            errorResponse.writeJSONString(resp.getWriter());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (ParseException e) {
             logger.log(Level.INFO, "User "+SessionUtils.getPrincipal()+" was trying to analyze ORC certificates, but the certificates failed to parse", e);
             final JSONObject errorResponse = new JSONObject();
             errorResponse.put(ORCCertificateUploadConstants.STATUS, "ERROR");
             errorResponse.put(ORCCertificateUploadConstants.MESSAGE, "Unable to parse certificate selection: "+e.getMessage());
-            resp.getOutputStream().print(errorResponse.toJSONString());
+            errorResponse.writeJSONString(resp.getWriter());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } finally {
             resp.setContentType("text/html;charset=UTF-8");
@@ -110,7 +110,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
         }
         jsonResponse.put(ORCCertificateUploadConstants.CERTIFICATES, certificatesAsJson);
         jsonResponse.put(ORCCertificateUploadConstants.STATUS, "OK");
-        resp.getWriter().write(jsonResponse.toJSONString());
+        jsonResponse.writeJSONString(resp.getWriter());
     }
 
 }

@@ -12,8 +12,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.util.thread.ShutdownThread;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -297,13 +295,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
-                    client = new WebSocketClient(new SslContextFactory()) {
-                        @Override
-                        public void destroy() {
-                            super.destroy();
-                            ShutdownThread.deregister(this); // this will make sure that after destroy() no reference is being held to this client
-                        }
-                    };
+                    client = new WebSocketClient();
                     client.start();
                     currentSocket = new WebSocket();
                     igtimiServerTimepoint = null;

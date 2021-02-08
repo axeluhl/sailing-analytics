@@ -32,6 +32,7 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
     private final String raceName;
     private final String raceID;
     private final String link;
+    private final String swissTimingUrl;
     private final transient SwissTimingReplayService replayService;
     
     class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
@@ -120,11 +121,12 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
         }
     }
 
-    public SwissTimingReplayConnectivityParameters(String link, String raceName, String raceID, String boatClassName,
-            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+    public SwissTimingReplayConnectivityParameters(String link, String swissTimingUrl, String raceName, String raceID,
+            String boatClassName, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
             SwissTimingReplayService replayService, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
         super(/* trackWind: never track live wind with a SwissTiming Replay race */ false, /* correctWindDirectionByMagneticDeclination */ false);
         this.link = link;
+        this.swissTimingUrl = swissTimingUrl;
         this.raceName = raceName;
         this.raceID = raceID;
         this.boatClassName = boatClassName;
@@ -197,6 +199,10 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     public String getLink() {
         return link;
+    }
+    
+    public String getSwissTimingUrl() {
+        return swissTimingUrl;
     }
     
     @Override

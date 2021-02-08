@@ -41,19 +41,18 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkPairWithConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -64,21 +63,22 @@ import com.sap.sailing.domain.coursetemplate.impl.MarkPropertiesBasedMarkConfigu
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateBasedMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.RegattaMarkConfigurationImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointWithMarkConfigurationImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBuilder;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/courseconfiguration")
@@ -142,8 +142,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromCourse/{regattaName}/{raceColumn}/{fleet}")
     public Response createCourseConfigurationFromCourse(@PathParam("regattaName") String regattaName,
             @PathParam("raceColumn") String raceColumn, @PathParam("fleet") String fleet,
-            @QueryParam("tag") List<String> tags) throws Exception {
-
+            @QueryParam("tags") List<String> tags) throws Exception {
         if (regattaName == null || raceColumn == null || fleet == null) {
             return getBadCourseConfigurationValidationErrorResponse(
                     "Course configuration is required to have a regatta name and a race name");
@@ -175,7 +174,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 .createCourseConfigurationFromRegatta(courseBase, regatta, raceColumnByName.getTrackedRace(fleetByName),
                         tags);
         final JSONObject jsonResult = getCourseConfigurationJsonSerializer().serialize(courseConfiguration);
-        return Response.ok(jsonResult.toJSONString()).build();
+        return Response.ok(streamingOutput(jsonResult)).build();
     }
 
     @GET
@@ -183,7 +182,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
     @Path("getFromCourseTemplate/{courseTemplateId}")
     public Response createCourseConfigurationFromCourseTemplate(@PathParam("courseTemplateId") String courseTemplateId,
             @QueryParam("regattaName") String regattaName,
-            @QueryParam("tag") List<String> tags,
+            @QueryParam("tags") List<String> tags,
             @QueryParam("numberOfLaps") Integer optionalNumberOfLaps) {
         final CourseTemplate courseTemplate = this.getSharedSailingData()
                 .getCourseTemplateById(UUID.fromString(courseTemplateId));
@@ -199,8 +198,7 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
         }
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfiguration = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromTemplate(courseTemplate, regatta, tags, optionalNumberOfLaps);
-        String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfiguration).toJSONString();
-        return Response.ok(jsonString).build();
+        return Response.ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseConfiguration))).build();
 
     }
 
@@ -236,8 +234,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 regatta, getService().getCourseAndMarkConfigurationFactory()
                     .createCourseTemplateAndUpdatedConfiguration(courseConfiguration, tags,
                         optionalUserGroupForNonDefaultMarkPropertiesOwnership));
-        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseTemplate).toJSONString();
-        return Response.ok(jsonString).build();
+        return Response
+                .ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseTemplate))).build();
     }
 
     private CourseConfiguration<MarkConfigurationResponseAnnotation> annotateWithLastKnownPositionInformation(
@@ -400,9 +398,8 @@ public class CourseConfigurationResource extends AbstractSailingServerResource {
                 raceLog.getCurrentPassId(), course, CourseDesignerMode.BY_MARKS));
         final CourseConfiguration<MarkConfigurationResponseAnnotation> courseConfigurationResult = getService().getCourseAndMarkConfigurationFactory()
                 .createCourseConfigurationFromRegatta(course, regatta, raceColumnByName.getTrackedRace(fleetByName),
-                        /* tagsToFilterMarkProperties */ null);
-        final String jsonString = getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult).toJSONString();
-        return Response.ok(jsonString).build();
+                        /* tagsToFilterMarkProperties */ Collections.emptyList());
+        return Response.ok(streamingOutput(getCourseConfigurationJsonSerializer().serialize(courseConfigurationResult))).build();
     }
 
     private synchronized JsonSerializer<CourseConfiguration<MarkConfigurationResponseAnnotation>> getCourseConfigurationJsonSerializer() {

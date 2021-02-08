@@ -22,15 +22,15 @@ import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.domain.base.impl.TransientCompetitorAndBoatStoreImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorAndBoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class CompetitorJsonSerializerTest {
 
@@ -53,7 +53,7 @@ public class CompetitorJsonSerializerTest {
         when(team.getName()).thenReturn("The Team");
         when(competitor.getTeam()).thenReturn(team);
     }
-
+    
     /**
      * This test case fails based on bug 1599.
      */

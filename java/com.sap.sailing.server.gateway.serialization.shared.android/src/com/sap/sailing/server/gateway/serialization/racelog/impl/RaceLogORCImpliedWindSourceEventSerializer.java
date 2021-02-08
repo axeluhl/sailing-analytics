@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 /**
  * Serializer for {@link com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent RaceLogORCImpliedWindSourceEvent}.

@@ -5,7 +5,7 @@
   font-size: 1rem;
   background: #008fcc;
   color: #fff;
-  padding: 2em 0;
+  padding: 2em 0 0 0;
   margin-top: 3em;
 }
 .socialfooter_heading {
@@ -15,15 +15,20 @@
 }
 .socialfooter_item {
   white-space: nowrap;
+  padding-bottom: 2em;
 }
 .socialfooter_item a {
   color: #f6f9fc;
+  text-decoration: none;
 }
 .socialfooter_item_contentwrapper {
   visibility: visible;
 }
 .socialfooter_itemleft {
   text-align: right;
+}
+.socialfooter_itemcenter {
+  text-align: center;
 }
 .socialfooter_itemright {
   text-align: left;

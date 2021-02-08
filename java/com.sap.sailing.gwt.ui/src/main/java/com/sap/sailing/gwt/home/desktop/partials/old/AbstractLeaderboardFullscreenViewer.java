@@ -3,12 +3,11 @@ package com.sap.sailing.gwt.home.desktop.partials.old;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicatorResources;
@@ -54,14 +53,6 @@ public abstract class AbstractLeaderboardFullscreenViewer extends FullscreenCont
         leaderboardPanel.getFirstChildElement().getStyle().clearMarginTop();
         leaderboardPanel.blur();
         leaderboardPanel.removeAttribute("tabIndex");
-    }
-
-    protected Widget createPanel(Widget... contentWidgets) {
-        FlowPanel panel = new FlowPanel();
-        for (Widget widget : contentWidgets) {
-            panel.add(widget);
-        }
-        return panel;
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.MappableToDeviceFormatter;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -16,9 +16,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, RefreshableSingleSelectionModel<DeviceMappingDTO>> {
-    public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
+    public DeviceMappingTableWrapper(SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+        super(sailingServiceWrite, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 /* leaving EntityIdentityComparator null, reducing comparison to equals/hashCode which is well
                  * defined on DeviceMappingDTO
                  */ null);

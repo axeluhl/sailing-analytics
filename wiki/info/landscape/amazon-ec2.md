@@ -4,11 +4,15 @@
 
 ## Quickstart
 
-#### Servers
+Our default region in AWS EC2 is eu-west-1 (Ireland).
+
+#### Servers, Hostnames
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
 - Database Server: dbserver.internal.sapsailing.com
-- Database and Queue Server: rabbit.internal.sapsailing.com
+- RabbitMQ Server: rabbit.internal.sapsailing.com
+- Standalone MongoDB Server: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203)
+- MongoDB Servers for "live" replica set: mongo0.internal.sapsailing.com and mongo1.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -24,13 +28,12 @@ You may need to select "All generations" instead of "Current generation" to see 
 
 Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar. Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_URI` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
+A typical set-up for a master node could look like this:
+
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-master-server
 SERVER_NAME=myspecificevent
-REPLICATION_CHANNEL=myspecificevent
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent?replicaSet=live&retryWrites=true"
-SERVER_STARTUP_NOTIFY=you@email.com
 # Provide authentication credentials for a user on security-service.sapsailing.com permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on security-service.sapsailing.com server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on security-service.sapsailing.com)
@@ -39,22 +42,164 @@ SERVER_STARTUP_NOTIFY=you@email.com
 # or by logging in to the security-service.sapsailing.com server using your web browser and then navigating to
 #     https://security-service.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from security-service.sapsailing.com)
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
+SERVER_STARTUP_NOTIFY=you@email.com
 ```
 
-Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group.
+This will use the default "live" MongoDB replica set with a database named after the `SERVER_NAME` variable, and with an outbound RabbitMQ exchange also named after the `SERVER_NAME` variable, using the default RabbitMQ instance in the landscape for replication purposes, and based on the `live-master-server` environment will start replicating the SecurityService as well as the SharedSailingData service from the central `security-service.sapsailing.com` instance. Furthermore, a reverse proxy setting for your `EVENT_ID` will be created, using `${SERVER_NAME}.sapsailing.com` as the hostname for the mapping.
+
+More variables are available, and some variables---if not set in the environment specified by `USE_ENVIRONMENT` nor in the user data provided when launching the instance---have default values which may be constants or may be computed based on values of other variables, most notably the `SERVER_NAME` variable. Here is the list:
+
+* `SERVER_NAME`
+    used to define the server's name. This is relevant in particular for the user group
+    created/used for all new server-specific objects such as the `SERVER` object itself. The group's
+    name is constructed by appending "-server" to the server name. This variable furthermore provides the default value for a few other settings, including the default hostname mapping `${SERVER_NAME}.sapsailing.com` for any series or event specified, the database name in the default `MONGODB_URI`, as well as the default name for the outbound RabbitMQ replication exchange `REPLICATION_CHANNEL`.
+
+* `INSTALL_FROM_RELEASE` The user data variable to use to specify the release to install and run on the host. Typical values are `live-master-server` and `live-replica-server`, used to start a master or a replica server, respectively, or `archive-server` for launching an "ARCHIVE" server.
+ 
+* `MONGODB_URI`
+    used to specify the MongoDB connection URI; if neither this variable nor `MONGODB_HOST` are specified, a default MongoDB URI will be constructed as `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest` for a server that does not set the `AUTO_REPLICATE` variable, and to `mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${SERVER_NAME}-replica?replicaSet=live&retryWrites=true&readPreference=nearest` for a server that does set the `AUTO_REPLICATE` variable to a non-empty value such as `true`.
+
+* `REPLICATION_CHANNEL`
+    used to define the name of the RabbitMQ exchange to which this master node
+    will send its operations bound for its replica nodes. The replica-side counterpart for this is
+    `REPLICATE_MASTER_EXCHANGE_NAME`. Defaults to `${SERVER_NAME}` if no automatic replication is
+    requested using the `AUTO_REPLICATE` variable,  otherwise to `${SERVER_NAME}-${INSTANCE_NAME}` which
+    provides a separate "transitive" replication channel for each replica.
+
+* `REPLICATION_HOST`
+    hostname or IP address of the RabbitMQ node that this master process will use for outbound replication. Defaults to `rabbit.internal.sapsailing.com`.
+
+* `REPLICATION_PORT`
+    the port used by this master process to connect to RabbitMQ for outbound replication. Using 0 (the default)
+    will use the default port as encoded in the RabbitMQ driver. 
+
+* `SERVER_PORT`
+    The port on which the built-in web server of an application server process can be reached using HTTP. Defaults to 8888.
+
+* `TELNET_PORT`
+    The port on which the OSGi console of a server process can be reached. Defaults to 14888.
+
+* `EXPEDITION_PORT`
+    The port on which the application server will listen for incoming UDP packets, usually then forwarded to the Expedition receiver for wind and other Expedition-based sensor data. Defaults to 2010.
+    
+* `SERVER_STARTUP_NOTIFY`
+    defines one or more comma-separated e-mail addresses to which a notification will
+    be sent after the server has started successfully.
+
+* `USE_ENVIRONMENT`
+    defines the environment file (stored at `http://releases.sapsailing.com/environments`) which provides default combinations of variables. The most frequently used environments are probably `live-master-server` which configures the replication of the `SecurityService` and `SharedSailingData` from `security-service.sapsailing.com`, leading to a centralized user management and allows for sharing sailing-related data across server clusters such as course templates. The `live-replica-server` environment will pre-configure replication from a master for all replicable services required for the SAP Sailing Analytics, by setting the `AUTO_REPLICATE` variable to `true`. The `archive-server` environment contains pre-configured memory and database settings for the archive server set-up and, like a regular master server, replicates the central security service.
+
+* `REPLICATE_MASTER_SERVLET_HOST`
+    the host name or IP address where a replica can reach the master node in order to
+    request the initial load, register, un-register, and send operations for reverse replication to.
+    The value is always combined with that of the `REPLICATE_MASTER_SERVLET_PORT` variable which
+    provides the port for this communication. Defaults to `${SERVER_NAME}.sapsailing.com`, assuming that
+    this maps to a load balancer that identifies requests bound for the master instance of an
+    application server replica set and routes them to the master accordingly. Note in this context how with `EVENT_HOSTNAME`
+    and `SERIES_HOSTNAME` the reverse proxy mappings may be adjusted to use alternative or additional
+    hostname mappings.
+
+* `REPLICATE_MASTER_SERVLET_PORT`
+    the port number where a replica can reach the master node in order to
+    request the initial load, register, un-register, and send operations for reverse replication to.
+    The value is always combined with that of the `REPLICATE_MASTER_SERVLET_HOST` variable which
+    provides the host name / IP address for this communication. Defaults to 443.
+
+* `REPLICATE_MASTER_EXCHANGE_NAME`
+    the name of the RabbitMQ exchange to which the master sends operations for fan-out
+    distribution to all replicas, and that therefore a replica has to attach a queue to in order to receive
+    those operations. Specified on a replica. The master-side counterpart is `REPLICATION_CHANNEL`. Defaults
+    to `${SERVER_NAME}` which has been the default for the corresponding master based on its `${SERVER_NAME}`
+    which is assumed to be equal to the `${SERVER_NAME}` setting used to launch this replica.
+
+* `REPLICATE_MASTER_QUEUE_HOST`
+    the RabbitMQ host name that this replica will connect to in order to connect a queue to the
+    fan-out exchange whose name is provided by the `REPLICATE_MASTER_EXCHANGE_NAME` variable. Used
+    in conjunction with the `REPLICATE_MASTER_QUEUE_PORT` variable. Defaults to `rabbit.internal.sapsailing.com`.
+
+* `REPLICATE_MASTER_QUEUE_PORT`
+    the RabbitMQ port that this replica will connect to in order to connect a queue to the fan-out
+    exchange whose name is provided by the `REPLICATE_MASTER_EXCHANGE_NAME` variable. Defaults to 0 which
+    instructs the driver to use the Rabbit default port (usually 5672) for connecting. Used in conjunction with the
+    `REPLICATE_MASTER_QUEUE_HOST` variable.
+
+* `REPLICATE_ON_START`
+    specifies the IDs (basically the fully-qualified class names) of those Replicables to
+    start replicating when the server process starts. The process using this will become a replica for those
+    replicables specified with this variable, and it will replicate the master node described by
+    `REPLICATE_MASTER_SERVLET_HOST` and `REPLICATE_MASTER_SERVLET_PORT` and receive the operation
+    feed through the RabbitMQ exchange configured by `REPLICATE_MASTER_EXCHANGE_NAME`.
+
+* `AUTO_REPLICATE`
+    If this variable has a non-empty value (e.g., "true"), `REPLICATE_ON_START` will default to the set of replicable IDs required by an SAP Sailing Analytics replica instance. Any value provided for `REPLICATE_ON_START` in the environment selected by `USE_ENVIRONMENT` or in the user data provided at instance start-up will take precedence, though.
+
+* `REPLICATE_MASTER_BEARER_TOKEN`
+    used to specify which bearer token to use to authenticate at the master
+    in case this is to become a replica of some sort, e.g., replicating the SecurityService
+    and the SharedSailingData service. Use alternatively to `REPLICATE_MASTER_USERNAME/REPLICATE_MASTER_PASSWORD`.
+
+* `REPLICATE_MASTER_USERNAME, REPLICATE_MASTER_PASSWORD`
+    used to specify the user name and password for authenticating at the master
+    in case this is to become a replica of some sort, e.g., replicating the SecurityService
+    and the SharedSailingData service. Use alternatively to `REPLICATE_MASTER_BEARER_TOKEN`.
+
+* `MEMORY`
+    Specifies the value to which both, minimum and maximum heap size for the Java VM used to run the application will be set. As of this writing it defaults to "6000m" (6GB). During instance boot-up, a default value is calculated based on the instance's physical memory available, not considering swap space, and appended to the env.sh file. Therefore, auto-installed application processes will never use this "6000m" default. Specifying `MEMORY` in the user data will override the default size computed by the boot script.
+
+* `MAIL_FROM`
+    The address to use in the "From:" header field when the application sends e-mail.
+
+* `MAIL_SMTP_HOST`
+    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    
+* `MAIL_SMTP_PORT`
+    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `MAIL_SMTP_AUTH`
+    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`.
+
+* `MAIL_SMTP_USER`
+    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `MAIL_SMTP_PASSWORD`
+    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+
+* `EVENT_ID`
+    Used to specify one or more UUIDs of events for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``EVENT_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${EVENT_HOSTNAME}` is used as the hostname, or if `EVENT_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Event-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``EVENT_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``EVENT_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``EVENT_ID[1]=...`` and then optionally ``EVENT_HOSTNAME[1]=...``, and so on. If neither `EVENT_ID` nor `SERIES_ID` is specified, a default reverse proxy mapping for the server process will be created using the `Home-SSL` macro which redirects requests for the base URL (`${SERVER_NAME}.sapsailing.com`) to the `/gwt/Home.html` entry point. 
+
+* `EVENT_HOSTNAME`
+    If specified, overrides the `${SERVER_NAME}.sapsailing.com` default for reverse proxy mappings requested by providing event IDs in the `EVENT_ID` variable. If array notation is used for `EVENT_ID` then so should it for `EVENT_HOSTNAME`.
+
+* `SERIES_ID`
+    Used to specify one or more UUIDs of event series (league seasons) for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``SERIES_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${SERIES_HOSTNAME}` is used as the hostname, or if `SERIES_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Series-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``SERIES_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``SERIES_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``SERIES_ID[1]=...`` and then optionally ``SERIES_HOSTNAME[1]=...``, and so on. If neither `EVENT_ID` nor `SERIES_ID` is specified, a default reverse proxy mapping for the server process will be created using the `Home-SSL` macro which redirects requests for the base URL (`${SERVER_NAME}.sapsailing.com`) to the `/gwt/Home.html` entry point.
+
+* `SERIES_HOSTNAME`
+    If specified, overrides the `${SERVER_NAME}.sapsailing.com` default for reverse proxy mappings requested by providing event IDs in the `SERIES_ID` variable. If array notation is used for `SERIES_ID` then so should it for `SERIES_HOSTNAME`.
+
+* `BUILD_COMPLETE_NOTIFY`
+    The comma-separated list of e-mail addresses to send a notification message to after a release has been installed or built from sources (this happens within the `refreshInstance.sh` script).
+
+* `SERVER_STARTUP_NOTIFY`
+    The comma-separated list of e-mail addresses to send a notification message to after a server process has been launched.
+
+* `image-upgrade`
+    If provided in a line of its own, the `httpd` server on the instance will be stopped, no application server release will be installed, the operating system packages will be updated, the git repository under `/home/sailing/code` will be pulled for the branch that the workspace is checked out on for the image launched (usually `master`) which will update various scripts relevant for the bootstrapping process, all log directories for `httpd` and the application server will be cleared, and by default the instance will then be shut down for a new AMI to be created for it. See also the `no-shutdown` user data option.
+
+* `no-shutdown`
+    If provided in conjunction with the `image-upgrade` option, also on a line of its own, after performing the `image-upgrade` actions the instance will be kept running. This way, you may still log on using SSH and make further adjustments if needed before you create the new image.
+
+Have at least a public-facing target group ready. If you want to expose the master to the public (single-instance scenario or master-replica scenario where the master also handles reading client requests) add the master to the public target group. Either ensure that your add rules to the "default" dynamic Application Load Balancer (ALB) to which the wildcard DNS rule points (`*.sapsailing.com`), or add the rules to a dedicated ALB and create a Route53 DNS CNAME entry pointing to that ALB's DNS name.
 
 If you want to launch one or more replicas, ensure you have a dedicated ``...-master`` target group to which you add your master instance, and a load balancer rule that forwards your replica's requests directed to the master to that ``...-master`` target group, for example, by using a dedicated ``...-master`` hostname rule in your load balancer which then forwards to the ``...-master`` target group.	
 
-After your master server is ready, note the internal IP and configure your replica instances if you'd like to connect using the master's IP address. Alternatively, you may route the replica requests through the load balancer again, using whatever your load balancer requires to route the requests to your master, such as the ``...-master`` hostname with HTTPS as a protocol and 443 for a port. If you don't want to use the credentials of your own user account (which is expected to have permission ``SERVER:REPLICATE:{SERVERNAME}`` already because as described above you need this for configuring the new server), e.g., because you then have to expose an access token in the environment that anyone with SSH access to the instance may be able to see, set up a new user account, such as ``{SERVERNAME}-replicator``, that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}`` where ``{SERVERNAME}`` is what you provided above for the ``SERVER_NAME`` environment variable. You will be able to grant this permission to the new user because your own user account is expected to have this permission. You will need your own or this new user's credentials to authenticate your replicas for replication.
+After your master server is ready, route the replica requests to the master through the load balancer again. This is also the default if you set up a replica. If you don't want to use the credentials of your own user account (which is expected to have permission ``SERVER:REPLICATE:{SERVERNAME}`` already because as described above you need this for configuring the new server), e.g., because you then have to expose an access token in the environment that anyone with SSH access to the instance may be able to see, set up a new user account, such as ``{SERVERNAME}-replicator``, that has the following permission: ``SERVER:REPLICATE:{SERVERNAME}`` where ``{SERVERNAME}`` is what you provided above for the ``SERVER_NAME`` environment variable. You will be able to grant this permission to the new user because your own user account is expected to have this permission. You will need your own or this new user's credentials to authenticate your replicas for replication.
 
-Make sure to use the preconfigured environment from http://releases.sapsailing.com/environments/live-replica-server. Then absolutely make sure to add the line "REPLICATE_MASTER_SERVLET_HOST" to the user-data and adjust the `myspecificevent` master exchange name in the replica's ``REPLICATE_MASTER_EXCHANGE_NAME`` variable to the value of the ``REPLICATION_CHANNEL`` setting you used for the master configuration.  Also ensure that you provide the ``REPLICATE_MASTER_BEARER_TOKEN`` value (or, alternatively ``REPLICATE_MASTER_USERNAME`` and ``REPLICATE_MASTER_PASSWORD``) to grant the replica the permissions it needs to successfully register with the master as a replica.
+Make sure to use the preconfigured environment from `http://releases.sapsailing.com/environments/live-replica-server`. If you don't add the line `REPLICATE_MASTER_SERVLET_HOST` to the user-data and adjust the `myspecificevent` master exchange name in the replica's ``REPLICATE_MASTER_EXCHANGE_NAME`` variable to the value of the ``REPLICATION_CHANNEL`` setting you used for the master configuration, all default to the `${SERVER_NAME}.sapsailing.com` and `${SERVER_NAME}`, respectively.  Also ensure that you provide the ``REPLICATE_MASTER_BEARER_TOKEN`` value (or, alternatively ``REPLICATE_MASTER_USERNAME`` and ``REPLICATE_MASTER_PASSWORD``) to grant the replica the permissions it needs to successfully register with the master as a replica.
 
 ```
 INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
-REPLICATE_MASTER_SERVLET_HOST=(IP of your master server or external -master hostname)
-REPLICATE_MASTER_SERVLET_PORT=(port your master is listening on for HTTP/HTTPS requests; defaults to 8888; use 443 for -master hostname)
-REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # Provide authentication credentials for a user on the master permitted to replicate, either by username/password...
 #REPLICATE_MASTER_USERNAME=(user for replicator login on master server having SERVER:REPLICATE:&lt;server-name&gt; permission)
 #REPLICATE_MASTER_PASSWORD=(password of the user for replication login on master)
@@ -63,11 +208,29 @@ REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
 # or by logging in to the master server using your web browser and then navigating to
 #     https://master-server.sapsailing.com/security/api/restsecurity/access_token
 REPLICATE_MASTER_BEARER_TOKEN=(a bearer token allowing this master to replicate from your master)
-SERVER_NAME=MYSPECIFICEVENT
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/myspecificevent-replica?replicaSet=live&retryWrites=true"
-EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
+SERVER_NAME=myspecificevent
+EVENT_ID={some-uuid-of-an-event-you-want-to-feature}
 SERVER_STARTUP_NOTIFY=you@email.com
 ```
+
+This will automatically start replication from your master which is assumed to be reachable at `${SERVER_NAME}.sapsailing.com`. Adjust `REPLICATE_MASTER_SERVLET_HOST` and `REPLICATE_MASTER_SERVLET_PORT` accordingly if this is not the case. The RabbitMQ exchange to subscribe to is also defaulted with the `${SERVER_NAME}`, just like is the case for the outbound side on the master, defining this exchange. Each replica gets its own outbound RabbitMQ exchange by default, using the `${SERVER_NAME}` to which the replica's Amazon instance ID is appended, in case transitive replication should become a need. The database connection string (`MONGODB_URI`) defaults to master's DB with the database name extended by the suffix `-replica`.
+
+#### Upgrading an application server replica set with Auto-Scaling Group and Launch Configuration in Place
+
+* prepare local `/etc/hosts` (on Windows `c:/windows/system32/drivers/etc/hosts`) entries for master and replica with an `.sapsailing.com` suffix in order to allow for logging in to the respective server's admin console
+* if your master will need to reload a lot of tracking data from MongoDB, spin up MongoDB replicas as needed and wait for them to leave the `STARTUP2` phase, becoming `SECONDARY` replicas in their replica set
+* remove master from public target group
+* ssh to master, invoke `refreshInstance.sh` to prepare for master upgrade
+* remove master from master target group
+* log on to replica's `/gwt/AdminConsole.html` page, go to "Advanced" / "Replication" and stop replication; to this manually for all replicas in this application server replica set
+* restart the master's application process (`./stop; sleep 5; ./start`)
+* while your master spins up, follow its `/gwt/status` page
+* while your master spins up, prepare a new Launch Configuration for the replicas that uses the new release; for this, find out which release your new master is running (e.g., `build-202012211912`), copy your existing Launch Configuration to one with a new name that reflects the new release, and edit the new Launch Configuration's "User Data" section, adjusting the `INSTALL_FROM_RELEASE` variable to the new release name. You find the "User Data" in the section "Additional configuration - optional" after expanding the "Advanced details" drop-down. Acknowledge your key at the bottom and save the new launch configuration.
+* as your new master's `/gwt/status` response tells you that the new master process is available again, add it to the master target group and the public target group again; in times of low load where you may afford going to zero replicas in your public target group, remove all replicas from the public target group; otherwise, before this step you would first need to spin up one or more replicas for your new release to replace all old replicas in the public target group in one transaction.
+* update the Auto-Scaling Group so it uses your new Launch Configuration
+* you may want to wait until your master's `/gwt/status` shows it has finished loading all races before starting new replicas on it; this way you can avoid huge numbers of replication operations that would be necessary to replicate the loading process fix by fix from the master to all replicas; it is a lot more efficient to transfer the result of loading all races in one sweep during the initial load process when a replica attaches after loading has completed
+* terminate all existing replicas running the old release; the Auto-Scaling Group will launch as many replicas as you configured after a minute or two and will automatically assign them to the public target group
+* don't forget to terminate the MongoDB replicas again that you spun up before specifically for this process
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
@@ -131,8 +294,21 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    <pre>
    # JAVA_HOME=/opt/jdk1.8.0_20
    </pre>
+   Optional: setup event management URL by setting <pre>com.sap.sailing.eventmanagement.url</pre> system property. See ADDITIONAL_JAVA_ARGS at <pre>env.sh</pre>.
 
-8. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
+8. White label switch, uncomment this line in env.sh
+   <pre>
+   #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dcom.sap.sse.debranding=true"
+   </pre>
+   to enable white labeling.
+
+9. Anniversary switch,  uncomment this line in env.sh
+   <pre>
+   #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -DAnniversaryRaceDeterminator.enabled=true"
+   </pre>
+   to enable anniversary calculation.
+
+10. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
 
    <pre>
    for i in /home/sailing/servers/*/env.sh; do cat $i | grep "^ *SERVER_PORT=" | tail -1 | tr -d "SERVER_PORT="; done | sort -n
@@ -142,7 +318,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
 
    If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14888, EXPEDITION_PORT=2010.
 
-9. Append the following variable assignments to your env.sh file.
+11. Append the following variable assignments to your env.sh file.
    <pre>
    SERVER_NAME=SSV
    TELNET_PORT=14888
@@ -154,7 +330,7 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
    DEPLOY_TO=ssv
    </pre>
 
-10. Append the following description to the /home/sailing/servers/README file.
+12. Append the following description to the /home/sailing/servers/README file.
 
   <pre>
   # ssv (Schwartauer Segler-Verein, www.ssv-net.de, Alexander Probst, webmaster@alexprobst.de)
@@ -165,15 +341,15 @@ To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsaili
   EXPEDITION_PORT=2000
   </pre>
 
-11. Start the multi instance.
+13. Start the multi instance.
     <pre>
     cd /home/sailing/servers/ssv
     ./start
     </pre>
 
-12. Change the admin password now and create a new user with admin role.
+14. Change the admin password now and create a new user with admin role.
 
-13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
+15. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
 
 
 ##### Reachability
@@ -228,7 +404,24 @@ BE CAREFUL please use for a live-server and live-master-server the traffic port 
 
 You should now be able to reach your multi instance with the dns name "ssv.sapsailing.com".
 
+## SSH Key Management
 
+AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
+
+We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
+
+The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` has been implemented which is based on state managed in the `com.sap.sse.landscape.aws` bundle's Activator. This activator registers SSH key pair listeners on any AwsLandscape object created by any of the AwsLandscape.obtain methods and uses those to update the time stamp returned by `get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` each time SSH keys are added or removed. Furthermore, the activator listens for changes regarding the `LANDSCAPE:MANAGE:AWS` permission using the new `PermissionChangeListener` observer pattern offered by SecurityService. The activator tracks the SecurityService, and the listener registration would be renewed even if the SecurityService was replaced in the OSGi registry. The actual mapping of changes to SecurityService to listener notifications is implemented by the new class PermissionChangeListeners.
+
+With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
+
+Two new scripts and a crontab file are provided under the configuration/ folder:
+- `update_authorized_keys_for_landscape_managers_if_changed`
+- `update_authorized_keys_for_landscape_managers`
+- `crontab`
+
+The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
+
+The `crontab` file which is used during image-upgrade (see `configuration/imageupdate.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
 
 #### Setting up a Dedicated Instance
 [...]

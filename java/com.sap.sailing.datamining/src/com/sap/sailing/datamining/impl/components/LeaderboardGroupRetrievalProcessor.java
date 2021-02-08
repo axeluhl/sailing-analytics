@@ -30,7 +30,7 @@ public class LeaderboardGroupRetrievalProcessor extends AbstractRetrievalProcess
             if (isAborted()) {
                 break;
             }
-            data.add(new LeaderboardGroupWithContext(leaderboardGroup, polarDataService));
+            data.add(new LeaderboardGroupWithContext(leaderboardGroup, polarDataService, element.getBaseDomainFactory()));
         }
         return data;
     }

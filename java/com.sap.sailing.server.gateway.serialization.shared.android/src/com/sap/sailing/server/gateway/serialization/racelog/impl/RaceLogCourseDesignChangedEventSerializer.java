@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogCourseDesignChangedEventSerializer extends BaseRaceLogEventSerializer {
 

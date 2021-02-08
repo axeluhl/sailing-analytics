@@ -25,11 +25,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogResultsAreOfficialEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
@@ -48,10 +50,10 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
@@ -121,6 +123,15 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         assertEquals(lowerFlag, actualEvent.getLowerFlag());
         assertEquals(isDisplayed, actualEvent.isDisplayed());
     }
+    
+    @Test
+    public void testStoreAndLoadResultsAreOfficialEvent() {
+        RaceLogResultsAreOfficialEvent expectedEvent = new RaceLogResultsAreOfficialEventImpl(MillisecondsTimePoint.now(), expectedEventTime,
+                author, expectedId, expectedPassId);
+        Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
+        RaceLogResultsAreOfficialEvent actualEvent = loadEvent(dbObject);
+        assertBaseFields(expectedEvent, actualEvent);
+    }
 
     @Test
     public void testStoreAndLoadPassChangeEvent() {
@@ -150,7 +161,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadStartTimeEvent() {
         TimePoint startTime = new MillisecondsTimePoint(1337);
         RaceLogStartTimeEvent expectedEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedPassId, startTime, RaceLogRaceStatus.SCHEDULED);
+                expectedEventTime, author, expectedId, expectedPassId, startTime, RaceLogRaceStatus.SCHEDULED, /* courseAreaId */ null);
 
         Document dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogStartTimeEvent actualEvent = loadEvent(dbObject);

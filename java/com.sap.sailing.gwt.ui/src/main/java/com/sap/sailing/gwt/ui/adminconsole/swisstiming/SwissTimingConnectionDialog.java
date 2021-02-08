@@ -136,6 +136,7 @@ public class SwissTimingConnectionDialog extends DataEntryDialog<SwissTimingConf
         final String result = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIdText);
         if (result != null) {
             manage2SailEventUrlJsonTextBox.setValue(result, /* fire events */ false);
+            validateAndUpdate();
         }
     }
 

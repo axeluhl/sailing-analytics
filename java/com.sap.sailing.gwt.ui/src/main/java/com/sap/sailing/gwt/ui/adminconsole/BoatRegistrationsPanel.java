@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -66,7 +66,7 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
      *            whether the pool of "all" boats is to be restricted to those obtained from the leaderboard, or
      *            to all boats in the server's boat store
      */
-    protected BoatRegistrationsPanel(final SailingServiceAsync sailingService, final UserService userService,
+    protected BoatRegistrationsPanel(final SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             String leaderboardName, boolean canBoatsOfCompetitorsChangePerRace, String boatClass, Runnable validator,
             Consumer<AsyncCallback<Collection<BoatDTO>>> registeredBoatsRetriever,
@@ -88,9 +88,9 @@ public class BoatRegistrationsPanel extends FlowPanel implements BusyDisplay {
         final HorizontalPanel boatRegistrationPanel = new HorizontalPanel();
         final CaptionPanel allBoatsPanel = new CaptionPanel(stringMessages.boatPool());
         final CaptionPanel registeredBoatsPanel = new CaptionPanel(stringMessages.registeredBoats());
-        allBoatsTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */
+        allBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */true, 20, false);
-        registeredBoatsTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */
+        registeredBoatsTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */false,  20, false);
         allBoatsPanel.add(allBoatsTable);
         registeredBoatsPanel.add(registeredBoatsTable);

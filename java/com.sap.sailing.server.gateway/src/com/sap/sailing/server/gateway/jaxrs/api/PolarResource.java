@@ -173,7 +173,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } finally {
                     maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
                 }
-                response = Response.ok(resultAsJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                response = Response.ok(streamingOutput(resultAsJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="UTF-8"?><resources>
 
     
     
@@ -19,7 +19,6 @@
     
 
     <!-- Generic -->
-    
     <string name="generic_error">"错误"</string>
     <string name="about">"信息"</string>
 
@@ -73,6 +72,7 @@
     <string name="enable_gps">"GPS 已关闭。此应用需要 GPS 位置。是否在定位设置中打开 GPS？"</string>
 
     <!-- Message Sending -->
+    <string name="connected_to_wp">"已连接到：%1$s\n%2$s\n绑定服务：%3$s"</string>
     <string name="sending_waiting">"目前，%1$d个活动等待发送。\n上次成功发送时间：%2$s"</string>
     <string name="sending_no_waiting">"目前没有等待发送的活动。"</string>
 
@@ -87,5 +87,4 @@
     
 
     
-
 </resources>

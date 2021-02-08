@@ -3,7 +3,6 @@ package com.sap.sse.common.settings.generic;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +90,7 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
     public AbstractGenericSerializableSettings(String name, AbstractGenericSerializableSettings settings) {
         super(name, settings);
         value = (SettingsValue) settings.getValue(name);
-        if(value == null) {
+        if (value == null) {
             value = new SettingsValue();
             settings.setValue(name, value);
         }
@@ -103,18 +102,18 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
      */
     protected void adoptValue(SettingsValue value) {
         this.value = value;
-        if(childSettings != null) {
-            for(Map.Entry<String, Setting> entry : childSettings.entrySet()) {
+        if (childSettings != null) {
+            for (Map.Entry<String, Setting> entry : childSettings.entrySet()) {
                 Setting childSetting = entry.getValue();
-                if(childSetting instanceof AbstractGenericSerializableSettings) {
+                if (childSetting instanceof AbstractGenericSerializableSettings) {
                     Value childValue = value.getValue(entry.getKey());
-                    if(childValue != null) {
+                    if (childValue != null) {
                         ((AbstractGenericSerializableSettings) childSetting).adoptValue((SettingsValue) childValue);
                     }
                 }
-                if(childSetting instanceof SettingsList<?>) {
+                if (childSetting instanceof SettingsList<?>) {
                     Value childValue = value.getValue(entry.getKey());
-                    if(childValue != null) {
+                    if (childValue != null) {
                         ((SettingsList<?>) childSetting).adoptValue();
                     }
                 }
@@ -140,8 +139,7 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
      * TODO make abstract when all Settings are ported to the new system
      * 
      */
-    protected void addChildSettings() {
-    }
+    protected abstract void addChildSettings();
     
     // TODO make protected
     public Value getValue(String settingName) {
@@ -184,7 +182,9 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
 
     @Override
     public Map<String, Setting> getChildSettings() {
-        return Collections.unmodifiableMap(childSettings);
+        synchronized(childSettings) {
+            return new HashMap<String, Setting>(childSettings);
+        }
     }
     
     @GwtIncompatible

@@ -90,7 +90,7 @@ public class TagsResource extends AbstractSailingServerResource {
                 }
             }
             JSONArray jsonTags = serializer.serialize(tags);
-            response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
+            response = Response.ok(streamingOutput(jsonTags)).type(APPLICATION_JSON_UTF8).build();
         } catch (RaceLogNotFoundException e) {
             response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
         } catch (Exception e) {

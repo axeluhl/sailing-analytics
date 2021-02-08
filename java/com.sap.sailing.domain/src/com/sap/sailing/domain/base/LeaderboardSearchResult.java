@@ -36,7 +36,7 @@ public interface LeaderboardSearchResult extends LeaderboardSearchResultBase {
      * If there is a connection between an {@link Event} and the {@link #getLeaderboard() leaderboard}, e.g., because
      * the {@link Event} has a {@link Event#getLeaderboardGroups() leaderboard group} that is part of {@link #getLeaderboardGroups()} or
      * the event has a course area attached to its {@link Event#getVenue() venue} that is referenced by the leaderboard as
-     * its {@link Leaderboard#getDefaultCourseArea() default course area}, the event is part of the resulting iterable.
+     * its {@link Leaderboard#getCourseAreas() default course area}, the event is part of the resulting iterable.
      */
     Iterable<Event> getEvents();
 }

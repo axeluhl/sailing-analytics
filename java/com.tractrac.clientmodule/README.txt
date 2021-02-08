@@ -17,6 +17,72 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+      TracAPI 3.13.6
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+
+ Release date: 11/01/2021
+ Build number: 73b39ce774c7ee4d372ac6afd4c9302227b26229
+
+ 1) Bugs
+
+  - ConcurrentModificationException sending a notification to the app (Reported by Axel Uhl, 08/01/2021)
+
+********************************************
+      TracAPI 3.13.5
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+
+ Release date: 02/12/2020
+ Build number: a589499d3cbc6c517faf088b95c8164d706fdab7
+
+ 1) Bugs
+
+  - NullPointerExcpetion creating an IRace if the parameters file has not been successfully loaded
+  (Reported by Axel Uhl, 01/08/2020)
+
+********************************************
+      TracAPI 3.13.4
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+It keeps the backward compatibility.
+
+ Release date: 17/08/2020
+ Build number: 3949342626e65a5d7f19bcc21ebd5146e2b3fdac
+
+ 1) Bugs
+
+  - If a race is not initialized and the race start time is edited, the library invokes
+    the method IRacesListener.abandonRace (Reported by Axel Uhl, 15/08/2020)
+
+
+********************************************
+      TracAPI 3.13.3
+********************************************
+This is a final version. The only difference with the previous version is the JDK used to compile the sources.
+It keeps the backward compatibility.
+
+ Release date: 01/05/2020
+ Build number: dfa0d7732ebb374236628868810547d28a357f92
+
+ 1) Bugs
+
+  - The previous version was compiled using Java 13 (Reported by Axel Uhl, 01/05/2020)
+
+********************************************
+     TracAPI 3.13.2
+********************************************
+This is a final version. It adds fixes some features. It keeps the backward compatibility.
+
+Release date: 30/04/2020
+Build number: 242936347afa7ec28fc8b61996caf92693ab11af
+
+1) Bugs
+
+ - Checking if a control exists before to add it to the route (Reported by Axel Uhl, 24/03/2020)
+ - The EventFactory has to synchronize the access to the "Map of IControls" (Reported by Axel Uhl, 30/04/2020)
+
+********************************************
      TracAPI 3.13.1
 ********************************************
 This is a final version. It adds a some features. It keeps the backward compatibility.
@@ -575,7 +641,7 @@ Build number: 13262
 2) Bugs
 
  - The ICompetitorClass implementation can contain duplicate entries of different implementations. (Reported by
- Juan Salvador Pérez, 16/01/2017)
+ Juan Salvador Pï¿½rez, 16/01/2017)
 
 ********************************************
     TracAPI 3.3.0
@@ -926,7 +992,7 @@ Build number: 9436
  has a race start time) and FirstControl (if the start of the race happens when the competitor passes for
  the first control). The value by default is RaceStart. At this moment this value only can be managed at an event
  level (in the event manager) but in a future we will add this functionality at a race level (Requested by
- Jérome Soussens, 14/10/2014)
+ Jï¿½rome Soussens, 14/10/2014)
  - The method IControlPoint.getPosition is deprecated. Use the IControlPointPositionListener.gotControlPointPosition()
  to know the position of a control point (Reported by Jorge Piera, 28/10/2014)
  - Adding the isNonCompeting() method to the ICompetitor interface. If a competitor is a non competing competitor

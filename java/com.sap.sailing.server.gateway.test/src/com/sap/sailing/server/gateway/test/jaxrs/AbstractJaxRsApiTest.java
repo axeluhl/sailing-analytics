@@ -90,6 +90,7 @@ public abstract class AbstractJaxRsApiTest {
         doReturn(getSecurityService()).when(boatsResource).getSecurityService();
         competitorsResource = spyResource(new DummyCompetitorsResource());
         doReturn(getSecurityService()).when(competitorsResource).getSecurityService();
+        doReturn(racingEventService).when(competitorsResource).getService();
         doReturn(RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory()))
                 .when(leaderboardsResource).getRaceLogTrackingAdapter();
     }

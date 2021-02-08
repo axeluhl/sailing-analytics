@@ -12,7 +12,10 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
  * Groups settings for multiple {@link Component}s. This can be of particular interest when working with
- * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.
+ * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.<p>
+ * 
+ * No synchronization is required here because when the constructor returns, the map used internally
+ * will no longer be modified.
  */
 public class CompositeSettings extends AbstractSettings implements SettingsMap {
     private final Map<String, Settings> settingsPerComponentId;

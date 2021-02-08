@@ -40,5 +40,9 @@ public enum MimeType {
             return null;
         }
     }
+    
+    public static MimeType[] mp4MimeTypes() {
+        return new MimeType[] { mp4, mp4panorama, mp4panoramaflip};
+    }
 
 }

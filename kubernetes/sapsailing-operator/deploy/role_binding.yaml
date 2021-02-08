@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sapsailing-operator
+subjects:
+- kind: ServiceAccount
+  name: sapsailing-operator
+roleRef:
+  kind: Role
+  name: sapsailing-operator
+  apiGroup: rbac.authorization.k8s.io

@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.Select;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.adminconsole.CourseAreaSelectionPO;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.DateAndTimeInputPO;
 import com.sap.sailing.selenium.pages.gwt.ListBoxPO;
@@ -27,12 +28,11 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "EndDateTimeBox")
     private WebElement endDateTimeBox;
     
-//    @FindBy(how = BySeleniumId.class, using = "ScoringSchemeListBox")
-//    private WebElement scoringSystemDropDown;
     @FindBy(how = BySeleniumId.class, using = "EventListBox")
     private WebElement eventDropDown;
+
     @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
-    private WebElement courseAreaDropDown;
+    private WebElement courseAreaSelection;
     
     @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
     private WebElement addSeriesButton;
@@ -59,9 +59,14 @@ public class RegattaCreateDialogPO extends DataEntryDialogPO {
         }
     }
     
-    public void setEventAndCourseArea(String event, String courseArea) {
+    public void setEventAndCourseArea(String event, String[] courseAreaNames) {
         ListBoxPO.create(driver, eventDropDown).selectOptionByLabel(event);
-        ListBoxPO.create(driver, courseAreaDropDown).selectOptionByLabel(courseArea);
+        if (courseAreaNames != null) {
+            final CourseAreaSelectionPO courseAreaSelectionPO = CourseAreaSelectionPO.create(driver, courseAreaSelection);
+            for (final String courseAreaName : courseAreaNames) {
+                courseAreaSelectionPO.selectCourseAreaByLabel(courseAreaName);
+            }
+        }
     }
     
     public void setValues(String name, String boatClass, Date startDate, Date endDate) {

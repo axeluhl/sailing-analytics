@@ -28,14 +28,21 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     
     UserGroup getUserGroupByName(String name);
     
+    /**
+     * Obtains all user groups that have {@code roleDefinition} as key in their {@link UserGroup#getRoleDefinitionMap() role definition map},
+     * regardless of whether for all users or only the members of the group.
+     */
+    Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition);
+    
     UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException;
 
     void addUserGroup(UserGroup group) throws UserGroupManagementException;
     
     void updateUserGroup(UserGroup userGroup);
     
-    void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
-    
+    /**
+     * A new, non-live copy, as a snapshot, of the set of users known to this user store
+     */
     Iterable<User> getUsers();
     
     boolean hasUsers();
@@ -64,8 +71,6 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     void addRoleForUser(String username, Role role) throws UserManagementException;
 
     void removeRoleFromUser(String username, Role role) throws UserManagementException;
-
-    Iterable<WildcardPermission> getPermissionsFromUser(String username) throws UserManagementException;
 
     void removePermissionFromUser(String username, WildcardPermission permission) throws UserManagementException;
 

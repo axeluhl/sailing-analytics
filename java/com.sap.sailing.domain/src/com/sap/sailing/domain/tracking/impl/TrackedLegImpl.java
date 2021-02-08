@@ -12,11 +12,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -34,6 +37,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -273,6 +278,43 @@ public class TrackedLegImpl implements TrackedLeg {
         return middleOfLeg;
     }
     
+    @Override
+    public Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfPositions) {
+        final Optional<Position> approximateLegStartPosition = Optional
+                .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getFrom(), at));
+        final Optional<Position> approximateLegEndPosition = Optional
+                .ofNullable(getTrackedRace().getApproximatePosition(getLeg().getTo(), at));
+        final List<Position> result = approximateLegStartPosition.map(legStart -> {
+            return approximateLegEndPosition.map(legEnd -> {
+                final Bearing bearing = legStart.getBearingGreatCircle(legEnd);
+                final Distance segmentDistance = legStart.getDistance(legEnd).scale(1.0 / (numberOfPositions-1));
+                final List<Position> positions = new ArrayList<>();
+                Position position = legStart;
+                for (int i=0; i<numberOfPositions; i++) {
+                    positions.add(position);
+                    position = position.translateGreatCircle(bearing, segmentDistance);
+                }
+                return positions;
+            }).orElse(Collections.<Position>emptyList());
+        }).orElse(Collections.<Position>emptyList());
+        return result;
+    }
+    
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getAverageWind(int numParts) {
+        ConfidenceBasedWindAverager<Util.Pair<Position, TimePoint>> timeWeigher = 
+                ConfidenceFactory.INSTANCE.createWindAverager(/* weigher==null means use 1.0 as base confidence */ null);
+        final Iterable<TimePoint> referenceTimePoints = getEquidistantReferenceTimePoints(numParts);
+        Iterable<WindWithConfidence<Util.Pair<Position, TimePoint>>> winds = 
+                Util.stream(referenceTimePoints).flatMap(timepoint -> {
+                    return Util.stream(getEquidistantSectionsOfLeg(timepoint, numParts))
+                            .map(p -> getTrackedRace().getWindWithConfidence(p, timepoint));
+                }).collect(Collectors.toList());
+        return timeWeigher.getAverage(winds, null);
+    }
+
+
+    
     public Position getEffectiveWindPosition(Callable<Position> exactPositionProvider, TimePoint at, WindPositionMode mode) {
         final Position effectivePosition;
         switch (mode) {
@@ -492,7 +534,34 @@ public class TrackedLegImpl implements TrackedLeg {
         final TimePoint middle = firstLegStartMarkPassingTimePoint.plus(firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(2));
         return middle;
     }
+    
+    @Override
+    public Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints) {
+        final Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
+        final Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        getTrackedRace().lockForRead(legStartMarkPassings);
+        getTrackedRace().lockForRead(legFinishMarkPassings);
+        try {
+            final TimePoint firstLegStartMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legStartMarkPassings, Util::first);
+            final TimePoint lastLegFinishMarkPassingTimePoint = convertMarkPassingIteratorToTimePoint(legFinishMarkPassings, Util::last);
+            final Duration equidistantTime = firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(numberOfPoints);
+            final ArrayList<TimePoint> timePoints = new ArrayList<>(numberOfPoints);
+            TimePoint accum = firstLegStartMarkPassingTimePoint;
+            for (int i = 0; i < numberOfPoints; i++) {
+                timePoints.add(accum);
+                accum = accum.plus(equidistantTime);
+            }
+            return timePoints;
+        } finally {
+            getTrackedRace().unlockAfterRead(legFinishMarkPassings);
+            getTrackedRace().unlockAfterRead(legStartMarkPassings);
+        }
+    }
 
+    private TimePoint convertMarkPassingIteratorToTimePoint(final Iterable<MarkPassing> markPassings, Function<Iterable<MarkPassing>, MarkPassing> firstOrLast) {
+        return Optional.ofNullable(firstOrLast.apply(markPassings)).map(MarkPassing::getTimePoint).orElse(MillisecondsTimePoint.now());
+    }
+    
     @Override
     public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         return getWindwardDistance(/* legType==null means infer leg type */ null, middle, cache);

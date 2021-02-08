@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 import android.app.Service;
 
@@ -31,6 +31,7 @@ public class RaceEventSender implements RaceLogChangedListener {
         ExLog.i(service, TAG, "RaceEventSender.eventAdded: " + event.getShortInfo());
         JSONObject serializedEvent = serializer.serialize(event);
         try {
+            //TODO Log
             service.startService(EventSendingServiceUtil.createEventIntent(service, race, event.getId(),
                     serializedEvent.toJSONString(), RaceLogEventsCallback.class));
         } catch (UnsupportedEncodingException e) {

@@ -13,8 +13,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ORCCertificateJsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
@@ -26,6 +24,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SecondsDurationImpl;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCertificate> {
 
@@ -37,8 +37,8 @@ public class ORCCertificateJsonDeserializer implements JsonDeserializer<ORCCerti
         String sailnumber = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_SAILNUMBER);
         String boatName = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATNAME);
         String boatclass = (String) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_BOATCLASS);
-        Distance length = new MeterDistance(
-                ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LENGTH)).doubleValue());
+        final Number lengthOverAll = (Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_LENGTH);
+        Distance length = lengthOverAll==null?null:new MeterDistance(lengthOverAll.doubleValue());
         Duration gph = new SecondsDurationImpl(
                 ((Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_GPH)).doubleValue());
         final Number cdlAsNumber = (Number) json.get(ORCCertificateJsonSerializer.ORC_CERTIFICATE_CDL);

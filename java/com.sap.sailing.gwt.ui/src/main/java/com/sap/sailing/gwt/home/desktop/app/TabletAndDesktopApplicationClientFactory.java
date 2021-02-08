@@ -60,10 +60,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
-        
         final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
         WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
-        final Runnable signInSuccesfullNavigation = new Runnable() {
+        final Runnable signInSuccesfulNavigation = new Runnable() {
             @Override
             public void run() {
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
@@ -75,11 +74,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         this.userManagementWizardController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
-                        signInSuccesfullNavigation), userManagementDisplay, getEventBus());
-
+                        signInSuccesfulNavigation), userManagementDisplay, getEventBus());
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
-
         new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
     
@@ -152,5 +149,4 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
         return getHomePlacesNavigator().getPasswordResettedConfirmationNavigation(username);
     }
-
 }

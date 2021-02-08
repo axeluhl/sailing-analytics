@@ -5,11 +5,10 @@ import static org.mockito.Mockito.mock;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogPassChangeEventSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogPassChangeEventSerializerTest extends AbstractEventSerializerTest<RaceLogPassChangeEvent> {
-
     @Override
     protected RaceLogPassChangeEvent createMockEvent() {
         RaceLogPassChangeEvent event = mock(RaceLogPassChangeEvent.class);
@@ -20,5 +19,4 @@ public class RaceLogPassChangeEventSerializerTest extends AbstractEventSerialize
     protected JsonSerializer<RaceLogEvent> createSerializer(JsonSerializer<Competitor> competitorSerializer) {
         return new RaceLogPassChangeEventSerializer(competitorSerializer);
     }
-
 }

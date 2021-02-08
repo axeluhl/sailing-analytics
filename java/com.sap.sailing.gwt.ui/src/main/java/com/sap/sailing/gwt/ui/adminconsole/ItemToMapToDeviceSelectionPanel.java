@@ -13,7 +13,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -34,14 +34,14 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         void onSelectionChange(MarkDTO mark);
     }
 
-    public ItemToMapToDeviceSelectionPanel(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
+    public ItemToMapToDeviceSelectionPanel(SailingServiceWriteAsync sailingServiceWrite, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, final SelectionChangedHandler handler, MappableToDevice selected) {
         this.selected = selected;
         this.errorReporter = errorReporter;
-        competitorTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ false,
+        competitorTable = new CompetitorTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false,
                 /* enablePager */ true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
-        boatTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
-        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingService,
+        boatTable = new BoatTableWrapper<>(sailingServiceWrite, userService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, /* allowActions */ false);
+        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingServiceWrite,
                 stringMessages, errorReporter);
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override

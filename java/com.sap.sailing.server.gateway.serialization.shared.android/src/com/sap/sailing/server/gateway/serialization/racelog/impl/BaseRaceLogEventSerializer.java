@@ -5,8 +5,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
     public static final String FIELD_CLASS = "@class";

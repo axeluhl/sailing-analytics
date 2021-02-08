@@ -937,7 +937,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
 
     public String toString() {
         return getName() + " "
-                + (getDefaultCourseArea() != null ? getDefaultCourseArea().getName() : "<No course area defined>") + " "
+                + Util.join(", ", getCourseAreas()) + " "
                 + (getScoringScheme() != null ? getScoringScheme().getType().name() : "<No scoring scheme set>");
     }
 

@@ -113,17 +113,6 @@ public class TagDTODeSerializer {
     }
 
     /**
-     * Serializes single {@link TagDTO tag} to json object.
-     * 
-     * @param tag
-     *            tag to be seriaized
-     * @return json object
-     */
-    public String serializeTag(TagDTO tag) {
-        return serialize(tag).toJSONString();
-    }
-
-    /**
      * Serializes list of {@link TagDTO tags} to json array.
      * 
      * @param tags

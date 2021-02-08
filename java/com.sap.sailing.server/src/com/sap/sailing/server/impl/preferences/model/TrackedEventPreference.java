@@ -1,7 +1,6 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
@@ -27,38 +26,30 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
 
     /** copy constructor */
     public TrackedEventPreference(TrackedEventPreference other) {
-        this();
-        eventId.setValue(other.getEventId());
-        leaderboardName.setValue(other.getLeaderboardName());
-        trackedElements.setValues(other.getTrackedElements());
-        baseUrl.setValue(other.getBaseUrl());
-        isArchived.setValue(other.getIsArchived());
-        this.regattaSecret.setValue(other.getRegattaSecret());
+        this(other.getEventId(), other.getLeaderboardName(),
+                other.getTrackedElements(), other.getBaseUrl(),
+                other.getIsArchived(), other.getRegattaSecret());
     }
 
     /** copy constructor with new archived state */
     public TrackedEventPreference(TrackedEventPreference other, boolean isArchived) {
-        this();
-        eventId.setValue(other.getEventId());
-        leaderboardName.setValue(other.getLeaderboardName());
-        trackedElements.setValues(other.getTrackedElements());
-        baseUrl.setValue(other.getBaseUrl());
-        this.isArchived.setValue(isArchived);
-        this.regattaSecret.setValue(other.getRegattaSecret());
+        this(other.getEventId(), other.getLeaderboardName(),
+                other.getTrackedElements(), other.getBaseUrl(),
+                isArchived, other.getRegattaSecret());
     }
 
     /** copy constructor with additional tracked event */
     public TrackedEventPreference(TrackedEventPreference other, TrackedElementWithDeviceId trackedElement) {
-        this();
-        eventId.setValue(other.getEventId());
-        leaderboardName.setValue(other.getLeaderboardName());
-        final Collection<TrackedElementWithDeviceId> trackedElements = new HashSet<>();
-        Util.addAll(other.getTrackedElements(), trackedElements);
-        trackedElements.add(trackedElement);
-        this.trackedElements.setValues(trackedElements);
-        baseUrl.setValue(other.getBaseUrl());
-        this.isArchived.setValue(other.getIsArchived());
-        this.regattaSecret.setValue(other.getRegattaSecret());
+        this(other.getEventId(), other.getLeaderboardName(),
+                addTrackedElement(other.getTrackedElements(), trackedElement), other.getBaseUrl(),
+                other.getIsArchived(), other.getRegattaSecret());
+    }
+
+    private static Iterable<TrackedElementWithDeviceId> addTrackedElement(
+            Iterable<TrackedElementWithDeviceId> trackedElements, TrackedElementWithDeviceId trackedElement) {
+        final Set<TrackedElementWithDeviceId> result = Util.asSet(trackedElements);
+        result.add(trackedElement);
+        return result;
     }
 
     public TrackedEventPreference(UUID eventId, String leaderboardName,

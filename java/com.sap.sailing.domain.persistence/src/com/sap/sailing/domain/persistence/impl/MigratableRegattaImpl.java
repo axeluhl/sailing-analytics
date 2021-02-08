@@ -30,14 +30,14 @@ public class MigratableRegattaImpl extends RegattaImpl implements MigratableRega
     public <S extends Series> MigratableRegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate,
-            Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
+            Iterable<S> series, boolean persistent, ScoringScheme scoringScheme, Serializable id, Iterable<CourseArea> courseAreas,
             Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor,
-            MongoObjectFactory mongoObjectFactory, String registrationLinkSecret) {
+            boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
+            RankingMetricConstructor rankingMetricConstructor, MongoObjectFactory mongoObjectFactory, String registrationLinkSecret) {
         super(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series,
-                persistent, scoringScheme, id, courseArea, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                controlTrackingFromStartAndFinishTimes, rankingMetricConstructor,
-                registrationLinkSecret);
+                persistent, scoringScheme, id, courseAreas, buoyZoneRadiusInHullLengths, useStartTimeInference,
+                controlTrackingFromStartAndFinishTimes, autoRestartTrackingUponCompetitorSetChange,
+                rankingMetricConstructor, registrationLinkSecret);
         this.mongoObjectFactory = mongoObjectFactory;
         mongoObjectFactory.storeRegatta(this); // make sure the canBoatsOfCompetitorsChangePerRace flag makes it into the DB
     }

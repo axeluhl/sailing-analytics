@@ -9,11 +9,13 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public interface TrackedLeg extends Serializable {
@@ -178,13 +180,27 @@ public interface TrackedLeg extends Serializable {
      * waypoint's position at time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
      */
     Position getMiddleOfLeg(TimePoint at);
+    
+    /**
+     * The positions of the course breaking up of line, connecting the start and the end of leg waypoint's position at
+     * time point <code>at</code> and the position of the leg's end waypoint at time point <code>at</code>.
+     * 
+     * @param numberOfPositions
+     *            number of positions along the way, with the first position being the approximate position of the leg's
+     *            start waypoint and the last position being the approximate position of the leg's end waypoint
+     * @return if the position of at least one of the leg's start/end waypoints cannot be determined, an empty sequence
+     *         of {@link Position}s will be returned
+     */
+    Iterable<Position> getEquidistantSectionsOfLeg(TimePoint at, int numberOfPositions);
 
     /**
-     * @param timepoint Used for positions of marks and wind information
+     * @param timepoint
+     *            Used for positions of marks and wind information
      * @return estimated time it takes to complete the leg
-     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
-     * is not available
-     * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
+     *             no wind available. unable to determine legtypes for given timepoint
      */
     LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
@@ -225,7 +241,33 @@ public interface TrackedLeg extends Serializable {
      * "now" is used.
      */
     TimePoint getReferenceTimePoint();
-
+    
+    
+    /**
+     * Computes a set of reference time point for this leg that is the same for all competitors and that is the equidistant 
+     * time points between first leg entry and last leg exit. If no competitor has entered the leg, "now" is used as a
+     * default. If competitors have entered the leg but none has finished it yet, the middle between first entry and
+     * "now" is used. 
+     */
+    Iterable<TimePoint> getEquidistantReferenceTimePoints(int numberOfPoints);
+    
+    /**
+     * Computes a {@link Wind} estimation based on {@link #numParts} x {@link #numParts} wind samples, taken for
+     * {@link #numParts} time points spread equally across the time range between the first boat entering and the last
+     * boat exiting the leg (defaulting to "now" if no boat has exited the leg yet) and across {@link #numParts}
+     * positions along the great circle segment connecting the approximate start waypoint's position and the approximate
+     * end waypoint's position at the respective time point. Those wind samples are averaged based on their original
+     * confidences. The {@link #scale(double) scaling} of this leg does not affect the wind sampling; in all cases, wind
+     * samples will always be taken along the full leg distance, making the result of this method the same for the same
+     * boundary conditions (mark passings etc.) for all competitors.
+     * 
+     * @param numParts
+     *            the number of positions and the number of time points to use for averaging the wind field; the result
+     *            will hence be computed as an average---weighted by the original confidence of each wind estimation at
+     *            any of these positions/time points---of these {@code numParts*numParts} wind estimations.
+     */
+    WindWithConfidence<Util.Pair<Position, TimePoint>> getAverageWind(int numParts);
+    
     /**
      * The leader at the given <code>timePoint</code> in this leg, based on the {@link TrackedRace#getRankingMetric() ranking metric}
      * installed for the race.

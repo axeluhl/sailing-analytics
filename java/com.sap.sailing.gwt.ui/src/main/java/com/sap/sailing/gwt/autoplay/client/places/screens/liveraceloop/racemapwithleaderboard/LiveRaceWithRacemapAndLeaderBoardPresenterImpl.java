@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SixtyInchLeaderboardStyle;
-import com.sap.sailing.gwt.ui.raceboard.QuickRanksDTOFromLeaderboardDTOProvider;
+import com.sap.sailing.gwt.ui.raceboard.QuickFlagDataFromLeaderboardDTOProvider;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -186,7 +186,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             }
         });
 
-        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickRanksDTOFromLeaderboardDTOProvider(
+        getPlace().getRaceMap().setQuickRanksDTOProvider(new QuickFlagDataFromLeaderboardDTOProvider(
                 new RaceCompetitorSet(getPlace().getRaceMapSelectionProvider()), liveRace));
         view.startingWith(this, panel, getPlace().getRaceMap(), leaderboardPanel);
         selectionTimer.schedule(SWITCH_COMPETITOR_DELAY + AnimationPanel.ANIMATION_DURATION + AnimationPanel.DELAY);

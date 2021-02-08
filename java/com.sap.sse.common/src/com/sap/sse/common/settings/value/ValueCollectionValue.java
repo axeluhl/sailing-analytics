@@ -7,6 +7,13 @@ import com.sap.sse.common.settings.generic.ValueConverter;
 
 public abstract class ValueCollectionValue<C extends Collection<Value>> implements ValueCollection {
     private static final long serialVersionUID = -5820765644801217519L;
+
+    /**
+     * All access to this collection must be {@code synchronized}. Unfortunately, GWT does not offer
+     * {@link Collections#synchronizedCollection(Collection)} in its JRE emulation, so we have to
+     * make sure to consistently wrap all methods that access this collection with a {@code synchronized}
+     * block that obtains this collection's monitor.
+     */
     private C values;
     
     protected ValueCollectionValue(C values) {
@@ -17,75 +24,99 @@ public abstract class ValueCollectionValue<C extends Collection<Value>> implemen
     
     @Override
     public <T> Collection<T> getValues(ValueConverter<T> converter) {
-        Collection<T> result = emptyCollection();
-        for (Value value : values) {
-            result.add(converter.fromValue(value));
+        final Collection<T> result = emptyCollection();
+        synchronized (values) {
+            for (Value value : values) {
+                result.add(converter.fromValue(value));
+            }
+            return result;
+        }
+    }
+    
+    public Iterable<Value> getValueObjects() {
+        final Collection<Value> result = emptyCollection();
+        synchronized (values) {
+            result.addAll(values);
         }
         return result;
     }
     
-    public Iterable<Value> getValueObjects() {
-        return Collections.unmodifiableCollection(values);
-    }
-    
     @Override
     public <T> void setValues(Iterable<T> values, ValueConverter<T> converter) {
-        clear();
-        if(values != null) {
-            for (T value : values) {
-                addValue(value, converter);
+        synchronized (this.values) {
+            clear();
+            if (values != null) {
+                for (T value : values) {
+                    addValue(value, converter);
+                }
             }
         }
     }
     
     @Override
     public void clear() {
-        this.values.clear();
+        synchronized (values) {
+            this.values.clear();
+        }
     }
     
     public <T> void addValue(T value, ValueConverter<T> converter) {
-        this.values.add(converter.toValue(value));
+        synchronized (values) {
+            addValue(converter.toValue(value));
+        }
     }
     
     public <T> void addValue(Value value) {
-        this.values.add(value);
+        synchronized (values) {
+            this.values.add(value);
+        }
     }
 
     public boolean isEmpty() {
-        return values.isEmpty();
+        synchronized (values) {
+            return values.isEmpty();
+        }
     }
 
     public int size() {
-        return values.size();
+        synchronized (values) {
+            return values.size();
+        }
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((values == null) ? 0 : values.hashCode());
-        return result;
+        synchronized (values) {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((values == null) ? 0 : values.hashCode());
+            return result;
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ValueCollectionValue<?> other = (ValueCollectionValue<?>) obj;
-        if (values == null) {
-            if (other.values != null)
+        synchronized (values) {
+            if (this == obj)
+                return true;
+            if (obj == null)
                 return false;
-        } else if (!values.equals(other.values))
-            return false;
-        return true;
+            if (getClass() != obj.getClass())
+                return false;
+            ValueCollectionValue<?> other = (ValueCollectionValue<?>) obj;
+            if (values == null) {
+                if (other.values != null)
+                    return false;
+            } else if (!values.equals(other.values))
+                return false;
+            return true;
+        }
     }
     
     @Override
     public String toString() {
-        return values.toString();
+        synchronized (values) {
+            return values.toString();
+        }
     }
 }

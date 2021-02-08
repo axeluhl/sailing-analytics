@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -38,7 +39,11 @@ public class WindFinderReportParser {
         if (jsonOfSingleMeasurement.get("dtl") != null &&
             jsonOfSingleMeasurement.get("ws") != null &&
             jsonOfSingleMeasurement.get("wd") != null) {
-            result = new WindImpl(position, new MillisecondsTimePoint(dateFormat.parse(jsonOfSingleMeasurement.get("dtl").toString())),
+            final Date date;
+            synchronized (dateFormat) {
+                date = dateFormat.parse(jsonOfSingleMeasurement.get("dtl").toString());
+            }
+            result = new WindImpl(position, new MillisecondsTimePoint(date),
                 new KnotSpeedWithBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("ws").toString()),
                         new DegreeBearingImpl(Double.parseDouble(jsonOfSingleMeasurement.get("wd").toString())).reverse()));
         } else {

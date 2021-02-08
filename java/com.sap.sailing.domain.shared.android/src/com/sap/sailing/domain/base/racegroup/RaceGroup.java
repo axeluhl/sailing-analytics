@@ -3,7 +3,6 @@ package com.sap.sailing.domain.base.racegroup;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sse.common.Named;
@@ -30,11 +29,6 @@ import com.sap.sse.common.Named;
  * 
  */
 public interface RaceGroup extends Named {
-    /**
-     * Gets the {@link CourseArea} associated with the {@link RaceGroup}.
-     */
-    public CourseArea getDefaultCourseArea();
-
     /**
      * Gets the associated {@link BoatClass} if any present, otherwise
      * <code>null</code>.

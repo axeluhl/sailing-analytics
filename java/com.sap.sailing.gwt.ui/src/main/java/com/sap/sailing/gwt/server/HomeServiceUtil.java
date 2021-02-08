@@ -25,9 +25,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -420,34 +418,20 @@ public final class HomeServiceUtil {
         return result;
     }
     
-    public static String getCourseAreaNameForRegattaIdThereIsMoreThanOne(EventBase event, Leaderboard leaderboard) {
+    public static String getCourseAreaNameForRegattaIfThereIsMoreThanOne(EventBase event, Leaderboard leaderboard) {
         /** The course area will not be shown if there is only one course area defined for the event */
+        final String result;
         if (Util.size(event.getVenue().getCourseAreas()) <= 1) {
-            return null;
+            result = null;
+        } else {
+            final Iterable<CourseArea> courseAreas = leaderboard.getCourseAreas();
+            result = Util.isEmpty(courseAreas) ? null : Util.join(", ", courseAreas);
         }
-        CourseArea courseArea = null;
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
-        } else if(leaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            if (regatta != null) {
-                courseArea = regatta.getDefaultCourseArea();
-            }
-        }
-        return courseArea == null ? null : courseArea.getName();
+        return result;
     }
     
-    public static String getCourseAreaIdForRegatta(EventBase event, Leaderboard leaderboard) {
-        CourseArea courseArea = null;
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
-        } else if(leaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            if (regatta != null) {
-                courseArea = regatta.getDefaultCourseArea();
-            }
-        }
-        return courseArea == null ? null : courseArea.getId().toString();
+    public static Iterable<String> getCourseAreaIdsAsStringsForRegatta(EventBase event, Leaderboard leaderboard) {
+        return Util.map(leaderboard.getCourseAreas(), ca->ca.getId().toString());
     }
     
     public static void forAllPublicEventsWithReadPermission(RacingEventService service, HttpServletRequest request,
@@ -609,13 +593,10 @@ public final class HomeServiceUtil {
     }
 
     private static Event getAssociatedEventForLeaderboardInSeries(Leaderboard leaderboard,
-            Iterable<Event> eventsInSeries) {
-        final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
-        if (defaultCourseArea != null) {
-            for (Event event : eventsInSeries) {
-                if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
-                    return event;
-                }
+        Iterable<Event> eventsInSeries) {
+        for (Event event : eventsInSeries) {
+            if (Util.containsAny(event.getVenue().getCourseAreas(), leaderboard.getCourseAreas())) {
+                return event;
             }
         }
         return null;

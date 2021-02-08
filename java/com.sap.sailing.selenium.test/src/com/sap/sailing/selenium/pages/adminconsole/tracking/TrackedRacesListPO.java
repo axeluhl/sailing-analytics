@@ -85,8 +85,6 @@ public class TrackedRacesListPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesFilterTextBox")
     private WebElement trackedRacesFilterTextBox;
     
-    //@FindBy(how = BySeleniumId.class, using = "NoTrackedRacesLabel")
-
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesCellTable")
     private WebElement trackedRacesTable;
     
@@ -105,8 +103,6 @@ public class TrackedRacesListPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "ExportButton")
     private WebElement exportButton;
     
-    //@FindBy(how = BySeleniumId.class, using = "ExportPopup")
-    
     public TrackedRacesListPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -117,41 +113,18 @@ public class TrackedRacesListPO extends PageArea {
     }
     
     public List<DataEntryPO> getTrackedRaces() {
-//        List<TrackedRaceDescriptor> descriptors = new LinkedList<>();
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
-        
-//        for(DataEntryPO entry : table.getEntries()) {
-//            String regatta = entry.getColumnContent(0);
-//            String boatClass = entry.getColumnContent(1);
-//            String race = entry.getColumnContent(2);
-//            
-//            descriptors.add(new TrackedRaceDescriptor(regatta, boatClass, race));
-//        }
-        
         return table.getEntries();
     }
     
-//    public WebElement getTrackedRace(String regatta, String race) {
-//        for (WebElement raceRow : getTrackedRaces()) {
-//            List<WebElement> fields = raceRow.findElements(By.tagName("td"));
-//            if (regattaName.equals(fields.get(0).getText()) && raceName.equals(fields.get(2).getText())) {
-//                return raceRow;
-//            }
-//        }
-//        return null;
-//    }
-    
     public Status getStatus(TrackedRaceDescriptor race) {
         List<Status> status = getStatus(Arrays.asList(race));
-        
         return status.get(0);
     }
     
     public List<Status> getStatus(List<TrackedRaceDescriptor> races) {
         List<Status> result = new ArrayList<>(Collections.<Status>nCopies(races.size(), null));
-        
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
-        
         final int regattaColumnIndex = table.getColumnIndex("Regatta");
         final int boatClassColumnIndex = table.getColumnIndex("Boat Class");
         final int raceColumnIndex = table.getColumnIndex("Race");
@@ -161,14 +134,11 @@ public class TrackedRacesListPO extends PageArea {
             String boatClass = entry.getColumnContent(boatClassColumnIndex);
             String race = entry.getColumnContent(raceColumnIndex);
             String status = entry.getColumnContent(statusColumnIndex);
-            
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
-            
             if(races.contains(descriptor)) {
                 result.set(races.indexOf(descriptor), Status.fromString(status));
             }
         }
-        
         return result;
     }
     
@@ -194,25 +164,22 @@ public class TrackedRacesListPO extends PageArea {
     
     public void remove(List<TrackedRaceDescriptor> races) {
         selectRaces(races);
-        
         removeSelectedTrackedRacesAndWaitForAjaxRequests();
     }
     
     public void removeAll() {
         getTrackedRacesTable().selectAllEntries();
-        
         removeSelectedTrackedRacesAndWaitForAjaxRequests();
     }
 
     private void removeSelectedTrackedRacesAndWaitForAjaxRequests() {
         this.removeButton.click();
-        
+        this.waitForAlertAndAccept();
         waitForAjaxRequests();
     }
     
     public void refresh() {
         this.refreshButton.click();
-        
         waitForAjaxRequests();
     }
     
@@ -249,60 +216,37 @@ public class TrackedRacesListPO extends PageArea {
         });
     }
     
-//    public void waitForTrackedRaceLoadingFinished(String regattaName, String raceName, long timeoutInMillis) throws InterruptedException {
-//        waitForAjaxRequests(); // wait for the Start Tracking request to succeed; then check Tracked races table and keep refreshing until we time out
-//        TrackedRacesPanel trp = getTrackedRacesPanel();
-//        long started = System.currentTimeMillis();
-//        WebElement raceRow = trp.getTrackedRace(regattaName, raceName);
-//        while ((raceRow == null || !"TRACKING".equals(raceRow.findElements(By.tagName("td")).get(6).getText()))
-//                && System.currentTimeMillis()-started < timeoutInMillis) {
-//            Thread.sleep(2000); // wait 2s for the race to appear
-//            trp.refresh();
-//            raceRow = trp.getTrackedRace(regattaName, raceName);
-//        }
-//    }
-    
     public void stopTracking(List<TrackedRaceDescriptor> races, boolean waitForFinished) {
         selectRaces(races);
         this.stopTrackingButton.click();
         waitForAjaxRequests();
-        if(waitForFinished) {
+        if (waitForFinished) {
             waitForTrackedRaces(races, Status.FINISHED);
         }
     }
     
     public CellTablePO<DataEntryPO> getTrackedRacesTable() {
-//        if(!this.trackedRacesTable.isDisplayed()) {
-//            return null;
-//        }
-        
         return new GenericCellTablePO<>(this.driver, this.trackedRacesTable, DataEntryPO.class);
     }
     
     private List<DataEntryPO> getTrackedRaces(List<TrackedRaceDescriptor> races) {
         List<DataEntryPO> result = new ArrayList<>(Collections.<DataEntryPO>nCopies(races.size(), null));
-        
         CellTablePO<DataEntryPO> table = getTrackedRacesTable();
         List<DataEntryPO> rows = table.getEntries();
         Iterator<DataEntryPO> iterator = rows.iterator();
-        
         final int regattaColumnIndex = table.getColumnIndex("Regatta");
         final int boatClassColumnIndex = table.getColumnIndex("Boat Class");
         final int raceColumnIndex = table.getColumnIndex("Race");
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             DataEntryPO entry = iterator.next();
-            
             String regatta = entry.getColumnContent(regattaColumnIndex);
             String boatClass = entry.getColumnContent(boatClassColumnIndex);
             String race = entry.getColumnContent(raceColumnIndex);
-            
             TrackedRaceDescriptor descriptor = new TrackedRaceDescriptor(regatta, boatClass, race);
-            
-            if(races.contains(descriptor)) {
+            if (races.contains(descriptor)) {
                 result.set(races.indexOf(descriptor), entry);
             }
         }
-        
         return result;
     }
     

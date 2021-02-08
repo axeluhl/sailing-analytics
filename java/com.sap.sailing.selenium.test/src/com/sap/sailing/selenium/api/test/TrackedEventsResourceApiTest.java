@@ -3,11 +3,22 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.StreamSupport;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +36,8 @@ import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvents;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+
+import junit.framework.AssertionFailedError;
 
 public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
 
@@ -58,61 +71,103 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
 
         final Event evt = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
-        final String eventId = evt.getId();
-        final String leaderboardName = evt.getName();
-        final String regattaSecret = evt.getSecret();
 
         final Event evt2 = eventApi.createEvent(adminCtx, "TestEvent-" + UUID.randomUUID().toString(),
                 "75QMNATIONALEKREUZER", CompetitorRegistrationType.CLOSED, "Mannheim");
-        final String eventId2 = evt2.getId();
-        final String leaderboardName2 = evt2.getName();
-        final String regattaSecret2 = evt.getSecret();
 
         final Set<Triple<String, String, String>> trackedIds = new HashSet<>();
         trackedIds.add(new Triple<>(competitorId, null, null));
         trackedIds.add(new Triple<>(null, boatId, null));
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId, leaderboardName, eventBaseUrl, deviceId,
-                trackedIds, regattaSecret);
-        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, eventId2, leaderboardName2, eventBaseUrl, deviceId,
-                new HashSet<>(Arrays.asList(new Triple<>(null, null, markId))), regattaSecret2);
+        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, evt.getId(), evt.getName(), eventBaseUrl, deviceId,
+                trackedIds, evt.getSecret());
+        trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, evt2.getId(), evt2.getName(), eventBaseUrl, deviceId,
+                new HashSet<>(Arrays.asList(new Triple<>(null, null, markId))), evt2.getSecret());
 
-        trackedEventsApi.setArchived(adminCtx, evt.getId(), leaderboardName, true);
-        trackedEventsApi.setArchived(adminCtx, evt2.getId(), leaderboardName2, false);
+        trackedEventsApi.setArchived(adminCtx, evt.getId(), evt.getName(), true);
+        trackedEventsApi.setArchived(adminCtx, evt2.getId(), evt2.getName(), false);
         // check if created event is still there
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, false);
 
-        int cntEvents = 0;
-        for (final TrackedEvent event : trackedEvents.getEvents()) {
-            cntEvents++;
-            Assert.assertEquals("Unexpected event base url", eventBaseUrl, event.getEventBaseUrl());
-            if (eventId.equals(event.getEventId())) {
-                Assert.assertEquals("Unexpected event ID", eventId, event.getEventId());
-                Assert.assertEquals("Unexpected leaderboard name", leaderboardName, event.getLeaderboardName());
-                Assert.assertEquals("Unexpected regatta secret", regattaSecret, event.getRegattaSecret());
-                Assert.fail("Expected event 1 to not be shown anymore.");
-            } else if (eventId2.equals(event.getEventId())) {
-                Assert.assertEquals("Unexpected event ID", eventId2, event.getEventId());
-                Assert.assertEquals("Unexpected leaderboard name", leaderboardName2, event.getLeaderboardName());
-                Assert.assertEquals("Unexpected regatta secret", regattaSecret2, event.getRegattaSecret());
-            } else {
-                Assert.fail("Invalid event id.");
-            }
+        validateTrackedEvent(trackedEvents, evt2);
+        validateTrackedElements(trackedEvents, evt2, null, null, markId, deviceId, 1);
+        assertThat(trackedEvents.getEvents(), iterableWithSize(1));
+    }
 
-            int cntElements = 0;
-            for (final TrackedElement elem : event.getTrackedElements()) {
-                cntElements++;
-                final boolean correctBoatId = boatId.equals(elem.getBoatId());
-                final boolean correctCompetitorId = competitorId.equals(elem.getCompetitorId());
-                final boolean correctMarkId = markId.equals(elem.getMarkId());
+    @Test
+    public void testCreateUpdateTrackingEventsMultiThreaded() throws InterruptedException {
+        final ExecutorService threadPool = Executors.newFixedThreadPool(20);
+        final List<Future<?>> executions = new ArrayList<>();
+        final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+        final String eventBaseUrl = "testUrl";
+        final String deviceId = UUID.randomUUID().toString();
 
-                Assert.assertEquals("Unexpected device ID", deviceId, elem.getDeviceId());
-                Assert.assertTrue("More than one or zero items tracked in this element",
-                        correctBoatId ^ correctCompetitorId ^ correctMarkId);
+        List<Event> events = new ArrayList<>();
+        for (int i = 0; i < 2000; i++) {
+            Event event = eventApi.createEvent(adminCtx, "TestEvent_" + i, "75QMNATIONALEKREUZER",
+                    CompetitorRegistrationType.CLOSED, "Mannheim" + i);
+            events.add(event);
+            if (i % 2 == 0) {
+                executions.add((Future<?>) threadPool.submit(() -> trackedEventsApi.updateOrCreateTrackedEvent(adminCtx,
+                        event.getId(), event.getName(), eventBaseUrl, deviceId, null, event.getSecret())));
             }
-            Assert.assertEquals("Invalid numer of elements in this event", 1, cntElements);
         }
 
-        Assert.assertEquals("Expected 1 events", 1, cntEvents);
+        for (int i = 0; i < 2000; i++) {
+            Event event = events.get(i);
+            if (i % 2 == 0) {
+                // A:competitor id B:boat id C:mark id
+                Set<Triple<String, String, String>> trackedIds = new HashSet<>();
+                for (int j = 0; j < 10; j++) {
+                    trackedIds.add(
+                            new Triple<String, String, String>("competitor" + i + "_" + j, "boat" + i + "_" + j, null));
+                }
+                final int ii = i;
+                executions.add((Future<?>) threadPool.submit(() -> {
+                    trackedEventsApi.updateOrCreateTrackedEvent(adminCtx, event.getId(), event.getName(),
+                            eventBaseUrl + ii, deviceId + ii, null, event.getSecret());
+                }));
+
+                executions.add(threadPool.submit(() -> {
+                    trackedEventsApi.getTrackedEvents(adminCtx, false);
+                }));
+            }
+        }
+        threadPool.awaitTermination(60, SECONDS);
+        executions.forEach(future -> {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                Assert.fail("interrupted exception occurred");
+            } catch (ExecutionException e) {
+                Assert.fail("execution exception:" + e.getCause());
+            }
+        });
+    }
+
+    private void validateTrackedElements(TrackedEvents actualEvents, Event expected, String expectedBoatId,
+            String expectedCompetitorId, String expectedMarkId, String expectedDeviceId, long expectedElementCount) {
+        TrackedEvent actual = StreamSupport.stream(actualEvents.getEvents().spliterator(), false)
+                .filter(evt -> evt.getEventId().equals(expected.getId())).findFirst()
+                .orElseThrow(AssertionFailedError::new);
+
+        for (final TrackedElement actualElement : actual.getTrackedElements()) {
+            assertThat(actualElement.getBoatId(), equalTo(expectedBoatId));
+            assertThat(actualElement.getCompetitorId(), equalTo(expectedCompetitorId));
+            assertThat(actualElement.getMarkId(), equalTo(expectedMarkId));
+            assertThat("Unexpected device ID", actualElement.getDeviceId(), equalTo(expectedDeviceId));
+        }
+        assertThat(expectedElementCount,
+                equalTo(StreamSupport.stream(actual.getTrackedElements().spliterator(), false).count()));
+    }
+
+    private TrackedEvent validateTrackedEvent(TrackedEvents actualEvents, Event expected) {
+        TrackedEvent actual = StreamSupport.stream(actualEvents.getEvents().spliterator(), false)
+                .filter(evt -> evt.getEventId().equals(expected.getId())).findFirst()
+                .orElseThrow(AssertionFailedError::new);
+        assertThat("Unexpected event ID", actual.getEventId(), equalTo(expected.getId()));
+        assertThat("Unexpected leaderboard name", actual.getLeaderboardName(), equalTo(expected.getName()));
+        assertThat("Unexpected regatta secret", actual.getRegattaSecret(), equalTo(expected.getSecret()));
+        return actual;
     }
 
     @Test

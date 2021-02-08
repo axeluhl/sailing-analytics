@@ -23,7 +23,7 @@ public abstract class DeclinationImportTest<I extends DeclinationImporter> exten
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("2020-04-17").getTime()));
         assertEquals(1.03748, record.getBearing().getDegrees(), 0.05);
-        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.05);
+        assertEquals(0.14795, record.getAnnualChange().getDegrees(), 0.06);
     }
 
     @Test

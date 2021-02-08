@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
@@ -64,6 +65,8 @@ public abstract class AbstractSeleniumTest {
     
     private static final String CLEAR_STATE_URL = "sailingserver/test-support/clearState"; //$NON-NLS-1$
     
+    private static final String SWITCH_WHITELABEL_URL = "sailingserver/test-support/switch/whitelabel/"; //$NON-NLS-1$
+    
     private static final String OBTAIN_ACCESS_TOKEN_URL = "security/api/restsecurity/access_token";
     
     private static final String CREATE_SESSION_URL = "sailingserver/test-support/createSession";
@@ -94,11 +97,10 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
-
+        setWhitelabel(false, contextRoot);
         if (!headless) {
             // To be able to access LocalStorage we need to load a page having the target origin
             getWebDriver().get(contextRoot);
-
             final String notificationTimeoutKey = "sse.notification.customTimeOutInSeconds";
             final String notificationTimeoutValue = Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS);
             if (getWebDriver() instanceof WebStorage) {
@@ -113,7 +115,6 @@ public abstract class AbstractSeleniumTest {
                 ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.setItem(\""
                         + notificationTimeoutKey + "\", \"" + notificationTimeoutValue + "\");");
             }
-
             try {
                 // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
                 // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact
@@ -123,28 +124,65 @@ public abstract class AbstractSeleniumTest {
                 // (this should be pre-configured in local-test-environment.xml when activating IE driver)
                 getWebDriver().findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, "0"));
             } catch (Exception e) {
+                logger.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
 
     /**
      * Resets the state for running tests in a clean state. In most cases of UI test also the state of the web page
-     * needs to get resetted. In some other cases (e.g. only Rest-API calls are involved in the test, an initialization
-     * of the webpage is not requirered. If so the method {@link clearState([contextroot], false)} can be called.
-     * 
-     * @param contextRoot
+     * needs to get reset. In some other cases (e.g. only Rest-API calls are involved in the test) an initialization of
+     * the web page is not required. If so the method {@link #clearState(String, boolean)} can be called.
      */
     protected void clearState(String contextRoot) {
         clearState(contextRoot, false);
     }
 
+    protected void setWhitelabel(boolean status, String contextRoot) {
+        try {
+            URL url = new URL(contextRoot + SWITCH_WHITELABEL_URL + Boolean.toString(status));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.connect();
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
+    protected boolean getWhitelabel(String contextRoot) {
+        try {
+            URL url = new URL(contextRoot + SWITCH_WHITELABEL_URL + "status");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            if (connection.getResponseCode() != 200) {
+                throw new RuntimeException(connection.getResponseMessage());
+            }
+            String response = (String)connection.getContent();
+            return Boolean.valueOf(response);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+    
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
+        setUpAuthenticatedSession(webDriver, "admin", "admin");
+    }
+    
+    protected void clearSession(WebDriver webDriver) {
+        webDriver.manage().deleteCookieNamed("JSESSIONID");
+    }
+    
+    protected void setUpAuthenticatedSession(WebDriver webDriver, String username, String password) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());
         logger.info("Authenticating session...");
         Cookie sessionCookie;
         try {
-            sessionCookie = authenticate(getContextRoot());
+            sessionCookie = authenticate(getContextRoot(), username, password);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -171,7 +209,7 @@ public abstract class AbstractSeleniumTest {
      * @return the cookie that represents the authenticated session or <code>null</code> if the session
      * couldn't successfully be authenticated
      */
-    protected Cookie authenticate(String contextRoot) throws JSONException {
+    protected Cookie authenticate(String contextRoot, String username, String password) throws JSONException {
         try {
             Cookie result = null;
             URL accessTokenUrl = new URL(contextRoot + OBTAIN_ACCESS_TOKEN_URL);
@@ -179,7 +217,7 @@ public abstract class AbstractSeleniumTest {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.connect();
-            connection.getOutputStream().write("username=admin&password=admin".getBytes());
+            connection.getOutputStream().write(("username=" + username + "&password=" + password).getBytes());
             final JSONObject jsonResponse = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) connection.getContent())));
             final String accessToken = jsonResponse.getString("access_token");
             URL createSessionUrl = new URL(contextRoot + CREATE_SESSION_URL);

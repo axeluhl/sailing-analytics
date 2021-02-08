@@ -34,3 +34,8 @@ mobile/github-advrecyclerview_lib/bin
 captures
 /.recommenders/
 /java/.recommenders/
+java/com.sap.sailing.selenium.test/com.sap.sailing.selenium.test (No Proxy) individual.launch
+
+## Kubernetes
+kubernetes/aws-alb-ingress-controller.yaml
+java/com.sap.sailing.gwt.ui/360_VR_Wimbachklamm.mp4

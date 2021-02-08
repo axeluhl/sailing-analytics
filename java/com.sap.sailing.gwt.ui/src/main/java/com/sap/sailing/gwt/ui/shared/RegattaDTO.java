@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -37,11 +37,11 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     public List<RaceWithCompetitorsAndBoatsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
-    public UUID defaultCourseAreaUuid;
-    public String defaultCourseAreaName;
+    public List<CourseAreaDTO> courseAreas = new ArrayList<>();
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
+    public boolean autoRestartTrackingUponCompetitorSetChange = false;
     public boolean canBoatsOfCompetitorsChangePerRace = false;
     public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
     public RankingMetrics rankingMetricType;
@@ -71,12 +71,12 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
             this.series.add(new SeriesDTO(otherSeries)); // clone the series; clients may replace / alter their fields
         }
         this.scoringScheme = other.scoringScheme;
-        this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
-        this.defaultCourseAreaName = other.defaultCourseAreaName;
+        this.courseAreas = other.courseAreas;
         this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = other.autoRestartTrackingUponCompetitorSetChange;
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
         this.competitorRegistrationType = other.competitorRegistrationType;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;

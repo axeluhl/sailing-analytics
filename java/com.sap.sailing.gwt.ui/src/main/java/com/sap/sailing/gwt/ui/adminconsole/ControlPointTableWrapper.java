@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -11,9 +11,9 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class ControlPointTableWrapper<S extends RefreshableSelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
-    public ControlPointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
+    public ControlPointTableWrapper(boolean multiSelection, SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
                 new EntityIdentityComparator<ControlPointDTO>() {
                     @Override
                     public boolean representSameEntity(ControlPointDTO dto1, ControlPointDTO dto2) {
