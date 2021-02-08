@@ -225,8 +225,7 @@ public class Activator implements BundleActivator {
                 SecurityUrlPathProviderSailingImpl.APPLICATION);
         context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
                 sailingSecurityUrlPathProviderProperties);
-        registrations.add(context.registerService(HasPermissionsProvider.class,
-                (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
+        registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService

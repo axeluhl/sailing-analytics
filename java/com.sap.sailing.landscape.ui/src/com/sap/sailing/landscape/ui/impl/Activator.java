@@ -15,7 +15,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
     }
 
-    public static BundleContext getDefault() {
+    public static BundleContext getContext() {
         return context;
     }
 }

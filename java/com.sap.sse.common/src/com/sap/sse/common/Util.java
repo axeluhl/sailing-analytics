@@ -312,6 +312,10 @@ public class Util {
         }
     }
     
+    /**
+     * @return the first element of the {@code iterable}, or {@code null} if the {@code iterable}
+     *         {@link #isEmpty(Iterable) is empty}.
+     */
     public static <T> T first(Iterable<T> iterable) {
         final Iterator<T> iter = iterable.iterator();
         final T result;

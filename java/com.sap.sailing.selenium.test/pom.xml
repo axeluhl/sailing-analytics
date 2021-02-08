@@ -120,6 +120,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sse.landscape.aws</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.server</id>
                   <level>5</level>
                   <autoStart>true</autoStart>

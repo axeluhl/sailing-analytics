@@ -386,6 +386,12 @@ public class AccessControlStoreImpl implements AccessControlStore {
             }
         }
     }
+    
+    @Override
+    public Iterable<OwnershipAnnotation> getOwnerhipsWithGroupOwner(UserGroup owningUserGroup) {
+        final Set<OwnershipAnnotation> ownerships = userGroupToOwnership.get(owningUserGroup);
+        return ownerships==null ? Collections.emptySet() : Collections.unmodifiableCollection(ownerships);
+    }
 
     @Override
     public OwnershipAnnotation getOwnership(final QualifiedObjectIdentifier idOfOwnedObjectAsString) {

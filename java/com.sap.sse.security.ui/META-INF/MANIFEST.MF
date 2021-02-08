@@ -26,7 +26,10 @@ Require-Bundle: org.eclipse.jetty.osgi-servlet-api;bundle-version="3.1.0",
  com.sap.sse.security.common,
  com.sap.sse.mail
 Web-ContextPath: /security/ui
-Export-Package: com.sap.sse.security.ui.authentication,
+Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sse.security.shared,
+ com.google.gwt.user.client.rpc.core.com.sap.sse.security.shared.impl,
+ com.google.gwt.user.client.rpc.core.com.sap.sse.security.ui.shared,
+ com.sap.sse.security.ui.authentication,
  com.sap.sse.security.ui.authentication.app,
  com.sap.sse.security.ui.authentication.confirm,
  com.sap.sse.security.ui.authentication.create,

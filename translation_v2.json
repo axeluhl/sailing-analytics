@@ -22,7 +22,7 @@
          "collectionName":"LandscapeManagementUi",
          "folders":[  
             {  
-               "startingFolderPath":"java/com.sap.sailing.landscape.ui/src/main/java/com/sap/sailing/landscape/ui/client/i18n",
+               "startingFolderPath":"java/com.sap.sailing.landscape.ui/src/com/sap/sailing/landscape/ui/client/i18n",
                "sourceFilters":[  
                   "**/StringMessages*.properties"
                ],
