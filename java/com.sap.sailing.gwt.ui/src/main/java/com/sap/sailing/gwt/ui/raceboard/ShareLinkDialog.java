@@ -131,87 +131,15 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         VerticalPanel settingsPanel = new VerticalPanel();
         settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         mainPanel.add(settingsPanel);
-        timeStampCheckbox = createCheckbox(stringMessages.timeStampCheckBoxLabel());
-        timeStampCheckbox.setValue(true);
-        timeStampCheckbox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(timeStampCheckbox);
-        leaderBoardPanelCheckBox = createCheckbox(stringMessages.leaderboardCheckBoxLabel());
-        leaderBoardPanelCheckBox.setValue(true);
-        leaderBoardPanelCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(leaderBoardPanelCheckBox);
-        tagsCheckBox = createCheckbox(stringMessages.tagsCheckBoxLabel());
-        tagsCheckBox.setValue(true);
-        tagsCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(tagsCheckBox);
-        filterSetNameCheckBox = createCheckbox(stringMessages.filterSetNameCheckBoxLabel());
-        filterSetNameCheckBox.setValue(true);
-        filterSetNameCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(filterSetNameCheckBox);
-        competitorSelectionCheckBox = createCheckbox(stringMessages.competitorSelectionCheckBoxLabel());
-        competitorSelectionCheckBox.setValue(true);
-        competitorSelectionCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(competitorSelectionCheckBox);
-        windChartCheckBox = createCheckbox(stringMessages.windChartCheckBoxLabel());
-        windChartCheckBox.setValue(true);
-        windChartCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(windChartCheckBox);
-        competitorChartCheckBox = createCheckbox(stringMessages.competitorChartCheckBoxLabel());
-        competitorChartCheckBox.setValue(true);
-        competitorChartCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(competitorChartCheckBox);
-        maneuverCheckBox = createCheckbox(stringMessages.maneuverCheckBoxLabel());
-        maneuverCheckBox.setValue(true);
-        maneuverCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(maneuverCheckBox);
-        zoomCheckBox = createCheckbox(stringMessages.zoomCheckBoxLabel());
-        zoomCheckBox.setValue(true);
-        zoomCheckBox.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateLink();
-            }
-        });
-        settingsPanel.add(zoomCheckBox);
+        timeStampCheckbox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.timeStampCheckBoxLabel());
+        leaderBoardPanelCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.leaderboardCheckBoxLabel());
+        tagsCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.tagsCheckBoxLabel());
+        filterSetNameCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.filterSetNameCheckBoxLabel());
+        competitorSelectionCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorSelectionCheckBoxLabel());
+        windChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.windChartCheckBoxLabel());
+        competitorChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorChartCheckBoxLabel());
+        maneuverCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.maneuverCheckBoxLabel());
+        zoomCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.zoomCheckBoxLabel());
         VerticalPanel linkContentPanel = new VerticalPanel();
         linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         linkField = createTextBox(assembleLink());
@@ -233,5 +161,18 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         mainPanel.add(linkContentPanel);
         updateLink();
         return mainPanel;
+    }
+    
+    private CheckBox createCheckBoxAndAddToPanel(VerticalPanel settingsPanel, String label) {
+        CheckBox checkBox = createCheckbox(label);
+        checkBox.setValue(true);
+        checkBox.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                updateLink();
+            }
+        });
+        settingsPanel.add(checkBox);
+        return checkBox;
     }
 }
