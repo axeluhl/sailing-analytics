@@ -78,7 +78,7 @@ configure_and_start_server() {
   if [ -f /root/mail.properties ]; then
     mkdir -p "${SERVERS_DIR}/${conf}/configuration"
     cp /root/mail.properties "${SERVERS_DIR}/${conf}/configuration"
-    chmod sailing "${SERVERS_DIR}/${conf}/configuration/mail.properties"
+    chown sailing "${SERVERS_DIR}/${conf}/configuration/mail.properties"
     chgrp sailing "${SERVERS_DIR}/${conf}/configuration/mail.properties"
   fi
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start; ./defineReverseProxyMappings.sh" 2>>/var/log/sailing.err >>/var/log/sailing.err
