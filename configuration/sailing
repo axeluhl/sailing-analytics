@@ -77,6 +77,8 @@ configure_and_start_server() {
   # If there is a "secret" mail.properties then use it for the default server
   if [ -f /root/mail.properties ]; then
     mkdir -p "${SERVERS_DIR}/${conf}/configuration"
+    chown sailing "${SERVERS_DIR}/${conf}/configuration"
+    chgrp sailing "${SERVERS_DIR}/${conf}/configuration"
     cp /root/mail.properties "${SERVERS_DIR}/${conf}/configuration"
     chown sailing "${SERVERS_DIR}/${conf}/configuration/mail.properties"
     chgrp sailing "${SERVERS_DIR}/${conf}/configuration/mail.properties"
