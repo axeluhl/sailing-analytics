@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -87,6 +87,11 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return this.getId().hashCode();
     }
     
+    @Override
+    public UUID getId() {
+        return id;
+    }
+    
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
@@ -118,8 +123,18 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
         return officialWebsiteURL;
     }
 
+    private String getUrlWithHttpsAsDefaultProtocolIfMissing(String url) {
+        final String result;
+        if (url != null && !url.contains("://")) {
+            result = "https://" + url;
+        } else {
+            result = url;
+        }
+        return result;
+    }
+    
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
-        this.officialWebsiteURL = officialWebsiteURL;
+        this.officialWebsiteURL = getUrlWithHttpsAsDefaultProtocolIfMissing(officialWebsiteURL);
     }
     
     public Map<String, String> getSailorsInfoWebsiteURLs() {
@@ -131,17 +146,17 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     }
     
     public void setSailorsInfoWebsiteURL(String locale, String url) {
-        if(url == null || url.isEmpty()) {
+        if (url == null || url.isEmpty()) {
             sailorsInfoWebsiteURLs.remove(locale);
         } else {
-            sailorsInfoWebsiteURLs.put(locale, url);
+            sailorsInfoWebsiteURLs.put(locale, getUrlWithHttpsAsDefaultProtocolIfMissing(url));
         }
     }
 
     public void setSailorsInfoWebsiteURLs(Map<String, String> sailorsInfoWebsiteURLs) {
         this.sailorsInfoWebsiteURLs.clear();
-        if(sailorsInfoWebsiteURLs != null) {
-            this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
+        for (final Entry<String, String> e : sailorsInfoWebsiteURLs.entrySet()) {
+            this.sailorsInfoWebsiteURLs.put(e.getKey(), getUrlWithHttpsAsDefaultProtocolIfMissing(e.getValue()));
         }
     }
 
@@ -160,11 +175,7 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
      * NOTE: <code>https://</code> will be assumed if no protocol has been provided.
      */
     public void setBaseURL(String baseURL) {
-        if (baseURL != null && !baseURL.contains("://")) {
-            this.baseURL = "https://" + baseURL;
-        } else {
-            this.baseURL = baseURL;
-        }
+        this.baseURL = getUrlWithHttpsAsDefaultProtocolIfMissing(baseURL);
     }
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
@@ -211,10 +222,4 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
     }
-
-    @Override
-    public Serializable getId() {
-        return id;
-    }
-
 }

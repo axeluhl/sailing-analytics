@@ -16,7 +16,7 @@ import com.sap.sse.security.shared.RoleDefinition;
  */
 public class SecuredSecurityTypes extends HasPermissionsImpl {
     private static final long serialVersionUID = -5052828472297142038L;
-    private static Set<HasPermissions> allInstances = new HashSet<>();
+    private static Set<SecuredSecurityTypes> allInstances = new HashSet<>();
     
     public SecuredSecurityTypes(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -28,7 +28,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         allInstances.add(this);
     }
 
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredSecurityTypes> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 
@@ -41,13 +41,13 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
 
     public static enum UserActions implements Action {
         /** Update a user's password without knowing the old password. */
-        FORCE_OVERWRITE_PASSWORD
+        FORCE_OVERWRITE_PASSWORD, ADD_SUBSCRIPTION
     };
     /**
      * type-relative identifier is the {@link User#getName() username}.
      */
     public static final HasPermissions USER = new SecuredSecurityTypes("USER", DefaultActions
-            .plus(UserActions.FORCE_OVERWRITE_PASSWORD, PublicReadableActions.READ_PUBLIC));
+            .plus(UserActions.FORCE_OVERWRITE_PASSWORD, PublicReadableActions.READ_PUBLIC, UserActions.ADD_SUBSCRIPTION));
 
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation

@@ -10,17 +10,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.UserService;
 
 public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     private final String leaderboardName;
@@ -28,10 +26,10 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     private final String fleetName;
     private final Button removeMark; 
 
-    public RaceLogCourseManagementWidget(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
+    public RaceLogCourseManagementWidget(final Presenter presenter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
-            final String fleetName, final UserService userService) {
-        super(sailingServiceWrite, errorReporter, stringMessages, userService, /* always show ORC OCS leg data actions */ ()->true);
+            final String fleetName) {
+        super(presenter, stringMessages, /* always show ORC OCS leg data actions */ () -> true);
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
@@ -69,17 +67,15 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
                 for (final MarkDTO markToRemove : marksToRemove) {
-                    sailingServiceWrite.revokeMarkDefinitionEventInRegattaLog(leaderboardName, markToRemove,
+                    sailingServiceWrite.revokeMarkDefinitionEventInRegattaLog(leaderboardName, raceColumnName, fleetName, markToRemove,
                             new AsyncCallback<Void>() {
-
                                 @Override
                                 public void onSuccess(Void result) {
                                     refreshMarks();
                                 }
-
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Removing mark failed: "+caught.getMessage());
+                                    errorReporter.reportError("Removing mark failed: " + caught.getMessage());
                                 }
                             });
                 }

@@ -59,6 +59,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             final MultiSelectionModel<UserDTO> userSelectionModel, final Runnable updateUsers,
             Function<SuggestOracle, SuggestBox> suggestBoxConstructor, Supplier<TextBox> textBoxConstructor) {
         // create multi to single selection adapter
+        this.ensureDebugId(getClass().getSimpleName());
         final SingleSelectionModel<UserDTO> multiToSingleSelectionModelAdapter = new SingleSelectionModel<>();
         userSelectionModel.addSelectionChangeHandler(event -> {
             multiToSingleSelectionModelAdapter.clear();
@@ -81,12 +82,15 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         roleAndPermissionDetailsResources.css().ensureInjected();
         suggestRole.addStyleName(roleAndPermissionDetailsResources.css().enterRoleNameSuggest());
         suggestRole.getElement().setPropertyString("placeholder", stringMessages.enterRoleName());
+        suggestRole.ensureDebugId("suggestRole");
         this.initPlaceholder(suggestRole, stringMessages.enterRoleName());
         // create role input panel + add controls
         final HorizontalPanel roleInputPanel = new HorizontalPanel();
         final TextBox tenantInput = textBoxConstructor.get();
+        tenantInput.ensureDebugId("tenantInput");
         this.initPlaceholder(tenantInput, stringMessages.groupName());
         final TextBox userInput = textBoxConstructor.get();
+        userInput.ensureDebugId("userInput");
         this.initPlaceholder(userInput, stringMessages.username());
         roleInputPanel.add(suggestRole);
         roleInputPanel.add(tenantInput);
@@ -96,7 +100,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             if (role != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
-                    userService.getUserManagementService().addRoleToUser(selectedUser.getName(), userInput.getText(),
+                    userService.getUserManagementWriteService().addRoleToUser(selectedUser.getName(), userInput.getText(),
                             role.getId(), tenantInput.getText(), new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -118,6 +122,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             tenantInput.setText("");
             userInput.setText("");
         });
+        addRoleButton.ensureDebugId("addRoleButton");
         final Command addRoleButtonUpdater = () -> addRoleButton.setEnabled(!suggestRole.getValue().isEmpty());
         suggestRole.addKeyUpHandler(event -> addRoleButtonUpdater.execute());
         suggestRole.addSelectionHandler(event -> addRoleButtonUpdater.execute());
@@ -138,6 +143,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         captionPanel.add(rolePanel);
         this.setVisible(false);
         add(captionPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     public void refreshSuggest() {

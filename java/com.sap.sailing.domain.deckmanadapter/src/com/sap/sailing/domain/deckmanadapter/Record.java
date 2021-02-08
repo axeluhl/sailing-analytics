@@ -3,6 +3,7 @@ package com.sap.sailing.domain.deckmanadapter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Position;
@@ -37,7 +38,11 @@ public class Record implements Timed, Positioned {
     
     public Record(Map<FieldType, String> fieldsAsString) throws ParseException {
         this.fieldsAsString = fieldsAsString;
-        timePoint = new MillisecondsTimePoint(dateFormat.parse(this.fieldsAsString.get(FieldType.date)));
+        final Date date;
+        synchronized (dateFormat) {
+            date = dateFormat.parse(this.fieldsAsString.get(FieldType.date));
+        }
+        timePoint = new MillisecondsTimePoint(date);
         position = new DegreePosition(Double.valueOf(this.fieldsAsString.get(FieldType.latitude)),
                 Double.valueOf(this.fieldsAsString.get(FieldType.longitude)));
         final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(Double.valueOf(this.fieldsAsString.get(FieldType.sog)),

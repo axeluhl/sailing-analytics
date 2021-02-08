@@ -1,5 +1,6 @@
 package com.sap.sailing.expeditionconnector.persistence.impl;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,14 +26,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         expeditionDeviceConfigurationsCollection.createIndex(index, new IndexOptions().name("uuidindex").unique(true).background(false));
     }
 
-    private Document getExpeditionDeviceConfigurationDBKey(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final Document basicDBObject = new Document(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
+    private Document getExpeditionDeviceConfigurationDBKey(UUID expeditionDeviceConfigurationId) {
+        final Document basicDBObject = new Document(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfigurationId);
         return basicDBObject;
     }
     
     @Override
     public void storeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        final Document key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration);
+        final Document key = getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration.getDeviceUuid());
         final Document expeditionDeviceConfigurationDBObject = new Document();
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_UUID.name(), expeditionDeviceConfiguration.getDeviceUuid());
         expeditionDeviceConfigurationDBObject.put(FieldNames.EXPEDITION_DEVICE_CONFIGURATION_NAME.name(), expeditionDeviceConfiguration.getName());
@@ -56,7 +57,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration expeditionDeviceConfiguration) {
-        expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfiguration));
+    public void removeExpeditionDeviceConfiguration(UUID expeditionDeviceConfigurationId) {
+        expeditionDeviceConfigurationsCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(getExpeditionDeviceConfigurationDBKey(expeditionDeviceConfigurationId));
     }
 }

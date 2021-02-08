@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -21,6 +23,8 @@ import com.sap.sailing.domain.windfinder.Spot;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
+    private static final Logger logger = Logger.getLogger(ReviewedSpotsCollectionImpl.class.getName());
+    
     /**
      * What needs to be appended to the spot collection {@link #id} in order
      * to obtain the file name of the document that has the JSON array with
@@ -43,8 +47,12 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
         this.parser = new WindFinderReportParser();
         this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(()->{
             final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
-            for (final Spot spot : loadSpots()) {
-                result.put(spot.getId(), spot);
+            try {
+                for (final Spot spot : loadSpots()) {
+                    result.put(spot.getId(), spot);
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Problem loading spots for spot collection "+id, e);
             }
             return result;
         }, /* delay */ 0, TimeUnit.MILLISECONDS);
@@ -96,10 +104,15 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     
     private Iterable<Spot> loadSpots() throws IOException, ParseException, MalformedURLException {
         final Iterable<Spot> result;
-        JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(new InputStreamReader(
-                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent()));
-                    result = parser.parseSpots(spotsAsJson, this);
-        return result;
+        final InputStreamReader in = new InputStreamReader(
+                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent());
+        try {
+            JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+            result = parser.parseSpots(spotsAsJson, this);
+            return result;
+        } finally {
+            in.close();
+        }
     }
 
     @Override

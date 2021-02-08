@@ -15,6 +15,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.typedarrays.shared.Int8Array;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -62,7 +64,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         @Override
         public String getErrorMessage(MediaTrack media) {
             String errorMessage = null;
-
             if (media.url == null || media.url.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (media.title == null || media.title.trim().isEmpty()) {
@@ -74,10 +75,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             } else if (media.duration == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.duration());
             }
-
             return errorMessage;
         }
-
     }
 
     protected final StringMessages stringMessages;
@@ -206,6 +205,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     mediaTrack.startTime = defaultStartTime;
                 }
 
+                
+                boolean isVimeoUrl = isVimeoUrl(url);
                 String youtubeId = YoutubeApi.getIdByUrl(url);
                 if (youtubeId != null) {
                     mediaTrack.url = youtubeId;
@@ -227,6 +228,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                             }
                         }
                     });
+                } else if (isVimeoUrl) {
+                    mediaTrack.url = url;
+                    mediaTrack.mimeType = MimeType.vimeo;
                 } else {
                     mediaTrack.url = url;
                     AnchorElement anchor = Document.get().createAnchorElement();
@@ -250,6 +254,17 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 }
                 refreshUI();
             }
+        }
+    }
+
+    private boolean isVimeoUrl(String url) {
+        try {
+            RegExp urlPattern = RegExp.compile("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
+            MatchResult matchResult = urlPattern.exec(url);
+            String host = matchResult.getGroup(2);
+            return host.contains("vimeo.com");
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -339,12 +354,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 if (!remoteMp4WasStarted) {
                     processMp4(mediaTrack);
                 } else if (remoteMp4WasFinished) {
-                    manualMimeTypeSelection(null, mediaTrack);
+                    manualMimeTypeSelection(null, mediaTrack, MimeType.mp4MimeTypes());
                 } else {
                     infoLabel.setWidget(new Label(stringMessages.processingMP4()));
                 }
+            } else if (mediaTrack.mimeType == MimeType.vimeo) {
+              infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             } else {
-                infoLabel.setWidget(new Label(mediaTrack.typeToString()));
+                manualMimeTypeSelection(null, mediaTrack, new MimeType[] { MimeType.mp4, MimeType.mp4panorama,
+                        MimeType.mp4panoramaflip, MimeType.youtube, MimeType.vimeo });
             }
         }
         startTimeBox.setValue(mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate(), DONT_FIRE_EVENTS);
@@ -378,7 +396,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             public void onFailure(Throwable caught) {
                 busyIndicator.setBusy(false);
                 remoteMp4WasFinished = true;
-                manualMimeTypeSelection(caught.getMessage(), mediaTrack);
+                manualMimeTypeSelection(caught.getMessage(), mediaTrack, MimeType.mp4MimeTypes());
             }
         });
     }
@@ -447,7 +465,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     protected void mp4MetadataResult(VideoMetadataDTO result) {
         if (!result.isDownloadable()) {
             Notification.notify(stringMessages.couldNotDownload(mediaTrack.url), NotificationType.ERROR);
-            manualMimeTypeSelection(result.getMessage(), mediaTrack);
+            manualMimeTypeSelection(result.getMessage(), mediaTrack, MimeType.mp4MimeTypes());
         } else {
             mediaTrack.duration = result.getDuration();
             if (mediaTrack.duration == null) {
@@ -462,15 +480,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         }
     }
 
-    private void manualMimeTypeSelection(String message, MediaTrack mediaTrack) {
+    private void manualMimeTypeSelection(String message, MediaTrack mediaTrack, MimeType[] proposedMimeTypes) {
         FlowPanel fp = new FlowPanel();
         if (message != null) {
             fp.add(new Label(message));
         }
         ListBox mimeTypeListBox = createListBox(false);
-        mimeTypeListBox.addItem(MimeType.mp4.name());
-        mimeTypeListBox.addItem(MimeType.mp4panorama.name());
-        mimeTypeListBox.addItem(MimeType.mp4panoramaflip.name());
+        for (int i = 0; i < proposedMimeTypes.length; i++) {
+            mimeTypeListBox.addItem(proposedMimeTypes[i].name());
+        }
         mimeTypeListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

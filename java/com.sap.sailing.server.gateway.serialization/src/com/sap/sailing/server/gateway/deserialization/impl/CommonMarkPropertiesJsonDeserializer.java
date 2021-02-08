@@ -5,10 +5,10 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CommonMarkPropertiesJsonSerializer;
 import com.sap.sse.common.impl.RGBColor;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class CommonMarkPropertiesJsonDeserializer
         implements JsonDeserializer<CommonMarkProperties> {

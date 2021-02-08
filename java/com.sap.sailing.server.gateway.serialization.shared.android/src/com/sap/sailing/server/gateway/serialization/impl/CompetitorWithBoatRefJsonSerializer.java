@@ -6,7 +6,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CompetitorWithBoatRefJsonSerializer implements JsonSerializer<CompetitorWithBoat> {
     private final JsonSerializer<Competitor> competitorJsonSerializer;

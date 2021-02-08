@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="running_on_course">(Kurs %s)</string>
     <string name="course_design_number_waypoints">Kurs hat %d Wegpunkte</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
@@ -47,7 +46,6 @@
     <string name="currentlyLoading">Lädt &#8230;</string>
     <string name="racingview_header">Wettfahrten auf Bahn \'%s\'</string>
     <string name="running_on_unknown">(Kurs setzen)</string>
-    <string name="empty"></string>
     <string name="updateIndicator">Update Icon</string>
     <string name="reset_race">Rennen zurücksetzen</string>
     <string name="postpone">Verschieben</string>
@@ -179,7 +177,7 @@
     <string name="number">Nummer</string>
     <string name="snap">Fotos schießen</string>
     <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">Wollen Sie sich abmelden und als neuer Nutzer anmelden. Ihre Rennen bleiben im Hintergrund erhalten.</string>
+    <string name="logout_dialog_message">Wollen Sie sich abmelden und als neuer Nutzer anmelden?</string>
     <string name="change_dialog_title">Ummelden</string>
     <string name="change_dialog_message">Wenn Sie sich ummelden, wird kein Rennen mehr auf der aktuellen Bahn mehr verwaltet.</string>
     <string name="logout">Abmelden</string>
@@ -335,8 +333,6 @@
     <string name="race_reset_cancel">Nein danke</string>
     <string name="race_reset_message">Möchten Sie wirklich das Rennen inklusive aller Einstellungen und getätigten Aktionen zurücksetzen? Das kann nicht rückgängig gemacht werden!</string>
     <string name="race_set_time">Zeit setzen</string>
-    <string name="race_start_time_in">-%s</string>
-    <string name="race_start_time_ago">%s</string>
     <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
     <string name="race_begin_finish_current">Aktuelle Zeit</string>
     <string name="race_begin_finish_custom">Individuelle Zeit</string>
@@ -412,7 +408,6 @@
     <string name="events_waiting_to_be_sent"><![CDATA[Es müssen noch %1$d Events gesendet werden.\nDie letzte erfolgreiche Übertragung war am: %2$s.]]></string>
     <string name="no_event_to_be_sent">Derzeit wartet kein Event auf die Übertragung.</string>
     <string name="never">nie</string>
-    <string name="connected_to_wp">Verbunden mit: %1$s\n%2$s\nBoundService:%3$s</string>
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>

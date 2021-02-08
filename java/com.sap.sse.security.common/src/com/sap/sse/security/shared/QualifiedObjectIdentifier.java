@@ -50,6 +50,11 @@ public interface QualifiedObjectIdentifier extends Serializable {
     WildcardPermission getPermission(Action action);
     
     /**
+     * Constructs a permission which describes the action specified by {@code actionName} on the object identified by this object.
+     */
+    WildcardPermission getPermission(String actionName);
+    
+    /**
      * @return the concatenation of {@link #getTypeIdentifier()}, {@link #QUALIFIER_SEPARATOR} and
      *         {@link #getTypeRelativeObjectIdentifier()}'s {@link TypeRelativeObjectIdentifier#toString() toString}
      *         representation which is encoded such that it can be used as a part of a {@link WildcardPermission}.

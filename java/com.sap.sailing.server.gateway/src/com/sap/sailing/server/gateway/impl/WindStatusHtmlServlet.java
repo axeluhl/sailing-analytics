@@ -2,6 +2,8 @@ package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -36,14 +38,14 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String reinitializeWindReceiverParameter = req.getParameter(PARAM_RELOAD_WIND_RECEIVER);
         initializeWindReceiver(reinitializeWindReceiverParameter != null && reinitializeWindReceiverParameter.equalsIgnoreCase("true"));
+        writePostRefreshingHeadAndEmptyBody(req, resp, "Wind Status");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Wind Status</title>");
-        out.println("<meta http-equiv=refresh content='10; url="+req.getRequestURI()+"'>");
-        out.println("</head>");
-        out.println("<body>");
+        out.println("<p>last refresh from server: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")) + "</p>");
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+getIgtimiMessagesRawCount()+" raw messages received)</h3>");
         Map<LiveDataConnection, IgtimiConnectionInfo> igtimiConnections = getIgtimiConnections();
@@ -110,8 +112,6 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
         } else {
             out.println("<i>No Expedition messages received so far!</i>");
         }
-        out.println("</body>");
-        out.println("</html>");
         out.close();
     }
 

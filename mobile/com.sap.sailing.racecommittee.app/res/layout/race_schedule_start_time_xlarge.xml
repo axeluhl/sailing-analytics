@@ -105,7 +105,6 @@
                     android:layout_marginRight="@dimen/default_margin"
                     android:layout_marginTop="@dimen/default_margin_half"
                     android:textAppearance="?attr/textXLarge"
-                    android:visibility="visible"
                     tools:text="1:01:00" />
             </RelativeLayout>
 

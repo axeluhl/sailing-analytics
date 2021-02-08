@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.shared.places.error;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sse.gwt.client.AbstractBasePlace;
 
 public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
     
@@ -32,6 +32,7 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
     }
 
     private ErrorPlace(final boolean reloadedError, final String errorMessageDetail) {
+        super("");
         this.errorMessageDetail = errorMessageDetail;
         this.reloadedError = reloadedError;
     }

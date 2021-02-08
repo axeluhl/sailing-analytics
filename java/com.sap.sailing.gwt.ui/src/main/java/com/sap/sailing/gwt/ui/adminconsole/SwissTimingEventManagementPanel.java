@@ -24,9 +24,9 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionDialog;
 import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingConnectionTableWrapper;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -35,15 +35,15 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
@@ -54,7 +54,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
  * @author Axel Uhl (D043530)
  * 
  */
-public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel {
+public class SwissTimingEventManagementPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<SwissTimingConfigurationWithSecurityDTO> {
     private static final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     
     private final LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO> filterablePanelEvents;
@@ -63,11 +63,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
     private final SwissTimingConnectionTableWrapper connectionsTable;
 
-    public SwissTimingEventManagementPanel(final SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringConstants, final CellTableWithCheckboxResources tableResources) {
-        super(sailingServiceWrite, userService, regattaRefresher, errorReporter, true, stringConstants);
-        this.errorReporter = errorReporter;
+    public SwissTimingEventManagementPanel(final Presenter presenter, StringMessages stringConstants,
+            final CellTableWithCheckboxResources tableResources) {
+        super(presenter, true, stringConstants);
+        this.errorReporter = presenter.getErrorReporter();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -76,11 +75,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         VerticalPanel verticalPanel = new VerticalPanel();
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-        connectionsTable = new SwissTimingConnectionTableWrapper(userService, sailingServiceWrite, stringConstants,
+        connectionsTable = new SwissTimingConnectionTableWrapper(presenter.getUserService(), sailingServiceWrite, stringConstants,
                 errorReporter, true, tableResources, () -> {});
         connectionsTable.refreshSwissTimingConnectionList();
         // Add button panel
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(),
                 SecuredDomainType.TRACKED_RACE);
         verticalPanel.add(buttonPanel);
         verticalPanel.add(connectionsTable);
@@ -115,7 +114,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                             @Override
                             public void cancel() {
                             }
-                        }, userService, errorReporter).show());
+                        }, presenter.getUserService(), errorReporter).show());
         // Remove SwissTiming Connection
         buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
             sailingServiceWrite.deleteSwissTimingConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
@@ -401,7 +400,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                         // store a successful configuration in the database for later retrieval
                         final SwissTimingConfigurationWithSecurityDTO updatedDTO = new SwissTimingConfigurationWithSecurityDTO(
                                 selectedObject, result.trackingDataHost, result.trackingDataPort, result.eventName);
-
                         sailingServiceWrite.updateSwissTimingConfiguration(updatedDTO, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -440,7 +438,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         
         // Check if the assigned regatta makes sense
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port,
+            sailingServiceWrite.trackWithSwissTiming(/* regattaToAddTo */ regattaIdentifier, selectedRaces, hostname, port==null?0:port,
                     trackWind, correctWindByDeclination, useInternalMarkPassingAlgorithm, updateURL, updateUsername,
                     updatePassword, selectedObject.getName(), selectedObject.getJsonUrl(), new AsyncCallback<Void>() {
                         @Override
@@ -451,9 +449,14 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
                         @Override
                         public void onSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
+                            presenter.getRegattasRefresher().reloadAndCallFillAll();
                         }
                     });
         }
+    }
+
+    @Override
+    public AbstractFilterablePanel<SwissTimingConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
 }

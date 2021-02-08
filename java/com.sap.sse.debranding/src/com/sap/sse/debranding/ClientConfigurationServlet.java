@@ -1,5 +1,6 @@
 package com.sap.sse.debranding;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -88,6 +89,9 @@ public class ClientConfigurationServlet extends HttpServlet {
             IOUtils.write(cachedPage, resp.getOutputStream());
         } else {
             try (InputStream in = this.getServletContext().getResourceAsStream(servletPath)) {
+                if (in == null) {
+                    throw new FileNotFoundException(servletPath);
+                }
                 byte[] buffer = IOUtils.toByteArray(in);
                 String content = new String(buffer);
                 for (Map.Entry<String, String> item : createReplacementMap(deBrandingActive).entrySet()) {
@@ -99,6 +103,9 @@ public class ClientConfigurationServlet extends HttpServlet {
             } catch (RuntimeException e) {
                 logger.log(Level.WARNING, "could not process or read resource " + servletPath, e);
                 resp.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            }  catch (FileNotFoundException f) {
+                logger.log(Level.WARNING, "could not find resource " + servletPath);
+                resp.sendError(HttpStatus.SC_NOT_FOUND);
             }
         }
     }

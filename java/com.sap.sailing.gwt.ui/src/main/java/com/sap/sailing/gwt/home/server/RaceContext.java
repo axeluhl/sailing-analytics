@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -450,6 +451,9 @@ public class RaceContext {
         final Iterable<String> leaderboardGroupNames = leaderboardContext.getLeaderboardGroupNames();
         dto.setLeaderboardGroupName(leaderboardGroupNames == null || Util.isEmpty(leaderboardGroupNames) ? null :
             leaderboardGroupNames.iterator().next());
+        final Iterable<UUID> leaderboardGroupIds = leaderboardContext.getLeaderboardGroupIds();
+        dto.setLeaderboardGroupId(leaderboardGroupIds == null || Util.isEmpty(leaderboardGroupIds) ? null :
+            leaderboardGroupIds.iterator().next());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());

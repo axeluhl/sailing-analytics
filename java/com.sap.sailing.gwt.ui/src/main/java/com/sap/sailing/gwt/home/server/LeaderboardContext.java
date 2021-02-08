@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -224,6 +225,14 @@ public class LeaderboardContext {
         final List<String> result = new ArrayList<>();
         for (final LeaderboardGroup lg : leaderboardGroups) {
             result.add(lg.getName());
+        }
+        return result;
+    }
+    
+    public Iterable<UUID> getLeaderboardGroupIds() {
+        final List<UUID> result = new ArrayList<>();
+        for (final LeaderboardGroup lg : leaderboardGroups) {
+            result.add(lg.getId());
         }
         return result;
     }

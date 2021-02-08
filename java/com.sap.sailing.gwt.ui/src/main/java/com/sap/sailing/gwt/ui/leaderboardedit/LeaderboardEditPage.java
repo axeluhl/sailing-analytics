@@ -16,12 +16,17 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
-import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.EditableLeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.EditableLeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -29,89 +34,138 @@ import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
 public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implements ProvidesLeaderboardRouting {
-    private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
+    
+    private static final Logger logger = Logger.getLogger(LeaderboardEditPage.class.getName());
+    public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
+    
     private String leaderboardName;
+    private EditableLeaderboardContextDefinition editableLeaderboardContextDefinition;
     
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        this.editableLeaderboardContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new EditableLeaderboardContextDefinition());
+        leaderboardName = editableLeaderboardContextDefinition.getLeaderboardName();
         
-        final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
-        leaderboardName = settings.getLeaderboardName();
         getSailingService().getLeaderboardNames(new MarkedAsyncCallback<List<String>>(
-                new AsyncCallback<List<String>>() {
-            @Override
-            public void onSuccess(List<String> leaderboardNames) {
-                if (leaderboardNames.contains(leaderboardName)) {
-                    getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, null, new AsyncCallback<Iterable<DetailType>>() {
+                new GetLeaderboardNamesCallback()));
+    }
+    
+    private class GetLeaderboardNamesCallback implements AsyncCallback<List<String>> {
+
+        @Override
+        public void onSuccess(List<String> leaderboardNames) {
+            if (leaderboardNames.contains(leaderboardName)) {
+                getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName, null, 
+                        new GetAvailableDetailTypesForLeaderboardCallback());
+            } else {
+                RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            reportError(getStringMessages().getLeaderboardNamesError());
+            logger.log(Level.SEVERE, "Could not load detailtypes", t);
+        }
+    }
+    
+    private class GetAvailableDetailTypesForLeaderboardCallback implements AsyncCallback<Iterable<DetailType>> {
+        
+        @Override
+        public void onFailure(Throwable caught) {
+            reportError(getStringMessages().getAvailableDetailTypesForLeaderboardError());
+            logger.log(Level.SEVERE, "Could not load detailtypes", caught);
+        }
+
+        @Override
+        public void onSuccess(Iterable<DetailType> result) {
+            SAPHeaderWithAuthentication header = initHeader();
+            GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
+                    header.getAuthenticationMenuView());
+            AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
+                    genericSailingAuthentication);
+            getSailingService().getLeaderboardWithSecurity(leaderboardName,
+                    new GetLeaderboardWithSecurityCallback(authorizedContentDecorator, result, header));
+        }
+
+    }
+    
+    private class GetLeaderboardWithSecurityCallback implements AsyncCallback<StrippedLeaderboardDTOWithSecurity> {
+        private final AuthorizedContentDecorator authorizedContentDecorator;
+        private final Iterable<DetailType> getAvailableDetailTypesForLeaderboardResult;
+        private final SAPHeaderWithAuthentication header;
+
+        GetLeaderboardWithSecurityCallback(AuthorizedContentDecorator authorizedContentDecorator,
+                Iterable<DetailType> getAvailableDetailTypesForLeaderboardResult,
+                SAPHeaderWithAuthentication header) {
+            this.authorizedContentDecorator = authorizedContentDecorator;
+            this.getAvailableDetailTypesForLeaderboardResult = getAvailableDetailTypesForLeaderboardResult;
+            this.header = header;
+        }
+        
+        @Override
+        public void onFailure(Throwable caught) {
+            logger.log(Level.SEVERE, "Could not get leaderboard data.", caught);
+            reportError(getStringMessages().getLeaderboardError());        
+        }
+
+        @Override
+        public void onSuccess(
+                StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
+            final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
+                    .createStoredSettingsLocatorForEditableLeaderboard(editableLeaderboardContextDefinition);
+            EditableLeaderboardLifecycle rootComponentLifeCycle = 
+                    new EditableLeaderboardLifecycle(StringMessages.INSTANCE, leaderboardWithSecurity, 
+                            getAvailableDetailTypesForLeaderboardResult);
+            ComponentContext<EditableLeaderboardSettings> context = 
+                    new ComponentContextWithSettingsStorage<>(
+                    rootComponentLifeCycle, getUserService(), storageDefinition);
+            
+            authorizedContentDecorator.setPermissionToCheck(
+                    leaderboardWithSecurity, DefaultActions.UPDATE);
+            
+            context.getInitialSettings(new OnSettingsLoadedCallback<EditableLeaderboardSettings>() {
+                
+                @Override
+                public void onSuccess(EditableLeaderboardSettings settings) {
+                    authorizedContentDecorator
+                    .setContentWidgetFactory(new WidgetFactory() {
                         @Override
-                        public void onFailure(Throwable caught) {
-                            logger.log(Level.SEVERE, "Could not load detailtypes", caught);
-                        }
-
-                        @Override
-                        public void onSuccess(Iterable<DetailType> result) {
-                            SAPHeaderWithAuthentication header = initHeader();
-                            GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-                            AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-                                            getSailingService().getLeaderboardWithSecurity(leaderboardName,
-                                                    new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
-
-                                                        @Override
-                                                        public void onFailure(Throwable caught) {
-                                                            reportError(
-                                                                    "Error trying to obtain list leaderboard with security: "
-                                                                            + caught.getMessage());
-                                                        }
-
-                                                        @Override
-                                                        public void onSuccess(
-                                                                StrippedLeaderboardDTOWithSecurity leaderboardWithSecurity) {
-                                                            authorizedContentDecorator.setPermissionToCheck(
-                                                                    leaderboardWithSecurity, DefaultActions.UPDATE);
-                                                            authorizedContentDecorator
-                                                                    .setContentWidgetFactory(new WidgetFactory() {
-                                                                        @Override
-                                                                        public Widget get() {
-                                                                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(
-                                                                                    getSailingService(),
-                                                                                    new AsyncActionsExecutor(),
-                                                                                    leaderboardName, null,
-                                                                                    LeaderboardEditPage.this,
-                                                                                    getStringMessages(), userAgent,
-                                                                                    result);
-                                                                            leaderboardPanel.ensureDebugId(
-                                                                                    "EditableLeaderboardPanel");
-                                                                            return leaderboardPanel;
-                                                                        }
-                                                                    });
-
-                                                            DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-                                                            RootLayoutPanel.get().add(mainPanel);
-                                                            mainPanel.addNorth(header, 75);
-                                                            mainPanel.add(new ScrollPanel(authorizedContentDecorator));
-                                                        }
-                                                    });
+                        public Widget get() {
+                            EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(
+                                    context, getSailingService(), new AsyncActionsExecutor(), leaderboardName, 
+                                    /* leaderboardGroupName */ null, LeaderboardEditPage.this, getStringMessages(), 
+                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings);
+                            leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
+                            return leaderboardPanel;
                         }
                     });
-                } else {
-                    RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
+                    DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+                    RootLayoutPanel.get().add(mainPanel);
+                    mainPanel.addNorth(header, 75);
+                    mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                 }
-            }
-            @Override
-            public void onFailure(Throwable t) {
-                reportError("Error trying to obtain list of leaderboard names: "+t.getMessage());
-            }
-        }));
+                
+                @Override
+                public void onError(Throwable caught,
+                        EditableLeaderboardSettings fallbackDefaultSettings) {
+                    logger.log(Level.SEVERE, "Could not get editable leaderboard settings.", caught);
+                    reportError(getStringMessages().settingsGetError());                    
+                }
+            });
+        }
+        
     }
 
     private SAPHeaderWithAuthentication initHeader() {
-        SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().editScores());
-//        header.getElement().getStyle().setPosition(Position.FIXED);
-//        header.getElement().getStyle().setTop(0, Unit.PX);
+        SAPSailingHeaderWithAuthentication header = 
+                new SAPSailingHeaderWithAuthentication(getStringMessages().editScores());
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
     }

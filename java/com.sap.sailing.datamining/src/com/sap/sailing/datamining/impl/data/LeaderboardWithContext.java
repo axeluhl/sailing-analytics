@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 
 public class LeaderboardWithContext implements HasLeaderboardContext {
@@ -21,15 +20,5 @@ public class LeaderboardWithContext implements HasLeaderboardContext {
     @Override
     public Leaderboard getLeaderboard() {
         return leaderboard;
-    }
-    
-    @Override
-    public BoatClass getBoatClass() {
-        return getLeaderboard().getBoatClass();
-    }
-
-    @Override
-    public String getName() {
-        return getLeaderboard().getName();
     }
 }

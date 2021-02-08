@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,14 +63,14 @@ public interface MongoObjectFactory {
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
     /**
-     * Removes the group with the name <code>groupName</code> from the database.
+     * Removes the group with the ID <code>leaderboardGroupId</code> from the database.
      */
-    void removeLeaderboardGroup(String groupName);
+    void removeLeaderboardGroup(UUID leaderboardGroupId);
 
     /**
-     * Renames the group with the name <code>oldName</code>.
+     * Renames the group with the ID <code>leaderboardGroupId</code>.
      */
-    void renameLeaderboardGroup(String oldName, String newName);
+    void renameLeaderboardGroup(UUID leaderboardGroupId, String newName);
 
     /**
      * Stores the event with its name, venue and the venue's course areas, as well as the links to the
@@ -106,6 +107,20 @@ public interface MongoObjectFactory {
      * @param serves the servers to store
      */
     void storeSailingServer(RemoteSailingServerReference server);
+
+    /**
+     * Stores the list of selected events for remote sailing server. If <code>include</code> parameter is not set then
+     * all events are loaded, if it's set to <code>true</code> then selected events are loaded inclusively, if to
+     * <code>false</code> then exclusively.
+     * 
+     * @param name
+     *            to get target sailing server by
+     * @param include
+     *            the flag determining whether to load events inclusively or exclusively
+     * @param selectedEventIds
+     *            the list of event id's to exclude from being loading
+     */
+    void updateSailingServer(String name, boolean include, Set<UUID> selectedEventIds);
 
     void removeSailingServer(String name);
 

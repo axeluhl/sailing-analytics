@@ -102,6 +102,6 @@ public interface SailorProfileConverter {
     /** @return converted BoatClassDTO from BoatClass */
     @GwtIncompatible
     default BoatClassDTO convertBoatClassToDTO(BoatClass bc) {
-        return new BoatClassDTO(bc.getName(), bc.getDisplayName(), bc.getHullLength(), bc.getHullBeam());
+        return new BoatClassDTO(bc.getName(), bc.getHullLength(), bc.getHullBeam());
     }
 }

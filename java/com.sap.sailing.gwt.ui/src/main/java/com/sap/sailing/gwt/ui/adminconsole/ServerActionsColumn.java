@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.sap.sse.gwt.client.celltable.ActionsColumn;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.shared.HasPermissions.Action;
 
 /**
  * Implementation of actions column for actions that requires checking only server permissions. The

@@ -98,8 +98,9 @@ public abstract class SortableRaceListColumn<T extends RaceMetadataDTO<?>, C> ex
     }
     
     private String getCurrentStyle(String baseStyle) {
-        return getStyleNamesString(baseStyle, isShowDetails() ? columnVisibility.getAdditionalStyle()
-                : RaceListResources.INSTANCE.css().racesListHideColumn());
+        return getStyleNamesString(baseStyle != null ? baseStyle : "",
+                isShowDetails() ? columnVisibility.getAdditionalStyle()
+                        : RaceListResources.INSTANCE.css().racesListHideColumn());
     }
         
     private static class WrappedTextHeader extends SafeHtmlHeader {

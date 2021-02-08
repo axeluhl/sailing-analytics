@@ -230,7 +230,13 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
 
         @Override
         public void visit(RegattaLogRevokeEvent event) {
-            final RegattaLogEvent revokedEvent = logToObserve.getEventById(event.getRevokedEventId());
+            final RegattaLogEvent revokedEvent;
+            logToObserve.lockForRead();
+            try {
+                revokedEvent = logToObserve.getEventById(event.getRevokedEventId());
+            } finally {
+                logToObserve.unlockAfterRead();
+            }
             if (revokedEvent == null) {
                 logger.warning("Unable to find revoked event with ID "+event.getRevokedEventId());
             } else if (regattaLogEventClass.isInstance(revokedEvent) &&

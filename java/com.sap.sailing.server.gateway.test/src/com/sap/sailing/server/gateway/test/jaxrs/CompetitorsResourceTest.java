@@ -37,6 +37,6 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
         assertEquals(id, json.get("id"));
         assertEquals(name, json.get("name"));
         assertEquals(nationality, json.get("nationality"));
-        assertEquals(countryCode, json.get("countryCode"));
+        assertEquals(countryCode, json.get("nationalityISO2"));
     }
 }

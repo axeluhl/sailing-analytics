@@ -3,10 +3,9 @@ package com.sap.sse.util.impl;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import com.sap.sse.util.AbstractMXBeanImpl;
 import com.sap.sse.util.ThreadPoolMXBean;
 
-public class ThreadPoolMXBeanImpl extends AbstractMXBeanImpl implements ThreadPoolMXBean {
+public class ThreadPoolMXBeanImpl implements ThreadPoolMXBean {
     private static final long serialVersionUID = -7057754487764427044L;
     private final NamedTracingScheduledThreadPoolExecutor threadPool;
     
@@ -22,7 +21,7 @@ public class ThreadPoolMXBeanImpl extends AbstractMXBeanImpl implements ThreadPo
 
     @Override
     public ObjectName getObjectName() throws MalformedObjectNameException {
-        return new ObjectName("com.sap.sse:type=ThreadPool,name="+escapeIllegalObjectNameCharacters(getName()));
+        return new ObjectName("com.sap.sse:type=ThreadPool,name="+ObjectName.quote(getName()));
     }
 
     @Override

@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class Helpers {
     private final static Logger logger = Logger.getLogger(Helpers.class.getName());

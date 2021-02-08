@@ -31,13 +31,14 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static final Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase db;
     final MongoCollection<org.bson.Document> settingCollection;
-
 
     public MongoObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
@@ -94,7 +95,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), idOfAccessControlledObject.toString());
         aclCollection.deleteOne(dbACL);
     }
-    
+
+    @Override
+    public void deleteAllAccessControlLists() {
+        final MongoCollection<org.bson.Document> aclCollection = db
+                .getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        aclCollection.deleteMany(new Document());
+    }
+
     @Override
     public void storeOwnership(OwnershipAnnotation owner) {
         MongoCollection<org.bson.Document> ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
@@ -114,6 +122,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document dbOwnership = new Document();
         dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), ownedObjectId.toString());
         ownershipCollection.deleteOne(dbOwnership);
+    }
+
+    @Override
+    public void deleteAllOwnerships() {
+        final MongoCollection<org.bson.Document> ownershipCollection = db
+                .getCollection(CollectionNames.OWNERSHIPS.name());
+        ownershipCollection.deleteMany(new Document());
     }
 
     @Override
@@ -215,6 +230,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             defaultTennants.add(tenant);
         }
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
+        dbUser.put(FieldNames.User.SUBSCRIPTIONS.name(), createSubscriptions(user.getSubscriptions()));
         usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
@@ -263,6 +279,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void deleteAllSettings() {
+        final MongoCollection<org.bson.Document> settingsCollection = db
+                .getCollection(CollectionNames.SETTINGS.name());
+        settingsCollection.deleteMany(new Document());
+    }
+
+    @Override
     public void storePreferences(String username, Map<String, String> userMap) {
         BasicDBList dbSettings = new BasicDBList();
         for (Entry<String, String> e : userMap.entrySet()) {
@@ -275,6 +298,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document update = new Document(FieldNames.Preferences.KEYS_AND_VALUES.name(), dbSettings);
         update.put(FieldNames.Preferences.USERNAME.name(), username);
         settingCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, update, new UpdateOptions().upsert(true));
+    }
+
+    @Override
+    public void deleteAllPreferences() {
+        final MongoCollection<org.bson.Document> preferencesCollection = db
+                .getCollection(CollectionNames.PREFERENCES.name());
+        preferencesCollection.deleteMany(new Document());
     }
 
     @Override
@@ -302,5 +332,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbSettingTypes.put(e.getKey(), e.getValue().getName());
         }
         return dbSettingTypes;
+    }
+
+    private BasicDBList createSubscriptions(Iterable<Subscription> subscriptions) {
+        final BasicDBList result;
+        if (subscriptions != null) {
+            result = new BasicDBList();
+            for (final Subscription subscription : subscriptions) {
+                final Document doc = new Document();
+                final SubscriptionDataHandler subscriptionDataHandler = Activator.getSubscriptionDataHandler(subscription.getProviderName());
+                doc.putAll(subscriptionDataHandler.toMap(subscription));
+                result.add(doc);
+            }
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

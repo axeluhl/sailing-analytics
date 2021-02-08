@@ -38,7 +38,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
 
     @Before
     public void setUp() {
-        clearState(getContextRoot());
+        clearState(getContextRoot(), /* headless */ true);
         super.setUp();
     }
 
@@ -224,7 +224,10 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final Event eventCreatedWithNewGroupTenant = eventApi.createEvent(ownerCtx, eventName2, "GC 32",
                 CompetitorRegistrationType.CLOSED, "somewhere");
         assertEquals(eventName2, eventCreatedWithNewGroupTenant.getName());
-        final String groupOfEvent = adminConsole.goToEvents().getEventEntry(eventName2).getColumnContent("Group");
+        final String groupOfEvent = adminConsole.goToEvents()
+                .refreshEvents()
+                .getEventEntry(eventName2)
+                .getColumnContent("Group");
         assertEquals(defaultTenantGroup, groupOfEvent);
     }
 

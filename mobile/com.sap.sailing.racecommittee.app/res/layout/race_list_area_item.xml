@@ -2,92 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_cell_height">
+    android:layout_height="@dimen/navigation_drawer_cell_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <RelativeLayout
-        android:id="@+id/panel_right"
-        android:layout_width="@dimen/navigation_drawer_right_box"
+    <View
+        android:id="@+id/race_marker"
+        android:layout_width="@dimen/obesity_line"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true">
-
-        <LinearLayout
-            android:id="@+id/race_scheduled"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:orientation="vertical">
-
-            <com.sap.sailing.racecommittee.app.ui.views.RaceTimeView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textAppearance="?attr/textXLarge"
-                tools:text="13:36" />
-
-            <TextView
-                android:id="@+id/race_started"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/race_started"
-                android:textAppearance="?attr/textXSmall" />
-
-            <TextView
-                android:id="@+id/race_finished"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/race_finished"
-                android:textAppearance="?attr/textXSmall" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/race_unscheduled"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/race_unscheduled"
-            android:textColor="?attr/sap_light_gray"
-            android:textSize="@dimen/textSize_18"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/update_badge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:contentDescription="@string/updateIndicator"
-            android:scaleType="matrix"
-            android:src="@drawable/updated"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <ImageView
-            android:id="@+id/panel_additional_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="2dp"
-            android:src="@drawable/ic_warning_yellow"
-            android:visibility="gone"
-            tools:visibility="visible" />
-    </RelativeLayout>
+        android:duplicateParentState="true"
+        android:background="?attr/marker_race" />
 
     <RelativeLayout
         android:id="@+id/panel_left"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/panel_right"
-        android:layout_toStartOf="@id/panel_right">
+        android:layout_toStartOf="@id/panel_right"
+        android:layout_toLeftOf="@id/panel_right">
 
-        <ImageView
-            android:id="@+id/race_marker"
-            android:layout_width="@dimen/obesity_line"
-            android:layout_height="match_parent"
-            android:src="?attr/marker_race" />
 
         <LinearLayout
             android:id="@+id/additional_info"
@@ -106,53 +37,35 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <LinearLayout
+            <com.sap.sailing.racecommittee.app.ui.views.FlagTimeView
                 android:id="@+id/race_flag"
+                app:flagSize="@integer/flag_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
-                android:orientation="vertical"
                 android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/current_flag"
-                    android:layout_width="40dp"
-                    android:layout_height="25dp"
-                    android:layout_gravity="center"
-                    android:scaleType="centerInside"
-                    tools:src="@drawable/flag_alpha_64dp" />
-
-                <com.sap.sailing.racecommittee.app.ui.views.FlagTimeView
-                    android:id="@+id/flag_timer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:drawableLeft="?attr/arrow_down"
-                    android:textAppearance="?attr/textXSmall"
-                    tools:text="01:12" />
-            </LinearLayout>
+                tools:visibility="visible" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/navigation_drawer_text_margin"
-            android:layout_toLeftOf="@id/additional_info"
             android:layout_toStartOf="@id/additional_info"
+            android:layout_toLeftOf="@id/additional_info"
             android:orientation="vertical">
 
             <TextView
-                    android:id="@+id/race_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="middle"
-                    android:singleLine="true"
-                    android:textAppearance="?attr/textNormal"
-                    tools:text="Race 3" />
+                android:id="@+id/race_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textAppearance="?attr/textNormal"
+                tools:text="Race 3" />
 
             <TextView
                 android:id="@+id/depends_on"
@@ -167,6 +80,78 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/panel_right"
+        android:layout_width="@dimen/navigation_drawer_right_box"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true">
+
+        <ImageView
+            android:id="@+id/update_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/updateIndicator"
+            android:scaleType="matrix"
+            android:src="@drawable/updated"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/panel_additional_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="2dp"
+            android:src="@drawable/ic_warning_yellow"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/race_scheduled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/race_started"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/race_started"
+                android:textAppearance="?attr/textXSmall" />
+
+            <TextView
+                android:id="@+id/race_finished"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/race_finished"
+                android:textAppearance="?attr/textXSmall" />
+
+            <com.sap.sailing.racecommittee.app.ui.views.RaceTimeView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textAppearance="?attr/textLarge"
+                tools:text="13:36" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/race_unscheduled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/race_unscheduled"
+            android:textColor="?attr/sap_light_gray"
+            android:textSize="@dimen/textSize_18"
+            android:visibility="gone" />
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/explicit_factor"
         android:layout_width="wrap_content"
@@ -177,7 +162,7 @@
         android:textColor="?attr/white_invert"
         tools:text="x 3.5" />
 
-    <ImageView
+    <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"

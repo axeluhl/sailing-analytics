@@ -6,5 +6,5 @@ what is defined in the .product file.
 
 Example usage:
 
-  analyzeProduct.sh ../raceanalysis.product ../../com.sap.sailing.server/SailingServer\ \(No\ Proxy\,\ GENERATED\).launch
+  updateEclipseLaunchers.sh ../raceanalysis.product ../../com.sap.sailing.server/SailingServer\ \(No\ Proxy\,\ GENERATED\).launch
 

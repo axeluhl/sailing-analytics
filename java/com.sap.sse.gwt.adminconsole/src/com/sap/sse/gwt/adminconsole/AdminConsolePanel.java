@@ -11,6 +11,8 @@ import java.util.function.BooleanSupplier;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -19,6 +21,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -68,7 +71,7 @@ import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectable {
+public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends HeaderPanel {
     private final UserService userService;
     
     /**
@@ -82,6 +85,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     
     private final Map<Widget, Set<BooleanSupplier>> permissionsAnyOfWhichIsRequiredToSeeWidget;
     
+    private final Map<Widget, T> widgetPlacesMap;
+    
+    private final Map<String, String> verticalTabNameToTitleMap;
+    
+    private final Map<Widget, String> panelAndDebugId;
+    
+    private final Map<Class<?>, String> placeAndDebugId;
+
     private final SelectionHandler<Integer> tabSelectionHandler;
     
     /**
@@ -95,7 +106,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * Keys are the results of calling {@link RefreshableAdminConsolePanel#getWidget()} on their associated values. This
      * allows the panel to find the refresh target when a widget has been selected in a tab panel.
      */
-    private final Map<Widget, RefreshableAdminConsolePanel> panelsByWidget;
+    private final Map<Widget, RefreshableAdminConsolePanel<? extends Widget>> panelsByWidget;
+
+    private final PlaceController placeController;
+
+    private T currentPlace;
 
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
@@ -105,13 +120,22 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     private class TabSelectionHandler implements SelectionHandler<Integer> {
         @Override
         public void onSelection(SelectionEvent<Integer> event) {
+
             Object source = event.getSource();
             if (source != null) {
                 if (source instanceof HorizontalTabLayoutPanel) {
                     final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
-                    refreshDataFor(selectedPanel);
-                } else if (source instanceof VerticalTabLayoutPanel) {
+                    if (selectedPanel instanceof PanelSupplierScollPanel) {
+                        PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) selectedPanel;
+                        supplierScollPanel.activate(panelSupplierScollPanel -> {
+                                goToWidgetsPlace(panelSupplierScollPanel);
+                            });
+                    } else {
+                        goToWidgetsPlace(selectedPanel);
+                    }
+
+               } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
                     if (widgetAssociatedToVerticalTab instanceof HorizontalTabLayoutPanel) {
@@ -121,18 +145,28 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
                         }
                     }
-                    refreshDataFor(widgetAssociatedToVerticalTab);
+                    if (widgetAssociatedToVerticalTab instanceof PanelSupplierScollPanel) {
+                        PanelSupplierScollPanel dummyScrollPanel = (PanelSupplierScollPanel) widgetAssociatedToVerticalTab;
+                        dummyScrollPanel.activate(panelSupplierScollPanel -> 
+                        {
+                            goToWidgetsPlace(panelSupplierScollPanel);
+                        });
+                    } else {
+                        goToWidgetsPlace(widgetAssociatedToVerticalTab);
+                    }
                 }
             }
         }
-
-        private void refreshDataFor(Widget target) {
-            RefreshableAdminConsolePanel refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
-            if (refreshTarget != null) {
-                refreshTarget.refreshAfterBecomingVisible();
+        
+        private void goToWidgetsPlace(Widget widget) {
+            Place gotoPlace = null;
+            if (widgetPlacesMap.containsKey(widget)) {
+                gotoPlace = widgetPlacesMap.get(widget);
+            }
+            if (currentPlace == null || (gotoPlace != null && !currentPlace.isSamePlace(gotoPlace))) {
+                placeController.goTo(gotoPlace);
             }
         }
-
     }
     
     /**
@@ -151,16 +185,21 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     
     public AdminConsolePanel(UserService userService,
             ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
-            StringMessages stringMessages) {
+            String releaseNotesURL, Anchor footerAnchor, ErrorReporter errorReporter, LoginPanelCss loginPanelCss,
+            StringMessages stringMessages, PlaceController placeController) {
+        this.placeController = placeController;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
         roleSpecificTabs = new LinkedHashSet<>();
         this.panelsByWidget = new HashMap<>();
+        this.widgetPlacesMap = new HashMap<>();
+        this.verticalTabNameToTitleMap = new HashMap<>();
+        this.panelAndDebugId = new HashMap<>();
+        this.placeAndDebugId = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                updateTabDisplayForCurrentUser(user);
+                updateTabDisplayForCurrentUser(user, true);
             }
         });
         tabSelectionHandler = new TabSelectionHandler();
@@ -168,11 +207,13 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         topLevelTabPanel.addSelectionHandler(tabSelectionHandler);
         topLevelTabPanel.ensureDebugId("AdministrationTabs");
         topLevelTabPanelWrapper = new VerticalOrHorizontalTabLayoutPanel() {
+            
             @Override
-            public void add(Widget child, String text, boolean asHtml) {
-                topLevelTabPanel.add(child, text, asHtml);
+            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
+                child.setTitle(text);
+                topLevelTabPanel.add(child, text, asHtml, fireEvents);
                 topLevelTabPanel.forceLayout();
-            }
+            }  
 
             @Override
             public boolean remove(Widget child) {
@@ -191,8 +232,12 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
 
             @Override
             public void selectTab(int index) {
-                topLevelTabPanel.selectTab(index);
-                
+                topLevelTabPanel.selectTab(index);      
+            }
+
+            @Override
+            public void selectTab(int index, boolean fireEvent) {
+                topLevelTabPanel.selectTab(index, fireEvent);
             }
 
             @Override
@@ -216,6 +261,11 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             sysinfoPanel.add(releaseNotesLink);
             informationPanel.add(releaseNotesLink, DockPanel.EAST);
         }
+        
+        if (footerAnchor != null) {
+            informationPanel.add(footerAnchor, DockPanel.EAST);
+        }
+        
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
         this.setFooterWidget(informationPanel);
@@ -231,10 +281,20 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * this method, but then this method needs to be invoked again to ensure that all all tabs are properly displayed
      * for the current panel's state.
      */
-    public void initUI() {
-        updateTabDisplayForCurrentUser(getUserService().getCurrentUser());
-        if (topLevelTabPanel.getWidgetCount() > 0) {
-            topLevelTabPanel.selectTab(0);
+   public void initUI(final T place) {
+        updateTabDisplayForCurrentUser(getUserService().getCurrentUser(), false);
+        if (place == null) {
+            if (topLevelTabPanel.getWidgetCount() > 0) {
+                topLevelTabPanel.selectTab(0);
+                // activate 1st initial widget this way because selection logic will not be called in this case
+                Widget currentSelectedWidget = topLevelTabPanel.getWidget(0);
+                if (currentSelectedWidget instanceof PanelSupplierScollPanel) {
+                    PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentSelectedWidget;
+                    supplierScollPanel.activate(t -> {});
+                }
+            }
+        } else {
+            selectTabByPlace(place, false);
         }
     }
 
@@ -242,8 +302,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return userService;
     }
 
-    private static interface VerticalOrHorizontalTabLayoutPanel {
-        void add(Widget child, String text, boolean asHtml);
+    public static interface VerticalOrHorizontalTabLayoutPanel {
+        
+        void add(Widget child, String text, boolean asHtml, boolean fireEvents);
 
         boolean remove(Widget child);
         
@@ -253,6 +314,8 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         
         void selectTab(int index);
         
+        void selectTab(int index, boolean fireEvent);
+
         int getWidgetIndex(Widget child);
     }
 
@@ -262,22 +325,29 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, WildcardPermission... requiresAnyOfThesePermissions) {
+    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, T place, WildcardPermission... requiresAnyOfThesePermissions) {
         final HorizontalTabLayoutPanel newTabPanel = new HorizontalTabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
-        rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions));
+        panelAndDebugId.put(newTabPanel, tabDebugId);
+        rememberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions), place);
         return newTabPanel;
     }
 
+    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, WildcardPermission... requiresAnyOfThesePermissions) {
+        verticalTabNameToTitleMap.put(tabDebugId, tabTitle);
+        return addVerticalTab(tabTitle, tabDebugId, null, requiresAnyOfThesePermissions);
+    }
+    
     /**
      * Adds an administration panel as an entry to the top-level vertical panel, without an intermediary horizontal tab panel.
      * This is useful for panels that form a top-level category of its own but don't require multiple panels to represent this
      * top-level category.
      */
-    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
-        addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions));
+    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, T place,
+            WildcardPermission... requiresAnyOfThesePermissions) {
+        addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions), place);
     }
 
     private ScrollPanel wrapInScrollPanel(Widget panelToAdd) {
@@ -287,9 +357,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return scrollPanel;
     }
 
-    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd,
-            String tabTitle) {
-        this.addToTabPanel(tabPanel, panelToAdd, tabTitle, new WildcardPermission(WildcardPermission.WILDCARD_TOKEN));
+    private ScrollPanel wrapInDummyScrollPanel(AdminConsolePanelSupplier<? extends Widget> supplierToAdd) {
+        ScrollPanel scrollPanel = new PanelSupplierScollPanel(supplierToAdd);
+        return scrollPanel;
+    }
+
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd,
+            String tabTitle, T place) {
+        this.addToTabPanel(tabPanel, panelToAdd, tabTitle, place, new WildcardPermission(WildcardPermission.WILDCARD_TOKEN));
     }
     
     public BooleanSupplier anyPermissionCheck(WildcardPermission... requiresAnyOfThesePermissions) {
@@ -305,15 +380,16 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         };
     }
 
-    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
-        addToTabPanel(tabPanel, panelToAdd, tabTitle, anyPermissionCheck(requiresAnyOfThesePermissions));
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, T place, WildcardPermission... requiresAnyOfThesePermissions) {
+        addToTabPanel(tabPanel, panelToAdd, tabTitle, place, anyPermissionCheck(requiresAnyOfThesePermissions));       
     }
     
-    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, BooleanSupplier permissionCheck) {
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, BooleanSupplier permissionCheck, T place) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
-            public void add(Widget child, String text, boolean asHtml) {
-                tabPanel.add(child, text, asHtml);
+            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
+                child.setTitle(text);
+                tabPanel.add(child, text, asHtml, fireEvents);
                 tabPanel.forceLayout();
             }
 
@@ -335,25 +411,87 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             @Override
             public void selectTab(int index) {
                tabPanel.selectTab(index);
-                
+            }
+
+            @Override
+            public void selectTab(int index, boolean fireEvent) {
+                tabPanel.selectTab(index, fireEvent);
             }
 
             @Override
             public int getWidgetIndex(Widget child) {
                 return tabPanel.getWidgetIndex(child);
             }
-        };
-        addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck);
-    }
 
+        };
+        addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck, place);
+    }
+    
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget> panelToAdd, String tabTitle, T place, BooleanSupplier permissionCheck) {
+        VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
+            @Override
+            public void add(Widget child, String text, boolean asHtml, boolean fireEvents) {
+                child.setTitle(text);
+                tabPanel.add(child, text, asHtml, fireEvents);
+                tabPanel.forceLayout();
+            }
+
+            @Override
+            public boolean remove(Widget child) {
+                return tabPanel.remove(child);
+            }
+            
+            @Override
+            public boolean remove(Widget child, boolean fireEvents) {
+                return tabPanel.remove(tabPanel.getWidgetIndex(child), fireEvents);
+            }
+
+            @Override
+            public Widget getPanel() {
+                return tabPanel;
+            }
+
+            @Override
+            public void selectTab(int index) {
+               tabPanel.selectTab(index);
+            }
+
+            @Override
+            public void selectTab(int index, boolean fireEvent) {
+                tabPanel.selectTab(index, fireEvent);
+            }
+
+            @Override
+            public int getWidgetIndex(Widget child) {
+                return tabPanel.getWidgetIndex(child);
+            }
+
+        };
+        addToTabPanel(wrapper, panelToAdd, tabTitle, permissionCheck, place);
+        String debugId = panelAndDebugId.get(tabPanel);
+        if (debugId != null) {
+            placeAndDebugId.put(place.getClass(), debugId);
+        }
+    }
+    
     /**
-     * Remembers in which tab panel the <code>panelToAdd</code> is to be displayed and for which feature; additionally, remembers adds
-     * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
-     * method can be called.
+     * Remembers in which tab panel the <code>panelToAdd</code> is to be displayed and for which feature; additionally,
+     * adds a hook so that when the <code>panelToAdd</code>'s widget is selected then the
+     * {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()} method can be called.
      */
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, BooleanSupplier permissionCheck) {
-        rememberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, permissionCheck);
-        panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel<? extends Widget>
+    panelToAdd, String tabTitle, BooleanSupplier permissionCheck, T place) {
+        if (panelToAdd.getAdminConsolePanelSupplier() != null) {
+            panelToAdd.getAdminConsolePanelSupplier().setTitle(tabTitle);
+            ScrollPanel wrapped = wrapInDummyScrollPanel(panelToAdd.getAdminConsolePanelSupplier());
+            rememberWidgetLocationAndPermissions(tabPanel, wrapped, tabTitle, permissionCheck, place);
+            panelsByWidget.put(wrapped, panelToAdd);
+        } else {
+            panelToAdd.getWidget().setTitle(tabTitle);
+            ScrollPanel wrapped = wrapInScrollPanel(panelToAdd.getWidget());
+            rememberWidgetLocationAndPermissions(tabPanel, wrapped, tabTitle, permissionCheck, place);
+            panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
+        }
     }
 
     /**
@@ -368,16 +506,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      *            will be shown the widget.
      */
     private void rememberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
-            String tabTitle, BooleanSupplier permissionCheck) {
+            String tabTitle, BooleanSupplier permissionCheck, T place) {
         roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
         final Set<BooleanSupplier> permissionChecksAsSet = new HashSet<>(Arrays.asList(permissionCheck));
         permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionChecksAsSet);
-        Set<BooleanSupplier> permissionsForTabPanel = permissionsAnyOfWhichIsRequiredToSeeWidget.get(tabPanel.getPanel());
-        if (permissionsForTabPanel == null) {
-            permissionsForTabPanel = new HashSet<>();
-            permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
+        Util.addToValueSet(permissionsAnyOfWhichIsRequiredToSeeWidget, tabPanel.getPanel(), permissionCheck);
+        if (place != null) { // for horizontal tabs
+            widgetPlacesMap.put(widgetToAdd, place);
         }
-        permissionsForTabPanel.add(permissionCheck);
     }
 
     /**
@@ -385,13 +521,13 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * to see which tabs. See {@link #roleSpecificTabs}. A selection event is fired when the tab currently selected
      * was removed and another tab was therefore selected.
      */
-    private void updateTabDisplayForCurrentUser(UserDTO user) {
+    private void updateTabDisplayForCurrentUser(UserDTO user, boolean fireEvents) {
         final Widget selectedPanel = getSelectedTab(null);
         for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
             final Widget widgetToAddOrRemove = e.getB();
             if (user != null && userHasPermissionsToSeeWidget(user, e.getB())) {
                 if (e.getA().getWidgetIndex(widgetToAddOrRemove) == -1) {
-                    e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false);
+                    e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false, fireEvents);
                 }
             } else {
                 e.getA().remove(widgetToAddOrRemove, /* fireEvents */ false);
@@ -435,29 +571,64 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return selectedTabInHorizontalTabPanel != null ? selectedTabInHorizontalTabPanel : topLevelSelectedTab;
     }
 
-    @Override
-    public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
-        if (verticalTabName == null) {
-            return;
-        }
+    public void selectTabByPlace(T place) {
+        selectTabByPlace(place, true);
+    }
 
-        Widget widgetForSetup = null; //Remember widget for set up
-        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
-            VerticalOrHorizontalTabLayoutPanel panel = e.getA();
-            Widget currentWidget = e.getB();
-            if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
+    public void selectTabByPlace(T place, boolean fireEvent) {
+        String verticalTabTitle = null;
+        String placeVerticalTabName = placeAndDebugId.get(place.getClass());
+        if (placeVerticalTabName != null && verticalTabNameToTitleMap.containsKey(placeVerticalTabName)) {
+            verticalTabTitle = verticalTabNameToTitleMap.get(placeVerticalTabName);
+        }
+        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> panelWidgetName : roleSpecificTabs) {
+            VerticalOrHorizontalTabLayoutPanel panel = panelWidgetName.getA();
+            Widget currentWidget = panelWidgetName.getB();
+            if (isWidgetForPlace(place, panelWidgetName, verticalTabTitle)) {
                 int index = panel.getWidgetIndex(currentWidget);
-                panel.selectTab(index);
-                if (horizontalTabName == null) {//If we don't have horizontal tab will setup vertical tab.
-                    widgetForSetup = currentWidget;
+                currentPlace = place;
+                panel.selectTab(index, fireEvent);      
+                if (currentWidget instanceof PanelSupplierScollPanel) {
+                    PanelSupplierScollPanel supplierScollPanel = (PanelSupplierScollPanel) currentWidget;
+                    supplierScollPanel.activate(t -> {filterAndSelect(place, unwrapScrollPanel(t)); refreshDataFor(t);});
+                } else {
+                    filterAndSelect(place, unwrapScrollPanel(currentWidget));
+                    refreshDataFor(currentWidget);
                 }
-            } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
-                int index = panel.getWidgetIndex(currentWidget);
-                panel.selectTab(index);
-                widgetForSetup = currentWidget;
             }
         }
-        panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);
+    }
+
+    private void refreshDataFor(final Widget target) {
+        final RefreshableAdminConsolePanel<? extends Widget> refreshTarget;
+        if (target instanceof PanelSupplierScollPanel) {
+            refreshTarget = panelsByWidget.get(target);
+        } else {
+            refreshTarget = panelsByWidget.get(unwrapScrollPanel(target));
+        }
+        if (refreshTarget != null) {
+            refreshTarget.refreshAfterBecomingVisible();
+        }
+    }
+
+    private boolean isWidgetForPlace(final T place, final Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> panelWidgetName, final String verticalTabTitle) {
+        Widget currentWidget = panelWidgetName.getB();
+        boolean isHorizontalMenu = widgetPlacesMap.containsKey(currentWidget) && place.isSamePlace(widgetPlacesMap.get(currentWidget));
+        if (isHorizontalMenu) {
+            return true;
+        }
+        VerticalOrHorizontalTabLayoutPanel panel = panelWidgetName.getA();
+        String verticalPanelName = panelWidgetName.getC();
+        boolean isVerticalTab = panel == topLevelTabPanelWrapper && verticalTabTitle != null && verticalTabTitle.equals(verticalPanelName);
+        return isVerticalTab;
+    }
+
+    private void filterAndSelect(final T place, final Widget widget) {
+        if (widget instanceof FilterablePanelProvider && place instanceof FilterableAdminConsolePlace && ((FilterableAdminConsolePlace)place).getFilterAndSelectParameters() != null) {
+            FilterablePanelProvider<?> filterablePanelProvider = (FilterablePanelProvider<?>) widget;
+            FilterableAdminConsolePlace filterablePlace = (FilterableAdminConsolePlace) place;
+            filterablePanelProvider.getFilterablePanel().filterAndSelect(filterablePlace.getFilterAndSelectParameters());
+        }
     }
 
     /**

@@ -16,8 +16,10 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sse.security,
  com.sap.sse.security.common,
  com.sap.sse.replication,
- com.sap.sailing.shared.server
+ com.sap.sailing.shared.server,
+ com.sap.sse.shared.android
 Export-Package: com.sap.sailing.server.gateway.deserialization.impl,
+ com.sap.sailing.server.gateway.dto,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.server.gateway.serialization.impl,
  com.sap.sailing.server.gateway.serialization.racelog.tracking,

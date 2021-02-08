@@ -1,0 +1,62 @@
+TL;DR
+Keep this project CLOSED in Eclipse unless updating the AWS SDK for the target platform.
+To make this into a valid Eclipse and compilable Maven project, run
+	./createLocalAwsApiP2Repository.sh
+which will download all JARs required, generates MANIFEST.MF, build.properties, and .classpath
+files and aligns the version specification in all related artifacts such as feature.xml,
+target platform definition, and pom.xml accordingly, then builds a local P2 repository
+that serves as alocal update site for the AWS SDK.
+
+Details:
+
+This is an OSGi wrapper project around the parts of the AWS Java SDK libraries required by
+this project. There is a Gradle configuration (build.gradle, settings.gradle). You can change to this
+project's directory (${workspace}/java/com.amazon.aws.aws-java-api) and run
+
+	rm ./lib/*
+	../../gradlew downloadLibs
+
+This will download all JARs required for the components listed in build.gradle in the
+dependencies section, such as
+
+    implementation 'software.amazon.awssdk:s3'
+
+Add more components by adding more lines, such as
+
+    implementation 'software.amazon.awssdk:ec2'
+
+and repeat the process as needed. Make sure to update build.properties to
+reference the additional JAR files (which can alternatively be accomplished through the MANIFEST.MF
+editor's "Runtime" tab).
+
+To download source JARs which can then be attached, add lines such as the following to the dependencies section:
+
+    implementation group: 'software.amazon.awssdk', name: 's3', classifier: 'sources'
+
+This will fetch the source JAR corresponding to the s3 code JAR. To attach it, go to the project's
+build path settings, expand the code JAR's tree node in the "Libraries" tab, select the "Source Attachment"
+sub-node, click the "Edit" button and select the source JAR that got downloaded. Don't forget to add the
+source JAR to the git repository.
+
+This project is intended to remain CLOSED in the Eclipse workspace. An exception may be if you'd like to
+do an upgrade or add a JAR and see if the workspace still builds after those changes. In this case, rename the
+dot_project file to .project, import the project into your workspace, and it will take precedence over the
+bundle with the same ID from the target platform.
+
+The bundle is otherwise mainly intended to construct an
+OSGi wrapper bundle which becomes part of the target platform and is uploaded to the p2 repository
+at http://p2.sapsailing.com/p2/aws-sdk. Its lib/ folder is .gitignore'd so we don't add the large libraries
+to git.
+
+Updating the wrapper bundle, either because new components have been added or a release upgrade for the
+AWS SDK has been done by adjusting the version number in the line
+    implementation platform('software.amazon.awssdk:bom:2.13.50')
+in the build.gradle file can be done using the script ${workspace}/java/com.sap.sailing.targetplatform/scripts/createLocalAwsApiP2Repository.sh.
+It automates the process of fetching the libraries according to the build.gradle file,
+updates .classpath, pom.xml, build.properties and META-INF/MANIFEST.MF accordingly, then
+runs a Maven build to produce the wrapper bundle's JAR file. This JAR is then copied to the
+update site project's plugins/aws-sdk folder, the feature.xml file for the update site is updated
+to reflect the correct version number, and then the update site is built using Maven.
+
+If you like what you've got, update the p2.sapsailing.com version of the aws-sdk update site by invoking
+	/java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh

@@ -37,8 +37,7 @@ public class ThreadManager extends StreamingOutputUtil {
                 threadsJson.add(threadJson);
             }
         }
-        String json = threadsJson.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(streamingOutput(threadsJson), MediaType.APPLICATION_JSON).build();
     }
 
     @SuppressWarnings("deprecation") // using Thread.suspend()

@@ -89,7 +89,7 @@ public class AnniversariesPresenter implements RefreshableWidget<AnniversariesDT
     private String getRaceBoardLink(AnniversaryDTO anniversary) {
         return EntryPointWithSettingsLinkFactory.createRaceBoardLink(anniversary.getRemoteUrl(),
                 new RaceboardContextDefinition(anniversary.getRegattaName(), anniversary.getRaceName(),
-                        anniversary.getLeaderboardName(), null, anniversary.getEventID(), null),
+                        anniversary.getLeaderboardName(), null, null, anniversary.getEventID(), null),
                 new PerspectiveCompositeSettings<>(new RaceBoardPerspectiveOwnSettings(), Collections
                         .singletonMap(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true))));
     }

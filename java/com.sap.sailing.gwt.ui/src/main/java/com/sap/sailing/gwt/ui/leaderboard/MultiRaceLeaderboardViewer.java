@@ -38,12 +38,11 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final Function<String, SailingServiceAsync> sailingServiceFactory, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, 
-            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
+            final Timer timer, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingServiceFactory, asyncActionsExecutor, timer,
-                leaderboardGroupName, leaderboardName, errorReporter,
+                leaderboardName, errorReporter,
                 stringMessages, chartDetailType, availableDetailTypes);
     }
 
@@ -53,8 +52,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,
             final Function<String, SailingServiceAsync> sailingServiceFactory, final AsyncActionsExecutor asyncActionsExecutor,
-            final Timer timer, 
-            final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
+            final Timer timer, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, DetailType chartDetailType, Iterable<DetailType> availableDetailTypes) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
@@ -62,9 +60,9 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
         final SailingServiceAsync sailingServiceForMainLeaderboard = sailingServiceFactory.apply(leaderboardName);
         
         init(new MultiRaceLeaderboardPanel(this, getComponentContext(), sailingServiceForMainLeaderboard, asyncActionsExecutor,
-                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false,
-                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
+                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), false, competitorSelectionModel,
+                timer, leaderboardName, errorReporter, stringMessages,
+                settings.getPerspectiveOwnSettings().isShowRaceDetails(),
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
@@ -107,7 +105,7 @@ public class MultiRaceLeaderboardViewer extends AbstractLeaderboardViewer<Leader
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
                                         false,  competitorSelectionProvider, timer,
-                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
+                                        overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false, FlagImageResolverImpl.get(), availableDetailTypes);

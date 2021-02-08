@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.actions;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
@@ -20,11 +21,12 @@ public class GetCompetitorsRaceDataAction implements AsyncAction<CompetitorsRace
     private final long stepSizeInMs;
     private final DetailType detailType;
     private final String leaderboarGroupName;
+    private final UUID leaderboarGroupId;
     private final String leaderboardName;
     
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RegattaAndRaceIdentifier raceIdentifier,
             List<CompetitorDTO> competitors, Date fromDate, Date toDate, long stepSizeInMs, DetailType detailType,
-            String leaderboardGroupName, String leaderboardName) {
+            String leaderboardGroupName, UUID leaderboardGroupId, String leaderboardName) {
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.competitors = competitors;
@@ -33,12 +35,13 @@ public class GetCompetitorsRaceDataAction implements AsyncAction<CompetitorsRace
         this.stepSizeInMs = stepSizeInMs;
         this.detailType = detailType;
         this.leaderboarGroupName = leaderboardGroupName;
+        this.leaderboarGroupId = leaderboardGroupId;
         this.leaderboardName = leaderboardName;
     }
 
     @Override
     public void execute(AsyncCallback<CompetitorsRaceDataDTO> callback) {
         sailingService.getCompetitorsRaceData(raceIdentifier, competitors, fromDate, toDate, stepSizeInMs, detailType,
-                leaderboarGroupName, leaderboardName, callback);
+                leaderboarGroupName, leaderboarGroupId, leaderboardName, callback);
     }
 }

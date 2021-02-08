@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event;
 
+import java.util.UUID;
+
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -69,7 +71,7 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
-        String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
+        String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId,
                 RegattaAndRaceIdentifier raceIdentifier);
     }
     

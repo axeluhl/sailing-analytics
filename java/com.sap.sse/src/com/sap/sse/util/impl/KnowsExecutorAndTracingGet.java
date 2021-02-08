@@ -27,4 +27,11 @@ public interface KnowsExecutorAndTracingGet<V> extends KnowsExecutor, HasTracing
      * call/run method of this task.
      */
     void removeInheritableThreadLocalValues();
+
+    /**
+     * Removes all values stored in {@link ThreadLocal}s of a thread. This should be called
+     * after task execution to prevent illegal {@link ThreadLocal} value reuse when using
+     * thread pools.
+     */
+    public void removeThreadLocalValues();
 }

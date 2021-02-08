@@ -14,11 +14,11 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
+import com.sap.sse.shared.json.JsonSerializer;
 
 /**
  * Serializes a {@link Competitor} or {@link CompetitorWithBoat} object. If a {@link CompetitorWithBoat} object,
@@ -144,16 +144,6 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
                     competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
-        // adding redundant values to migrate CompetitorsResource to use this serializer instead of its own; see also bug5289
-        result.put(CompetitorJsonConstants.FIELD_COLOR, color == null ? null : color.getAsHtml());
-        result.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE,
-                countryCode == null ? "" : countryCode.getTwoLetterISOCode());
-        result.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE,
-                competitor.getFlagImage() != null ? competitor.getFlagImage().toString() : null);
-        result.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI,
-                competitor.getTeam() != null
-                        ? competitor.getTeam().getImage() != null ? competitor.getTeam().getImage().toString() : null
-                        : null);
         return result;
     }
 

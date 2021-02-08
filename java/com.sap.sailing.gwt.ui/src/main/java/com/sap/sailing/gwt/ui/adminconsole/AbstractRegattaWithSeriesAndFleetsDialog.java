@@ -277,9 +277,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
-        sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
+        sailingEventsListBox.addItem(stringMessages.selectSailingEvent(), stringMessages.selectSailingEvent());
         for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
-            sailingEventsListBox.addItem(event.getName());
+            sailingEventsListBox.addItem(event.getName(), event.getId().toString());
             if (defaultEvent != null) {
                 if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
@@ -289,7 +289,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                         courseAreaSelection.setSelected(event.venue.getCourseAreas().iterator().next(), true);
                     }
                 }
-            } else { 
+            } else {
                 if (isAnyOfTheCourseAreasInEvent(event, regatta.courseAreas)) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
@@ -333,7 +333,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (selIndex > 0) { // the zero index represents the 'no selection' text
             String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemValue)) {
+                if (eventDTO.getId().toString().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }

@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class FlatGPSFixJsonSerializer implements JsonSerializer<GPSFix> {
     public static final String FIELD_LON_DEG = "longitude";

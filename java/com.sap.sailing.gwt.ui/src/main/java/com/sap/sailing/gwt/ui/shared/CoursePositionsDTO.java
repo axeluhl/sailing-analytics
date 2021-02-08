@@ -14,6 +14,11 @@ public class CoursePositionsDTO implements IsSerializable {
     public Set<MarkDTO> marks;
     
     public int totalLegsCount;
+    
+    /**
+     * The leg number is 0 before the start, the number of the current leg during the race
+     * and the number of the last leg at the end of the race even if the race has finished. 
+     */
     public int currentLegNumber;
     
     /**

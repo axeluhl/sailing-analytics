@@ -36,10 +36,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -52,6 +54,7 @@ import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -64,12 +67,13 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class IgtimiAccountsPanel extends FlowPanel {
+public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelProvider<AccountWithSecurityDTO> {
 
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel;
+    private final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -92,10 +96,11 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
     }
 
-    public IgtimiAccountsPanel(final SailingServiceWriteAsync sailingServiceWrite, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    @SuppressWarnings("unchecked")
+    public IgtimiAccountsPanel(final Presenter presenter,
+            final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -117,18 +122,17 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 return null;
             }
         };
-        createIgtimiAccountsTable(cellTable, tableRes, userService, filteredAccounts, filterAccountsPanel);
+        createIgtimiAccountsTable(cellTable, tableRes, presenter.getUserService(), filteredAccounts, filterAccountsPanel);
         // refreshableAccountsSelectionModel will be of correct type, see below in createIgtimiAccountsTable
-        @SuppressWarnings("unchecked")
-        final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
+        refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
                 .getSelectionModel();
 
         final Panel controlsPanel = new HorizontalPanel();
         filterAccountsPanel
-                .setUpdatePermissionFilterForCheckbox(account -> userService.hasPermission(account, DefaultActions.UPDATE));
+                .setUpdatePermissionFilterForCheckbox(account -> presenter.getUserService().hasPermission(account, DefaultActions.UPDATE));
         controlsPanel.add(filterAccountsPanel);
 
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(),
                 SecuredDomainType.IGTIMI_ACCOUNT);
         controlsPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
@@ -236,12 +240,12 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         final DialogConfig<AccountWithSecurityDTO> config = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<AccountWithSecurityDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                configACL::openACLDialog);
+                configACL::openDialog);
 
         table.addColumn(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getHeader());
         table.addColumn(accountNameColumn, stringMessages.name());
@@ -383,5 +387,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
                 removeFrom.getList().remove(account);
             }
         });
+    }
+
+    @Override
+    public AbstractFilterablePanel<AccountWithSecurityDTO> getFilterablePanel() {
+        return filterAccountsPanel;
     }
 }

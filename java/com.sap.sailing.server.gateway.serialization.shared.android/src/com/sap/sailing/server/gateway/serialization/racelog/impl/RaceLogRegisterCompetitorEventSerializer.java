@@ -7,8 +7,8 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetito
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogRegisterCompetitorEventSerializer extends BaseRaceLogEventSerializer {
     public static final String VALUE_CLASS = RegisterCompetitorEvent.class.getSimpleName();
