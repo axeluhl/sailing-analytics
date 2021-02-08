@@ -39,9 +39,10 @@
     <dispatcher>INCLUDE</dispatcher>
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
+  
   <filter>
       <filter-name>DefaultTenantFilter</filter-name>
-      <filter-class>com.sap.sailing.server.gateway.impl.DefaultTenantRequestFilter</filter-class>
+      <filter-class>com.sap.sse.security.impl.DefaultTenantRequestFilter</filter-class>
   </filter>
   <filter-mapping>
       <filter-name>DefaultTenantFilter</filter-name>

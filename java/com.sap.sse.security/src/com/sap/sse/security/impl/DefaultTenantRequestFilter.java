@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl;
+package com.sap.sse.security.impl;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
+import com.sap.sse.security.jaxrs.RestServletContainer;
 import com.sap.sse.security.SecurityService;
 
 /**
