@@ -36,5 +36,11 @@ public interface RegattaOverviewResources extends ClientBundle {
         @ClassName("custom-teaser")
         String customTeaser();
 
+        @ClassName("boatclass-logo")
+        String boatclassLogo();
+        
+        @ClassName("races")
+        String races();
+
     }
 }

@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.managementconsole.places.regatta.overview.partials;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -10,6 +13,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewResources;
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewView.Presenter;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -24,12 +28,14 @@ public class RegattaCard extends Composite {
 
     @UiField
     RegattaOverviewResources local_res;
-
     @UiField
     Element card, title, subTitle;
-
     @UiField
     Anchor advancedSettingsRegattaAnchor;
+    @UiField
+    AnchorElement logoUi;
+    @UiField
+    SpanElement racesUi;
 
     private final RegattaDTO regatta;
     private final Presenter presenter;
@@ -40,24 +46,16 @@ public class RegattaCard extends Composite {
         this.presenter = presenter;
         local_res.style().ensureInjected();
 
-        // TODO get race count
-        // regatta.getRaceCount();
-        // TODO get icon for boatclass
-        // regatta.boatClass;
-        
-        final String title = regatta.getName();
-        String venue = "-";
-        venue = regatta.getName();
-        
-        String time = "-";
-        if (regatta.startDate != null && regatta.endDate != null) {
-            time = DateAndTimeFormatterUtil.formatDateRange(regatta.startDate, regatta.endDate);
-        } else if (regatta.startDate != null) {
-            time = DateAndTimeFormatterUtil.formatDateAndTime(regatta.startDate);
-        }
+        int raceCount = regatta.races.size();
+        String boatClass = regatta.boatClass.getName();
+        ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(boatClass);
+        logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
+        String date = regatta.getStartDate() == null ? "" :
+            DateAndTimeFormatterUtil.longDateFormatter.render(regatta.getStartDate());
 
-        this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(title));
-        this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
+        racesUi.setInnerText(raceCount + " races");
+        this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(regatta.getName()));
+        this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(date));
     }
 
     @UiHandler("advancedSettingsRegattaAnchor")

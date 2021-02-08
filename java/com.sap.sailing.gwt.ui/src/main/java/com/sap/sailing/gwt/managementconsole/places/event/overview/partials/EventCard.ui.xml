@@ -7,8 +7,8 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
     <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.cardPanel}">
-        <div class="{local_res.style.eventCard}" ui:field="card">
-            <div class="{local_res.style.eventCardContainer}">
+        <div ui:field="card" class="{local_res.style.eventCard}" >
+            <div ui:field="container" class="{local_res.style.eventCardContainer}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">
                         <div ui:field="title" class="{local_res.style.title}" />
@@ -17,7 +17,7 @@
                             <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {local_res.style.details}"/>
                         </div>
                     </div>
-                    <g:Anchor ui:field="advancedSettingsEventAnchor" 
+                    <g:Anchor ui:field="contextMenu" 
                             addStyleNames="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
                 </div>
             </div>

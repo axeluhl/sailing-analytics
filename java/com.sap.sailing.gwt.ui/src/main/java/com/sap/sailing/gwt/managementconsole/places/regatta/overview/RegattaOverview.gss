@@ -1,6 +1,29 @@
 @charset "UTF-8";
 @def EVENT_CARD_BACKGROUND_COLOR #1e2d39;
 
+.boatclass-logo {
+    width: 1.5em;
+    height: 1.5em;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
+}
+
+.races {
+    border-radius: 3.01px;
+    font-size: 13px;
+    line-height: 1;
+    padding: 1px 5px;
+    margin: 0 5px 0 5px;
+    max-width: 100%;
+    background-color: #4E6070;
+}
+
+.boatclass-logo:hover {
+	cursor: auto;
+} 
+
 .cards {
     padding: 0 6px;
 }

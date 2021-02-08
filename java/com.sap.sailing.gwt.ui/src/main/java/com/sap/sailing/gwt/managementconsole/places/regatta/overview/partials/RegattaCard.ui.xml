@@ -13,9 +13,10 @@
                     <div class="{app_res.style.flexItemAutoWidth}">
                         <h1 ui:field="title" />
                         <div class="{app_res.style.flexContainer}">
-                            <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
-                            <h2 ui:field="subTitle" class="{app_res.style.flexItemAutoWidth}"/>
-                        </div>
+                            <a class="{local_res.style.boatclassLogo}" ui:field="logoUi"></a>
+                            <span ui:field="racesUi" class="{local_res.style.races}"></span>
+                            <h2 ui:field="subTitle" class="{app_res.style.flexItemAutoWidth}"/>              
+                        </div>                     
                     </div>
                     <g:Anchor ui:field="advancedSettingsRegattaAnchor" 
                             styleName="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
