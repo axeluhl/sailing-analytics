@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Base Activity for all desktop multi-regatta-event pages.
@@ -41,6 +42,16 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
+    }
+    
+    @Override
+    public com.google.web.bindery.event.shared.EventBus getEventBus() {
+        return clientFactory.getEventBus();
+    }
+    
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
     
     @Override

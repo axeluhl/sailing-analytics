@@ -31,6 +31,7 @@
             </div>
             <g:Button
                 addStyleNames="{local_res.css.addButton} {res.mainCss.button}"
+                visible="false"
                 ui:field="addMediaButtonUi"></g:Button>
         </div>
         <g:Label addStyleNames="{style.infoLabel}"

@@ -171,6 +171,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         });
         
         add(content);
+        
     }
     
     protected class SubmitHandler implements FormPanel.SubmitHandler {

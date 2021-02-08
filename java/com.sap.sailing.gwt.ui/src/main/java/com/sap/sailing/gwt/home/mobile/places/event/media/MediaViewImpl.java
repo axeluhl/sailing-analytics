@@ -16,9 +16,12 @@ import com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGallery;
 import com.sap.sailing.gwt.home.mobile.partials.uploadpopup.MobileMediaUploadPopup;
 import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implements MediaView {
-
+    
     private static MediaViewImplUiBinder uiBinder = GWT.create(MediaViewImplUiBinder.class);
 
     interface MediaViewImplUiBinder extends UiBinder<Widget, MediaViewImpl> {
@@ -35,6 +38,21 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         super(presenter, false, true, false);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
+        UserDTO currentUser = presenter.getUserService().getCurrentUser();
+        if (currentUser != null && !currentUser.getName().equals("Anonymous")) {
+            setMediaManaged(true);
+        }
+        
+        presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event->{
+            // for some reason this event is only send after logout. Never the less it will also handle login.
+            AuthenticationContext authContext = event.getCtx();
+            if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
+                setMediaManaged(true);
+            } else {
+                setMediaManaged(false);
+            }
+        });
+        
         mobileMediaUploadPopup = new MobileMediaUploadPopup();
 
         addMediaButtonUi.addClickHandler(new ClickHandler() {
@@ -55,6 +73,16 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         videoGalleryUi.setVisible(!videos.isEmpty());
         imageGalleryUi.setImages(images);
         imageGalleryUi.setVisible(!images.isEmpty());
+    }
+    
+    private void setMediaManaged(boolean managed) {
+        addMediaButtonUi.setVisible(managed);
+        videoGalleryUi.setManageButtonsVisible(managed);
+        imageGalleryUi.setManageButtonsVisible(managed);
+        if (!managed) {
+            videoGalleryUi.setMediaManaged(managed);
+            imageGalleryUi.setMediaManaged(managed);
+        }
     }
     
 }

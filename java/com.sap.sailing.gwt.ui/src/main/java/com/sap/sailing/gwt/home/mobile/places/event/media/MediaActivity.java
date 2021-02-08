@@ -14,8 +14,10 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MediaActivity extends AbstractEventActivity<AbstractEventPlace> implements Presenter {
+    
 
-    public MediaActivity(AbstractEventPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+    public MediaActivity(AbstractEventPlace place, EventViewDTO eventDTO, NavigationPathDisplay navigationPathDisplay, 
+            MobileApplicationClientFactory clientFactory) {
         super(place, eventDTO, clientFactory);
         initNavigationPath(navigationPathDisplay);
     }

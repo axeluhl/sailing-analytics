@@ -78,7 +78,8 @@
 	<g:HTMLPanel addStyleNames="{style.mediaPage}">
         <div class="{res.mediaCss.grid} {style.addButtonArea}">
             <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-                <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" >
+                <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" 
+                        visible="false">
                     <ui:text from='{i18n.upload}' />
                 </g:Button>
             </div>
@@ -88,7 +89,8 @@
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<h1>
                         <ui:text from='{i18n.videos}' />
-                        <g:Button ui:field="videoSettingsButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.manageMedia}" ></g:Button>
+                        <g:Button ui:field="videoSettingsButton" visible="false"
+                                addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.manageMedia}" ></g:Button>
                         </h1>
 				</div>
 				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns}">
@@ -106,7 +108,8 @@
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 				<h1 style="width: auto">
                     <ui:text from='{i18n.photos}' />
-                    <g:Button ui:field="photoSettingsButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.manageMedia}" ></g:Button>
+                    <g:Button ui:field="photoSettingsButton" visible="false"
+                            addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.manageMedia}" ></g:Button>
                 </h1>
 			</div>
 		</div>

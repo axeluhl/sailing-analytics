@@ -198,7 +198,11 @@ public class SectionHeaderContent extends Composite {
     
     public void addManageButtonClickHandler(ClickHandler handler) {
         manageButtonUi.addClickHandler(handler);
-        manageButtonUi.setVisible(true);
+        manageButtonUi.setVisible(false);
+    }
+    
+    public void setManageButtonVisible(boolean visible) {
+        manageButtonUi.setVisible(visible);
     }
     
     public void setManageButtonActive(boolean active) {

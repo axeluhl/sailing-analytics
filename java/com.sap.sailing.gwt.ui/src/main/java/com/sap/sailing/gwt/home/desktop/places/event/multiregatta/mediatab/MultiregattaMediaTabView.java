@@ -18,6 +18,10 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     
     private Presenter currentPresenter;
     
+    public MultiregattaMediaTabView() {
+        super();
+    }
+    
     @Override
     public void setPresenter(EventMultiregattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
@@ -36,7 +40,7 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     @Override
     public void start(MultiregattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         ErrorAndBusyClientFactory errorAndBusyClientFactory = currentPresenter.getErrorAndBusyClientFactory();
-        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView());
+        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView(), currentPresenter.getEventBus(), currentPresenter.getUserService());
         initWidget(mediaPage);
         currentPresenter.ensureMedia(new ActivityCallback<MediaDTO>(errorAndBusyClientFactory, contentArea) {
             @Override

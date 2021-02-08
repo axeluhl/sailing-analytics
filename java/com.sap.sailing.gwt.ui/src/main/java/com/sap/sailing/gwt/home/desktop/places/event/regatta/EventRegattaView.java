@@ -18,7 +18,7 @@ public interface EventRegattaView extends EventView<AbstractEventRegattaPlace, E
         Timer getAutoRefreshTimer();
         
         UserService getUserService();
-
+        
         void getAvailableDetailTypesForLeaderboard(String leaderboardName, RegattaAndRaceIdentifier raceOrNull,
                 AsyncCallback<Iterable<DetailType>> asyncCallback);
     }

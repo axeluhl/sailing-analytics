@@ -37,16 +37,7 @@ public class ImageGallery extends Composite {
             
             @Override
             public void onClick(ClickEvent event) {
-                managed = !managed;
-                for (int i = 0; i < firstColumnUi.getWidgetCount(); i++) {
-                    ImageGalleryItem item = (ImageGalleryItem) firstColumnUi.getWidget(i);
-                    item.manageMedia(managed);
-                }
-                for (int i = 0; i < secondColumnUi.getWidgetCount(); i++) {
-                    ImageGalleryItem item = (ImageGalleryItem) secondColumnUi.getWidget(i);
-                    item.manageMedia(managed);
-                }
-                sectionHeaderUi.setManageButtonActive(managed);
+                setMediaManaged(!managed);
                 event.stopPropagation();
             }
         });
@@ -83,6 +74,23 @@ public class ImageGallery extends Composite {
         } else {
             secondColumnUi.add(imageGalleryItem);
         }
+    }
+    
+    public void setManageButtonsVisible(boolean visible) {
+        sectionHeaderUi.setManageButtonVisible(visible);
+    }
+    
+    public void setMediaManaged(boolean managed) {
+        this.managed = managed;
+        for (int i = 0; i < firstColumnUi.getWidgetCount(); i++) {
+            ImageGalleryItem item = (ImageGalleryItem) firstColumnUi.getWidget(i);
+            item.manageMedia(managed);
+        }
+        for (int i = 0; i < secondColumnUi.getWidgetCount(); i++) {
+            ImageGalleryItem item = (ImageGalleryItem) secondColumnUi.getWidget(i);
+            item.manageMedia(managed);
+        }
+        sectionHeaderUi.setManageButtonActive(managed);
     }
     
 }

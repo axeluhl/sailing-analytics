@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
@@ -24,6 +25,10 @@ import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Desktop page to show videos and images as a gallery.
@@ -66,12 +71,17 @@ public class MediaPage extends Composite {
     private boolean managePhotos;
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
+    private final UserService userService;
     private VideoWithLowerThird videoDisplayUi;
 
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
         manageVideos = !manageVideos;
-        if (manageVideos) {
+        setVideosManaged(manageVideos);
+    }
+    
+    private void setVideosManaged(boolean managed) {
+        if (managed) {
             videoSettingsButton.addStyleName(local_res.css().active());
         } else {
             videoSettingsButton.removeStyleName(local_res.css().active());
@@ -79,7 +89,7 @@ public class MediaPage extends Composite {
         for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
             if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
                 VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
-                thumb.setManageable(manageVideos);
+                thumb.setManageable(managed);
             }
         }
     }
@@ -87,7 +97,11 @@ public class MediaPage extends Composite {
     @UiHandler("photoSettingsButton")
     public void handlePhotoSettingsButtonClick(ClickEvent e) {
         managePhotos = !managePhotos;
-        if (managePhotos) {
+        setPhotosManaged(managePhotos);
+    }
+    
+    private void setPhotosManaged(boolean managed) {
+        if (managed) {
             photoSettingsButton.addStyleName(local_res.css().active());
         } else {
             photoSettingsButton.removeStyleName(local_res.css().active());
@@ -95,7 +109,7 @@ public class MediaPage extends Composite {
         for (int i = 0; i < photoListOuterBoxUi.getWidgetCount(); i++) {
             if (photoListOuterBoxUi.getWidget(i) instanceof GalleryImageHolder) {
                 GalleryImageHolder gih = (GalleryImageHolder) photoListOuterBoxUi.getWidget(i);
-                gih.setManageable(managePhotos);
+                gih.setManageable(managed);
             }
         }
     }
@@ -103,20 +117,28 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        //ManageMediaDialog manageMediaDialog = new ManageMediaDialog(i18n, res, local_res);
         DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup();
-        //popupHolder.add(manageMediaDialog);
         popupHolder.add(popup);
         popup.center();
-        popup.openFileUpload();
     }
     
-    public MediaPage(IsWidget initialView) {
+    public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService) {
         MediaPageResources.INSTANCE.css().ensureInjected();
+        this.userService = userService;
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
         popupHolder = new FlowPanel();
+        
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
+            // for some reason this event is only send after logout. Never the less it will also handle login.
+            AuthenticationContext authContext = event.getCtx();
+            if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
+                setMediaManaged(true);
+            } else {
+                setMediaManaged(false);
+            }
+        });
     }
 
     public void setMedia(final MediaDTO media) {
@@ -204,6 +226,13 @@ public class MediaPage extends Composite {
         } else {
             contentPanel.setWidget(mediaUi);
         }
+
+        UserDTO currentUser = userService.getCurrentUser();
+        if (currentUser != null && !currentUser.getName().equals("Anonymous")) {
+            setMediaManaged(true);
+        } else {
+            setMediaManaged(false);
+        }
     }
 
     /**
@@ -216,5 +245,17 @@ public class MediaPage extends Composite {
         videoDisplayUi = new VideoWithLowerThird(true, autoplay);
         videoDisplayUi.setVideo(video);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
+    }
+    
+    private void setMediaManaged(boolean managed) {
+        mediaAddButton.setVisible(managed);
+        photoSettingsButton.setVisible(managed);
+        videoSettingsButton.setVisible(managed);
+        if (!managed) {
+            managePhotos = false;
+            setPhotosManaged(managePhotos);
+            manageVideos = false;
+            setVideosManaged(manageVideos);
+        }
     }
 }

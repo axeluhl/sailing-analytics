@@ -35,14 +35,7 @@ public class VideoGallery extends Composite {
             
             @Override
             public void onClick(ClickEvent event) {
-                managed = !managed;
-                for (int i = 0; i < mobileSection.getWidgetCount(); i++) {
-                    if (mobileSection.getWidget(i) instanceof VideoGalleryVideo) {
-                        VideoGalleryVideo item = (VideoGalleryVideo) mobileSection.getWidget(i);
-                        item.manageMedia(managed);
-                    }
-                }
-                sectionHeaderUi.setManageButtonActive(managed);
+                setMediaManaged(!managed);
                 event.stopPropagation();
             }
         });
@@ -54,6 +47,21 @@ public class VideoGallery extends Composite {
         for (VideoDTO video : videos) {
             mobileSection.addContent(new VideoGalleryVideo(video));
         }
+    }
+    
+    public void setManageButtonsVisible(boolean visible) {
+        sectionHeaderUi.setManageButtonVisible(visible);
+    }
+    
+    public void setMediaManaged(boolean managed) {
+        this.managed = managed;
+        for (int i = 0; i < mobileSection.getWidgetCount(); i++) {
+            if (mobileSection.getWidget(i) instanceof VideoGalleryVideo) {
+                VideoGalleryVideo item = (VideoGalleryVideo) mobileSection.getWidget(i);
+                item.manageMedia(managed);
+            }
+        }
+        sectionHeaderUi.setManageButtonActive(managed);
     }
     
 }
