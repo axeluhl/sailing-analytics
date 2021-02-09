@@ -5,17 +5,19 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.util.Wait;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -125,17 +127,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
         return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
     }
     
-    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
-        final TimePoint startingToPollForReady = TimePoint.now();
-        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
-            if (optionalTimeout.isPresent()) {
-                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
-                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
-            } else {
-                logger.info(""+this+" not yet ready; waiting forever...");
-            }
-            Thread.sleep(5000);
-        }
-        return isReady(optionalTimeout);
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
 }
