@@ -48,6 +48,8 @@ implements StartFromSailingAnalyticsImage {
      * that after the upgrade progress the server does not try to re-boot. Defaults:<ul>
      * <li>The instance name defaults to "Multi-Server"</li>
      * <li>The instance type defaults to {@link InstanceType#C5_D_4_XLARGE}</li>
+     * <li>The {@link #setImageType(String) image type} defaults to {@link StartFromSailingAnalyticsImage#IMAGE_TYPE_TAG_VALUE_SAILING}
+     * ({@code "sailing-analytics-server"}).
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -137,7 +139,7 @@ implements StartFromSailingAnalyticsImage {
     @Override
     public void run() throws Exception {
         super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout);
+        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout); // FIXME this is a problem when root's authorized_keys is updated asynchronously
         final String instanceId = getHost().getInstanceId();
         getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         boolean fileFound = false;

@@ -130,6 +130,6 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     @Override
     public void run() throws Exception {
         super.run();
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout());
+        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout()); // FIXME this is a problem when root's authorized_keys is updated asynchronously
     }
 }
