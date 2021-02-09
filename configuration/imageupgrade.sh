@@ -32,11 +32,6 @@ clean_httpd_logs() {
   rm /etc/httpd/conf.d/001-internals.conf
 }
 
-clean_sailing_logs() {
-  echo "Clearing sailing logs" >>/var/log/sailing.err
-  rm -rf /home/sailing/servers/*/logs/*
-}
-
 clean_startup_logs() {
   echo "Clearing bootstrap logs" >>/var/log/sailing.err
   rm /var/log/sailing*
@@ -65,7 +60,6 @@ run_git_pull
 run_refresh_instance_install_release
 clean_logrotate_target
 clean_httpd_logs
-clean_sailing_logs
 clean_servers_dir
 clean_startup_logs
 update_root_crontab
