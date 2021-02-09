@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -108,7 +110,9 @@ public class Activator implements BundleActivator {
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
         landscapeState = new AwsLandscapeStateImpl();
         landscapeState.addSSHKeyPairListener(sshKeyPairListener);
-        context.registerService(Replicable.class, landscapeState, null);
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, landscapeState.getId().toString());
+        context.registerService(Replicable.class, landscapeState, replicableServiceProperties);
     }
 
     public static Activator getInstance() {

@@ -5,11 +5,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
@@ -18,6 +20,7 @@ import org.json.simple.JSONObject;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.impl.Activator;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -46,6 +49,29 @@ public class LandscapeResource extends StreamingOutputUtil {
             }
         }
         return Response.ok(streamingOutput(sshKeysAsJsonArray)).build();
+    }
+
+    /**
+     * Deletes the SSH key pair with the name provided
+     */
+    @DELETE
+    @Produces("application/json;charset=UTF-8")
+    @Path("/delete_ssh_key")
+    public Response getSshKeysOwnedByUser(@QueryParam("region") final String regionId, @QueryParam("key_name") final String keyName) throws IOException {
+        final JSONArray sshKeysAsJsonArray = new JSONArray();
+        final AwsLandscapeState landscape = Activator.getInstance().getLandscapeState();
+        final AwsRegion region = new AwsRegion(regionId);
+        final SSHKeyPair sshKeyPair = landscape.getSSHKeyPair(region, keyName);
+        final Response result;
+        if (sshKeyPair == null) {
+            result = Response.status(Status.NOT_FOUND).entity("Key "+keyName+" not found in region "+regionId).build();
+        } else {
+            SecurityUtils.getSubject().checkPermission(sshKeyPair.getIdentifier().getStringPermission(DefaultActions.DELETE));
+            landscape.deleteKeyPair(region, keyName);
+            sshKeysAsJsonArray.add(sshKeyPairJsonSerializer.serialize(sshKeyPair));
+            result = Response.ok(streamingOutput(sshKeysAsJsonArray)).build();
+        }
+        return result;
     }
 
     /**

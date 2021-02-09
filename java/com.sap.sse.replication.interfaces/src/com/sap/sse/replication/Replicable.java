@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
@@ -61,7 +62,11 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * instantiation of the {@link ObjectInputStreamResolvingAgainstCache} class.</li>
  * <li>In your bundle's {@link BundleActivator activator} create your replicable instance and
  * {@link BundleContext#registerService(Class, Object, java.util.Dictionary) register it with the OSGi service registry}
- * under the {@link Replicable} service interface.</li>
+ * under the {@link Replicable} service interface, like this:
+ * <pre>
+ *     final Dictionary&lt;String, String&gt; replicableServiceProperties = new Hashtable&lt;&gt;();
+ *     replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
+ *     registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));</pre></li>
  * <li>Add your replicable's fully-qualified class name to the {@code env-default-rules.sh} file where the
  * {@code REPLICATE_ON_START} variable has its default value defined.</li>
  * </ul>
