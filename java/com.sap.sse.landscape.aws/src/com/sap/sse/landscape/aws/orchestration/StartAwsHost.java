@@ -8,10 +8,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
@@ -30,7 +27,6 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.orchestration.StartHost;
-import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -45,7 +41,6 @@ public abstract class StartAwsHost<ShardingKey,
                           ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
                           HostT extends AwsInstance<ShardingKey, MetricsT>>
 extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
-    private static final Logger logger = Logger.getLogger(StartAwsHost.class.getName());
     protected static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
@@ -377,14 +372,5 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     
     protected byte[] getPrivateKeyEncryptionPassphrase() {
         return privateKeyEncryptionPassphrase;
-    }
-
-    protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
-            throws Exception {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
-        final String sailingUserSsh = "/home/" + username + "/.ssh";
-        final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";
-        logger.info("Appended root's authorized_keys also to " + username + "'s authorized_keys. stdout: "
-                + sshChannel.runCommandAndReturnStdoutAndLogStderr("cat /root/.ssh/authorized_keys >>" + sailingUserAuthorizedKeys, "stderr: ", Level.WARNING));
     }
 }

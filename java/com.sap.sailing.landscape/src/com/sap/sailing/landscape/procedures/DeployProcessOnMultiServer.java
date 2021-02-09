@@ -250,13 +250,16 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel(StartFromSailingAnalyticsImage.SAILING_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr(
-                    "mkdir -p "+serverDirectory+"; "+
-                    "cd "+serverDirectory+"; "+
-                    "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments()+
-                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh",
-                    "stderr: ", Level.WARNING));
+            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                    "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
+                    "mkdir -p "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
+                    "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
+                    "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"")+
+                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh"+
+                    "\"",
+                    "stderr: ", Level.WARNING);
+            logger.info("stdout: "+stdout);
         }
         {
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);

@@ -126,10 +126,4 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
     }
-
-    @Override
-    public void run() throws Exception {
-        super.run();
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout()); // FIXME this is a problem when root's authorized_keys is updated asynchronously
-    }
 }
