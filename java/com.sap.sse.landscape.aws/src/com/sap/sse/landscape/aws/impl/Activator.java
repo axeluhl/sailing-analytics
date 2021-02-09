@@ -8,8 +8,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
 import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
@@ -51,6 +51,7 @@ public class Activator implements BundleActivator {
     private SSHKeyPairListener sshKeyPairListener;
     private PermissionChangeListener permissionChangeListener;
     private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
+    private AwsLandscapeStateImpl landscapeState;
 
     public Activator() {
         super();
@@ -101,30 +102,24 @@ public class Activator implements BundleActivator {
                         });
         new Thread(() -> {
             try {
-                securityServiceTracker.getInitializedService(0).addPermissionChangeListener(landscapeManagerPermission,
-                        permissionChangeListener);
+                securityServiceTracker.getInitializedService(0).addPermissionChangeListener(landscapeManagerPermission, permissionChangeListener);
             } catch (InterruptedException e) {
                 logger.warning("Problem obtaining SecurityService in " + Activator.class.getName());
             }
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
+        landscapeState = new AwsLandscapeStateImpl();
     }
 
     public static Activator getInstance() {
         return instance;
     }
-
-    public AwsLandscape<?, ApplicationProcessMetrics, ?> getDefaultLandscape() {
-        final AwsLandscape<?, ApplicationProcessMetrics, ?> landscape;
-        if (System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME) != null
-                || System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME) == null) {
-            logger.info("Not all system properties of " + AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME + " and "
-                    + AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME + " set. Obtaining an unauthenticated AWS landscape object.");
-            landscape = AwsLandscape.obtain();
-        } else {
-            landscape = AwsLandscape.obtain(System.getProperty(AwsLandscape.ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
-                    System.getProperty(AwsLandscape.SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
-        }
-        return landscape;
+    
+    /**
+     * Obtains the single landscape state object that this bundle instance has. Is manages the persistent, replicable state
+     * of the AWS landscape, such as the set of SSH key pairs.
+     */
+    public AwsLandscapeState getLandscapeState() {
+        return landscapeState;
     }
 
     public TimePoint getTimePointOfLastChangeOfSetOfLandscapeManagers() {

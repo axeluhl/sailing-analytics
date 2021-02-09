@@ -51,12 +51,26 @@ import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
 
 /**
- * A simplified view onto the AWS SDK API that is geared towards specific ways and patterns of managing an application
- * and infrastructure landscape. Among others, it uses {@link Ec2Client}, {@link Route53Client},
- * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.<p>
+ * A simplified, largely stateless view onto the AWS SDK API that is geared towards specific ways and patterns of
+ * managing an application and infrastructure landscape. Only the credentials provided to this object during its
+ * construction constitute its state which is used to create, among others, the {@link Ec2Client},
+ * {@link Route53Client}, {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} client objects to manage the
+ * underlying AWS landscape.
+ * <p>
  * 
- * An instance of this landscape interface is expected to be created by this bundle's {@link Activator} if the necessary
- * credentials have been supplied; it is registered with the OSGi service registry under this interface.
+ * A {@link Activator#getDefaultLandscape() default instance} of this landscape interface may be obtained from this
+ * bundle's {@link Activator} if the necessary credentials have been supplied as system properties; it is then
+ * registered with the OSGi service registry under this interface. Such a default instance may be used, e.g., for
+ * automated, orchestrated infrastructure processes such as establishing dedicated infrastructure for an event that is
+ * about to start, or archiving an event that has finished.
+ * <p>
+ * 
+ * Clients may also create dedicated instances of this service wrapper, using their own credentials. See
+ * {@link #obtain(String, String)}.
+ * <p>
+ * 
+ * This object interacts with an instance of {@link AwsLandscapeState} which keeps persistent and replicable state about
+ * the landscape, such as the set of SSH key pairs.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -132,7 +146,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>();
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
         result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
         return result;
     }
@@ -145,7 +159,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(accessKey, secret);
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
         result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
         return result;
     }

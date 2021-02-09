@@ -16,7 +16,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.impl.Activator;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.rest.StreamingOutputUtil;
@@ -38,7 +38,7 @@ public class LandscapeResource extends StreamingOutputUtil {
     @Path("/get_ssh_keys_owned_by_user")
     public Response getSshKeysOwnedByUser(@QueryParam("username[]") final Set<String> usernames) throws IOException {
         final JSONArray sshKeysAsJsonArray = new JSONArray();
-        final AwsLandscape<?, ?, ?> landscape = Activator.getInstance().getDefaultLandscape();
+        final AwsLandscapeState landscape = Activator.getInstance().getLandscapeState();
         for (final SSHKeyPair sshKeyPair : landscape.getSSHKeyPairs()) {
             if (usernames.contains(sshKeyPair.getCreatorName()) &&
                     SecurityUtils.getSubject().isPermitted(sshKeyPair.getIdentifier().getStringPermission(DefaultActions.READ))) {

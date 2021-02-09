@@ -42,6 +42,7 @@ import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
@@ -160,20 +161,20 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private final AwsRegion globalRegion;
     private final Set<SSHKeyPairListener> sshKeyPairListeners;
     
-    public AwsLandscapeImpl() {
-        this(System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME),
-             System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
+        this(awsLandscapeState,
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
     }
     
-    public AwsLandscapeImpl(String accessKeyId, String secretAccessKey) {
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
         this(accessKeyId, secretAccessKey,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE));
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState);
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
+            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState awsLandscapeState) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
