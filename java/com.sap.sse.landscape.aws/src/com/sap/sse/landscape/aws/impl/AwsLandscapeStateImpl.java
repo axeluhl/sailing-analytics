@@ -17,9 +17,9 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsLandscapeOperation;
 import com.sap.sse.landscape.aws.ReplicableAwsLandscapeState;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -101,8 +101,13 @@ public class AwsLandscapeStateImpl extends AbstractReplicableWithObjectInputStre
     }
 
     @Override
-    public void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> listeners) {
-        Util.addAll(listeners, this.sshKeyPairListeners);
+    public void addSSHKeyPairListener(SSHKeyPairListener listener) {
+        sshKeyPairListeners.add(listener);
+    }
+
+    @Override
+    public void removeSSHKeyPairListener(SSHKeyPairListener listener) {
+        sshKeyPairListeners.remove(listener);
     }
 
     @Override

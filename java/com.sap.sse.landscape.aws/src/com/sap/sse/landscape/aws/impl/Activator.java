@@ -11,7 +11,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -75,7 +74,6 @@ public class Activator implements BundleActivator {
                 timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
             }
         };
-        AwsLandscape.addSSHKeyPairListener(sshKeyPairListener);
         context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
         permissionChangeListener = (permission, usersNowHavingPermission) -> timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
         securityServiceTracker = FullyInitializedReplicableTracker
@@ -109,6 +107,7 @@ public class Activator implements BundleActivator {
             }
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
         landscapeState = new AwsLandscapeStateImpl();
+        landscapeState.addSSHKeyPairListener(sshKeyPairListener);
         context.registerService(Replicable.class, landscapeState, null);
     }
 
@@ -130,7 +129,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        AwsLandscape.removeSSHKeyPairListener(sshKeyPairListener);
+        landscapeState.removeSSHKeyPairListener(sshKeyPairListener);
         final SecurityService securityService = securityServiceTracker.getService();
         if (securityService != null) {
             securityService.removePermissionChangeListener(landscapeManagerPermission, permissionChangeListener);

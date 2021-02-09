@@ -44,7 +44,6 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -590,11 +589,6 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
         landscapeState.deleteKeyPair(region, keyName);
-    }
-
-    @Override
-    public void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> listeners) {
-        landscapeState.addSSHKeyPairListeners(listeners);
     }
 
     @Override

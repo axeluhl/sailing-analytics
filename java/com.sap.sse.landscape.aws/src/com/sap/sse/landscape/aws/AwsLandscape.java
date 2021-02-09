@@ -23,8 +23,6 @@ import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl;
-import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -118,25 +116,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
     
-    SSHKeyPairListeners SSH_KEY_PAIR_LISTENERS = new SSHKeyPairListenersImpl();
-    
-    /**
-     * Listeners added here will be added to each {@link AwsLandscape} object returned by {@link #obtain()} / {@link #obtain(String, String)}
-     * and hence will be notified each time a change occurs to the set of SSH key pairs.
-     */
-    static void addSSHKeyPairListener(SSHKeyPairListener listener) {
-        SSH_KEY_PAIR_LISTENERS.addSSHKeyPairListener(listener);
-    }
-    
-    /**
-     * Listeners removed here will no longer be added to new {@link AwsLandscape} objects returned by {@link #obtain()}
-     * / {@link #obtain(String, String)} and hence will no longer notified of changes to the set of SSH key pairs for new
-     * {@link AwsLandscape} objects.
-     */
-    static void removeSSHKeyPairListener(SSHKeyPairListener listener) {
-        SSH_KEY_PAIR_LISTENERS.removeSSHKeyPairListener(listener);
-    }
-    
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
      * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
@@ -147,7 +126,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
         final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
-        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
         return result;
     }
     
@@ -160,12 +138,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
         final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
-        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
         return result;
     }
     
-    void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> sshKeyPairListeners);
-
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
