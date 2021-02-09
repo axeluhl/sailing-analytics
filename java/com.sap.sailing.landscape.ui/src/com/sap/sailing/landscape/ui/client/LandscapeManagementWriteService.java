@@ -21,4 +21,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     SSHKeyPairDTO addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
             String encryptedPrivateKey) throws Exception;
+
+    byte[] getDecryptedSshPrivateKey(String regionId, String keyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

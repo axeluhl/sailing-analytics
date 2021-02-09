@@ -144,4 +144,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(keyPair,
             ()->AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName()));
     }
+    
+    @Override
+    public byte[] getDecryptedSshPrivateKey(String regionId, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        return landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase);
+    }
 }
