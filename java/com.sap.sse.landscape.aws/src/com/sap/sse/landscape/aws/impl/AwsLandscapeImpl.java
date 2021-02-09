@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,8 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -156,10 +153,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private final String accessKeyId;
     private final String secretAccessKey;
-    private final MongoObjectFactory mongoObjectFactory;
-    private ConcurrentMap<Pair<String, String>, SSHKeyPair> sshKeyPairs;
     private final AwsRegion globalRegion;
-    private final Set<SSHKeyPairListener> sshKeyPairListeners;
+    private final AwsLandscapeState landscapeState;
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
@@ -174,25 +169,12 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState awsLandscapeState) {
+            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
-        this.mongoObjectFactory = mongoObjectFactory;
-        this.sshKeyPairs = new ConcurrentHashMap<Util.Pair<String,String>, SSHKeyPair>();
-        this.sshKeyPairListeners = new HashSet<>();
-        for (final SSHKeyPair keyPair : domainObjectFactory.loadSSHKeyPairs()) {
-            internalAddKeyPair(keyPair);
-        }
+        this.landscapeState = landscapeState;
     }
-    
-    /**
-     * No persistence, no replication.
-     */
-    private void internalAddKeyPair(SSHKeyPair keyPair) {
-        sshKeyPairs.put(new Pair<>(keyPair.getRegionId(), keyPair.getName()), keyPair);
-    }
-    
     
     private static byte[] getPrivateKeyBytes(KeyPair unencryptedKeyPair) {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -205,16 +187,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         assert !keyPairWithDecryptedPrivateKey.isEncrypted();
         final SSHKeyPair result = new SSHKeyPair(region.getId(), creator, TimePoint.now(), keyName, keyPairWithDecryptedPrivateKey.getPublicKeyBlob(),
                 getPrivateKeyBytes(keyPairWithDecryptedPrivateKey));
-        addSSHKeyPair(result);
+        landscapeState.addSSHKeyPair(result);
         return result;
-    }
-    
-    private void addSSHKeyPair(SSHKeyPair keyPair) {
-        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
-            sshKeyPairListener.sshKeyPairAdded(keyPair);
-        }
-        internalAddKeyPair(keyPair);
-        mongoObjectFactory.storeSSHKeyPair(keyPair);
     }
     
     @Override
@@ -238,7 +212,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         final SSHKeyPair result = new SSHKeyPair(region.getId(), creatorName,
                 now, keyPairResponse.keyName(), publicKeyBytes.toByteArray(), privKey,
                 privateKeyEncryptionPassphrase);
-        addSSHKeyPair(result);
+        landscapeState.addSSHKeyPair(result);
         return result;
     }
 
@@ -615,16 +589,12 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public void deleteKeyPair(com.sap.sse.landscape.Region region, String keyName) {
         getEc2Client(getRegion(region)).deleteKeyPair(DeleteKeyPairRequest.builder().keyName(keyName).build());
-        final SSHKeyPair removedKeyPair = sshKeyPairs.remove(new Pair<>(region.getId(), keyName));
-        for (final SSHKeyPairListener sshKeyPairListener : sshKeyPairListeners) {
-            sshKeyPairListener.sshKeyPairRemoved(removedKeyPair);
-        }
-        mongoObjectFactory.removeSSHKeyPair(region.getId(), keyName);
+        landscapeState.deleteKeyPair(region, keyName);
     }
 
     @Override
     public void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> listeners) {
-        Util.addAll(listeners, this.sshKeyPairListeners);
+        landscapeState.addSSHKeyPairListeners(listeners);
     }
 
     @Override
@@ -656,18 +626,18 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         }
         final SSHKeyPair keyPair = new SSHKeyPair(region.getId(), principal==null?"":principal.toString(),
                 TimePoint.now(), keyName, publicKey, encryptedPrivateKey);
-        addSSHKeyPair(keyPair);
+        landscapeState.addSSHKeyPair(keyPair);
         return keyPair;
     }
 
     @Override
     public SSHKeyPair getSSHKeyPair(com.sap.sse.landscape.Region region, String keyName) {
-        return sshKeyPairs.get(new Pair<>(region.getId(), keyName));
+        return landscapeState.getSSHKeyPair(region, keyName);
     }
     
     @Override
     public Iterable<SSHKeyPair> getSSHKeyPairs() {
-        return Collections.unmodifiableCollection(sshKeyPairs.values());
+        return landscapeState.getSSHKeyPairs();
     }
 
     @Override
