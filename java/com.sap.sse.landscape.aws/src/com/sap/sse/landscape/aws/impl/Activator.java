@@ -15,6 +15,7 @@ import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PermissionChangeListener;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissionsProvider;
@@ -108,6 +109,7 @@ public class Activator implements BundleActivator {
             }
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
         landscapeState = new AwsLandscapeStateImpl();
+        context.registerService(Replicable.class, landscapeState, null);
     }
 
     public static Activator getInstance() {
