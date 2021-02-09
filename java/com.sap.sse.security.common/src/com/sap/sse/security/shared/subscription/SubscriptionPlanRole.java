@@ -5,7 +5,8 @@ import java.util.UUID;
 /**
  * Specify role UUID associated with a plan with qualification. Role qualification (by group/user ownership) can be
  * specified by rules, such as qualifying for objects owned by the subscribing user, qualified by the subscribing user's
- * own default group, etc. or by specific user name, and/or user group name.
+ * own default group, etc. or by specific user name, and/or user group name. Choose {@code NONE} or {@code null} for the
+ * user / group qualification mode if you want to provide an explicit user / group for qualification, respectively.
  * 
  * @author Tu Tran
  */
@@ -25,20 +26,26 @@ public class SubscriptionPlanRole {
     }
 
     /**
-     * Specify how role is qualified by user group: {@link #NONE NONE (unqualified)}, by qualified user default group
-     * (<tt>{username}-tenant</tt>), or by subscribed user default tenant
+     * Specify how role is qualified by user group: {@link #NONE NONE (unqualified)} allows for an explicit group to be
+     * specified optionally for a user qualification, by qualified user default group (<tt>{username}-tenant</tt>), or
+     * by subscribed user default tenant
      */
     public static enum GroupQualificationMode {
         /**
-         * Unqualified
+         * Unqualified; an explicit group qualification may be specified instead 
          */
         NONE,
         /**
-         * Default tenant of qualified user
+         * Default tenant of qualified user; if the user qualification is chosen to be the
+         * {@link UserQualificationMode#SUBSCRIBING_USER subscribing user}, then the subscribing user's default
+         * group/tenant is used. If an explicit user qualification for a user other than the subscribing user has been
+         * selected, then that user's default group/tenant will be used.
          */
         DEFAULT_QUALIFIED_USER_TENANT,
         /**
-         * Default tenant of subscribing user
+         * Default tenant of subscribing user; even if an explicit user other than the subscribing user is selected for
+         * the user qualification of the role, still the subscribing user's default group/tenant will be used as group
+         * qualification for the role assigned.
          */
         SUBSCRIBING_USER_DEFAULT_TENANT
     }
@@ -62,12 +69,26 @@ public class SubscriptionPlanRole {
         this(roleId, groupQualificationMode, userQualificationMode, /* explicitUserQualification */ null, /* explicitGroupQualification */ null);
     }
 
+    /**
+     * @param groupQualificationMode
+     *            must be {@code null} or {@link UserQualificationMode#NONE} in case a non-{@code null}
+     *            {@code idOfExplicitGroupQualification} is specified
+     * @param userQualificationMode
+     *            must be {@code null} or {@link GroupQualificationMode#NONE} in case a non-{@code null}
+     *            {@code explicitUserQualification} is specified
+     */
     public SubscriptionPlanRole(UUID roleId, GroupQualificationMode groupQualificationMode,
-            UserQualificationMode userQualificationMode, String explicitUserQualfication, UUID idOfExplicitGroupQualification) {
+            UserQualificationMode userQualificationMode, String explicitUserQualification, UUID idOfExplicitGroupQualification) {
+        if (explicitUserQualification != null && (userQualificationMode != null && userQualificationMode != UserQualificationMode.NONE)) {
+            throw new IllegalArgumentException("Explicit user qualification provided, but user qualification mode "+userQualificationMode+" hides it.");
+        }
+        if (idOfExplicitGroupQualification != null && (groupQualificationMode != null && groupQualificationMode != GroupQualificationMode.NONE)) {
+            throw new IllegalArgumentException("Explicit groupo qualification provided, but group qualification mode "+groupQualificationMode+" hides it.");
+        }
         this.roleId = roleId;
         this.userQualificationMode = userQualificationMode;
         this.groupQualificationMode = groupQualificationMode;
-        this.explicitUserQualification = explicitUserQualfication;
+        this.explicitUserQualification = explicitUserQualification;
         this.idOfExplicitGroupQualification = idOfExplicitGroupQualification;
     }
 

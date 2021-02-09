@@ -18,10 +18,13 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.aws.impl.Activator;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl;
+import com.sap.sse.landscape.aws.impl.SSHKeyPairListenersImpl.SSHKeyPairListener;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -50,7 +53,10 @@ import software.amazon.awssdk.services.route53.model.RRType;
 /**
  * A simplified view onto the AWS SDK API that is geared towards specific ways and patterns of managing an application
  * and infrastructure landscape. Among others, it uses {@link Ec2Client}, {@link Route53Client},
- * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.
+ * {@link CloudWatchClient} and {@link ElasticLoadBalancingV2Client} to manage the underlying AWS landscape.<p>
+ * 
+ * An instance of this landscape interface is expected to be created by this bundle's {@link Activator} if the necessary
+ * credentials have been supplied; it is registered with the OSGi service registry under this interface.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -63,8 +69,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
-    
-    String S3_BUCKET_FOR_ALB_LOGS_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.s3bucketforalblogs";
     
     /**
      * The name of the tag used on {@link AwsInstance hosts} running one or more {@link MongoProcess}(es). The tag value
@@ -99,7 +103,26 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
-
+    
+    SSHKeyPairListeners SSH_KEY_PAIR_LISTENERS = new SSHKeyPairListenersImpl();
+    
+    /**
+     * Listeners added here will be added to each {@link AwsLandscape} object returned by {@link #obtain()} / {@link #obtain(String, String)}
+     * and hence will be notified each time a change occurs to the set of SSH key pairs.
+     */
+    static void addSSHKeyPairListener(SSHKeyPairListener listener) {
+        SSH_KEY_PAIR_LISTENERS.addSSHKeyPairListener(listener);
+    }
+    
+    /**
+     * Listeners removed here will no longer be added to new {@link AwsLandscape} objects returned by {@link #obtain()}
+     * / {@link #obtain(String, String)} and hence will no longer notified of changes to the set of SSH key pairs for new
+     * {@link AwsLandscape} objects.
+     */
+    static void removeSSHKeyPairListener(SSHKeyPairListener listener) {
+        SSH_KEY_PAIR_LISTENERS.removeSSHKeyPairListener(listener);
+    }
+    
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
      * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
@@ -109,7 +132,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
-        return new AwsLandscapeImpl<>();
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>();
+        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
+        return result;
     }
     
     /**
@@ -120,9 +145,13 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
-        return new AwsLandscapeImpl<>(accessKey, secret);
+        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(accessKey, secret);
+        result.addSSHKeyPairListeners(SSH_KEY_PAIR_LISTENERS.getSshKeyPairListeners());
+        return result;
     }
     
+    void addSSHKeyPairListeners(Iterable<SSHKeyPairListener> sshKeyPairListeners);
+
     default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {

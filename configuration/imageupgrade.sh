@@ -44,18 +44,38 @@ clean_startup_logs() {
   rm "${REBOOT_INDICATOR}"
 }
 
+clean_servers_dir() {
+  rm -rf /home/sailing/servers/*
+}
+
+update_root_crontab() {
+  # The following assumes that /root/crontab is a symbolic link to /home/sailing/code/configuration/crontab
+  # which has previously been updated by a git pull:
+  cd /root
+  crontab crontab
+}
+
+clean_root_ssh_dir() {
+  echo "Cleaning up /root/.ssh" >>/var/log/sailing.err
+  rm -rf /root/.ssh/*
+}
+
 run_yum_update
 run_git_pull
 run_refresh_instance_install_release
 clean_logrotate_target
 clean_httpd_logs
 clean_sailing_logs
+clean_servers_dir
 clean_startup_logs
+update_root_crontab
 
 # Finally, shut down the node unless "no-shutdown" was provided in the user data, so that a new AMI can be constructed cleanly
 if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
-  echo "Shutdown disabled by no-shutdown option in user data"
+  echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
   touch /tmp/image-upgrade-finished
 else
+  # Only clean root's .ssh directory if the next step is shutdown / image creation
+  clean_root_ssh_dir
   shutdown -h now &
 fi

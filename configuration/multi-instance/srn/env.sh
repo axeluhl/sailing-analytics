@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=srn
 SERVER_NAME=SRN
 SERVER_PORT=8906
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/SRN?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/SRN?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2028
 TELNET_PORT=14906

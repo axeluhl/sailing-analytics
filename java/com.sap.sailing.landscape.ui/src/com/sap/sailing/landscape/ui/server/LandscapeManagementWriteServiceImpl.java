@@ -16,10 +16,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
-import com.sap.sse.landscape.common.SecuredLandscapeTypes;
+import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
@@ -38,8 +39,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
-    public LandscapeManagementWriteServiceImpl() {
-        BundleContext context = Activator.getDefault();
+    public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
+        BundleContext context = Activator.getContext();
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
     }
     

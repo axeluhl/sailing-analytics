@@ -9,7 +9,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.landscape.Host;
-import com.sap.sse.landscape.common.SecuredLandscapeTypes;
+import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;

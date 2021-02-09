@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=jonaswitt
 SERVER_NAME=jonaswitt
 SERVER_PORT=8934
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/jonaswitt?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/jonaswitt?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2056
 TELNET_PORT=14934
