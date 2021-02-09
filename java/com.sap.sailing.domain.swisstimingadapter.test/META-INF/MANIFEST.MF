@@ -21,7 +21,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.common,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
- com.sap.sailing.domain.shared.android
+ com.sap.sailing.domain.shared.android,
+ com.sap.sse.replication.interfaces
 Bundle-ClassPath: resources/,
  .
 Import-Package: com.sap.sailing.server
