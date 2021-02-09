@@ -139,7 +139,9 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         assertTrue(testKeyFromBytes.isEncrypted()); // AND AS A CONSEQUENCE THE KEY IS STILL ENCRYPTED!
         // In order to use this to import a valid key existing pair we'll import the last valid key, namely testKeyFromEncryptedBytes:
         landscape.importKeyPair(region, pubKeyBytes, encryptedPrivateKeyFromDecrypted.toByteArray(), AXELS_KEY_NAME);
-        final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next().createRootSshChannel(optionalTimeout, AXELS_KEY_PASS.getBytes());
+        final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next()
+                .createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(),
+                        AXELS_KEY_PASS.getBytes());
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls -al", /* stderr prefix */ null, /* stderr log level */ null);
         assertFalse(stdout.isEmpty());
     }
@@ -153,16 +155,16 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String hostname = "kw2021.sapsailing.com";
         final AwsInstance<String, SailingAnalyticsMetrics> proxyHost = proxy.getHosts().iterator().next();
         final ProcessT process = createApplicationProcess(proxyHost);
-        proxy.setEventRedirect(hostname, process, UUID.randomUUID(), AXELS_KEY_PASS.getBytes());
+        proxy.setEventRedirect(hostname, process, UUID.randomUUID(), /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
-        final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout, AXELS_KEY_PASS.getBytes());
+        final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis());
         final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
         sftpChannel.get(configFileName, configFileContents);
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
         sftpChannel.disconnect();
-        proxy.removeRedirect(hostname, AXELS_KEY_PASS.getBytes());
-        final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, AXELS_KEY_PASS.getBytes());
+        proxy.removeRedirect(hostname, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
+        final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
         assertTrue(lsOutput.isEmpty());
     }
@@ -206,12 +208,12 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
             final ProcessT process = createApplicationProcess(host);
             process.waitUntilReady(optionalTimeout);
             // check env.sh access
-            final String envSh = process.getEnvSh(optionalTimeout, keyPass);
+            final String envSh = process.getEnvSh(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
-            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, keyPass);
+            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
             assertNotNull(release);
-            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, keyPass));
+            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass));
             final AwsLandscape<String, SailingAnalyticsMetrics, ProcessT> castLandscape = (AwsLandscape<String, SailingAnalyticsMetrics, ProcessT>) landscape;
             final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, ProcessT, AwsInstance<String, SailingAnalyticsMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
             builder
@@ -227,7 +229,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
                 createDNSBasedLoadBalancerMappingProcedure.run();
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed());
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getMasterTargetGroupCreated());
-                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout, keyPass), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated().getName());
+                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated().getName());
             } finally {
                 if (createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed() != null) {
                     createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().delete();
@@ -357,13 +359,13 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
             InetAddress address = host.getPublicAddress(optionalTimeout);
             assertNotNull(address);
             logger.info("Obtained public IP address "+address);
-            SshCommandChannel shellChannel = host.createRootSshChannel(optionalTimeout, keyPass);
+            SshCommandChannel shellChannel = host.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
             assertNotNull(shellChannel);
             logger.info("Shell channel connected. Waiting for it to become responsive...");
             final String stdout = shellChannel.runCommandAndReturnStdoutAndLogStderr("pwd", /* stderr prefix */ null, /* stderr log level */ Level.WARNING);
             assertEquals("/root\n", turnAllLineSeparatorsIntoLineFeed(stdout));
             // now try a simple command, checking for the "init" process to be found
-            final SshCommandChannel commandChannel = host.createRootSshChannel(Optional.empty(), keyPass);
+            final SshCommandChannel commandChannel = host.createRootSshChannel(Optional.empty(), /* optional SSH key name */ Optional.empty(), keyPass);
             final String processToLookFor = "init";
             final String output = commandChannel.runCommandAndReturnStdoutAndLogStderr("ps axlw | grep "+processToLookFor, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(output.contains(processToLookFor));

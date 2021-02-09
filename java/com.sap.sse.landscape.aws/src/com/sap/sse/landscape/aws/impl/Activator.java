@@ -59,11 +59,6 @@ public class Activator implements BundleActivator {
         super();
         this.landscapeManagerPermission = WildcardPermission.builder().withTypes(SecuredLandscapeTypes.LANDSCAPE)
                 .withActions(SecuredLandscapeTypes.LandscapeActions.MANAGE).withIds(AWS_LANDSCAPE_OBJECT_ID).build();
-    }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        instance = this;
         timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
         sshKeyPairListener = new SSHKeyPairListener() {
             @Override
@@ -76,8 +71,15 @@ public class Activator implements BundleActivator {
                 timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
             }
         };
-        context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
         permissionChangeListener = (permission, usersNowHavingPermission) -> timePointOfLastChangeOfSetOfLandscapeManagers = TimePoint.now();
+        landscapeState = new AwsLandscapeStateImpl();
+        landscapeState.addSSHKeyPairListener(sshKeyPairListener);
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        instance = this;
+        context.registerService(HasPermissionsProvider.class, SecuredAwsLandscapeType::getAllInstances, null);
         securityServiceTracker = FullyInitializedReplicableTracker
                 .createAndOpen(context, SecurityService.class,
                         new ServiceTrackerCustomizer<SecurityService, SecurityService>() {
@@ -108,14 +110,15 @@ public class Activator implements BundleActivator {
                 logger.warning("Problem obtaining SecurityService in " + Activator.class.getName());
             }
         }, "Waiting for SecurityService in " + Activator.class.getName()).start();
-        landscapeState = new AwsLandscapeStateImpl();
-        landscapeState.addSSHKeyPairListener(sshKeyPairListener);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, landscapeState.getId().toString());
         context.registerService(Replicable.class, landscapeState, replicableServiceProperties);
     }
 
     public static Activator getInstance() {
+        if (instance == null) {
+            instance = new Activator();
+        }
         return instance;
     }
     

@@ -94,7 +94,7 @@ implements StartFromSailingAnalyticsImage {
                 result = (instanceId, az, landscape)->
                     new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, serverDirectory)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), getPrivateKeyEncryptionPassphrase());
+                            return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -139,11 +139,11 @@ implements StartFromSailingAnalyticsImage {
         super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
         copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, optionalTimeout);
         final String instanceId = getHost().getInstanceId();
-        getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, getPrivateKeyEncryptionPassphrase());
+        getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         boolean fileFound = false;
         final TimePoint startedToWaitForImageUpgradeToFinish = TimePoint.now();
         do {
-            final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, getPrivateKeyEncryptionPassphrase());
+            final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
             sftpChannel.connect();
             try {
                 final SftpATTRS stat = sftpChannel.stat("/tmp/image-upgrade-finished");
@@ -158,7 +158,7 @@ implements StartFromSailingAnalyticsImage {
             // wait until the file indicating the finishing of the image upgrade process was found
             // or, if a timeout was provided, the timeout expired
         } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).after(TimePoint.now())).orElse(true));
-        final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, getPrivateKeyEncryptionPassphrase());
+        final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
                 sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
                         "stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": ", Level.INFO));

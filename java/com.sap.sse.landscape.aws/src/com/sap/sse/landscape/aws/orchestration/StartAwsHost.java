@@ -322,7 +322,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         return securityGroups;
     }
 
-    private String getKeyName() {
+    protected String getKeyName() {
         return keyName;
     }
 
@@ -381,7 +381,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
 
     protected void copyRootAuthorizedKeysToOtherUser(String username, Optional<Duration> optionalTimeout)
             throws Exception {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, getPrivateKeyEncryptionPassphrase());
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         final String sailingUserSsh = "/home/" + username + "/.ssh";
         final String sailingUserAuthorizedKeys = sailingUserSsh + "/authorized_keys";
         logger.info("Appended root's authorized_keys also to " + username + "'s authorized_keys. stdout: "

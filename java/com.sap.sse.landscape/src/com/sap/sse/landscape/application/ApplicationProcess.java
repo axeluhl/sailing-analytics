@@ -27,9 +27,10 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * @param releaseRepository
      *            mandatory parameter required to enable resolving the release and enabling the download of its
      *            artifacts, including its release notes
+     * @param optionalKeyName TODO
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -46,7 +47,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
     
-    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
@@ -60,10 +61,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
+     * @param optionalKeyName TODO
      */
-    String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -78,16 +80,18 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
+     * @param optionalKeyName TODO
      * @throws Exception 
      */
-    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
 
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     * @param optionalKeyName TODO
      */
-    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
 
     /**

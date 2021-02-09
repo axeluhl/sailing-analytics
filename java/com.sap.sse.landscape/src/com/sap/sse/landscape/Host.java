@@ -55,32 +55,48 @@ public interface Host {
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * 
      * @see #createSshChannel(String, Optional, byte[])
      */
-    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the

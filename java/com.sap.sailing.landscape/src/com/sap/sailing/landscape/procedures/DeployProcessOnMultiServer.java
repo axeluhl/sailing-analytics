@@ -42,7 +42,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     private final ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo;
     private final ApplicationConfigurationT applicationConfiguration;
     private final Optional<Duration> optionalTimeout;
-    private byte[] privateKeyEncryptionPassphrase;
+    private final Optional<String> optionalKeyName;
+    private final byte[] privateKeyEncryptionPassphrase;
 
     /**
      * The process launched by this procedure. {@link #hostToDeployTo} is expected to be identical to
@@ -78,6 +79,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * If the application configuration does not
      * {@link AwsApplicationConfiguration.Builder#setRegion(com.sap.sse.landscape.aws.impl.AwsRegion) specify a region},
      * the host's region is used as the default region.
+     * <p>
+     * 
+     * If no {@link #setKeyName(String) key name} is specified, the private key of the key pair used to launch the
+     * {@link #setHostToDeployTo(ApplicationProcessHost) host} will be unlocked using the mandatory
+     * {@link #setPrivateKeyEncryptionPassphrase(byte[]) decryption passphrase}.
      * 
      * @author Axel Uhl (D043530)
      */
@@ -86,6 +92,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
     extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
         BuilderT setHostToDeployTo(ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo);
+        BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
     
@@ -96,6 +103,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     implements Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> {
         private final SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder;
         private ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo;
+        private Optional<String> optionalKeyName = Optional.empty();
         private byte[] privateKeyEncryptionPassphrase;
 
         protected BuilderImpl(SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder) {
@@ -110,7 +118,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             if (!getApplicationConfigurationBuilder().isServerDirectorySet()) {
                 getApplicationConfigurationBuilder().setServerDirectory(ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+getApplicationConfigurationBuilder().getServerName());
             }
-            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHostToDeployTo().getApplicationProcesses(getOptionalTimeout(), privateKeyEncryptionPassphrase);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHostToDeployTo().getApplicationProcesses(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase);
             if (!getApplicationConfigurationBuilder().isPortSet()) {
                 getApplicationConfigurationBuilder().setPort(getNextAvailablePort(applicationProcesses,
                         SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT,
@@ -121,7 +129,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                         SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_TELNET_PORT,
                         ap->{
                             try {
-                                return ap.getTelnetPortToOSGiConsole(getOptionalTimeout(), privateKeyEncryptionPassphrase);
+                                return ap.getTelnetPortToOSGiConsole(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -132,7 +140,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                         SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT,
                         ap->{
                             try {
-                                return ap.getExpeditionUdpPort(getOptionalTimeout(), privateKeyEncryptionPassphrase);
+                                return ap.getExpeditionUdpPort(getOptionalTimeout(), optionalKeyName, privateKeyEncryptionPassphrase);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -205,6 +213,16 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         protected byte[] getPrivateKeyEncryptionPassphrase() {
             return privateKeyEncryptionPassphrase;
         }
+
+        @Override
+        public BuilderT setKeyName(String keyName) {
+            this.optionalKeyName = Optional.ofNullable(keyName);
+            return self();
+        }
+        
+        protected Optional<String> getOptionalKeyName() {
+            return optionalKeyName;
+        }
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>,
@@ -221,6 +239,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         super(builder);
         this.hostToDeployTo = builder.getHostToDeployTo();
         this.optionalTimeout = builder.getOptionalTimeout();
+        this.optionalKeyName = builder.getOptionalKeyName();
         this.privateKeyEncryptionPassphrase = builder.getPrivateKeyEncryptionPassphrase();
         this.applicationConfiguration = builder.getApplicationConfigurationBuilder().build();
         assert getHostToDeployTo() != null;
@@ -231,7 +250,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout, privateKeyEncryptionPassphrase);
+            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "mkdir -p "+serverDirectory+"; "+
                     "cd "+serverDirectory+"; "+
@@ -240,7 +259,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                     "stderr: ", Level.WARNING));
         }
         {
-            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, privateKeyEncryptionPassphrase);
+            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr("service httpd reload", "stderr: ", Level.WARNING));
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);

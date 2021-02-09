@@ -1037,13 +1037,13 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
-            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
+            BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
-            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, privateKeyEncryptionPassphrase)) {
-                final String serverName = applicationProcess.getServerName(optionalTimeout, privateKeyEncryptionPassphrase);
+            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
+                final String serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
                 final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
                 if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
                     // then applicationProcess is a replica in the serverName cluster:
