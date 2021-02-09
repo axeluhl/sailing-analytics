@@ -64,12 +64,13 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Qrcode generation failed: ", caught);
+                qrCodeImage.setVisible(true);
             }
-
             @Override
             public void onSuccess(String result) {
                 GWT.log("Qrcode generated for url: " + url);
                 qrCodeImage.setUrl("data:image/png;base64, " + result);
+                qrCodeImage.setVisible(true);
             }
         });
     }
@@ -147,6 +148,8 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         qrCodeImage = new Image();
         qrCodeImage.ensureDebugId("regattaSharingQrCode");
         qrCodeImage.setPixelSize(400, 400);
+        qrCodeImage.setAltText(stringMessages.alternateTextIfQRCodeTooBig());
+        qrCodeImage.setVisible(false);
         if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
             Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
             copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
