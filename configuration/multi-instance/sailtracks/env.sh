@@ -210,8 +210,8 @@ REPLICATE_MASTER_EXCHANGE_NAME=
 #REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 DEPLOY_TO=sailtracks
-SERVER_NAME=sailtracks
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/Sailtracks?replicaSet=live&retryWrites=true"
+SERVER_NAME=SAILTRACKS
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/Sailtracks?replicaSet=live&retryWrites=true&readPReference=nearest&readPreference=nearest"
 EXPEDITION_PORT=2025
 SERVER_PORT=8903
 TELNET_PORT=14903

@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=jojopolgar
 SERVER_NAME=JOJOPOLGAR
 SERVER_PORT=8905
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/JOJOPOLGAR?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/JOJOPOLGAR?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2027
 TELNET_PORT=14905
