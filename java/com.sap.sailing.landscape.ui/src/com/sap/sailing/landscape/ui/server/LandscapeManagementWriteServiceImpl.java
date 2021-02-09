@@ -146,9 +146,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public byte[] getDecryptedSshPrivateKey(String regionId, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
+    public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
         final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
-        return landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getEncryptedPrivateKey();
+    }
+
+    @Override
+    public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getPublicKey();
     }
 }

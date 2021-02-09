@@ -29,4 +29,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String pleaseProvidePassphrase();
     String pleaseRepeatPassphrase();
     String passphrasesDontMatch();
+    String showKeys();
+    String download();
+    String encryptedPrivateKey();
 }

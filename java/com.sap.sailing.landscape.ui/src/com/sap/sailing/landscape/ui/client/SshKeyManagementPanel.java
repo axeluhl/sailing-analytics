@@ -28,8 +28,8 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
@@ -110,7 +110,28 @@ public class SshKeyManagementPanel extends VerticalPanel {
                             public void onSuccess(Void result) {
                                 sshKeyTable.remove(sshKeyPairDTO);
                             }
-                    
+                }));
+        sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_SHOW_KEYS, DefaultActions.READ,
+                sshKeyPairDTO->landscapeManagementService.getSshPublicKey(sshKeyPairDTO.getRegionId(), sshKeyPairDTO.getName(), new AsyncCallback<byte[]>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(final byte[] publicKey) {
+                        landscapeManagementService.getEncryptedSshPrivateKey(sshKeyPairDTO.getRegionId(), sshKeyPairDTO.getName(), new AsyncCallback<byte[]>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(final byte[] encryptedPrivateKey) {
+                                showKeys(sshKeyPairDTO.getName(), publicKey, encryptedPrivateKey, stringMessages);
+                            }
+                        });
+                    }
                 }));
         sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
@@ -138,6 +159,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
         });
     }
     
+    private void showKeys(String keyName, byte[] publicKey, byte[] encryptedPrivateKey, StringMessages stringMessages) {
+        new SshKeyDisplayAndDownloadDialog(keyName, publicKey, encryptedPrivateKey, stringMessages).show();
+    }
+
     private void openGenerateSshKeyDialog(StringMessages stringMessages, AwsAccessKeyProvider awsAccessKeyProvider) {
         new GenerateSshKeyDialog(stringMessages,
                 new DialogCallback<Triple<String, String, String>>() {

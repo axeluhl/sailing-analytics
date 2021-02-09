@@ -40,6 +40,7 @@ public interface LandscapeManagementWriteServiceAsync {
     void addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
             String encryptedPrivateKey, AsyncCallback<SSHKeyPairDTO> callback);
 
-    void getDecryptedSshPrivateKey(String regionId, String keyName, byte[] privateKeyEncryptionPassphrase,
-            AsyncCallback<byte[]> callback);
+    void getEncryptedSshPrivateKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
+
+    void getSshPublicKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
 }
