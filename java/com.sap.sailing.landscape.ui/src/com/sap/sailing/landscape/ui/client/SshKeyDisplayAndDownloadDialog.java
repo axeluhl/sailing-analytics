@@ -17,7 +17,7 @@ public class SshKeyDisplayAndDownloadDialog extends DataEntryDialog<Void> {
     private final StringMessages stringMessages;
     
     public SshKeyDisplayAndDownloadDialog(String keyName, byte[] publicKey, byte[] encryptedPrivateKey, StringMessages stringMessages) {
-        super(stringMessages.sshKeys(), stringMessages.sshKeys(), stringMessages.ok(), /* cancelButtonName */ null, /* validator */ null, /* callback */ null);
+        super(stringMessages.sshKeys(), stringMessages.sshKeys(), stringMessages.close(), /* cancelButtonName */ null, /* validator */ null, /* callback */ null);
         this.stringMessages = stringMessages;
         publicKeyTextArea = new TextArea();
         publicKeyTextArea.setSize("40em", "6em");
