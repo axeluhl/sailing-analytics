@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=baldeneysee
 SERVER_NAME=baldeneysee
 SERVER_PORT=8942
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/baldeneysee?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/baldeneysee?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2064
 TELNET_PORT=14942

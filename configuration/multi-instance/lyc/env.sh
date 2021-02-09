@@ -211,7 +211,7 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 
 SERVER_NAME=LYC
 DEPLOY_TO=lyc
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/LYC?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/LYC?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2020
 SERVER_PORT=8898
 TELNET_PORT=14898
