@@ -250,7 +250,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
-            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel("sailing", optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            final SshCommandChannel sshChannel = getHostToDeployTo().createSshChannel(StartFromSailingAnalyticsImage.SAILING_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "mkdir -p "+serverDirectory+"; "+
                     "cd "+serverDirectory+"; "+
@@ -260,7 +260,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         }
         {
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            logger.info("stdout: "+sshChannel.runCommandAndReturnStdoutAndLogStderr("service httpd reload", "stderr: ", Level.WARNING));
+            final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
+            logger.info("stdout: "+stdout);
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
     }
