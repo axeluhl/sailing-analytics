@@ -102,7 +102,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
     protected Locale getClientLocale() {
         final HttpServletRequest request = getThreadLocalRequest();
         if (request != null) {
-            final String localeString = request.getHeader(HttpRequestHeaderConstants.HEADER_LOCALE);
+            final String localeString = request.getHeader(HttpRequestHeaderConstants.HEADER_KEY_LOCALE);
             if (localeString != null && ! localeString.isEmpty()) {
                 try {
                     return Locale.forLanguageTag(localeString);

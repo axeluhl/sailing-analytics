@@ -44,7 +44,7 @@ public class DefaultTenantRequestFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         final SecurityService securityService = getSecurityService(request.getServletContext());
-        final String defaultTenantGroupId = httpRequest.getHeader(HttpRequestHeaderConstants.HEADER_DEFAULT_TENANT_GROUP_ID);
+        final String defaultTenantGroupId = httpRequest.getHeader(HttpRequestHeaderConstants.HEADER_KEY_DEFAULT_TENANT_GROUP_ID);
         if (defaultTenantGroupId != null) {
             securityService.setTemporaryDefaultTenant(UUID.fromString(defaultTenantGroupId));
             logger.info("executing request " + httpRequest.getRequestURI() + " with divergent tenant group "
