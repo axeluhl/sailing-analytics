@@ -189,7 +189,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"),
                 Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")),
                 "MONGODB_URI=\""+mongoEndpoint.getURI(Optional.of(new DatabaseImpl(mongoEndpoint, "winddbTest")))+"\"",
-                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811").getName());
+                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811").getName()); // TODO this is the development branch/release; switch to master build later
         try {
             assertNotNull(host);
             final Instance instance = landscape.getInstance(host.getInstanceId(), region);
