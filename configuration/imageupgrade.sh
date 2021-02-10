@@ -15,11 +15,6 @@ run_git_pull() {
   su - sailing -c "cd code; git pull"
 }
 
-run_refresh_instance_install_release() {
-  echo "Upgrading sailing server software" >>/var/log/sailing.err
-  su - sailing -c "cd servers; for i in *; do echo \"Upgrading \$i\"; cd \$i; echo \"Updating release in \`pwd\`\"; ./refreshInstance.sh install-release; cd ..; done" >>/var/log/sailing.err
-}
-
 clean_logrotate_target() {
   echo "Clearing logrorate-targets" >>/var/log/sailing.err
   rm -rf /var/log/logrotate-target/*
@@ -58,7 +53,6 @@ clean_root_ssh_dir_and_tmp() {
 
 run_yum_update
 run_git_pull
-run_refresh_instance_install_release
 clean_logrotate_target
 clean_httpd_logs
 clean_servers_dir
