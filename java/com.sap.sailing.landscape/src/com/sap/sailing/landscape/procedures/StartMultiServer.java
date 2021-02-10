@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.procedures;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,12 +12,12 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
+import com.sap.sse.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -142,9 +143,8 @@ implements StartFromSailingAnalyticsImage {
         final String instanceId = getHost().getInstanceId();
         getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         logger.info("Waiting for image upgrade process to finish on "+getHost());
-        boolean fileFound = false;
-        final TimePoint startedToWaitForImageUpgradeToFinish = TimePoint.now();
-        do {
+        final Callable<Boolean> imageUpgradeFinishedDetector = ()->{
+            boolean fileFound = false;
             final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
             sftpChannel.connect();
             try {
@@ -157,10 +157,12 @@ implements StartFromSailingAnalyticsImage {
             } finally {
                 sftpChannel.disconnect();
             }
-            // wait until the file indicating the finishing of the image upgrade process was found
-            // or, if a timeout was provided, the timeout expired
-        } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).after(TimePoint.now())).orElse(true));
-        logger.info("Image upgrade process on "+getHost()+" did "+(fileFound?"":"not ")+"finish.");
+            return fileFound;
+        };
+        final boolean imageUpgradeFinished = Wait.wait(
+                imageUpgradeFinishedDetector, optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5),
+                Level.INFO, "Waiting for image upgrade process to finish on "+getHost());
+        logger.info("Image upgrade process on "+getHost()+" did "+(imageUpgradeFinished?"":"not ")+"finish.");
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
                 sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
