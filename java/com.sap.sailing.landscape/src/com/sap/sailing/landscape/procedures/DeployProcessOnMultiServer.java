@@ -250,6 +250,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         assert getHostToDeployTo() != null;
         final String serverDirectory = applicationConfiguration.getServerDirectory();
         {
+            logger.info("Deploying process to multi-server "+getHostToDeployTo()+" into directory "+serverDirectory+" with configuration:\n"+
+                    applicationConfiguration.getAsEnvironmentVariableAssignments());
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
@@ -262,6 +264,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             logger.info("stdout: "+stdout);
         }
         {
+            logger.info("Reloading/starting httpd on "+getHostToDeployTo()+" after application deployment");
             final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
