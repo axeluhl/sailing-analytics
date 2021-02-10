@@ -525,7 +525,7 @@
          id="org.eclipse.jetty.osgi.boot.jsp.source"
          download-size="0"
          install-size="0"
-         version="9.4.35.v20201120"
+         version="9.4.36.v20210114"
          unpack="false"/>
 
    <plugin
