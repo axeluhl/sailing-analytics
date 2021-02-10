@@ -293,7 +293,7 @@
 <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.35.v20201120"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.36.v20201120"/>
 <plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
