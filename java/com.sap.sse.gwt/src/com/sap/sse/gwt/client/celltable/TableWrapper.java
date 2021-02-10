@@ -122,6 +122,16 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
      * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
      * column}.
      */
+    public void addColumnWithNaturalComparatorOnStringRepresentation(Column<T, ?> column, String header) {
+        addColumn(column, header,
+                (t1, t2)->new NaturalComparator(/* case sensitive */ false).compare(""+column.getValue(t1), ""+column.getValue(t2)));
+    }
+    
+    /**
+     * Sets the {@code column} as {@link Column#setSortable(boolean) sortable}, assigns the comparator for the
+     * {@code column} in the {@link #getColumnSortHandler() sort handler} and {@link #addColumn(Column, String) adds the
+     * column}.
+     */
     public void addColumn(Column<T, ?> column, String header, Comparator<T> comparator) {
         ListHandler<T> boatColumnListHandler = getColumnSortHandler();
         column.setSortable(true);

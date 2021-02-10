@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.client;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 
@@ -43,4 +44,11 @@ public interface LandscapeManagementWriteServiceAsync {
     void getEncryptedSshPrivateKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
 
     void getSshPublicKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
+
+    void getAmazonMachineImages(String awsAccessKey, String awsSecret, String region, AsyncCallback<ArrayList<AmazonMachineImageDTO>> callback);
+
+    void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId, AsyncCallback<Void> callback);
+
+    void upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId,
+            AsyncCallback<AmazonMachineImageDTO> callback);
 }

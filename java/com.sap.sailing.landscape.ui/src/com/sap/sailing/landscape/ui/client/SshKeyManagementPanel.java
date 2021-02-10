@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
@@ -41,6 +43,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class SshKeyManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources> sshKeyTable;
+    private final PasswordTextBox sshPrivateKeyPassphrase;
     private final BusyIndicator sshKeyLoadingBusy;
     private final ErrorReporter errorReporter;
     private final RefreshableSingleSelectionModel<String> regionSelectionModel;
@@ -52,6 +55,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
         this.regionSelectionModel = regionSelectionModel;
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
+        this.sshPrivateKeyPassphrase = new PasswordTextBox();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
         final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
@@ -135,6 +139,8 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 }));
         sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
+        add(new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair()));
+        add(sshPrivateKeyPassphrase);
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
         buttonPanel.addRemoveAction(stringMessages.remove(), sshKeyTable.getSelectionModel(), /* withConfirmation */ true, ()->{
@@ -157,6 +163,10 @@ public class SshKeyManagementPanel extends VerticalPanel {
             addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
             generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
         });
+    }
+    
+    public String getPassphraseForPrivateKeyDecryption() {
+        return sshPrivateKeyPassphrase.getValue();
     }
     
     private void showKeys(String keyName, byte[] publicKey, byte[] encryptedPrivateKey, StringMessages stringMessages) {

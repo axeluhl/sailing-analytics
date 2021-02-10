@@ -32,4 +32,12 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String showKeys();
     String download();
     String encryptedPrivateKey();
+    String sshPrivateKeyPassphraseForSelectedKeyPair();
+    String state();
+    String createdAt();
+    String mongoEndpoints();
+    String machineImages();
+    String doYouReallyWantToRemoveMachineImage(String name, String id, String regionId);
+    String successfullyRemovedMachineImage(String name, String id, String regionId);
+    String successfullyUpgradedMachineImage(String name, String id, String regionId, String newName);
 }

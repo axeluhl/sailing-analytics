@@ -493,7 +493,9 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(
                         Filter.builder().name("tag-key").values(IMAGE_TYPE_TAG_NAME).build()).build());
-        return Util.map(response.images(), image->image.tags().stream().filter(t->t.key().equals(IMAGE_TYPE_TAG_NAME)).findAny().get().value());
+        final Set<String> result = new HashSet<>();
+        Util.addAll(Util.map(response.images(), image->image.tags().stream().filter(t->t.key().equals(IMAGE_TYPE_TAG_NAME)).findAny().get().value()), result);
+        return result;
     }
 
     @Override

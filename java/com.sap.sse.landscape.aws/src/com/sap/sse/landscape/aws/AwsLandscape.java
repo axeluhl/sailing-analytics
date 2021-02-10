@@ -195,6 +195,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
         return getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
     }
 
+    /**
+     * Use the results, e.g., as second parameter in in {@link #getLatestImageWithType(Region, String)}.
+     */
     Iterable<String> getMachineImageTypes(Region region);
     
     void setSnapshotName(Region region, String snapshotId, String snapshotName);
