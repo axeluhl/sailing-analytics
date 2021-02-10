@@ -12,7 +12,7 @@
 
   <properties>
     <parameters.jetty>
-      -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085
+      -Djetty.home=${basedir}/../target/configuration/jetty -Djetty.port=8085 -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory
     </parameters.jetty>
     <!-- NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the local 
       settings.xml, because of the differences between the CI-Build and the local setup. -->
@@ -325,68 +325,28 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sse.landscape.aws</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>org.eclipse.jetty.osgi.boot</id>
                   <level>3</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>org.apache.felix.shell</id>
-                  <level>0</level>
+                  <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>org.apache.felix.shell.remote</id>
-                  <level>0</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.deploy</id>
                   <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>org.eclipse.jetty.http</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.io</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.jmx</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.security</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.server</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.servlet</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.util</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.webapp</id>
-                  <level>4</level>
-                  <autoStart>true</autoStart>
-                </bundle>
-                <bundle>
-                  <id>org.eclipse.jetty.xml</id>
-                  <level>4</level>
+                  <level>3</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
@@ -397,6 +357,21 @@
                 <bundle>
                   <id>org.eclipse.equinox.simpleconfigurator</id>
                   <level>2</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>org.eclipse.jetty.apache-jsp</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>org.apache.aries.spifly.dynamic.bundle</id>
+                  <level>3</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
+                  <id>org.eclipse.jetty.annotations</id>
+                  <level>4</level>
                   <autoStart>true</autoStart>
                 </bundle>
               </bundleStartLevel>
