@@ -106,7 +106,11 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
             }
             @Override
             public void onSuccess(String result) {
-                GWT.log("Qrcode generated for url: " + url);
+                if(result == null){
+                    GWT.log("Qrcode generation failed.");
+                }else {
+                    GWT.log("Qrcode generated for url: " + url);
+                }
                 qrCodeImage.setUrl("data:image/png;base64, " + result);
                 callback.run();
             }
