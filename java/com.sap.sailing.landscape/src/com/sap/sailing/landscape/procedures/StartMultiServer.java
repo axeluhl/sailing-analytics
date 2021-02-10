@@ -164,7 +164,7 @@ implements StartFromSailingAnalyticsImage {
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
                 sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
-                        "stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": ", Level.INFO));
-        logger.info("exit status for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \"+instanceId+\": "+sshCommandChannel.getExitStatus());
+                        "stderr for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \""+instanceId+"\": ", Level.INFO));
+        logger.info("exit status for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance \""+instanceId+"\": "+sshCommandChannel.getExitStatus());
     }
 }
