@@ -8,7 +8,7 @@
 <booleanAttribute key="clearConfig" value="false"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/target"/>
 <booleanAttribute key="default" value="true"/>
-<booleanAttribute key="default_auto_start" value="true"/>
+<booleanAttribute key="default_auto_start" value="false"/>
 <intAttribute key="default_start_level" value="4"/>
 <booleanAttribute key="includeOptional" value="true"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
@@ -219,6 +219,7 @@
 <setEntry value="com.sap.sse.landscape.common@default:default"/>
 <setEntry value="com.sap.sse.landscape@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws@4:true"/>
+<setEntry value="com.sap.sse.landscape.aws.common@default:default"/>
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>

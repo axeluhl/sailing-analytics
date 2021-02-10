@@ -3,7 +3,6 @@ package com.sap.sse.security.ui.client.usermanagement;
 import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,6 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -49,17 +47,12 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
-        this(userService, stringMessages, Collections.<HasPermissions>emptySet(), errorReporter, tableResources);
-    }
-
-    public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
         final UserManagementWriteServiceAsync userManagementWriteService = userService.getUserManagementWriteService();
         final VerticalPanel west = new VerticalPanel();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
-        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
-                /* multiSelection */ true, /* enablePager */ true, tableResources);
+        userList = new UserTableWrapper<>(userService, stringMessages, errorReporter, /* multiSelection */ true,
+                /* enablePager */ true, tableResources);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(),
                 () -> userList.refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null, false));
         Button createUserButton = buttonPanel.addCreateActionWithoutServerCreateObjectPermissionCheck(stringMessages.createUser(),

@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.impl.SecondsDurationImpl;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class SerializationDummy implements Serializable {
@@ -20,4 +21,5 @@ public class SerializationDummy implements Serializable {
     SecondsDurationImpl secondsDuration;
     KnotSpeedImpl knotSpeedImpl;
     KilometersPerHourSpeedImpl kmhSpeedImpl;
+    HasPermissions hasPermissions;
 }

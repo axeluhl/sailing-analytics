@@ -70,8 +70,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
     private final UserService userService;
     
     public UserTableWrapper(UserService userService,
-            Iterable<HasPermissions> additionalPermissions, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, TR tableResources) {
+            StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean multiSelection, boolean enablePager, TR tableResources) {
         super(stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<UserDTO>() {
                     @Override
@@ -158,7 +158,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final HasPermissions type = SecuredSecurityTypes.USER;
         final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-        userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
+        userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
                 getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
@@ -274,7 +274,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         filterField.updateAll(result);
     }
     
-    private void editUser(final UserDTO originalUser, Iterable<HasPermissions> additionalPermissions) {
+    private void editUser(final UserDTO originalUser) {
         final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<UserDTO>() {
             @Override
             public void ok(final UserDTO user) {
