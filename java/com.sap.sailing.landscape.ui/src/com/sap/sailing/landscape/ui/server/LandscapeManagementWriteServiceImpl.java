@@ -2,6 +2,7 @@ package com.sap.sailing.landscape.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -16,6 +17,7 @@ import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -42,6 +44,8 @@ import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
+    
+    private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
@@ -206,7 +210,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         upgradeAmiBuilder
             .setLandscape(landscape)
             .setRegion(awsRegion)
-            .setMachineImage(ami);
+            .setMachineImage(ami)
+            .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
         final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
         upgradeAmi.run();
         final AmazonMachineImage<String, SailingAnalyticsMetrics> resultingAmi = upgradeAmi.getUpgradedAmi();
