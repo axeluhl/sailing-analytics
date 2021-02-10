@@ -141,6 +141,7 @@ implements StartFromSailingAnalyticsImage {
         super.run(); // this will trigger the "sailing" init.d script running in the background, triggering the image upgrade, then the httpd stop and clean-up
         final String instanceId = getHost().getInstanceId();
         getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
+        logger.info("Waiting for image upgrade process to finish on "+getHost());
         boolean fileFound = false;
         final TimePoint startedToWaitForImageUpgradeToFinish = TimePoint.now();
         do {
@@ -159,6 +160,7 @@ implements StartFromSailingAnalyticsImage {
             // wait until the file indicating the finishing of the image upgrade process was found
             // or, if a timeout was provided, the timeout expired
         } while (!fileFound && optionalTimeout.map(timeout->startedToWaitForImageUpgradeToFinish.plus(timeout).after(TimePoint.now())).orElse(true));
+        logger.info("Image upgrade process on "+getHost()+" did "+(fileFound?"":"not ")+"finish.");
         final SshCommandChannel sshCommandChannel = getHost().createRootSshChannel(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
         logger.info("stdout for removing "+ApplicationProcessHost.DEFAULT_SERVER_PATH+" and starting httpd service on instance "+instanceId+": "+
                 sshCommandChannel.runCommandAndReturnStdoutAndLogStderr("rm -rf "+ApplicationProcessHost.DEFAULT_SERVER_PATH+"; service httpd start",
