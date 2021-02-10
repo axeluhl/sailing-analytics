@@ -268,7 +268,7 @@ public class RaceBoardPanel
                 shareLinkAction = () -> {
                     final ShareLinkDialog shareLinkDialog = new ShareLinkDialog(RACEBOARD_PATH, lifecycle,
                             getSettings(), sailingService, stringMessages, linkWithSettingsGenerator);
-                    shareLinkDialog.show();
+                    shareLinkDialog.initLinkAndShow();
                 };
             }else {
                 if(NavigatorUtil.clientHasNavigatorShareSupport()) {

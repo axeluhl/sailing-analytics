@@ -23,7 +23,6 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
 
 public class ShareLinkDialog extends DataEntryDialog<String> {
-    private final StringMessages stringMessages;
     private final PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle;
     private final PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings;
     private final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator;
@@ -39,6 +38,7 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
     private CheckBox zoomCheckBox;
     private TextBox linkField;
     private Image qrCodeImage;
+    private VerticalPanel mainPanel;
 
     public ShareLinkDialog(String path, PerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> perspectiveCompositeSettings,
@@ -50,27 +50,65 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
         this.perspectiveCompositeSettings = perspectiveCompositeSettings;
         this.sailingService = sailingService;
         this.linkWithSettingsGenerator = linkWithSettingsGenerator;
-        this.stringMessages = stringMessages;
+        mainPanel = new VerticalPanel();
+        mainPanel.setSpacing(30);
+        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        final VerticalPanel settingsPanel = new VerticalPanel();
+        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        mainPanel.add(settingsPanel);
+        initializeCheckboxes(stringMessages, settingsPanel);
+        VerticalPanel linkContentPanel = new VerticalPanel();
+        linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        linkField = createTextBox(assembleLink());
+        linkContentPanel.add(linkField);
+        qrCodeImage = new Image();
+        qrCodeImage.ensureDebugId("regattaSharingQrCode");
+        qrCodeImage.setPixelSize(400, 400);
+        qrCodeImage.setAltText(stringMessages.alternateTextIfQRCodeTooBig());
+        if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
+            Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
+            copyToClipBoardAnchor.addClickHandler(event -> NavigatorUtil.copyToClipboard(linkField.getText()));
+            linkContentPanel.add(copyToClipBoardAnchor);
+        }
+        linkContentPanel.add(qrCodeImage);
+        mainPanel.add(linkContentPanel);
+    }
+
+    private void initializeCheckboxes(StringMessages stringMessages, final VerticalPanel settingsPanel) {
+        timeStampCheckbox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.timeStampCheckBoxLabel());
+        leaderBoardPanelCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.leaderboardCheckBoxLabel());
+        tagsCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.tagsCheckBoxLabel());
+        filterSetNameCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.filterSetNameCheckBoxLabel());
+        competitorSelectionCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorSelectionCheckBoxLabel());
+        windChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.windChartCheckBoxLabel());
+        competitorChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorChartCheckBoxLabel());
+        maneuverCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.maneuverCheckBoxLabel());
+        zoomCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.zoomCheckBoxLabel());
+    }
+    
+    public void initLinkAndShow() {
+        String url = linkWithSettingsGenerator.createUrl(perspectiveCompositeSettings);
+        createQrCode(url, this::show);
     }
 
     void updateLink() {
         String url = assembleLink();
         linkField.setText(url);
-        createQrCode(url);
+        createQrCode(url, () -> {});
     }
 
-    private void createQrCode(String url) {
+    private void createQrCode(String url, Runnable callback) {
         sailingService.createRaceBoardLinkQrCode(url, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log("Qrcode generation failed: ", caught);
-                qrCodeImage.setVisible(true);
+                callback.run();
             }
             @Override
             public void onSuccess(String result) {
                 GWT.log("Qrcode generated for url: " + url);
                 qrCodeImage.setUrl("data:image/png;base64, " + result);
-                qrCodeImage.setVisible(true);
+                callback.run();
             }
         });
     }
@@ -126,43 +164,6 @@ public class ShareLinkDialog extends DataEntryDialog<String> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel mainPanel = new VerticalPanel();
-        mainPanel.setSpacing(30);
-        mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        VerticalPanel settingsPanel = new VerticalPanel();
-        settingsPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        mainPanel.add(settingsPanel);
-        timeStampCheckbox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.timeStampCheckBoxLabel());
-        leaderBoardPanelCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.leaderboardCheckBoxLabel());
-        tagsCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.tagsCheckBoxLabel());
-        filterSetNameCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.filterSetNameCheckBoxLabel());
-        competitorSelectionCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorSelectionCheckBoxLabel());
-        windChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.windChartCheckBoxLabel());
-        competitorChartCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.competitorChartCheckBoxLabel());
-        maneuverCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.maneuverCheckBoxLabel());
-        zoomCheckBox = createCheckBoxAndAddToPanel(settingsPanel, stringMessages.zoomCheckBoxLabel());
-        VerticalPanel linkContentPanel = new VerticalPanel();
-        linkContentPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        linkField = createTextBox(assembleLink());
-        linkContentPanel.add(linkField);
-        qrCodeImage = new Image();
-        qrCodeImage.ensureDebugId("regattaSharingQrCode");
-        qrCodeImage.setPixelSize(400, 400);
-        qrCodeImage.setAltText(stringMessages.alternateTextIfQRCodeTooBig());
-        qrCodeImage.setVisible(false);
-        if (NavigatorUtil.clientHasNavigatorCopyToClipboardSupport()) {
-            Anchor copyToClipBoardAnchor = new Anchor(stringMessages.copyToClipboard());
-            copyToClipBoardAnchor.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    NavigatorUtil.copyToClipboard(linkField.getText());
-                }
-            });
-            linkContentPanel.add(copyToClipBoardAnchor);
-        }
-        linkContentPanel.add(qrCodeImage);
-        mainPanel.add(linkContentPanel);
-        updateLink();
         return mainPanel;
     }
     
