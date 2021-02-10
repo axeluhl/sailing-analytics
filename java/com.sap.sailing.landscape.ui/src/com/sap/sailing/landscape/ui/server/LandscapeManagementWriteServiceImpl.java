@@ -191,7 +191,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
                 new TypeRelativeObjectIdentifier("AWS")));
         final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
-        landscape.deleteImage(new AwsRegion(region), machineImageId);
+        final AmazonMachineImage<Object, ApplicationProcessMetrics> ami = landscape.getImage(new AwsRegion(region), machineImageId);
+        ami.delete();
     }
 
     @Override
