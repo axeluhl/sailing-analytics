@@ -34,8 +34,10 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> Builder<BuilderT, ShardingKey> masterBuilder() {
-        return new BuilderImpl<>();
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> BuilderT masterBuilder() {
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<>();
+        return result;
     }
 
     protected SailingAnalyticsMasterConfiguration(BuilderImpl<?, ShardingKey> builder) {

@@ -182,18 +182,18 @@ public class TestProcedures {
         }
     }
     
-    private <AppConfigBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>,
+    private <AppConfigBuilderT extends SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String>,
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-    SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT>>
+    SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT>>
     SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
-        final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsApplicationConfiguration.<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>builder();
+        final AppConfigBuilderT multiServerAppConfigBuilder = SailingAnalyticsMasterConfiguration.<AppConfigBuilderT, String>masterBuilder();
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
                 ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
+                SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> multiServerAppDeployerBuilder =
                 DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String,
                         ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-                        SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
+                        SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
         multiServerAppDeployerBuilder
             .setHostToDeployTo(host)
             .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
@@ -202,7 +202,7 @@ public class TestProcedures {
             .setServerName(serverName)
             .setRelease(SailingReleaseRepository.INSTANCE.getLatestRelease("bug4811")); // TODO this is the debug config for the current branch bug4811 and its releases
         final DeployProcessOnMultiServer<String, ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
-            SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
+            SailingAnalyticsMasterConfiguration<String>, AppConfigBuilderT> deployer = multiServerAppDeployerBuilder.build();
         deployer.run();
         return deployer.getProcess();
     }
