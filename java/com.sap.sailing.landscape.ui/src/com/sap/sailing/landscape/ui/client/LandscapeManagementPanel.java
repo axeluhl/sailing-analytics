@@ -286,16 +286,20 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
     }
     
     private void upgradeMachineImage(final StringMessages stringMessages, final AmazonMachineImageDTO machineImageToUpgrade) {
+        Notification.notify(stringMessages.startedImageUpgrade(machineImageToUpgrade.getName(), machineImageToUpgrade.getId(), machineImageToUpgrade.getRegionId()), NotificationType.INFO);
+        machineImagesBusy.setBusy(true);
         landscapeManagementService.upgradeAmazonMachineImage(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
                 machineImageToUpgrade.getRegionId(), machineImageToUpgrade.getId(),
                 new AsyncCallback<AmazonMachineImageDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
+                machineImagesBusy.setBusy(false);
             }
 
             @Override
             public void onSuccess(AmazonMachineImageDTO result) {
+                machineImagesBusy.setBusy(false);
                 refreshMachineImagesTable();
                 Notification.notify(
                         stringMessages.successfullyUpgradedMachineImage(machineImageToUpgrade.getName(),

@@ -40,4 +40,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String doYouReallyWantToRemoveMachineImage(String name, String id, String regionId);
     String successfullyRemovedMachineImage(String name, String id, String regionId);
     String successfullyUpgradedMachineImage(String name, String id, String regionId, String newName);
+    String startedImageUpgrade(String name, String id, String regionId);
 }
