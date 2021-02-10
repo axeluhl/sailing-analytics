@@ -50,9 +50,10 @@ update_root_crontab() {
   crontab crontab
 }
 
-clean_root_ssh_dir() {
+clean_root_ssh_dir_and_tmp() {
   echo "Cleaning up /root/.ssh" >>/var/log/sailing.err
   rm -rf /root/.ssh/*
+  rm -rf /tmp/image-upgrade-finished
 }
 
 run_yum_update
@@ -69,7 +70,7 @@ if /opt/aws/bin/ec2-metadata -d | grep "^no-shutdown$"; then
   echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
   touch /tmp/image-upgrade-finished
 else
-  # Only clean root's .ssh directory if the next step is shutdown / image creation
-  clean_root_ssh_dir
+  # Only clean root's .ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
+  clean_root_ssh_dir_and_tmp
   shutdown -h now &
 fi
