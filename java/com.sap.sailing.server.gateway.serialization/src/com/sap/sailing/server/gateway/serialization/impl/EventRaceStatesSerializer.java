@@ -12,10 +12,10 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class EventRaceStatesSerializer implements JsonSerializer<Pair<Event, Iterable<Leaderboard>>> {
     public static final String FIELD_EVENT_NAME = "name";

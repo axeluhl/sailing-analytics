@@ -1,6 +1,5 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
@@ -8,7 +7,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -80,15 +78,21 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         return hostname+CONFIG_FILE_EXTENSION;
     }
 
-    private void setRedirect(String configFileNameForHostname, String macroName, String hostname, String... macroArguments) throws InterruptedException, JSchException, IOException {
-        final String command = "echo \"Use "+macroName+" "+hostname+" "+String.join(" ", macroArguments)+"\" >"+getConfigFilePath(configFileNameForHostname)+
-                "; service httpd reload";
-        logger.info("Standard output from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: "+
-                runCommandAndReturnStdoutAndStderr(command, "Standard error from setting up the re-direct for "+hostname+" and reloading the Apache httpd server: ", Level.INFO));
+    private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
+            throws Exception {
+        final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
+                + "\" >" + getConfigFilePath(configFileNameForHostname) + "; service httpd reload";
+        logger.info("Standard output from setting up the re-direct for " + hostname
+                + " and reloading the Apache httpd server: "
+                + runCommandAndReturnStdoutAndStderr(command,
+                        "Standard error from setting up the re-direct for " + hostname
+                                + " and reloading the Apache httpd server: ",
+                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
-    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException {
-        final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT);
+    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command, stderrLogPrefix, stderrLogLevel);
         return stdout;
     }
@@ -98,60 +102,65 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     @Override
-    public void setScopeRedirect(Scope<ShardingKey> scope,ProcessT applicationReplicaSet) {
+    public void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationReplicaSet) {
         // TODO Implement ApacheReverseProxy.setScopeRedirect(...)
     }
 
     @Override
-    public void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), PLAIN_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, host, ""+port);
     }
 
     @Override
-    public void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), HOME_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, host, ""+port);
     }
 
     @Override
-    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId) throws InterruptedException, JSchException, IOException {
+    public void setEventRedirect(String hostname, ProcessT applicationProcess, UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, eventId.toString(), host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), EVENT_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, eventId.toString(), host, ""+port);
     }
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
+            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception {
         final String host = applicationProcess.getHost().getPrivateAddress().getHostAddress();
         final int port = applicationProcess.getPort();
-        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, leaderboardGroupId.toString(), host, ""+port);
+        setRedirect(getConfigFileNameForHostname(hostname), SERIES_REDIRECT_MACRO, hostname, optionalKeyName, privateKeyEncryptionPassphrase, leaderboardGroupId.toString(), host, ""+port);
     }
 
     @Override
-    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
-        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), INTERNAL_SERVER_STATUS);
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), optionalKeyName, privateKeyEncryptionPassphrase, INTERNAL_SERVER_STATUS);
     }
 
     @Override
-    public void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException {
+    public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String configFilePath = getConfigFilePath(getConfigFileNameForScope(scope));
-        removeRedirect(configFilePath, scope.toString());
+        removeRedirect(configFilePath, scope.toString(), optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     @Override
-    public void removeRedirect(String hostname) throws IOException, InterruptedException, JSchException {
+    public void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String configFilePath = getConfigFilePath(getConfigFileNameForHostname(hostname));
-        removeRedirect(configFilePath, hostname);
+        removeRedirect(configFilePath, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
-    private void removeRedirect(String configFilePath, String redirectNameForLogOutput) throws IOException, InterruptedException, JSchException {
-        final String command = "rm "+configFilePath+"; service httpd reload";
-        logger.info("Standard output from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: "+
-                runCommandAndReturnStdoutAndStderr(command, "Standard error from removing the re-direct for "+redirectNameForLogOutput+" and reloading the Apache httpd server: ", Level.INFO));
+    private void removeRedirect(String configFilePath, String redirectNameForLogOutput,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final String command = "rm " + configFilePath + "; service httpd reload";
+        logger.info("Standard output from removing the re-direct for " + redirectNameForLogOutput
+                + " and reloading the Apache httpd server: "
+                + runCommandAndReturnStdoutAndStderr(command,
+                        "Standard error from removing the re-direct for " + redirectNameForLogOutput
+                                + " and reloading the Apache httpd server: ",
+                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
     }
 
     @Override

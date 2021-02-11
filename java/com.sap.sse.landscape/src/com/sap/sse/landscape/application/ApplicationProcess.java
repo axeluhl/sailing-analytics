@@ -2,34 +2,37 @@ package com.sap.sse.landscape.application;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.util.Wait;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
+    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
     
     /**
      * @param releaseRepository
      *            mandatory parameter required to enable resolving the release and enabling the download of its
      *            artifacts, including its release notes
+     * @param optionalKeyName TODO
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -46,7 +49,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
     
-    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
@@ -60,10 +63,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
+     * @param optionalKeyName TODO
      */
-    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException, InterruptedException;
+    String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -73,23 +77,24 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getHealthCheckPath();
 
-    ProcessT getMaster();
-
-    Iterable<ProcessT> getReplicas();
+    String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
+     * @param optionalKeyName TODO
+     * @throws Exception 
      */
-    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout)
-            throws JSchException, IOException, InterruptedException;
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
 
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     * @param optionalKeyName TODO
      */
-    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout)
-            throws JSchException, IOException, InterruptedException;
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
 
     /**
      * Tells whether this process is ready to accept requests. Use this for a health check in a target group
@@ -97,8 +102,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
         try {
-            final HttpURLConnection connection = (HttpURLConnection) new URL("http",
-                    getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), getHealthCheckPath())
+            final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout)
                             .openConnection();
             return connection.getResponseCode() == 200;
         } catch (Exception e) {
@@ -106,18 +110,24 @@ extends Process<RotatingFileBasedLog, MetricsT> {
             return false;
         }
     }
+
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(getHealthCheckPath(), optionalTimeout);
+    }
     
-    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
-        final TimePoint startingToPollForReady = TimePoint.now();
-        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
-            if (optionalTimeout.isPresent()) {
-                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
-                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
-            } else {
-                logger.info(""+this+" not yet ready; waiting forever...");
-            }
-            Thread.sleep(5000);
-        }
-        return isReady(optionalTimeout);
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
+        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+    }
+    
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
+        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
 }

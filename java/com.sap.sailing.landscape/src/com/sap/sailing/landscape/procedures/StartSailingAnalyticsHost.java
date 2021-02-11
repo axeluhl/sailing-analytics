@@ -1,10 +1,8 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
@@ -93,8 +91,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
-                            } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });
@@ -127,11 +125,5 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
-    }
-
-    @Override
-    public void run() throws Exception {
-        super.run();
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout());
     }
 }

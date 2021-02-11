@@ -1,10 +1,10 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +15,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -24,6 +25,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
+import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.orchestration.Procedure;
@@ -61,8 +63,10 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
+    private final AwsRegion region;
     private final String upgradedImageName;
     private final String imageType;
+    private final boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
     private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
@@ -77,17 +81,27 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * <li>If no {@link #setInstanceType(software.amazon.awssdk.services.ec2.model.InstanceType) instance type} is
      * specified, it defaults to {@link InstanceType#T2_MEDIUM}.</li>
      * <li>If no {@link #setImageType(String) image type} is specified, it defaults to the value of the constant
-     * {@link #IMAGE_TYPE_TAG_VALUE_SAILING} (expected to be {@code "sailing-analytics-server"}).</li>
-     * <li>The user data are set to the string defined by {@link UpgradeAmi#IMAGE_UPGRADE_USER_DATA}, forcing the image to
-     * boot without trying to launch a process instance.</li>
+     * {@link #IMAGE_TYPE_TAG_VALUE_SAILING} (expected to be {@code "sailing-analytics-server"}); note that the image
+     * type is also used to tag the resulting upgraded image; an explicit
+     * {@link #setMachineImage(com.sap.sse.landscape.MachineImage) machine image}, if provided, takes precedence
+     * regarding the selection of the image to upgrade.</li>
+     * <li>The user data are set to the string defined by {@link UpgradeAmi#IMAGE_UPGRADE_USER_DATA}, forcing the image
+     * to boot without trying to launch a process instance.</li>
      * <li>The {@link #isNoShutdown()} property default is changed to {@code false} because when upgrading an image the
      * default is that after the upgrading activity the instance is shut down for image creation.</li>
      * <li>By default the last part of the version number found will be incremented.</li>
-     * <li>If the {@link #setVersionPartToIncrement(VersionPart)} method is used to explicitly specify a part to increment
-     * then if its {@link VersionPart#MICRO} and the {@link VersionPart#MICRO} part doesn't exist yet, it is added and set to 0.
-     * If the part exists it is incremented and in case it's not the last part, tailing parts are all set to 0. With this,
-     * the new image name defaults to the old image's base name plus a space plus the new version number.</li>
+     * <li>If the {@link #setVersionPartToIncrement(VersionPart)} method is used to explicitly specify a part to
+     * increment then if its {@link VersionPart#MICRO} and the {@link VersionPart#MICRO} part doesn't exist yet, it is
+     * added and set to 0. If the part exists it is incremented and in case it's not the last part, tailing parts are
+     * all set to 0. If not provided, the last existing part is increments if at least a minor version exists, otherwise
+     * a major.minor scheme is used and the minor version is set to 0. With this, the new image name defaults to the old
+     * image's base name plus a space plus the new version number.</li>
+     * <li>If no {@link #setKeyName(String) SSH key} has been specified, a temporary key is
+     * {@link AwsLandscape#createKeyPair(com.sap.sse.landscape.Region, String, byte[]) created} with a random
+     * {@link #setPrivateKeyEncryptionPassphrase(byte[]) private key pass phrase}. The builder implementation must indicate
+     * to the procedure that the key is temporary and needs to be removed after the procedure has finished executing.</li>
      * </ul>
+     * 
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
@@ -117,6 +131,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
         private final Map<String, String> deviceNamesToSnapshotBaseNames;
+        private boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
 
         private BuilderImpl() {
             super();
@@ -145,6 +160,37 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         @Override
         protected boolean isNoShutdown() {
             return super.isNoShutdown();
+        }
+
+        /**
+         * If no key pair name has been {@link #setKeyName(String) set} yet, a temporary key is
+         * {@link AwsLandscape#createKeyPair(com.sap.sse.landscape.Region, String, byte[]) created} with a random name
+         * and a random private key encryption passphrase. The passphrase is
+         * {@link #setPrivateKeyEncryptionPassphrase(byte[]) set} so that {@link #getPrivateKeyEncryptionPassphrase()}
+         * will return it. From there on, {@link #getKeyName()} will continue to deliver the same random key name
+         * generated, and {@link #isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone()} will return {@code true},
+         * indicating that when done with the key and the upgrade procedure, the key must be
+         * {@link AwsLandscape#deleteKeyPair(com.sap.sse.landscape.Region, String) deleted} again.
+         */
+        @Override
+        protected String getKeyName() {
+            if (super.getKeyName() == null) {
+                keyPairIsTemporaryAndNeedsToBeRemovedWhenDone = true;
+                final String keyName = "MyKey-"+UUID.randomUUID();
+                logger.info("No key name provided; creating temporary key "+keyName);
+                setPrivateKeyEncryptionPassphrase(UUID.randomUUID().toString().getBytes());
+                try {
+                    getLandscape().createKeyPair(getRegion(), keyName, getPrivateKeyEncryptionPassphrase());
+                } catch (JSchException e) {
+                    throw new RuntimeException(e);
+                }
+                setKeyName(keyName);
+            }
+            return super.getKeyName();
+        }
+
+        boolean isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone() {
+            return keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
         }
 
         @Override
@@ -207,8 +253,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
-                            } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });
@@ -220,6 +266,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         
         protected Map<String, String> getDeviceNamesToSnapshotBaseNames() {
             return Collections.unmodifiableMap(deviceNamesToSnapshotBaseNames);
+        }
+        
+        /**
+         * Make visible to procedure's constructor
+         */
+        protected AwsRegion getRegion() {
+            return super.getRegion();
         }
 
         @Override
@@ -246,11 +299,13 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     
     protected UpgradeAmi(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
+        region = builder.getRegion();
         imageType = builder.getImageType();
         upgradedImageName = builder.getUpgradedImageName();
         timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
         deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
+        keyPairIsTemporaryAndNeedsToBeRemovedWhenDone = builder.isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone();
     }
 
     @Override
@@ -261,6 +316,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
             if (waitForShutdown) {
                 logger.info("Waiting for shutdown of instance "+instance.instanceId());
                 // wait for the instance to shut down
+                // TODO use Wait.wait...
                 final TimePoint startedWaiting = TimePoint.now();
                 while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                     logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
@@ -270,7 +326,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                     instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
                 }
             }
-            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(IMAGE_TYPE_TAG_NAME, imageType)));
+            upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(Landscape.IMAGE_TYPE_TAG_NAME, imageType)));
             final TimePoint startedWaiting = TimePoint.now();
             while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
                 logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
@@ -287,6 +343,10 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 }
             }
         } finally {
+            if (keyPairIsTemporaryAndNeedsToBeRemovedWhenDone) {
+                logger.info("Removing temporary key "+getKeyName());
+                getLandscape().deleteKeyPair(region, getKeyName());
+            }
             if (getHost() != null) {
                 getHost().terminate();
             }

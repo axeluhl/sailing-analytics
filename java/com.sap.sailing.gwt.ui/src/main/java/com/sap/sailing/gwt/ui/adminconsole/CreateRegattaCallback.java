@@ -12,8 +12,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
-import com.sap.sailing.gwt.ui.client.EventsRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -27,24 +26,19 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.security.ui.client.UserService;
 
 public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
-    private final EventsRefresher eventsRefresher;
-    private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
+    private final Presenter presenter;
 
-    public CreateRegattaCallback(UserService userService, SailingServiceWriteAsync sailingServiceWrite,
-            StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
-            EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
-        this.regattaRefresher = regattaRefresher;
-        this.eventsRefresher = eventsRefresher;
+    public CreateRegattaCallback(StringMessages stringMessages, Presenter presenter, List<EventDTO> existingEvents) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
+        this.presenter = presenter;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
     }
@@ -86,7 +80,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 // if regatta creation was successful, add race columns as modeled in the creation dialog;
                 // note that the SeriesCreationParametersDTO don't describe race columns.
                 createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
-                fillRegattas();
+                reloadRegattas();
                 fillEvents(); // events have their associated regattas
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
@@ -115,22 +109,28 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
                     @Override
                     public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                        fillRegattas();
+                        reloadRegattas();
                     }
                 });
             }
         }
     }
     
-    private void fillRegattas() {
-        if (regattaRefresher != null){
-            regattaRefresher.fillRegattas();
+    private void reloadLeaderboards() {
+        if (presenter.getLeaderboardsRefresher() != null) {
+            presenter.getLeaderboardsRefresher().reloadAndCallFillAll();
+        }
+    }
+    
+    private void reloadRegattas() {
+        if (presenter.getRegattasRefresher() != null){
+            presenter.getRegattasRefresher().reloadAndCallFillAll();
         }
     }
     
     private void fillEvents() {
-        if (eventsRefresher != null) {
-            eventsRefresher.fillEvents();
+        if (presenter.getEventsRefresher() != null) {
+            presenter.getEventsRefresher().reloadAndCallFillAll();
         }
     }
     
@@ -157,6 +157,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                                 openRegattaLeaderboardToLeaderboardGroupOfEventLinkingDialog(result, event);
                             }
                         }
+                        reloadLeaderboards();
                     }
 
                 });

@@ -88,6 +88,9 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
      * <li>The {@link #setServerName(String) server name} property will be obtained from the {@link #setProcess(ApplicationProcess) process}'s
      * {@code SERVER_NAME} environment setting if not provided explicitly.</li>
      * <li>The timeout for looking up the process's server name defaults to no timeout.</li>
+     * <li>If no {@link #setKeyName(String) SSH key pair name} is specified, the key pair used to launch the
+     * instance that runs the {@link #setProcess(ApplicationProcess) application process} will be looked up and
+     * decrypted using the {@link #setPrivateKeyEncryptionPassphrase(byte[]) passphrase} that must be provided.
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -101,6 +104,8 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         BuilderT setProcess(ProcessT process);
         BuilderT setHostname(String hostname);
         BuilderT setTimeout(Duration timeout);
+        BuilderT setKeyName(String keyName);
+        BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
@@ -113,11 +118,23 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         private String hostname;
         private ProcessT process;
         private Optional<Duration> optionalTimeout = Optional.empty();
+        private Optional<String> optionalKeyName = Optional.empty(); // if empty, SSH key pair used to start the instance hosting the process will be used
+        private byte[] privateKeyEncryptionPassphrase;
 
         @Override
         public BuilderT setProcess(ProcessT process) {
             this.process = process;
             return self();
+        }
+        
+        @Override
+        public BuilderT setKeyName(String keyName) {
+            this.optionalKeyName = Optional.ofNullable(keyName);
+            return self();
+        }
+        
+        protected Optional<String> getOptionalKeyName() {
+            return optionalKeyName;
         }
 
         @Override
@@ -143,14 +160,20 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         protected Optional<Duration> getOptionalTimeout() {
             return optionalTimeout;
         }
+        
+        @Override
+        public BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase) {
+            this.privateKeyEncryptionPassphrase = privateKeyEncryptionPassphrase;
+            return self();
+        }
 
         @Override
-        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws Exception {
             final String result;
             if (super.getServerName() != null) {
                 result = super.getServerName();
             } else {
-                result = getProcess().getServerName(getOptionalTimeout());
+                result = getProcess().getServerName(getOptionalTimeout(), getOptionalKeyName(), privateKeyEncryptionPassphrase);
             }
             return result;
         }
@@ -165,7 +188,7 @@ extends ProcedureWithTargetGroup<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
 
-    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();

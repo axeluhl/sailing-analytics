@@ -49,6 +49,7 @@ import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.ui.client.SerializationDummy;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
@@ -100,10 +101,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     protected ServerInfoDTO getServerInfo() {
         ServerInfoDTO result = new ServerInfoDTO(ServerInfo.getName(), ServerInfo.getBuildVersion(), ServerInfo.getManageEventsBaseUrl());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result, result.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
         return result;
     }
-
+    
+    @Override
+    public ArrayList<HasPermissions> getAllHasPermissions() {
+        final ArrayList<HasPermissions> result = new ArrayList<>();
+        Util.addAll(getSecurityService().getAllHasPermissions(), result);
+        return result;
+    }
+    
     @Override
     public ArrayList<RoleDefinitionDTO> getRoleDefinitions() {
         final ArrayList<RoleDefinitionDTO> result = new ArrayList<>();
@@ -274,7 +282,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier) {
+    public SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions) {
         return null;
     }
 

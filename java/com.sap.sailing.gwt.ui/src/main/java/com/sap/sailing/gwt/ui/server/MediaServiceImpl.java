@@ -95,8 +95,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         return racingEventService().getSecurityService().mapAndFilterByReadPermissionForCurrentUser(mediaTracksToFilter,
                 mediaTrack -> {
                     final MediaTrackWithSecurityDTO securedMediaTrack = new MediaTrackWithSecurityDTO(mediaTrack);
-                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack,
-                            mediaTrack.getIdentifier());
+                    SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), securedMediaTrack);
                     return securedMediaTrack;
                 });
     }

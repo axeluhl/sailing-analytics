@@ -18,9 +18,9 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class TestParseAndMigratePassingSideAndControlPointTwoMarks {
     public TestParseAndMigratePassingSideAndControlPointTwoMarks() {
