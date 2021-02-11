@@ -149,7 +149,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             onIndividualRecallChanged(true);
 
             showMainContent();
-            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         }
 
         @Override
@@ -159,7 +158,6 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             onIndividualRecallChanged(false);
 
             showMainContent();
-            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         }
     }
 }
