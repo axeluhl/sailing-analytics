@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -38,6 +39,7 @@ import com.sap.sse.gwt.client.celltable.ActionsColumn;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -76,10 +78,12 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
     private final BusyIndicator mongoEndpointsBusy;
     private final TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources> machineImagesTable;
     private final BusyIndicator machineImagesBusy;
+    private final SshKeyManagementPanel sshKeyManagementPanel;
     private final TextBox awsAccessKeyTextBox;
     private final PasswordTextBox awsSecretPasswordTextBox;
     private final ErrorReporter errorReporter;
     private final static String AWS_ACCESS_KEY_USER_PREFERENCE = "aws.access.key";
+    private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -128,7 +132,7 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
                 return Collections.singleton(t);
             }
         };
-        final SshKeyManagementPanel sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
+        sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
                 landscapeManagementService, tableResources, errorReporter, /* access key provider */ this, regionsTable.getSelectionModel());
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         awsCredentialsAndSshKeys.add(sshKeysCaptionPanel);
@@ -142,17 +146,7 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
         regionsCaptionPanel.add(regionsTable);
         add(regionsCaptionPanel);
-        landscapeManagementService.getRegions(new AsyncCallback<ArrayList<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(ArrayList<String> regions) {
-                regionsTable.refresh(regions);
-            }
-        });
+        refreshRegionsTable(userService);
         mongoEndpointsTable = new TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -178,6 +172,10 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
                 return Util.joinStrings(",", Util.map(mongoEndpointDTO.getHostnamesAndPorts(), hostnameAndPort->hostnameAndPort.getA()+":"+hostnameAndPort.getB()));
             }
         }, stringMessages.hostname());
+        final ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell> mongoEndpointsActionColumn = new ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell>(
+                new MongoEndpointsImagesBarCell(stringMessages), /* permission checker */ (mongoEndpoint, action)->true);
+        mongoEndpointsActionColumn.addAction(MongoEndpointsImagesBarCell.ACTION_SCALE, mongoEndpointToScale->scaleMongoEndpoint(stringMessages, mongoEndpointToScale));
+        mongoEndpointsTable.addColumn(mongoEndpointsActionColumn);
         final CaptionPanel mongoEndpointsCaptionPanel = new CaptionPanel(stringMessages.mongoEndpoints());
         final VerticalPanel mongoEndpointsVerticalPanel = new VerticalPanel();
         mongoEndpointsCaptionPanel.add(mongoEndpointsVerticalPanel);
@@ -220,24 +218,103 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         add(machineImagesCaptionPanel);
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
         {
-            sshKeyManagementPanel.showKeysInRegion(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
-                        regionsTable.getSelectionModel().getSelectedObject());
+            final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
             refreshMongoEndpointsTable();
             refreshMachineImagesTable();
+            storeRegionSelection(userService, selectedRegion);
         });
-        // TODO SSH keys: allow user to provide pass phrase for the decryption of a private key only in the browser
-        // TODO upon region selection show AppServer clusters, and upgradable AMIs in region
+        awsAccessKeyTextBox.addChangeHandler(e->{
+            GWT.log("awsAccessKeyTextBox changed");
+            refreshAllThatNeedsAwsCredentials(userService);
+        });
+        awsSecretPasswordTextBox.addChangeHandler(e->{
+            GWT.log("awsSecretPasswordTextBox changed");
+            refreshAllThatNeedsAwsCredentials(userService);
+        });
+        // TODO upon region selection show AppServer clusters in region
         // TODO try to identify archive servers
         // TODO support creating a new app server cluster
-        // TODO support AMI upgrade
-        // TODO support archive server upgrade
-        // TODO support upgrading all app server instances in a region
-        // TODO region could be a drop-down maybe, and it could remember its last selection
-        // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
         // TODO support archiving and dismantling of an application server cluster
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
+        // TODO support archive server upgrade
+        // TODO support upgrading all app server instances in a region
+        // TODO region table should remember its last selection in user preferences
+        // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+    }
+
+    private void refreshRegionsTable(UserService userService) {
+        landscapeManagementService.getRegions(new AsyncCallback<ArrayList<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<String> regions) {
+                regionsTable.refresh(regions);
+                userService.getPreference(AWS_DEFAULT_REGION_USER_PREFERENCE, new AsyncCallback<String>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Couldn't obtain "+AWS_DEFAULT_REGION_USER_PREFERENCE+" preference for user "+userService.getCurrentUser().getName());
+                    }
+
+                    @Override
+                    public void onSuccess(String defaultRegion) {
+                        regionsTable.getFilterPanel().search(defaultRegion);
+                        regionsTable.getSelectionModel().setSelected(defaultRegion, /* selected */ true);
+                    }
+                });
+            }
+        });
     }
     
+    private void refreshAllThatNeedsAwsCredentials(UserService userService) {
+        if (hasAwsCredentialsFilledIn()) {
+            refreshMongoEndpointsTable();
+            refreshMachineImagesTable();
+            sshKeyManagementPanel.showKeysInRegion(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(), regionsTable.getSelectionModel().getSelectedObject());
+        }
+    }
+
+    private boolean hasAwsCredentialsFilledIn() {
+        return Util.hasLength(awsAccessKeyTextBox.getValue()) && Util.hasLength(awsSecretPasswordTextBox.getValue());
+    }
+
+    private void storeRegionSelection(UserService userService, String selectedRegion) {
+        if (selectedRegion != null) {
+            userService.setPreference(AWS_DEFAULT_REGION_USER_PREFERENCE, selectedRegion, new AsyncCallback<Void>() {
+                @Override public void onFailure(Throwable caught) {} @Override public void onSuccess(Void result) {}
+            });
+        }
+    }
+
+    private void scaleMongoEndpoint(StringMessages stringMessages, MongoEndpointDTO mongoEndpointToScale) {
+        new MongoScalingDialog(stringMessages, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
+            @Override
+            public void ok(MongoScalingInstructionsDTO mongoScalingInstructions) {
+                mongoEndpointsBusy.setBusy(true);
+                landscapeManagementService.scaleMongo(mongoScalingInstructions, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        mongoEndpointsBusy.setBusy(false);
+                        errorReporter.reportError(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        mongoEndpointsBusy.setBusy(false);
+                        Notification.notify(stringMessages.successfullyScaledMongoDB(), NotificationType.SUCCESS);
+                        refreshMongoEndpointsTable();
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+            }
+        }).show();
+    }
+
     private boolean isNewest(AmazonMachineImageDTO ami) {
         final Comparator<TimePoint> timePointComparator = Comparator.nullsLast(Comparator.reverseOrder());
         final Comparator<AmazonMachineImageDTO> imageByTimePointComparator = (AmazonMachineImageDTO i1, AmazonMachineImageDTO i2)->
@@ -249,51 +326,53 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
     }
 
     private void refreshMongoEndpointsTable() {
-        mongoEndpointsTable.getDataProvider().getList().clear();
-        if (regionsTable.getSelectionModel().getSelectedObject() != null) {
-            mongoEndpointsBusy.setBusy(true);
-            landscapeManagementService.getMongoEndpoints(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
-                    regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<MongoEndpointDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                    mongoEndpointsBusy.setBusy(false);
-                }
-    
-                @Override
-                public void onSuccess(ArrayList<MongoEndpointDTO> mongoEndpointDTOs) {
-                    mongoEndpointsTable.refresh(mongoEndpointDTOs);
-                    mongoEndpointsBusy.setBusy(false);
-                }
-            });
-        } else {
+        if (hasAwsCredentialsFilledIn()) {
             mongoEndpointsTable.getDataProvider().getList().clear();
+            if (regionsTable.getSelectionModel().getSelectedObject() != null) {
+                mongoEndpointsBusy.setBusy(true);
+                landscapeManagementService.getMongoEndpoints(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
+                        regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<MongoEndpointDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                        mongoEndpointsBusy.setBusy(false);
+                    }
+        
+                    @Override
+                    public void onSuccess(ArrayList<MongoEndpointDTO> mongoEndpointDTOs) {
+                        mongoEndpointsTable.refresh(mongoEndpointDTOs);
+                        mongoEndpointsBusy.setBusy(false);
+                    }
+                });
+            } else {
+                mongoEndpointsTable.getDataProvider().getList().clear();
+            }
         }
-
     }
     
     private void refreshMachineImagesTable() {
-        machineImagesTable.getDataProvider().getList().clear();
-        if (regionsTable.getSelectionModel().getSelectedObject() != null) {
-            machineImagesBusy.setBusy(true);
-            landscapeManagementService.getAmazonMachineImages(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
-                    regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<AmazonMachineImageDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                    machineImagesBusy.setBusy(false);
-                }
-    
-                @Override
-                public void onSuccess(ArrayList<AmazonMachineImageDTO> machineImagesDTOs) {
-                    machineImagesTable.refresh(machineImagesDTOs);
-                    machineImagesBusy.setBusy(false);
-                }
-            });
-        } else {
+        if (hasAwsCredentialsFilledIn()) {
             machineImagesTable.getDataProvider().getList().clear();
+            if (regionsTable.getSelectionModel().getSelectedObject() != null) {
+                machineImagesBusy.setBusy(true);
+                landscapeManagementService.getAmazonMachineImages(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(),
+                        regionsTable.getSelectionModel().getSelectedObject(), new AsyncCallback<ArrayList<AmazonMachineImageDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                        machineImagesBusy.setBusy(false);
+                    }
+        
+                    @Override
+                    public void onSuccess(ArrayList<AmazonMachineImageDTO> machineImagesDTOs) {
+                        machineImagesTable.refresh(machineImagesDTOs);
+                        machineImagesBusy.setBusy(false);
+                    }
+                });
+            } else {
+                machineImagesTable.getDataProvider().getList().clear();
+            }
         }
-
     }
     
     private void upgradeMachineImage(final StringMessages stringMessages, final AmazonMachineImageDTO machineImageToUpgrade) {

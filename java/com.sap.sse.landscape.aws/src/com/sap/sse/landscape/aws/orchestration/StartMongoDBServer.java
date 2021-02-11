@@ -18,6 +18,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
@@ -221,7 +222,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
         
         @Override
         public StartMongoDBServer<ShardingKey, MetricsT, ProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException {
-            setTags(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoProcess.DEFAULT_PORT));
+            setTags(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoDBConstants.DEFAULT_PORT));
             if (!isSecurityGroupsSet()) {
                 setSecurityGroups(Collections.singleton(getLandscape().getDefaultSecurityGroupForMongoDBHosts(getRegion())));
             }
@@ -278,7 +279,7 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, M
             }
             final MongoReplicaSet replicaSet = getLandscape().getDatabaseConfigurationForReplicaSet(getHost().getRegion(), replicaSetName);
             final Host instance = Util.stream(replicaSet.getInstances()).filter(replica->replica.getHost().equals(getHost())).map(replica->replica.getHost()).findAny().get();
-            mongoProcess = new MongoProcessInReplicaSetImpl(replicaSet, MongoProcess.DEFAULT_PORT, instance);
+            mongoProcess = new MongoProcessInReplicaSetImpl(replicaSet, MongoDBConstants.DEFAULT_PORT, instance);
         }
     }
 }

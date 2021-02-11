@@ -42,4 +42,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyUpgradedMachineImage(String name, String id, String regionId, String newName);
     String startedImageUpgrade(String name, String id, String regionId);
     String showNewestOnlyPerType();
+    String scale();
+    String youCannotShutdownMongoDBInstancesNotRunningOnDefaultPort(String hostnamesAndPortsToShutdown);
+    String successfullyScaledMongoDB();
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -39,6 +41,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
@@ -69,6 +72,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 new TypeRelativeObjectIdentifier("AWS")));
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
+        return result;
+    }
+    
+    @Override
+    public ArrayList<String> getInstanceTypes() {
+        final ArrayList<String> result = new ArrayList<>();
+        Util.addAll(Util.map(Arrays.asList(InstanceType.values()), instanceType->instanceType.name()), result);
         return result;
     }
     
@@ -217,5 +227,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         upgradeAmi.run();
         final AmazonMachineImage<String, SailingAnalyticsMetrics> resultingAmi = upgradeAmi.getUpgradedAmi();
         return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
+    }
+
+    @Override
+    public void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions) {
+        // TODO Implement LandscapeManagementWriteServiceImpl.scaleMongo(...)
+        
     }
 }

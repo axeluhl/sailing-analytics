@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
+    
+    ArrayList<String> getInstanceTypes();
 
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String awsAccessKey, String awsSecret, String region);
     
@@ -32,4 +35,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
     void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId);
 
     AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception;
+
+    void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions);
 }

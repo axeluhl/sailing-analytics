@@ -158,10 +158,12 @@ public class SshKeyManagementPanel extends VerticalPanel {
             });
         });
         regionSelectionModel.addSelectionChangeHandler(e->{
-            showKeysInRegion(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
-                    regionSelectionModel.getSelectedObject());
-            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
-            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            if (Util.hasLength(awsAccessKeyProvider.getAwsSecret())) {
+                showKeysInRegion(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
+                        regionSelectionModel.getSelectedObject());
+                addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+                generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            }
         });
     }
     

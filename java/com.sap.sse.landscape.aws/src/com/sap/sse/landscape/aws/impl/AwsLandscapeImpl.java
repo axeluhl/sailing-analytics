@@ -47,9 +47,9 @@ import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
-import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
@@ -915,7 +915,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     private int getMongoPort(String[] replicaSetNameAndOptionalPort) {
         final int result;
         if (replicaSetNameAndOptionalPort.length < 2) {
-            result = MongoProcess.DEFAULT_PORT;
+            result = MongoDBConstants.DEFAULT_PORT;
         } else {
             result = Integer.valueOf(replicaSetNameAndOptionalPort[1].trim());
         }

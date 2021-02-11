@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
-    void getRegions(AsyncCallback<ArrayList<String>> asyncCallback);
+    void getRegions(AsyncCallback<ArrayList<String>> callback);
+    
+    void getInstanceTypes(AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String awsAccessKey, String awsSecret, String regionId,
             AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
@@ -51,4 +54,6 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId,
             AsyncCallback<AmazonMachineImageDTO> callback);
+
+    void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
 }
