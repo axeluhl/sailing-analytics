@@ -489,6 +489,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
+    public Iterable<AmazonMachineImage<ShardingKey, MetricsT>> getAllImagesWithTag(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue) {
+        final DescribeImagesResponse response = getEc2Client(getRegion(region))
+                .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
+        return Util.map(response.images(), image->new AmazonMachineImageImpl<>(image, region, this));
+    }
+
+    @Override
     public Iterable<String> getMachineImageTypes(com.sap.sse.landscape.Region region) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(

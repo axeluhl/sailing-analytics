@@ -194,6 +194,12 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     default AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithType(Region region, String imageType) {
         return getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
     }
+    
+    Iterable<AmazonMachineImage<ShardingKey, MetricsT>> getAllImagesWithTag(Region region, String tagName, String tagValue);
+
+    default Iterable<AmazonMachineImage<ShardingKey, MetricsT>> getAllImagesWithType(Region region, String imageType) {
+        return getAllImagesWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
+    }
 
     /**
      * Use the results, e.g., as second parameter in in {@link #getLatestImageWithType(Region, String)}.
@@ -544,7 +550,6 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
-     * @param optionalKeyName TODO
      */
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,

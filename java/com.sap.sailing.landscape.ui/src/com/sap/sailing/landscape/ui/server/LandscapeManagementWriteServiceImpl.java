@@ -181,11 +181,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion awsRegion = new AwsRegion(region);
         final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
         for (final String imageType : landscape.getMachineImageTypes(awsRegion)) {
-            final AmazonMachineImage<?, ApplicationProcessMetrics> machineImage = landscape.getLatestImageWithType(awsRegion, imageType);
-            final AmazonMachineImageDTO dto = new AmazonMachineImageDTO(machineImage.getId(),
-                    machineImage.getRegion().getId(), machineImage.getName(), imageType, machineImage.getState().name(),
-                    machineImage.getCreatedAt());
-            result.add(dto);
+            for (final AmazonMachineImage<Object, ApplicationProcessMetrics> machineImage : landscape.getAllImagesWithType(awsRegion, imageType)) {
+                final AmazonMachineImageDTO dto = new AmazonMachineImageDTO(machineImage.getId(),
+                        machineImage.getRegion().getId(), machineImage.getName(), imageType, machineImage.getState().name(),
+                        machineImage.getCreatedAt());
+                result.add(dto);
+            }
         }
         return result;
     }

@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
@@ -187,8 +188,8 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         machineImagesTable = new TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
-                /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
-                /* filter checkbox label */ null) {
+                /* checkbox filter function */ Optional.of(this::isNewest), /* filter label */ Optional.empty(),
+                /* filter checkbox label */ stringMessages.showNewestOnlyPerType()) {
             @Override
             protected Iterable<String> getSearchableStrings(AmazonMachineImageDTO t) {
                 return Arrays.asList(t.getRegionId(), t.getId(), t.getName(), t.getState() );
@@ -235,6 +236,16 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
         // TODO support archiving and dismantling of an application server cluster
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
+    }
+    
+    private boolean isNewest(AmazonMachineImageDTO ami) {
+        final Comparator<TimePoint> timePointComparator = Comparator.nullsLast(Comparator.reverseOrder());
+        final Comparator<AmazonMachineImageDTO> imageByTimePointComparator = (AmazonMachineImageDTO i1, AmazonMachineImageDTO i2)->
+                timePointComparator.compare(i1.getCreationTimePoint(), i2.getCreationTimePoint());
+        return ami.getCreationTimePoint().equals(
+                machineImagesTable.getDataProvider().getList().stream().filter(imageFromTable->imageFromTable.getType().equals(ami.getType()))
+                .sorted(imageByTimePointComparator)
+                .findFirst().get().getCreationTimePoint());
     }
 
     private void refreshMongoEndpointsTable() {
