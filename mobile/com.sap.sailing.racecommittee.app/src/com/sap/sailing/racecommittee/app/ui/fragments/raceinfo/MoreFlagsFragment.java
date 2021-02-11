@@ -112,6 +112,10 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             return fragment;
         }
 
+        public int getStartMode() {
+            return getArguments().getInt(START_MODE);
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -222,20 +226,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         }
 
         @Override
-        public void onResume() {
-            super.onResume();
-
-            sendIntent(AppConstants.ACTION_TIME_HIDE);
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-
-            sendIntent(AppConstants.ACTION_TIME_SHOW);
-        }
-
-        @Override
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.finish_current:
@@ -264,7 +254,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     break;
                 }
                 default:
-                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                     break;
             }
