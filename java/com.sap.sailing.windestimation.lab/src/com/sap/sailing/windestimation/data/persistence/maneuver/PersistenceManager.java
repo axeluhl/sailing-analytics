@@ -7,8 +7,8 @@ import org.json.simple.parser.ParseException;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public interface PersistenceManager<T> {
 

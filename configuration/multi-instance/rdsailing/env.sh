@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=rdsailing
 SERVER_NAME=RDSAILING
 SERVER_PORT=8909
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/RDSAILING?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/RDSAILING?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2031
 TELNET_PORT=14909

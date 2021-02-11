@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class TrackingConnectorInfoJsonSerializer implements JsonSerializer<TrackingConnectorInfo> {
     public static final String FIELD_TRACKING_CONNECTOR_NAME = "trackingConnectorName";

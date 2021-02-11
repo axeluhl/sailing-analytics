@@ -1,9 +1,5 @@
 package com.sap.sse.landscape.aws.orchestration;
 
-import java.io.IOException;
-
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -67,7 +63,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         }
 
         @Override
-        public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
+        public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws Exception {
             return new CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>(this);
         }
     }
@@ -81,7 +77,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT, HostT>();
     }
 
-    protected CreateDynamicLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected CreateDynamicLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
     }
 }

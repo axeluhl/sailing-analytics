@@ -2,12 +2,12 @@ package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
 import org.bson.Document;
 
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**

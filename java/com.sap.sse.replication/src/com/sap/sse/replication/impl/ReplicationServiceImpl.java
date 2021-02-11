@@ -952,6 +952,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
         for (final Replicable<?, ?> replicable : getAllReplicables()) {
             isInitialLoadRunning.put(replicable.getId().toString(), replicable.isCurrentlyFillingFromInitialLoad());
         }
-        return new ReplicationStatusImpl(isReplica, isReplicationStarting, suspended, stopped, messageQueueLength, isInitialLoadRunning, operationQueueLengths);
+        return new ReplicationStatusImpl(isReplica, ServerInfo.getName(), isReplicationStarting, suspended, stopped,
+                messageQueueLength, isInitialLoadRunning, operationQueueLengths, getReplicatingFromMaster(), getReplicaInfo(), exchangeName, exchangePort);
     }
 }

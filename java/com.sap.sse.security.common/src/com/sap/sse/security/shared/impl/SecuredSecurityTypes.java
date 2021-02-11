@@ -16,7 +16,7 @@ import com.sap.sse.security.shared.RoleDefinition;
  */
 public class SecuredSecurityTypes extends HasPermissionsImpl {
     private static final long serialVersionUID = -5052828472297142038L;
-    private static Set<HasPermissions> allInstances = new HashSet<>();
+    private static Set<SecuredSecurityTypes> allInstances = new HashSet<>();
     
     public SecuredSecurityTypes(String logicalTypeName, Action... availableActions) {
         super(logicalTypeName, availableActions);
@@ -28,7 +28,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         allInstances.add(this);
     }
 
-    public static Iterable<HasPermissions> getAllInstances() {
+    public static Iterable<SecuredSecurityTypes> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
 

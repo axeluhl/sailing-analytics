@@ -73,8 +73,16 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "LeaderboardDetailsPanel")
     private WebElement leaderboardDetailsPanel;
     
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardRefreshButton")
+    private WebElement leaderboardRefreshButton;
+    
     public LeaderboardConfigurationPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
+    }
+    
+    public void refreshLeaderboard() {
+        this.leaderboardRefreshButton.click();
+        waitForAjaxRequests();        
     }
     
     public FlexibleLeaderboardCreateDialogPO startCreatingFlexibleLeaderboard() {
@@ -90,6 +98,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         FlexibleLeaderboardCreateDialogPO dialog = startCreatingFlexibleLeaderboard();
         dialog.setName(name);
         dialog.pressOk();
+        waitUntil(() -> findLeaderboard(name) != null);
     }
     
     public RegattaLeaderboardCreateDialogPO startCreatingRegattaLeaderboard() {

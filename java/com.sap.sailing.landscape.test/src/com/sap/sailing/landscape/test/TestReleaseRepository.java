@@ -9,7 +9,6 @@ import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Util;
 
 public class TestReleaseRepository {
-
     @Test
     public void testForAtLeastOneRelease() {
         assertFalse(Util.isEmpty(SailingReleaseRepository.INSTANCE));

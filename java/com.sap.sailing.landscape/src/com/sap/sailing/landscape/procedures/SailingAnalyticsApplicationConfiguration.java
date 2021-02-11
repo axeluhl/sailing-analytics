@@ -103,7 +103,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         }
 
         protected String getServerDirectory() {
-            return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVER_PATH : serverDirectory;
+            return serverDirectory == null ? ApplicationProcessHost.DEFAULT_SERVERS_PATH + "/" + getServerName() : serverDirectory;
         }
         
         protected boolean isServerDirectorySet() {

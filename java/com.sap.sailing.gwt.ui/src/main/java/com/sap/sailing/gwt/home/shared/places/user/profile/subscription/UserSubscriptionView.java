@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.client.subscription.BaseUserSubscriptionView;
 
 /**
  * View for displaying user subscription information like plan, subscription status...In this view user is able to
@@ -9,26 +9,11 @@ import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
  * 
  * @author Tu Tran
  */
-public interface UserSubscriptionView extends IsWidget {
+public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget {
     /**
      * Called on start loading subscription data
      */
     public void onStartLoadSubscription();
-
-    /**
-     * Update the view with subscription data returned from back-end
-     */
-    public void updateView(SubscriptionDTO subscription);
-
-    /**
-     * Called on checkout modal is closed
-     */
-    public void onCloseCheckoutModal();
-
-    /**
-     * Called on checkout modal has errors
-     */
-    public void onOpenCheckoutError(String error);
 
     /**
      * Presenter for {@link UserSubscriptionView}

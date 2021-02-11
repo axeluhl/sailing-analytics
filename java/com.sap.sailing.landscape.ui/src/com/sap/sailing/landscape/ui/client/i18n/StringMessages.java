@@ -1,0 +1,44 @@
+package com.sap.sailing.landscape.ui.client.i18n;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+
+@DefaultLocale("en")
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
+com.sap.sse.security.ui.client.i18n.StringMessages,
+com.sap.sse.gwt.adminconsole.StringMessages {
+    public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
+
+    String region();
+    String images();
+    String imageType();
+    String upgrade();
+    String replicaSet();
+    String awsCredentials();
+    String awsAccessKey();
+    String awsSecret();
+    String creator();
+    String creationTime();
+    String sshKeys();
+    String publicKey();
+    String privateKey();
+    String pleaseProvidePublicKey();
+    String pleaseProvidePrivateKey();
+    String pleaseProvideKeyPairName();
+    String generate();
+    String pleaseProvidePassphrase();
+    String pleaseRepeatPassphrase();
+    String passphrasesDontMatch();
+    String showKeys();
+    String download();
+    String encryptedPrivateKey();
+    String sshPrivateKeyPassphraseForSelectedKeyPair();
+    String state();
+    String createdAt();
+    String mongoEndpoints();
+    String machineImages();
+    String doYouReallyWantToRemoveMachineImage(String name, String id, String regionId);
+    String successfullyRemovedMachineImage(String name, String id, String regionId);
+    String successfullyUpgradedMachineImage(String name, String id, String regionId, String newName);
+    String startedImageUpgrade(String name, String id, String regionId);
+}

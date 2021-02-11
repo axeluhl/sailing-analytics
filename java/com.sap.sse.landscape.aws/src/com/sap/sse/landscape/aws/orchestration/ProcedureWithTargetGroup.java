@@ -84,7 +84,7 @@ extends AbstractAwsProcedureImpl<ShardingKey, MetricsT, ProcessT> {
             return targetGroupNamePrefix;
         }
 
-        protected String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws Exception {
             return serverName;
         }
 
@@ -93,7 +93,7 @@ extends AbstractAwsProcedureImpl<ShardingKey, MetricsT, ProcessT> {
         }
     }
 
-    protected ProcedureWithTargetGroup(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    protected ProcedureWithTargetGroup(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
         this.loadBalancerUsed = builder.getLoadBalancerUsed();
         this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();

@@ -12,21 +12,16 @@ public abstract class StartHost<ShardingKey,
                        HostT extends Host>
 extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT>
 implements Procedure<ShardingKey, MetricsT, ProcessT> {
-    /**
-     * The {@link AwsLandscape#getLatestImageWithTag(com.sap.sse.landscape.Region, String, String)} method is
-     * used to obtain default images for specific AWS host starting procedures that subclass this class. The
-     * Amazon Machine Images (AMIs) for this are then expected to be tagged with a tag named as specified by this
-     * constant ("image-type"). The tag value then must match what the subclass wants.
-     * 
-     * @see #getLatestImageOfType(String)
-     */
-    protected final static String IMAGE_TYPE_TAG_NAME = "image-type";
-
     private final MachineImage machineImage;
     
     /**
      * A builder that helps building an instance of type {@link StartHost} or any subclass thereof (then using
-     * specialized builders).
+     * specialized builders). The following default rules apply:
+     * <ul>
+     * <li>If no explicit {@link #setMachineImage(MachineImage) machine image} is specified, an {@link #setImageType(String) image type}
+     * is expected which is then used to look up the latest image of that type in the region that needs to also be specified by the
+     * concrete builder implementation.</li>
+     * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
@@ -37,6 +32,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     HostT extends Host>
     extends Procedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         BuilderT setImageType(String imageType);
+        BuilderT setMachineImage(MachineImage machineImage);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
@@ -47,23 +43,16 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private MachineImage machineImage;
-        private Region region;
         private String imageType;
         
         protected MachineImage getMachineImage() {
-            return machineImage == null ? getLandscape().getLatestImageWithTag(getRegion(), IMAGE_TYPE_TAG_NAME, getImageType()) : machineImage;
+            return machineImage == null ? getLandscape().getLatestImageWithType(getRegion(), getImageType()) : machineImage;
         }
 
-        protected Region getRegion() {
-            return region;
-        }
+        protected abstract Region getRegion();
 
-        protected BuilderT setRegion(Region region) {
-            this.region = region;
-            return self();
-        }
-
-        protected BuilderT setMachineImage(MachineImage machineImage) {
+        @Override
+        public BuilderT setMachineImage(MachineImage machineImage) {
             this.machineImage = machineImage;
             return self();
         }

@@ -127,6 +127,30 @@
     	<version>${project.version}</version>
     	<classifier>sources</classifier>
     </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.landscape.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.landscape.aws.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.landscape.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.landscape.ui</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
   </dependencies>
 
   <build>
@@ -144,6 +168,7 @@
                 <module>com.sap.sailing.gwt.home.Home</module>
                 <module>com.sap.sailing.gwt.autoplay.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+                <module>com.sap.sailing.gwt.managementconsole.ManagementConsole</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
                 <module>com.sap.sailing.gwt.ui.RaceBoard</module>

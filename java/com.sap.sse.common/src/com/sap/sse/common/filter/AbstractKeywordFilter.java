@@ -21,7 +21,7 @@ public abstract class AbstractKeywordFilter<T> implements Filter<T> {
     };
 
     private final Set<String> keywords = new HashSet<>();
-
+    
     /**
      * Sets the keywords to use for matching of domain objects.
      */
@@ -43,5 +43,9 @@ public abstract class AbstractKeywordFilter<T> implements Filter<T> {
     @Override
     public String getName() {
         return getClass().getSimpleName();
+    }
+    
+    public boolean matchesExactly(T t) {
+        return matcher.matchesExactly(keywords, t);
     }
 }
