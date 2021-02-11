@@ -357,10 +357,6 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
                 return;
             }
 
-            branchEventId = null;
-            branchCourseAreaUuid = null;
-            branchPriority = NO_PRIORITY;
-
             //Non-branch link
             if (!referringParams.optBoolean(Clicked_Branch_Link.getKey())) {
                 handleLegacyStart();
@@ -466,6 +462,9 @@ public class LoginActivity extends BaseActivity implements EventSelectedListener
         if (Intent.ACTION_VIEW.equals(action)) {
             final Uri uri = getIntent().getData();
             if (uri != null && TextUtils.equals(uri.getPath(), "/apps/com.sap.sailing.racecommittee.app.apk")) {
+                branchEventId = null;
+                branchCourseAreaUuid = null;
+                branchPriority = NO_PRIORITY;
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(R.string.app_name);
                 if (QRHelper.with(this).saveData(getIntent().getDataString())) {
