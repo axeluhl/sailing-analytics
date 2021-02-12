@@ -63,9 +63,9 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String STATUS = "Status";
     private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
     
-    private final AwsInstance<ShardingKey, MetricsT> host;
+    private final AwsInstance<ShardingKey> host;
     
-    public ApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, AwsInstance<ShardingKey, MetricsT> host) {
+    public ApacheReverseProxy(AwsLandscape<ShardingKey> landscape, AwsInstance<ShardingKey> host) {
         super(landscape);
         this.host = host;
     }
@@ -178,7 +178,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      * {@link AwsInstance}.
      */
     @Override
-    public AwsInstance<ShardingKey, MetricsT> getHost() {
+    public AwsInstance<ShardingKey> getHost() {
         return host;
     }
 

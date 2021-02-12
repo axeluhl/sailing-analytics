@@ -29,7 +29,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * @param releaseRepository
      *            mandatory parameter required to enable resolving the release and enabling the download of its
      *            artifacts, including its release notes
-     * @param optionalKeyName TODO
      * @return the release that this process is currently running
      */
     Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
@@ -63,7 +62,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * as the base name of the {@link #getServerDirectory() server's directory}. Often, it is also used as the name of
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
-     * @param optionalKeyName TODO
      */
     String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
@@ -82,7 +80,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
      * in the evaluated {@code env.sh} file.
-     * @param optionalKeyName TODO
      * @throws Exception 
      */
     String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)

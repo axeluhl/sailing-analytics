@@ -36,5 +36,5 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception;
 
-    void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions);
+    void scaleMongo(String awsAccessKey, String awsSecret, String region, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception;
 }

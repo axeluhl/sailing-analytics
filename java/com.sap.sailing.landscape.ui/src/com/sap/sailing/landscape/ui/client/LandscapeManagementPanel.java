@@ -174,7 +174,9 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         }, stringMessages.hostname());
         final ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell> mongoEndpointsActionColumn = new ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell>(
                 new MongoEndpointsImagesBarCell(stringMessages), /* permission checker */ (mongoEndpoint, action)->true);
-        mongoEndpointsActionColumn.addAction(MongoEndpointsImagesBarCell.ACTION_SCALE, mongoEndpointToScale->scaleMongoEndpoint(stringMessages, mongoEndpointToScale));
+        mongoEndpointsActionColumn.addAction(MongoEndpointsImagesBarCell.ACTION_SCALE,
+                mongoEndpointToScale -> scaleMongoEndpoint(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), mongoEndpointToScale));
         mongoEndpointsTable.addColumn(mongoEndpointsActionColumn);
         final CaptionPanel mongoEndpointsCaptionPanel = new CaptionPanel(stringMessages.mongoEndpoints());
         final VerticalPanel mongoEndpointsVerticalPanel = new VerticalPanel();
@@ -288,12 +290,13 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
         }
     }
 
-    private void scaleMongoEndpoint(StringMessages stringMessages, MongoEndpointDTO mongoEndpointToScale) {
+    private void scaleMongoEndpoint(StringMessages stringMessages, String selectedRegion, MongoEndpointDTO mongoEndpointToScale) {
         new MongoScalingDialog(mongoEndpointToScale, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
             @Override
             public void ok(MongoScalingInstructionsDTO mongoScalingInstructions) {
                 mongoEndpointsBusy.setBusy(true);
-                landscapeManagementService.scaleMongo(mongoScalingInstructions, new AsyncCallback<Void>() {
+                landscapeManagementService.scaleMongo(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(), selectedRegion,
+                        mongoScalingInstructions, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         mongoEndpointsBusy.setBusy(false);

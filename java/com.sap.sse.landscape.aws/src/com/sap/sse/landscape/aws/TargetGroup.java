@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
@@ -15,24 +14,24 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
  * @author Axel Uhl (D043530)
  *
  */
-public interface TargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
+public interface TargetGroup<ShardingKey> extends Named {
     Region getRegion();
     
-    Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getRegisteredTargets();
+    Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets();
     
-    default void addTarget(AwsInstance<ShardingKey, MetricsT> target) {
+    default void addTarget(AwsInstance<ShardingKey> target) {
         addTargets(Collections.singleton(target));
     }
     
-    void addTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+    void addTargets(Iterable<AwsInstance<ShardingKey>> targets);
     
-    default void removeTarget(AwsInstance<ShardingKey, MetricsT> target) {
+    default void removeTarget(AwsInstance<ShardingKey> target) {
         removeTargets(Collections.singleton(target));
     }
     
-    void removeTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+    void removeTargets(Iterable<AwsInstance<ShardingKey>> targets);
 
     String getTargetGroupArn();
 
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer();
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
 }

@@ -42,7 +42,6 @@ import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -72,7 +71,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
 public class TestProcedures {
     private static final Logger logger = Logger.getLogger(TestProcedures.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
-    private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape;
+    private AwsLandscape<String> landscape;
     private AwsRegion region;
     private final static String MAIL_SMTP_PASSWORD = "mail.smtp.password";
     private final static String SECURITY_SERVICE_REPLICATION_BEARER_TOKEN = "security.service.replication.bearer.token";
@@ -211,8 +210,8 @@ public class TestProcedures {
     public void testAddMongoReplica() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
-        final StartMongoDBServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> builder = StartMongoDBServer.builder();
-        final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> startMongoDBServerProcedure = builder
+        final StartMongoDBServer.Builder<?, String, MongoProcess> builder = StartMongoDBServer.builder();
+        final StartMongoDBServer<String, MongoProcess> startMongoDBServerProcedure = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
               .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
@@ -268,7 +267,7 @@ public class TestProcedures {
                     .build();
         try {
             imageUpgradeProcedure.run();
-            final AmazonMachineImage<String, SailingAnalyticsMetrics> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
+            final AmazonMachineImage<String> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
             assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(10)) < 0);
             assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
         } catch (Exception e) {
@@ -336,15 +335,14 @@ public class TestProcedures {
             final String domain = "wiesen-weg.de";
             final String hostname = serverName+"."+domain;
             CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics,
-                    SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
+                    SailingAnalyticsProcess<String>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
             createAlbProcedureBuilder
                 .setProcess(process)
                 .setHostname(hostname)
                 .setTargetGroupNamePrefix("S-ded-") // TODO when we combine procedures for launching dedicated hosts (StartSailingAnlayticsHost and specializations) then "S-ded-" should be the default; for DeployProcessOnMultiServer, "S-shared-" should be the default
                 .setLandscape(landscape);
             optionalTimeout.ifPresent(createAlbProcedureBuilder::setTimeout);
-            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedure =
-                    createAlbProcedureBuilder.build();
+            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createAlbProcedure = createAlbProcedureBuilder.build();
             try {
                 createAlbProcedure.run();
                 // A few validations:

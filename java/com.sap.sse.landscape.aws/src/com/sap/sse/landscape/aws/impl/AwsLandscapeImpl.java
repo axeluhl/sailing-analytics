@@ -136,9 +136,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
-public class AwsLandscapeImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
+public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> {
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
@@ -241,7 +239,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
         final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
@@ -255,16 +253,17 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
                         LoadBalancerAttribute.builder().key("access_logs.s3.enabled").value("true").build(),
                         LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(getS3BucketForAlbLogs(region)).build(),
                         LoadBalancerAttribute.builder().key("idle_timeout.timeout_seconds").value("4000").build()).build());
-        final ApplicationLoadBalancer<ShardingKey, MetricsT> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
+        final ApplicationLoadBalancer<ShardingKey> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
         createLoadBalancerListener(result, ProtocolEnum.HTTP);
         createLoadBalancerListener(result, ProtocolEnum.HTTPS);
         return result;
     }
     
-    private Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey, MetricsT> alb, ProtocolEnum protocol) {
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey> alb, ProtocolEnum protocol) {
         final int port = protocol==ProtocolEnum.HTTP?80:443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey, MetricsT> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
                 port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         return getLoadBalancingClient(
@@ -287,24 +286,24 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
+    public void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey> alb) {
         getLoadBalancingClient(getRegion(alb.getRegion())).deleteLoadBalancer(DeleteLoadBalancerRequest.builder().loadBalancerArn(alb.getArn()).build());
     }
 
     @Override
-    public Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
+    public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
         return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
                 tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn()));
     }
 
     @Override
-    public Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
+    public Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb) {
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
         return client.describeListeners(b->b.loadBalancerArn(alb.getArn())).listeners();
     }
 
     @Override
-    public LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
+    public LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey> alb) {
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(getRegion(alb.getRegion()));
         final DescribeLoadBalancersResponse response = client.describeLoadBalancers(b->b.loadBalancerArns(alb.getArn()));
         return response.loadBalancers().iterator().next().state();
@@ -364,7 +363,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Iterable<ApplicationLoadBalancer<ShardingKey, MetricsT>> getLoadBalancers(com.sap.sse.landscape.Region region) {
+    public Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(com.sap.sse.landscape.Region region) {
         final List<LoadBalancer> loadBalancers = getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(DescribeLoadBalancersRequest.builder().build())
                 .loadBalancers();
@@ -373,7 +372,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerByName(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, com.sap.sse.landscape.Region region) {
         try {
             final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(name));
             return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
@@ -383,7 +382,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancer(String loadBalancerArn, com.sap.sse.landscape.Region region) {
         final LoadBalancer loadBalancer = getLoadBalancingClient(getRegion(region))
                 .describeLoadBalancers(DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancerArn).build())
                 .loadBalancers().iterator().next();
@@ -409,7 +408,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     
     @Override
     public ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname,
-            ApplicationLoadBalancer<ShardingKey, MetricsT> alb) {
+            ApplicationLoadBalancer<ShardingKey> alb) {
         final String dnsName = alb.getDNSName();
         return setDNSRecord(hostedZoneId, hostname, RRType.CNAME, dnsName);
     }
@@ -456,14 +455,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public AmazonMachineImage<ShardingKey, MetricsT> getImage(com.sap.sse.landscape.Region region, String imageId) {
+    public AmazonMachineImage<ShardingKey> getImage(com.sap.sse.landscape.Region region, String imageId) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().imageIds(imageId).build());
         return new AmazonMachineImageImpl<>(response.images().iterator().next(), region, this);
     }
     
     @Override
-    public AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName, Optional<Tags> tags) {
+    public AmazonMachineImage<ShardingKey> createImage(AwsInstance<ShardingKey> instance, String imageName, Optional<Tags> tags) {
         logger.info("Creating Amazon Machine Image (AMI) named "+imageName+" for instance "+instance.getInstanceId());
         final Ec2Client client = getEc2Client(getRegion(instance.getRegion()));
         final String imageId = client.createImage(b->b
@@ -482,14 +481,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
+    public AmazonMachineImage<ShardingKey> getLatestImageWithTag(com.sap.sse.landscape.Region region, String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
         return new AmazonMachineImageImpl<>(response.images().stream().max(getMachineImageCreationDateComparator()).get(), region, this);
     }
     
     @Override
-    public Iterable<AmazonMachineImage<ShardingKey, MetricsT>> getAllImagesWithTag(com.sap.sse.landscape.Region region,
+    public Iterable<AmazonMachineImage<ShardingKey>> getAllImagesWithTag(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
         final DescribeImagesResponse response = getEc2Client(getRegion(region))
                 .describeImages(DescribeImagesRequest.builder().filters(Filter.builder().name("tag:"+tagName).values(tagValue).build()).build());
@@ -519,7 +518,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
+    public Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
         Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
         return getHostsWithFilters(region, filter);
@@ -530,7 +529,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
+    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
             String tagName, String tagValue) {
         return getHostsWithFilters(region, getRunningHostFilter());
     }
@@ -539,8 +538,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         return Filter.builder().name("instance-state-name").values("running").build();
     }
 
-    private Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
-        final List<AwsInstance<ShardingKey, MetricsT>> result = new ArrayList<>();
+    private Iterable<AwsInstance<ShardingKey>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
+        final List<AwsInstance<ShardingKey>> result = new ArrayList<>();
         final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filters));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
@@ -550,21 +549,21 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         return result;
     }
 
-    private AwsInstance<ShardingKey, MetricsT> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
-        return new AwsInstanceImpl<ShardingKey, MetricsT>(instance.instanceId(), getAvailabilityZoneByName(region, instance.placement().availabilityZone()), this);
+    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
+        return new AwsInstanceImpl<ShardingKey>(instance.instanceId(), getAvailabilityZoneByName(region, instance.placement().availabilityZone()), this);
     }
 
-    private AwsInstance<ShardingKey, MetricsT> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
+    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
         return getHost(region, getInstance(instanceId, region));
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
+    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
         return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
+    public Iterable<AwsInstance<ShardingKey>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
         return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName));
     }
     
@@ -652,13 +651,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes() {
         // TODO Implement Landscape<ShardingKey,MetricsT>.getScopes(...)
         return null;
     }
     
     @Override
-    public <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier,
+    public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> launchHosts(HostSupplier<ShardingKey, HostT> hostSupplier,
             int numberOfHostsToLaunch, MachineImage fromImage,
             InstanceType instanceType, AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         if (!fromImage.getRegion().equals(az.getRegion())) {
@@ -695,7 +695,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public void terminate(AwsInstance<ShardingKey, MetricsT> host) {
+    public void terminate(AwsInstance<ShardingKey> host) {
         logger.info("Terminating instance "+host);
         getEc2Client(getRegion(host.getAvailabilityZone().getRegion())).terminateInstances(
                 TerminateInstancesRequest.builder().instanceIds(host.getInstanceId()).build());
@@ -712,7 +712,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public TargetGroup<ShardingKey, MetricsT> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
+    public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final DescribeTargetGroupsResponse targetGroupResponse = loadBalancingClient.describeTargetGroups(b->b.names(targetGroupName));
         return targetGroupResponse.hasTargetGroups()
@@ -722,7 +722,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public TargetGroup<ShardingKey, MetricsT> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
+    public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -772,14 +772,14 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public <SK, MT extends ApplicationProcessMetrics> void deleteTargetGroup(TargetGroup<SK, MT> targetGroup) {
+    public <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
 
     @Override
-    public Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup) {
-        final Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> result = new HashMap<>();
+    public Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup) {
+        final Map<AwsInstance<ShardingKey>, TargetHealth> result = new HashMap<>();
         final Region region = getRegion(targetGroup.getRegion());
         getLoadBalancingClient(region)
                 .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
@@ -790,9 +790,10 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey, MetricsT> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -805,24 +806,24 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public void addTargetsToTargetGroup(
-            TargetGroup<ShardingKey, MetricsT> targetGroup,
-            Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+            TargetGroup<ShardingKey> targetGroup,
+            Iterable<AwsInstance<ShardingKey>> targets) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(getRegisterTargetsRequestBuilderConsumer(targetGroup, targets));
     }
 
-    private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+    private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey>> targets) {
         return Util.toArray(Util.map(targets, t->TargetDescription.builder().id(t.getInstanceId()).build()), new TargetDescription[0]);
     }
 
     @Override
     public void removeTargetsFromTargetGroup(
-            TargetGroup<ShardingKey, MetricsT> targetGroup,
-            Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+            TargetGroup<ShardingKey> targetGroup,
+            Iterable<AwsInstance<ShardingKey>> targets) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deregisterTargets(getDeregisterTargetRequestBuilderConsumers(targetGroup, targets));
     }
 
     private Consumer<software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest.Builder> getRegisterTargetsRequestBuilderConsumer(
-            TargetGroup<ShardingKey, MetricsT> targetGroup, Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+            TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> targets) {
         final TargetDescription[] targetDescriptions = getTargetDescriptions(targets);
         return b->b
                 .targetGroupArn(targetGroup.getTargetGroupArn())
@@ -830,7 +831,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     private Consumer<software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest.Builder> getDeregisterTargetRequestBuilderConsumers(
-            TargetGroup<ShardingKey, MetricsT> targetGroup, Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+            TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> targets) {
         final TargetDescription[] targetDescriptions = getTargetDescriptions(targets);
         return b->b
                 .targetGroupArn(targetGroup.getTargetGroupArn())
@@ -877,13 +878,13 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(
+    public ApplicationLoadBalancer<ShardingKey> getNonDNSMappedLoadBalancer(
             com.sap.sse.landscape.Region region, String wildcardDomain) {
         return getLoadBalancerByName(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> createNonDNSMappedLoadBalancer(
+    public ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(
             com.sap.sse.landscape.Region region, String wildcardDomain) {
         return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
     }
@@ -893,11 +894,11 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(
+    public ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(
             com.sap.sse.landscape.Region region, String hostname) {
         final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
         for (final LoadBalancer lb : response.loadBalancers()) {
-            final ApplicationLoadBalancer<ShardingKey, MetricsT> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
+            final ApplicationLoadBalancer<ShardingKey> alb = new ApplicationLoadBalancerImpl<>(region, lb, this);
             for (final Rule rule : alb.getRules()) {
                 if (rule.conditions().stream().filter(r->r.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()) {
                     return alb;
@@ -923,7 +924,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName) {
+    public Optional<String> getTag(AwsInstance<ShardingKey> host, String tagName) {
         final DescribeTagsResponse tagResponse = getEc2Client(getRegion(host.getRegion())).describeTags(b->b.filters(
                 Filter.builder()
                     .name("resource-id").values(host.getInstanceId()).build(),
@@ -941,7 +942,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public MongoReplicaSet getDatabaseConfigurationForReplicaSet(com.sap.sse.landscape.Region region, String mongoReplicaSetName) {
         final MongoReplicaSet result = new MongoReplicaSetImpl(mongoReplicaSetName);
-        for (final AwsInstance<ShardingKey, MetricsT> host : getMongoDBHosts(region)) {
+        for (final AwsInstance<ShardingKey> host : getMongoDBHosts(region)) {
             for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(host)) {
                 if (replicaSetNameAndPort.getA().equals(mongoReplicaSetName)) {
                     result.addReplica(new MongoProcessInReplicaSetImpl(result, replicaSetNameAndPort.getB(), host));
@@ -951,7 +952,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
         return result;
     }
 
-    private Iterable<AwsInstance<ShardingKey, MetricsT>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
+    private Iterable<AwsInstance<ShardingKey>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
         return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
     }
 
@@ -960,7 +961,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
      *            assumed to be a host that has the {@link #MONGO_REPLICA_SETS_TAG_NAME} tag set
      * @return the replica set name / port number pairs extracted from the tag value
      */
-    private Iterable<Pair<String, Integer>> getMongoEndpointSpecificationsAsReplicaSetNameAndPort(final AwsInstance<ShardingKey, MetricsT> host) {
+    private Iterable<Pair<String, Integer>> getMongoEndpointSpecificationsAsReplicaSetNameAndPort(final AwsInstance<ShardingKey> host) {
         final List<Pair<String, Integer>> result = new ArrayList<>();
         getTag(host, MONGO_REPLICA_SETS_TAG_NAME).ifPresent(tagValue->{
             for (final String replicaNameWithOptionalPortColonSeparated : tagValue.split(",")) {
@@ -975,7 +976,7 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     public Iterable<MongoEndpoint> getMongoEndpoints(com.sap.sse.landscape.Region region) {
         final Set<MongoEndpoint> result = new HashSet<>();
         final Set<String> replicaSetsCreated = new HashSet<>();
-        for (final AwsInstance<ShardingKey, MetricsT> mongoDBHost : getMongoDBHosts(region)) {
+        for (final AwsInstance<ShardingKey> mongoDBHost : getMongoDBHosts(region)) {
             for (final Pair<String, Integer> replicaSetNameAndPort : getMongoEndpointSpecificationsAsReplicaSetNameAndPort(mongoDBHost)) {
                 if (replicaSetNameAndPort.getA() != null && !replicaSetNameAndPort.getA().isEmpty()) { // non-empty replica set name
                     if (!replicaSetsCreated.contains(replicaSetNameAndPort.getA())) {
@@ -994,9 +995,9 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey, MetricsT>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
+        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
         if (rabbitMQHostsInRegion.iterator().hasNext()) {
-            final AwsInstance<ShardingKey, MetricsT> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
+            final AwsInstance<ShardingKey> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
             result = new RabbitMQEndpoint() {
                 @Override
                 public int getPort() {
@@ -1033,10 +1034,11 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
         final List<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> result = new ArrayList<>();
-        for (final AwsInstance<ShardingKey, MetricsT> host : getRunningHostsWithTag(region, tagName)) {
+        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
             final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> applicationProcessHost =
                     new ApplicationProcessHostImpl<ShardingKey, MetricsT, ProcessT>(
                             host.getInstanceId(), host.getAvailabilityZone(), this, processFactoryFromHostAndServerDirectory);
@@ -1046,7 +1048,8 @@ implements AwsLandscape<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(com.sap.sse.landscape.Region region, String tagName,
             BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> hosts = getApplicationProcessHostsByTag(region, tagName, processFactoryFromHostAndServerDirectory);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();

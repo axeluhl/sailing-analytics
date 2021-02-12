@@ -10,7 +10,6 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.jcraft.jsch.JSchException;
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
@@ -29,6 +28,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -148,7 +148,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId) {
         final ArrayList<SSHKeyPairDTO> result = new ArrayList<>();
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
         final AwsRegion region = new AwsRegion(regionId);
         for (final KeyPairInfo keyPairInfo : landscape.getAllKeyPairInfos(region)) {
             final SSHKeyPair key = landscape.getSSHKeyPair(region, keyPairInfo.keyName());
@@ -169,7 +169,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain();
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getEncryptedPrivateKey();
@@ -177,7 +177,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final AwsLandscape<String> landscape = AwsLandscape.obtain();
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
         getSecurityService().checkCurrentUserReadPermission(keyPair);
         return keyPair.getPublicKey();
@@ -189,9 +189,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 new TypeRelativeObjectIdentifier("AWS")));
         final ArrayList<AmazonMachineImageDTO> result = new ArrayList<>();
         final AwsRegion awsRegion = new AwsRegion(region);
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
         for (final String imageType : landscape.getMachineImageTypes(awsRegion)) {
-            for (final AmazonMachineImage<Object, ApplicationProcessMetrics> machineImage : landscape.getAllImagesWithType(awsRegion, imageType)) {
+            for (final AmazonMachineImage<String> machineImage : landscape.getAllImagesWithType(awsRegion, imageType)) {
                 final AmazonMachineImageDTO dto = new AmazonMachineImageDTO(machineImage.getId(),
                         machineImage.getRegion().getId(), machineImage.getName(), imageType, machineImage.getState().name(),
                         machineImage.getCreatedAt());
@@ -205,8 +205,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) {
         SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
                 new TypeRelativeObjectIdentifier("AWS")));
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
-        final AmazonMachineImage<Object, ApplicationProcessMetrics> ami = landscape.getImage(new AwsRegion(region), machineImageId);
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AmazonMachineImage<String> ami = landscape.getImage(new AwsRegion(region), machineImageId);
         ami.delete();
     }
 
@@ -214,9 +214,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception {
         SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
                 new TypeRelativeObjectIdentifier("AWS")));
-        final AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
         final AwsRegion awsRegion = new AwsRegion(region);
-        final AmazonMachineImage<?, ?> ami = landscape.getImage(awsRegion, machineImageId);
+        final AmazonMachineImage<String> ami = landscape.getImage(awsRegion, machineImageId);
         final UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> upgradeAmiBuilder = UpgradeAmi.builder();
         upgradeAmiBuilder
             .setLandscape(landscape)
@@ -225,13 +225,29 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
         final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
         upgradeAmi.run();
-        final AmazonMachineImage<String, SailingAnalyticsMetrics> resultingAmi = upgradeAmi.getUpgradedAmi();
+        final AmazonMachineImage<String> resultingAmi = upgradeAmi.getUpgradedAmi();
         return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
     }
 
     @Override
-    public void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions) {
-        // TODO Implement LandscapeManagementWriteServiceImpl.scaleMongo(...)
-        
+    public void scaleMongo(String awsAccessKey, String awsSecret, String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
+        if (mongoScalingInstructions.getReplicaSetName() == null) {
+            throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
+        }
+        final AwsLandscape<String> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsRegion region = new AwsRegion(regionId);
+        for (int i=0; i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances(); i++) {
+            final StartMongoDBServer.Builder<?, String, MongoProcessInReplicaSet> startMongoProcessBuilder = StartMongoDBServer.builder();
+            final StartMongoDBServer<String, MongoProcessInReplicaSet> startMongoDBServer = startMongoProcessBuilder
+                .setLandscape(landscape)
+                .setInstanceType(InstanceType.valueOf(mongoScalingInstructions.getLaunchParameters().getInstanceType()))
+                .setRegion(region)
+                .setReplicaSetName(mongoScalingInstructions.getReplicaSetName())
+                .setReplicaSetPrimary(mongoScalingInstructions.getLaunchParameters().getReplicaSetPrimary())
+                .setReplicaSetPriority(mongoScalingInstructions.getLaunchParameters().getReplicaSetPriority())
+                .setReplicaSetVotes(mongoScalingInstructions.getLaunchParameters().getReplicaSetVotes())
+                .build();
+            startMongoDBServer.run();
+        }
     }
 }

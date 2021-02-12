@@ -55,5 +55,6 @@ public interface LandscapeManagementWriteServiceAsync {
     void upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId,
             AsyncCallback<AmazonMachineImageDTO> callback);
 
-    void scaleMongo(MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
+    void scaleMongo(String awsAccessKey, String awsSecret, String region,
+            MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
 }
