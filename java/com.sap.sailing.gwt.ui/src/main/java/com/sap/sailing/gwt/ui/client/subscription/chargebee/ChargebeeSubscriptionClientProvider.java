@@ -4,10 +4,14 @@ import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MA
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionClientProvider;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionViewPresenter;
+import com.sap.sailing.gwt.ui.shared.subscription.chargebee.ChargebeeConfigurationDTO;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class ChargebeeSubscriptionClientProvider implements SubscriptionClientProvider {
     public static final String PROVIDER_NAME = "chargebee";
@@ -16,9 +20,23 @@ public class ChargebeeSubscriptionClientProvider implements SubscriptionClientPr
     private ChargebeeSubscriptionServiceAsync service;
     private ChargebeeSubscriptionWriteServiceAsync writeService;
 
+    final private AsyncCallback<ChargebeeConfigurationDTO> configurationCallback = new AsyncCallback<ChargebeeConfigurationDTO>() {
+        @Override
+        public void onSuccess(ChargebeeConfigurationDTO result) {
+            if (result != null) {
+                Chargebee.init(Chargebee.InitOption.create(result.getSiteName()));
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+            Notification.notify(caught.getMessage(), NotificationType.ERROR);
+        }
+    };
+
     @Override
     public void init() {
-        Chargebee.init(Chargebee.InitOption.create(SubscriptionConfiguration.CHARGEBEE_SITE));
+        getSubscriptionService().getConfiguration(configurationCallback);
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
@@ -22,14 +24,14 @@ import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.landscape.common.SecuredLandscapeTypes;
+import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
@@ -41,6 +43,7 @@ import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 public class SshKeyManagementPanel extends VerticalPanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<SSHKeyPairDTO, StringMessages, AdminConsoleTableResources> sshKeyTable;
+    private final PasswordTextBox sshPrivateKeyPassphrase;
     private final BusyIndicator sshKeyLoadingBusy;
     private final ErrorReporter errorReporter;
     private final RefreshableSingleSelectionModel<String> regionSelectionModel;
@@ -52,6 +55,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
         this.regionSelectionModel = regionSelectionModel;
         this.landscapeManagementService = landscapeManagementService;
         this.errorReporter = errorReporter;
+        this.sshPrivateKeyPassphrase = new PasswordTextBox();
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, SecuredLandscapeTypes.SSH_KEY);
         add(buttonPanel);
         final Button addButton = buttonPanel.addCreateAction(stringMessages.add(), ()->{
@@ -110,10 +114,33 @@ public class SshKeyManagementPanel extends VerticalPanel {
                             public void onSuccess(Void result) {
                                 sshKeyTable.remove(sshKeyPairDTO);
                             }
-                    
+                }));
+        sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_SHOW_KEYS, DefaultActions.READ,
+                sshKeyPairDTO->landscapeManagementService.getSshPublicKey(sshKeyPairDTO.getRegionId(), sshKeyPairDTO.getName(), new AsyncCallback<byte[]>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(final byte[] publicKey) {
+                        landscapeManagementService.getEncryptedSshPrivateKey(sshKeyPairDTO.getRegionId(), sshKeyPairDTO.getName(), new AsyncCallback<byte[]>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(final byte[] encryptedPrivateKey) {
+                                showKeys(sshKeyPairDTO.getName(), publicKey, encryptedPrivateKey, stringMessages);
+                            }
+                        });
+                    }
                 }));
         sshKeyTable.addColumn(sshKeyPairActionColumn);
         add(sshKeyTable);
+        add(new Label(stringMessages.sshPrivateKeyPassphraseForSelectedKeyPair()));
+        add(sshPrivateKeyPassphrase);
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
         buttonPanel.addRemoveAction(stringMessages.remove(), sshKeyTable.getSelectionModel(), /* withConfirmation */ true, ()->{
@@ -138,6 +165,14 @@ public class SshKeyManagementPanel extends VerticalPanel {
         });
     }
     
+    public String getPassphraseForPrivateKeyDecryption() {
+        return sshPrivateKeyPassphrase.getValue();
+    }
+    
+    private void showKeys(String keyName, byte[] publicKey, byte[] encryptedPrivateKey, StringMessages stringMessages) {
+        new SshKeyDisplayAndDownloadDialog(keyName, publicKey, encryptedPrivateKey, stringMessages).show();
+    }
+
     private void openGenerateSshKeyDialog(StringMessages stringMessages, AwsAccessKeyProvider awsAccessKeyProvider) {
         new GenerateSshKeyDialog(stringMessages,
                 new DialogCallback<Triple<String, String, String>>() {

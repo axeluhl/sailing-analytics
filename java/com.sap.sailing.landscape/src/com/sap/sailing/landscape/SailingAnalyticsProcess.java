@@ -10,9 +10,9 @@ public interface SailingAnalyticsProcess<ShardingKey> extends ApplicationProcess
     static Logger logger = Logger.getLogger(SailingAnalyticsProcess.class.getName());
     static String HEALTH_CHECK_PATH = "/gwt/status";
 
-    default int getExpeditionUdpPort(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    default int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         return Integer.parseInt(getEnvShValueFor(SailingAnalyticsProcessConfigurationVariable.EXPEDITION_PORT.name(),
-                optionalTimeout, privateKeyEncryptionPassphrase));
+                optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
     }
 }

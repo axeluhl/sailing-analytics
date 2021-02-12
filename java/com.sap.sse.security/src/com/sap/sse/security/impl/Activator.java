@@ -196,12 +196,13 @@ public class Activator implements BundleActivator {
                 new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
-        registration = context.registerService(SecurityService.class.getName(), initialSecurityService, null);
+        registration = context.registerService(SecurityService.class, initialSecurityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
                 initialSecurityService.getId().toString());
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
+        context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     

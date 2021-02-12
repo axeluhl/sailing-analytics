@@ -16,7 +16,6 @@ import android.widget.ListView;
 
 import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
@@ -24,7 +23,6 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
@@ -34,7 +32,6 @@ import com.sap.sse.common.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -93,7 +90,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onResume() {
         super.onResume();
-        loadItems();
+        initLoader();
     }
 
     @Override
@@ -139,14 +136,13 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
         checkedItems.clear();
-        if (isForceLoad() && !isCached) {
+        if (!isCached) {
             listAdapter.setCheckedPosition(-1);
             mSelectedIndex = -1;
         }
         // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator<>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
@@ -156,7 +152,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
             listAdapter.notifyDataSetChanged();
         }
 
-        if (!isForceLoad() || !isCached) {
+        if (!isCached) {
             showProgressBar(false);
         }
     }
@@ -164,24 +160,46 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     private String getEventSubText(Named named) {
         String subText = null;
         if (named instanceof EventBase) {
-            EventBase eventBase = (EventBase) named;
+            final EventBase eventBase = (EventBase) named;
             String dateString;
             if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
-                Locale locale = getResources().getConfiguration().locale;
-                Calendar startDate = Calendar.getInstance();
+                final Locale locale = getResources().getConfiguration().locale;
+                final int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                final Calendar startDate = Calendar.getInstance();
                 startDate.setTime(eventBase.getStartDate().asDate());
-                Calendar endDate = Calendar.getInstance();
+                final Calendar endDate = Calendar.getInstance();
                 endDate.setTime(eventBase.getEndDate().asDate());
-                String start = String.format("%s %s", startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
-                        startDate.get(Calendar.DATE));
-                String end = "";
-                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
-                    end = endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+                final int startYear = startDate.get(Calendar.YEAR);
+                String start;
+                if (startYear == currentYear) {
+                    start = String.format(
+                            "%s %s",
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
+                } else {
+                    start = String.format(
+                            "%s %s %s",
+                            startYear,
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
                 }
-                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)
-                        || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
-                    end += " " + endDate.get(Calendar.DATE);
+                final StringBuilder builder = new StringBuilder();
+                if (startYear != endDate.get(Calendar.YEAR)) {
+                    builder.append(endDate.get(Calendar.YEAR))
+                            .append(" ")
+                            .append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
+                    builder.append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                    builder.append(endDate.get(Calendar.DATE));
                 }
+                final String end = builder.toString();
                 dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
                 subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(),
                         (!TextUtils.isEmpty(dateString) ? ", " : ""),
@@ -201,17 +219,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     Loader<DataLoaderResult<Collection<T>>> restartLoader() {
         return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
-    }
-
-    private void loadItems() {
-        final Loader<DataLoaderResult<Collection<T>>> loader = initLoader();
-        if (isForceLoad()) {
-            loader.forceLoad();
-        }
-    }
-
-    private boolean isForceLoad() {
-        return getArguments() != null && getArguments().getBoolean(AppConstants.ACTION_EXTRA_FORCED);
     }
 
     private void showLoadFailedDialog(String message) {
@@ -234,7 +241,9 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         listAdapter.notifyDataSetChanged();
 
         mSelectedIndex = position;
-        getListView().setSelection(position);
+        if (mSelectedIndex >= 0) {
+            getListView().setSelection(mSelectedIndex);
+        }
         if (notify) {
             listener.itemSelected(this, eventBase);
         }

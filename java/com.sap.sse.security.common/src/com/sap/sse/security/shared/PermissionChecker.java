@@ -17,16 +17,14 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
- * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
- * "https://wiki.sapsailing.com/wiki/info/security/permission-concept#algorithm-boolean-ispermitted-principalcollection-principals-wildcardpermission-permission-for-composite-realm">Permission
- * Concept Wiki article</a>. It checks permissions in four stages where earlier stages overwrite later.
- * 
- * 1. Firstly, the data object's ACL is checked if it grants or explicitly revokes the permission. 2. Thereafter, the
- * permissions directly assigned to the user are checked. 3. Finally the permissions implied by roles the user has are
- * checked. This includes roles qualified by the group/user ownerships of the objetcs to which they are applied.
+ * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in the
+ * <a href= "https://wiki.sapsailing.com/wiki/info/security/permission-concept">Concept Wiki article</a>. It checks
+ * permissions in four stages where earlier stages overwrite later. See also
+ * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)}.
  * 
  * @author Jonas Dann, Axel Uhl (d043530)
  */
@@ -92,6 +90,11 @@ public class PermissionChecker {
     }
     
     /**
+     * Like
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)},
+     * determining the groups of the {@code user} and the {@code allUser} through {@link User#getUserGroups()}. See also
+     * {@link #getGroupsOfUser(SecurityUser)}.
+     * 
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
      *            general permission for the data object type is asked after (e.g. "event:create"). If the action
@@ -109,6 +112,25 @@ public class PermissionChecker {
     }
 
     /**
+     * The following checks are performed. If a step cannot decide authoritatively, the preliminary result remains as
+     * {@link PermissionState#NONE}, and the subsequent steps are performed to find the result. If a step computes a
+     * non-{@code NONE} result, it is returned.
+     * <ol>
+     * <li>ACL check (see {@link #checkAcl(WildcardPermission, Iterable, Iterable, SecurityAccessControlList)}): If the
+     * object's {@code acl} passed to this method explicitly allows or denies access to the {@code user}'s group or to
+     * the {@code allUser}'s group then this is the result.</li>
+     * <li>User permissions (see {@link User#getPermissions()}): If any of the explicit permissions assigned to the
+     * {@code user} or the {@code allUser} passed to this method match or imply the {@code permission} requested, the
+     * result is {@link PermissionState#GRANTED}, leading to {@code true} being returned.</li>
+     * <li>If an {@code ownership} exists for the object being accessed and has a valid group ownership, that group's
+     * roles are evaluated; if any of those roles implies the {@code permission} requested to the users of that group
+     * and the {@code user} or the {@code allUser} belongs to that group, or if the role implies the {@code permission}
+     * requested to all users, the result is {@link PermissionState#GRANTED}, and {@code true} will be returned.</li>
+     * <li>If any of the roles assigned to the {@code user} or the {@code allUser}---considering their optional user/group
+     * qualificiations based on the {@code ownership}---implies the {@code permission} requested, the result is
+     * {@link PermissionState#GRANTED}, and {@code true} will be returned.</li>
+     * </ol>
+     * 
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
      *            general permission for the data object type is asked after (e.g. "event:create"). If the action
@@ -235,7 +257,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermission(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
+            Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser, O ownership, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> ownership, aclResolver);
     }
     
@@ -258,7 +280,7 @@ public class PermissionChecker {
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermissionWithOwnershipResolution(
-            WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            WildcardPermission permission, Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser,
             Function<QualifiedObjectIdentifier, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         return checkMetaPermissionInternal(permission, allPermissionTypes, user, allUser, wp -> {
             final Iterable<QualifiedObjectIdentifier> qualifiedObjectIdentifiers = wp.getQualifiedObjectIdentifiers();
@@ -282,7 +304,7 @@ public class PermissionChecker {
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     boolean checkMetaPermissionInternal(
             WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, U user, U allUser,
+            Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser,
             Function<WildcardPermission, O> ownershipResolver, AclResolver<A, O> aclResolver) {
         assert permission != null;
         assert allPermissionTypes != null;
@@ -363,7 +385,7 @@ public class PermissionChecker {
      *            {@link WildcardPermission}.
      */
     private static Set<WildcardPermission> expandSingleWildcardPermissionToDistinctPermissions(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
+            Iterable<? extends HasPermissions> allPermissionTypes, boolean expandToSingleIds) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -445,7 +467,7 @@ public class PermissionChecker {
      * we need to check the permission for any possibly existing object ID.
      */
     public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
-    boolean hasUserAnyPermission(WildcardPermission permission, Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
+    boolean hasUserAnyPermission(WildcardPermission permission, Iterable<? extends HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
@@ -461,16 +483,22 @@ public class PermissionChecker {
     }
     
     /**
+     * Like
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)},
+     * only without the ACL check. As a matter of fact, this method is being used by
+     * {@link #isPermitted(WildcardPermission, SecurityUser, Iterable, SecurityUser, Iterable, AbstractOwnership, SecurityAccessControlList)}
+     * for all but the ACL check.
+     * 
      * @param permissionChecker
      *            The permissionChecker is the one that checks if one permission implies another permission. This means,
      *            it just calls {@link WildcardPermission#implies(WildcardPermission)} in most cases. In case of an any
      *            check this needs to call {@link WildcardPermission#impliesAny(WildcardPermission)).
      * @param matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven
      *            If {@code false} and no ownership is given, all associated {@link Role Roles} of a user are checked.
-     *            For a normal permission check, this needs to be {@code true}, because qualified {@link Role Roles}
-     *            can not grant unqualified permissions. In case of an any check it is necessary to include all
-     *            qualified roles of an user, because even a qualified {@link Role} may grant any of the included
-     *            permissions. in this case, the parameter is intended to be {@code false}.
+     *            For a normal permission check, this needs to be {@code true}, because qualified {@link Role Roles} can
+     *            not grant unqualified permissions. In case of an any check it is necessary to include all qualified
+     *            roles of an user, because even a qualified {@link Role} may grant any of the included permissions. in
+     *            this case, the parameter is intended to be {@code false}.
      */
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     PermissionState checkUserPermissions(

@@ -91,7 +91,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), getPrivateKeyEncryptionPassphrase());
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -125,11 +125,5 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
-    }
-
-    @Override
-    public void run() throws Exception {
-        super.run();
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout());
     }
 }

@@ -26,6 +26,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+        <inherits name="com.sap.sailing.landscape.Landscape" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 	<inherits name="com.sap.sailing.polars.datamining.DataMiningPolars" />
         <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />

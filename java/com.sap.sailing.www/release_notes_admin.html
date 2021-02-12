@@ -4,13 +4,13 @@
     <link href="sailing-fontface-1.0.cache.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
     <link href="start.css" rel="stylesheet" type="text/css" />
     <link href="release_notes.css" rel="stylesheet" type="text/css" />
-    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico"  selenium-id="shortcutIcon"/>
-    <title>${SAP}Sailing Analytics - Admin Console Release Notes</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${applicationScope['clientConfigurationContext.whitelabeled']}.ico"  selenium-id="shortcutIcon"/>
+    <title>${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics - Admin Console Release Notes</title>
 </head>
 <body>
     <div class="logoAndTitlePanel">
         <script>
-            if (!${debrandingActive}){
+            if (!${applicationScope['clientConfigurationContext.debrandingActive']}){
                 document.write("<a class=\"sapLogo\" href=\"http://www.sap.com\"><img class=\"sapLogoImage\" src=\"/images/logo-small@2x.png\" alt=\"SAP Website\"/></a>\r\n");
             }
         </script>
@@ -55,6 +55,7 @@
                             <a href="https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:filter=Trave&selectExact=Worlds">https://dev.sapsailing.com/gwt/AdminConsole.html#RegattasPlace:filter=Trave&selectExact=Worlds</a>. 
                             Use URL-encoding for special characters in the parameter values. See class <tt>FilterAndSelectParameters</tt> for a full documentation of the filter and select-parameters.
                          </li>
+                         <li>When editing a user's permissions, the suggest box now shows the complete set of permissions.</li>
                     </ul>
                     <h2 class="articleSubheadline">December 2020</h2>
                     <ul class="bulletList">

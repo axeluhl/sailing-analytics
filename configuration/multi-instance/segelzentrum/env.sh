@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=segelzentrum
 SERVER_NAME=SEGELZENTRUM
 SERVER_PORT=8908
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/SEGELZENTRUM?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/SEGELZENTRUM?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2030
 TELNET_PORT=14908
