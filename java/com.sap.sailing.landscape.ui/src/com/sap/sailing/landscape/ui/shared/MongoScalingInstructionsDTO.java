@@ -8,14 +8,14 @@ import com.sap.sse.common.Util.Pair;
 public class MongoScalingInstructionsDTO implements IsSerializable {
     private String replicaSetName;
     private Set<Pair<String, Integer>> hostnamesAndPortsToShutDown;
-    private Set<MongoLaunchParametersDTO> launchParameters;
+    private MongoLaunchParametersDTO launchParameters;
 
     @Deprecated
     MongoScalingInstructionsDTO() {
     } // for GWT RPC serialization only
 
     public MongoScalingInstructionsDTO(String replicaSetName, Set<Pair<String, Integer>> hostnamesAndPortsToShutDown,
-            Set<MongoLaunchParametersDTO> launchParameters) {
+            MongoLaunchParametersDTO launchParameters) {
         super();
         this.replicaSetName = replicaSetName;
         this.hostnamesAndPortsToShutDown = hostnamesAndPortsToShutDown;
@@ -30,8 +30,7 @@ public class MongoScalingInstructionsDTO implements IsSerializable {
         return hostnamesAndPortsToShutDown;
     }
 
-    public Set<MongoLaunchParametersDTO> getLaunchParameters() {
+    public MongoLaunchParametersDTO getLaunchParameters() {
         return launchParameters;
     }
-
 }

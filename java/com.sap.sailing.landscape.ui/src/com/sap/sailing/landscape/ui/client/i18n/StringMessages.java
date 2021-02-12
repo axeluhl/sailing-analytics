@@ -45,4 +45,14 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String scale();
     String youCannotShutdownMongoDBInstancesNotRunningOnDefaultPort(String hostnamesAndPortsToShutdown);
     String successfullyScaledMongoDB();
+    String mongoInstancesToStop();
+    String showOnlyInstanceYouCanStop();
+    String mongoInstancesToLaunch();
+    String numberOfMongoInstancesToLaunch();
+    String priority();
+    String votes();
+    String instanceType();
+    String youHaveToProvideAPositiveNumberOfInstancesToLaunch();
+    String youHaveToProvideANonNegativePriority();
+    String youHaveToProvideANonNegativeNumberOfVotes();
 }

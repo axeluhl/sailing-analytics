@@ -5,20 +5,24 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class MongoLaunchParametersDTO implements IsSerializable {
     private String replicaSetName;
     private String replicaSetPrimary;
-    private int replicaSetPriority;
-    private int replicaSetVotes;
+    private Integer replicaSetPriority;
+    private Integer replicaSetVotes;
+    private String instanceType;
+    private Integer numberOfInstances;
 
     @Deprecated
     MongoLaunchParametersDTO() {
     } // for GWT RPC serialization only
 
-    public MongoLaunchParametersDTO(String replicaSetName, String replicaSetPrimary, int replicaSetPriority,
-            int replicaSetVotes) {
+    public MongoLaunchParametersDTO(String replicaSetName, String replicaSetPrimary, Integer replicaSetPriority,
+            Integer replicaSetVotes, String instanceType, Integer numberOfInstances) {
         super();
         this.replicaSetName = replicaSetName;
         this.replicaSetPrimary = replicaSetPrimary;
         this.replicaSetPriority = replicaSetPriority;
         this.replicaSetVotes = replicaSetVotes;
+        this.instanceType = instanceType;
+        this.numberOfInstances = numberOfInstances;
     }
 
     public String getReplicaSetName() {
@@ -29,11 +33,19 @@ public class MongoLaunchParametersDTO implements IsSerializable {
         return replicaSetPrimary;
     }
 
-    public int getReplicaSetPriority() {
+    public Integer getReplicaSetPriority() {
         return replicaSetPriority;
     }
 
-    public int getReplicaSetVotes() {
+    public Integer getReplicaSetVotes() {
         return replicaSetVotes;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public Integer getNumberOfInstances() {
+        return numberOfInstances;
     }
 }

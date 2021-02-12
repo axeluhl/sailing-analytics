@@ -289,7 +289,7 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
     }
 
     private void scaleMongoEndpoint(StringMessages stringMessages, MongoEndpointDTO mongoEndpointToScale) {
-        new MongoScalingDialog(stringMessages, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
+        new MongoScalingDialog(mongoEndpointToScale, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
             @Override
             public void ok(MongoScalingInstructionsDTO mongoScalingInstructions) {
                 mongoEndpointsBusy.setBusy(true);
