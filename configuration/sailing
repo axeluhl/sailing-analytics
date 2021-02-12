@@ -55,6 +55,10 @@ start_servers() {
 	  else
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration; reverse proxy entries may be created, and applications are launched." >>/var/log/sailing.err
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
+	    if [ "${FIRST_SERVER}" = "" ]; then
+	      echo "No SERVER_NAME provided; defaulting to \"server\" as the server directory name" >>/var/log/sailing.err
+	      FIRST_SERVER=server
+	    fi
             echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
 	    configure_and_start_server "${FIRST_SERVER}"
 	    create_basic_httpd_config "${FIRST_SERVER}"

@@ -16,7 +16,12 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     
     /**
      * A builder that helps building an instance of type {@link StartHost} or any subclass thereof (then using
-     * specialized builders).
+     * specialized builders). The following default rules apply:
+     * <ul>
+     * <li>If no explicit {@link #setMachineImage(MachineImage) machine image} is specified, an {@link #setImageType(String) image type}
+     * is expected which is then used to look up the latest image of that type in the region that needs to also be specified by the
+     * concrete builder implementation.</li>
+     * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
@@ -27,6 +32,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     HostT extends Host>
     extends Procedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
         BuilderT setImageType(String imageType);
+        BuilderT setMachineImage(MachineImage machineImage);
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
@@ -37,23 +43,16 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private MachineImage machineImage;
-        private Region region;
         private String imageType;
         
         protected MachineImage getMachineImage() {
             return machineImage == null ? getLandscape().getLatestImageWithType(getRegion(), getImageType()) : machineImage;
         }
 
-        protected Region getRegion() {
-            return region;
-        }
+        protected abstract Region getRegion();
 
-        protected BuilderT setRegion(Region region) {
-            this.region = region;
-            return self();
-        }
-
-        protected BuilderT setMachineImage(MachineImage machineImage) {
+        @Override
+        public BuilderT setMachineImage(MachineImage machineImage) {
             this.machineImage = machineImage;
             return self();
         }

@@ -122,23 +122,35 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createRootSshSession(byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        return createSshSession(ROOT_USER_NAME, privateKeyEncryptionPassphrase);
+    public com.jcraft.jsch.Session createRootSshSession(Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws JSchException {
+        return createSshSession(ROOT_USER_NAME, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     /**
-     * Establishes an unconnected session configured for the "root" user.
+     * Establishes an unconnected session configured for the user specified by {@code sshUserName}, trying to find and
+     * unlock the SSH private key for the key pair whose name is provided by the {@code keyName} parameter. A
+     * {@link NullPointerException} will be thrown if such a key cannot be found in the {@link #getRegion() region} of
+     * this instance.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     *            the pass phrase to unlock the private key that belongs to the key pair identified by {@code keyName}
      * @see #createRootSshChannel
      */
-    public com.jcraft.jsch.Session createSshSession(String sshUserName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
-        final String keyName = getInstance().keyName(); // the SSH key pair name that can be used to log on
+    public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
+        final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
@@ -159,8 +171,8 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return createSshChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return createSshChannel(ROOT_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     /**
@@ -176,13 +188,13 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
      */
     @Override
     public SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout, privateKeyEncryptionPassphrase));
-
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return new SshCommandChannelImpl((ChannelExec) createSshChannelInternal(sshUserName, "exec", optionalTimeout,
+                optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
     private Channel createSshChannelInternal(String sshUserName, String channelType, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
                 "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
                 " to instance with ID "+getInstanceId());
@@ -191,7 +203,7 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
             result = Wait.wait(()->{
                     Session session = null;
                     try {
-                        session = createSshSession(sshUserName, privateKeyEncryptionPassphrase);
+                        session = createSshSession(sshUserName, optionalKeyName, privateKeyEncryptionPassphrase);
                         session.setUserInfo(new YesUserInfo());
                         session.connect(optionalTimeout.map(d->d.asMillis()).orElse(0l).intValue());
                         return session.openChannel(channelType);
@@ -214,15 +226,15 @@ public class AwsInstanceImpl<ShardingKey, MetricsT extends ApplicationProcessMet
     
     @Override
     public ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return (ChannelSftp) createSshChannelInternal(sshUserName, "sftp", optionalTimeout,
-                privateKeyEncryptionPassphrase);
+                optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    public ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        return createSftpChannel(ROOT_USER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
+        return createSftpChannel(ROOT_USER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override

@@ -521,6 +521,13 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
+    
+    /**
+     * @see SailingService#createRaceBoardLinkQrCode(String url)
+     * @param url
+     * @param asyncCallback
+     */
+    void createRaceBoardLinkQrCode(String url, AsyncCallback<String> asyncCallback);
 
     void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
 

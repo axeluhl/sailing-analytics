@@ -28,8 +28,13 @@ extends AwsInstance<ShardingKey, MetricsT> {
     
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
+     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      */
-    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
 }

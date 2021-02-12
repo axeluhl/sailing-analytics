@@ -21,7 +21,7 @@ public class JCraftLogAdapter implements Logger {
         levelMap.put(com.jcraft.jsch.Logger.DEBUG, Level.FINE);
         levelMap.put(com.jcraft.jsch.Logger.ERROR, Level.SEVERE);
         levelMap.put(com.jcraft.jsch.Logger.FATAL, Level.SEVERE);
-        levelMap.put(com.jcraft.jsch.Logger.INFO, Level.INFO);
+        levelMap.put(com.jcraft.jsch.Logger.INFO, Level.FINE); // to keep the flood of key exchange messages muted in normal mode
         levelMap.put(com.jcraft.jsch.Logger.WARN, Level.WARNING);
     }
 

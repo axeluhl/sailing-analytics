@@ -160,7 +160,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             if (fragment != null) {
                 LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
                 manager.sendBroadcast(new Intent(action));
-                manager.sendBroadcast(new Intent(AppConstants.ACTION_CLEAR_TOGGLE));
                 return true;
             }
         }
@@ -573,8 +572,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                     if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                         content = RaceFlagViewerFragment.newInstance();
                     } else {
-                        boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED,
-                                false);
+                        boolean forced = intent.getBooleanExtra(AppConstants.ACTION_EXTRA_FORCED, false);
                         if (forced) {
                             content = RaceFinishingFragment.newInstance();
                         } else {

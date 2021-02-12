@@ -18,13 +18,13 @@
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
-    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
-    <link href='images/sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${applicationScope['clientConfigurationContext.whitelabeled']}.ico" />
+    <link href='images/sap-sailing-app-icon${applicationScope['clientConfigurationContext.whitelabeled']}.png' rel='apple-touch-icon'>
 
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>${SAP}Sailing Analytics AutoPlay</title>
+    <title>${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics AutoPlay</title>
 
     <link rel="stylesheet" type="text/css" href="/sailing-reset-2.0.cache.css">
     <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css">
@@ -45,7 +45,7 @@
     </script>
     <script>
        document.clientConfigurationContext = {
-            debrandingActive: ${debrandingActive}
+            debrandingActive: ${applicationScope['clientConfigurationContext.debrandingActive']}
        };
     </script>
     <script type="text/javascript" src="com.sap.sailing.gwt.autoplay.AutoPlay/com.sap.sailing.gwt.autoplay.AutoPlay.nocache.js"></script>

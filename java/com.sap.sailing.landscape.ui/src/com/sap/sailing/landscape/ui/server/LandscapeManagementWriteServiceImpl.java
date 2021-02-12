@@ -2,22 +2,29 @@ package com.sap.sailing.landscape.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
+import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
@@ -29,6 +36,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
@@ -36,6 +44,8 @@ import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
+    
+    private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
@@ -55,7 +65,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public ArrayList<String> getRegions() {
-        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
         return result;
@@ -63,7 +74,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public ArrayList<MongoEndpointDTO> getMongoEndpoints(String awsAccessKey, String awsSecret, String region) {
-        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
         final ArrayList<MongoEndpointDTO> result = new ArrayList<>();
         for (final MongoEndpoint mongoEndpoint : AwsLandscape.obtain(awsAccessKey, awsSecret).getMongoEndpoints(new AwsRegion(region))) {
             final MongoEndpointDTO dto;
@@ -143,5 +155,66 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair) {
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(keyPair,
             ()->AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName()));
+    }
+    
+    @Override
+    public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getEncryptedPrivateKey();
+    }
+
+    @Override
+    public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getPublicKey();
+    }
+
+    @Override
+    public ArrayList<AmazonMachineImageDTO> getAmazonMachineImages(String awsAccessKey, String awsSecret, String region) {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
+        final ArrayList<AmazonMachineImageDTO> result = new ArrayList<>();
+        final AwsRegion awsRegion = new AwsRegion(region);
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        for (final String imageType : landscape.getMachineImageTypes(awsRegion)) {
+            final AmazonMachineImage<?, ApplicationProcessMetrics> machineImage = landscape.getLatestImageWithType(awsRegion, imageType);
+            final AmazonMachineImageDTO dto = new AmazonMachineImageDTO(machineImage.getId(),
+                    machineImage.getRegion().getId(), machineImage.getName(), imageType, machineImage.getState().name(),
+                    machineImage.getCreatedAt());
+            result.add(dto);
+        }
+        return result;
+    }
+
+    @Override
+    public void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
+        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AmazonMachineImage<Object, ApplicationProcessMetrics> ami = landscape.getImage(new AwsRegion(region), machineImageId);
+        ami.delete();
+    }
+
+    @Override
+    public AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
+        final AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsRegion awsRegion = new AwsRegion(region);
+        final AmazonMachineImage<?, ?> ami = landscape.getImage(awsRegion, machineImageId);
+        final UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> upgradeAmiBuilder = UpgradeAmi.builder();
+        upgradeAmiBuilder
+            .setLandscape(landscape)
+            .setRegion(awsRegion)
+            .setMachineImage(ami)
+            .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
+        final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
+        upgradeAmi.run();
+        final AmazonMachineImage<String, SailingAnalyticsMetrics> resultingAmi = upgradeAmi.getUpgradedAmi();
+        return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
     }
 }
