@@ -645,12 +645,12 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastHorizontalSplitter != null) {
             if(horizontalEastSplitters.size() > 0) {
                 Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalEastSplitters,
-                        "gwt-SplitLayoutPanel-WestToggleButton-Panel", "gwt-SplitLayoutPanel-WestToggleButton", cm, /* additional buttons and styles */ null);                
+                        "gwt-SplitLayoutPanel-WestToggleButton-Panel", "gwt-SplitLayoutPanel-WestToggleButton", cm, /* additional buttons and styles */ null);
                 panelForHorizontalButtons.add(horizontalButtonsPanel);
             }
             if(horizontalWestSplitters.size() > 0) {
                 Panel horizontalButtonsPanel = createToggleButtonPanel(horizontalWestSplitters,
-                        "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);                
+                        "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);
                 panelForHorizontalButtons.add(horizontalButtonsPanel);
             }
             lastHorizontalSplitter.setVisible(false);
@@ -677,9 +677,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 buttonFlowPanel.add(button);
             }
         }
+        int bottom = 0;
         for (final Splitter splitter : splitters) {
             final Component<?> associatedComponent = splitter.getAssociatedComponent();
             final Button splitterTogglerButton = splitter.getToggleButton();
+            splitterTogglerButton.getElement().getStyle().setBottom(bottom, Unit.PX);
             splitterTogglerButton.setStyleName(buttonStyleName);
             splitterTogglerButton.addStyleDependentName("Closed");
             splitterTogglerButton.addStyleDependentName("Closed-"+associatedComponent.getDependentCssClassName());
@@ -729,6 +731,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 }
             });
             buttonFlowPanel.add(splitterTogglerButton);
+            bottom += splitterTogglerButton.getOffsetHeight() + 100;
         }
         return buttonFlowPanel;
     }
