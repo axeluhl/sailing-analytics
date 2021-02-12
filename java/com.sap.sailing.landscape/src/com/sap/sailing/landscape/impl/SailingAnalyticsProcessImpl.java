@@ -31,11 +31,16 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     /**
      * Tries to obtain the port from the {@code env.sh} file found in the {@code serverDirectory}
+     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      */
     public SailingAnalyticsProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase)
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        super(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase);
+        super(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
@@ -61,7 +66,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
      * information about server name as well as availability and replication status can be obtained.
      */
     @Override
-    public String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws JSchException, IOException, InterruptedException, SftpException, ParseException {
         String result = null;
         final TimePoint start = TimePoint.now();

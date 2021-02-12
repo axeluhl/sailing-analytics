@@ -94,6 +94,8 @@ public abstract class DataEntryDialog<T> {
     }
 
     /**
+     * @param cancelButtonName
+     *            if {@code null}, no cancel button will be displayed
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
      *            data validation is triggered upon any noticeable change in any of the elements constructed by
@@ -108,6 +110,8 @@ public abstract class DataEntryDialog<T> {
     }
     
     /**
+     * @param cancelButtonName
+     *            if {@code null}, no cancel button will be displayed
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
      *            data validation is triggered upon any noticeable change in any of the elements constructed by
@@ -149,19 +153,23 @@ public abstract class DataEntryDialog<T> {
         rightButtonPanel.add(okButton);
         buttonPanel.add(rightButtonPanel, DockPanel.EAST);
         buttonPanel.add(leftButtonPanel, DockPanel.WEST);
-        cancelButton = new Button(cancelButtonName);
-        cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
-        cancelButton.ensureDebugId("CancelButton");
-        rightButtonPanel.add(cancelButton);
-        cancelButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dataEntryDialog.hide();
-                if (callback != null) {
-                    callback.cancel();
+        if (cancelButtonName != null) {
+            cancelButton = new Button(cancelButtonName);
+            cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
+            cancelButton.ensureDebugId("CancelButton");
+            rightButtonPanel.add(cancelButton);
+            cancelButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    dataEntryDialog.hide();
+                    if (callback != null) {
+                        callback.cancel();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            cancelButton = null;
+        }
         dataEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

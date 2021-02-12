@@ -1,8 +1,6 @@
-package com.sap.sailing.windestimation.integration;
+package com.sap.sse.replication.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +19,18 @@ import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 /**
+ * Subclasses must implement {@link #createObjectInputStreamResolvingAgainstCache(InputStream)}, usually by instantiating an anonymous inner class
+ * that is subclass of {@link ObjectInputStreamResolvingAgainstCache}, as in
+ * <pre>
+ *  public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+ *      return new ObjectInputStreamResolvingAgainstCache&lt;Object&gt;(is,
+ *             new Object(), // dummy cache
+ *             null) {       // resolve listener
+ *      };
+ *  }
+ * </pre>
+ * This way, the class is loaded by the same class loader that also loads the replicable's implementation class and hence sees all
+ * the same classes that the replicable sees. This is important for the de-serialization process, especially for the operation objects.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -70,6 +80,15 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
         }
     }
 
+    /**
+     * The default implementation calls {@link #clearReplicaState()}. Subclasses may override in case they need more special
+     * test case clearing support.
+     */
+    @Override
+    public void clearState() throws Exception {
+        clearReplicaState();
+    }
+
     @Override
     public Serializable getId() {
         return getClass().getName();
@@ -103,12 +122,6 @@ public abstract class AbstractReplicableWithObjectInputStream<S, O extends Opera
     @Override
     public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
         this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
-    }
-
-    @Override
-    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy "cache" */ new Object(), /* resolve listener */ null) {
-        }; // use anonymous inner class in this class loader to see all that this class sees
     }
 
     @Override
