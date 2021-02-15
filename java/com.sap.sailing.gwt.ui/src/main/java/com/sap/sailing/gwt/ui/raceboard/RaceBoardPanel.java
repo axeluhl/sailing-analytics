@@ -93,7 +93,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
@@ -161,7 +161,7 @@ public class RaceBoardPanel
     private EditMarkPassingsPanel editMarkPassingPanel;
     private EditMarkPositionPanel editMarkPositionPanel;
     
-    private final TaggingPanel taggingPanel;
+    private final TaggingComponent taggingComponent;
     
     private final DockLayoutPanel dockPanel;
     private final ResizableFlowPanel timePanelWrapper;
@@ -337,10 +337,10 @@ public class RaceBoardPanel
                 }
             }
         }
-        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
+        taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, userService, timer,
                 raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
-        addChildComponent(taggingPanel);
-        taggingPanel.setVisible(showTaggingPanel);
+        addChildComponent(taggingComponent);
+        taggingComponent.setVisible(showTaggingPanel);
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -481,7 +481,7 @@ public class RaceBoardPanel
                         });
             }
         };
-        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingPanel, mediaPlayerManagerComponent,
+        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
                 maneuverTablePanel, asyncFetcher);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
@@ -617,7 +617,7 @@ public class RaceBoardPanel
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
     public void setTaggingPanelVisible(boolean visible) {
-        setComponentVisible(mapViewer, taggingPanel, visible);
+        setComponentVisible(mapViewer, taggingComponent, visible);
     }
 
     /**
@@ -729,7 +729,7 @@ public class RaceBoardPanel
             }
             regattaAndRaceTimeInformationHeader.add(dataByLogo);
             currentRaceHasBeenSelectedOnce = true;
-            taggingPanel.updateRace(leaderboardName, raceColumn, fleet);
+            taggingComponent.updateRace(leaderboardName, raceColumn, fleet);
         }
     }
 

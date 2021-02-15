@@ -69,11 +69,11 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
-public class TaggingPanel extends ComponentWithoutSettings
+public class TaggingComponent extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
 
     /**
-     * Describes the {@link TaggingPanel#currentState current state} of the {@link TaggingPanel}.
+     * Describes the {@link TaggingComponent#currentState current state} of the {@link TaggingComponent}.
      */
     protected enum State {
             VIEW, // default
@@ -167,7 +167,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     private StrippedLeaderboardDTOWithSecurity leaderboardDTO;
 
-    public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
+    public TaggingComponent(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight,
             StrippedLeaderboardDTOWithSecurity leaderboardDTO, SailingServiceWriteAsync sailingServiceWrite) {
@@ -223,7 +223,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Initializes UI of {@link TaggingPanel}.
+     * Initializes UI of {@link TaggingComponent}.
      */
     private void initializePanel() {
         taggingPanel.setStyleName(style.taggingPanel());
@@ -263,10 +263,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                             // remove time change listener when manually selecting tag cells as this could end in an
                             // infinite loop
                             // of timer change -> automatic selection change -> timer change -> ...
-                            timer.removeTimeListener(TaggingPanel.this);
+                            timer.removeTimeListener(TaggingComponent.this);
                             timer.setTime(selectedTag.getRaceTimepoint().asMillis());
                             // adding time change listener again
-                            timer.addTimeListener(TaggingPanel.this);
+                            timer.addTimeListener(TaggingComponent.this);
                         }
                     }
                 }
@@ -676,7 +676,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     /**
      * Returns instance of {@link TagListProvider} so it does not have to be a constructor parameter of every sub
-     * component of the {@link TaggingPanel}.
+     * component of the {@link TaggingComponent}.
      */
     protected TagListProvider getTagListProvider() {
         return tagListProvider;
@@ -694,7 +694,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Returns current state of {@link TaggingPanel}.
+     * Returns current state of {@link TaggingComponent}.
      * 
      * @return current state
      */
@@ -879,7 +879,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     public void timeChanged(Date newTime, Date oldTime) {
         // When reopening Tagging-Panel after it was opened and closed by the user, the TouchSplitLayoutPanel will
         // set the timer to the current time and not the race time, oldTime will be null in this case. This would cause
-        // a jump in time as TaggingPanel selects most current tag when time changes. When time continues while timer is
+        // a jump in time as TaggingComponent selects most current tag when time changes. When time continues while timer is
         // in "play"-mode, oldValue won't be null. This can be used as a workaround to discover this "false" time
         // change.
         // => workaround: Check if oldValue is not null to avoid jumps in time
@@ -901,7 +901,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     @Override
     public String getId() {
-        return "TaggingPanel";
+        return "TaggingComponent";
     }
 
     @Override
@@ -920,7 +920,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Requests tags from server only if {@link TaggingPanel} is visible.
+     * Requests tags from server only if {@link TaggingComponent} is visible.
      */
     @Override
     public void setVisible(boolean visible) {
