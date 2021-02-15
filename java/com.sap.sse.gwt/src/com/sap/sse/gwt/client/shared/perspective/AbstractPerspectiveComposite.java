@@ -63,7 +63,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
                 settingsPerComponent.put(c.getId(), c.getSettings());
             }
         }
-        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, settingsPerComponent);
+        return new PerspectiveCompositeSettings<>(getPerspectiveSettings(), settingsPerComponent);
     }
 
     @Override

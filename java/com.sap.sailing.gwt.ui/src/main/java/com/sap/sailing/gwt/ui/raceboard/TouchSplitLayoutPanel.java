@@ -733,6 +733,11 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         return buttonFlowPanel;
     }
     
+    @Override
+    public void forceLayout() {
+        ensureVerticalToggleButtonPosition();
+    }
+    
     /**
      * This method ensures that the toggle buttons always are positioned on top of all split panels. This requires
      * a bit of trickery as there are some edge cases (e.g. when no splitter is visible at all). 
@@ -805,7 +810,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             }
             
         }
-        forceLayout();
+        super.forceLayout();
     }
 
     public boolean hidePanelContaining(Widget child) {

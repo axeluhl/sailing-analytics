@@ -85,7 +85,8 @@ public class AutoplayHelper {
             }
         }
         if (raceTimesInfoProvider.getRaceIdentifiers().isEmpty()) {
-            LOGGER.severe("No raceidentifier was found, cannot determine currently LifeRace, check event configuration");
+            LOGGER.warning(
+                    "No raceidentifier was found. Can not determine current live race. Check event configuration in case you expect a race to be in live state.");
             callback.onSuccess(null);
         }
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
@@ -180,7 +181,7 @@ public class AutoplayHelper {
     public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
-        LOGGER.severe("Creating map for " + regattaAndRaceIdentifier);
+        LOGGER.info("Creating map for " + regattaAndRaceIdentifier);
         Timer creationTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
 
         creationTimer.setLivePlayDelayInMillis(1000);

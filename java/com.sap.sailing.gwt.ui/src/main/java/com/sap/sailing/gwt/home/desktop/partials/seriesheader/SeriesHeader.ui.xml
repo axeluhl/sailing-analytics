@@ -18,7 +18,7 @@
 			</div>
 		</div>
 		<div class="{res.mediaCss.showonlarge} {res.mediaCss.large3} {res.mediaCss.columns}">
-			<dp:sharing.SharingButtons ui:field="sharing" />
+			<dp:sharing.EventHeaderSharingButtons ui:field="sharing" />
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
