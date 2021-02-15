@@ -125,6 +125,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         getSecurityService().unsetPreference(getSecurityService().getCurrentUser().getName(), USER_PREFERENCE_FOR_SESSION_TOKEN);
     }
 
+    @Override
+    public boolean hasValidSessionCredentials() {
+        return getSessionCredentials() != null;
+    }
+
     private void checkLandscapeManageAwsPermission() {
         SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
                 new TypeRelativeObjectIdentifier("AWS")));

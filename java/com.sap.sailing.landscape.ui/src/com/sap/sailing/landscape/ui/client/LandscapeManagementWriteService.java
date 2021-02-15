@@ -52,4 +52,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
      * {@link #createMfaSessionCredentials(String, String, String)}.
      */
     void clearSessionCredentials();
+
+    boolean hasValidSessionCredentials();
 }

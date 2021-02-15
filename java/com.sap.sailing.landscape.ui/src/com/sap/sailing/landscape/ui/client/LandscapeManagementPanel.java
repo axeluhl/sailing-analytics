@@ -79,7 +79,7 @@ public class LandscapeManagementPanel extends VerticalPanel implements AwsAccess
     private final TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources> machineImagesTable;
     private final BusyIndicator machineImagesBusy;
     private final SshKeyManagementPanel sshKeyManagementPanel;
-    private final TextBox awsAccessKeyTextBox;
+    private final TextBox awsAccessKeyTextBox; // TODO bug4811: use landscapeManagementService.hasValidSessionCredentials to find out and show popup with access key/secret/MFA token code to produce them
     private final PasswordTextBox awsSecretPasswordTextBox;
     private final ErrorReporter errorReporter;
     private final static String AWS_ACCESS_KEY_USER_PREFERENCE = "aws.access.key";

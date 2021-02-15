@@ -59,6 +59,13 @@ public interface LandscapeManagementWriteServiceAsync {
             MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
 
     /**
+     * Probes whether the current user has the {@code LANDSCAPE:MANAGE:AWS} permission and has previously
+     * {@link #createMfaSessionCredentials(String, String, String, AsyncCallback) created} a valid set of session
+     * credentials.
+     */
+    void hasValidSessionCredentials(AsyncCallback<Boolean> callback);
+    
+    /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
      * credentials and stores them in the user's preference store from where they can be obtained again using
      * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
