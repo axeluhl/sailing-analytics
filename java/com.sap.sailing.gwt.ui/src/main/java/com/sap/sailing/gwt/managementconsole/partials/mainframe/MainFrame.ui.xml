@@ -11,7 +11,7 @@
         <p:header.Header ui:field="header" addStyleNames="{local_res.style.header}" />
         <p:authentication.decorator.AuthorizedDecorator ui:field="decorator">
             <p:content>
-                <g:ScrollPanel ui:field="contentContainer" addStyleNames="{local_res.style.content}" />
+                <g:SimpleLayoutPanel ui:field="contentContainer" addStyleNames="{local_res.style.content}" />
             </p:content>
         </p:authentication.decorator.AuthorizedDecorator>
     </g:HeaderPanel>

@@ -77,6 +77,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource iconElipse();
 
+    @Source("icons/Icon-SettingsGLobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconSettings();
+
     interface Style extends CssResource {
 
         String backdropImage();
@@ -93,6 +97,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("page-header")
         String pageHeader();
+
+        @ClassName("section-header")
+        String sectionHeader();
 
         @ClassName("flex-container")
         String flexContainer();
@@ -168,5 +175,8 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-elipse")
         String iconElipse();
+
+        @ClassName("icon-settings")
+        String iconSettings();
     }
 }

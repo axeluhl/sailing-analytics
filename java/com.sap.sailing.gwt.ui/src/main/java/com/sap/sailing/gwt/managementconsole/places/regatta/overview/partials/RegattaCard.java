@@ -7,7 +7,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewResources;
@@ -26,10 +25,7 @@ public class RegattaCard extends Composite {
     RegattaOverviewResources local_res;
 
     @UiField
-    Element card, title, subTitle;
-
-    @UiField
-    Anchor advancedSettingsRegattaAnchor;
+    Element card, container, title, details;
 
     private final RegattaDTO regatta;
     private final Presenter presenter;
@@ -44,11 +40,11 @@ public class RegattaCard extends Composite {
         // regatta.getRaceCount();
         // TODO get icon for boatclass
         // regatta.boatClass;
-        
+
         final String title = regatta.getName();
         String venue = "-";
         venue = regatta.getName();
-        
+
         String time = "-";
         if (regatta.startDate != null && regatta.endDate != null) {
             time = DateAndTimeFormatterUtil.formatDateRange(regatta.startDate, regatta.endDate);
@@ -57,10 +53,10 @@ public class RegattaCard extends Composite {
         }
 
         this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(title));
-        this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
+        this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
     }
 
-    @UiHandler("advancedSettingsRegattaAnchor")
+    @UiHandler("contextMenu")
     void onSettingsIconClick(final ClickEvent regatta) {
         presenter.navigateToRegatta(this.regatta);
     }

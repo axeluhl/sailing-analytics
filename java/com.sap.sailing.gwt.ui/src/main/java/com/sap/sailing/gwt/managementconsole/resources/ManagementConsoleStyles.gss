@@ -7,7 +7,7 @@ html, body {
 }
 
 html, .backdropImage {
-    background-color: BACKGROUND_COLOR_LIGHT;
+    background-color: BACKGROUND_COLOR_DARKEST;
     background-image: resourceUrl("backdropGeneralSized");
     background-position: center center;
     background-repeat: no-repeat;
@@ -124,7 +124,12 @@ input::-ms-input-placeholder,
 .page-header {
     position: fixed;
     top: 0;
-    width: calc(100% - 2.25rem);
+    width: calc(100% - 3.25rem);
+    padding-right: 0;
+    margin: 1rem 0;
+}
+
+.section-header {
     margin: 1rem 0;
 }
 
@@ -155,7 +160,7 @@ input::-ms-input-placeholder,
 
     .page-header {
         position: relative;
-        top: 0;
         width: 100%;
+        padding-right: 1.5rem;
     }
 }

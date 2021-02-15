@@ -19,7 +19,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RegattaService {
     
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger LOG = Logger.getLogger(RegattaService.class.getName());
     
     private final SailingServiceWriteAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -49,13 +49,13 @@ public class RegattaService {
             sailingService.getRegattasForEvent(eventId, new AsyncCallback<List<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    logger.severe("requestRegattaList :: Cannot load regattas!");
+                    LOG.severe("requestRegattaList :: Cannot load regattas!");
                     errorReporter.reportError("Error", "Cannot load regattas!");
                 }
     
                 @Override
                 public void onSuccess(List<RegattaDTO> result) {
-                    logger.info("requestRegattaList :: onSuccess");
+                    LOG.info("requestRegattaList :: onSuccess");
                     setRegattas(result);
                     eventBus.fireEvent(new RegattaListResponseEvent(result));
                 }

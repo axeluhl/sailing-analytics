@@ -5,7 +5,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.ResizeComposite;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.partials.authentication.decorator.AuthorizedDecorator;
 import com.sap.sailing.gwt.managementconsole.partials.header.Header;
@@ -30,7 +29,7 @@ public class MainFrame extends ResizeComposite implements NeedsAuthenticationCon
     Header header;
 
     @UiField
-    ScrollPanel contentContainer;
+    AcceptsOneWidget contentContainer;
 
     public MainFrame(final NotLoggedInPresenter presenter) {
         this.decorator = new AuthorizedDecorator(presenter);
