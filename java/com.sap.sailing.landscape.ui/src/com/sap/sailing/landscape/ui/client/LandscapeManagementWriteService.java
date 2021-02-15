@@ -37,4 +37,19 @@ public interface LandscapeManagementWriteService extends RemoteService {
     AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception;
 
     void scaleMongo(String awsAccessKey, String awsSecret, String region, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception;
+
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode);
+
+    /**
+     * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
+     * user's preference store which holds any session credentials created previously using
+     * {@link #createMfaSessionCredentials(String, String, String)}.
+     */
+    void clearSessionCredentials();
 }

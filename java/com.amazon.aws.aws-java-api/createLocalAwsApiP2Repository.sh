@@ -125,4 +125,8 @@ echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}...
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
 echo "You can also try a Hudson build with the -v option, generating and using the local target platform during the build."
-echo "When all this works, update the P2 repository at p2.sapsailing.com using the script uploadAwsApiRepositoryToServer.sh."
+echo "In this case, start with an unpatched remote target platform (race-analysis-p2-remote.target) and an unpatched"
+echo "java/com.sap.sse.feature.runtime/feature.xml so that running this script during the Hudson build can resolve"
+echo "the target platform."
+echo "When all this works, commit and push the patched to race-analysis-p2-remote.target and feature.xml"
+echo "and update the P2 repository at p2.sapsailing.com using the script uploadAwsApiRepositoryToServer.sh."

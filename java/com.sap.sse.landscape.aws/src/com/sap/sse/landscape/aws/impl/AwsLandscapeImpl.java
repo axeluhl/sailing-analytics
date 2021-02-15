@@ -62,6 +62,7 @@ import com.sap.sse.security.SessionUtils;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
@@ -135,6 +136,8 @@ import software.amazon.awssdk.services.route53.model.GetChangeRequest;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> {
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
@@ -150,25 +153,26 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private final String accessKeyId;
     private final String secretAccessKey;
+    private final Optional<String> sessionToken;
     private final AwsRegion globalRegion;
     private final AwsLandscapeState landscapeState;
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
-             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME), Optional.empty());
     }
     
-    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
-        this(accessKeyId, secretAccessKey,
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, Optional<String> mfaTokenCode) {
+        this(accessKeyId, secretAccessKey, mfaTokenCode,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
-                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState);
+                PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE), PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState);
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
+            Optional<String> sessionToken, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
+        this.sessionToken = sessionToken;
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.landscapeState = landscapeState;
     }
@@ -397,7 +401,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     private Route53Client getRoute53Client() {
-        return Route53Client.builder().region(getRegion(globalRegion)).build();
+        return getClient(Route53Client.builder(), getRegion(globalRegion));
     }
     
     @Override
@@ -577,8 +581,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         };
     }
 
+    /**
+     * If a {@link #sessionToken} was provided to this landscape, use it to create {@link AwsSessionCredentials}; otherwise
+     * an {@link AwsBasicCredentials} object will be produced from the {@link #accessKeyId} and the {@link #secretAccessKey}.
+     * @return
+     */
     private AwsCredentials getCredentials() {
-        return AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+        return sessionToken.map(nonEmptySessionToken->(AwsCredentials) AwsSessionCredentials.create(accessKeyId, secretAccessKey, sessionToken.get()))
+                .orElse(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
+    }
+    
+    @Override
+    public Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode) {
+        return StsClient.builder().credentialsProvider(()->AwsBasicCredentials.create(accessKeyId, secretAccessKey)).build()
+            .getSessionToken(b->b.tokenCode(nonEmptyMfaTokenCode)).credentials();
     }
     
     @Override

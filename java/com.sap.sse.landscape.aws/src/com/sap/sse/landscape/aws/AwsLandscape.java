@@ -47,6 +47,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 /**
  * A simplified, largely stateless view onto the AWS SDK API that is geared towards specific ways and patterns of
@@ -64,7 +65,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * <p>
  * 
  * Clients may also create dedicated instances of this service wrapper, using their own credentials. See
- * {@link #obtain(String, String)}.
+ * {@link #obtain(String, String, Optional)}.
  * <p>
  * 
  * This object interacts with an instance of {@link AwsLandscapeState} which keeps persistent and replicable state about
@@ -118,7 +119,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Based on system properties for the AWS access key ID and the secret access key (see
      * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
      * returns a landscape object which internally has access to the clients for the underlying AWS landscape, such as
-     * an EC2 client, a Route53 client, etc.
+     * an EC2 client, a Route53 client, etc. Note that this way no multi-factor authentication (MFA) is possible. If
+     * the system properties described above are not set or not valid, an unauthenticated landscape object will result;
+     * some rudimentary things may still work, such as querying the set of regions.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -134,8 +137,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, Optional<String> mfaTokenCode) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, mfaTokenCode);
         return result;
     }
     
@@ -555,5 +558,11 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Obtains session credentials using an MFA token code valid for the user for which this landscape object was authenticated
+     * during its creation with an access key ID and a secret. 
+     */
+    Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
 }
