@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
+import java.util.UUID;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -22,6 +25,8 @@ import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.DesktopMediaUploadPopup;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
@@ -34,6 +39,7 @@ import com.sap.sse.security.ui.client.UserService;
  * Desktop page to show videos and images as a gallery.
  */
 public class MediaPage extends Composite {
+    private Logger logger = Logger.getLogger(this.getClass().getName());
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
 
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
@@ -72,6 +78,8 @@ public class MediaPage extends Composite {
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
     private final UserService userService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final UUID eventId;
     private VideoWithLowerThird videoDisplayUi;
 
     @UiHandler("videoSettingsButton")
@@ -117,12 +125,14 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup();
+        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(sailingServiceWrite, eventId);
         popupHolder.add(popup);
         popup.center();
     }
     
-    public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService) {
+    public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, UUID eventId) {
+        this.eventId = eventId;
+        sailingServiceWrite =  SailingServiceHelper.createSailingServiceWriteInstance();
         MediaPageResources.INSTANCE.css().ensureInjected();
         this.userService = userService;
         contentPanel = new SimplePanel();
@@ -192,6 +202,7 @@ public class MediaPage extends Composite {
             }
         }
         int videoCount = media.getVideos().size();
+        logger.info("show vidoes: " + videoCount);
         if (videoCount > 0) {
             videoSectionUi.getStyle().clearDisplay();
             if (videoCount == 1) {

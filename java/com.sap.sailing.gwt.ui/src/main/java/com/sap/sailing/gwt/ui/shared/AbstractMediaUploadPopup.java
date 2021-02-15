@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
-
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -18,7 +20,10 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -27,17 +32,22 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.fileupload.FileUploadConstants;
-import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.media.MediaType;
+import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
     
@@ -48,30 +58,43 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String STATUS_OK = "OK";
     private final static String STATUS_NOT_OK = "NOK";
     private final static String EMPTY_MESSAGE = "-";
+    private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
+    private final static String IMAGE_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(jpg|jpeg|png|gif)";
+    private final static String ACC_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(acc)";
+    private final static String MP3_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mp3)";
+    private final static String MP4_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mp4)";
+    private final static String OGG_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogg)";
+    private final static String OGV_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogv)";
+    private final static String QT_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mov|qt|quicktime)";
+    private final static String WEBM_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(webm)";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
 
     protected final FileUpload upload;
     protected final FlowPanel content;
     protected final TextBox fileNameInput;
+    protected final TextBox urlInput;
+    protected final TextBox titleTextBox;
+    protected final TextBox subtitleTextBox;
+    protected final TextBox copyrightTextBox;
+    protected final ListBox mimeTypeListBox;;
+    protected final IntegerBox widthInPxBox;
+    protected final IntegerBox heightInPxBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
-    private final SailingServiceWriteAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final UUID eventId;
     private String uri;
     
-    public AbstractMediaUploadPopup() {
+    public AbstractMediaUploadPopup(SailingServiceWriteAsync sailingServiceWrite, UUID eventId) {
+        this.sailingServiceWrite = sailingServiceWrite;
+        this.eventId = eventId;
         sharedHomeResources.sharedHomeCss().ensureInjected();
         addStyleName(sharedHomeResources.sharedHomeCss().popup());
         setTitle(i18n.upload());
         setText(i18n.upload().toUpperCase());
         setGlassEnabled(true);
         setAnimationEnabled(true);
-        
-        // init media service
-        sailingService = GWT.create(SailingServiceWrite.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath, HEADER_FORWARD_TO_MASTER);
-        
-        //sailingService.updateEvent(eventId, eventName, eventDescription, startDate, endDate, venue, isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLsByLocaleName, images, videos, windFinderReviewedSpotCollectionIds, callback);
         
         upload = new FileUpload();
         upload.setVisible(false);
@@ -80,6 +103,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         
         content = new FlowPanel();
         fileNameInput = new TextBox();
+        urlInput = new TextBox();
         
         // Upload form
         final FormPanel uploadForm = new FormPanel();
@@ -123,6 +147,73 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileInputGroup.add(uploadButton);
         metaDataPanel.add(fileInputGroup);
         
+        // TODO: translate
+        metaDataPanel.add(new Label("-- or --"));
+        
+        Label urlLabel = new Label(i18n.url());
+        urlLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(urlLabel);
+        urlInput.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        urlInput.addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                checkSaveButton();
+            }
+        });
+        urlInput.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                selectMimeTypeInBox(getMimeType(urlInput.getValue()));
+            }
+        });
+        metaDataPanel.add(urlInput);     
+        
+        Label detailsSubTitle = new Label(i18n.details());
+        detailsSubTitle.addStyleName(sharedHomeResources.sharedHomeCss().subTitle());
+        metaDataPanel.add(detailsSubTitle);
+        
+        Label titleLabel = new Label(i18n.title());
+        titleLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(titleLabel);
+        titleTextBox = new TextBox();
+        titleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        metaDataPanel.add(titleTextBox);
+
+        Label subtitleLabel = new Label(i18n.subtitle());
+        subtitleLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(subtitleLabel);
+        subtitleTextBox = new TextBox();
+        subtitleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        metaDataPanel.add(subtitleTextBox);
+
+        Label copyrightLabel = new Label(i18n.copyright());
+        copyrightLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(copyrightLabel);
+        copyrightTextBox = new TextBox();
+        copyrightTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        metaDataPanel.add(copyrightTextBox);
+        
+        mimeTypeListBox = new ListBox();
+        mimeTypeListBox.addStyleName(sharedHomeResources.sharedHomeCss().select());
+        initMediaTypes();
+        metaDataPanel.add(mimeTypeListBox);
+
+        Label widthInPxLabel = new Label(i18n.widthInPx());
+        widthInPxLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(widthInPxLabel);
+        widthInPxBox = new IntegerBox();
+        widthInPxBox.setEnabled(false);
+        widthInPxBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        metaDataPanel.add(widthInPxBox);
+
+        Label heightInPxLabel = new Label(i18n.heightInPx());
+        heightInPxLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        metaDataPanel.add(heightInPxLabel);
+        heightInPxBox = new IntegerBox();
+        heightInPxBox.setEnabled(false);
+        heightInPxBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
+        metaDataPanel.add(heightInPxBox);
+        
         fileExistingPanel = new FlowPanel();
         // TODO: i18n
         fileExistingPanel.add(new Label("-- no media selected --"));
@@ -155,8 +246,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             @Override
             public void onSubmit(SubmitEvent event) {
                 fileNameInput.setValue("");
-                addMediaTrack();
-                hide();
+                addMedia();
             }
         });
         content.add(metaDataForm);
@@ -174,17 +264,84 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         
     }
     
+    private void initMediaTypes() {
+        mimeTypeListBox.addItem(MimeType.unknown.name());
+        for (MimeType mimeType: MimeType.values()) {
+            if (mimeType != MimeType.unknown) {
+                mimeTypeListBox.addItem(mimeType.name());
+            }
+        }
+        mimeTypeListBox.setSelectedIndex(0);
+    }
+    
+    private void selectMimeTypeInBox(MimeType mimeType) {
+        for (int i=0; i<mimeTypeListBox.getItemCount(); i++) {
+            if (mimeType.name().equals(mimeTypeListBox.getValue(i))) {
+                mimeTypeListBox.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+    
+    private MimeType getMimeType(String urlParam) {
+        String url;
+        if (urlParam == null) {
+            url = "";
+        } else {
+            url = urlParam.trim();
+        }
+        logger.info("Check url: " + url);
+        final MimeType mimeType;
+        if (matches(url, ACC_REGEX)) {
+            mimeType = MimeType.aac;
+        } else if (matches(url, IMAGE_REGEX)) {
+            mimeType = MimeType.image;
+        } else if (matches(url, MP3_REGEX)) {
+            mimeType = MimeType.mp3;
+        } else if (matches(url, MP4_REGEX)) {
+            mimeType = MimeType.mp4;
+        } else if (matches(url, OGG_REGEX)) {
+            mimeType = MimeType.ogg;
+        } else if (matches(url, OGV_REGEX)) {
+            mimeType = MimeType.ogv;
+        } else if (matches(url, QT_REGEX)) {
+            mimeType = MimeType.qt;
+        } else if (matches(url, WEBM_REGEX)) {
+            mimeType = MimeType.webm;
+        } else if (matches(url, YOUTUBE_REGEX)) {
+            mimeType = MimeType.youtube;
+        } else if (isVimeoUrl(url)) {
+            mimeType = MimeType.vimeo;
+        } else {
+            mimeType = MimeType.unknown;
+        }
+        return mimeType;
+    }
+    
+    private boolean matches(String matcher, String pattern) {
+        return RegExp.compile(pattern, "i").test(matcher);
+    }
+    
+    private boolean isVimeoUrl(String url) {
+        try {
+            RegExp urlPattern = RegExp.compile("^(.*:)//([A-Za-z0-9\\-\\.]+)(:[0-9]+)?(.*)$");
+            MatchResult matchResult = urlPattern.exec(url);
+            String host = matchResult.getGroup(2);
+            return host.contains("vimeo.com");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
     protected class SubmitHandler implements FormPanel.SubmitHandler {
 
         @Override
         public void onSubmit(SubmitEvent event) {
             // This event is fired just before the form is submitted. We can take
             // this opportunity to perform validation.
-            if (!upload.getFilename().toLowerCase().endsWith(".png") && !upload.getFilename().endsWith(".svg")
-                    && !upload.getFilename().endsWith(".tiff") && !upload.getFilename().endsWith(".jpg")
-                    && !upload.getFilename().endsWith(".jpeg")) {
-                logger.log(Level.SEVERE, "File type is not supported. Supported file types are PNG, SVG, JPG, JPEG and TIFF.");
-                Notification.notify("File type is not supported. Supported file types are PNG, SVG, JPG, JPEG and TIFF.", NotificationType.WARNING);
+            if (getMimeType(upload.getFilename()) == MimeType.unknown) {
+                logger.log(Level.SEVERE, "File type is not supported.");
+                Notification.notify("File type is not supported.", NotificationType.WARNING);
                 event.cancel();
             }
         }
@@ -207,8 +364,35 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                             .stringValue();
                     String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString()
                             .stringValue();
+                    Notification.notify("upload '" + fileName + "' to url: " + uri, NotificationType.INFO);
                     updateUri(uri, fileName);
-                    Notification.notify("File " + fileName + " can be used.", NotificationType.INFO);
+                    if (uri == null || uri.isEmpty()) {
+                        logger.info("Skip resolve image dimensions because required url is not available.");
+                    } else if(getMimeType(uri) == MimeType.image) {
+                        logger.info("Get size... resolveImageDimensions from " + uri);
+                        sailingServiceWrite.resolveImageDimensions(uri, new AsyncCallback<Pair<Integer,Integer>>() {
+                            
+                            @Override
+                            public void onSuccess(Pair<Integer, Integer> result) {
+                                logger.info("Get size: " + result);
+                                if (result == null || result.getA() == null || result.getB() == null) {
+                                    logger.log(Level.SEVERE, "Size of image could not be determined!");
+                                    Notification.notify("Size of image could not be determined!", NotificationType.WARNING);
+                                    AbstractMediaUploadPopup.this.widthInPxBox.setValue(null);
+                                    AbstractMediaUploadPopup.this.heightInPxBox.setValue(null);
+                                } else {
+                                    AbstractMediaUploadPopup.this.widthInPxBox.setValue(result.getA());
+                                    AbstractMediaUploadPopup.this.heightInPxBox.setValue(result.getB());
+                                    
+                                }
+                            }
+                            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                 logger.severe("Error getting size.");
+                            }
+                        });
+                    }
 
                 } else {
                     String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue();
@@ -231,10 +415,128 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     /**
      * Finally add a new MediaTrack.
      */
-    private void addMediaTrack() {
-        // TODO: not working. Try to get correct initialized media service.
-        Notification.notify("Would save media track, but it's currently not working.", NotificationType.ERROR);
-        
+    private void addMedia() {
+        sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
+            
+            @Override
+            public void onSuccess(EventDTO event) {
+               logger.info("Event loaded. " + event + ", images: " + event.getImages().size() + ", videos: " + event.getVideos().size());
+                final String uploadUrl;
+                if (uri == null) {
+                    uploadUrl = "";
+                } else if (!UriUtils.isSafeUri(uri.trim()))  {
+                    logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+                    uploadUrl = "";
+                } else {
+                    uploadUrl = uri.trim();
+                }
+                final String inputUrl;
+                if (urlInput.getValue() == null) {
+                    inputUrl = "";
+                } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
+                    logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+                    inputUrl = "";
+                } else {
+                    inputUrl = urlInput.getValue();
+                }
+                final String url;
+                if (uploadUrl.isEmpty()) {
+                    url = inputUrl;
+                } else {
+                    url = uploadUrl;
+                }
+                
+                if (!url.isEmpty()) {
+                    final String mimeTypeName = mimeTypeListBox.getSelectedValue();
+                    final MimeType mimeType;
+                    if (mimeTypeName != null) {
+                        mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
+                    } else {
+                        mimeType = MimeType.unknown;
+                    }
+                    if (mimeType.mediaType == MediaType.image) {
+                        event.addImage(createImage(url));
+                        updateEvent(event);
+                    } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
+                        event.addVideo(createVideo(url, null, mimeType));
+                        updateEvent(event);
+                    } else {
+                        logger.warning("No image nor video detected. Nothing will be saved.");
+                        // TODO: translation
+                        Notification.notify("No image nor video detected. Nothing will be saved.", NotificationType.WARNING);
+                    }
+                    
+                } else {
+                    Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
+                }
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(i18n.fileUploadResult(
+                        STATUS_NOT_OK,
+                        caught.getLocalizedMessage()),
+                        NotificationType.ERROR);
+                logger.log(Level.SEVERE, "Submit file failed. Status: " + STATUS_NOT_OK + ", message: " + caught.getMessage());
+            }
+        });
+        /**final ImageDTO image = new ImageDTO(uri, new Date());
+        image.setTitle(titleTextBox.getValue());
+        image.setSubtitle(subtitleTextBox.getValue());
+        image.setCopyright(copyrightTextBox.getValue());
+        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
+            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+        }
+        image.setTags(tags);
+        **/
+    }
+    
+    private void updateEvent(EventDTO event) {
+        AbstractMediaUploadPopup.this.sailingServiceWrite.updateEvent(event, new AsyncCallback<EventDTO>() {
+            @Override
+            public void onSuccess(EventDTO result) {
+                logger.info("Event updated. " + event + ", images: " + event.getImages().size() + ", videos: " + event.getVideos().size());
+                Notification.notify(i18n.fileUploadResult(
+                        STATUS_OK,
+                        "Image was saved successfully"),
+                        NotificationType.SUCCESS);
+                AbstractMediaUploadPopup.this.hide();
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(i18n.fileUploadResult(
+                        STATUS_NOT_OK,
+                        caught.getLocalizedMessage()),
+                        NotificationType.ERROR);
+                logger.log(Level.SEVERE, "Submit file failed. Status: " + STATUS_NOT_OK + ", message: " + caught.getMessage());
+            }
+        });
+    }
+    
+    private ImageDTO createImage(String url) {
+        logger.info("Start creating an image. URL: " + url);
+        final ImageDTO image = new ImageDTO(url, new Date());
+        image.setTitle(titleTextBox.getValue());
+        image.setSubtitle(subtitleTextBox.getValue());
+        image.setCopyright(copyrightTextBox.getValue());
+        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
+            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+        }
+        Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
+        image.setTags(defaultTags);
+        logger.info("Image ready: " + image);
+        return image;
+    }
+    
+    private VideoDTO createVideo(String url, String thumbnailUrl, MimeType mimeType) {
+        final VideoDTO video = new VideoDTO(url, mimeType, new Date());
+        video.setTitle(titleTextBox.getValue());
+        video.setSubtitle(subtitleTextBox.getValue());
+        video.setCopyright(copyrightTextBox.getValue());
+        video.setThumbnailRef(thumbnailUrl);
+        Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
+        video.setTags(defaultTags);
+        logger.info("video created. " + url + ", " + mimeType);
+        return video;
     }
     
     private void cleanupTempFileUpload() {
@@ -304,13 +606,32 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         if (uri == null) {
             fileExistingPanel.setVisible(true);
             saveButton.setEnabled(false);
-            fileNameInput.setEnabled(false);
+            //fileNameInput.setEnabled(false);
+            urlInput.setEnabled(true);
         } else {
             fileExistingPanel.setVisible(false);
             saveButton.setEnabled(true);
-            fileNameInput.setEnabled(true);
+            //fileNameInput.setEnabled(true);
+            urlInput.setEnabled(false);
+            selectMimeTypeInBox(getMimeType(uri));
         }
+        if (fileName != null) {
+            final String name;
+            if (fileName.contains(".")) {
+                name = fileName.substring(0, fileName.lastIndexOf("."));
+            } else {
+                name = fileName;
+            }
+            titleTextBox.setValue(name);
+        }
+        checkSaveButton();
         fileNameInput.setValue(fileName);
+    }
+    
+    private void checkSaveButton() {
+        boolean urlInputNotEmpty = urlInput.getValue() != null && !urlInput.getValue().trim().isEmpty();
+        boolean uriNotEmpty = uri != null && !uri.trim().isEmpty();
+        saveButton.setEnabled(urlInputNotEmpty || uriNotEmpty);
     }
 
 }

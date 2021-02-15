@@ -25,6 +25,13 @@ button.primary {
     border-radius: .25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
+.input:disabled {
+    color: rgb(84, 84, 84);
+    cursor: default;
+    background-color: #dedede;
+    border-color: #dedede;
+    opacity: 1;
+}
 .inputGroup {
     display: flex;
 }
@@ -83,3 +90,12 @@ button.primary {
     white-space: nowrap;
     font-family: 'Open Sans',sans-serif;
 }
+
+.subTitle {
+    width: 100%;
+    color: #333;
+    margin-bottom: .5rem;
+    font-weight: 1000;
+}
+
+.select {}

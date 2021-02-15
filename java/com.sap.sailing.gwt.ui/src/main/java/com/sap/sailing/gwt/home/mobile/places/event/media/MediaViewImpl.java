@@ -12,10 +12,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
 import com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGallery;
 import com.sap.sailing.gwt.home.mobile.partials.uploadpopup.MobileMediaUploadPopup;
 import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -52,8 +55,10 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
                 setMediaManaged(false);
             }
         });
-        
-        mobileMediaUploadPopup = new MobileMediaUploadPopup();
+
+        SailingServiceWriteAsync sailingServiceWrite =  SailingServiceHelper.createSailingServiceWriteInstance();
+        MediaPageResources.INSTANCE.css().ensureInjected();
+        mobileMediaUploadPopup = new MobileMediaUploadPopup(sailingServiceWrite, presenter.getEventDTO().getId());
 
         addMediaButtonUi.addClickHandler(new ClickHandler() {
             

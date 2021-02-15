@@ -20,12 +20,14 @@ public interface SharedHomeResources extends CommonIcons {
         String primary();
         String right();
         String label();
+        String subTitle();
         String input();
         String inputGroup();
         String buttonGroup();
         String overlay();
         String uploadButton();
         String popup();
+        String select();
     }
     
     @Source("default_event_logo.jpg")
