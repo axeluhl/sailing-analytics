@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.desktop.partials.sharing.EventHeaderSharingButtons;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
@@ -38,7 +38,7 @@ public class SeriesHeader extends Composite {
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
-    @UiField SharingButtons sharing;
+    @UiField EventHeaderSharingButtons sharing;
 
     private EventSeriesViewDTO series;
     private Presenter presenter;
