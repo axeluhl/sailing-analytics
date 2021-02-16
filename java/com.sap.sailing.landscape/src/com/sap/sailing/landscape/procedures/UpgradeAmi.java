@@ -58,8 +58,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @param <HostT>
  */
 public class UpgradeAmi<ShardingKey>
-extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>, StartFromSailingAnalyticsImage {
+extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
     
@@ -70,7 +70,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
-    private AmazonMachineImage<ShardingKey, SailingAnalyticsMetrics> upgradedAmi;
+    private AmazonMachineImage<ShardingKey> upgradedAmi;
     
     /**
      * Additional default rules in addition to what the {@link StartAwsHost.Builder parent builder} defines:
@@ -106,7 +106,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
     ProcessT extends ApplicationProcess<ShardingKey, SailingAnalyticsMetrics, ProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
+    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
@@ -126,7 +126,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     }
 
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
-    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
     implements Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
@@ -248,8 +248,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         }
 
         @Override
-        public HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape)->
+        public HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {
@@ -293,7 +293,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
-    HostT extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> builder() {
+    HostT extends AwsInstance<ShardingKey>> Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> builder() {
         return new BuilderImpl<>();
     }
     
@@ -368,7 +368,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     /**
      * @return the resulting AMI that has the upgraded version of everything
      */
-    public AmazonMachineImage<ShardingKey, SailingAnalyticsMetrics> getUpgradedAmi() {
+    public AmazonMachineImage<ShardingKey> getUpgradedAmi() {
         return upgradedAmi;
     }
 }

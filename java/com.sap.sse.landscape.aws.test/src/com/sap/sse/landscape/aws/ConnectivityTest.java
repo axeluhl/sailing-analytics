@@ -71,7 +71,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
 public class ConnectivityTest<ProcessT extends ApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
-    private AwsLandscape<String, SailingAnalyticsMetrics, ProcessT> landscape;
+    private AwsLandscape<String> landscape;
     private AwsRegion region;
     private byte[] keyPass;
     private String AXELS_KEY_PASS;
@@ -153,7 +153,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     public void testApacheProxyBasics() throws Exception {
         final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
-        final AwsInstance<String, SailingAnalyticsMetrics> proxyHost = proxy.getHosts().iterator().next();
+        final AwsInstance<String> proxyHost = proxy.getHosts().iterator().next();
         final ProcessT process = createApplicationProcess(proxyHost);
         proxy.setEventRedirect(hostname, process, UUID.randomUUID(), /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
@@ -169,7 +169,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         assertTrue(lsOutput.isEmpty());
     }
 
-    protected ProcessT createApplicationProcess(final AwsInstance<String, SailingAnalyticsMetrics> host) {
+    protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
         @SuppressWarnings("unchecked")
         final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH);
         return process;
@@ -183,7 +183,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         final MongoEndpoint mongoEndpoint = landscape.getMongoEndpoints(region).iterator().next();
-        final AwsInstance<String, SailingAnalyticsMetrics> host = landscape.launchHost(
+        final AwsInstance<String> host = landscape.launchHost(
                 getLatestSailingImage(),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"),
                 Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")),
@@ -213,15 +213,15 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
             final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
             assertNotNull(release);
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass));
-            final AwsLandscape<String, SailingAnalyticsMetrics, ProcessT> castLandscape = (AwsLandscape<String, SailingAnalyticsMetrics, ProcessT>) landscape;
-            final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, ProcessT, AwsInstance<String, SailingAnalyticsMetrics>> builder = CreateDNSBasedLoadBalancerMapping.builder();
+            final AwsLandscape<String> castLandscape = (AwsLandscape<String>) landscape;
+            final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, ProcessT> builder = CreateDNSBasedLoadBalancerMapping.builder();
             builder
                 .setProcess(process)
                 .setHostname(hostname)
                 .setTargetGroupNamePrefix(TARGET_GROUP_NAME_PREFIX)
                 .setLandscape(castLandscape);
             optionalTimeout.ifPresent(builder::setTimeout);
-            final CreateDNSBasedLoadBalancerMapping<String, SailingAnalyticsMetrics, ProcessT, AwsInstance<String, SailingAnalyticsMetrics>> createDNSBasedLoadBalancerMappingProcedure =
+            final CreateDNSBasedLoadBalancerMapping<String, SailingAnalyticsMetrics, ProcessT> createDNSBasedLoadBalancerMappingProcedure =
                     builder.build();
             final String wiesenWegId = landscape.getDNSHostedZoneId(hostedZoneName);
             try {
@@ -241,7 +241,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         }
     }
 
-    private AmazonMachineImage<String, SailingAnalyticsMetrics> getLatestSailingImage() {
+    private AmazonMachineImage<String> getLatestSailingImage() {
         return landscape.getLatestImageWithTag(region, "image-type", StartFromSailingAnalyticsImage.IMAGE_TYPE_TAG_VALUE_SAILING);
     }
     
@@ -348,7 +348,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
 
     private void testSshConnectWithKey(final String keyName) throws Exception {
-        final AwsInstance<String, SailingAnalyticsMetrics> host = landscape.launchHost(getLatestSailingImage(),
+        final AwsInstance<String> host = landscape.launchHost(getLatestSailingImage(),
                 InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"), /* tags */ Optional.empty());
         try {
             assertNotNull(host);
@@ -387,7 +387,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     
     @Test
     public void testImageDate() throws ParseException {
-        final AmazonMachineImage<String, SailingAnalyticsMetrics> image = landscape.getImage(region, "ami-0c0907685eae2dbab");
+        final AmazonMachineImage<String> image = landscape.getImage(region, "ami-0c0907685eae2dbab");
         assertEquals(TimePoint.of(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").parse(
                 /* November 9, 2020 at 9:37:16 PM UTC+1 */ "2020-11-09T21:37:16+0100")),
                 image.getCreatedAt());
@@ -416,7 +416,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Test
     public void createEmptyLoadBalancerTest() throws InterruptedException {
         final String albName = "MyAlb"+new Random().nextInt();
-        final ApplicationLoadBalancer<String, SailingAnalyticsMetrics> alb = landscape.createLoadBalancer(albName, region);
+        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());
@@ -439,9 +439,9 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Test
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
-        final TargetGroup<String, SailingAnalyticsMetrics> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
+        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
         try {
-            final TargetGroup<String, SailingAnalyticsMetrics> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);

@@ -307,13 +307,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     /**
      * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
-     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     * {@link UserStore#registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> T getPreferenceObject(String username, String key);
     
     /**
      * Gets all preference objects resolving to a certain key. Always returns a valid map. May be empty.
-     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     * {@link UserStore#registerPreferenceConverter(String, PreferenceConverter)}.
      */
     <T> Map<String, T> getPreferenceObjectsByKey(String key);
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sse.security.util;
 
 import java.util.function.Supplier;
 
@@ -24,5 +24,4 @@ public class GenericJSONPreferenceConverter<PREF extends GenericSerializableSett
     public PREF toPreferenceObject(String stringPreference) {
         return serializer.deserialize(emptyInstanceFactory.get(), stringPreference);
     }
-
 }

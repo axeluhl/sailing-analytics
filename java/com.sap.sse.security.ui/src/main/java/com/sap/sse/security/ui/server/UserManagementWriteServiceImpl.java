@@ -414,7 +414,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     @Override
     public void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException {
         getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
-            getSecurityService().setPreference(username, key, value);
+        getSecurityService().setPreference(username, key, value);
     }
 
     @Override

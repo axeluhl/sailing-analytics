@@ -103,18 +103,17 @@ public class SshKeyManagementPanel extends VerticalPanel {
         sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE,
-                sshKeyPairDTO->landscapeManagementService.removeSshKey(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
-                        sshKeyPairDTO, new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(caught.getMessage());
-                            }
+                sshKeyPairDTO->landscapeManagementService.removeSshKey(sshKeyPairDTO, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
 
-                            @Override
-                            public void onSuccess(Void result) {
-                                sshKeyTable.remove(sshKeyPairDTO);
-                            }
-                }));
+                    @Override
+                    public void onSuccess(Void result) {
+                        sshKeyTable.remove(sshKeyPairDTO);
+                    }
+            }));
         sshKeyPairActionColumn.addAction(SshKeyPairImagesBarCell.ACTION_SHOW_KEYS, DefaultActions.READ,
                 sshKeyPairDTO->landscapeManagementService.getSshPublicKey(sshKeyPairDTO.getRegionId(), sshKeyPairDTO.getName(), new AsyncCallback<byte[]>() {
                     @Override
@@ -144,24 +143,24 @@ public class SshKeyManagementPanel extends VerticalPanel {
         sshKeyLoadingBusy = new SimpleBusyIndicator();
         add(sshKeyLoadingBusy);
         buttonPanel.addRemoveAction(stringMessages.remove(), sshKeyTable.getSelectionModel(), /* withConfirmation */ true, ()->{
-            landscapeManagementService.removeSshKey(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
-                    sshKeyTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                }
+            landscapeManagementService.removeSshKey(sshKeyTable.getSelectionModel().getSelectedObject(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            errorReporter.reportError(caught.getMessage());
+            }
 
-                @Override
-                public void onSuccess(Void result) {
-                    sshKeyTable.remove(sshKeyTable.getSelectionModel().getSelectedObject());
-                }
-            });
+            @Override
+            public void onSuccess(Void result) {
+            sshKeyTable.remove(sshKeyTable.getSelectionModel().getSelectedObject());
+            }
+         });
         });
         regionSelectionModel.addSelectionChangeHandler(e->{
-            showKeysInRegion(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
-                    regionSelectionModel.getSelectedObject());
-            addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
-            generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            if (awsAccessKeyProvider.hasValidSessionCredentials()) {
+                showKeysInRegion(regionSelectionModel.getSelectedObject());
+                addButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+                generateButton.setEnabled(regionSelectionModel.getSelectedObject() != null);
+            }
         });
     }
     
@@ -178,8 +177,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 new DialogCallback<Triple<String, String, String>>() {
                     @Override
                     public void ok(Triple<String, String, String> keyPairNameAndPassphrases) {
-                        landscapeManagementService.generateSshKeyPair(awsAccessKeyProvider.getAwsAccessKeyId(),
-                                awsAccessKeyProvider.getAwsSecret(), regionSelectionModel.getSelectedObject(),
+                        landscapeManagementService.generateSshKeyPair(regionSelectionModel.getSelectedObject(),
                                 keyPairNameAndPassphrases.getA(), keyPairNameAndPassphrases.getB(),
                                 new AsyncCallback<SSHKeyPairDTO>() {
                             @Override
@@ -205,8 +203,7 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 new DialogCallback<Triple<String, String, String>>() {
                     @Override
                     public void ok(Triple<String, String, String> keyPairNameAndPublicAndPrivateKey) {
-                        landscapeManagementService.addSshKeyPair(awsAccessKeyProvider.getAwsAccessKeyId(), awsAccessKeyProvider.getAwsSecret(),
-                                regionSelectionModel.getSelectedObject(), keyPairNameAndPublicAndPrivateKey.getA(),
+                        landscapeManagementService.addSshKeyPair(regionSelectionModel.getSelectedObject(), keyPairNameAndPublicAndPrivateKey.getA(),
                                 keyPairNameAndPublicAndPrivateKey.getB(), keyPairNameAndPublicAndPrivateKey.getC(),
                                 new AsyncCallback<SSHKeyPairDTO>() {
                                     @Override
@@ -227,11 +224,11 @@ public class SshKeyManagementPanel extends VerticalPanel {
                 }).show();
     }
 
-    public void showKeysInRegion(String awsAccessKey, String awsSecret, String regionId) {
-        sshKeyTable.getDataProvider().getList().clear();
+    public void showKeysInRegion(String regionId) {
+        sshKeyTable.getFilterPanel().removeAll();
         if (regionId != null) {
             sshKeyLoadingBusy.setBusy(true);
-            landscapeManagementService.getSshKeys(awsAccessKey, awsSecret, regionId, new AsyncCallback<ArrayList<SSHKeyPairDTO>>() {
+            landscapeManagementService.getSshKeys(regionId, new AsyncCallback<ArrayList<SSHKeyPairDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError(caught.getMessage());
@@ -244,8 +241,6 @@ public class SshKeyManagementPanel extends VerticalPanel {
                     sshKeyLoadingBusy.setBusy(false);
                 }
             });
-        } else {
-            sshKeyTable.getDataProvider().getList().clear();
         }
     }
 }

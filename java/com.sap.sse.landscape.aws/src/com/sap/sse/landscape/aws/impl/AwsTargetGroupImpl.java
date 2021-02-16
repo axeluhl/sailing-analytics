@@ -4,8 +4,6 @@ import java.util.Map;
 
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -13,15 +11,14 @@ import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
-public class AwsTargetGroupImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends NamedImpl implements TargetGroup<ShardingKey, MetricsT> {
+public class AwsTargetGroupImpl<ShardingKey>
+extends NamedImpl implements TargetGroup<ShardingKey> {
     private static final long serialVersionUID = -5442598262397393201L;
     private final String arn;
-    private final AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
+    private final AwsLandscape<ShardingKey> landscape;
     private final Region region;
 
-    public AwsTargetGroupImpl(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, Region region, String targetGroupName, String arn) {
+    public AwsTargetGroupImpl(AwsLandscape<ShardingKey> landscape, Region region, String targetGroupName, String arn) {
         super(targetGroupName);
         this.arn = arn;
         this.landscape = landscape;
@@ -37,14 +34,14 @@ extends NamedImpl implements TargetGroup<ShardingKey, MetricsT> {
     }
 
     @Override
-    public Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getRegisteredTargets() {
+    public Map<AwsInstance<ShardingKey>, TargetHealth> getRegisteredTargets() {
         return landscape.getTargetHealthDescriptions(this);
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer() {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancer() {
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = getAwsTargetGroup();
-        final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+        final ApplicationLoadBalancer<ShardingKey> result;
         if (targetGroup.hasLoadBalancerArns() && !targetGroup.loadBalancerArns().isEmpty()) {
             result = new ApplicationLoadBalancerImpl<>(getRegion(), landscape.getAwsLoadBalancer(
                 targetGroup.loadBalancerArns().iterator().next(), getRegion()), landscape);
@@ -55,12 +52,12 @@ extends NamedImpl implements TargetGroup<ShardingKey, MetricsT> {
     }
 
     @Override
-    public void addTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+    public void addTargets(Iterable<AwsInstance<ShardingKey>> targets) {
         landscape.addTargetsToTargetGroup(this, targets);
     }
 
     @Override
-    public void removeTargets(Iterable<AwsInstance<ShardingKey, MetricsT>> targets) {
+    public void removeTargets(Iterable<AwsInstance<ShardingKey>> targets) {
         landscape.removeTargetsFromTargetGroup(this, targets);
     }
 

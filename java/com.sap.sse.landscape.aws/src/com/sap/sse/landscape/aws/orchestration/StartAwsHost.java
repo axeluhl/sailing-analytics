@@ -36,11 +36,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * 
  * @author Axel Uhl (D043530)
  */
-public abstract class StartAwsHost<ShardingKey,
-                          MetricsT extends ApplicationProcessMetrics,
-                          ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-                          HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
+public abstract class StartAwsHost<ShardingKey, HostT extends AwsInstance<ShardingKey>>
+extends StartHost<ShardingKey, HostT> {
     protected static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
@@ -49,7 +46,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     private final String keyName;
     private final Iterable<SecurityGroup> securityGroups;
     private final Optional<Tags> tags;
-    private final HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
+    private final HostSupplier<ShardingKey, HostT> hostSupplier;
     private final byte[] privateKeyEncryptionPassphrase;
     private HostT host;
     
@@ -74,12 +71,10 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
-    MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartHost.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
+    T extends StartAwsHost<ShardingKey, HostT>, ShardingKey,
+    HostT extends AwsInstance<ShardingKey>>
+    extends StartHost.Builder<BuilderT, T, ShardingKey, HostT> {
         BuilderT setInstanceType(InstanceType instanceType);
         
         BuilderT setAvailabilityZone(AwsAvailabilityZone availabilityZone);
@@ -108,16 +103,14 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         
         BuilderT setInstanceName(String name);
         
-        BuilderT setHostSupplier(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier);
+        BuilderT setHostSupplier(HostSupplier<ShardingKey, HostT> hostSupplier);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
-    MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
+    T extends StartAwsHost<ShardingKey, HostT>, ShardingKey,
+    HostT extends AwsInstance<ShardingKey>>
+    extends StartHost.BuilderImpl<BuilderT, T, ShardingKey, HostT>
+    implements Builder<BuilderT, T, ShardingKey, HostT> {
         private InstanceType instanceType;
         private AwsAvailabilityZone availabilityZone;
         private String keyName;
@@ -126,11 +119,11 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         private List<String> userData = new ArrayList<>();
         private AwsRegion region;
         private String instanceName;
-        private HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier;
+        private HostSupplier<ShardingKey, HostT> hostSupplier;
         private byte[] privateKeyEncryptionPassphrase;
         
-        protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-            return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
+        protected AwsLandscape<ShardingKey> getLandscape() {
+            return (AwsLandscape<ShardingKey>) super.getLandscape();
         }
 
         protected InstanceType getInstanceType() {
@@ -138,8 +131,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
 
         @Override
-        public BuilderT setInstanceType(
-                InstanceType instanceType) {
+        public BuilderT setInstanceType(InstanceType instanceType) {
             this.instanceType = instanceType;
             return self();
         }
@@ -232,12 +224,12 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
             return self();
         }
 
-        protected HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> getHostSupplier() {
+        protected HostSupplier<ShardingKey, HostT> getHostSupplier() {
             return hostSupplier;
         }
         
         @Override
-        public BuilderT setHostSupplier(HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier) {
+        public BuilderT setHostSupplier(HostSupplier<ShardingKey, HostT> hostSupplier) {
             this.hostSupplier = hostSupplier;
             return self();
         }
@@ -253,7 +245,7 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
     }
     
-    protected StartAwsHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) {
+    protected StartAwsHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, HostT>, ShardingKey, HostT> builder) {
         super(builder);
         this.userData = new ArrayList<>();
         for (final String ud : builder.getUserData()) {
@@ -271,14 +263,14 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     protected static <ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AmazonMachineImage<ShardingKey, MetricsT> getLatestImageOfType(String imageType, AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape, Region region) {
+    AmazonMachineImage<ShardingKey> getLatestImageOfType(String imageType, AwsLandscape<ShardingKey> landscape, Region region) {
         return landscape.getLatestImageWithType(region, imageType);
     }
     
     protected static <ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+    AwsAvailabilityZone getRandomAvailabilityZone(AwsRegion region, AwsLandscape<ShardingKey> landscape) {
         final Iterable<AvailabilityZone> azs = landscape.getAvailabilityZones(region);
         return (AwsAvailabilityZone) Util.get(azs, new Random().nextInt(Util.size(azs)));
     }
@@ -286,13 +278,13 @@ extends StartHost<ShardingKey, MetricsT, ProcessT, HostT> {
     protected static <ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Set<SecurityGroup> getDefaultSecurityGroupForApplicationHosts(Landscape<ShardingKey, MetricsT, ProcessT> landscape, Region region) {
+    Set<SecurityGroup> getDefaultSecurityGroupForApplicationHosts(Landscape<ShardingKey> landscape, Region region) {
         return Collections.singleton(landscape.getDefaultSecurityGroupForApplicationHosts(region));
     }
 
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-        return (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
 
     @Override

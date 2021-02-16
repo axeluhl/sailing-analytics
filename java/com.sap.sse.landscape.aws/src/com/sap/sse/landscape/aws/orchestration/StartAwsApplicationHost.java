@@ -21,8 +21,8 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 public class StartAwsApplicationHost<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
+HostT extends AwsInstance<ShardingKey>>
+extends StartAwsHost<ShardingKey, HostT> {
     /**
      * When setting the {@link #setLandscape(Landscape) landscape} or the {@link #setRegion(AwsRegion) region}, these
      * settings are also copied to the {@link AwsApplicationConfiguration.Builder application configuration builder}.
@@ -30,19 +30,19 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
+    T extends StartAwsHost<ShardingKey, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    HostT extends AwsInstance<ShardingKey>>
+    extends StartAwsHost.Builder<BuilderT, T, ShardingKey, HostT> {
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
+    T extends StartAwsHost<ShardingKey, HostT>, ShardingKey,
     MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>
+    HostT extends AwsInstance<ShardingKey>>
+    extends StartAwsHost.BuilderImpl<BuilderT, T, ShardingKey, HostT>
     implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
         private final AwsApplicationConfiguration.Builder<?, ?, ShardingKey, MetricsT, ProcessT> applicationConfigurationBuilder;
 
@@ -62,8 +62,8 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         }
 
         @Override
-        public BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape) {
-            getApplicationConfigurationBuilder().setLandscape((AwsLandscape<ShardingKey, MetricsT, ProcessT>) landscape);
+        public BuilderT setLandscape(Landscape<ShardingKey> landscape) {
+            getApplicationConfigurationBuilder().setLandscape((AwsLandscape<ShardingKey>) landscape);
             return super.setLandscape(landscape);
         }
 
@@ -74,13 +74,12 @@ extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT> {
         protected Optional<Duration> getOptionalTimeout() {
             return super.getOptionalTimeout();
         }
-        
     }
     
     private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration;
     private final Optional<Duration> optionalTimeout;
     
-    protected StartAwsApplicationHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
+    protected StartAwsApplicationHost(BuilderImpl<?, ? extends StartAwsHost<ShardingKey, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
         super(builder);
         this.optionalTimeout = builder.getOptionalTimeout();
         applicationConfiguration = builder.getApplicationConfigurationBuilder().build();

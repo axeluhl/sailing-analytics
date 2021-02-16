@@ -3,15 +3,10 @@ package com.sap.sse.landscape.orchestration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
-public abstract class StartHost<ShardingKey,
-                       MetricsT extends ApplicationProcessMetrics,
-                       ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-                       HostT extends Host>
-extends AbstractProcedureImpl<ShardingKey, MetricsT, ProcessT>
-implements Procedure<ShardingKey, MetricsT, ProcessT> {
+public abstract class StartHost<ShardingKey, HostT extends Host>
+extends AbstractProcedureImpl<ShardingKey>
+implements Procedure<ShardingKey> {
     private final MachineImage machineImage;
     
     /**
@@ -25,23 +20,19 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
-    MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
+    T extends StartHost<ShardingKey, HostT>, ShardingKey,
     HostT extends Host>
-    extends Procedure.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
+    extends Procedure.Builder<BuilderT, T, ShardingKey> {
         BuilderT setImageType(String imageType);
         BuilderT setMachineImage(MachineImage machineImage);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT>,
-    T extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey,
-    MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
+    T extends StartHost<ShardingKey, HostT>, ShardingKey,
     HostT extends Host>
-    extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey, MetricsT, ProcessT>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT, HostT> {
+    extends AbstractProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey>
+    implements Builder<BuilderT, T, ShardingKey, HostT> {
         private MachineImage machineImage;
         private String imageType;
         
@@ -68,7 +59,7 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         }
     }
     
-    protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder) {
+    protected StartHost(BuilderImpl<?, ? extends StartHost<ShardingKey,HostT>, ShardingKey, HostT> builder) {
         super(builder);
         this.machineImage = builder.getMachineImage();
     }
