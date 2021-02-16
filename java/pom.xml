@@ -264,17 +264,6 @@
             </dependency-resolution>
           </configuration>
         </plugin>
-        <plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-compiler-plugin</artifactId>
-	  <version>3.8.1</version>
-	  <configuration>
-	    <compilerArgs>
-	      <arg>-parameters</arg>
-	    </compilerArgs>
-	    <forceJavacCompilerUse>true</forceJavacCompilerUse>
-	  </configuration>
-        </plugin>
       </plugins>
     </build>
   </profile>
@@ -362,6 +351,9 @@
             <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
             <source>1.8</source>
             <target>1.8</target>
+            <compilerArgs>
+              <arg>-parameters</arg>
+            </compilerArgs>
           </configuration>
         </plugin>
       </plugins>
