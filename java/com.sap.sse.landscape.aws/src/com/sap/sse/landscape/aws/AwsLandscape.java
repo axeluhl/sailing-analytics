@@ -131,14 +131,26 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     }
     
     /**
-     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object which
-     * internally has access to the clients for the underlying AWS landscape, such as an EC2 client, a Route53 client,
-     * etc.
+     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object, but not
+     * multi factor-authenticated (MFA). Can be used for operations not requiring MFA, such as obtaining an MFA-authenticated
+     * version of the landscape.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, Optional<String> mfaTokenCode) {
-        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, mfaTokenCode);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
+        return result;
+    }
+    
+    /**
+     * Based on an explicit AWS access key ID, the secret access key, and an MFA token code, this method returns a
+     * landscape object which internally has access to the clients for the underlying AWS landscape, such as an EC2
+     * client, a Route53 client, etc.
+     */
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken);
         return result;
     }
     

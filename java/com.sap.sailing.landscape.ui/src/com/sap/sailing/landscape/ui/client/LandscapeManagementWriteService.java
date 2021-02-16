@@ -13,30 +13,30 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     ArrayList<String> getInstanceTypes();
 
-    ArrayList<MongoEndpointDTO> getMongoEndpoints(String awsAccessKey, String awsSecret, String region);
+    ArrayList<MongoEndpointDTO> getMongoEndpoints(String region);
     
-    MongoEndpointDTO getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName);
+    MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName);
 
-    ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId);
+    ArrayList<SSHKeyPairDTO> getSshKeys(String regionId);
 
-    void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair);
+    void removeSshKey(SSHKeyPairDTO keyPair);
 
-    SSHKeyPairDTO generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String privateKeyEncryptionPassphrase);
+    SSHKeyPairDTO generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase);
 
-    SSHKeyPairDTO addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
+    SSHKeyPairDTO addSshKeyPair(String regionId, String keyName, String publicKey,
             String encryptedPrivateKey) throws Exception;
 
     byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws Exception;
 
     byte[] getSshPublicKey(String regionId, String keyName) throws Exception;
 
-    ArrayList<AmazonMachineImageDTO> getAmazonMachineImages(String awsAccessKey, String awsSecret, String region);
+    ArrayList<AmazonMachineImageDTO> getAmazonMachineImages(String region);
 
-    void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId);
+    void removeAmazonMachineImage(String region, String machineImageId);
 
-    AmazonMachineImageDTO upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId) throws Exception;
+    AmazonMachineImageDTO upgradeAmazonMachineImage(String region, String machineImageId) throws Exception;
 
-    void scaleMongo(String awsAccessKey, String awsSecret, String region, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception;
+    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception;
 
     /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session

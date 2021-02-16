@@ -125,6 +125,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupA
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.MFADevice;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
@@ -159,20 +161,24 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState) {
         this(awsLandscapeState,
-             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME), Optional.empty());
+             System.getProperty(ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME), System.getProperty(SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME));
     }
     
-    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, Optional<String> mfaTokenCode) {
-        this(accessKeyId, secretAccessKey, mfaTokenCode,
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey) {
+        this(awsLandscapeState, accessKeyId, secretAccessKey, /* no session token */ null);
+    }
+    
+    public AwsLandscapeImpl(AwsLandscapeState awsLandscapeState, String accessKeyId, String secretAccessKey, String sessionToken) {
+        this(accessKeyId, secretAccessKey, sessionToken,
                 // by using MongoDBService.INSTANCE the default test configuration will be used if nothing else is configured
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE), PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE), awsLandscapeState);
     }
     
     public AwsLandscapeImpl(String accessKeyId, String secretAccessKey,
-            Optional<String> sessionToken, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
+            String sessionToken, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, AwsLandscapeState landscapeState) {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
-        this.sessionToken = sessionToken;
+        this.sessionToken = Optional.ofNullable(sessionToken);
         this.globalRegion = new AwsRegion(Region.AWS_GLOBAL);
         this.landscapeState = landscapeState;
     }
@@ -593,8 +599,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode) {
-        return StsClient.builder().credentialsProvider(()->AwsBasicCredentials.create(accessKeyId, secretAccessKey)).build()
-            .getSessionToken(b->b.tokenCode(nonEmptyMfaTokenCode)).credentials();
+        final AwsBasicCredentials basicCredentials = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
+        final List<MFADevice> mfaDevices = IamClient.builder().region(Region.AWS_GLOBAL).credentialsProvider(()->basicCredentials).build()
+            .listMFADevices().mfaDevices();
+        logger.info("Found the following MFA devices: "+Util.joinStrings(", ", Util.map(mfaDevices, d->d.serialNumber())));
+        final String serialNumberOfMfaDevice = mfaDevices.iterator().next().serialNumber();
+        logger.info("Found MFA device "+serialNumberOfMfaDevice+"; using MFA token code "+nonEmptyMfaTokenCode);
+        final Credentials result = StsClient.builder().credentialsProvider(()->basicCredentials).build()
+            .getSessionToken(b->b.tokenCode(nonEmptyMfaTokenCode).serialNumber(serialNumberOfMfaDevice)).credentials();
+        logger.info("Produced valid MFA session credentials for access key ID "+result.accessKeyId());
+        return result;
     }
     
     @Override

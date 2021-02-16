@@ -55,4 +55,10 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String youHaveToProvideAPositiveNumberOfInstancesToLaunch();
     String youHaveToProvideANonNegativePriority();
     String youHaveToProvideANonNegativeNumberOfVotes();
+    String mfaTokenCode();
+    String login();
+    String invalidCredentialsNoSessionCreated(String message);
+    String loggedInSuccessfully();
+    String logout();
+    String loggedOutSuccessfully();
 }

@@ -13,50 +13,44 @@ public interface LandscapeManagementWriteServiceAsync {
     
     void getInstanceTypes(AsyncCallback<ArrayList<String>> callback);
 
-    void getMongoEndpoints(String awsAccessKey, String awsSecret, String regionId,
-            AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
+    void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
 
-    void getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName,
+    void getMongoEndpoint(String region, String replicaSetName,
             AsyncCallback<MongoEndpointDTO> callback);
 
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */
-    void getSshKeys(String awsAccessKey, String awsSecret, String regionId,
-            AsyncCallback<ArrayList<SSHKeyPairDTO>> callback);
+    void getSshKeys(String regionId, AsyncCallback<ArrayList<SSHKeyPairDTO>> callback);
 
     /**
      * The calling subject must have {@code DELETE} permission for the key requested.
      */
-    void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair, AsyncCallback<Void> asyncCallback);
+    void removeSshKey(SSHKeyPairDTO keyPair, AsyncCallback<Void> asyncCallback);
 
     /**
      * The calling subject must have {@code CREATE} permission for the key name and region requested as well as the
      * {@link CREATE_OBJECT} permission on the server on which this is called.
      */
-    void generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName,
-            String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
+    void generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase, AsyncCallback<SSHKeyPairDTO> callback);
 
     /**
      * The calling subject must have {@code CREATE} permission for the key requested as well as the
      * {@link CREATE_OBJECT} permission on the server on which this is called.
      */
-    void addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String publicKey,
-            String encryptedPrivateKey, AsyncCallback<SSHKeyPairDTO> callback);
+    void addSshKeyPair(String regionId, String keyName, String publicKey, String encryptedPrivateKey, AsyncCallback<SSHKeyPairDTO> callback);
 
     void getEncryptedSshPrivateKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
 
     void getSshPublicKey(String regionId, String keyName, AsyncCallback<byte[]> callback);
 
-    void getAmazonMachineImages(String awsAccessKey, String awsSecret, String region, AsyncCallback<ArrayList<AmazonMachineImageDTO>> callback);
+    void getAmazonMachineImages(String region, AsyncCallback<ArrayList<AmazonMachineImageDTO>> callback);
 
-    void removeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId, AsyncCallback<Void> callback);
+    void removeAmazonMachineImage(String region, String machineImageId, AsyncCallback<Void> callback);
 
-    void upgradeAmazonMachineImage(String awsAccessKey, String awsSecret, String region, String machineImageId,
-            AsyncCallback<AmazonMachineImageDTO> callback);
+    void upgradeAmazonMachineImage(String region, String machineImageId, AsyncCallback<AmazonMachineImageDTO> callback);
 
-    void scaleMongo(String awsAccessKey, String awsSecret, String region,
-            MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
+    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
 
     /**
      * Probes whether the current user has the {@code LANDSCAPE:MANAGE:AWS} permission and has previously
