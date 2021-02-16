@@ -351,9 +351,6 @@
             <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
             <source>1.8</source>
             <target>1.8</target>
-            <compilerArgs>
-              <arg>-parameters</arg>
-            </compilerArgs>
           </configuration>
         </plugin>
       </plugins>
@@ -522,8 +519,12 @@
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>tycho-compiler-plugin</artifactId>
       <version>${tycho-version}</version>
+      <configuration>
+        <compilerArgs>
+          <arg>-parameters</arg>
+        </compilerArgs>
+      </configuration>
     </plugin>
-
 
     <plugin>
       <groupId>org.codehaus.mojo</groupId>
