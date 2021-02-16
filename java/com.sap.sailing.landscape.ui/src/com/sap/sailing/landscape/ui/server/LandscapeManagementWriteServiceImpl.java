@@ -310,6 +310,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
+        // TODO handle mongoScalingInstructions.getHostnamesAndPortsToShutDown()...
         if (mongoScalingInstructions.getReplicaSetName() == null) {
             throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
         }
