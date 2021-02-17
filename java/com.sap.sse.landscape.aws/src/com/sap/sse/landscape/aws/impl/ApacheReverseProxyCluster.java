@@ -28,15 +28,15 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
-    private Set<AwsInstance<ShardingKey, MetricsT>> hosts;
+    private Set<AwsInstance<ShardingKey>> hosts;
 
-    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
+    public Iterable<AwsInstance<ShardingKey>> getHosts() {
         return Collections.unmodifiableCollection(hosts);
     }
     
@@ -45,14 +45,14 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     @Override
-    public void addHost(AwsInstance<ShardingKey, MetricsT> host) {
+    public void addHost(AwsInstance<ShardingKey> host) {
         hosts.add(host);
     }
     
     @Override
-    public AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
-        final AwsInstance<ShardingKey, MetricsT> host = getLandscape().launchHost(
-                (instanceId, availabilityZone, landscape) -> new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId,
+    public AwsInstance<ShardingKey> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
+        final AwsInstance<ShardingKey> host = getLandscape().launchHost(
+                (instanceId, availabilityZone, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, landscape),
                 getAmiId(), instanceType, az, keyName,
                 Collections.singleton(getSecurityGroup(az.getRegion())), Optional.of(Tags.with("Name", "ReverseProxy")));
@@ -61,7 +61,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
     
     @Override
-    public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
+    public void removeHost(AwsInstance<ShardingKey> host) {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
             throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
@@ -80,9 +80,9 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
 
     @Override
     public void terminate() {
-        Set<AwsInstance<ShardingKey, MetricsT>> hosts = new HashSet<>();
+        Set<AwsInstance<ShardingKey>> hosts = new HashSet<>();
         Util.addAll(getHosts(), hosts);
-        for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
+        for (final AwsInstance<ShardingKey> host : hosts) {
             getLandscape().terminate(host);
         }
     }

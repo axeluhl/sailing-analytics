@@ -33,7 +33,7 @@ import com.sap.sse.landscape.orchestration.Procedure;
  */
 public class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
+implements Procedure<ShardingKey>,
     StartFromSailingAnalyticsImage {
     public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
     private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
@@ -86,8 +86,8 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         }
 
         @Override
-        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape)->
+        protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, serverDirectory)->{
                             try {

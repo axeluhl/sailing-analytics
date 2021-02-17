@@ -4,27 +4,21 @@ import java.util.Optional;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.application.ApplicationProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
-public abstract class AbstractProcedureImpl<ShardingKey,
-MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-implements Procedure<ShardingKey, MetricsT, ProcessT> {
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
-    T extends Procedure<ShardingKey, MetricsT, ProcessT>, ShardingKey,
-    MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
-        private Landscape<ShardingKey, MetricsT, ProcessT> landscape;
+public abstract class AbstractProcedureImpl<ShardingKey>
+implements Procedure<ShardingKey> {
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends Procedure<ShardingKey>, ShardingKey>
+    implements Builder<BuilderT, T, ShardingKey> {
+        private Landscape<ShardingKey> landscape;
         private Optional<Duration> optionalTimeout;
 
-        protected Landscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+        protected Landscape<ShardingKey> getLandscape() {
             return landscape;
         }
 
         @Override
-        public BuilderT setLandscape(Landscape<ShardingKey, MetricsT, ProcessT> landscape) {
+        public BuilderT setLandscape(Landscape<ShardingKey> landscape) {
             this.landscape = landscape;
             return self();
         }
@@ -45,14 +39,14 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         }
     }
     
-    private final Landscape<ShardingKey, MetricsT, ProcessT> landscape;
+    private final Landscape<ShardingKey> landscape;
 
-    protected AbstractProcedureImpl(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
+    protected AbstractProcedureImpl(BuilderImpl<?, ?, ShardingKey> builder) {
         this.landscape = builder.getLandscape();
     }
 
     @Override
-    public Landscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+    public Landscape<ShardingKey> getLandscape() {
         return landscape;
     }
 }

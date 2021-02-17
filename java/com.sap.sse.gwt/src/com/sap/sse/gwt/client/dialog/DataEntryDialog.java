@@ -118,7 +118,7 @@ public abstract class DataEntryDialog<T> {
      *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
      * @param callback
      *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
-     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}; may be {@code null}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {

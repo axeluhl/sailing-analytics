@@ -89,7 +89,7 @@ REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.mas
 
 EQUINOX_LAUNCHER=$( find plugins -name 'org.eclipse.equinox.launcher_*.jar' )
 if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
-    nohup "$JAVA_BINARY" -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dosgi.shell.telnet.port=$TELNET_PORT -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -configuration ./ -clean 2>/dev/null >/dev/null &
+    nohup "$JAVA_BINARY" -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dgosh.args="-sc telnetd -p${TELNET_PORT}" -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -configuration ./ -clean 2>/dev/null >/dev/null &
     JAVA_PID=$!
     echo "Starting server... (PID: $JAVA_PID)"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -144,10 +144,10 @@ if [[ $PARAM == "" ]] || [[ $PARAM == "no-update" ]]; then
 elif [[ $PARAM == "debug" ]]; then
     echo "Starting remote debugging session on port 8000 - make sure this port is open and reachable from the outside"
     JFR_OPTIONS="-XX:+FlightRecorder -Dcom.sun.management.jmxremote.port=7091 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=7091 -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
-    "$JAVA_BINARY" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=y $JFR_OPTIONS -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -console -configuration ./ -clean
+    "$JAVA_BINARY" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=y $JFR_OPTIONS -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dgosh.args="-sc telnetd -p${TELNET_PORT}" -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -console -configuration ./ -clean
 
 elif [[ $PARAM == "fg" ]]; then
-    exec "$JAVA_BINARY" -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -console -configuration ./ -clean
+    exec "$JAVA_BINARY" -D$SERVER_NAME $ADDITIONAL_JAVA_ARGS -Dcom.sap.sailing.server.name=$SERVER_NAME $APP_PARAMETERS $REPLICATION_PARAMETERS -Djava.io.tmpdir="$PWD/tmp" -Dfile.encoding=cp1252 -Djetty.home=$scriptdir/configuration/jetty -Djava.util.logging.config.file=$scriptdir/configuration/logging.properties -Djava.library.path=$LIB_DIR -Dgosh.args="-sc telnetd -p${TELNET_PORT}" -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Xmx$MEMORY -jar "${EQUINOX_LAUNCHER}" -console -configuration ./ -clean
 
 fi
 

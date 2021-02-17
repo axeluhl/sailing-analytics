@@ -10,13 +10,13 @@ public abstract class AbstractApacheReverseProxy<ShardingKey, MetricsT extends A
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 implements ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     protected static final String INTERNAL_SERVER_STATUS = "internal-server-status";
-    private final AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
+    private final AwsLandscape<ShardingKey> landscape;
     
-    public AbstractApacheReverseProxy(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+    public AbstractApacheReverseProxy(AwsLandscape<ShardingKey> landscape) {
         this.landscape = landscape;
     }
 
-    protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+    protected AwsLandscape<ShardingKey> getLandscape() {
         return landscape;
     }
 

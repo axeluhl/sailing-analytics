@@ -133,7 +133,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
          * Expose for callers in same package as this class
          */
         @Override
-        protected AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getLandscape() {
+        protected AwsLandscape<ShardingKey> getLandscape() {
             return super.getLandscape();
         }
 

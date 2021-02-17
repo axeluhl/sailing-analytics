@@ -41,4 +41,24 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyRemovedMachineImage(String name, String id, String regionId);
     String successfullyUpgradedMachineImage(String name, String id, String regionId, String newName);
     String startedImageUpgrade(String name, String id, String regionId);
+    String showNewestOnlyPerType();
+    String scale();
+    String youCannotShutdownMongoDBInstancesNotRunningOnDefaultPort(String hostnamesAndPortsToShutdown);
+    String successfullyScaledMongoDB();
+    String mongoInstancesToStop();
+    String showOnlyInstanceYouCanStop();
+    String mongoInstancesToLaunch();
+    String numberOfMongoInstancesToLaunch();
+    String priority();
+    String votes();
+    String instanceType();
+    String youHaveToProvideAPositiveNumberOfInstancesToLaunch();
+    String youHaveToProvideANonNegativePriority();
+    String youHaveToProvideANonNegativeNumberOfVotes();
+    String mfaTokenCode();
+    String login();
+    String invalidCredentialsNoSessionCreated(String message);
+    String loggedInSuccessfully();
+    String logout();
+    String loggedOutSuccessfully();
 }

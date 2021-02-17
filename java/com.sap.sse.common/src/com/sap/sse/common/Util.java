@@ -374,7 +374,7 @@ public class Util {
     }
 
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
-        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
+        return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
     }
     
     /**

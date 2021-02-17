@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 
 public interface MongoReplicaSet extends Named, MongoEndpoint {
     static Logger logger = Logger.getLogger(MongoReplicaSet.class.getName());
@@ -35,7 +36,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
                 logger.info("Adding MongoDB process running on "+publicAddress+" to replica set "+this.getName());
                 final StringBuilder hostSpec = new StringBuilder();
                 hostSpec.append(publicAddress.getCanonicalHostName());
-                if (mongoProcess.getPort() != MongoProcess.DEFAULT_PORT) {
+                if (mongoProcess.getPort() != MongoDBConstants.DEFAULT_PORT) {
                     hostSpec.append(":");
                     hostSpec.append(mongoProcess.getPort());
                 }
