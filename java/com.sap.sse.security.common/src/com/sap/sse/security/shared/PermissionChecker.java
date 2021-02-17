@@ -151,14 +151,14 @@ public class PermissionChecker {
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
             PermissionState anonymous = checkUserPermissions(permission, allUser, groupsOfWhichAllUserIsMember,
-                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* isMetaPermissionCheck */ false);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
             result = checkUserPermissions(permission, user, groupsOfWhichUserIsMember, ownership, impliesChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true);
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* isMetaPermissionCheck */ false);
         }
         return result == PermissionState.GRANTED;
     }
@@ -345,9 +345,9 @@ public class PermissionChecker {
                 typesAndIdsAndOwnershipsWithFullSetOfAcls.put(collationKeyBasedOnTypeAndObjectIdAndOwnership, denyingAcls);
             }
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
-                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED
+                    impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* isMetaPermissionCheck */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
-                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* isMetaPermissionCheck */ true) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -473,9 +473,9 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleWildcardPermissionToDistinctPermissions(permission, allPermissionTypes, false);
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, getGroupsOfUser(user), ownership, impliesAnyChecker,
-                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED
+                    /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* isMetaPermissionCheck */false) == PermissionState.GRANTED
                     || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, getGroupsOfUser(allUser), ownership, impliesAnyChecker,
-                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false) == PermissionState.GRANTED) {
+                            /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ false, /* isMetaPermissionCheck */false) == PermissionState.GRANTED) {
                 return true;
             }
         }
@@ -503,7 +503,7 @@ public class PermissionChecker {
     private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, UR>, O extends AbstractOwnership<G, UR>, UR extends UserReference, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup<RD>, A extends SecurityAccessControlList<G>>
     PermissionState checkUserPermissions(
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
-            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
+            BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean isMetaPermissionCheck) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
@@ -533,7 +533,7 @@ public class PermissionChecker {
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (R role : user.getRoles()) {
                 if (implies(role, permission, ownership, permissionChecker,
-                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) && !role.getOriginatesFromSubscription()) {
+                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) && (!isMetaPermissionCheck || !role.getOriginatesFromSubscription())) {
                     result = PermissionState.GRANTED;
                     break;
                 }
