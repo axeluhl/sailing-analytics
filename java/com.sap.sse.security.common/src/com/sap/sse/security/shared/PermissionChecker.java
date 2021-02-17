@@ -515,15 +515,11 @@ public class PermissionChecker {
             }
         }
         // TODO documentation
-        final boolean ownershipIsGiven = ownership != null
-                && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
-        if (ownershipIsGiven) {
+        if (ownership != null && ownership.getTenantOwner() != null) {
             final G tenantOwner = ownership.getTenantOwner();
-            if (tenantOwner != null) {
-                final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
-                if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
-                    result = PermissionState.GRANTED;
-                }
+            final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);
+            if (isPermissionGrantedByGroup(permission, tenantOwner, userIsMemberOfGroup, permissionChecker)) {
+                result = PermissionState.GRANTED;
             }
         } else if (!matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
             for (G groupToCheck : groupsOfWhichUserIsMember) {
