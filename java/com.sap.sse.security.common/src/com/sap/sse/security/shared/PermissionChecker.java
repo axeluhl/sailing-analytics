@@ -533,7 +533,7 @@ public class PermissionChecker {
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (R role : user.getRoles()) {
                 if (implies(role, permission, ownership, permissionChecker,
-                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven)) {
+                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) && !role.getOriginatesFromSubscription()) {
                     result = PermissionState.GRANTED;
                     break;
                 }
