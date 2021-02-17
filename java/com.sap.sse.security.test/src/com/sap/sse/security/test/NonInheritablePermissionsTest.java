@@ -64,6 +64,7 @@ public class NonInheritablePermissionsTest {
         final RoleDefinition mediaEditorRoleDefinition = userStore.getRoleDefinition(PredefinedRoles.mediaeditor.getId());
         final WildcardPermission permissionImpliedByRole = mediaEditorRoleDefinition.getPermissions().iterator().next();
         final Role role = new Role(mediaEditorRoleDefinition, null, null);
+        role.setOriginatesFromSubscription(true);
         user.addRole(role);
         assertFalse(PermissionChecker.checkMetaPermission(permissionImpliedByRole, allHasPermissions, user, null, null, noopAclResolver));
     }
