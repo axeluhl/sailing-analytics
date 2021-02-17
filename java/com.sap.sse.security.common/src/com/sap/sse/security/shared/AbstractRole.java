@@ -19,6 +19,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     protected RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
+    protected boolean originatesFromSubscription;
 
     @Deprecated
     protected AbstractRole() {
@@ -40,6 +41,14 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     @Override
     public String getName() {
         return roleDefinition.getName();
+    }
+    
+    public void setOriginatesFromSubscription(boolean originatesFromSubscription) {
+        this.originatesFromSubscription = originatesFromSubscription;
+    }
+    
+    public boolean getOriginatesFromSubscription() {
+        return this.originatesFromSubscription;
     }
 
     public RD getRoleDefinition() {
