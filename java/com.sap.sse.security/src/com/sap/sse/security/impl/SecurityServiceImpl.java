@@ -2676,6 +2676,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             logger.info(() -> "Add user roles for subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
+                role.setOriginatesFromSubscription(true);
                 store.addRoleForUser(user.getName(), role);
             }
         }
