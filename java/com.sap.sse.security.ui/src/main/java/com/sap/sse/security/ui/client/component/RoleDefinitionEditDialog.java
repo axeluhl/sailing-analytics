@@ -9,7 +9,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
     private final UUID roleDefinitionId;
-    
+
     public RoleDefinitionEditDialog(RoleDefinition roleDefinition, StringMessages stringMessages,
             Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinitionDTO> allOtherRoles,
             DialogCallback<RoleDefinitionDTO> callback) {
@@ -18,6 +18,7 @@ public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
         roleDefinitionNameField.setText(roleDefinition.getName());
         permissionsList.setValue(roleDefinition.getPermissions());
         this.ensureDebugId(this.getClass().getSimpleName());
+        transitiveCheckBox.setValue(roleDefinition.isTransitive());
     }
 
     @Override

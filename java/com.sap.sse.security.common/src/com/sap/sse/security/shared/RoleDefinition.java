@@ -27,6 +27,7 @@ import com.sap.sse.security.shared.impl.Role;
  * instantiated from a single {@link RoleDefinition}.
  * <p>
  * 
+ * <p>
  * Equality ({@link #equals(Object)}) and {@link #hashCode()} are expected to be based solely on the {@link #getId() ID}.
  * 
  * @author Axel Uhl (d043530)
@@ -41,6 +42,9 @@ public interface RoleDefinition extends NamedWithID, Renamable, WithQualifiedObj
     default String getIdAsString() {
         return getId().toString();
     }
+
+    boolean isTransitive();
+    void setTransitive(boolean transitive);
 
     void setPermissions(Iterable<WildcardPermission> permissions);
 }
