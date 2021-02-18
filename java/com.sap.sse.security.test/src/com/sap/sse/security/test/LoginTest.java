@@ -98,7 +98,7 @@ public class LoginTest {
         securityService.removePermissionFromUser(username, createObjectPermissionOnMyserver);
         assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
         final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
-        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission");
+        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission", false);
         roleGrantingPermission.setPermissions(Collections.singleton(createObjectPermissionOnMyserver));
         securityService.updateRoleDefinition(roleGrantingPermission);
         specialUserGroup1.put(roleGrantingPermission, /* forAll */ false);

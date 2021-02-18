@@ -472,7 +472,7 @@ public class PermissionCheckerTest {
         final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck), false);
         final Role transientRole = new Role(transientRoleDefinition);
         user.addRole(transientRole);
-        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
         assertFalse(metaPermitted);
         boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
         assertTrue(permitted);
