@@ -30,9 +30,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
@@ -150,6 +152,13 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+//        clearBrowserCache(getWebDriver());
+    }
+    
+    public void clearBrowserCache(WebDriver driver) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, 1L);
+        WebElement clearBrowsingButon = webDriverWait.until(d -> d.findElement(By.cssSelector("* /deep/ #clearBrowsingDataConfirm")));
+        clearBrowsingButon.click();
     }
     
     protected boolean getWhitelabel(String contextRoot) {
@@ -168,15 +177,21 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    
-    
     protected void setUpAuthenticatedSession(WebDriver webDriver) {
+        setUpAuthenticatedSession(webDriver, "admin", "admin");
+    }
+    
+    protected void clearSession(WebDriver webDriver) {
+        webDriver.manage().deleteCookieNamed("JSESSIONID");
+    }
+    
+    protected void setUpAuthenticatedSession(WebDriver webDriver, String username, String password) {
         // To be able to set a cookie we need to load a page having the target origin
         webDriver.get(getContextRoot());
         logger.info("Authenticating session...");
         Cookie sessionCookie;
         try {
-            sessionCookie = authenticate(getContextRoot());
+            sessionCookie = authenticate(getContextRoot(), username, password);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -203,7 +218,7 @@ public abstract class AbstractSeleniumTest {
      * @return the cookie that represents the authenticated session or <code>null</code> if the session
      * couldn't successfully be authenticated
      */
-    protected Cookie authenticate(String contextRoot) throws JSONException {
+    protected Cookie authenticate(String contextRoot, String username, String password) throws JSONException {
         try {
             Cookie result = null;
             URL accessTokenUrl = new URL(contextRoot + OBTAIN_ACCESS_TOKEN_URL);
@@ -211,7 +226,7 @@ public abstract class AbstractSeleniumTest {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.connect();
-            connection.getOutputStream().write("username=admin&password=admin".getBytes());
+            connection.getOutputStream().write(("username=" + username + "&password=" + password).getBytes());
             final JSONObject jsonResponse = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) connection.getContent())));
             final String accessToken = jsonResponse.getString("access_token");
             URL createSessionUrl = new URL(contextRoot + CREATE_SESSION_URL);

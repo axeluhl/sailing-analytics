@@ -31,7 +31,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sse.common.Util;
 
 /**
@@ -40,7 +39,7 @@ import com.sap.sse.common.Util;
  * @author Simon Marcel Pamies
  *
  */
-public abstract class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
+public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedContentReplacing implements IgtimiWindListener, BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(WindStatusServlet.class.getName());
     private static final long serialVersionUID = -6791613843435003810L;
     

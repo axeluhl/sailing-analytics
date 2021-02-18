@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=hnv
 SERVER_NAME=HNV
 SERVER_PORT=8901
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/HNV?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/HNV?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2023
 TELNET_PORT=14901

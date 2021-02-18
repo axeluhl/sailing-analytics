@@ -3,8 +3,8 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public final class TrackingDeviceStatusSerializer implements JsonSerializer<TrackingDeviceStatus> {
     private final GPSFixJsonSerializer gpsFixSerializer = new GPSFixJsonSerializer();

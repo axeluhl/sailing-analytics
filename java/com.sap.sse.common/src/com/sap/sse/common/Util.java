@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +27,6 @@ import com.sap.sse.common.util.NaturalComparator;
 
 
 public class Util {
-
     public static class Pair<A, B> implements Serializable {
         private static final long serialVersionUID = -7631774746419135931L;
     
@@ -312,6 +312,10 @@ public class Util {
         }
     }
     
+    /**
+     * @return the first element of the {@code iterable}, or {@code null} if the {@code iterable}
+     *         {@link #isEmpty(Iterable) is empty}.
+     */
     public static <T> T first(Iterable<T> iterable) {
         final Iterator<T> iter = iterable.iterator();
         final T result;
@@ -370,7 +374,7 @@ public class Util {
     }
 
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
-        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
+        return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
     }
     
     /**
@@ -562,25 +566,16 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
-    public static String join(String separator, Object... objects) {
-        final String[] strings = new String[objects.length];
-        int i=0;
-        for (Object o : objects) {
-            strings[i++] = o.toString();
-        }
-        return joinStrings(separator, Arrays.asList(strings));
-    }
-
-    public static String joinStrings(String separator, Iterable<String> strings) {
+    public static String joinStrings(String separator, Iterable<? extends Object> objects) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
-        for (String string : strings) {
+        for (Object object : objects) {
             if (first) {
                 first = false;
             } else {
                 result.append(separator);
             }
-            result.append(string);
+            result.append(String.valueOf(object));
         }
         return result.toString();
     }
@@ -819,7 +814,7 @@ public class Util {
     
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
-     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * Collections of the resulting Map are created using the given {@link Supplier} instance.
      * <br>
      * Can be replaced with Java 8 Stream API in the future.
      * 
@@ -854,20 +849,26 @@ public class Util {
     }
 
     /**
-     * Checks if the given map is null, and if, returns an empty map.
+     * Checks if the given map is null, and if so, returns an empty map.
      */
     public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        final Map<K, V> result;
         if (map == null) {
-            return Collections.emptyMap();
+            result = Collections.emptyMap();
+        } else {
+            result = map;
         }
-        return map;
+        return result;
     }
 
     public static String toStringOrNull(Object toStringOrNull) {
+        final String result;
         if (toStringOrNull == null) {
-            return null;
+            result = null;
+        } else {
+            result = toStringOrNull.toString();
         }
-        return toStringOrNull.toString();
+        return result;
     }
     
     public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {
@@ -1002,5 +1003,27 @@ public class Util {
      */
     public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
         return asSet(a).equals(asSet(b));
+    }
+    
+    public static interface MapBuilder<K, V> {
+        MapBuilder<K, V> put(K key, V value);
+        Map<K, V> build();
+    }
+    
+    public static <K, V> MapBuilder<K, V> mapBuilder() {
+        return new MapBuilder<K, V>() {
+            final Map<K, V> result = new HashMap<>();
+            
+            @Override
+            public Map<K, V> build() {
+                return result;
+            }
+
+            @Override
+            public MapBuilder<K, V> put(K key, V value) {
+                result.put(key, value);
+                return this;
+            }
+        };
     }
 }

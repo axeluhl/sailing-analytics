@@ -41,12 +41,14 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -58,7 +60,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class CourseTemplatePanel extends FlowPanel {
+public class CourseTemplatePanel extends FlowPanel implements FilterablePanelProvider<CourseTemplateDTO>{
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private final SailingServiceWriteAsync sailingService;
@@ -308,9 +310,9 @@ public class CourseTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<CourseTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<CourseTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, courseTemplateDTO -> courseTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<CourseTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, courseTemplate -> courseTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_DELETE, DELETE, e -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveCourseTemplate(e.getName()))) {
@@ -331,7 +333,7 @@ public class CourseTemplatePanel extends FlowPanel {
         actionsColumn.addAction(ACTION_UPDATE, UPDATE, e -> openEditCourseTemplateDialog(e, userService, false));
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                courseTemplate -> configACL.openACLDialog(courseTemplate));
+                courseTemplate -> configACL.openDialog(courseTemplate));
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
@@ -379,6 +381,11 @@ public class CourseTemplatePanel extends FlowPanel {
                 }, isNew);
         dialog.ensureDebugId("CourseTemplateEditDialog");
         dialog.show();
+    }
+
+    @Override
+    public AbstractFilterablePanel<CourseTemplateDTO> getFilterablePanel() {
+        return filterableCourseTemplatePanel;
     }
 
 }

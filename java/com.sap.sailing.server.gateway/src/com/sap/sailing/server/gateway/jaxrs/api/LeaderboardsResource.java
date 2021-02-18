@@ -116,7 +116,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
@@ -136,6 +135,7 @@ import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
@@ -158,6 +158,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboards")
@@ -321,6 +322,38 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+    
+    @POST
+    @Path("{name}/updateCompetitorDisplayName")
+    public Response updateCompetitorDisplayName(@PathParam("name") String leaderboardName,
+            @QueryParam("competitorId") String competitorIdAsString,
+            @QueryParam("displayName") String competitorDisplayName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (!isValidLeaderboard(leaderboard)) {
+            logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
+        Response response;
+        if (getSecurityService().hasCurrentUserUpdatePermission(leaderboard)) {
+            final Competitor competitor;
+            // find competitor
+            if (competitorIdAsString == null || (competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString)) == null) {
+                logger.warning("No competitor found for id " + competitorIdAsString);
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorIdAsString))
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            getService().apply(new UpdateCompetitorDisplayNameInLeaderboard(leaderboardName, competitorIdAsString, competitorDisplayName));
+            logger.fine("Successfully set display name for competitor with ID " + competitorIdAsString + " named "
+                    + competitor.getName() + " in leaderboard " + leaderboardName + " to " + competitorDisplayName);
+            response = Response.status(Status.OK).build();
+        } else {
+            response = Response.status(Status.FORBIDDEN).build();
+        }
+        return response;
     }
 
     @POST
@@ -685,16 +718,12 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
             @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination,
-            @QueryParam(RaceLogServletConstants.PARAMS_TRACKED_RACE_NAME) String optionalTrackedRaceName,
-            @QueryParam("secret") String secret)
+            @QueryParam(RaceLogServletConstants.PARAMS_TRACKED_RACE_NAME) String optionalTrackedRaceName)
                     throws NotDenotedForRaceLogTrackingException, Exception {
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(
                 leaderboardName, raceColumnName, fleetName);
-        boolean skip = getService().skipChecksDueToCorrectSecret(leaderboardName, secret);
-        if (!skip) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
-                    DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
-        }
+        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(
+                DefaultActions.UPDATE, leaderboardAndRaceColumnAndFleetAndResponse.getLeaderboard()));
         final Callable<Response> innerAction = () -> {
             final Response result;
             if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {

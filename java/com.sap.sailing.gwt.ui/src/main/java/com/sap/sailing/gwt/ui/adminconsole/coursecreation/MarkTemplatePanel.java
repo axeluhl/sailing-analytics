@@ -32,12 +32,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -49,7 +51,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkTemplatePanel extends FlowPanel {
+public class MarkTemplatePanel extends FlowPanel implements FilterablePanelProvider<MarkTemplateDTO>{
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -272,13 +274,13 @@ public class MarkTemplatePanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkTemplateDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkTemplateDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, markTemplate -> markTemplateListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkTemplateDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, markTemplate -> markTemplate.getAccessControlList(),
+                userService.getUserManagementWriteService(), type, markTemplate -> markTemplate.getAccessControlList(),
                 stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markTemplate -> configACL.openACLDialog(markTemplate));
+                markTemplate -> configACL.openDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
     }
@@ -319,5 +321,10 @@ public class MarkTemplatePanel extends FlowPanel {
                 });
         dialog.ensureDebugId("MarkTemplateEditDialog");
         dialog.show();
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkTemplateDTO> getFilterablePanel() {
+        return filterableMarkTemplates;
     }
 }

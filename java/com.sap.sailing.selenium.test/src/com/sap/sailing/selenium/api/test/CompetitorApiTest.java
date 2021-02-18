@@ -56,10 +56,8 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals(competitor.getTimeOnTimeFactor(), competitorReloaded.getTimeOnTimeFactor());
         assertEquals(competitor.getTimeOnDistanceAllowanceInSecondsPerNauticalMile(),
                 competitorReloaded.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
-        assertEquals(competitor.getNationalityISO2(), competitorReloaded.get("countryCode"));
-        assertEquals(competitor.getColor(), competitorReloaded.get("color"));
-        assertEquals(competitor.getFlagImageUri(), competitorReloaded.get("flagImage"));
-        assertEquals(competitor.getTeam().getTeamImageUri(), competitorReloaded.get("teamImageUri"));
+        assertEquals(competitor.getNationalityISO2(), competitorReloaded.getNationalityISO2());
+        assertEquals(competitor.getNationalityISO3(), competitorReloaded.getNationalityISO3());
     }
 
     @Test

@@ -32,12 +32,14 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -48,7 +50,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class MarkRolePanel extends FlowPanel {
+public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<MarkRoleDTO>{
 
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -238,13 +240,13 @@ public class MarkRolePanel extends FlowPanel {
         final AccessControlledActionsColumn<MarkRoleDTO, DefaultActionsImagesBarCell> actionsColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         final EditOwnershipDialog.DialogConfig<MarkRoleDTO> configOwnership = EditOwnershipDialog
-                .create(userService.getUserManagementService(), SecuredDomainType.MARK_ROLE, markRole -> markRoleListDataProvider.refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), SecuredDomainType.MARK_ROLE, markRole -> markRoleListDataProvider.refresh(), stringMessages);
         final EditACLDialog.DialogConfig<MarkRoleDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), SecuredDomainType.MARK_ROLE,
+                userService.getUserManagementWriteService(), SecuredDomainType.MARK_ROLE,
                 markRole -> markRole.getAccessControlList(), stringMessages);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                markRole -> configACL.openACLDialog(markRole));
+                markRole -> configACL.openDialog(markRole));
         markRolesTable.addColumn(idColumn, stringMessages.id());
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
     }
@@ -281,5 +283,10 @@ public class MarkRolePanel extends FlowPanel {
                 });
         dialog.ensureDebugId("MarkRoleEditDialog");
         dialog.show();
+    }
+
+    @Override
+    public AbstractFilterablePanel<MarkRoleDTO> getFilterablePanel() {
+        return filterableMarkRoles;
     }
 }

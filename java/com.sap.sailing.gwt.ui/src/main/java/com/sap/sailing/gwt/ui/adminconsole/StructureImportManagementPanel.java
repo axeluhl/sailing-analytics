@@ -37,7 +37,8 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventAndRegattaDTO;
@@ -52,14 +53,12 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.security.ui.client.UserService;
 
 public class StructureImportManagementPanel extends SimplePanel implements RegattaStructureProvider {
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final RegattaRefresher regattaRefresher;
-    private final EventManagementPanel eventManagementPanel;
+    private final Presenter presenter;
     private final StructureImportListComposite regattaListComposite;
     private final BusyIndicator busyIndicator;
     private TextBox jsonURLTextBox;
@@ -71,6 +70,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private final FlexTable regattaStructureGrid;
     private List<EventDTO> existingEvents;
     private ListBox sailingEventsListBox;
+    
+    private final Displayer<EventDTO> eventsDisplayer;
     
     /**
      * Holds one {@link RegattaDTO} for each distinct regatta structure. The user can work with this panel
@@ -97,25 +98,20 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
     
-    public StructureImportManagementPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
-            EventManagementPanel eventManagementPanel) {
+    public StructureImportManagementPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
-        this.eventManagementPanel = eventManagementPanel;
         this.busyIndicator = new SimpleBusyIndicator();
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(sailingServiceWrite, userService, regattaRefresher,
-                this, errorReporter, stringMessages);
+        this.presenter = presenter;
+        this.regattaListComposite = new StructureImportListComposite(presenter, this, errorReporter, stringMessages);
+        this.eventsDisplayer = result->fillEvents(result);
         regattaListComposite.ensureDebugId("RegattaListComposite");
-
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         createUI(mainPanel);
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
@@ -130,7 +126,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     private void createUI(VerticalPanel mainPanel) {        
         final Panel progressPanel = new FlowPanel();
         progressPanel.add(busyIndicator);
-
         eventIDTextBox = new TextBox();
         eventIDTextBox.addChangeHandler(new ChangeHandler() {
             @Override
@@ -170,31 +165,25 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 listRegattasAndTheirStructures();
             }
         });
-
         Grid eventURLGrid = new Grid(3, 2);
         eventURLGrid.setWidget(0, 0, new Label(stringMessages.manage2SailEvent() + stringMessages.id() + ":"));
         eventURLGrid.setWidget(0, 1, eventIDTextBox);
         eventURLGrid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
         eventURLGrid.setWidget(1, 1, jsonURLTextBox);
         eventURLGrid.setWidget(2, 1, listRegattasButton);
-
         mainPanel.add(progressPanel);
         mainPanel.add(eventURLGrid);
-        
         regattaImportPanel = new CaptionPanel(stringMessages.manage2SailEvent());
         mainPanel.add(regattaImportPanel);
         VerticalPanel regattaImportContentPanel = new VerticalPanel();
         regattaImportPanel.setContentWidget(regattaImportContentPanel);
-
         editSeriesPanel = new VerticalPanel();
-
         HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setSpacing(10);
         hPanel.add(regattaListComposite);
         hPanel.setCellWidth(regattaListComposite, "50%");
         hPanel.add(editSeriesPanel);
         hPanel.setCellWidth(editSeriesPanel, "50%");
-        
         regattaImportContentPanel.add(hPanel);
         regattaImportContentPanel.add(importDetailsButton);
     }
@@ -203,7 +192,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      * Adds an event selector and a "create new event" button to the {@link #editSeriesPanel} in its first row
      */
     private Widget createEventSelectionAndCreateEventButtonUI() {
-        Grid grid = new Grid(1, 2);
+        final Grid grid = new Grid(1, 2);
         sailingEventsListBox = new ListBox();
         sailingEventsListBox.setMultipleSelect(false);
         sailingEventsListBox.addChangeHandler(new ChangeHandler() {
@@ -212,9 +201,10 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 updateImportRegattasButtonEnabledness();
             }
         });
+        presenter.getEventsRefresher().callFillAndReloadInitially(getEventsDisplayer());
         sailingEventsListBox.ensureDebugId("EventListBox");
         grid.setWidget(0, 0, sailingEventsListBox);
-        Button newEventBtn = new Button(stringMessages.createNewEvent());
+        final Button newEventBtn = new Button(stringMessages.createNewEvent());
         newEventBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -223,28 +213,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         });
         grid.setWidget(0, 1, newEventBtn);
         editSeriesPanel.add(grid);
-        sailingServiceWrite.getEvents(new AsyncCallback<List<EventDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToGetEvents(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(List<EventDTO> events) {
-                existingEvents = events;
-                Collections.sort(existingEvents, new Comparator<EventDTO>() {
-                    private final NaturalComparator comp = new NaturalComparator();
-                    @Override
-                    public int compare(EventDTO o1, EventDTO o2) {
-                        return comp.compare(o1.getName(), o2.getName());
-                    }
-                });
-                sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-                for (EventDTO event : existingEvents) {
-                    sailingEventsListBox.addItem(event.getName());
-                }
-            }
-        });
         return grid;
     }
 
@@ -280,6 +248,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                     @Override
                     public void onSuccess(EventDTO newEvent) {
                         existingEvents.add(newEvent);
+                        presenter.getEventsRefresher().updateAndCallFillForAll(existingEvents,
+                                StructureImportManagementPanel.this.getEventsDisplayer());
                         sailingEventsListBox.addItem(newEvent.getName());
                         sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     }
@@ -453,7 +423,6 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
-        eventManagementPanel.fillEvents();
         final List<RegattaDTO> regattaConfigurationsToCreate = new ArrayList<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
             RegattaDTO cloneFromDefaults = new RegattaDTO(regattaDefaultsPerStructure.get(regattaStructures.get(originalRegattaFromXRR)));
@@ -478,7 +447,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
 
             @Override
             public void onSuccess(Void result) {
-                regattaRefresher.fillRegattas();
+                presenter.getRegattasRefresher().reloadAndCallFillAll();
                 Notification.notify(stringMessages.successfullyCreatedRegattas(), NotificationType.SUCCESS);
             }
         });
@@ -488,5 +457,27 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     public RegattaStructure getRegattaStructure(RegattaDTO regatta) {
         return regattaStructures.get(regatta);
     }
+    
+    public Displayer<EventDTO> getEventsDisplayer() {
+        return eventsDisplayer;
+    }
 
+    private void fillEvents(Iterable<EventDTO> result) {
+        if (sailingEventsListBox != null) { // is initialized only one a regatta structure has been loaded
+            sailingEventsListBox.clear();
+            existingEvents = new ArrayList<EventDTO>();
+            result.forEach(existingEvents::add);
+            Collections.sort(existingEvents, new Comparator<EventDTO>() {
+                private final NaturalComparator comp = new NaturalComparator();
+                @Override
+                public int compare(EventDTO o1, EventDTO o2) {
+                    return comp.compare(o1.getName(), o2.getName());
+                }
+            });
+            sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
+            for (EventDTO event : existingEvents) {
+                sailingEventsListBox.addItem(event.getName());
+            }
+        }
+    }
 }

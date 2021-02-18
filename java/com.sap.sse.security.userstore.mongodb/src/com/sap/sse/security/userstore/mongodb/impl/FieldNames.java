@@ -39,8 +39,8 @@ public class FieldNames {
         NAME,
         USERNAMES,
         ROLE_DEFINITION_MAP, // a list of objects with two components each:
-            ROLE_DEFINITION_MAP_ROLE_ID,
-            ROLE_DEFINITION_MAP_FOR_ALL
+        ROLE_DEFINITION_MAP_ROLE_ID,
+        ROLE_DEFINITION_MAP_FOR_ALL
     }
     
     public static enum User {
@@ -56,7 +56,8 @@ public class FieldNames {
         PASSWORD_RESET_SECRET,
         VALIDATION_SECRET,
         DEFAULT_TENANT_SERVER,
-        DEFAULT_TENANT_GROUP;
+        DEFAULT_TENANT_GROUP,
+        SUBSCRIPTIONS;
     }
     
     public static enum Settings {
@@ -82,6 +83,4 @@ public class FieldNames {
         SALTED_PW,
         SALT;
     }
-    
-    
 }

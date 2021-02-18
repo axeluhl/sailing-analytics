@@ -17,7 +17,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.roles.UserRoleDefinitionPanel;
 
 /**
- * Suggest oracle for use in {@link UserGroupRoleDefinitionPanel} and {@link UserRoleDefinitionPanel}, which oracles the
+ * Suggest oracle for use in {@link GroupRoleDefinitionPanel} and {@link UserRoleDefinitionPanel}, which oracles the
  * role names.
  */
 public class RoleDefinitionSuggestOracle extends MultiWordSuggestOracle {

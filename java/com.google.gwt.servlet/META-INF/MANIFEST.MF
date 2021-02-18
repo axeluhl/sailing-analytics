@@ -175,4 +175,4 @@ Export-Package: com.google.gwt.activity.shared,
  com.google.web.bindery.requestfactory.vm.testing,
  javaemul.internal,
  javaemul.internal.annotations
-Require-Bundle: javax.servlet;bundle-version="3.1.0"
+Require-Bundle: org.eclipse.jetty.osgi-servlet-api

@@ -160,6 +160,14 @@ public class TestORCPublicCertificateDatabase {
                                        * boat class name; could be set to cert.getBoatClassName() but there are
                                        * deviations in ORC DBs and query API, so leaving null:
                                        */ null, /* includeInvalid */ false);
+        if (Util.isEmpty(certHandles)) {
+            // there were certs; get one from the previous year
+            certHandles = db.search(null, LocalDate.now().getYear()-1, null, cert.getBoatName(),
+                    cert.getSailNumber(), /*
+                                           * boat class name; could be set to cert.getBoatClassName() but there are
+                                           * deviations in ORC DBs and query API, so leaving null:
+                                           */ null, /* includeInvalid */ false);
+        }
         Optional<CertificateHandle> certificateHandle = Optional.ofNullable(certHandles.iterator().hasNext() ? certHandles.iterator().next() : null);
         assertTrue("No certificate found for handle "+certificateHandle+
                 " extracted from certificates "+certificates, certificateHandle.isPresent());
@@ -188,7 +196,7 @@ public class TestORCPublicCertificateDatabase {
                     new BoatClassImpl(orcCertificate.getBoatClassName(), true)));
         }
         for (Future<Set<ORCCertificate>> futureResult : futures) {
-            isYearFound = isYearFound || assertFoundYear(futureResult.get(), year);
+            isYearFound = isYearFound || assertFoundYear(futureResult.get(), year) || assertFoundYear(futureResult.get(), year-1);
         }
         assertTrue(isYearFound);
     }

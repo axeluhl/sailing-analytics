@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
@@ -76,11 +77,12 @@ public class SwissTimingReplayAdapterServiceTest {
         assertEquals(321920, replayCountListener.rankingMarkCount);                
     }
 
+    @Ignore("SwissTiming has shut down the ota2.sportresult.com server around 2020-11-13")
     @Test
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495").getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -120,7 +122,7 @@ public class SwissTimingReplayAdapterServiceTest {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
         byte[] onlineCopy = read((InputStream) new URL(
-                "http://ota2.sportresult.com/Replay?id=446495&_start=0").getContent());
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495").getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  

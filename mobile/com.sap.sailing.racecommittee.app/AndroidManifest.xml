@@ -9,7 +9,6 @@
         android:name="com.sap.sailing.racecommittee.app.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
-
     <!--<uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -36,7 +35,10 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDH-Dwy5yFlyBa2-VUgiZ3qGGUO8M_0MPY" />
 
-        <activity android:name=".ui.activities.LoginActivity">
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -55,14 +57,42 @@
 
                 <data
                     android:host="*"
-                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"
+                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"
+                    android:scheme="https" />
+            </intent-filter>
+            <!-- Branch URI Scheme -->
+            <intent-filter>
+                <data android:scheme="comsapsailingracemanager" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
+            <!-- Branch App Links (optional) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="racemanager-app.sapsailing.com"
+                    android:scheme="https" />
+                <data
+                    android:host="5z0o-alternate.app.link"
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity"
+            android:screenOrientation="behind"
+            tools:replace="android:screenOrientation" />
         <activity android:name=".ui.activities.RacingActivity" />
         <activity android:name=".ui.activities.PasswordActivity" />
         <activity
             android:name=".ui.activities.PreferenceActivity"
+            android:screenOrientation="behind"
             android:theme="@style/PreferenceTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
@@ -74,7 +104,8 @@
 
         <service
             android:name=".services.polling.RaceLogPollingService"
-            android:exported="false">
+            android:exported="false"
+            android:stopWithTask="true">
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.stopPoller" />
                 <action android:name="com.sap.sailing.racecommittee.app.action.addRace" />
@@ -84,7 +115,8 @@
         </service>
         <service
             android:name=".services.RaceStateService"
-            android:exported="false">
+            android:exported="false"
+            android:stopWithTask="true">
             <intent-filter>
                 <action android:name="com.sap.sailing.racecommittee.app.action.startProcedureSpecificAction" />
             </intent-filter>
@@ -103,13 +135,23 @@
         </service>
 
         <provider
-                android:name="android.support.v4.content.FileProvider"
-                android:authorities="${applicationId}.fileprovider"
-                android:grantUriPermissions="true"
-                android:exported="false">
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/filepaths" />
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
         </provider>
+
+        <meta-data
+            android:name="io.branch.sdk.BranchKey"
+            android:value="key_live_jgDZ6HTD063Wiy7rDt5clbdmEFplJRdd" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey.test"
+            android:value="key_test_netW6MGq3YW5az2uCv2fwgmbttafGPdB" />
+        <meta-data
+            android:name="io.branch.sdk.TestMode"
+            android:value="false" /><!-- Set to true to use Branch_Test_Key (useful when simulating installs and/or switching between debug and production flavors) -->
     </application>
 </manifest>

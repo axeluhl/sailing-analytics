@@ -33,7 +33,7 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sse.security,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
- javax.servlet;bundle-version="3.1.0",
+ org.eclipse.jetty.osgi-servlet-api;bundle-version="3.1.0",
  com.sap.sailing.server.interface,
  org.mongodb.mongo-java-driver;bundle-version="3.6.4",
  com.sap.sse.security.common

@@ -1,5 +1,18 @@
-<?xml version="1.0"?>
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+<?xml version="1.0"?><!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+
+<!-- =============================================================== -->
+<!-- Documentation of this file format can be found at:              -->
+<!-- https://www.eclipse.org/jetty/documentation/current/            -->
+<!--                                                                 -->
+<!-- Additional configuration files are available in $JETTY_HOME/etc -->
+<!-- and can be mixed in. See start.ini file for the default         -->
+<!-- configuration files.                                            -->
+<!--                                                                 -->
+<!-- For a description of the configuration mechanism, see the       -->
+<!-- output of:                                                      -->
+<!--   java -jar start.jar -?                                        -->
+<!-- =============================================================== -->
+
 <!-- =============================================================== -->
 <!-- Configure a Jetty Server instance with an ID "Server"           -->
 <!-- Other configuration files may also configure the "Server"       -->
@@ -91,17 +104,11 @@
     <!-- RequestLogHandler after the default handler                 -->
     <!-- =========================================================== -->
     <Set name="handler">
-      <!--
       <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
-      -->
-      <New id="Handlers" class="com.sap.sse.jettyextensions.SynchronizedHandlerCollection">
         <Set name="handlers">
          <Array type="org.eclipse.jetty.server.Handler">
            <Item>
-      <!--
-               <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
-      -->
-               <New id="Contexts" class="com.sap.sse.jettyextensions.SynchronizedContextHandlerCollection"/>
+             <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
            </Item>
            <Item>
              <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>

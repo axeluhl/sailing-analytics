@@ -32,16 +32,19 @@ import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Void, Void> {
+public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCompetitor, Void, Void>
+implements OfficialCompetitorUpdateProvider {
     private static final Logger logger = Logger.getLogger(CompetitorChangeReceiver.class.getName());
     private final IRaceCompetitorListener listener;
     private final RaceAndCompetitorStatusWithRaceLogReconciler reconciler;
 
     public CompetitorChangeReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, Simulator simulator, DomainFactory domainFactory,
-            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, long timeoutInMilliseconds, RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, long timeoutInMilliseconds,
+            RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         reconciler = raceAndCompetitorStatusWithRaceLogReconciler;
+        reconciler.setOfficialCompetitorUpdateProvider(this);
         listener = new IRaceCompetitorListener() {
             @Override
             public void addRaceCompetitor(IRaceCompetitor raceCompetitor) {
@@ -98,5 +101,10 @@ public class CompetitorChangeReceiver extends AbstractReceiverWithQueue<IRaceCom
             logger.warning("Couldn't find tracked race for race " + race.getName()
                     + ". Dropping competitor change event " + event);
         }
+    }
+
+    @Override
+    public void runWhenNoMoreOfficialCompetitorUpdatesPending(Runnable runnable) {
+        callBackWhenLoadingQueueIsDone(receiver->runnable.run());
     }
 }

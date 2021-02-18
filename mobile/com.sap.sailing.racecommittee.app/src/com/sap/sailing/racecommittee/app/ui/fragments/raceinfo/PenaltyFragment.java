@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,7 +28,6 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
@@ -263,8 +261,7 @@ public class PenaltyFragment extends BaseFragment
                         mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-                                sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                                sendIntent(AppConstants.ACTION_SHOW_SUMMARY_CONTENT);
                             }
                         });
                     } else {
@@ -273,7 +270,7 @@ public class PenaltyFragment extends BaseFragment
                 }
             case FINISHING:
                 if (mListButton != null) {
-                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(getActivity(), R.attr.list_both_24dp));
+                    mListButton.setImageDrawable(BitmapHelper.getAttrDrawable(requireContext(), R.attr.list_both_24dp));
                 }
                 if (mListButtonLayout != null) {
                     mListButtonLayout.setVisibility(View.VISIBLE);
@@ -297,23 +294,18 @@ public class PenaltyFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRaceState() != null) {
             getRaceState().addChangedListener(mStateChangeListener);
         }
 
         initLocalData();
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_START);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        if (getRace() != null && getRaceState() != null) {
+        if (getRace() != null) {
             getRaceState().removeChangedListener(mStateChangeListener);
         }
 
@@ -322,11 +314,6 @@ public class PenaltyFragment extends BaseFragment
         if (diff.size() > 0) {
             getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), diff);
         }
-
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_ON_LIFECYCLE);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA_LIFECYCLE, AppConstants.INTENT_ACTION_EXTRA_STOP);
-        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COMPETITOR);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     private void setReason(String reason) {
@@ -420,7 +407,7 @@ public class PenaltyFragment extends BaseFragment
                     MergeState.OK);
             mCompetitorResults.add(new CompetitorResultEditableImpl(result));
         }
-        if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) { // mix with finish position
+        if (getRaceState().getFinishPositioningList() != null) { // mix with finish position
             // list
             for (CompetitorResult result : getRaceState().getFinishPositioningList()) {
                 int pos = 0;
@@ -704,7 +691,7 @@ public class PenaltyFragment extends BaseFragment
 
     @Override
     public void onEditClicked(final CompetitorResultEditableImpl competitor) {
-        Context context = getActivity();
+        Context context = requireContext();
         if (context instanceof AppCompatActivity) {
             ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
             if (actionBar != null) {
@@ -854,8 +841,8 @@ public class PenaltyFragment extends BaseFragment
         }
 
         @Override
-        public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
-            super.onFinishingPositioningsChanged(state);
+        public void onFinishingPositionsChanged(ReadonlyRaceState state) {
+            super.onFinishingPositionsChanged(state);
 
             PenaltyFragment fragment = mReference.get();
             if (fragment != null) {

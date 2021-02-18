@@ -82,6 +82,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
             editSeriesMedals.pressOk();
             trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+            leaderboard.refreshLeaderboard();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
             
             for(int i = 1; i<=11; i++) {
@@ -104,7 +105,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         validateIsDisplayed(homePage.getCopyrightDiv(), false);
         validateIsDisplayed(homePage.getImprintLink(), false);
         validateIsDisplayed(homePage.getPrivacyLink(), false);
-        validateIsDisplayed(homePage.getJobsLink(), false);
+        validateIsDisplayed(homePage.getSupportLink(), false);
         validateIsDisplayed(homePage.getFeedbackLink(), false);
         validateIsDisplayed(homePage.getNewsLink(), false);
         validateIsDisplayed(homePage.getLanguageSelectionLabel(), true);

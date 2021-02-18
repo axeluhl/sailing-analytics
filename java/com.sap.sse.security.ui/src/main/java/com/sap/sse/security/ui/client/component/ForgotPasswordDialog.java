@@ -13,24 +13,26 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class ForgotPasswordDialog extends AbstractUserDialog {
-    public ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
+    private ForgotPasswordDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserDTO user,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<UserData> callback) {
+        // using write service to enforce round trip going to master for consistency purposes
         super(stringMessages, stringMessages.forgotPassword(), stringMessages.enterUsernameOrEmail(),
                 userManagementService, user, /* validator */ null, callback);
     }
-    
+
     /**
-     * Uses a default callback handler that triggers {@link UserManagementServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
+     * Uses a default callback handler that triggers {@link UserManagementWriteServiceAsync#resetPassword(String, String, String, AsyncCallback)} when
      * the user confirms the dialog.
      */
-    public ForgotPasswordDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, UserDTO user) {
-        this(stringMessages, userManagementService, user, new DialogCallback<UserData>() {
+    public ForgotPasswordDialog(final StringMessages stringMessages, final UserManagementWriteServiceAsync userManagementWriteService, UserDTO user) {
+        this(stringMessages, userManagementWriteService, user, new DialogCallback<UserData>() {
             @Override
             public void ok(final UserData userData) {
-                userManagementService.resetPassword(userData.getUsername(), userData.getEmail(),
+                userManagementWriteService.resetPassword(userData.getUsername(), userData.getEmail(),
                         EntryPointLinkFactory.createPasswordResetLink(new HashMap<String, String>()),
                         new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override

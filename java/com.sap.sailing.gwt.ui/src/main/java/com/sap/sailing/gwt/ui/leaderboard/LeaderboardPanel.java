@@ -313,7 +313,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     Anchor playPause;
 
-    final CompetitorSelectionProvider competitorSelectionProvider;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
     private final HorizontalPanel filterControlPanel;
     private Label filterStatusLabel;
     private Button filterClearButton;
@@ -481,6 +481,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
+        totalRankColumn.setCellStyleNames("totalRankColumn");
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
                 style.getTableresources());
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
@@ -906,7 +907,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private class BoatInfoColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
         private final BoatFetcher<T> boatFetcher;
 
-        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {            
+        public BoatInfoColumn(BoatFetcher<T> boatFetcher, LeaderBoardStyle style) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.boatFetcher = boatFetcher;
             // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
@@ -1201,6 +1202,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
+            result.put(DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_COURSE_OVER_GROUND_IN_TRUE_DEGREES,
+                            new RaceCurrentCourseOverGroundInTrueDegrees(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
             result.put(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
                     new RideHeightColumn(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
@@ -1585,6 +1590,44 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          * 
          * @author Axel Uhl (D043530)
          */
+        private class RaceCurrentSpeedOverGroundInKnots implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.currentSpeedAndCourseOverGround == null ? null :
+                        fieldsForRace.currentSpeedAndCourseOverGround.getKnots();
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average absolute (distance always counted as positive, no matter whether left or right)
+         * cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceCurrentCourseOverGroundInTrueDegrees implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.currentSpeedAndCourseOverGround == null ? null :
+                        fieldsForRace.currentSpeedAndCourseOverGround.getBearing().getDegrees();
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average absolute (distance always counted as positive, no matter whether left or right)
+         * cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
         private class RaceAverageAbsoluteCrossTrackErrorInMeters implements DataExtractor<Double, LeaderboardRowDTO> {
             @Override
             public Double get(LeaderboardRowDTO row) {
@@ -1908,18 +1951,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             @Override
             public String getRaceColumnName() {
                 return TextRaceColumn.this.getRaceColumnName();
-            }
-        }
-
-        private class RaceCurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {
-            @Override
-            protected Double getBeforeLastLegFinished(LegEntryDTO currentLegDetail) {
-                return currentLegDetail.currentSpeedOverGroundInKnots;
-            }
-
-            @Override
-            protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
-                return new RaceAverageSpeedInKnots().get(row);
             }
         }
 
@@ -3212,7 +3243,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return needsCarryColumn ? zeroBasedIndexOfCarryColumn + 1 : zeroBasedIndexOfCarryColumn;
     }
 
-    private void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
+    protected void ensureNoCarryColumn(int zeroBasedIndexOfCarryColumn) {
         if (getLeaderboardTable().getColumnCount() > zeroBasedIndexOfCarryColumn && getLeaderboardTable()
                 .getColumn(zeroBasedIndexOfCarryColumn) instanceof LeaderboardPanel.CarryColumn) {
             removeColumn(zeroBasedIndexOfCarryColumn);

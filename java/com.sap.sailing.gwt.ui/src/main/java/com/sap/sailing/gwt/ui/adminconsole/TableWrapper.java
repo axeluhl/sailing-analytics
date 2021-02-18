@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -11,10 +10,8 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
- * The {@link #getTable() table} created and wrapped by this object offers already a {@link ListHandler} for sorting.
- * Subclasses can obtain the table's default column sort handler created by this class's constructor by calling
- * {@link #getColumnSortHandler}. The table is wrapped by a panel that can be obtained using {@link #asWidget()}
- * and which contains, if requested, the pager widget underneath the table.
+ * Simplifies the use of a pager by offering a {@link #DEFAULT_PAGING_SIZE} of 100, and by remembering a
+ * {@link SailingServiceWriteAsync} instance for use by the subclasses.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>>
 extends com.sap.sse.gwt.client.celltable.TableWrapper<T, S, StringMessages, AdminConsoleTableResources> {

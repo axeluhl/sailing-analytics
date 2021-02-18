@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,22 +31,19 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("application/json;charset=UTF-8")
-    public Response importMasterData(
-            @FormParam("targetServerUrl") String targetServerUrlAsString,
+    public Response importMasterData(@FormParam("targetServerUrl") String targetServerUrlAsString,
             @FormParam("targetServerUsername") String targetServerUsername,
             @FormParam("targetServerPassword") String targetServerPassword,
             @FormParam("targetServerBearerToken") String targetServerBearerToken,
-            @FormParam("names[]") List<String> requestedLeaderboardGroups, 
-            @FormParam("override") Boolean override,
-            @FormParam("compress") Boolean compress, 
-            @FormParam("exportWind") Boolean exportWind,
-            @FormParam("exportDeviceConfigs") Boolean exportDeviceConfigs,
-            @FormParam("exportTrackedRacesAndStartTracking") Boolean exportTrackedRacesAndStartTracking) {
+            @FormParam("leaderboardgroupUUID[]") List<UUID> requestedLeaderboardGroupIds,
+            @FormParam("override") @DefaultValue("false") Boolean override,
+            @FormParam("compress") @DefaultValue("true") Boolean compress,
+            @FormParam("exportWind") @DefaultValue("true") Boolean exportWind,
+            @FormParam("exportDeviceConfigs") @DefaultValue("false") Boolean exportDeviceConfigs,
+            @FormParam("exportTrackedRacesAndStartTracking") @DefaultValue("true") Boolean exportTrackedRacesAndStartTracking) {
         Response response = null;
-        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroups.isEmpty() || override == null
-                || compress == null || exportWind == null || exportDeviceConfigs == null
-                || exportTrackedRacesAndStartTracking == null
-                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerUsername))
+        if (!Util.hasLength(targetServerUrlAsString) || requestedLeaderboardGroupIds.isEmpty()
+                || ((Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword))
                         && Util.hasLength(targetServerBearerToken))) {
             response = Response.status(Status.BAD_REQUEST).build();
         } else {
@@ -53,11 +51,11 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             try {
                 getSecurityService().checkCurrentUserServerPermission(ServerActions.CAN_IMPORT_MASTERDATA);
                 getService().importMasterData(targetServerUrlAsString,
-                        requestedLeaderboardGroups.toArray(new String[requestedLeaderboardGroups.size()]), override,
+                        requestedLeaderboardGroupIds.toArray(new UUID[requestedLeaderboardGroupIds.size()]), override,
                         compress, exportWind, exportDeviceConfigs, targetServerUsername, targetServerPassword,
                         targetServerBearerToken, exportTrackedRacesAndStartTracking, importMasterDataUid);
                 final JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("LeaderboardgroupsImported", requestedLeaderboardGroups);
+                jsonResponse.put("LeaderboardgroupsImported", getLeaderboardGroupNamesFromIdList(requestedLeaderboardGroupIds));
                 jsonResponse.put("ImportedFrom", targetServerUrlAsString);
                 jsonResponse.put("override", override);
                 jsonResponse.put("exportWind", exportWind);
@@ -77,5 +75,13 @@ public class MasterDataImportResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+    
+    private JSONObject getLeaderboardGroupNamesFromIdList(List<UUID> uuidList) {
+        JSONObject result = new JSONObject();
+        for (UUID uuid : uuidList) {
+            result.put(uuid, getService().getLeaderboardGroupByID(uuid).getName());
+        }
+        return result;
     }
 }

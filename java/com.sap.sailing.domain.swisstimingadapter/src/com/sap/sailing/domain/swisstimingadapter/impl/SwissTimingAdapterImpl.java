@@ -34,6 +34,7 @@ import com.sap.sailing.xrr.schema.Person;
 import com.sap.sailing.xrr.schema.RaceResult;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.schema.Team;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     private final SwissTimingFactory swissTimingFactory;
@@ -145,7 +146,7 @@ public class SwissTimingAdapterImpl implements SwissTimingAdapter {
     public RegattaResults readRegattaEntryListFromXrrUrl(String xrrEntryListUrl) throws IOException, JAXBException {
         // try to read the entry list from manage2sail
         URL regattaEntryListUrl = new URL(xrrEntryListUrl);
-        URLConnection regattaEntryListConn = regattaEntryListUrl.openConnection();
+        URLConnection regattaEntryListConn = HttpUrlConnectionHelper.redirectConnection(regattaEntryListUrl);
         RegattaResults regattaResults = ParserFactory.INSTANCE
                 .createParser((InputStream) regattaEntryListConn.getContent(), xrrEntryListUrl).parse();
         return regattaResults;

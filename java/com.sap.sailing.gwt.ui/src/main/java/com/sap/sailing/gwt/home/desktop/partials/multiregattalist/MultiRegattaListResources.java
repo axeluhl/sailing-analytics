@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.desktop.partials.multiregattalist;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 
 public interface MultiRegattaListResources extends SharedHomeResources {
     public static final MultiRegattaListResources INSTANCE = GWT.create(MultiRegattaListResources.class);

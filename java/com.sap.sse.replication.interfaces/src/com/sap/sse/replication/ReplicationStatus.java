@@ -18,7 +18,7 @@ public interface ReplicationStatus {
     /**
      * The queue length or {@code null} if no queue exists for the replicable with ID {@link code replicableIdAsString}
      */
-    Integer getOperationQueueLengthsByReplicableIdAsString(String replicableIdAsString);
+    Integer getOperationQueueLength(String replicableIdAsString);
     
     int getTotalOperationQueueLength();
     

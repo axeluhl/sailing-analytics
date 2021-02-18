@@ -31,13 +31,14 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.subscription.SubscriptionDataHandler;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static final Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final MongoDatabase db;
     final MongoCollection<org.bson.Document> settingCollection;
-
 
     public MongoObjectFactoryImpl(MongoDatabase db) {
         this.db = db;
@@ -230,6 +231,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             defaultTennants.add(tenant);
         }
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
+        dbUser.put(FieldNames.User.SUBSCRIPTIONS.name(), createSubscriptions(user.getSubscriptions()));
         usersCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbUser, new UpdateOptions().upsert(true));
     }
     
@@ -333,4 +335,19 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return dbSettingTypes;
     }
 
+    private BasicDBList createSubscriptions(Iterable<Subscription> subscriptions) {
+        final BasicDBList result;
+        if (subscriptions != null) {
+            result = new BasicDBList();
+            for (final Subscription subscription : subscriptions) {
+                final Document doc = new Document();
+                final SubscriptionDataHandler subscriptionDataHandler = Activator.getSubscriptionDataHandler(subscription.getProviderName());
+                doc.putAll(subscriptionDataHandler.toMap(subscription));
+                result.add(doc);
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
 }

@@ -36,16 +36,19 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -54,11 +57,11 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
+public class ExpeditionDeviceConfigurationsPanel extends FlowPanel implements FilterablePanelProvider<ExpeditionDeviceConfiguration>  {
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
@@ -67,12 +70,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
     private final RefreshableSingleSelectionModel<ExpeditionDeviceConfiguration> refreshableDeviceConfigurationsSelectionModel;
     private final UserService userService;
 
-    public ExpeditionDeviceConfigurationsPanel(final SailingServiceWriteAsync sailingServiceWrite,
-            final ErrorReporter errorReporter, final StringMessages stringMessages, final UserService userService) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    public ExpeditionDeviceConfigurationsPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.userService = userService;
+        this.userService = presenter.getUserService();
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         allDeviceConfigurations = new BaseCelltable<>(/* pageSize */10000, tableRes);
         final ListDataProvider<ExpeditionDeviceConfiguration> filteredDeviceConfigurations = new ListDataProvider<>();
@@ -106,6 +108,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 return t.getDeviceUuid().hashCode();
             }
         }, filterDeviceConfigurationsPanel.getAllListDataProvider());
+        allDeviceConfigurations.ensureDebugId("ExpeditionDeviceConfigurationsTable");
         allDeviceConfigurations.setSelectionModel(refreshableDeviceConfigurationsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
         controlsPanel.add(filterDeviceConfigurationsPanel);
@@ -154,13 +157,13 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         });
         final HasPermissions type = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION;
         final DialogConfig<ExpeditionDeviceConfiguration> config = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 deviceConfiguration -> config.openOwnershipDialog(deviceConfiguration));
         final EditACLDialog.DialogConfig<ExpeditionDeviceConfiguration> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, deviceConfiguration -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, deviceConfiguration -> refresh(), stringMessages);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                deviceConfiguration -> configACL.openACLDialog(deviceConfiguration));
+                deviceConfiguration -> configACL.openDialog(deviceConfiguration));
         SecuredDTOOwnerColumn.configureOwnerColumns(allDeviceConfigurations, deviceConfigurationColumnListHandler,
                 stringMessages);
         allDeviceConfigurations.addColumn(actionsColumn, stringMessages.actions());
@@ -352,5 +355,10 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 filterDeviceConfigurationsPanel.remove(expeditionDeviceConfiguration);
             }
         });
+    }
+    
+    @Override
+    public AbstractFilterablePanel<ExpeditionDeviceConfiguration> getFilterablePanel() {
+        return filterDeviceConfigurationsPanel;
     }
 }

@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.racelog.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogFinishPositioningConfirmedEventSerializer extends RaceLogFinishPositioningEventSerializer {
 

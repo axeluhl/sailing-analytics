@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.desktop.resources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.google.gwt.resources.client.ImageResource;
-import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
 public interface SharedDesktopResources extends SharedHomeResources {
     

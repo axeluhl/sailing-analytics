@@ -50,7 +50,6 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -64,6 +63,7 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResult
 import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
@@ -82,12 +82,12 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -296,7 +296,7 @@ public class SearchServiceTest {
     
     @Test
     public void testSimpleSearchByCompetitorName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Tobi" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Tobi" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(pfingstbusch29er, foundRegatta);
@@ -304,7 +304,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByCompetitorName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Hasso" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Hasso" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -312,7 +312,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Flensburg" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Flensburg" })));
         assertEquals(1, Util.size(searchResults.getHits()));
         Regatta foundRegatta = searchResults.getHits().iterator().next().getRegatta();
         assertSame(aalRegatta, foundRegatta);
@@ -320,7 +320,7 @@ public class SearchServiceTest {
 
     @Test
     public void testSimpleSearchByVenueName2() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Kiel" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Kiel" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iterator = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iterator.next();
@@ -335,7 +335,7 @@ public class SearchServiceTest {
 
     @Test
     public void testMultipleMatchesSortedCorrectly() {
-        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+        Result<LeaderboardSearchResult> searchResults = server.search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         assertEquals(2, Util.size(searchResults.getHits()));
         final Iterator<LeaderboardSearchResult> iter = searchResults.getHits().iterator();
         final LeaderboardSearchResult firstMatch = iter.next();
@@ -351,7 +351,7 @@ public class SearchServiceTest {
     @Test
     public void testSerializeAndDeserializeSearchResult() throws JsonDeserializationException {
         Result<LeaderboardSearchResult> searchResults = server
-                .search(new KeywordQuery(Arrays.asList(new String[] { "Buhl" })));
+                .search(new KeywordQueryWithOptionalEventQualification(Arrays.asList(new String[] { "Buhl" })));
         LeaderboardGroupBaseJsonSerializer leaderboardGroupBaseJsonSerializer = new LeaderboardGroupBaseJsonSerializer();
         LeaderboardSearchResultJsonSerializer serializer = new LeaderboardSearchResultJsonSerializer(
                 new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),

@@ -226,6 +226,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             adminConsole.goToTracTracEvents();
             smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
             leaderboards = smartphoneTrackingPanel.getLeaderboardTable();
+            smartphoneTrackingPanel.refreshLeaderboardTable();
             // select leaderboard
             entryToSelect = null;
             for(DataEntryPO entry : leaderboards.getEntries()) {

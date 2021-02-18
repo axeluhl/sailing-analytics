@@ -2,8 +2,12 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import static com.sap.sailing.gwt.ui.client.SailingServiceHelper.createSailingServiceWriteInstance;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -25,11 +29,14 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
+import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsAndBoatsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
@@ -48,13 +55,16 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
      * Controls the predefined mode into which to switch or configure the race viewer.
      */
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
+    private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     private RaceboardContextDefinition raceboardContextDefinition;
 
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
-                RemoteServiceMappingConstants.mediaServiceRemotePath);
+                RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_REPLICA);
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite,
+                RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         raceboardContextDefinition = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RaceboardContextDefinition());
         if (raceboardContextDefinition.getRegattaName() == null || raceboardContextDefinition.getRegattaName().isEmpty()
@@ -121,7 +131,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings) {
                         createPerspective(mode, componentContext, settings, raceboardData, lifeCycle,
-                                raceboardData.getAvailableDetailTypesForLeaderboard());
+                                raceboardData.getAvailableDetailTypesForLeaderboard(), raceboardContextDefinition);
                     }
                 });
     }
@@ -142,7 +152,7 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
     private void createPerspective(final RaceBoardModes raceBoardMode,
             ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
-            RaceBoardPerspectiveLifecycle raceLifeCycle, Iterable<DetailType> availableDetailTypes) {
+            RaceBoardPerspectiveLifecycle raceLifeCycle, Iterable<DetailType> availableDetailTypes, RaceboardContextDefinition raceboardContextDefinition) {
         final Timer timer = new Timer(PlayModes.Replay, 1000l);
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
 
@@ -153,41 +163,44 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 asyncActionsExecutor, this, Collections.singletonList(selectedRace.getRaceIdentifier()),
                 5000l /* requestInterval */);
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(/* parent */ null, context, raceLifeCycle, settings,
-                getSailingService(), mediaService, getUserService(), asyncActionsExecutor,
+                getSailingService(), mediaService, mediaServiceWrite, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(),
                 raceboardContextDefinition.getLeaderboardName(), raceboardContextDefinition.getLeaderboardGroupName(),
                 raceboardContextDefinition.getLeaderboardGroupId(),
                 raceboardContextDefinition.getEventId(), RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo, true, availableDetailTypes,
                 raceboardData.getLeaderboard(), selectedRace, raceboardData.getTrackingConnectorInfo(),
-                createSailingServiceWriteInstance() /* create write instance for later admin usage */);
+                createSailingServiceWriteInstance() /* create write instance for later admin usage */,
+                raceboardContextDefinition);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
 
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);
             raceBoardMode.getMode().addInitializationFinishedRunner(
-                    () -> selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective));
+                    () -> selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective, settings.getPerspectiveOwnSettings()));
         } else {
-            selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective);
+            selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective, settings.getPerspectiveOwnSettings());
         }
     }  
     
-    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel) {
-        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
-                .getPerspectiveOwnSettings();
+    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel, RaceBoardPerspectiveOwnSettings perspectiveOwnSettings) {
         if (perspectiveOwnSettings != null) {
-            String competitorId = perspectiveOwnSettings.getSelectedCompetitor();
-            if (competitorId != null && !"".equals(competitorId)) {
-                for (CompetitorDTO comp : raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors()) {
+            final String oldCompetitorId = perspectiveOwnSettings.getSelectedCompetitor();
+            Iterable<String> competitorIds = perspectiveOwnSettings.getSelectedCompetitors();
+            if (Util.isEmpty(competitorIds) && oldCompetitorId != null) {
+                competitorIds = Collections.singleton(oldCompetitorId);
+            }
+            final Iterable<CompetitorDTO> allCompetitors = raceBoardPanel.getCompetitorSelectionProvider()
+                    .getAllCompetitors();
+            final Set<CompetitorDTO> selectedCompetitors = new HashSet<CompetitorDTO>();
+            for (String competitorId : competitorIds) {
+                for (CompetitorDTO comp : allCompetitors) {
                     if (competitorId.equals(comp.getIdAsString())) {
-                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, true,
-                                new CompetitorSelectionChangeListener[0]);
-                    } else {
-                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, false,
-                                new CompetitorSelectionChangeListener[0]);
+                        selectedCompetitors.add(comp);
                     }
                 }
             }
+            raceBoardPanel.getCompetitorSelectionProvider().setSelection(selectedCompetitors, new CompetitorSelectionChangeListener[0]);
         }
     }
 

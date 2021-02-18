@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,7 +36,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider;
@@ -51,8 +50,6 @@ public class UserGroupDetailPanel extends Composite
     private final MultiSelectionModel<UserGroupDTO> userGroupSelectionModel;
     private final UserGroupUsersTableWrapper tenantUsersTable;
     private final TenantUsersListDataProvider tenantUsersListDataProvider;
-
-    private UserGroupSuggestOracle oracle;
 
     private class TenantUsersListDataProvider extends AbstractDataProvider<StrippedUserDTO> {
         private final TextBox filterBox;
@@ -120,31 +117,31 @@ public class UserGroupDetailPanel extends Composite
         final VerticalPanel addUserToGroupPanel = new VerticalPanel();
         final Widget buttonPanel = createButtonPanel(userService, stringMessages);
         this.userGroupSelectionModel.addSelectionChangeHandler(event -> {
-            buttonPanel.setVisible(userService.hasPermission(TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel), UPDATE));
+            buttonPanel.setVisible(userService.hasPermission(TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel), UPDATE));
         });
         addUserToGroupPanel.add(buttonPanel);
         addUserToGroupPanel.add(filterPanel);
         // addUserToGroupPanel.add(tenantUsersPanelCaption);
         addUserToGroupPanel.add(tenantUsersTable);
         initWidget(addUserToGroupPanel);
+        this.ensureDebugId(this.getClass().getSimpleName());
     }
 
     /** Creates the button bar with add/remove/refresh buttons and the SuggestBox. */
     private Widget createButtonPanel(final UserService userService, final StringMessages stringMessages) {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER_GROUP);
-        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
-        // setup suggest
-        this.oracle = new UserGroupSuggestOracle(userManagementService, stringMessages);
-        final SuggestBox suggestUser = new SuggestBox(oracle);
-        suggestUser.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
-        suggestUser.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
+        final UserManagementWriteServiceAsync userManagementService = userService.getUserManagementWriteService();
+        final TextBox userBox = new TextBox();
+        userBox.addStyleName(userGroupUserResources.css().userDefinitionSuggest());
+        userBox.getElement().setPropertyString("placeholder", stringMessages.enterUsername());
+        userBox.ensureDebugId("UserSuggestion");
         // add suggest
-        buttonPanel.insertWidgetAtPosition(suggestUser, 0);
+        buttonPanel.insertWidgetAtPosition(userBox, 0);
         // add add button
-        buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
-            final String selectedUsername = suggestUser.getValue();
+        final Button addButton = buttonPanel.addUpdateAction(stringMessages.addUser(), () -> {
+            final String selectedUsername = userBox.getValue();
             if (!getSelectedUserGroupUsernames().contains(selectedUsername)) {
-                final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+                final UserGroupDTO selectedUserGroup = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
                 if (selectedUserGroup != null) {
                     userManagementService.addUserToUserGroup(selectedUserGroup.getId().toString(), selectedUsername,
                             new AsyncCallback<Void>() {
@@ -158,12 +155,13 @@ public class UserGroupDetailPanel extends Composite
                                 public void onSuccess(Void result) {
                                     selectedUserGroup.add(new StrippedUserDTO(selectedUsername));
                                     updateUserList();
-                                    suggestUser.setText("");
+                                    userBox.setText("");
                                 }
                             });
                 }
             }
         });
+        addButton.ensureDebugId("AddUserButton");
         // add remove button
         final Button removeButton = buttonPanel.addUpdateAction(stringMessages.actionRemove(), () -> {
             final Set<UserGroupDTO> selectedUserGroups = userGroupSelectionModel.getSelectedSet();
@@ -230,16 +228,11 @@ public class UserGroupDetailPanel extends Composite
 
     public void updateUserList() {
         tenantUsersListDataProvider.updateDisplays();
-        oracle.resetAndRemoveExistingUsers(getSelectedUserGroupUsernames());
-    }
-
-    public void refreshSuggest() {
-        oracle.refresh();
     }
 
     private List<String> getSelectedUserGroupUsernames() {
         final List<String> result;
-        final UserGroupDTO tenant = TableWrapper.getSingleSelectedUserGroup(userGroupSelectionModel);
+        final UserGroupDTO tenant = TableWrapper.getSingleSelectedObjectOrNull(userGroupSelectionModel);
         if (tenant != null) {
             result = Util.asList(tenant.getUsers()).stream().map(StrippedUserDTO::getName).collect(Collectors.toList());
         } else {
