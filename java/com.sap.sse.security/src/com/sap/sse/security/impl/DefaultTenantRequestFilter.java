@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.impl;
+package com.sap.sse.security.impl;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -16,7 +16,8 @@ import javax.ws.rs.ext.Provider;
 
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
+import com.sap.sse.security.jaxrs.RestServletContainer;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.security.SecurityService;
 
 /**
@@ -29,8 +30,6 @@ import com.sap.sse.security.SecurityService;
 public class DefaultTenantRequestFilter implements Filter {
 
     private static final Logger logger = Logger.getLogger(DefaultTenantRequestFilter.class.getName());
-
-    private static final String DEFAULT_TENANT_GROUP_ID_HEADER_KEY = "tenantGroupId";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -45,7 +44,7 @@ public class DefaultTenantRequestFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         final SecurityService securityService = getSecurityService(request.getServletContext());
-        final String defaultTenantGroupId = httpRequest.getHeader(DEFAULT_TENANT_GROUP_ID_HEADER_KEY);
+        final String defaultTenantGroupId = httpRequest.getHeader(HttpRequestHeaderConstants.HEADER_KEY_DEFAULT_TENANT_GROUP_ID);
         if (defaultTenantGroupId != null) {
             securityService.setTemporaryDefaultTenant(UUID.fromString(defaultTenantGroupId));
             logger.info("executing request " + httpRequest.getRequestURI() + " with divergent tenant group "

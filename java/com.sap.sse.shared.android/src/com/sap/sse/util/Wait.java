@@ -32,7 +32,7 @@ public class Wait {
      * 
      * If a non-{@code null} {@code logLevel} and {@code retryLogMessage} are provided, upon failure and if the timeout permits
      * for another round of sleep/retry, a message will be logged telling that {@code retryLogMessage} failed and that
-     * another attempt will be made in {@cod esleepBetweenAttempts} until the timeout has been reached.
+     * another attempt will be made in {@code sleepBetweenAttempts} until the timeout has been reached.
      * 
      * @return the last evaluation result of {@code condition}
      */

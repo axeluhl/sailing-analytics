@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=nor
 SERVER_NAME=NOR
 SERVER_PORT=8904
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/NOR?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/NOR?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2026
 TELNET_PORT=14904

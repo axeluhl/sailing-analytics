@@ -3,6 +3,7 @@ package com.sap.sse.gwt.common;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
+import com.google.gwt.resources.client.ImageResource;
 
 public interface CommonIcons extends ClientBundle {
 
@@ -29,4 +30,7 @@ public interface CommonIcons extends ClientBundle {
     @Source("instagram_inverse.svg")
     @MimeType("image/svg+xml")
     DataResource instagramInverse();
+    
+    @Source("email-icon.png")
+    ImageResource email();
 }

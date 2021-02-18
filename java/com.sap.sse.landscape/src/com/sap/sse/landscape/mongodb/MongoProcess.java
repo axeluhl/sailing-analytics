@@ -9,8 +9,6 @@ import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 
 public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics>, MongoEndpoint {
-    int DEFAULT_PORT = 27017;
-    
     @Override
     default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
         return getURI(optionalDb, getHostname());
@@ -21,7 +19,7 @@ public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics
     }
     
     default String getHostname() {
-        return getHost().getPublicAddress().getCanonicalHostName();
+        return getHost().getPrivateAddress().getCanonicalHostName();
     }
     
     @Override

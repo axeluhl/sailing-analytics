@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
@@ -82,7 +81,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
     }
     
     public static <BuilderT extends Builder<BuilderT, ShardingKey>,
-    ShardingKey extends AwsInstance<ShardingKey, SailingAnalyticsMetrics>> BuilderT replicaBuilder() {
+    ShardingKey extends AwsInstance<ShardingKey>> BuilderT replicaBuilder() {
         @SuppressWarnings("unchecked")
         final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>();
         return result;

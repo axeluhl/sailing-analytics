@@ -43,7 +43,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     /**
      * Absolute path in the file system of the host on which this process is running and that represents
      * this process's working directory. This directory is expected to contain a file named {@link #ENV_SH}
-     * whose contents can be obtained using the {@link #getEnvSh(Optional, byte[])} method.
+     * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.
      */
     private final String serverDirectory;
 
@@ -51,11 +51,15 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
      * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        this(readPortFromDirectory(host, serverDirectory, optionalTimeout, privateKeyEncryptionPassphrase), host, serverDirectory);
+    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        this(readPortFromDirectory(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase), host, serverDirectory);
     }
     
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
@@ -64,19 +68,19 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase)
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         return Integer.parseInt(
                 getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(),
-                        optionalTimeout, privateKeyEncryptionPassphrase));
+                        optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
     @Override
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase)
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
-        final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, privateKeyEncryptionPassphrase));
+        final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         final Release result;
         if (matcher.find()) {
             result = new ReleaseImpl(matcher.group(1), releaseRepository);
@@ -93,12 +97,15 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * With this it is possible to infer the release that will be run upon the next process start, which is also the one
      * running now if this process is currently running and no other release has been deployed since the process has
      * started.
-     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    private String getVersionTxt(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, privateKeyEncryptionPassphrase);
+    private String getVersionTxt(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getFileContents(getServerDirectory()+"/"+VERSION_TXT, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -108,10 +115,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
-                privateKeyEncryptionPassphrase));
+                optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
     /**
@@ -120,14 +127,14 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      */
     @Override
     public String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, privateKeyEncryptionPassphrase);
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getEnvShValueFor(getHost(), getServerDirectory(), variableName, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
     protected static String getEnvShValueFor(Host host, String serverDirectory, String variableName,
-            Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, privateKeyEncryptionPassphrase);
+        final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         final String variableValue = sshChannel.runCommandAndReturnStdoutAndLogStderr(". "+getEnvShPath(serverDirectory)+">/dev/null 2>/dev/null; "+
                                                 "echo \"${"+variableName+"}\"", /* stderr prefix */ null, /* stderr log level */ null);
         return variableValue.endsWith("\n") ? variableValue.substring(0, variableValue.length()-1) : variableValue;
@@ -138,8 +145,8 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * in the evaluated {@code env.sh} file.
      */
     @Override
-    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(variable.name(), optionalTimeout, privateKeyEncryptionPassphrase);
+    public String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getEnvShValueFor(variable.name(), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
@@ -156,18 +163,18 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, privateKeyEncryptionPassphrase);
+    public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
     @Override
-    public String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getFileContents(getEnvShPath(), optionalTimeout, privateKeyEncryptionPassphrase);
+    public String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getFileContents(getEnvShPath(), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 
-    protected String getFileContents(String path, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
+        final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
         sftpChannel.get(path, bos);

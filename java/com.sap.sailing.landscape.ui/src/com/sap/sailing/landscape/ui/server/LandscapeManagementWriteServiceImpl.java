@@ -1,25 +1,37 @@
 package com.sap.sailing.landscape.ui.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
+import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsFromUserPreference;
+import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiry;
+import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiryImpl;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -29,16 +41,21 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
     
+    private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
+    
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
-
+    
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
         BundleContext context = Activator.getContext();
@@ -53,19 +70,89 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         }
     }
     
+    /**
+     * For the logged-in user checks the LANDSCAPE:MANAGE:AWS permission, and if present, tries to obtain the user preference
+     * named like {@link #USER_PREFERENCE_FOR_SESSION_TOKEN}. If found and not yet expired, they are returned. Otherwise,
+     * {@code null} is returned, indicating to the caller that new session credentials shall be obtained which shall then be
+     * stored to the user preference again for future reference.
+     */
+    private AwsSessionCredentialsWithExpiry getSessionCredentials() {
+        final AwsSessionCredentialsWithExpiry result;
+        checkLandscapeManageAwsPermission();
+        final AwsSessionCredentialsFromUserPreference credentialsPreferences = getSecurityService().getPreferenceObject(
+                getSecurityService().getCurrentUser().getName(), Activator.USER_PREFERENCE_FOR_SESSION_TOKEN);
+        if (credentialsPreferences != null) {
+            final AwsSessionCredentialsWithExpiry credentials = credentialsPreferences.getAwsSessionCredentialsWithExpiry();
+            if (credentials.getExpiration().before(TimePoint.now())) {
+                result = null;
+            } else {
+                result = credentials;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    @Override
+    public void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode) {
+        checkLandscapeManageAwsPermission();
+        final Credentials credentials = AwsLandscape.obtain(awsAccessKey, awsSecret).getMfaSessionCredentials(mfaTokenCode);
+        final AwsSessionCredentialsWithExpiryImpl result = new AwsSessionCredentialsWithExpiryImpl(
+                credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken(),
+                TimePoint.of(credentials.expiration().toEpochMilli()));
+        final AwsSessionCredentialsFromUserPreference credentialsPreferences = new AwsSessionCredentialsFromUserPreference(result);
+        getSecurityService().setPreferenceObject(
+                getSecurityService().getCurrentUser().getName(), Activator.USER_PREFERENCE_FOR_SESSION_TOKEN, credentialsPreferences);
+    }
+    
+    /**
+     * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
+     * user's preference store which holds any session credentials created previously using
+     * {@link #createMfaSessionCredentials(String, String, String)}.
+     */
+    @Override
+    public void clearSessionCredentials() {
+        checkLandscapeManageAwsPermission();
+        getSecurityService().unsetPreference(getSecurityService().getCurrentUser().getName(), Activator.USER_PREFERENCE_FOR_SESSION_TOKEN);
+    }
+
+    @Override
+    public boolean hasValidSessionCredentials() {
+        return getSessionCredentials() != null;
+    }
+
+    private void checkLandscapeManageAwsPermission() {
+        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermissionForTypeRelativeIdentifier(SecuredLandscapeTypes.LandscapeActions.MANAGE,
+                new TypeRelativeObjectIdentifier("AWS")));
+    }
+    
     @Override
     public ArrayList<String> getRegions() {
-        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
+        checkLandscapeManageAwsPermission();
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(AwsLandscape.obtain().getRegions(), r->r.getId()), result);
         return result;
     }
     
     @Override
-    public ArrayList<MongoEndpointDTO> getMongoEndpoints(String awsAccessKey, String awsSecret, String region) {
-        SecurityUtils.getSubject().checkPermission(SecuredLandscapeTypes.LANDSCAPE.getStringPermission(SecuredLandscapeTypes.LandscapeActions.MANAGE));
+    public ArrayList<String> getInstanceTypes() {
+        final ArrayList<String> result = new ArrayList<>();
+        Util.addAll(Util.map(Arrays.asList(InstanceType.values()), instanceType->instanceType.name()), result);
+        return result;
+    }
+    
+    @Override
+    public ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) {
+        checkLandscapeManageAwsPermission();
         final ArrayList<MongoEndpointDTO> result = new ArrayList<>();
-        for (final MongoEndpoint mongoEndpoint : AwsLandscape.obtain(awsAccessKey, awsSecret).getMongoEndpoints(new AwsRegion(region))) {
+        for (final MongoEndpoint mongoEndpoint : getLandscape().getMongoEndpoints(new AwsRegion(region))) {
             final MongoEndpointDTO dto;
             if (mongoEndpoint.isReplicaSet()) {
                 final MongoReplicaSet replicaSet = mongoEndpoint.asMongoReplicaSet();
@@ -83,27 +170,44 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         return result;
     }
 
+    private AwsLandscape<String> getLandscape() {
+        final String keyId;
+        final String secret;
+        final String sessionToken;
+        final AwsSessionCredentialsWithExpiry sessionCredentials = getSessionCredentials();
+        final AwsLandscape<String> result;
+        if (sessionCredentials != null) {
+            keyId = sessionCredentials.getAccessKeyId();
+            secret = sessionCredentials.getSecretAccessKey();
+            sessionToken = sessionCredentials.getSessionToken();
+            result = AwsLandscape.obtain(keyId, secret, sessionToken);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     @Override
-    public MongoEndpointDTO getMongoEndpoint(String awsAccessKey, String awsSecret, String region, String replicaSetName) {
-        return getMongoEndpoints(awsAccessKey, awsSecret, region).stream().filter(mep->Util.equalsWithNull(mep.getReplicaSetName(), replicaSetName)).findAny().orElse(null);
+    public MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) {
+        return getMongoEndpoints(region).stream().filter(mep->Util.equalsWithNull(mep.getReplicaSetName(), replicaSetName)).findAny().orElse(null);
     }
     
     @Override
-    public SSHKeyPairDTO generateSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName, String privateKeyEncryptionPassphrase) {
+    public SSHKeyPairDTO generateSshKeyPair(String regionId, String keyName, String privateKeyEncryptionPassphrase) {
         final Subject subject = SecurityUtils.getSubject();
         final SSHKeyPair dummyKeyPairForSecurityCheck = new SSHKeyPair(regionId, subject.getPrincipal().toString(), 
                 TimePoint.now(), keyName, /* publicKey */ null, /* encryptedPrivateKey */ null);
         final SSHKeyPair keyPair = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(dummyKeyPairForSecurityCheck.getPermissionType(),
                 dummyKeyPairForSecurityCheck.getIdentifier().getTypeRelativeObjectIdentifier(), keyName,
                         ()->{
-                            return AwsLandscape.obtain(awsAccessKey, awsSecret)
+                            return getLandscape()
                                     .createKeyPair(new AwsRegion(regionId), keyName, privateKeyEncryptionPassphrase.getBytes());
                 });
         return convertToSSHKeyPairDTO(keyPair);
     }
    
     @Override
-    public SSHKeyPairDTO addSshKeyPair(String awsAccessKey, String awsSecret, String regionId, String keyName,
+    public SSHKeyPairDTO addSshKeyPair(String regionId, String keyName,
             String publicKey, String encryptedPrivateKey) throws JSchException {
         final Subject subject = SecurityUtils.getSubject();
         final SSHKeyPair dummyKeyPairForSecurityCheck = new SSHKeyPair(regionId, subject.getPrincipal().toString(), 
@@ -111,7 +215,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SSHKeyPair keyPair = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(dummyKeyPairForSecurityCheck.getPermissionType(),
                 dummyKeyPairForSecurityCheck.getIdentifier().getTypeRelativeObjectIdentifier(), keyName,
                         ()->{
-                            return AwsLandscape.obtain(awsAccessKey, awsSecret)
+                            return getLandscape()
                                     .importKeyPair(new AwsRegion(regionId), publicKey.getBytes(), encryptedPrivateKey.getBytes(), keyName);
                 });
         return convertToSSHKeyPairDTO(keyPair);
@@ -124,9 +228,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public ArrayList<SSHKeyPairDTO> getSshKeys(String awsAccessKey, String awsSecret, String regionId) {
+    public ArrayList<SSHKeyPairDTO> getSshKeys(String regionId) {
         final ArrayList<SSHKeyPairDTO> result = new ArrayList<>();
-        final AwsLandscape<Object, ApplicationProcessMetrics, ?> landscape = AwsLandscape.obtain(awsAccessKey, awsSecret);
+        final AwsLandscape<String> landscape = getLandscape();
         final AwsRegion region = new AwsRegion(regionId);
         for (final KeyPairInfo keyPairInfo : landscape.getAllKeyPairInfos(region)) {
             final SSHKeyPair key = landscape.getSSHKeyPair(region, keyPairInfo.keyName());
@@ -140,8 +244,90 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public void removeSshKey(String awsAccessKey, String awsSecret, SSHKeyPairDTO keyPair) {
+    public void removeSshKey(SSHKeyPairDTO keyPair) {
         getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(keyPair,
-            ()->AwsLandscape.obtain(awsAccessKey, awsSecret).deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName()));
+            ()->getLandscape().deleteKeyPair(new AwsRegion(keyPair.getRegionId()), keyPair.getName()));
+    }
+    
+    @Override
+    public byte[] getEncryptedSshPrivateKey(String regionId, String keyName) throws JSchException {
+        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getEncryptedPrivateKey();
+    }
+
+    @Override
+    public byte[] getSshPublicKey(String regionId, String keyName) throws JSchException {
+        final AwsLandscape<String> landscape = AwsLandscape.obtain();
+        final SSHKeyPair keyPair = landscape.getSSHKeyPair(new AwsRegion(regionId), keyName);
+        getSecurityService().checkCurrentUserReadPermission(keyPair);
+        return keyPair.getPublicKey();
+    }
+
+    @Override
+    public ArrayList<AmazonMachineImageDTO> getAmazonMachineImages(String region) {
+        checkLandscapeManageAwsPermission();
+        final ArrayList<AmazonMachineImageDTO> result = new ArrayList<>();
+        final AwsRegion awsRegion = new AwsRegion(region);
+        final AwsLandscape<String> landscape = getLandscape();
+        for (final String imageType : landscape.getMachineImageTypes(awsRegion)) {
+            for (final AmazonMachineImage<String> machineImage : landscape.getAllImagesWithType(awsRegion, imageType)) {
+                final AmazonMachineImageDTO dto = new AmazonMachineImageDTO(machineImage.getId(),
+                        machineImage.getRegion().getId(), machineImage.getName(), imageType, machineImage.getState().name(),
+                        machineImage.getCreatedAt());
+                result.add(dto);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void removeAmazonMachineImage(String region, String machineImageId) {
+        checkLandscapeManageAwsPermission();
+        final AwsLandscape<String> landscape = getLandscape();
+        final AmazonMachineImage<String> ami = landscape.getImage(new AwsRegion(region), machineImageId);
+        ami.delete();
+    }
+
+    @Override
+    public AmazonMachineImageDTO upgradeAmazonMachineImage(String region, String machineImageId) throws Exception {
+        checkLandscapeManageAwsPermission();
+        final AwsLandscape<String> landscape = getLandscape();
+        final AwsRegion awsRegion = new AwsRegion(region);
+        final AmazonMachineImage<String> ami = landscape.getImage(awsRegion, machineImageId);
+        final UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> upgradeAmiBuilder = UpgradeAmi.builder();
+        upgradeAmiBuilder
+            .setLandscape(landscape)
+            .setRegion(awsRegion)
+            .setMachineImage(ami)
+            .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
+        final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
+        upgradeAmi.run();
+        final AmazonMachineImage<String> resultingAmi = upgradeAmi.getUpgradedAmi();
+        return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
+    }
+
+    @Override
+    public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
+        // TODO handle mongoScalingInstructions.getHostnamesAndPortsToShutDown()...
+        if (mongoScalingInstructions.getReplicaSetName() == null) {
+            throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
+        }
+        final AwsLandscape<String> landscape = getLandscape();
+        final AwsRegion region = new AwsRegion(regionId);
+        for (int i=0; i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances(); i++) {
+            final StartMongoDBServer.Builder<?, String, MongoProcessInReplicaSet> startMongoProcessBuilder = StartMongoDBServer.builder();
+            final StartMongoDBServer<String, MongoProcessInReplicaSet> startMongoDBServer = startMongoProcessBuilder
+                .setLandscape(landscape)
+                .setInstanceType(InstanceType.valueOf(mongoScalingInstructions.getLaunchParameters().getInstanceType()))
+                .setRegion(region)
+                .setReplicaSetName(mongoScalingInstructions.getReplicaSetName())
+                .setReplicaSetPrimary(mongoScalingInstructions.getLaunchParameters().getReplicaSetPrimary())
+                .setReplicaSetPriority(mongoScalingInstructions.getLaunchParameters().getReplicaSetPriority())
+                .setReplicaSetVotes(mongoScalingInstructions.getLaunchParameters().getReplicaSetVotes())
+                .build();
+            startMongoDBServer.run();
+        }
     }
 }

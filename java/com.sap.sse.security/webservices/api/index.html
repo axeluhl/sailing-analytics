@@ -21,6 +21,31 @@ be <code>http://sapsailing.com/security/api/restsecurity/login</code>.
 <table>
 <thead>
 	<tr>
+		<td>Request Header Fields</td>
+		<td>Description</td>
+	</tr>
+</thead>
+<tbody>
+    <tr>
+        <td>defaultTenant</td>
+        <td>Request will be executed under a specified default tenant. This will specifically affect created items. <br>
+        Example: "defaultTenant:{valid UserGroup id}"</td>
+    </tr>
+    <tr>
+        <td>X-Client-Locale</td>
+        <td>Sets a specified client locale for a request. The locale is required to be in IETF BCP 47 format. If no locale is given, the default is English("en")<br>
+        Example: "X-Client-Locale:en"</td>
+    </tr>
+    <tr>
+        <td>X-SAPSSE-Forward-Request-To</td>
+        <td>Specifies a target group for the request to be forwarded to. Valid values are "master" and "replica"<br>
+        Example: "X-SAPSSE-Forward-Request-To:master"</td>
+    </tr>
+</tbody>
+</table>
+<table>
+<thead>
+	<tr>
 		<td>Webservice URL</td>
 		<td>Description</td>
 	</tr>

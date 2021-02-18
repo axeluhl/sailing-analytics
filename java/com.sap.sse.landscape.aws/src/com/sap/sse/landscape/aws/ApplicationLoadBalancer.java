@@ -2,7 +2,6 @@ package com.sap.sse.landscape.aws;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -29,7 +28,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
+public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
@@ -77,7 +76,7 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
      */
     Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
     
-    Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups();
+    Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 
     /**
      * Deletes this application load balancer and all its {@link #getTargetGroups target groups}.

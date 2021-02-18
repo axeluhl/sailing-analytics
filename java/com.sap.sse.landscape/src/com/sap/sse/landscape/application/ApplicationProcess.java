@@ -5,17 +5,19 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.util.Wait;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -29,7 +31,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
@@ -46,7 +48,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
     
-    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
@@ -61,9 +63,9 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
-    String getServerName(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getEnvSh(Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -80,14 +82,15 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * in the evaluated {@code env.sh} file.
      * @throws Exception 
      */
-    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
 
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     * @param optionalKeyName TODO
      */
-    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, byte[] privateKeyEncryptionPassphrase)
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
 
     /**
@@ -121,17 +124,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
         return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
     }
     
-    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws IOException, InterruptedException {
-        final TimePoint startingToPollForReady = TimePoint.now();
-        while (!isReady(optionalTimeout) && (!optionalTimeout.isPresent() || startingToPollForReady.until(TimePoint.now()).compareTo(optionalTimeout.get()) <= 0)) {
-            if (optionalTimeout.isPresent()) {
-                logger.info(""+this+" not yet ready; waiting at most "+TimePoint.now().until(startingToPollForReady.plus(optionalTimeout.get()))+
-                        " until "+startingToPollForReady.plus(optionalTimeout.get()));
-            } else {
-                logger.info(""+this+" not yet ready; waiting forever...");
-            }
-            Thread.sleep(5000);
-        }
-        return isReady(optionalTimeout);
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
 }

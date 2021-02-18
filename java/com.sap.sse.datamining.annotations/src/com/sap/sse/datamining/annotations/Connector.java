@@ -43,5 +43,4 @@ public @interface Connector {
      * If <code>false</code>, the connection won't be used to find {@link Statistic Statistics}.
      */
     public boolean scanForStatistics() default true;
-
 }

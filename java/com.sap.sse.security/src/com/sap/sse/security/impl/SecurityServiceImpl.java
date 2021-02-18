@@ -87,13 +87,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
@@ -132,6 +126,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.ResetPasswordOperation;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.operations.SetAccessTokenOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
 import com.sap.sse.security.operations.SetEmptyAccessControlListOperation;
@@ -182,7 +177,9 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
+public class SecurityServiceImpl
+extends AbstractReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>>
+implements ReplicableSecurityService, ClearStateTestSupport {
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
@@ -211,30 +208,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
-
-    /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
-     * replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-    
-    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
-    
-    private volatile boolean currentlyFillingFromInitialLoad;
-    
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
-     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
-     * method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
-
     private static Ini shiroConfiguration;
 
     private final HasPermissionsProvider hasPermissionsProvider;
@@ -294,13 +270,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         logger.info("Initializing Security Service with user store " + userStore);
-        this.currentlyFillingFromInitialLoad = false;
-        this.currentlyFillingFromInitialLoad = false;
         this.permissionChangeListeners = new PermissionChangeListeners(this);
-        operationsSentToMasterForReplication = new HashSet<>();
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
-        this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
@@ -346,26 +318,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
         return hasPermissionsProvider.getAllHasPermissions();
-    }
-
-    @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
     }
 
     @Override
@@ -2216,47 +2168,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<OperationExecutionListener<ReplicableSecurityService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
-    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<ReplicableSecurityService, ?> operationWithResultWithIdWrapper) {
-        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
-        return this.operationsSentToMasterForReplication.remove(operation);
-    }
-
-    @Override
     public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
         return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
@@ -2553,20 +2464,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-    @Override
     public void storeSession(String cacheName, Session session) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 
     @Override
