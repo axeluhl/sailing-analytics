@@ -19,7 +19,7 @@ public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics
     }
     
     default String getHostname() {
-        return getHost().getPublicAddress().getCanonicalHostName();
+        return getHost().getPrivateAddress().getCanonicalHostName();
     }
     
     @Override
