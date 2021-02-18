@@ -6,9 +6,10 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
-import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
 public interface LandscapeManagementWriteService extends RemoteService {
@@ -58,5 +59,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     boolean hasValidSessionCredentials();
     
-    SerializationDummyDTO serializationDummy(MongoProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO);
+    ArrayList<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSets(String regionId,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
+    SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 }

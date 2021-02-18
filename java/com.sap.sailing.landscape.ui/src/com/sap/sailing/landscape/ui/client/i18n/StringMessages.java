@@ -64,4 +64,10 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String port();
     String instanceId();
     String launchTimePoint();
+    String applicationReplicaSets();
+    String masterHostName();
+    String masterPort();
+    String masterServerName();
+    String masterInstanceId();
+    String replicas();
 }

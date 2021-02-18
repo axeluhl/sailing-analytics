@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -15,7 +16,11 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
@@ -27,7 +32,10 @@ import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiryImpl;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
+import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -36,6 +44,7 @@ import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -194,6 +203,54 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
         return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(), host.getRegion().getId(), host.getLaunchTimePoint());
     }
+    
+    @Override
+    public ArrayList<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSets(String regionId,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
+        final AwsRegion region = new AwsRegion(regionId);
+        final BiFunction<Host, String, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
+                (host, serverDirectory)->{
+                    try {
+                        return new SailingAnalyticsProcessImpl<String>(host, serverDirectory, WAIT_FOR_PROCESS_TIMEOUT,
+                                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+        for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
+            getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                processFactoryFromHostAndServerDirectory, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+            result.add(convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+        }
+        return result;
+    }
+
+    private SailingApplicationReplicaSetDTO<String> convertToSailingApplicationReplicaSetDTO(
+            ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return new SailingApplicationReplicaSetDTO<>(applicationServerReplicaSet.getName(),
+                convertToSailingAnalyticsProcessDTO(applicationServerReplicaSet.getMaster(), optionalKeyName, privateKeyEncryptionPassphrase),
+                Util.map(applicationServerReplicaSet.getReplicas(), r->{
+                    try {
+                        return convertToSailingAnalyticsProcessDTO(r, optionalKeyName, privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException();
+                    }
+                }),
+                applicationServerReplicaSet.getVersion().getName());
+    }
+    
+    private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return new SailingAnalyticsProcessDTO(convertToAwsInstanceDTO(sailingAnalyticsProcess.getHost()),
+                sailingAnalyticsProcess.getPort(), sailingAnalyticsProcess.getHostname(),
+                sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
+                sailingAnalyticsProcess.getTelnetPortToOSGiConsole(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerName(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerDirectory(),
+                sailingAnalyticsProcess.getExpeditionUdpPort(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase));
+    }
 
     private AwsLandscape<String> getLandscape() {
         final String keyId;
@@ -336,7 +393,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
-        for (final MongoProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
+        for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion());
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
@@ -365,7 +422,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public SerializationDummyDTO serializationDummy(MongoProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO) {
+    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
         return null;
     }
 }
