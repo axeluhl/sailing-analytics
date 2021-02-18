@@ -21,10 +21,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -126,9 +126,10 @@ public class LandscapeManagementPanel extends VerticalPanel {
                 if (mongoEndpointDTO.getReplicaSetName() != null) {
                     result.add(mongoEndpointDTO.getReplicaSetName());
                 }
-                for (final Pair<String, Integer> hostnameAndPort : mongoEndpointDTO.getHostnamesAndPorts()) {
-                    result.add(hostnameAndPort.getA());
-                    result.add(hostnameAndPort.getB().toString());
+                for (final MongoProcessDTO hostnameAndPort : mongoEndpointDTO.getHostnamesAndPorts()) {
+                    result.add(hostnameAndPort.getHost().getInstanceId());
+                    result.add(hostnameAndPort.getHostname());
+                    result.add(Integer.toString(hostnameAndPort.getPort()));
                 }
                 return result;
             }
@@ -137,7 +138,10 @@ public class LandscapeManagementPanel extends VerticalPanel {
         mongoEndpointsTable.addColumn(new TextColumn<MongoEndpointDTO>() {
             @Override
             public String getValue(MongoEndpointDTO mongoEndpointDTO) {
-                return Util.joinStrings(",", Util.map(mongoEndpointDTO.getHostnamesAndPorts(), hostnameAndPort->hostnameAndPort.getA()+":"+hostnameAndPort.getB()));
+                return Util.joinStrings(",",
+                        Util.map(mongoEndpointDTO.getHostnamesAndPorts(),
+                                hostnameAndPort -> hostnameAndPort.getHostname() + ":" + hostnameAndPort.getPort()
+                                        + " (" + hostnameAndPort.getHost().getInstanceId() + ")"));
             }
         }, stringMessages.hostname());
         final ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell> mongoEndpointsActionColumn = new ActionsColumn<MongoEndpointDTO, MongoEndpointsImagesBarCell>(

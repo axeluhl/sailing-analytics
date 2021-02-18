@@ -61,4 +61,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String loggedInSuccessfully();
     String logout();
     String loggedOutSuccessfully();
+    String port();
+    String instanceId();
+    String launchTimePoint();
 }

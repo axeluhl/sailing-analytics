@@ -64,6 +64,11 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private Instance getInstance() {
         return landscape.getInstance(getInstanceId(), getRegion());
     }
+    
+    @Override
+    public TimePoint getLaunchTimePoint() {
+        return TimePoint.of(getInstance().launchTime().toEpochMilli());
+    }
 
     @Override
     public InetAddress getPublicAddress() {

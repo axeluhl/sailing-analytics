@@ -4,18 +4,21 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
     
     ArrayList<String> getInstanceTypes();
 
-    ArrayList<MongoEndpointDTO> getMongoEndpoints(String region);
+    ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
     
-    MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName);
+    MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws Exception;
 
     ArrayList<SSHKeyPairDTO> getSshKeys(String regionId);
 
@@ -54,4 +57,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
     void clearSessionCredentials();
 
     boolean hasValidSessionCredentials();
+    
+    SerializationDummyDTO serializationDummy(MongoProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO);
 }
