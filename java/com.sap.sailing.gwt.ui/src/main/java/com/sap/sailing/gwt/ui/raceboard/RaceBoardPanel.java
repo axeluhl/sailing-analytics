@@ -710,7 +710,7 @@ public class RaceBoardPanel
     }
     
     public void setTagPanelVisible(boolean visible) {
-        setComponentVisible(mapViewer, taggingPanel, visible);
+        setComponentVisible(mapViewer, taggingComponent, visible);
     }
     
     public void setManeuverTableVisible(boolean visible) {
@@ -914,7 +914,7 @@ public class RaceBoardPanel
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
-                selectedCompetitorIds, taggingPanel.isVisible(), isManeuverTableVisible,
+                selectedCompetitorIds, taggingComponent.isVisible(), isManeuverTableVisible,
                 initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis, autoExpandPreSelectedRace);
         return raceBoardPerspectiveOwnSettings;
     }
