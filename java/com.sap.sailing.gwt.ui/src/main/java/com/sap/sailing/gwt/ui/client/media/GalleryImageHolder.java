@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -17,6 +19,8 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 public class GalleryImageHolder extends Composite implements HasClickHandlers {
 
     private static VideoThumbnailUiBinder uiBinder = GWT.create(VideoThumbnailUiBinder.class);
+    private final String imageSourceRef;
+    private final Date imageCreateAt;
 
     interface VideoThumbnailUiBinder extends UiBinder<Widget, GalleryImageHolder> {
     }
@@ -31,10 +35,20 @@ public class GalleryImageHolder extends Composite implements HasClickHandlers {
     @UiField
     DivElement overlay;
 
-    public GalleryImageHolder(ImageDTO video) {
+    public GalleryImageHolder(ImageDTO image, ClickHandler deleteHandler) {
         initWidget(uiBinder.createAndBindUi(this));
-        imageHolderUi.getStyle().setBackgroundImage("url(\"" + video.getSourceRef() + "\")");
+        this.imageSourceRef = image.getSourceRef();
+        this.imageCreateAt = image.getCreatedAtDate();
+        deleteAnchor.addClickHandler(deleteHandler);
+        // TODO: activate after implementing edit logic
+        editAnchor.setVisible(false);
+        //editAnchor.addClickHandler(editHandler);
+        imageHolderUi.getStyle().setBackgroundImage("url(\"" + image.getSourceRef() + "\")");
         
+    }
+    
+    public boolean isImage(ImageDTO image) {
+        return image != null && image.getSourceRef().equals(imageSourceRef) && image.getCreatedAtDate().equals(imageCreateAt);
     }
 
     @Override

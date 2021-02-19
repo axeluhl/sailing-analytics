@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -11,6 +12,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -30,6 +33,9 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -131,10 +137,10 @@ public class MediaPage extends Composite {
     }
     
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, UUID eventId) {
-        this.eventId = eventId;
-        sailingServiceWrite =  SailingServiceHelper.createSailingServiceWriteInstance();
+        sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         MediaPageResources.INSTANCE.css().ensureInjected();
         this.userService = userService;
+        this.eventId = eventId;
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
@@ -150,7 +156,7 @@ public class MediaPage extends Composite {
             }
         });
     }
-
+    
     public void setMedia(final MediaDTO media) {
         Widget mediaUi = uiBinder.createAndBindUi(this);
         int photosCount = media.getPhotos().size();
@@ -185,7 +191,7 @@ public class MediaPage extends Composite {
             for (final SailingImageDTO holder : media.getPhotos()) {
                 if (holder.getSourceRef() != null) {
 
-                    GalleryImageHolder gih = new GalleryImageHolder(holder);
+                    GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
                     gih.addStyleName(photoCss);
                     gih.addStyleName(res.mediaCss().columns());
 
@@ -202,7 +208,6 @@ public class MediaPage extends Composite {
             }
         }
         int videoCount = media.getVideos().size();
-        logger.info("show vidoes: " + videoCount);
         if (videoCount > 0) {
             videoSectionUi.getStyle().clearDisplay();
             if (videoCount == 1) {
@@ -219,7 +224,7 @@ public class MediaPage extends Composite {
                     first = false;
                 }
                 if (videoCount > 1) {
-                    VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo);
+                    VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo, getDeleteVideoHandler(videoCandidateInfo), null);
                     thumbnail.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
@@ -244,6 +249,91 @@ public class MediaPage extends Composite {
         } else {
             setMediaManaged(false);
         }
+    }
+    
+    private ClickHandler getDeleteVideoHandler(SailingVideoDTO videoCandidateInfo) {
+        return new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                if (Window.confirm("Do you really want to delete the video")) {
+                    sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
+                        @Override
+                        public void onSuccess(EventDTO result) {
+                            result.getVideos().stream()
+                                    .filter(video -> video.getSourceRef().equals(videoCandidateInfo.getSourceRef()))
+                                    .forEach(matchVideo -> result.removeVideo(matchVideo));
+                            sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
+                                
+                                @Override
+                                public void onSuccess(EventDTO result) {
+                                    // TODO: translate
+                                    Notification.notify("Video removed.", NotificationType.SUCCESS);
+                                }
+                                
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // TODO: translate
+                                    Notification.notify("Error -> Cannot update event. Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
+                                    logger.log(Level.SEVERE, "Video not removed.", caught);
+                                }
+                            });
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO: translate
+                            Notification.notify("Error -> Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
+                            logger.log(Level.SEVERE, "Cannot get event. Video not removed.", caught);
+                        }
+                    });
+                }
+            }
+        };
+    }
+    
+    private ClickHandler getDeleteImageHandler(SailingImageDTO imageCandidateInfo) {
+        return new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                event.stopPropagation();
+                // TODO: translation
+                if (Window.confirm("Do you really want to delete the image")) {
+                    sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
+                        @Override
+                        public void onSuccess(EventDTO result) {
+                            result.getImages().stream()
+                                    .filter(image -> image.getSourceRef().equals(imageCandidateInfo.getSourceRef()) 
+                                            && image.getCreatedAtDate().equals(imageCandidateInfo.getCreatedAtDate()))
+                                    .forEach(matchImage -> result.removeImage(matchImage));
+                            sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
+                                
+                                @Override
+                                public void onSuccess(EventDTO result) {
+                                    // TODO: translate
+                                    Notification.notify("Image removed.", NotificationType.SUCCESS);
+                                }
+                                
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // TODO: translate
+                                    Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
+                                    logger.log(Level.SEVERE, "Cannot update event. Image not removed.", caught);
+                                }
+                            });
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO: translate
+                            Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
+                            logger.log(Level.SEVERE, "Cannot get event. Image not removed.", caught);
+                        }
+                    });
+                }
+            }
+        };
     }
 
     /**

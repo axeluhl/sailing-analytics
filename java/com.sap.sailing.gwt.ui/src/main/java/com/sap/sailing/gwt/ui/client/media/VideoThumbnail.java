@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
@@ -24,6 +26,9 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
 
     private static VideoThumbnailUiBinder uiBinder = GWT.create(VideoThumbnailUiBinder.class);
     
+    private final String videoSourceRef;
+    private final Date videoCreateAt;
+    
     @UiField
     SharedResources res;
     @UiField
@@ -45,13 +50,17 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
     @UiField
     DivElement overlay;
     
-    public VideoThumbnail(VideoDTO video) {
+    public VideoThumbnail(VideoDTO video, ClickHandler deleteHandler, ClickHandler editHandler) {
+        this.videoSourceRef = video.getSourceRef();
+        this.videoCreateAt = video.getCreatedAtDate();
         MediaPageResources.INSTANCE.css().ensureInjected();
         SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         //setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");
         captionUi.setInnerText(video.getTitle());
+        deleteAnchor.addClickHandler(deleteHandler);
+        //editAnchor.addClickHandler(editHandler);
         if (video.getThumbnailRef() == null) {
             if (video.getMimeType().mediaSubType == MediaSubType.youtube) {
                 String youtubeId = YoutubeApi.getIdByUrl(video.getSourceRef());
@@ -66,6 +75,10 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
         } else {
             thumbnailUi.setSrc(video.getThumbnailRef());
         }
+    }
+    
+    public boolean isVideo(VideoDTO video) {
+        return video != null && video.getCreatedAtDate().equals(videoCreateAt) && video.getSourceRef().equals(videoSourceRef);
     }
 
     @Override

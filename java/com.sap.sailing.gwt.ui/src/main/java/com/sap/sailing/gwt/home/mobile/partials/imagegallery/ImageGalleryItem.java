@@ -27,7 +27,7 @@ public class ImageGalleryItem extends Composite implements HasClickHandlers {
     @UiField Button editButtonUi;
     @UiField Button deleteButtonUi;
     
-    public ImageGalleryItem(ImageDTO image) {
+    public ImageGalleryItem(ImageDTO image, ClickHandler deleteHandler) {
         MediaViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + image.getSourceRef() + "')");
@@ -38,12 +38,7 @@ public class ImageGalleryItem extends Composite implements HasClickHandlers {
                 event.stopPropagation();
             }
         });
-        deleteButtonUi.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                event.stopPropagation();
-            }
-        });
+        deleteButtonUi.addClickHandler(deleteHandler);
     }
     
     @Override

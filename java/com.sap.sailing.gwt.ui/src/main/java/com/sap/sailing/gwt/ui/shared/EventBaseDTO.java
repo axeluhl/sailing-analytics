@@ -193,6 +193,10 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     public void addImage(ImageDTO image) {
         images.add(image);
     }
+    
+    public boolean removeImage(ImageDTO image) {
+        return images.remove(image);
+    }
 
     public List<ImageDTO> getImages() {
         return images;
@@ -200,6 +204,10 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
 
     public void addVideo(VideoDTO video) {
         videos.add(video);
+    }
+    
+    public boolean removeVideo(VideoDTO video) {
+        return videos.remove(video);
     }
 
     public List<VideoDTO> getVideos() {
