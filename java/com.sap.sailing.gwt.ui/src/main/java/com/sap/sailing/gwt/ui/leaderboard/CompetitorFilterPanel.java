@@ -220,6 +220,13 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
         competitorSelectionProvider.clearAllFilters();
     }
     
+    public void updateCompetitorFilterSetAndView(final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet) {
+        competitorsFilterSets.setActiveFilterSet(activeFilterSet);
+        updateCompetitorsFilterContexts(competitorsFilterSets);
+        competitorSelectionProvider.setCompetitorsFilterSet(competitorsFilterSets.getActiveFilterSetWithGeneralizedType());
+        updateCompetitorsFilterControlState(competitorsFilterSets);
+    }
+    
     private void showEditCompetitorsFiltersDialog() {
         CompetitorsFilterSetsDialog competitorsFilterSetsDialog = new CompetitorsFilterSetsDialog(competitorsFilterSets,
                 stringMessages, new DialogCallback<CompetitorsFilterSets>() {
@@ -238,15 +245,15 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             public void cancel() { 
             }
         });
-        competitorsFilterSetsDialog .show();
+        competitorsFilterSetsDialog.show();
     }
 
     private void insertSelectedCompetitorsFilter(CompetitorsFilterSets filterSet) {
         // selected competitors filter
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
+        final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> selectedCompetitorsFilterSet = 
                 new FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>>(stringMessages.selectedCompetitors());
         selectedCompetitorsFilterSet.setEditable(false);
-        SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
+        final SelectedCompetitorsFilter selectedCompetitorsFilter = new SelectedCompetitorsFilter();
         selectedCompetitorsFilter.setCompetitorSelectionProvider(competitorSelectionProvider);
         selectedCompetitorsFilterSet.addFilter(selectedCompetitorsFilter);
         filterSet.addFilterSet(0, selectedCompetitorsFilterSet);

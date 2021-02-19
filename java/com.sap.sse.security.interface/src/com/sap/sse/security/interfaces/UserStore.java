@@ -30,8 +30,8 @@ public interface UserStore extends BasicUserStore {
 
     /**
      * <p>
-     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
-     * {@link PreferenceConverterRegistrationManager} up. {@link PreferenceConverter}s should be registered in the OSGi
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting up a
+     * {@link PreferenceConverterRegistrationManager}. {@link PreferenceConverter}s should be registered in the OSGi
      * service registry with {@link PreferenceConverter#KEY_PARAMETER_NAME} containing the associated preference key
      * added as property of the service registration.
      * </p>

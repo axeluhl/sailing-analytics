@@ -299,7 +299,7 @@ auto_install ()
         echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
         echo "DEPLOY_TO: $DEPLOY_TO"
         echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-        echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
+        echo "USE_ENVIRONMENT: $USE_ENVIRONMENT"
         echo ""
 }
 

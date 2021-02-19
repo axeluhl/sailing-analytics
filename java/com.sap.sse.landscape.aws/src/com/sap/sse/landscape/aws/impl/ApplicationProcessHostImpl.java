@@ -22,23 +22,20 @@ import com.sap.sse.landscape.aws.ReverseProxy;
 
 public class ApplicationProcessHostImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends AwsInstanceImpl<ShardingKey, MetricsT>
+extends AwsInstanceImpl<ShardingKey>
 implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(ApplicationProcessHostImpl.class.getName());
     private final BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory;
 
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey, MetricsT, ?> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+            AwsLandscape<ShardingKey> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
         super(instanceId, availabilityZone, landscape);
         this.processFactoryFromHostAndServerDirectory = processFactoryFromHostAndServerDirectory;
     }
     
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-        @SuppressWarnings("unchecked")
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> castLandscape =
-            (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
-        return castLandscape;
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return super.getLandscape();
     }
 
     @Override
@@ -51,15 +48,17 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
      * folder} for sub-folders. In those sub-folders, the configuration file is analyzed for the port number to
      * instantiate an {@link ApplicationProcess} object for each one.
      * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
     @Override
-    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout,
-            byte[] privateKeyEncryptionPassphrase)
-            throws Exception {
+    public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final Set<ProcessT> result = new HashSet<>();
-        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout, privateKeyEncryptionPassphrase);
+        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         if (optionalTimeout.isPresent()) {
             sftpChannel.connect((int) optionalTimeout.get().asMillis());
         } else {

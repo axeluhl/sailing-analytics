@@ -14,24 +14,24 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @author Axel Uhl (D043530)
  */
 public class CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>
-implements Procedure<ShardingKey, MetricsT, ProcessT> {
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, HostT>,
-    T extends CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, HostT>,
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>
+implements Procedure<ShardingKey> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT>,
+    T extends CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationProcess<ShardingKey, MetricsT, MasterProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, HostT> {
+    MasterProcessT extends ApplicationProcess<ShardingKey, MetricsT, MasterProcessT>>
+    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT> {
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>
-    implements Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
+    implements Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         @Override
-        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
-            final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException {
+            final ApplicationLoadBalancer<ShardingKey> result;
             if (super.getLoadBalancerUsed() != null) {
                 result = super.getLoadBalancerUsed();
             } else {
@@ -40,11 +40,11 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
             return result;
         }
 
-        private ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateNonDNSMappedLoadBalancer(
-                Region region, String hostname, AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) throws InterruptedException {
+        private ApplicationLoadBalancer<ShardingKey> getOrCreateNonDNSMappedLoadBalancer(
+                Region region, String hostname, AwsLandscape<ShardingKey> landscape) throws InterruptedException {
             final String domainName = getHostedZoneName(hostname);
-            final ApplicationLoadBalancer<ShardingKey, MetricsT> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
-            final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+            final ApplicationLoadBalancer<ShardingKey> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
+            final ApplicationLoadBalancer<ShardingKey> result;
             if (existingLoadBalancer != null) {
                 result = existingLoadBalancer;
             } else {
@@ -56,28 +56,28 @@ implements Procedure<ShardingKey, MetricsT, ProcessT> {
         }
         
         private void createWildcardRoute53Mapping(
-                AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape,
-                ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer, String domainName) {
+                AwsLandscape<ShardingKey> landscape,
+                ApplicationLoadBalancer<ShardingKey> loadBalancer, String domainName) {
             final String hostname = "*." + domainName;
             landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer);
         }
 
         @Override
-        public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT> build() throws Exception {
-            return new CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>(this);
+        public CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT> build() throws Exception {
+            return new CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>(this);
         }
     }
 
     public static <MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>,
-    BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT>,
+    HostT extends AwsInstance<ShardingKey>,
+    BuilderT extends Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>,
     ShardingKey>
-    Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT, HostT>, ShardingKey, MetricsT, ProcessT, HostT> builder() {
-        return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT, HostT>();
+    Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
+        return new BuilderImpl<BuilderT, ShardingKey, MetricsT, ProcessT>();
     }
 
-    protected CreateDynamicLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT, HostT> builder) throws Exception {
+    protected CreateDynamicLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
     }
 }

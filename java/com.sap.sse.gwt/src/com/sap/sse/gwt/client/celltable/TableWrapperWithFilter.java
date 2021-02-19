@@ -117,7 +117,7 @@ extends TableWrapper<T, S, SM, TR> {
         getFilterPanel().removeAll();
     }
 
-    protected LabeledAbstractFilterablePanel<T> getFilterPanel() {
+    public LabeledAbstractFilterablePanel<T> getFilterPanel() {
         return filterPanel;
     }
 

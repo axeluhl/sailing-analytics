@@ -95,7 +95,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings = RaceBoardPerspectiveOwnSettings
                 .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
                         /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
-                        /* defaultForCanReplayDuringLiveRaces */ false, /* defaultForJumpToTag */ null);
+                        /* defaultForCanReplayDuringLiveRaces */ false, /*defaultShowTags*/ false, /*defaultShowManeuverTable*/false,
+                        /* defaultForJumpToTag */ null, /* zoomStart */ null, /* zoomEnd */ null, false);
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
