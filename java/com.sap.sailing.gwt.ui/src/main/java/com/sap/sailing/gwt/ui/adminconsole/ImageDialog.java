@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -25,7 +26,6 @@ import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObser
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
@@ -56,6 +56,8 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
     protected Image image;
     private final ExpandedUiWithCheckboxes<String> expandedUi;
     private final BusyIndicator busyIndicator;
+    private int busyCounter;
+    private final HashMap<String, Pair<Integer, Integer>> imageDimensionsMap;
 
     protected static class ImageParameterValidator implements Validator<List<ImageResizingTaskDTO>> {
         private final StringMessages stringMessages;
@@ -221,29 +223,40 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             @Override
             public void onValueChange(ValueChangeEvent<List<String>> event) {
                 List<String> imageUrls = event.getValue();
-                String imageUrlAsString = imageUrls.isEmpty() ? null : imageUrls.get(0);
-                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
+                if (imageUrls == null || imageUrls.isEmpty()) {
                     widthInPxBox.setText("");
                     heightInPxBox.setText("");
                 } else {
                     busyIndicator.setBusy(true);
-                    ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString,
-                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
-                                @Override
-                                public void onSuccess(Pair<Integer, Integer> imageSize) {
-                                    busyIndicator.setBusy(false);
-                                    if (imageSize != null) {
-                                        widthInPxBox.setValue(imageSize.getA());
-                                        heightInPxBox.setValue(imageSize.getB());
-                                    }
-                                    validateAndUpdate();
-                                }
+                    busyCounter = 0;
+                    for (final String imageUrl : imageUrls) {
+                        if (!imageDimensionsMap.containsKey(imageUrl)) {
+                            busyCounter += 1;
+                            ImageDialog.this.sailingService.resolveImageDimensions(imageUrl,
+                                    new AsyncCallback<Pair<Integer, Integer>>() {
+                                        @Override
+                                        public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                            imageDimensionsMap.put(imageUrl, imageSize);
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                            validateAndUpdate();
+                                        }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyIndicator.setBusy(false);
-                                }
-                            });
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            busyCounter -= 1;
+                                            if (busyCounter <= 0) {
+                                                busyIndicator.setBusy(false);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+                    if(busyCounter <= 0) {
+                        busyIndicator.setBusy(false);
+                    }
                 }
                 validateAndUpdate();
             }
@@ -267,6 +280,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                 validateAndUpdate();
             }
         });
+        imageDimensionsMap = new HashMap<>(4);
     }
 
     /**
@@ -289,13 +303,20 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             }
         }
         ArrayList<ImageResizingTaskDTO> results = new ArrayList<>(imageURLAndUploadComposite.getURLs().size());
-        for (String imageURL : imageURLAndUploadComposite.getURLs()) {
+        List<String> urLs = imageURLAndUploadComposite.getURLs();
+        for (int i = 0; i < urLs.size(); i++) {
+            final String imageURL = urLs.get(i);
             final ImageDTO image = new ImageDTO(imageURL, creationDate);
             image.setTitle(titleTextBox.getValue());
             image.setSubtitle(subtitleTextBox.getValue());
             image.setCopyright(copyrightTextBox.getValue());
-            if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-                image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+            final Pair<Integer, Integer> dims = imageDimensionsMap.get(imageURL);
+            if (dims != null) {
+                image.setSizeInPx(dims.getA(), dims.getB());
+                if (i == 0) {
+                    widthInPxBox.setValue(dims.getA());
+                    heightInPxBox.setValue(dims.getB());
+                }
             }
             image.setTags(tags);
             results.add(new ImageResizingTaskDTO(image, resizingTask));
