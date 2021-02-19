@@ -10,7 +10,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -26,6 +25,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
+import com.sap.sailing.gwt.ui.client.media.rebuild.MediaGalleryComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -86,14 +85,14 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private TouchSplitLayoutPanel splitLayoutPanel;
     private final UserService userService;
     private final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher;
-    private Component newMediaComponent;
     private final Panel newMediaPanel;
+    private MediaGalleryComponent newMediaGalleryComponent;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> centerComponentP,
             final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
             List<Component<?>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
-            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher) {
+            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher,final MediaGalleryComponent newMediaGalleryComponent) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -106,6 +105,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
+        this.newMediaGalleryComponent = newMediaGalleryComponent;
         markPositionPanel.setComponentViewer(this);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
@@ -170,47 +170,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         rightComponent.getEntryWidget().getElement().setId("rightComponent-TAGS");
         splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
         
-        final DockLayoutPanel docklayoutpanel = new DockLayoutPanel(Unit.PX);
-        Button button = new Button("TEST XXX");
-        docklayoutpanel.add(button);
-        newMediaComponent = new ComponentWithoutSettings(rightComponent.getParentComponent(), null) {
-            
-            @Override
-            public void setVisible(boolean visibility) {
-                button.setVisible(visibility);
-            }
-            
-            @Override
-            public boolean isVisible() {
-                return button.isVisible();
-            }
-            
-            @Override
-            public String getLocalizedShortName() {
-                return "Media Gallery";
-            }
-            
-            @Override
-            public String getId() {
-                return "media-component";
-            }
-            
-            @Override
-            public Widget getEntryWidget() {
-                return docklayoutpanel;
-            }
-            
-            @Override
-            public String getDependentCssClassName() {
-                return "";
-            }
-        };
-        newMediaComponent.setVisible(false);
+        this.newMediaGalleryComponent.setVisible(false);
         newMediaPanel = new SimpleLayoutPanel();
-        newMediaPanel.add(newMediaComponent.getEntryWidget());
-        newMediaPanel.setTitle(newMediaComponent.getEntryWidget().getTitle());
+        newMediaPanel.add(this.newMediaGalleryComponent.getEntryWidget());
+        newMediaPanel.setTitle(this.newMediaGalleryComponent.getEntryWidget().getTitle());
         
-        splitLayoutPanel.insert(newMediaPanel, newMediaComponent, Direction.EAST, MIN_MEDIA_WIDTH);
+        splitLayoutPanel.insert(newMediaPanel, this.newMediaGalleryComponent, Direction.EAST, MIN_MEDIA_WIDTH);
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
@@ -334,16 +299,16 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         }
 
         //newMediaComponent
-        if (!newMediaComponent.isVisible() && centerComponent.isVisible()) {
+        if (!newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
             // the tagging is not visible, but the map is
             if (isWidgetInSplitPanel(newMediaPanel)) {
-                splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaComponent, /* hidden */true,
+                splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */true,
                         MIN_TAGGING_WIDTH);
             }
-        } else if (newMediaComponent.isVisible() && centerComponent.isVisible()) {
+        } else if (newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
             // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaComponent, /* hidden */false, MIN_TAGGING_WIDTH);
-        } else if (!newMediaComponent.isVisible() && !centerComponent.isVisible()) {
+            splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */false, MIN_TAGGING_WIDTH);
+        } else if (!newMediaGalleryComponent.isVisible() && !centerComponent.isVisible()) {
         }
         
         for (Component<?> component : components) {

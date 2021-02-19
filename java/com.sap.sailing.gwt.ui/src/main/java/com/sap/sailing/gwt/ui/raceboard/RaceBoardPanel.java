@@ -70,6 +70,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListen
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
+import com.sap.sailing.gwt.ui.client.media.rebuild.MediaGalleryComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -324,9 +325,9 @@ public class RaceBoardPanel
         final String sharedTagURLParameter = settings.getPerspectiveOwnSettings().getJumpToTag();
         String sharedTagTitle = null;
         TimePoint sharedTagTimePoint = null;
-        boolean showTaggingPanel = false;
+        boolean showTaggingComponent = false;
         if (sharedTagURLParameter != null) {
-            showTaggingPanel = true;
+            showTaggingComponent = true;
             int indexOfSeperator = sharedTagURLParameter.indexOf(",");
             if (indexOfSeperator != -1) {
                 try {
@@ -340,7 +341,7 @@ public class RaceBoardPanel
         taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, userService, timer,
                 raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
         addChildComponent(taggingComponent);
-        taggingComponent.setVisible(showTaggingPanel);
+        taggingComponent.setVisible(showTaggingComponent);
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -388,6 +389,9 @@ public class RaceBoardPanel
     }
     
     /**
+     * Creates the overall split pane view with the map in the center and all the components around of it. 
+     * Except race time panel on the bottom.
+     *  
      * @param event
      *            an optional event; may be <code>null</code> or else can be used to show some context information.
      * @param showChartMarkEditMediaButtonsAndVideo 
@@ -481,9 +485,11 @@ public class RaceBoardPanel
                         });
             }
         };
+        
+        MediaGalleryComponent newMediaGalleryComponent = new MediaGalleryComponent(this, getComponentContext());
         mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
-                maneuverTablePanel, asyncFetcher);
+                maneuverTablePanel, asyncFetcher, newMediaGalleryComponent);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             @Override
             public void notifyStateChange() {
