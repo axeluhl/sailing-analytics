@@ -19,6 +19,7 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.impl.Activator;
+import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -546,12 +547,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * {@link ApplicationProcess} subtype for each server directory holding a process installation on that host.
      * 
      * @param processFactoryFromHostAndServerDirectory
-     *            takes the host and the server directory as arguments and is expected to produce an
+     *            takes the host, port, and the server directory as arguments and is expected to produce an
      *            {@link ApplicationProcess} object of some sort.
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(Region region,
-            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
+            String tagName, ApplicationProcessHostImpl.ProcessFactory<ShardingKey, MetricsT, ProcessT>  processFactoryFromHostAndServerDirectory);
 
     /**
      * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
@@ -560,7 +561,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
      * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
      * @param processFactoryFromHostAndServerDirectory
-     *            takes the host and the server directory as arguments and is expected to produce an
+     *            takes the host, port, and the server directory as arguments and is expected to produce an
      *            {@link ApplicationProcess} object of some sort.
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
@@ -568,7 +569,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
-            String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
+            String tagName, ApplicationProcessHostImpl.ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**

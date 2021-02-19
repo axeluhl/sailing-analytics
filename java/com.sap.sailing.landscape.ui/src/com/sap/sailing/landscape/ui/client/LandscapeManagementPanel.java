@@ -187,6 +187,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
             }
         };
         applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
+        applicationReplicaSetsTable.addColumn(rs->rs.getVersion(), stringMessages.versionHeader());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHostname(), stringMessages.masterHostName());
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getServerName(), stringMessages.masterServerName());

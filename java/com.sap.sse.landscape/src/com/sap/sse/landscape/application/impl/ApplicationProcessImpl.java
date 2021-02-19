@@ -80,6 +80,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        // TODO figure this out using the /gwt/status "health check" REST end point; we need to separate the various parameters in the status output's "buildversion" field into separate fields
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
         final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         final Release result;

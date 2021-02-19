@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -48,6 +47,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -209,11 +209,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
         final AwsRegion region = new AwsRegion(regionId);
-        final BiFunction<Host, String, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
-                (host, serverDirectory)->{
+        final ApplicationProcessHostImpl.ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
+                (host, port, serverDirectory)->{
                     try {
-                        return new SailingAnalyticsProcessImpl<String>(host, serverDirectory, WAIT_FOR_PROCESS_TIMEOUT,
-                                Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -243,6 +242,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        // TODO the values required from the process (server name, expedition UDP port, release, telnet port) should all be "baked" into the process object and shouldn't require a separate expensive SSH connect each
         return new SailingAnalyticsProcessDTO(convertToAwsInstanceDTO(sailingAnalyticsProcess.getHost()),
                 sailingAnalyticsProcess.getPort(), sailingAnalyticsProcess.getHostname(),
                 sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),

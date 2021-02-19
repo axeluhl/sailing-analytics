@@ -70,4 +70,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String masterServerName();
     String masterInstanceId();
     String replicas();
+    String versionHeader();
 }

@@ -90,9 +90,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
             return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, serverDirectory)->{
+                        (host, port, serverDirectory)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout(), Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }

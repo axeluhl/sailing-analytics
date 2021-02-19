@@ -3,15 +3,14 @@ package com.sap.sse.landscape.aws.impl;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Vector;
-import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.ChannelSftp.LsEntry;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -19,16 +18,22 @@ import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.ReverseProxy;
+import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 public class ApplicationProcessHostImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AwsInstanceImpl<ShardingKey>
 implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(ApplicationProcessHostImpl.class.getName());
-    private final BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory;
+    private final ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory;
+    
+    @FunctionalInterface
+    public static interface ProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+        ProcessT createProcess(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host, int port, String serverDirectory);
+    }
 
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+            AwsLandscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory) {
         super(instanceId, availabilityZone, landscape);
         this.processFactoryFromHostAndServerDirectory = processFactoryFromHostAndServerDirectory;
     }
@@ -57,28 +62,34 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
      */
     @Override
     public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final String SERVER_DIRECTORY_JSON_PROPERTY = "serverdirectory";
+        final String SERVER_PORT_JSON_PROEPRTY = "port";
         final Set<ProcessT> result = new HashSet<>();
-        final ChannelSftp sftpChannel = createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        if (optionalTimeout.isPresent()) {
-            sftpChannel.connect((int) optionalTimeout.get().asMillis());
-        } else {
-            sftpChannel.connect();
-        }
-        @SuppressWarnings("unchecked")
-        final Vector<LsEntry> files = sftpChannel.ls(DEFAULT_SERVERS_PATH);
-        for (final LsEntry subdirCandidate : files) {
-            if (subdirCandidate.getAttrs().isDir() && !subdirCandidate.getFilename().startsWith(".")) {
-                ProcessT process;
-                final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+subdirCandidate.getFilename();
+        final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
+                "cd "+DEFAULT_SERVERS_PATH+"; "+
+                "echo -n \"[\"; "+
+                "find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ \\\""+
+                        SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", \\\""+
+                        SERVER_PORT_JSON_PROEPRTY+"\\\":${SERVER_PORT} },\"' \\; ; echo \"{}]\"",
+                "Error(s) during evaluating server processes", Level.SEVERE);
+        final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
+        for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
+            final JSONObject serverDirectoryAndPortObject = (JSONObject) serverDirectoryAndPort;
+            ProcessT process;
+            final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
+            if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
+                final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
+                final int port = ((Number) serverDirectoryAndPortObject.get(SERVER_PORT_JSON_PROEPRTY)).intValue();
                 try {
-                    process = processFactoryFromHostAndServerDirectory.apply(this, serverDirectory);
+                    process = processFactoryFromHostAndServerDirectory.createProcess(this, port, serverDirectory);
                     result.add(process);
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);
                 }
             }
         }
-        sftpChannel.disconnect();
+        sshChannel.disconnect();
         return result;
     }
 }
