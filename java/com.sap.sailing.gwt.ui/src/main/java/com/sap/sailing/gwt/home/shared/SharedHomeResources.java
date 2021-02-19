@@ -95,13 +95,6 @@ public interface SharedHomeResources extends CommonIcons {
     @Source("raw_gps_fixes.png")
     ImageResource gpsFixes();
     
-    @Source("../../ui/client/images/share.svg")
-    @MimeType("image/svg+xml")
-    DataResource sharingIcon();
-    
-    @Source("../../ui/client/images/flat_copy.svg")
-    @MimeType("image/svg+xml")
-    DataResource copyIcon();
     
     @Source("add-media.svg")
     @MimeType("image/svg+xml")

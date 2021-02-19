@@ -159,6 +159,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent(RaceTimePanelSettings settings) {
         return componentLifecycle.getSettingsDialogComponent(settings);
     }
+    
+    public RaceTimesInfoDTO getLastRaceTimesInfo() {
+        return lastRaceTimesInfo;
+    }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
         if (raceTimesInfo == null) { 
@@ -206,7 +210,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.setZoomed(true);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        redrawAllMarkers(lastRaceTimesInfo);
+        if (lastRaceTimesInfo != null) {
+            redrawAllMarkers(lastRaceTimesInfo);
+        }
     }
 
     @Override

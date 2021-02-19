@@ -47,6 +47,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 /**
  * A simplified, largely stateless view onto the AWS SDK API that is geared towards specific ways and patterns of
@@ -64,7 +65,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * <p>
  * 
  * Clients may also create dedicated instances of this service wrapper, using their own credentials. See
- * {@link #obtain(String, String)}.
+ * {@link #obtain(String, String, Optional)}.
  * <p>
  * 
  * This object interacts with an instance of {@link AwsLandscapeState} which keeps persistent and replicable state about
@@ -75,9 +76,7 @@ import software.amazon.awssdk.services.route53.model.RRType;
  * @param <ShardingKey>
  * @param <MetricsT>
  */
-public interface AwsLandscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends Landscape<ShardingKey, MetricsT, ProcessT> {
+public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
     String SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.secretaccesskey";
@@ -120,32 +119,46 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Based on system properties for the AWS access key ID and the secret access key (see
      * {@link #ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME} and {@link #SECRET_ACCESS_KEY_SYSTEM_PROPERTY_NAME}), this method
      * returns a landscape object which internally has access to the clients for the underlying AWS landscape, such as
-     * an EC2 client, a Route53 client, etc.
+     * an EC2 client, a Route53 client, etc. Note that this way no multi-factor authentication (MFA) is possible. If
+     * the system properties described above are not set or not valid, an unauthenticated landscape object will result;
+     * some rudimentary things may still work, such as querying the set of regions.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain() {
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
+    AwsLandscape<ShardingKey> obtain() {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState());
         return result;
     }
     
     /**
-     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object which
-     * internally has access to the clients for the underlying AWS landscape, such as an EC2 client, a Route53 client,
-     * etc.
+     * Based on an explicit AWS access key ID and the secret access key, this method returns a landscape object, but not
+     * multi factor-authenticated (MFA). Can be used for operations not requiring MFA, such as obtaining an MFA-authenticated
+     * version of the landscape.
      */
     static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    AwsLandscape<ShardingKey, MetricsT, ProcessT> obtain(String accessKey, String secret) {
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret);
         return result;
     }
     
-    default AwsInstance<ShardingKey, MetricsT> launchHost(MachineImage image, InstanceType instanceType,
+    /**
+     * Based on an explicit AWS access key ID, the secret access key, and an MFA token code, this method returns a
+     * landscape object which internally has access to the clients for the underlying AWS landscape, such as an EC2
+     * client, a Route53 client, etc.
+     */
+    static <ShardingKey, MetricsT extends ApplicationProcessMetrics,
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsLandscape<ShardingKey> obtain(String accessKey, String secret, String sessionToken) {
+        final AwsLandscape<ShardingKey> result = new AwsLandscapeImpl<>(Activator.getInstance().getLandscapeState(), accessKey, secret, sessionToken);
+        return result;
+    }
+    
+    default AwsInstance<ShardingKey> launchHost(MachineImage image, InstanceType instanceType,
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
-        final HostSupplier<ShardingKey, MetricsT, ProcessT, AwsInstance<ShardingKey, MetricsT>> hostSupplier =
-                (instanceId, az, landscape)->new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId, az, landscape);
+        final HostSupplier<ShardingKey, AwsInstance<ShardingKey>> hostSupplier =
+                (instanceId, az, landscape)->new AwsInstanceImpl<ShardingKey>(instanceId, az, landscape);
         return launchHost(hostSupplier, image, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
     }
     
@@ -160,8 +173,8 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      *            concatenated, using the line separator to join them. The instance is able to read the user data throuh
      *            the AWS SDK installed on the instance.
      */
-    default <HostT extends AwsInstance<ShardingKey, MetricsT>> HostT launchHost(
-            HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier,
+    default <HostT extends AwsInstance<ShardingKey>> HostT launchHost(
+            HostSupplier<ShardingKey, HostT> hostSupplier,
             MachineImage fromImage, InstanceType instanceType, AwsAvailabilityZone az, String keyName,
             Iterable<SecurityGroup> securityGroups, Optional<Tags> tags, String... userData) {
         return launchHosts(hostSupplier, /* numberOfHostsToLaunch */ 1, fromImage, instanceType, az, keyName,
@@ -177,22 +190,28 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      *            the SSH key pair name to use when launching; this will grant root access with the corresponding
      *            private key; see also {@link #getKeyPairInfo(Region, String)}
      */
-    <HostT extends AwsInstance<ShardingKey, MetricsT>> Iterable<HostT> launchHosts(
-            HostSupplier<ShardingKey, MetricsT, ProcessT, HostT> hostSupplier, int numberOfHostsToLaunch,
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> launchHosts(
+            HostSupplier<ShardingKey, HostT> hostSupplier, int numberOfHostsToLaunch,
             MachineImage fromImage, InstanceType instanceType,
             AwsAvailabilityZone az, String keyName, Iterable<SecurityGroup> securityGroups, Optional<Tags> tags,
             String... userData);
 
-    AmazonMachineImage<ShardingKey, MetricsT> getImage(Region region, String imageId);
+    AmazonMachineImage<ShardingKey> getImage(Region region, String imageId);
 
-    AmazonMachineImage<ShardingKey, MetricsT> createImage(AwsInstance<ShardingKey, MetricsT> instance, String imageName, Optional<Tags> tags);
+    AmazonMachineImage<ShardingKey> createImage(AwsInstance<ShardingKey> instance, String imageName, Optional<Tags> tags);
 
     void deleteImage(Region region, String imageId);
 
-    AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithTag(Region region, String tagName, String tagValue);
+    AmazonMachineImage<ShardingKey> getLatestImageWithTag(Region region, String tagName, String tagValue);
     
-    default AmazonMachineImage<ShardingKey, MetricsT> getLatestImageWithType(Region region, String imageType) {
+    default AmazonMachineImage<ShardingKey> getLatestImageWithType(Region region, String imageType) {
         return getLatestImageWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
+    }
+    
+    Iterable<AmazonMachineImage<ShardingKey>> getAllImagesWithTag(Region region, String tagName, String tagValue);
+
+    default Iterable<AmazonMachineImage<ShardingKey>> getAllImagesWithType(Region region, String imageType) {
+        return getAllImagesWithTag(region, IMAGE_TYPE_TAG_NAME, imageType);
     }
 
     /**
@@ -210,7 +229,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * 
      * @see #getRunningHostsWithTagValue(Region, String)
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTagValue(Region region, String tagName, String tagValue);
+    Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(Region region, String tagName, String tagValue);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
@@ -218,19 +237,19 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * 
      * @see #getRunningHostsWithTag(Region, String)
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHostsWithTag(Region region, String tagName);
+    Iterable<AwsInstance<ShardingKey>> getHostsWithTag(Region region, String tagName);
     
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTag(Region region, String tagName);
+    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(Region region, String tagName);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getRunningHostsWithTagValue(Region region, String tagName,
+    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(Region region, String tagName,
             String tagValue);
 
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
@@ -247,7 +266,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      */
     SSHKeyPair importKeyPair(Region region, byte[] publicKey, byte[] encryptedPrivateKey, String keyName) throws JSchException;
 
-    void terminate(AwsInstance<ShardingKey, MetricsT> host);
+    void terminate(AwsInstance<ShardingKey> host);
 
     /**
      * The calling subject must have {@code READ} permission for the key requested.
@@ -303,7 +322,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param hostname
      *            the fully-qualified host name
      */
-    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey> alb);
 
     String getDNSHostedZoneId(String hostedZoneName);
 
@@ -334,22 +353,22 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
 
-    Iterable<ApplicationLoadBalancer<ShardingKey, MetricsT>> getLoadBalancers(Region region);
+    Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
     
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancer(String loadBalancerArn, Region region);
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer(String loadBalancerArn, Region region);
 
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerByName(String name, Region region);
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, Region region);
 
     /**
      * Creates an application load balancer with the name and in the region specified. The method returns once the request
      * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
      * to find out more.
      */
-    ApplicationLoadBalancer<ShardingKey, MetricsT> createLoadBalancer(String name, Region region);
+    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region);
 
-    Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
     
-    LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey> alb);
 
     Iterable<AvailabilityZone> getAvailabilityZones(Region awsRegion);
 
@@ -359,13 +378,13 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Deletes this load balancer and all its target groups (the target groups to which this load balancer currently
      * forwards any traffic).
      */
-    void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey, MetricsT> alb);
+    void deleteLoadBalancer(ApplicationLoadBalancer<ShardingKey> alb);
     
     /**
      * All target groups that have the load balancer identified by the ARN as "their" load balancer which means that
      * this load balancer is forwarding traffic to all those target groups.
      */
-    Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroupsByLoadBalancerArn(Region region, String loadBalancerArn);
+    Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(Region region, String loadBalancerArn);
 
     /**
      * Looks up a target group by its name in a region. The main reason is to obtain the target group's ARN in order to
@@ -374,17 +393,17 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @return {@code null} if no target group named according to the value of {@code targetGroupName} is found in the
      *         {@code region}
      */
-    TargetGroup<ShardingKey, MetricsT> getTargetGroup(Region region, String targetGroupName);
+    TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName);
 
     /**
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}.
      * The protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
      */
-    TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName, int port,
+    TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup<ShardingKey, MetricsT> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
+    default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
         return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
     }
 
@@ -392,9 +411,9 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
 
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroupByArn(Region region, String targetGroupArn);
 
-    Map<AwsInstance<ShardingKey, MetricsT>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey, MetricsT> targetGroup);
+    Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup);
 
-    <SK, MT extends ApplicationProcessMetrics> void deleteTargetGroup(TargetGroup<SK, MT> targetGroup);
+    <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup);
 
     Iterable<Rule> getLoadBalancerListenerRules(Listener loadBalancerListener, Region region);
 
@@ -416,12 +435,12 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
     void addTargetsToTargetGroup(
-            TargetGroup<ShardingKey, MetricsT> targetGroup,
-            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+            TargetGroup<ShardingKey> targetGroup,
+            Iterable<AwsInstance<ShardingKey>> targets);
 
     void removeTargetsFromTargetGroup(
-            TargetGroup<ShardingKey, MetricsT> targetGroup,
-            Iterable<AwsInstance<ShardingKey, MetricsT>> targets);
+            TargetGroup<ShardingKey> targetGroup,
+            Iterable<AwsInstance<ShardingKey>> targets);
 
     LoadBalancer getAwsLoadBalancer(String loadBalancerArn, Region region);
     
@@ -432,6 +451,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
      * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
      */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
     
     /**
@@ -448,7 +468,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param wildcardDomain e.g., "sapsailing.com" without leading and without trailing dot
      * 
      */
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
+    ApplicationLoadBalancer<ShardingKey> getNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
     
     /**
      * Creates an application load balancer (ALB) intended to serve requests for dynamically-mapped sub-domains where
@@ -456,13 +476,13 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
      * {@code region}, will deliver the load balancer created by this call.
      */
-    ApplicationLoadBalancer<ShardingKey, MetricsT> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
+    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
     
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
      */
-    ApplicationLoadBalancer<ShardingKey, MetricsT> getDNSMappedLoadBalancerFor(Region region, String hostname);
+    ApplicationLoadBalancer<ShardingKey> getDNSMappedLoadBalancerFor(Region region, String hostname);
     
     /**
      * The default MongoDB configuration to connect to. See also {@link #MONGO_DEFAULT_REPLICA_SET_NAME} and
@@ -518,7 +538,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * Looks for a tag with key as specified by {@code tagName} on the {@code host} specified. If found, the tag's value
      * is returned. Otherwise, the {@link Optional} returned {@link Optional#isPresent() is not present}.
      */
-    Optional<String> getTag(AwsInstance<ShardingKey, MetricsT> host, String tagName);
+    Optional<String> getTag(AwsInstance<ShardingKey> host, String tagName);
 
     /**
      * Obtains all hosts with a tag named {@code tagName}, regardless the tag's value, and returns them as
@@ -529,6 +549,7 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      *            takes the host and the server directory as arguments and is expected to produce an
      *            {@link ApplicationProcess} object of some sort.
      */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory);
 
@@ -544,10 +565,16 @@ extends Landscape<ShardingKey, MetricsT, ProcessT> {
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
-     * @param optionalKeyName TODO
      */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
             String tagName, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * Obtains session credentials using an MFA token code valid for the user for which this landscape object was authenticated
+     * during its creation with an access key ID and a secret. 
+     */
+    Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
 }

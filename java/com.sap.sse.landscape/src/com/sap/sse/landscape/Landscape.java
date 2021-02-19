@@ -8,8 +8,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 
-public interface Landscape<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+public interface Landscape<ShardingKey> {
     /**
      * The {@link Landscape#getLatestImageWithTag(Region, String, String)} method is
      * used to obtain default images for specific host starting procedures that subclass this class. The
@@ -21,7 +20,8 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
     /**
      * Tells which scope currently lives where
      */
-    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getScopes();
+    <ApplicationProcessMetricsT extends ApplicationProcessMetrics, ApplicationProcessT extends ApplicationProcess<ShardingKey, ApplicationProcessMetricsT, ApplicationProcessT>>
+    Map<Scope<ShardingKey>, ApplicationReplicaSet<ShardingKey, ApplicationProcessMetricsT, ApplicationProcessT>> getScopes();
     
     /**
      * @return the security group that shall be assigned by default to any application server host, whether master or

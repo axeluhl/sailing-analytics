@@ -11,7 +11,7 @@ import com.sap.sse.landscape.application.Scope;
 public interface ApplicationProcessHost<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends AwsInstance<ShardingKey, MetricsT> {
+extends AwsInstance<ShardingKey> {
     String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
     
     String DEFAULT_SERVER_DIRECTORY_NAME = "server";
@@ -36,5 +36,5 @@ extends AwsInstance<ShardingKey, MetricsT> {
      */
     Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
+    AwsLandscape<ShardingKey> getLandscape();
 }

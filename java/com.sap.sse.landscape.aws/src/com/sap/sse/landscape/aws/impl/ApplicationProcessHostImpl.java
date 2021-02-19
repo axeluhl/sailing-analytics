@@ -22,23 +22,20 @@ import com.sap.sse.landscape.aws.ReverseProxy;
 
 public class ApplicationProcessHostImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends AwsInstanceImpl<ShardingKey, MetricsT>
+extends AwsInstanceImpl<ShardingKey>
 implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(ApplicationProcessHostImpl.class.getName());
     private final BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory;
 
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey, MetricsT, ?> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
+            AwsLandscape<ShardingKey> landscape, BiFunction<Host, String, ProcessT> processFactoryFromHostAndServerDirectory) {
         super(instanceId, availabilityZone, landscape);
         this.processFactoryFromHostAndServerDirectory = processFactoryFromHostAndServerDirectory;
     }
     
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
-        @SuppressWarnings("unchecked")
-        final AwsLandscape<ShardingKey, MetricsT, ProcessT> castLandscape =
-            (AwsLandscape<ShardingKey, MetricsT, ProcessT>) super.getLandscape();
-        return castLandscape;
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return super.getLandscape();
     }
 
     @Override

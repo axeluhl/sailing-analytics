@@ -62,7 +62,7 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  * @author Axel Uhl (d043530)
  */
 public abstract class DataEntryDialog<T> {
-    private final DialogBox dateEntryDialog;
+    private final DialogBox dataEntryDialog;
     private Validator<T> validator;
     private final Button okButton;
     private final Button cancelButton;
@@ -118,14 +118,14 @@ public abstract class DataEntryDialog<T> {
      *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
      * @param callback
      *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
-     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}; may be {@code null}
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         validationExecutor = new AsyncActionsExecutor();
-        dateEntryDialog = new DialogBox();
-        dateEntryDialog.setText(title);
-        dateEntryDialog.setGlassEnabled(true);
+        dataEntryDialog = new DialogBox();
+        dataEntryDialog.setText(title);
+        dataEntryDialog.setGlassEnabled(true);
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
@@ -161,7 +161,7 @@ public abstract class DataEntryDialog<T> {
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    dateEntryDialog.hide();
+                    dataEntryDialog.hide();
                     if (callback != null) {
                         callback.cancel();
                     }
@@ -170,12 +170,12 @@ public abstract class DataEntryDialog<T> {
         } else {
             cancelButton = null;
         }
-        dateEntryDialog.setWidget(dialogFPanel);
+        dataEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 // wait for any outstanding validation request and check last validation result; call OK only if the pending validation was OK
                 ifLastValidationRequestSuccesssful(()->{
-                    dateEntryDialog.hide();
+                    dataEntryDialog.hide();
                     if (callback != null) {
                         callback.ok(getResult());
                     }
@@ -635,11 +635,11 @@ public abstract class DataEntryDialog<T> {
     }
 
     protected void setCursor(Style.Cursor cursor) {
-        dateEntryDialog.getElement().getStyle().setCursor(cursor);
+        dataEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
     public void center() {
-        dateEntryDialog.center();
+        dataEntryDialog.center();
     }
 
     public void show() {
@@ -648,7 +648,7 @@ public abstract class DataEntryDialog<T> {
             panelForAdditionalWidget.add(additionalWidget);
         }
         validateAndUpdate();
-        dateEntryDialog.center();
+        dataEntryDialog.center();
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
@@ -664,15 +664,15 @@ public abstract class DataEntryDialog<T> {
     }
 
     protected DialogBox getDialogBox() {
-        return dateEntryDialog;
+        return dataEntryDialog;
     }
     
     public void ensureDebugId(String debugId) {
-        dateEntryDialog.ensureDebugId(debugId);
+        dataEntryDialog.ensureDebugId(debugId);
     }
     
     protected void addAutoHidePartner(Element element) {
-        dateEntryDialog.addAutoHidePartner(element);
+        dataEntryDialog.addAutoHidePartner(element);
     }
     
     protected FlowPanel getLeftButtonPannel() {

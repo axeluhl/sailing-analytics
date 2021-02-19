@@ -44,7 +44,16 @@
 		<dispatcher>INCLUDE</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
-    
+
+	<filter>
+		<filter-name>DefaultTenantFilter</filter-name>
+		<filter-class>com.sap.sse.security.impl.DefaultTenantRequestFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>DefaultTenantFilter</filter-name>
+		<url-pattern>/api/*</url-pattern>
+	</filter-mapping>
+	
 	<servlet>
     	<servlet-name>Jersey REST API</servlet-name>
 		<servlet-class>com.sap.sse.security.jaxrs.RestServletContainer</servlet-class>

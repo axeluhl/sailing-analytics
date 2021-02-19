@@ -31,4 +31,7 @@ public interface IconResources extends ClientBundle {
     
     @Source("images/refresh.png")
     ImageResource refreshIcon();
+    
+    @Source("images/scale.png")
+    ImageResource scaleIcon();
 }
