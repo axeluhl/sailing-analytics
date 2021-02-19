@@ -92,7 +92,7 @@ implements StartFromSailingAnalyticsImage {
             final HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> result;
             if (super.getHostSupplier() == null) {
                 result = (instanceId, az, landscape)->
-                    new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, port, serverDirectory)->{
+                    new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, port, serverDirectory, telnetPort, serverName)->{
                         try {
                             return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory);
                         } catch (Exception e) {

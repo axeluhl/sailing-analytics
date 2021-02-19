@@ -27,11 +27,6 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(ApplicationProcessHostImpl.class.getName());
     private final ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory;
     
-    @FunctionalInterface
-    public static interface ProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
-        ProcessT createProcess(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host, int port, String serverDirectory);
-    }
-
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
             AwsLandscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory) {
         super(instanceId, availabilityZone, landscape);
@@ -63,15 +58,20 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     @Override
     public Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String SERVER_DIRECTORY_JSON_PROPERTY = "serverdirectory";
-        final String SERVER_PORT_JSON_PROEPRTY = "port";
+        final String SERVER_PORT_JSON_PROPERTY = "port";
+        final String TELNET_PORT_JSON_PROPERTY = "telnetport";
+        final String SERVER_NAME_JSON_PROPERTY = "servername";
         final Set<ProcessT> result = new HashSet<>();
         final SshCommandChannel sshChannel = createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                 "cd "+DEFAULT_SERVERS_PATH+"; "+
                 "echo -n \"[\"; "+
-                "find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ \\\""+
-                        SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", \\\""+
-                        SERVER_PORT_JSON_PROEPRTY+"\\\":${SERVER_PORT} },\"' \\; ; echo \"{}]\"",
+                "find * -type d -prune -exec bash -c 'cd '{}'; . env.sh >/dev/null; echo \"{ "+
+                        "\\\""+SERVER_DIRECTORY_JSON_PROPERTY+"\\\":\\\"'{}'\\\", "+
+                        "\\\""+SERVER_PORT_JSON_PROPERTY+"\\\":${SERVER_PORT} "+
+                        "\\\""+TELNET_PORT_JSON_PROPERTY+"\\\":${TELNET_PORT}, "+
+                        "\\\""+SERVER_NAME_JSON_PROPERTY+"\\\":\\\"${SERVER_NAME}\\\", "+
+                        "},\"' \\; ; echo \"{}]\"",
                 "Error(s) during evaluating server processes", Level.SEVERE);
         final JSONArray serverDirectoriesAndPorts = (JSONArray) new JSONParser().parse(stdout);
         for (final Object serverDirectoryAndPort : serverDirectoriesAndPorts) {
@@ -80,9 +80,11 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
             final String relativeServerDirectory = (String) serverDirectoryAndPortObject.get(SERVER_DIRECTORY_JSON_PROPERTY);
             if (relativeServerDirectory != null) { // null means we got the empty "terminator" record
                 final String serverDirectory = DEFAULT_SERVERS_PATH+"/"+relativeServerDirectory;
-                final int port = ((Number) serverDirectoryAndPortObject.get(SERVER_PORT_JSON_PROEPRTY)).intValue();
+                final int port = ((Number) serverDirectoryAndPortObject.get(SERVER_PORT_JSON_PROPERTY)).intValue();
+                final int telnetPort = ((Number) serverDirectoryAndPortObject.get(TELNET_PORT_JSON_PROPERTY)).intValue();
+                final String serverName = (String) serverDirectoryAndPortObject.get(SERVER_NAME_JSON_PROPERTY);
                 try {
-                    process = processFactoryFromHostAndServerDirectory.createProcess(this, port, serverDirectory);
+                    process = processFactoryFromHostAndServerDirectory.createProcess(this, port, serverDirectory, telnetPort, serverName);
                     result.add(process);
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Problem creating application process from directory "+serverDirectory+" on host "+this+"; skipping", e);

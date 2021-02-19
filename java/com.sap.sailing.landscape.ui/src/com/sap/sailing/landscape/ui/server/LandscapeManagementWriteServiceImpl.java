@@ -45,9 +45,9 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -209,8 +209,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
         final AwsRegion region = new AwsRegion(regionId);
-        final ApplicationProcessHostImpl.ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
-                (host, port, serverDirectory)->{
+        final ApplicationProcessHost.ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
+                (host, port, serverDirectory, telnetPort, serverName)->{
                     try {
                         return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory);
                     } catch (Exception e) {

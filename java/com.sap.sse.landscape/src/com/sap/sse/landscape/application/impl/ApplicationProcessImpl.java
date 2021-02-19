@@ -47,7 +47,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.
      */
     private final String serverDirectory;
-
+    
+    private String serverName;
+    
+    private Integer telnetPortToOSGiConsole;
+    
     /**
      * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
      * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
@@ -66,6 +70,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host);
         this.serverDirectory = serverDirectory;
+    }
+
+    public ApplicationProcessImpl(int port, Host host, String serverDirectory, int telnetPort, String serverName) {
+        this(port, host, serverDirectory);
+        this.telnetPortToOSGiConsole = telnetPort;
+        this.serverName = serverName;
     }
 
     private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
@@ -119,8 +129,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
+        if (telnetPortToOSGiConsole == null) {
+            telnetPortToOSGiConsole = Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
                 optionalKeyName, privateKeyEncryptionPassphrase));
+        }
+        return telnetPortToOSGiConsole;
     }
     
     /**
@@ -166,7 +179,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        if (serverName == null) {
+            serverName = getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+        return serverName;
     }
 
     @Override
