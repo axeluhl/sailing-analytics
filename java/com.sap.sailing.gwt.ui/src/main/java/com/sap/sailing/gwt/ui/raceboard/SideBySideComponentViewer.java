@@ -85,7 +85,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private TouchSplitLayoutPanel splitLayoutPanel;
     private final UserService userService;
     private final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher;
-    private final Panel newMediaPanel;
+    private final Panel newMediaPanel = new SimpleLayoutPanel();
     private MediaGalleryComponent newMediaGalleryComponent;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> centerComponentP,
@@ -169,13 +169,14 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         rightPanel.getElement().setId("rightPanel-TAGS");
         rightComponent.getEntryWidget().getElement().setId("rightComponent-TAGS");
         splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
-        
-        this.newMediaGalleryComponent.setVisible(false);
-        newMediaPanel = new SimpleLayoutPanel();
-        newMediaPanel.add(this.newMediaGalleryComponent.getEntryWidget());
-        newMediaPanel.setTitle(this.newMediaGalleryComponent.getEntryWidget().getTitle());
-        
-        splitLayoutPanel.insert(newMediaPanel, this.newMediaGalleryComponent, Direction.EAST, MIN_MEDIA_WIDTH);
+
+        if (false) { //enable this block to show panel in side by side view
+            this.newMediaGalleryComponent.setVisible(false);
+            newMediaPanel.add(this.newMediaGalleryComponent.getEntryWidget());
+            newMediaPanel.setTitle(this.newMediaGalleryComponent.getEntryWidget().getTitle());
+
+            splitLayoutPanel.insert(newMediaPanel, this.newMediaGalleryComponent, Direction.EAST, MIN_MEDIA_WIDTH);
+        }
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
