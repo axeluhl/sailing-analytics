@@ -357,7 +357,8 @@ public class LandscapeManagementPanel extends VerticalPanel {
     
     private void refreshApplicationReplicaSetsTable() {
         applicationReplicaSetsTable.getFilterPanel().removeAll();
-        if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null) {
+        if (mfaLoginWidget.hasValidSessionCredentials() && regionsTable.getSelectionModel().getSelectedObject() != null
+                && Util.hasLength(sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption())) {
             applicationReplicaSetsBusy.setBusy(true);
             final SSHKeyPairDTO selectedSshKeyPair = sshKeyManagementPanel.getSelectedKeyPair();
             landscapeManagementService.getApplicationReplicaSets(regionsTable.getSelectionModel().getSelectedObject(),

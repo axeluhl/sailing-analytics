@@ -19,9 +19,11 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
@@ -79,5 +81,10 @@ implements SailingAnalyticsProcess<ShardingKey> {
             }
         }
         return result;
+    }
+
+    @Override
+    public Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
 }

@@ -117,14 +117,17 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     }
     
     default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
-        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+        return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
     }
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
-        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
+        final int port = getPort();
+        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
+
+    Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 }

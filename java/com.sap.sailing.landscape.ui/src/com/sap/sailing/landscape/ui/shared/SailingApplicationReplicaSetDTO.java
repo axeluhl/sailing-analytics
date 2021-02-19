@@ -20,9 +20,10 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
             Iterable<SailingAnalyticsProcessDTO> replicas, String version) {
         super();
         this.master = master;
+        this.replicaSetName = replicaSetName;
+        this.version = version;
         this.replicas = new ArrayList<>();
         Util.addAll(replicas, this.replicas);
-        this.version = version;
     }
     
     public String getName() {

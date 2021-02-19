@@ -10,7 +10,7 @@ public class SailingAnalyticsProcessDTO extends ApplicationProcessDTO implements
 
     public SailingAnalyticsProcessDTO(AwsInstanceDTO host, int port, String hostname, String releaseName,
             int telnetPortToOSGiConsole, String serverName, String serverDirectory, int expeditionUdpPort) {
-        super(host, expeditionUdpPort, hostname, releaseName, telnetPortToOSGiConsole, serverName, serverDirectory);
+        super(host, port, hostname, releaseName, telnetPortToOSGiConsole, serverName, serverDirectory);
         this.expeditionUdpPort = expeditionUdpPort;
     }
 

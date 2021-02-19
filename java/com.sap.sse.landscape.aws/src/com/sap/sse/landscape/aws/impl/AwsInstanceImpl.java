@@ -154,6 +154,9 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            throw new IllegalStateException("Couldn't find key pair "+keyName+" in landscape.");
+        }
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
         jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase), keyPair.getPublicKey(), /* passphrase */ null);
@@ -199,6 +202,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
                 "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
+                " with key "+optionalKeyName+
                 " to instance with ID "+getInstanceId());
         Channel result;
         try {

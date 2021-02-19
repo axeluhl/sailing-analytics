@@ -238,7 +238,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         throw new RuntimeException();
                     }
                 }),
-                applicationServerReplicaSet.getVersion().getName());
+                applicationServerReplicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
