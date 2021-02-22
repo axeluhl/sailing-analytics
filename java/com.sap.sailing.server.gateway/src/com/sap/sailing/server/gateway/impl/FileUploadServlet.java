@@ -90,11 +90,15 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             }
             resultList.add(result);
         }
-        // surprise, surprise: see https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string
-        // When sending a JSON response for a file upload, don't use application/json as the content type. It would lead
-        // to wrapping the content by a <pre> tag. Use text/html instead which should deliver the content to the app running
-        // in the browser unchanged.
-        // 
+        // | surprise, surprise: see https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string
+        // | When sending a JSON response for a file upload, don't use application/json as the content type. It would lead
+        // | to wrapping the content by a <pre> tag. Use text/html instead which should deliver the content to the app running
+        // | in the browser unchanged.
+        // This not true in detail. The response is pure json without <pre> tag before. But the form submit is interpreting the 
+        // result and adding some HTML tags for displaying the content.
+        // If text/html is returned, the browser tries to interpret the content, e.g. on mobile phone a large number in response 
+        // will be interpreted as telephone number and is than wrapped into an <a> element. Therefore it it moved back to json. 
+        // The logic reading the response already ignore the <pre> tag. So it should be no problem to use this with application/json.
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resultList.writeJSONString(resp.getWriter());
