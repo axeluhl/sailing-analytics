@@ -54,6 +54,12 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 fileExtension = ".png";
             } else if (fileType.equals("image/gif")) {
                 fileExtension = ".gif";
+            } else if (fileType.startsWith("video/quicktime")) {
+                // Quicktime/MOV is not supported in HTML5. 
+                // Change file type to mp4 (which should work in most cases) is solving the problem.
+                // Else it would be necessary to convert the file, which is not possible without an high amount
+                // of effort.
+                fileExtension = ".mp4";
             } else if (fileType.startsWith("video/")) {
                 fileExtension = "."+fileType.substring(fileType.indexOf('/')+1);
             } else {
@@ -88,7 +94,8 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
         // When sending a JSON response for a file upload, don't use application/json as the content type. It would lead
         // to wrapping the content by a <pre> tag. Use text/html instead which should deliver the content to the app running
         // in the browser unchanged.
-        resp.setContentType("text/html");
+        // 
+        resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         resultList.writeJSONString(resp.getWriter());
     }

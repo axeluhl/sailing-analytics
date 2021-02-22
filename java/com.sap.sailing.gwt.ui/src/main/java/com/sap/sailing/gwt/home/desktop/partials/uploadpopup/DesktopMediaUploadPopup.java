@@ -14,4 +14,18 @@ public class DesktopMediaUploadPopup extends AbstractMediaUploadPopup {
         addStyleName(MediaPageResources.INSTANCE.css().popup());
     }
 
+    @Override
+    protected void updateFileName(String fileName) {
+        if (fileName != null) {
+            final String name;
+            if (fileName.contains(".")) {
+                name = fileName.substring(0, fileName.lastIndexOf("."));
+            } else {
+                name = fileName;
+            }
+            titleTextBox.setValue(name);
+        }
+        fileNameInput.setValue(fileName);
+    }
+
 }

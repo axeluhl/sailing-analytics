@@ -15,4 +15,8 @@ public class MobileMediaUploadPopup extends AbstractMediaUploadPopup {
         upload.getElement().setAttribute("accept", "image/*;capture=camera");
     }
 
+    @Override
+    protected void updateFileName(String fileName) {
+    }
+
 }

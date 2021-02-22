@@ -11,17 +11,15 @@
                     <div class="{local_res.css.sectionheader_item_image_seperator}"></div>
                 </div>
 			    <div ui:field="titleAndLabelContainerUi" class="{local_res.css.sectionheader_item_title_label}">
-			        <div>
                     <h2 class="{local_res.css.sectionheader_item_title}" ui:field="titleUi"></h2>
                     <div class="{local_res.css.sectionheader_item_label} {res.mainCss.label}" style="display:none;"
                         ui:field="labelUi"></div>
                     <g:Button addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.iconManage}" visible="false" ui:field="manageButtonUi"></g:Button>
                 </div>
-	                <div>
-	                    <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}"
-	                        ui:field="widgetContainerUi" />
-	                </div> 
-				</div>
+                <div>
+                    <g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}"
+                        ui:field="widgetContainerUi" />
+                </div> 
                 <div class="{local_res.css.sectionheader_item_subtitle}" style="display:none;" ui:field="subtitleUi"></div>
             </div>
             <g:HTMLPanel addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
