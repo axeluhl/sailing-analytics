@@ -19,7 +19,9 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
@@ -44,10 +46,11 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -180,7 +183,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             final MongoEndpointDTO dto;
             if (mongoEndpoint.isReplicaSet()) {
                 final MongoReplicaSet replicaSet = mongoEndpoint.asMongoReplicaSet();
-                // TODO produce ProcessDTO objects with AwsInstanceDTO objects inside that have the instance ID
                 final List<MongoProcessDTO> hostnamesAndPorts = new ArrayList<>();
                 for (final MongoProcessInReplicaSet process : replicaSet.getInstances()) {
                     hostnamesAndPorts.add(convertToMongoProcessDTO(process, replicaSet.getName()));
@@ -209,17 +211,20 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
         final AwsRegion region = new AwsRegion(regionId);
-        final ApplicationProcessHost.ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
-                (host, port, serverDirectory, telnetPort, serverName)->{
+        final ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
+                (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
-                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory);
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, (Integer) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name()));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 };
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
+                (instanceId, availabilityZone, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
+                        instanceId, availabilityZone, landscape, processFactoryFromHostAndServerDirectory);
         for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                processFactoryFromHostAndServerDirectory, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+                hostSupplier, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
             result.add(convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
         }
         return result;
@@ -242,7 +247,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        // TODO the values required from the process (server name, expedition UDP port, release, telnet port) should all be "baked" into the process object and shouldn't require a separate expensive SSH connect each
         return new SailingAnalyticsProcessDTO(convertToAwsInstanceDTO(sailingAnalyticsProcess.getHost()),
                 sailingAnalyticsProcess.getPort(), sailingAnalyticsProcess.getHostname(),
                 sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),

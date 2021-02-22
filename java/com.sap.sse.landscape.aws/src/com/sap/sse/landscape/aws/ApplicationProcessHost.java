@@ -12,12 +12,6 @@ public interface ApplicationProcessHost<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends AwsInstance<ShardingKey> {
-    @FunctionalInterface
-    public static interface ProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
-        // TODO what about the expedition UDP port; it would be useful for the sailing-specific process; how to include specific properties? Another type parameter for the constructor args for a Process instance?
-        ProcessT createProcess(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host, int port, String serverDirectory, int telnetPort, String serverName);
-    }
-
     String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
     
     String DEFAULT_SERVER_DIRECTORY_NAME = "server";

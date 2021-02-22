@@ -90,9 +90,10 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
             return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName)->{
+                        (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory);
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory,
+                                        (Integer) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name()));
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -130,6 +131,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     }
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
+        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
+                getApplicationConfiguration().getExpeditionPort());
     }
 }

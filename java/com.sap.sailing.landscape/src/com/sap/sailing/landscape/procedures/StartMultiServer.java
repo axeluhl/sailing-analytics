@@ -10,11 +10,11 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.HostSupplier;
-import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.util.Wait;
@@ -92,9 +92,10 @@ implements StartFromSailingAnalyticsImage {
             final HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> result;
             if (super.getHostSupplier() == null) {
                 result = (instanceId, az, landscape)->
-                    new ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>(instanceId, az, landscape, (host, port, serverDirectory, telnetPort, serverName)->{
+                    new SailingAnalyticsHostImpl<>(instanceId, az, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory);
+                            return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory,
+                                    (Integer) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name()));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }

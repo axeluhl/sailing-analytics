@@ -46,8 +46,9 @@ implements SailingAnalyticsProcess<ShardingKey> {
         super(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
-    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
+    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort) {
         super(port, host, serverDirectory);
+        this.expeditionUdpPort = expeditionUdpPort;
     }
 
     public SailingAnalyticsProcessImpl(int port,

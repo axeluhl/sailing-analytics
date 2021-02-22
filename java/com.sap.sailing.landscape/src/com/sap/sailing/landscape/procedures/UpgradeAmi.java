@@ -251,8 +251,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         public HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
             return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName)->{
+                        (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
+                                // TODO add expedition UDP port from additional properties; requires using SailingAnalyticsHostImpl instead...
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);

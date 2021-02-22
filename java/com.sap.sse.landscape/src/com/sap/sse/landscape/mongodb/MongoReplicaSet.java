@@ -24,7 +24,7 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
      */
     @Override
     default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
-        return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPublicAddress());
+        return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPrivateAddress());
     }
 
     default URI getURI(Optional<Database> optionalDb, Function<MongoProcess, InetAddress> publicAddressSupplier) throws URISyntaxException {
