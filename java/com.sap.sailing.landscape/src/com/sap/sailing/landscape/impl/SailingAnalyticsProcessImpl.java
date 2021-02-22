@@ -5,7 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Optional;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -15,20 +16,22 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
+import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.util.Wait;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
-    private final static Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());
-
+    private Integer expeditionUdpPort;
+    
     /**
      * Tries to obtain the port from the {@code env.sh} file found in the {@code serverDirectory}
      * 
@@ -45,6 +48,12 @@ implements SailingAnalyticsProcess<ShardingKey> {
     
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host, serverDirectory);
+    }
+
+    public SailingAnalyticsProcessImpl(int port,
+            ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> host,
+            String serverDirectory, int telnetPort, String serverName) {
+        super(port, host, serverDirectory, telnetPort, serverName);
     }
 
     @Override
@@ -64,20 +73,32 @@ implements SailingAnalyticsProcess<ShardingKey> {
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
+     * @throws Exception 
      */
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
-            throws JSchException, IOException, InterruptedException, SftpException, ParseException {
-        String result = null;
-        final TimePoint start = TimePoint.now();
-        while (result == null && optionalTimeout.map(d->start.until(TimePoint.now()).compareTo(d) < 0).orElse(true)) {
-            try {
-                result = getStatus(optionalTimeout).get("servername").toString();
-            } catch (Exception e) {
-                logger.info("Exception waiting for server name."+optionalTimeout.map(d->" Waiting another "+d.minus(start.until(TimePoint.now())).toString()).orElse(""));
-                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
-            }
+            throws TimeoutException, Exception {
+        return Wait.wait(()->getStatus(optionalTimeout).get("servername").toString(),
+                result->result!=null,
+                /* retry on exception */ true,
+                optionalTimeout,
+                /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                Level.INFO, "Waiting for server name");
+    }
+
+    @Override
+    public Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        // TODO see getRelease TODO note... we should try to obtain this from the REST API /gwt/status where we need to spread the buildversion info across fine-grained attributes
+        return getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+
+    @Override
+    public int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception {
+        if (expeditionUdpPort == null) {
+            expeditionUdpPort = Integer.parseInt(getEnvShValueFor(SailingAnalyticsProcessConfigurationVariable.EXPEDITION_PORT.name(),
+                optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         }
-        return result;
+        return expeditionUdpPort;
     }
 }

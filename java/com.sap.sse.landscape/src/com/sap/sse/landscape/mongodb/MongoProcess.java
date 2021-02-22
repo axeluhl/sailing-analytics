@@ -14,14 +14,6 @@ public interface MongoProcess extends Process<RotatingFileBasedLog, MongoMetrics
         return getURI(optionalDb, getHostname());
     }
     
-    default String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getHost().getPublicAddress(timeoutEmptyMeaningForever).getCanonicalHostName();
-    }
-    
-    default String getHostname() {
-        return getHost().getPrivateAddress().getCanonicalHostName();
-    }
-    
     @Override
     default URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
         return getURI(optionalDb, getHostname(timeoutEmptyMeaningForever));

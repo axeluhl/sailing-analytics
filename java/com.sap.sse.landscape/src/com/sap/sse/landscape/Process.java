@@ -19,6 +19,14 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
      */
     Host getHost();
     
+    default String getHostname() {
+        return getHost().getPrivateAddress().getCanonicalHostName();
+    }
+    
+    default String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getHost().getPublicAddress(timeoutEmptyMeaningForever).getCanonicalHostName();
+    }
+    
     /**
      * Grants access to the log that this process produces
      */

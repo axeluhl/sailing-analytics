@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,6 @@ import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
@@ -32,8 +32,9 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
+import com.sap.sse.util.Wait;
 
-public class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
+public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ProcessImpl<RotatingFileBasedLog, MetricsT>
 implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
@@ -46,7 +47,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      * whose contents can be obtained using the {@link #getEnvSh(Optional, Optional, byte[])} method.
      */
     private final String serverDirectory;
-
+    
+    private String serverName;
+    
+    private Integer telnetPortToOSGiConsole;
+    
     /**
      * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
      * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
@@ -67,6 +72,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverDirectory = serverDirectory;
     }
 
+    public ApplicationProcessImpl(int port, Host host, String serverDirectory, int telnetPort, String serverName) {
+        this(port, host, serverDirectory);
+        this.telnetPortToOSGiConsole = telnetPort;
+        this.serverName = serverName;
+    }
+
     private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
@@ -79,6 +90,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        // TODO figure this out using the /gwt/status "health check" REST end point; we need to separate the various parameters in the status output's "buildversion" field into separate fields
         final Pattern pattern = Pattern.compile("^[^-]*-([^ ]*) System:");
         final Matcher matcher = pattern.matcher(getVersionTxt(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         final Release result;
@@ -117,8 +129,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     @Override
     public int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        return Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
+        if (telnetPortToOSGiConsole == null) {
+            telnetPortToOSGiConsole = Integer.parseInt(getEnvShValueFor(DefaultProcessConfigurationVariables.TELNET_PORT, optionalTimeout,
                 optionalKeyName, privateKeyEncryptionPassphrase));
+        }
+        return telnetPortToOSGiConsole;
     }
     
     /**
@@ -164,7 +179,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        return getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        if (serverName == null) {
+            serverName = getEnvShValueFor(DefaultProcessConfigurationVariables.SERVER_NAME, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+        return serverName;
     }
 
     @Override
@@ -206,32 +224,33 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public String getMasterServerName(Optional<Duration> optionalTimeout) throws ClientProtocolException, IOException, ParseException, InterruptedException {
-        String result = null;
-        boolean obtainedReplicationStatusSuccessfully = false;
-        final TimePoint start = TimePoint.now();
-        while (!obtainedReplicationStatusSuccessfully && optionalTimeout.map(d->start.until(TimePoint.now()).compareTo(d) < 0).orElse(true)) {
-            try {
-                final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
-                obtainedReplicationStatusSuccessfully = true;
-                for (final Object replicable : (JSONArray) replicationStatus.get("replicables")) {
-                    final JSONObject replicableAsJson = (JSONObject) replicable;
-                    if (replicableAsJson.get("replicatedfrom") != null) {
-                        final JSONObject replicatedFrom = (JSONObject) replicableAsJson.get("replicatedfrom");
-                        final String hostname = replicatedFrom.get("hostname").toString();
-                        final int port = ((Number) replicatedFrom.get("port")).intValue();
-                        // the bearer token that is good for the connection to this process instance should then also
-                        // be recognized as valid on this instance's master and have the READ_REPLICATOR permission for the same server name
-                        final JSONObject masterReplicationStatus = getReplicationStatus(optionalTimeout, hostname, port);
-                        result = masterReplicationStatus.get("servername").toString();
-                        break;
+        final String[] result = new String[1];
+        try {
+            Wait.wait(()->{
+                try {
+                    final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
+                    for (final Object replicable : (JSONArray) replicationStatus.get("replicables")) {
+                        final JSONObject replicableAsJson = (JSONObject) replicable;
+                        if (replicableAsJson.get("replicatedfrom") != null) {
+                            final JSONObject replicatedFrom = (JSONObject) replicableAsJson.get("replicatedfrom");
+                            final String hostname = replicatedFrom.get("hostname").toString();
+                            final int port = ((Number) replicatedFrom.get("port")).intValue();
+                            // the bearer token that is good for the connection to this process instance should then also
+                            // be recognized as valid on this instance's master and have the READ_REPLICATOR permission for the same server name
+                            final JSONObject masterReplicationStatus = getReplicationStatus(optionalTimeout, hostname, port);
+                            result[0] = masterReplicationStatus.get("servername").toString();
+                            break;
+                        }
                     }
+                    return true;
+                } catch (Exception e) {
+                    return false;
                 }
-            } catch (Exception e) {
-                logger.info("Exception waiting for server name."+optionalTimeout.map(d->" Waiting another "+d.minus(start.until(TimePoint.now())).toString()).orElse(""));
-                Thread.sleep(Duration.ONE_SECOND.times(5).asMillis());
-            }
+            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for server name");
+        } catch (Exception e) {
+            logger.info("Exception while waiting for master server name: "+e.getMessage());
         }
-        return result;
+        return result[0];
     }
 
     private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)

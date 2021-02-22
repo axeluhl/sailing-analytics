@@ -31,12 +31,6 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public Release getVersion() {
-        // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.getVersion(...)
-        return null;
-    }
-
-    @Override
     public void upgrade(Release newVersion) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.upgrade(...)
     }
