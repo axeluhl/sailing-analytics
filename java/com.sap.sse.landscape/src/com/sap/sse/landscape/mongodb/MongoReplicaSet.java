@@ -1,15 +1,22 @@
 package com.sap.sse.landscape.mongodb;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 
 public interface MongoReplicaSet extends Named, MongoEndpoint {
-    Iterable<MongoProcess> getInstances();
+    static Logger logger = Logger.getLogger(MongoReplicaSet.class.getName());
+    
+    Iterable<MongoProcessInReplicaSet> getInstances();
     
     /**
      * The {@code "mongodb://..."} URI that application use to connect to this replica set; not specific
@@ -17,16 +24,27 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
      */
     @Override
     default URI getURI(Optional<Database> optionalDb) throws URISyntaxException {
+        return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPublicAddress());
+    }
+
+    default URI getURI(Optional<Database> optionalDb, Function<MongoProcess, InetAddress> publicAddressSupplier) throws URISyntaxException {
         final StringBuilder result = new StringBuilder("mongodb://");
         final List<String> hostSpecs = new ArrayList<>();
         for (final MongoProcess mongoProcess : getInstances()) {
-            final StringBuilder hostSpec = new StringBuilder();
-            hostSpec.append(mongoProcess.getHost().getPublicAddress().getCanonicalHostName());
-            if (mongoProcess.getPort() != MongoProcess.DEFAULT_PORT) {
-                hostSpec.append(":");
-                hostSpec.append(mongoProcess.getPort());
+            final InetAddress publicAddress = publicAddressSupplier.apply(mongoProcess);
+            if (publicAddress != null) {
+                logger.info("Adding MongoDB process running on "+publicAddress+" to replica set "+this.getName());
+                final StringBuilder hostSpec = new StringBuilder();
+                hostSpec.append(publicAddress.getCanonicalHostName());
+                if (mongoProcess.getPort() != MongoDBConstants.DEFAULT_PORT) {
+                    hostSpec.append(":");
+                    hostSpec.append(mongoProcess.getPort());
+                }
+                hostSpecs.add(hostSpec.toString());
+            } else {
+                logger.info("Not adding MongoDB process running on instance "+mongoProcess.getHost()+" to replica set "+this.getName()+
+                        " because its IP address cannot be determined. Probably it is not running.");
             }
-            hostSpecs.add(hostSpec.toString());
         }
         result.append(String.join(",", hostSpecs));
         result.append("/");
@@ -36,8 +54,13 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
         result.append("&retryWrites=true&readPreference=nearest");
         return new URI(result.toString());
     }
+
+    @Override
+    default URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeansForever) throws URISyntaxException {
+        return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPublicAddress(timeoutEmptyMeansForever));
+    }
     
-    void addReplica(MongoProcess newReplica);
+    void addReplica(MongoProcessInReplicaSet newReplica);
     
-    void removeReplica(MongoProcess replicaToRemove);
+    void removeReplica(MongoProcessInReplicaSet replicaToRemove);
 }

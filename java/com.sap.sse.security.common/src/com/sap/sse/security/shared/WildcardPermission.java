@@ -175,7 +175,6 @@ public class WildcardPermission implements Serializable {
     private boolean implies(WildcardPermission wp, boolean checkWildcardPartsIfThisPermissionHasMoreParts) {
         // By default only supports comparisons with other WildcardPermissions
         List<Set<String>> otherParts = wp.getParts();
-        
         int i = 0;
         for (Set<String> otherPart : otherParts) {
             // If this permission has fewer parts than the other permission, everything after the number of parts contained
@@ -190,7 +189,6 @@ public class WildcardPermission implements Serializable {
                 i++;
             }
         }
-        
         if (checkWildcardPartsIfThisPermissionHasMoreParts) {
             // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
             for (; i < getParts().size(); i++) {
@@ -200,7 +198,6 @@ public class WildcardPermission implements Serializable {
                 }
             }
         }
-        
         return true;
     }
     
@@ -246,8 +243,12 @@ public class WildcardPermission implements Serializable {
     
     /**
      * For all combinations of first and third part produces a {@link QualifiedObjectIdentifier}. The result is never
-     * {@code null} but may be empty. The third parts of this permission are
-     * {@link PermissionStringEncoder#decodePermissionPart(String) decoded} before combined into the result objects.
+     * {@code null} but may be empty, e.g., if no first part with type name(s) or no third part with object
+     * identifier(s) exists. The third parts of this permission are
+     * {@link PermissionStringEncoder#decodePermissionPart(String) decoded} before combined into the result objects. No
+     * expansion happens should the first part or the third par contain a wildcard ("*"); instead, the wildcard
+     * character will end up as the type name or type-relative object identifier, respectively, of all resulting
+     * qualified object identifiers.
      */
     public Iterable<QualifiedObjectIdentifier> getQualifiedObjectIdentifiers() {
         final List<QualifiedObjectIdentifier> result = new ArrayList<>();
@@ -272,20 +273,34 @@ public class WildcardPermission implements Serializable {
      * or wildcard for the type part.
      */
     public static class WildcardPermissionBuilder {
-        private Set<String> types = new HashSet<>();
-        private Set<String> actions = new HashSet<>();
+        private Set<String> typeNames = new HashSet<>();
+        private Set<String> actionNames = new HashSet<>();
         private Set<String> ids = new HashSet<>();
         
         public WildcardPermissionBuilder withTypes(HasPermissions... types) {
             for (HasPermissions hasPermissions : types) {
-                this.types.add(hasPermissions.getName());
+                this.typeNames.add(hasPermissions.getName());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withTypeNames(String... typeNames) {
+            for (final String typeName : typeNames) {
+                this.typeNames.add(typeName);
             }
             return this;
         }
         
         public WildcardPermissionBuilder withActions(Action... actions) {
             for (Action action : actions) {
-                this.actions.add(action.name());
+                this.actionNames.add(action.name());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withActionNames(String... actionNames) {
+            for (String actionName : actionNames) {
+                this.actionNames.add(actionName);
             }
             return this;
         }
@@ -304,13 +319,13 @@ public class WildcardPermission implements Serializable {
         
         public WildcardPermission build() {
             final List<Set<String>> parts = new ArrayList<>(2);
-            if (types.isEmpty()) {
+            if (typeNames.isEmpty()) {
                 parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
             } else {
-                parts.add(types);
+                parts.add(typeNames);
             }
-            if (!actions.isEmpty()) {
-                parts.add(actions);
+            if (!actionNames.isEmpty()) {
+                parts.add(actionNames);
             } else if (!ids.isEmpty()) {
                 parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
             }

@@ -13,9 +13,9 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ConfigurationJsonGetServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;

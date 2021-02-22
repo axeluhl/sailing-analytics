@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.coursedata.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class BaseControlPointJsonSerializer implements JsonSerializer<ControlPoint> {
     public static final String FIELD_CLASS = "@class";

@@ -1,24 +1,52 @@
 package com.sap.sse.landscape.orchestration;
 
+import java.util.Optional;
+
+import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Landscape;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 
-public abstract class AbstractProcedureImpl<ShardingKey, 
-MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
-    private final Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
+public abstract class AbstractProcedureImpl<ShardingKey>
+implements Procedure<ShardingKey> {
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends Procedure<ShardingKey>, ShardingKey>
+    implements Builder<BuilderT, T, ShardingKey> {
+        private Landscape<ShardingKey> landscape;
+        private Optional<Duration> optionalTimeout;
 
-    public AbstractProcedureImpl(Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-        super();
-        this.landscape = landscape;
+        protected Landscape<ShardingKey> getLandscape() {
+            return landscape;
+        }
+
+        @Override
+        public BuilderT setLandscape(Landscape<ShardingKey> landscape) {
+            this.landscape = landscape;
+            return self();
+        }
+        
+        /**
+         * A timeout for interacting with the instance, such as when creating an SSH / SFTP connection or waiting for its
+         * public IP address.
+         */
+        protected Optional<Duration> getOptionalTimeout() {
+            return optionalTimeout == null ? Optional.empty() : optionalTimeout;
+        }
+
+        @Override
+        public BuilderT setOptionalTimeout(
+                Optional<Duration> optionalTimeout) {
+            this.optionalTimeout = optionalTimeout;
+            return self();
+        }
+    }
+    
+    private final Landscape<ShardingKey> landscape;
+
+    protected AbstractProcedureImpl(BuilderImpl<?, ?, ShardingKey> builder) {
+        this.landscape = builder.getLandscape();
     }
 
     @Override
-    public Landscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
+    public Landscape<ShardingKey> getLandscape() {
         return landscape;
     }
-
 }

@@ -209,7 +209,6 @@ import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
@@ -351,6 +350,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -1615,13 +1615,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             if (competitor.hasBoat()) {
                 final CompetitorWithBoatDTO competitorWithBoat = addOrUpdateCompetitorWithBoat(
                         (CompetitorWithBoatDTO) competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat,
-                        competitorWithBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat);
                 result.add(competitorWithBoat);
             } else {
                 final CompetitorDTO competitorWithoutBoat = addOrUpdateCompetitorWithoutBoat(competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat,
-                        competitorWithoutBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat);
                 result.add(competitorWithoutBoat);
             }
         }
@@ -1723,24 +1721,24 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final Action action = () -> competitorsForSaving
                     .add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
             final Boat existingBoat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatById(competitorDescriptor.getBoatUUID());
+                    .getExistingBoatById(competitorDescriptor.getBoatId());
             final Action actionIncludingBoatSecurityCheck;
             if (existingBoat == null) {
                 actionIncludingBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.BOAT,
-                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()),
+                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatId()),
                                 competitorDescriptor.getBoatName(), action);
             } else {
                 actionIncludingBoatSecurityCheck = action;
             }
             final Competitor existingCompetitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+                    .getExistingCompetitorById(competitorDescriptor.getCompetitorId());
             final Action actionIncludingCompetitorAndBoatSecurityCheck;
             if (existingCompetitor == null) {
                 actionIncludingCompetitorAndBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.COMPETITOR,
                                 CompetitorImpl
-                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()),
+                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorId()),
                                 competitorDescriptor.getName(), actionIncludingBoatSecurityCheck);
             } else {
                 actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;
@@ -3546,6 +3544,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         configuration.setAllowedCourseAreaNames(dto.allowedCourseAreaNames);
         configuration.setResultsMailRecipient(dto.resultsMailRecipient);
         configuration.setByNameDesignerCourseNames(dto.byNameDesignerCourseNames);
+        configuration.setEventId(dto.eventId);
+        configuration.setCourseAreaId(dto.courseAreaId);
+        configuration.setPriority(dto.priority);
         return configuration;
     }
     

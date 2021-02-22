@@ -88,18 +88,6 @@ public class StartProcedureFragment extends BaseFragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        sendIntent(AppConstants.ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sendIntent(AppConstants.ACTION_TIME_SHOW);
-    }
-
     public void onClick(RacingProcedureType procedureType) {
         boolean sameProcedure = false;
         if (getRaceState().getRacingProcedure().getType() == procedureType) {

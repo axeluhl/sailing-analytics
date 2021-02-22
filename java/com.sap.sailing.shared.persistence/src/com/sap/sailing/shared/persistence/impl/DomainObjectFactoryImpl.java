@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +26,6 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
@@ -51,6 +51,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.TransformationException;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -113,7 +114,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final Document positionDocument = dbObject.get(FieldNames.MARK_PROPERTIES_FIXED_POSITION.name(), Document.class);
         final Position fixedPosition = positionDocument == null ? null : loadPosition(positionDocument);
         final ArrayList<?> tagsList = dbObject.get(FieldNames.MARK_PROPERTIES_TAGS.name(), ArrayList.class);
-        final Collection<String> tags = tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
+        final Collection<String> tags = tagsList == null ? Collections.emptyList() : tagsList.stream().map(t -> t.toString()).collect(Collectors.toList());
         // all mandatory data are loaded -> create builder 
         final MarkPropertiesBuilder builder = new MarkPropertiesBuilder(id, name, shortName, color, shape, pattern, markType).withTags(tags);
         if (fixedPosition != null) {

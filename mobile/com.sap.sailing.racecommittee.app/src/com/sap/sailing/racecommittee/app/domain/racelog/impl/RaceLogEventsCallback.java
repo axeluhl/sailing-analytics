@@ -18,7 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 
 import android.content.ComponentName;

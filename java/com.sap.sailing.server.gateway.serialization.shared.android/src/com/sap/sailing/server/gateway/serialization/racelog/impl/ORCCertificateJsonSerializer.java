@@ -7,9 +7,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ORCCertificateJsonSerializer implements JsonSerializer<ORCCertificate> {
     public static final String ORC_CERTIFICATE_BEAT_ANGLES = "beatAngles";

@@ -29,6 +29,7 @@ import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, WildcardPermission> implements User {
     private static final long serialVersionUID = 1788215575606546042L;
@@ -87,6 +88,8 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     private transient Set<Role> roles;
     
     private List<Role> roleListForSerialization;
+
+    private Subscription[] subscriptions;
 
     public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
             UserGroupProvider userGroupProvider, Account... accounts) {
@@ -374,5 +377,60 @@ public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup, 
     @Override
     public Map<String, UserGroup> getDefaultTenantMap() {
         return defaultTenantForServer;
+    }
+
+    @Override
+    public Iterable<Subscription> getSubscriptions() {
+        final Iterable<Subscription> result;
+        if (subscriptions == null) {
+            result = null;
+        } else {
+            result = Arrays.asList(subscriptions);
+        }
+        return result;
+    }
+
+    @Override
+    public void setSubscriptions(Subscription[] subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    @Override
+    public Subscription getSubscriptionByPlan(String planId) {
+        if (planId != null && !planId.equals("") && subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.getPlanId() != null && subscription.getPlanId().equals(planId)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Subscription getSubscriptionById(String subscriptionId) {
+        if (subscriptionId != null && !subscriptionId.isEmpty() && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.getSubscriptionId() != null
+                        && subscription.getSubscriptionId().equals(subscriptionId)) {
+                    return subscription;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasActiveSubscription() {
+        boolean result = false;
+        if (subscriptions != null && subscriptions.length > 0) {
+            for (Subscription subscription : subscriptions) {
+                if (subscription.isActiveSubscription()) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 }

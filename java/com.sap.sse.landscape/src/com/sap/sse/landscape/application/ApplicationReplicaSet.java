@@ -6,30 +6,40 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.Release;
 
+/**
+ * A replica set with master and zero or more replicas. Temporarily, e.g., during an upgrade procedure, even the master
+ * process may disappear. The replica set's name is also considered to be the "server name" of the processes
+ * constituting it.
+ * 
+ * @author Axel Uhl (D043530)
+ */
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Named {
     /**
      * The application version that the nodes in this replica set are currently running. During an
-     * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
+     * {@link #upgrade(Release)} things may temporarily seem inconsistent.
      */
-    ApplicationVersion getVersion();
+    default Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getMaster().getVersion(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
     
     /**
      * Upgrades this replica set to a new version. Things may temporarily seem inconsistent; e.g., a master
      * process may be stopped, upgraded to the new version, and then replica processes may be fired up against the new
      * master, and when enough replicas have reached an available state they will replace the previous replicas.
      */
-    void upgrade(ApplicationVersion newVersion);
+    void upgrade(Release newVersion);
     
-    MasterProcessT getMaster();
+    ProcessT getMaster();
     
-    Iterable<ReplicaProcessT> getReplicas();
+    Iterable<ProcessT> getReplicas();
     
-    default Iterable<ReplicaProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
+    default Iterable<ProcessT> getReadyReplicas(Optional<Duration> optionalTimeout) {
         return Util.filter(getReplicas(), r->{
             try {
                 return r.isReady(optionalTimeout);
@@ -55,7 +65,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #setRemoteReference
      */
-    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> source, Scope<ShardingKey> scopeToImport,
+    void importScope(ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> source, Scope<ShardingKey> scopeToImport,
             boolean failUponDiff, boolean removeFromSourceUponSuccess, boolean setRemoveReferenceInSourceUponSuccess);
     
     void removeScope(Scope<ShardingKey> scope);
@@ -66,7 +76,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * whether the reference shall only <em>include</em> those scopes ({@code true}) or it should list all scopes
      * <em>except those listed in {@code scopes}</em> ({@code false}) instead.
      */
-    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> to,
+    void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> to,
             Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes);
     
     void removeRemoteReference(String name);
@@ -93,7 +103,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      */
     boolean isReadFromMaster();
 
-    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>> getShardingInfo();
+    Map<ShardingKey, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>>> getShardingInfo();
     
     /**
      * Activates sharding for the {@code shard} by configuring this replica set such that requests for the {@code shard}
@@ -105,7 +115,7 @@ ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterP
      * 
      * @see #removeSharding
      */
-    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>> processesToPrimarilyHandleShard);
+    void setSharding(Shard<ShardingKey> shard, Set<ApplicationProcess<ShardingKey, MetricsT, ProcessT>> processesToPrimarilyHandleShard);
     
     /**
      * Re-configures this replica set such that requests for {@code shard} will be spread across all processes

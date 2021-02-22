@@ -10,8 +10,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.orc.ORCCertificateSelection;
 import com.sap.sailing.domain.common.orc.ORCCertificateUploadConstants;
 import com.sap.sailing.domain.common.orc.impl.ORCCertificateSelectionImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sse.util.impl.UUIDHelper;
 
 /**

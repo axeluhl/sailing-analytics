@@ -24,8 +24,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -83,18 +87,13 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
-import com.sap.sse.replication.ReplicationMasterDescriptor;
-import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
 import com.sap.sse.security.InstagramApi;
 import com.sap.sse.security.OAuthRealm;
+import com.sap.sse.security.PermissionChangeListener;
 import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
@@ -127,6 +126,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.ResetPasswordOperation;
+import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.operations.SetAccessTokenOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
 import com.sap.sse.security.operations.SetEmptyAccessControlListOperation;
@@ -138,6 +138,7 @@ import com.sap.sse.security.operations.UpdateRoleDefinitionOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserEmailOperation;
 import com.sap.sse.security.operations.UpdateSimpleUserPasswordOperation;
 import com.sap.sse.security.operations.UpdateUserPropertiesOperation;
+import com.sap.sse.security.operations.UpdateUserSubscriptionOperation;
 import com.sap.sse.security.operations.ValidateEmailOperation;
 import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -170,9 +171,15 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
+import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ThreadPoolUtil;
 
-public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
+public class SecurityServiceImpl
+extends AbstractReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>>
+implements ReplicableSecurityService, ClearStateTestSupport {
 
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
@@ -194,37 +201,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      */
     private final ReplicatingCacheManager cacheManager;
     
-    private UserStore store;
-    private AccessControlStore accessControlStore;
+    private final UserStore store;
+    private final AccessControlStore accessControlStore;
     
     private boolean isInitialOrMigration;
     private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
-
-    /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
-     * replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-    
-    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
-    
-    private volatile boolean currentlyFillingFromInitialLoad;
-    
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
-     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
-     * method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
-
     private static Ini shiroConfiguration;
 
     private final HasPermissionsProvider hasPermissionsProvider;
@@ -236,6 +222,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private final transient Set<SecurityInitializationCustomizer> customizers = ConcurrentHashMap.newKeySet();
     
     private final AclResolver<AccessControlList, Ownership> aclResolver;
+    
+    private final PermissionChangeListeners permissionChangeListeners;
     
     static {
         shiroConfiguration = new Ini();
@@ -282,12 +270,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         logger.info("Initializing Security Service with user store " + userStore);
-        this.currentlyFillingFromInitialLoad = false;
-        this.currentlyFillingFromInitialLoad = false;
-        operationsSentToMasterForReplication = new HashSet<>();
+        this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
-        this.operationExecutionListeners = new ConcurrentHashMap<>();
         this.store = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
@@ -329,25 +314,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         logger.info("Loaded "+count+" sessions");
         return result;
     }
-
+    
     @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
+    public Iterable<? extends HasPermissions> getAllHasPermissions() {
+        return hasPermissionsProvider.getAllHasPermissions();
     }
 
     @Override
@@ -499,7 +469,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return accessControlStore.getOwnership(idOfOwnedObjectAsString);
     }
     
-    public UserGroup getDefaultTenantForUser(User user) {
+    private UserGroup getDefaultTenantForUser(User user) {
         UserGroup specificTenant = temporaryDefaultTenant.get();
         if (specificTenant == null) {
             specificTenant = user.getDefaultTenant(ServerInfo.getName());
@@ -517,6 +487,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             return null;
         }
         return getDefaultTenantForUser(getCurrentUser());
+    }
+
+    @Override
+    public void setTemporaryDefaultTenant(final UUID tenantGroupId) {
+        if (tenantGroupId != null || getCurrentUser() == null) {
+            final UserGroup tenantGroup = getUserGroup(tenantGroupId);
+            if (tenantGroup == null) {
+                temporaryDefaultTenant.remove();
+            } else {
+                if (Util.contains(getUserGroupsOfUser(getCurrentUser()), tenantGroup)) {
+                    temporaryDefaultTenant.set(tenantGroup);
+                } else {
+                    logger.warning("User " + getCurrentUser().getName()
+                            + " tried to set foreign temporary default tenant group " + tenantGroupId.toString());
+                }
+            }
+        } else {
+            temporaryDefaultTenant.remove();
+        }
     }
 
     @Override
@@ -555,6 +544,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
         return null;
     }
@@ -580,7 +570,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 actionsToSet = entry.getValue();
             }
-            
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
             apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
@@ -590,6 +579,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
         return null;
     }
@@ -609,8 +599,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
-        accessControlStore.addAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
     }
 
@@ -618,13 +609,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
+    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             UserGroup group, String permission) {
         final AccessControlList result;
-        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
+        if (getAccessControlList(idOfAccessControlledObject) != null) {
             final UUID groupId = group == null ? null : group.getId();
-            apply(new AclRemovePermissionOperation(idOfAccessControlledObjectAsString, groupId, permission));
-            result = accessControlStore.getAccessControlList(idOfAccessControlledObjectAsString).getAnnotation();
+            apply(new AclRemovePermissionOperation(idOfAccessControlledObject, groupId, permission));
+            result = accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
         } else {
             result = null;
         }
@@ -632,63 +623,72 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UUID groupId, String permission) {
-        accessControlStore.removeAclPermission(idOfAccessControlledObjectAsString, getUserGroup(groupId), permission);
+    public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.removeAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
     }
 
     @Override
-    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
-        if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
-            apply(new DeleteAclOperation(idOfAccessControlledObjectAsString));
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        if (getAccessControlList(idOfAccessControlledObject) != null) {
+            apply(new DeleteAclOperation(idOfAccessControlledObject));
         }
     }
 
     @Override
-    public Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
-        accessControlStore.removeAccessControlList(idOfAccessControlledObjectAsString);
+    public Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        permissionChangeListeners.aclChanged(idOfAccessControlledObject);
+        accessControlStore.removeAccessControlList(idOfAccessControlledObject);
         return null;
     }
 
     @Override
-    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+    public Ownership setOwnership(QualifiedObjectIdentifier objectId, User userOwner,
             UserGroup tenantOwner) {
-        return setOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+        return setOwnership(objectId, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
+    public Ownership setOwnership(QualifiedObjectIdentifier objectId, User userOwner,
             UserGroup tenantOwner, String displayNameOfOwnedObject) {
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(new SetOwnershipOperation(idOfOwnedObjectAsString, userOwnerName, tenantId,
+        return apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
     }
     
     @Override
-    public Ownership internalSetOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        return accessControlStore.setOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+    public Ownership internalSetOwnership(QualifiedObjectIdentifier objectId, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        permissionChangeListeners.ownershipChanged(objectId);
+        return accessControlStore.setOwnership(objectId, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
     }
 
     @Override
-    public void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        if (getOwnership(idOfOwnedObjectAsString) != null) {
-            apply(new DeleteOwnershipOperation(idOfOwnedObjectAsString));
+    public void deleteOwnership(QualifiedObjectIdentifier objectId) {
+        if (getOwnership(objectId) != null) {
+            apply(new DeleteOwnershipOperation(objectId));
         }
     }
 
     @Override
-    public Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        accessControlStore.removeOwnership(idOfOwnedObjectAsString);
+    public Void internalDeleteOwnership(QualifiedObjectIdentifier objectId) {
+        permissionChangeListeners.ownershipChanged(objectId);
+        accessControlStore.removeOwnership(objectId);
         return null;
     }
 
     @Override
     public Iterable<UserGroup> getUserGroupList() {
         return store.getUserGroups();
+    }
+
+    @Override
+    public Iterable<UserGroup> getUserGroupsWithRoleDefinition(RoleDefinition roleDefinition) {
+        return store.getUserGroupsWithRoleDefinition(roleDefinition);
     }
 
     @Override
@@ -741,7 +741,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddUserToUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.add(getUserByName(username));
+        final User user = getUserByName(username);
+        userGroup.add(user);
+        permissionChangeListeners.userAddedToOrRemovedFromGroup(user, userGroup);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -749,7 +751,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveUserFromUserGroup(UUID groupId, String username) {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.remove(getUserByName(username));
+        final User user = getUserByName(username);
+        permissionChangeListeners.userAddedToOrRemovedFromGroup(user, userGroup);
+        userGroup.remove(user);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -774,7 +778,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalPutRoleDefinitionToUserGroup(UUID groupId, UUID roleDefinitionId, boolean forAll)
             throws UserGroupManagementException {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.put(getRoleDefinition(roleDefinitionId), forAll);
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        permissionChangeListeners.roleAddedToOrRemovedFromGroup(userGroup, roleDefinition);
+        userGroup.put(roleDefinition, forAll);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -789,7 +795,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalRemoveRoleDefinitionFromUserGroup(UUID groupId, UUID roleDefinitionId)
             throws UserGroupManagementException {
         final UserGroup userGroup = getUserGroup(groupId);
-        userGroup.remove(getRoleDefinition(roleDefinitionId));
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        permissionChangeListeners.roleAddedToOrRemovedFromGroup(userGroup, roleDefinition);
+        userGroup.remove(roleDefinition);
         store.updateUserGroup(userGroup);
         return null;
     }
@@ -806,6 +814,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userGroup == null) {
             logger.warning("Strange: the user group with ID "+groupId+" which is about to be deleted couldn't be found");
         } else {
+            for (final OwnershipAnnotation ownershipWithGroupAsOwner : accessControlStore.getOwnerhipsWithGroupOwner(userGroup)) {
+                permissionChangeListeners.ownershipChanged(ownershipWithGroupAsOwner.getIdOfAnnotatedObject());
+            }
             accessControlStore.removeAllOwnershipsFor(userGroup);
             store.deleteUserGroup(userGroup);
         }
@@ -855,6 +866,50 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
+    }
+
+    @Override
+    public Iterable<User> getUsersWithPermissions(WildcardPermission permission) {
+        if (Util.size(permission.getQualifiedObjectIdentifiers()) != 1) {
+            throw new IllegalArgumentException("Permission needs to specify exactly one object identifier");
+        }
+        final ScheduledExecutorService foregroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+        final int numberOfJobs = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
+        final ConcurrentMap<User, Boolean> result = new ConcurrentHashMap<>();
+        final User allUser = getAllUser();
+        final ConcurrentLinkedDeque<User> userList = new ConcurrentLinkedDeque<>();
+        Util.addAll(getUserList(), userList);
+        final Set<Future<?>> futures = new HashSet<>();
+        final QualifiedObjectIdentifier objectIdentifier = permission.getQualifiedObjectIdentifiers().iterator().next();
+        final OwnershipAnnotation ownership = accessControlStore.getOwnership(objectIdentifier);
+        final AccessControlListAnnotation acl = accessControlStore.getAccessControlList(objectIdentifier);
+        // create as many jobs as we expect the thread pool size to be and have each of them
+        // keep polling User objects and check whether that user has the permission sought; if so,
+        // add the User to the result.
+        // result and userList are thread-safe data structures
+        for (int i=0; i<numberOfJobs; i++) {
+            futures.add(foregroundExecutor.submit(()->{
+                User user;
+                int usersHandled = 0;
+                while ((user=userList.poll()) != null) {
+                    usersHandled++;
+                    if (PermissionChecker.isPermitted(permission, user, allUser,
+                            ownership == null ? null : ownership.getAnnotation(), acl == null ? null : acl.getAnnotation())) {
+                        result.put(user, true);
+                    }
+                }
+                final int finalUsersHandled = usersHandled;
+                logger.fine(()->"Handled "+finalUsersHandled+" users in job "+this);
+            }));
+        }
+        for (final Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.WARNING, "Exception while trying to wait for user permission check", e);
+            }
+        }
+        return result.keySet();
     }
 
     @Override
@@ -1114,8 +1169,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalDeleteRoleDefinition(UUID roleId) {
-        final RoleDefinition role = store.getRoleDefinition(roleId);
-        store.removeRoleDefinition(role);
+        final RoleDefinition roleDefinition = store.getRoleDefinition(roleId);
+        permissionChangeListeners.roleDefinitionRemoved(roleDefinition);
+        store.removeRoleDefinition(roleDefinition);
         return null;
     }
 
@@ -1129,6 +1185,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final RoleDefinition role = store.getRoleDefinition(roleWithNewProperties.getId());
         role.setName(roleWithNewProperties.getName());
         store.setRoleDefinitionDisplayName(roleWithNewProperties.getId(), role.getName());
+        permissionChangeListeners.permissionAddedToOrRemovedFromRoleDefinition(role, role.getPermissions(), roleWithNewProperties.getPermissions());
         role.setPermissions(roleWithNewProperties.getPermissions());
         store.setRoleDefinitionPermissions(role.getId(), role.getPermissions());
         return null;
@@ -1166,8 +1223,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        store.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        final Role role = new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+        permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
+        store.addRoleForUser(username, role);
         return null;
     }
 
@@ -1187,8 +1246,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        store.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
+        final Role role = new Role(getRoleDefinition(roleDefinitionId),
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+        permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
+        store.removeRoleFromUser(username, role);
         return null;
     }
 
@@ -1199,6 +1260,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
+        permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToRemove);
         store.removePermissionFromUser(username, permissionToRemove);
         return null;
     }
@@ -1210,6 +1272,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
+        permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToAdd);
         store.addPermissionForUser(username, permissionToAdd);
         return null;
     }
@@ -1227,6 +1290,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalDeleteUser(String username) throws UserManagementException {
         User userToDelete = store.getUserByName(username);
         if (userToDelete != null) {
+            permissionChangeListeners.userDeleted(userToDelete);
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
             store.deleteUser(username);
@@ -1657,7 +1721,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             HasPermissions type, TypeRelativeObjectIdentifier typeIdentifier, String securityDisplayName,
             Callable<T> actionWithResult) {
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type, typeIdentifier,
-                securityDisplayName, actionWithResult, true);
+                securityDisplayName, actionWithResult, /* check for SERVER:CREATE_OBJECT */ true);
     }
 
     /**
@@ -2104,47 +2168,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<OperationExecutionListener<ReplicableSecurityService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<ReplicableSecurityService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
-    public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<ReplicableSecurityService, ?> operationWithResultWithIdWrapper) {
-        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<ReplicableSecurityService, ?> operation) {
-        return this.operationsSentToMasterForReplication.remove(operation);
-    }
-
-    @Override
     public boolean migrateOwnership(WithQualifiedObjectIdentifier identifier) {
         return migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
@@ -2240,7 +2263,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void checkMigration(Iterable<HasPermissions> allInstances) {
+    public void checkMigration(Iterable<? extends HasPermissions> allInstances) {
         Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
         boolean allChecksSucessful = true;
         for (HasPermissions shouldBeMigrated : allInstances) {
@@ -2376,6 +2399,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T getPreferenceObject(String username, String key) {
         return store.getPreferenceObject(username, key);
     }
+    
+    @Override
+    public <T> Map<String, T> getPreferenceObjectsByKey(String key) {
+        return store.getPreferenceObjectsByKey(key);
+    }
 
     @Override
     public void setDefaultTenantForCurrentServerForUser(String username, UUID defaultTenantId) {
@@ -2436,20 +2464,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-    @Override
     public void storeSession(String cacheName, Session session) {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeSession(cacheName, session);
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 
     @Override
@@ -2486,5 +2502,332 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void registerCustomizer(SecurityInitializationCustomizer customizer) {
         customizers.add(customizer);
         customizer.customizeSecurityService(this);
+    }
+
+    @Override
+    public void updateUserSubscription(String username, Subscription newSubscription) throws UserManagementException {
+        final User user = getUserByName(username);
+        if (user != null) {
+            apply(new UpdateUserSubscriptionOperation(username, newSubscription));
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Void internalUpdateSubscription(String username, Subscription newSubscription)
+            throws UserManagementException {
+        final User user = getUserByName(username);
+        if (user != null) {
+            final String newSubscriptionPlanId = newSubscription.getPlanId();
+            final Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+            if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
+                logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
+                logger.info(() -> "Current user plan subscription: "
+                        + (currentSubscription != null ? currentSubscription.toString() : "null"));
+                logger.info(() -> "New plan subscription: "
+                        + (newSubscription != null ? newSubscription.toString() : "null"));
+                if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
+                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
+                }
+                final Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                if (newSubscriptions != null) {
+                    user.setSubscriptions(newSubscriptions);
+                }
+                store.updateUser(user);
+            } else {
+                logger.info(() -> "New subscription has been ignored: " + newSubscription);
+            }
+            return null;
+        } else {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+    }
+    
+    /**
+     * Check if new subscription should be processed, such as if it has a valid plan, or it's the most recent
+     * subscription of a plan
+     */
+    private boolean shouldProcessNewSubscription(Subscription currentSubscription, Subscription newSubscription) {
+        final boolean shouldProcess;
+        if (!newSubscription.hasPlan()) {
+            // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
+            // clearing all user subscriptions
+            shouldProcess = true;
+        } else if (SubscriptionPlan.getPlan(newSubscription.getPlanId()) != null) {
+            if (currentSubscription == null) {
+                // New subscription plan is valid, but current subscription of the plan is empty
+                shouldProcess = true;
+            } else if (!newSubscription.hasSubscriptionId()) {
+                // New subscription has plan id but doesn't have subscription id, this is an empty subscription for the
+                // plan that holds updated dates data for the plan's subscription
+                shouldProcess = newSubscription.isUpdatedMoreRecently(currentSubscription);
+            } else {
+                // Only process new subscription if it is the most recently created subscription
+                shouldProcess = newSubscription.getSubscriptionCreatedAt().asMillis() >= currentSubscription
+                        .getSubscriptionCreatedAt().asMillis();
+            }
+        } else {
+            // New subscription doesn't have a valid plan
+            shouldProcess = false;
+        }
+        return shouldProcess;
+    }
+
+    /**
+     * Build new subscription list for user from new subscription. This might update a subscription model, or add new
+     * one to user's subscription list. In case no updates for current user subscriptions then null will be returned
+     */
+    private Subscription[] buildNewUserSubscriptions(User user, Subscription newSubscription) {
+        Subscription[] newUserSubscriptions = null;
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
+        if (newSubscription != null) {
+            if (subscriptions == null || !subscriptions.iterator().hasNext()) {
+                newUserSubscriptions = new Subscription[] { newSubscription };
+            } else if (!newSubscription.hasPlan()) {
+                // New subscription has no plan, that means new subscription is just an empty one with some meta data
+                // for updated dates, and user has been deleted from provider. In this case we need to remove all
+                // current subscriptions of the user for this provider
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                for (Subscription subscription : subscriptions) {
+                    if (!subscription.getProviderName().equals(newSubscription.getProviderName())) {
+                        newSubscriptionList.add(subscription);
+                    }
+                }
+                newSubscriptionList.add(newSubscription);
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
+            } else {
+                List<Subscription> newSubscriptionList = new ArrayList<Subscription>();
+                boolean foundCurrentSubscription = false;
+                for (Subscription subscription : subscriptions) {
+                    if (!foundCurrentSubscription && ((!subscription.hasPlan()
+                            && subscription.getProviderName().equals(newSubscription.getProviderName()))
+                            || subscription.getPlanId().equals(newSubscription.getPlanId()))) {
+                        newSubscriptionList.add(newSubscription);
+                        foundCurrentSubscription = true;
+                    } else {
+                        newSubscriptionList.add(subscription);
+                    }
+                }
+                if (!foundCurrentSubscription) {
+                    newSubscriptionList.add(newSubscription);
+                }
+                newUserSubscriptions = newSubscriptionList.toArray(new Subscription[] {});
+            }
+        }
+        return newUserSubscriptions;
+    }
+
+    /**
+     * Add or remove subscription plan's roles for user
+     */
+    private void updateUserRolesOnSubscriptionChange(User user, Subscription currentSubscription,
+            Subscription newSubscription) throws UserManagementException {
+        logger.info(() -> "Update user subscription roles for user " + user.getName());
+        // in case new subscription has no planId, it means the subscription is an empty one with just meta data for
+        // update times, and user doesn't subscribe to any plans, so all plan's roles assigned to the user must be
+        // removed, but only if no other plan that the user still is subscribed to implies an equal role:
+        if (newSubscription != null && !newSubscription.hasPlan()) {
+            SubscriptionPlan[] plans = SubscriptionPlan.values();
+            for (SubscriptionPlan plan : plans) {
+                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
+            }
+        } else {
+            assert currentSubscription == null || newSubscription == null
+                    || currentSubscription.getPlanId().equals(newSubscription.getPlanId());
+            if (currentSubscription != null && currentSubscription.hasPlan()
+                    && currentSubscription.isActiveSubscription() && newSubscription != null
+                    && !newSubscription.isActiveSubscription()) {
+                SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
+                removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
+            }
+            if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
+                SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
+                addUserPlanRoles(user, newPlan);
+            }
+        }
+    }
+
+    /**
+     * Remove user roles implied by a subscription plan
+     * 
+     * @param checkOverlappingRoles
+     *            true if it needs to check overlapping roles with other active subscription plans of the same user,
+     *            otherwise roles will be removed without any overlap check
+     */
+    private void removeUserPlanRoles(User user, SubscriptionPlan plan, boolean checkOverlappingRoles)
+            throws UserManagementException {
+        if (plan != null) {
+            logger.info(() -> "Remove user roles of subscription plan " + plan.getName());
+            final Role[] rolesToRemove;
+            if (checkOverlappingRoles) {
+                rolesToRemove = getSubscriptionPlanUserRolesWithoutOverlapping(user, plan);
+            } else {
+                rolesToRemove = getSubscriptionPlanUserRoles(user, plan);
+            }
+            for (Role role : rolesToRemove) {
+                store.removeRoleFromUser(user.getName(), role);
+            }
+        }
+    }
+
+    private void addUserPlanRoles(User user, SubscriptionPlan plan) throws UserManagementException {
+        if (plan != null) {
+            logger.info(() -> "Add user roles for subscription plan " + plan.getName());
+            Role[] roles = getSubscriptionPlanUserRoles(user, plan);
+            for (Role role : roles) {
+                store.addRoleForUser(user.getName(), role);
+            }
+        }
+    }
+
+    private Role[] getSubscriptionPlanUserRoles(User user, SubscriptionPlan plan) {
+        final List<Role> roles = new ArrayList<Role>();
+        for (SubscriptionPlanRole planRole : plan.getRoles()) {
+            roles.add(getSubscriptionPlanUserRole(user, planRole));
+        }
+        return roles.toArray(new Role[] {});
+    }
+    
+    /**
+     * Get user roles of a plan that are not overlapping with roles of other user active subscription plan
+     */
+    private Role[] getSubscriptionPlanUserRolesWithoutOverlapping(User user, SubscriptionPlan plan) {
+        final Set<Role> otherPlanRoles = new HashSet<Role>();
+        Iterable<Subscription> subscriptions = user.getSubscriptions();
+        for (Subscription subscription : subscriptions) {
+            if (subscription.isActiveSubscription() && !subscription.getPlanId().equals(plan.getId())) {
+                SubscriptionPlan otherPlan = SubscriptionPlan.getPlan(subscription.getPlanId());
+                for (SubscriptionPlanRole planRole : otherPlan.getRoles()) {
+                    otherPlanRoles.add(getSubscriptionPlanUserRole(user, planRole));
+                }
+            }
+        }
+        final List<Role> roles = new ArrayList<Role>();
+        for (SubscriptionPlanRole planRole : plan.getRoles()) {
+            Role role = getSubscriptionPlanUserRole(user, planRole);
+            if (!otherPlanRoles.contains(role)) {
+                roles.add(role);
+            }
+        }
+        return roles.toArray(new Role[] {});
+    }
+
+    /**
+     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
+     */
+    private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
+        final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
+        final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
+    }
+
+    /**
+     * Check and return role qualified user {@code User} for a subscription plan role {@code SubscriptionPlanRole}
+     * definition. If the {@link SubscriptionPlanRole#getUserQualificationMode() user qualification mode} is set to
+     * {@link SubscriptionPlanRole.UserQualificationMode#SUBSCRIBING_USER} then {@code user} is returned. Else, if the
+     * subscription plan role specifies an {@link SubscriptionPlanRole#getExplicitUserQualification() explicit user
+     * qualification}, its user is returned. Otherwise, this method returns {@code null}.
+     */
+    private User getSubscriptionPlanRoleQualifiedUser(User user, SubscriptionPlanRole planRole) {
+        final User qualifiedUser;
+        if (planRole.getUserQualificationMode() != null
+                && planRole.getUserQualificationMode() == SubscriptionPlanRole.UserQualificationMode.SUBSCRIBING_USER) {
+            qualifiedUser = user;
+        } else if (planRole.getExplicitUserQualification() != null
+                && !planRole.getExplicitUserQualification().isEmpty()) {
+            qualifiedUser = getUserByName(planRole.getExplicitUserQualification());
+        } else {
+            qualifiedUser = null;
+        }
+        return qualifiedUser;
+    }
+
+    /**
+     * Check and return role qualified tenant {@code UserGroup} for a subscription plan role
+     * {@code SubscriptionPlanRole} definition.
+     * 
+     * @param qualifiedUser
+     *            qualified user from
+     *            {@code SecurityServiceImpl#getSubscriptionPlanRoleQualifiedUser(User, SubscriptionPlanRole)}
+     */
+    private UserGroup getSubscriptionPlanRoleQualifiedTenant(User subscriptionUser, User qualifiedUser,
+            SubscriptionPlanRole planRole) {
+        final UserGroup qualifiedForGroup;
+        final SubscriptionPlanRole.GroupQualificationMode groupQualificationMode = planRole.getGroupQualificationMode();
+        if (groupQualificationMode != null
+                && groupQualificationMode != SubscriptionPlanRole.GroupQualificationMode.NONE) {
+            final User u;
+            switch (groupQualificationMode) {
+            case DEFAULT_QUALIFIED_USER_TENANT:
+                if (qualifiedUser != null) {
+                    u = qualifiedUser;
+                } else {
+                    u = null;
+                }
+                break;
+            case SUBSCRIBING_USER_DEFAULT_TENANT:
+                if (subscriptionUser != null) {
+                    u = subscriptionUser;
+                } else {
+                    u = null;
+                }
+                break;
+            default:
+                u = null;
+                break;
+            }
+            if (u != null) {
+                // don't use the default tenant but the default tenant name to resolve the user's own default group;
+                // example: the user may have set a default object creation group (e.g., "kielerwoche2020-server") for
+                // the current server that is different from the user's own default group ("{username}-tenant"). Yet,
+                // when assigning a role based on a subscription, the "default tenant/group" has to be the user's own
+                // group, not the current object creation group that the user has currently set. Otherwise, those role
+                // assignments would be specific to a server which they shall not.
+                qualifiedForGroup = getUserGroupByName(getDefaultTenantNameForUsername(u.getName()));
+            } else {
+                qualifiedForGroup = null;
+            }
+        } else if (planRole.getIdOfExplicitGroupQualification() != null) {
+            qualifiedForGroup = getUserGroup(planRole.getIdOfExplicitGroupQualification());
+        } else {
+            qualifiedForGroup = null;
+        }
+        return qualifiedForGroup;
+    }
+
+    /**
+     * Role assignments that are based on plans subscribed need to be adjusted if the
+     * {@link Subscription#isActiveSubscription() is-active} status of the user's subscription has changed.
+     */
+    private boolean shouldUpdateUserRolesForSubscription(User user, Subscription currentSubscription,
+            Subscription newSubscription) {
+        final boolean result;
+        if (currentSubscription == null && newSubscription == null) {
+            result = false;
+        } else if (currentSubscription == null) {
+            // A case when there's no current subscription for a plan, if the plan's new subscription is active then
+            // user roles need to be updated with granted new roles, otherwise if currently user has active subscription
+            // then premium roles need to be removed
+            result = newSubscription.isActiveSubscription() || user.hasActiveSubscription();
+        } else if (newSubscription == null) {
+            // In case new subscription is null, user's subscriptions won't be changed
+            result = false;
+        } else {
+            assert currentSubscription.getPlanId().equals(newSubscription.getPlanId());
+            // in this case user roles will be needed to update only when subscription active status is changed
+            result = newSubscription.isActiveSubscription() != currentSubscription.isActiveSubscription();
+        }
+        return result;
+    }
+
+    @Override
+    public void addPermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
+        permissionChangeListeners.addPermissionChangeListener(permission, listener);
+    }
+
+    @Override
+    public void removePermissionChangeListener(WildcardPermission permission, PermissionChangeListener listener) {
+        permissionChangeListeners.removePermissionChangeListener(permission, listener);
     }
 }

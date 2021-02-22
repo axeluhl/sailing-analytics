@@ -37,7 +37,7 @@ public class CompetitorImportMatcher {
     }
 
     private boolean isEqual(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
-        return competitorDescriptor.getCompetitorUUID().toString().equals(existingCompetitor.getId().toString()) ||
+        return competitorDescriptor.getCompetitorId().toString().equals(existingCompetitor.getId().toString()) ||
                 (Util.equalsWithNull(competitorDescriptor.getName(), existingCompetitor.getName(), /* ignoreCase */ true)
                 && (!existingCompetitor.hasBoat() ||
                         Util.equalsWithNull(removeSpaces(competitorDescriptor.getSailNumber()),

@@ -48,7 +48,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     protected int toggleMarker(View view, @IdRes int resId) {
         int retValue = LEVEL_UNKNOWN;
 
-        ImageView image = view.findViewById(resId);
+        final ImageView image = view.findViewById(resId);
         if (image != null) {
             Drawable drawable = image.getDrawable();
             if (drawable != null) {
@@ -72,7 +72,7 @@ public abstract class BasePanelFragment extends RaceFragment {
         int retValue = LEVEL_UNKNOWN;
 
         if (isAdded()) {
-            ImageView image = view.findViewById(resId);
+            final ImageView image = view.findViewById(resId);
             if (image != null) {
                 Drawable drawable = image.getDrawable();
                 if (drawable != null) {
@@ -108,9 +108,9 @@ public abstract class BasePanelFragment extends RaceFragment {
         int retValue = LEVEL_UNKNOWN;
 
         if (view != null && isAdded()) {
-            ImageView image = view.findViewById(resId);
+            final ImageView image = view.findViewById(resId);
             if (image != null) {
-                Drawable drawable = image.getDrawable();
+                final Drawable drawable = image.getDrawable();
                 if (drawable != null) {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
@@ -152,7 +152,7 @@ public abstract class BasePanelFragment extends RaceFragment {
 
     protected void resetFragment(boolean isLocked, @IdRes int idRes, Class<? extends BaseFragment> cls) {
         if (isLocked && getFragmentManager() != null) {
-            Fragment fragment = requireFragmentManager().findFragmentById(idRes);
+            final Fragment fragment = requireFragmentManager().findFragmentById(idRes);
             if (fragment != null) {
                 if (TextUtils.equals(cls.getCanonicalName(), fragment.getClass().getCanonicalName())) {
                     sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);

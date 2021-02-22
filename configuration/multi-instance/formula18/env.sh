@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=formula18
 SERVER_NAME=formula18
 SERVER_PORT=8941
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/formula18?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/formula18?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2063
 TELNET_PORT=14941

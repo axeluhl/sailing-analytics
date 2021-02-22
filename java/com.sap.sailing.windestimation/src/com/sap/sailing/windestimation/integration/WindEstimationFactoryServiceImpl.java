@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.integration;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
@@ -21,6 +22,8 @@ import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class WindEstimationFactoryServiceImpl extends
         AbstractReplicableWithObjectInputStream<ReplicableWindEstimationFactoryService, WindEstimationModelsUpdateOperation>
@@ -53,6 +56,12 @@ public class WindEstimationFactoryServiceImpl extends
         gaussianBasedTwdTransitionDistributionCache = new GaussianBasedTwdTransitionDistributionCache(MODEL_STORE,
                 PRELOAD_ALL_MODELS, PRESERVE_LOADED_MODELS_MILLIS);
         modelsReady = maneuverClassifiersCache.isReady() && gaussianBasedTwdTransitionDistributionCache.isReady();
+    }
+
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
+        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy "cache" */ new Object(), /* resolve listener */ null) {
+        }; // use anonymous inner class in this class loader to see all that this class sees
     }
 
     private boolean isMaster() {

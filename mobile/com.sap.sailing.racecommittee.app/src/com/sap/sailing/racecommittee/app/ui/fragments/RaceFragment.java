@@ -26,6 +26,7 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.NavigationEvents;
 import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -41,10 +42,10 @@ public abstract class RaceFragment extends LoggableFragment {
 
     @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
     @Retention(RetentionPolicy.SOURCE)
-    protected @interface MOVE_VALUES {
+    @interface MOVE_VALUES {
     }
 
-    private static final String TAG = RaceFragment.class.getName();
+    private static final String TAG = RaceFragment.class.getSimpleName();
 
     protected ManagedRace managedRace;
     protected AppPreferences preferences;
@@ -137,10 +138,6 @@ public abstract class RaceFragment extends LoggableFragment {
         }
     }
 
-    public boolean isFragmentUIActive() {
-        return isAdded() && !isDetached() && !isRemoving();
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -153,15 +150,6 @@ public abstract class RaceFragment extends LoggableFragment {
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        BaseActivity baseActivity = (BaseActivity) context;
-        if (baseActivity != null) {
-            preferences = baseActivity.getPreferences();
         }
     }
 
@@ -266,5 +254,26 @@ public abstract class RaceFragment extends LoggableFragment {
             // show current panel
             mPanels.get(mActivePage).setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ExLog.i(getActivity(), TAG, "attach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.attach(this);
+
+        if (context instanceof BaseActivity) {
+            BaseActivity baseActivity = (BaseActivity) context;
+            preferences = baseActivity.getPreferences();
+        } else {
+            preferences = AppPreferences.on(context);
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ExLog.i(getActivity(), TAG, "detach fragment " + this.getClass().getSimpleName());
+        NavigationEvents.INSTANCE.detach(this);
     }
 }

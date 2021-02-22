@@ -46,6 +46,16 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return getName().equals(((HasPermissions) o).getName());
+    }
+    
+    @Override
+    public int hashCode() {
+        return getName().hashCode();
+    }
+    
+    @Override
     public Action[] getAvailableActions() {
         return availableActions;
     }

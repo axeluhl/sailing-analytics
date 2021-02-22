@@ -414,7 +414,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     @Override
     public void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException {
         getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
-            getSecurityService().setPreference(username, key, value);
+        getSecurityService().setPreference(username, key, value);
     }
 
     @Override
@@ -590,7 +590,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         new Thread("sending updated password to user "+username+" by e-mail") {
             @Override public void run() {
                 try {
-                    getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, please contact sailing_analytics@sap.com via email.");
+                    getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, please contact support@sapsailing.com via email.");
                 } catch (MailException e) {
                     logger.log(Level.SEVERE, "Error sending new password to user "+username+" by e-mail", e);
                 }

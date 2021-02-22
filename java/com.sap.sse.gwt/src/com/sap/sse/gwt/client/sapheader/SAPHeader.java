@@ -11,6 +11,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
 
@@ -26,8 +27,8 @@ import com.sap.sse.gwt.shared.DebugConstants;
  * </ul>
  */
 public class SAPHeader extends Composite {
-    
-    private static final String LOGO_URL = "https://www.sap.com/sponsorships";
+    private static final StringMessages stringMessages = GWT.create(StringMessages.class);
+    private static final String LOGO_URL = stringMessages.sapAnalyticsURL();
     
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 

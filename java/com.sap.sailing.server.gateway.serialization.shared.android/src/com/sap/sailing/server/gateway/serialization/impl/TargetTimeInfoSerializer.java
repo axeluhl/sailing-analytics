@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class TargetTimeInfoSerializer implements JsonSerializer<TargetTimeInfo> {
     

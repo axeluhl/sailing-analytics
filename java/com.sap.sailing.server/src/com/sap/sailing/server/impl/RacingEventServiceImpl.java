@@ -46,6 +46,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -244,10 +246,13 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.server.interfaces.DataImportLockWithProgress;
 import com.sap.sailing.server.interfaces.KeywordQueryWithOptionalEventQualification;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.interfaces.SimulationService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
@@ -326,13 +331,9 @@ import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
-import com.sap.sse.replication.OperationExecutionListener;
-import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.OperationsToMasterSender;
-import com.sap.sse.replication.OperationsToMasterSendingQueue;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -347,8 +348,9 @@ import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadLocalTransporter;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
-        LeaderboardRegistry, Replicator {
+public class RacingEventServiceImpl
+extends AbstractReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>
+implements RacingEventService, ClearStateTestSupport, RegattaListener, LeaderboardRegistry, Replicator {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -460,8 +462,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final NamedReentrantReadWriteLock regattaTrackingCacheLock;
 
-    private final ConcurrentHashMap<OperationExecutionListener<RacingEventService>, OperationExecutionListener<RacingEventService>> operationExecutionListeners;
-
     /**
      * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}.
@@ -534,18 +534,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private TypeBasedServiceFinderFactory serviceFinderFactory;
 
     /**
-     * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
-     * currently replicated from any master.
-     */
-    private ReplicationMasterDescriptor replicatingFromMaster;
-
-    private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
-
-    private volatile boolean currentlyFillingFromInitialLoad;
-    
-    private ThreadLocal<Boolean> currentlyApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-
-    /**
      * A synchronized set of the class loaders to use for importing master data. See also {@link MasterDataImportClassLoaderService},
      * {@link #addMasterDataClassLoader(ClassLoader)} and {@link #removeMasterDataClassLoader(ClassLoader)}. In order to loop over
      * these, synchronize on the object. See also {@link Collections#synchronizedSet(Set)}.
@@ -588,14 +576,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
     
-    /**
-     * This field is expected to be set by the {@link ReplicationService} once it has "adopted" this replicable.
-     * The {@link ReplicationService} "injects" this service so it can be used here as a delegate for the
-     * {@link OperationsToMasterSendingQueue#scheduleForSending(OperationWithResult, OperationsToMasterSender)}
-     * method.
-     */
-    private OperationsToMasterSendingQueue unsentOperationsToMasterSender;
-
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     private final CourseAndMarkConfigurationFactory courseAndMarkConfigurationFactory;
@@ -812,7 +792,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
             ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
-        this.currentlyFillingFromInitialLoad = false;
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.numberOfTrackedRacesRestoredDoneLoading = new AtomicInteger();
@@ -826,7 +805,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
         joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
-        this.operationsSentToMasterForReplication = new HashSet<>();
         this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
         populateBoatClasses(this.baseDomainFactory);
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
@@ -886,7 +864,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for " + this, /* fair */false);
-        operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
@@ -933,7 +910,40 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         anniversaryRaceDeterminator = new AnniversaryRaceDeterminatorImpl(this, remoteSailingServerSet,
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
-        this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        if (anniversaryRaceDeterminator.isEnabled()) {
+            this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        }
+    }
+
+    /**
+     * FIXME: Attention! This method is a migration effort. It shall not be called outside of the Activators initial startup, 
+     * since it does manipulate Preference Objects directly, outside of the preferenceLock in the UserStoreImpl.
+     */
+    public void migrateCompetitorNotificationPreferencesWithCompetitorNames() {
+        logger.log(Level.INFO, "Migrating Competitor names for CompetitorNotificationPreferences");
+        final SecurityService securityService = getSecurityService();
+        final Map<String, CompetitorNotificationPreferences> competitorNotificationPreferencesByUser = securityService
+                .getPreferenceObjectsByKey(CompetitorNotificationPreferences.PREF_NAME);
+        competitorNotificationPreferencesByUser.forEach((user, preferences) -> {
+            boolean missingCompetitorNameInSavedPreferences = false;
+            final Iterable<CompetitorNotificationPreference> competitors = preferences.getCompetitors();
+            for (CompetitorNotificationPreference competitor : competitors) {
+                if (competitor.getCompetitorName() == null) {
+                    DynamicCompetitor existingCompetitor = competitorAndBoatStore
+                            .getExistingCompetitorByIdAsString(competitor.getCompetitorIdAsString());
+                    if (existingCompetitor != null) {
+                        final String competitorName = existingCompetitor.getName() == null
+                                ? existingCompetitor.getShortName()
+                                : existingCompetitor.getName();
+                        missingCompetitorNameInSavedPreferences = true;
+                        competitor.setCompetitorName(competitorName);
+                    }
+                }
+            }
+            if (missingCompetitorNameInSavedPreferences) {
+                securityService.setPreferenceObject(user, CompetitorNotificationPreferences.PREF_NAME, preferences);
+            }
+        });
     }
 
     private void populateBoatClasses(DomainFactory baseDomainFactory) {
@@ -994,26 +1004,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public boolean isCurrentlyFillingFromInitialLoad() {
-        return currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public void setCurrentlyFillingFromInitialLoad(boolean currentlyFillingFromInitialLoad) {
-        this.currentlyFillingFromInitialLoad = currentlyFillingFromInitialLoad;
-    }
-
-    @Override
-    public boolean isCurrentlyApplyingOperationReceivedFromMaster() {
-        return currentlyApplyingOperationReceivedFromMaster.get();
-    }
-
-    @Override
-    public void setCurrentlyApplyingOperationReceivedFromMaster(boolean currentlyApplyingOperationReceivedFromMaster) {
-        this.currentlyApplyingOperationReceivedFromMaster.set(currentlyApplyingOperationReceivedFromMaster);
-    }
-
-    @Override
     public PolarDataService getPolarDataService() {
         return polarDataService;
     }
@@ -1045,6 +1035,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         for (MediaTrack mediaTrack : this.mediaLibrary.allTracks()) {
             mediaTrackDeleted(mediaTrack);
+        }
+        // TODO bug5288 replace with call of clearState() in ExpeditionTrackerFactory
+        for (WindTrackerFactory factory : getWindTrackerFactories()) {
+            if (factory instanceof ExpeditionTrackerFactory) {
+                ((ExpeditionTrackerFactory)factory).clearState();
+            }
         }
         this.competitorAndBoatStore.clear();
         this.windStore.clear();
@@ -3302,26 +3298,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Serializable getId() {
-        return getClass().getName();
-    }
-
-    @Override
-    public Iterable<OperationExecutionListener<RacingEventService>> getOperationExecutionListeners() {
-        return operationExecutionListeners.keySet();
-    }
-
-    @Override
-    public void addOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
-        operationExecutionListeners.put(listener, listener);
-    }
-
-    @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<RacingEventService> listener) {
-        operationExecutionListeners.remove(listener);
-    }
-
-    @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream oos) throws IOException {
         StringBuffer logoutput = new StringBuffer();
 
@@ -3556,7 +3532,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(regattasByNameLock);
         }
         regattasObservedWithRaceAdditionListener.clear();
-
         if (raceTrackersByRegatta != null && !raceTrackersByRegatta.isEmpty()) {
             for (DynamicTrackedRegatta regatta : regattaTrackingCache.values()) {
                 final Set<RaceTracker> trackers = raceTrackersByRegatta.get(regatta.getRegatta());
@@ -4394,31 +4369,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public ReplicationMasterDescriptor getMasterDescriptor() {
-        return replicatingFromMaster;
-    }
-
-    @Override
-    public void startedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = master;
-    }
-
-    @Override
     public void stoppedReplicatingFrom(ReplicationMasterDescriptor master) {
-        this.replicatingFromMaster = null;
+        super.stoppedReplicatingFrom(master);
         anniversaryRaceDeterminator.start();
         this.remoteSailingServerSet.setRetrieveRemoteRaceResult(true);
-    }
-
-    @Override
-    public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<RacingEventService, ?> operationWithResultWithIdWrapper) {
-        this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
-    }
-
-    @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<RacingEventService, ?> operation) {
-        return this.operationsSentToMasterForReplication.remove(operation);
     }
 
     @Override
@@ -4712,42 +4666,45 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> race : remoteSailingServerSet
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getRemoteRaceList(Predicate<UUID> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<SimpleRaceInfo>, Exception>> remoteServerRaces : remoteSailingServerSet
                 .getCachedRaceList().entrySet()) {
-            if (race.getValue().getB() != null) {
-                throw new RuntimeException("Some remoteserver did not respond " + race.getKey());
+            if (remoteServerRaces.getValue().getB() != null) {
+                throw new RuntimeException("Some remoteserver did not respond " + remoteServerRaces.getKey());
             }
-            for (SimpleRaceInfo raceinfo : race.getValue().getA()) {
-                store.put(raceinfo.getIdentifier(), raceinfo);
-            }
+            stream(remoteServerRaces.getValue().getA())
+                .filter(race->eventListFilter.test(race.getEventID()))
+                .forEach(race->{
+                    Util.addToValueSet(store, race.getIdentifier(), race);
+                });
         }
         return store;
     }
 
+    private static <T> Stream<T> stream(Iterable<T> iterable) {
+        return StreamSupport.stream(iterable.spliterator(), false);
+    }
+    
     @Override
-    public Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList() {
-        final HashMap<RegattaAndRaceIdentifier, SimpleRaceInfo> store = new HashMap<>();
-        for (Event event : getAllEvents()) {
-            for (LeaderboardGroup group : event.getLeaderboardGroups()) {
-                for (Leaderboard leaderboard : group.getLeaderboards()) {
-                    for (RaceColumn race : leaderboard.getRaceColumns()) {
-                        for (Fleet fleet : race.getFleets()) {
-                            TrackedRace trackedRace = race.getTrackedRace(fleet);
-                            if (trackedRace != null && trackedRace.hasGPSData()) {
-                                RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                                final TimePoint startOfRace = trackedRace.getStartOfRace();
-                                if (startOfRace != null) {
-                                    SimpleRaceInfo raceInfo = new SimpleRaceInfo(raceIdentifier, startOfRace, /* remoteURL */ null);
-                                    store.put(raceInfo.getIdentifier(), raceInfo);
-                                }
-                            }
-                        }
+    public Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> getLocalRaceList(Predicate<UUID> eventListFilter) {
+        Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> store = new HashMap<>();
+        stream(getAllEvents())
+                .filter(event->eventListFilter.test(event.getId()))
+                .forEach(event -> stream(event.getLeaderboardGroups())
+                        .flatMap(group -> stream(group.getLeaderboards()))
+                        .flatMap(leaderBoard -> stream(leaderBoard.getRaceColumns()))
+                        .flatMap(race -> stream(race.getFleets())
+                                .flatMap(fleet -> Stream.of(race.getTrackedRace(fleet))))
+                        .filter(trackedRace -> trackedRace != null && trackedRace.hasGPSData())
+                        .forEach(trackedRace -> {
+                            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                            final TimePoint startOfRace = trackedRace.getStartOfRace();
+                            if (startOfRace != null) {
+                                Util.addToValueSet(store, raceIdentifier, new SimpleRaceInfo(raceIdentifier, startOfRace,
+                                /* remoteURL */ null, event.getId()));
                     }
-                }
-            }
-        }
+                }));
         return store;
     }
     
@@ -4994,13 +4951,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
                 || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
                         : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
-        UUID competitorUUID = competitorDescriptor.getCompetitorUUID() != null ? competitorDescriptor.getCompetitorUUID() : UUID.randomUUID();
-        UUID boatUUID = competitorDescriptor.getBoatUUID() != null ? competitorDescriptor.getBoatUUID() : UUID.randomUUID();
+        Serializable competitorId = competitorDescriptor.getCompetitorId() != null ? competitorDescriptor.getCompetitorId() : UUID.randomUUID();
+        Serializable boatId = competitorDescriptor.getBoatId() != null ? competitorDescriptor.getBoatId() : UUID.randomUUID();
         DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
         DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
-        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorUUID, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
-        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatUUID,
+        DynamicBoat boat = getCompetitorAndBoatStore().getOrCreateBoat(competitorId, competitorDescriptor.getBoatName(), boatClass, competitorDescriptor.getSailNumber(), /* color */ null, /* storePersistently */ true);
+        DynamicCompetitorWithBoat competitorWithBoat = getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(boatId,
                 competitorDescriptor.getName(), competitorDescriptor.getShortName(), /* color */ null, /* eMail */ null,
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat, /* storePersistently */ true);
@@ -5024,18 +4981,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public CourseAndMarkConfigurationFactory getCourseAndMarkConfigurationFactory() {
         return courseAndMarkConfigurationFactory;
-    }
-
-    public void setUnsentOperationToMasterSender(OperationsToMasterSendingQueue service) {
-        this.unsentOperationsToMasterSender = service;
-    }
-
-    @Override
-    public <S, O extends OperationWithResult<S, ?>, T> void scheduleForSending(
-            O operationWithResult, OperationsToMasterSender<S, O> sender) {
-        if (unsentOperationsToMasterSender != null) {
-            unsentOperationsToMasterSender.scheduleForSending(operationWithResult, sender);
-        }
     }
 
     @Override
@@ -5064,25 +5009,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw e;
         }
-        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
-                && Util.hasLength(targetServerBearerToken)) {
-            IllegalArgumentException e = new IllegalArgumentException(
-                    "Please use either username/password or bearer token, not both.");
-            logger.log(Level.WARNING, e.getMessage(), e);
-            throw e;
-        }
         final User user = getSecurityService().getCurrentUser();
-        // Default to current user's token
-        final String effectiveTargetServerBearerToken;
-        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
-                && !Util.hasLength(targetServerBearerToken)) {
-            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
-        } else {
-            effectiveTargetServerBearerToken = targetServerBearerToken;
-        }
-        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
-                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(urlAsString, targetServerUsername,
-                        targetServerPassword) : effectiveTargetServerBearerToken);
+        final String token = getOrCreateTargetServerBearerToken(urlAsString, targetServerUsername, targetServerPassword,
+                targetServerBearerToken);
         createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
         // Create a progress indicator for as long as the server gets data from the other server.
@@ -5167,7 +5096,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private class TimeoutExtendingInputStream extends FilterInputStream {
-
         // default timeout is high to ensure that long running client operations
         // such as compressing data will not have the server run into a timeout.
         // this especially applies to foiling data where compression on slower machines
@@ -5198,7 +5126,32 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             connection.setReadTimeout(DEFAULT_TIMEOUT_IN_SECONDS*1000);
             return super.read(b, off, len);
         }
-
+    }
+    
+    @Override
+    public String getOrCreateTargetServerBearerToken(String targetServerUrlAsString, String targetServerUsername,
+            String targetServerPassword, String targetServerBearerToken) {
+        if (Util.hasLength(targetServerUsername) && Util.hasLength(targetServerPassword)
+                && Util.hasLength(targetServerBearerToken)) {
+            IllegalArgumentException e = new IllegalArgumentException(
+                    "Please use either username/password or bearer token, not both.");
+            logger.log(Level.WARNING, e.getMessage(), e);
+            throw e;
+        }
+        final User user = getSecurityService().getCurrentUser();
+        // Default to current user's token
+        final String effectiveTargetServerBearerToken;
+        if (!Util.hasLength(targetServerUsername) && !Util.hasLength(targetServerPassword)
+                && !Util.hasLength(targetServerBearerToken)) {
+            effectiveTargetServerBearerToken = getSecurityService().getOrCreateAccessToken(user.getName());
+        } else {
+            effectiveTargetServerBearerToken = targetServerBearerToken;
+        }
+        final String token = (!Util.hasLength(effectiveTargetServerBearerToken)
+                ? RemoteServerUtil.resolveBearerTokenForRemoteServer(targetServerUrlAsString, targetServerUsername,
+                        targetServerPassword)
+                : effectiveTargetServerBearerToken);
+        return token;
     }
     
     @Override
