@@ -285,7 +285,7 @@ if [[ "$@" == "release" ]]; then
     git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
     set_ACDIR_and_depending_variables "${PROJECT_HOME}/build"
-    cd "${ACDIR}
+    cd "${ACDIR}"
 
     mkdir -p ${JETTY_CONFIG_SUBDIR}/etc
     mkdir plugins
@@ -523,7 +523,6 @@ if [[ "$@" == "hot-deploy" ]]; then
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
-
 	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
         case $answer in
