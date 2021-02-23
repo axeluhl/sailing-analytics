@@ -1094,7 +1094,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     // then applicationProcess is a replica in the serverName cluster:
                     Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
                 } else {
-                    mastersByServerName.put(serverName, applicationProcess);
+                    // check if it's a new or else a newer master:
+                    if (!mastersByServerName.containsKey(serverName)
+                    || mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout).before(applicationProcess.getStartTimePoint(optionalTimeout))) {
+                        mastersByServerName.put(serverName, applicationProcess);
+                    }
                 }
             }
         }

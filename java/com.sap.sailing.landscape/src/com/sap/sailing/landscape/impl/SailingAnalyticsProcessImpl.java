@@ -21,6 +21,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
@@ -102,8 +103,13 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     @Override
     public Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        // TODO see getRelease TODO note... we should try to obtain this from the REST API /gwt/status where we need to spread the buildversion info across fine-grained attributes
         return getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
+    
+    @Override
+    public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException {
+        final JSONObject status = getStatus(optionalTimeout);
+        return TimePoint.of(((Number) status.get("start_time_millis")).longValue());
     }
 
     @Override

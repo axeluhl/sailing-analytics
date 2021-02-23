@@ -9,8 +9,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.parser.ParseException;
+
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -138,4 +141,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     }
 
     Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException;
 }

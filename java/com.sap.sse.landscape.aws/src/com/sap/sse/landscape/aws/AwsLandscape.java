@@ -552,7 +552,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * specified by {@code tagName} and discovers all application server processes configured on it. These are then
      * grouped by {@link ApplicationProcess#getServerName(Optional, Optional, byte[]) server name}, and using
      * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
-     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
+     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.<p>
+     * 
+     * Should more than one master exist with equal server name, only the newest master is considered.
+     * 
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
