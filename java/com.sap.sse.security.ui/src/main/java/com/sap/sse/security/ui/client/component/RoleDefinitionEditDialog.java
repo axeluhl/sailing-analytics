@@ -18,7 +18,6 @@ public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
         roleDefinitionNameField.setText(roleDefinition.getName());
         permissionsList.setValue(roleDefinition.getPermissions());
         this.ensureDebugId(this.getClass().getSimpleName());
-        transitiveCheckBox.setValue(roleDefinition.isTransitive());
     }
 
     @Override

@@ -210,8 +210,7 @@ public class AccessControlStoreTest {
 
     @Test
     public void testCreateRole() throws UserGroupManagementException {
-        userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>(),
-                /* transitive */ true);
+        userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
         assertNotNull(userStore.getRoleDefinition(testRoleId));
         newStores();
         assertNotNull(userStore.getRoleDefinition(testRoleId));
@@ -220,7 +219,7 @@ public class AccessControlStoreTest {
     @Test
     public void testDeleteRole() throws UserGroupManagementException {
         final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName,
-                new HashSet<WildcardPermission>(), /* transitive */ true);
+                new HashSet<WildcardPermission>());
         userStore.removeRoleDefinition(role);
         assertNull(userStore.getRoleDefinition(testRoleId));
         newStores();

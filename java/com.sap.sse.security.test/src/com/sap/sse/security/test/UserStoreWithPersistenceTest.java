@@ -243,8 +243,7 @@ public class UserStoreWithPersistenceTest {
             throws UserManagementException, UserGroupManagementException {
         User user = store.createUser("def", "d@test.de");
         RoleDefinitionImpl roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "My-Test-Role");
-        store.createRoleDefinition(roleDefinition.getId(), roleDefinition.getName(), new ArrayList<>(),
-                /* transitive */ true);
+        store.createRoleDefinition(roleDefinition.getId(), roleDefinition.getName(), new ArrayList<>());
         UserGroupImpl userGroup = store.createUserGroup(UUID.randomUUID(), "Test-Usergroup");
 
         // tenant is null

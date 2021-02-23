@@ -37,7 +37,7 @@ public class RoleDefinitionsTest {
     public void doBefore() throws UserStoreManagementException {
         userStore.clear();
         user = userStore.createUser(username, email);
-        roleDefinition = userStore.createRoleDefinition(testRoleUUID, TEST_ROLE, Collections.emptySet(), false);
+        roleDefinition = userStore.createRoleDefinition(testRoleUUID, TEST_ROLE, Collections.emptySet());
         userGroup = userStore.createUserGroup(testGroupUUID, groupName);
     }
     

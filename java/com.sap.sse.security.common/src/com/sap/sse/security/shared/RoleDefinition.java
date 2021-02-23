@@ -43,8 +43,5 @@ public interface RoleDefinition extends NamedWithID, Renamable, WithQualifiedObj
         return getId().toString();
     }
 
-    boolean isTransitive();
-    void setTransitive(boolean transitive);
-
     void setPermissions(Iterable<WildcardPermission> permissions);
 }

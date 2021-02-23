@@ -14,8 +14,8 @@ public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredDTO 
     @Deprecated
     RoleDefinitionDTO() {} // for GWT serialization only
     
-    public RoleDefinitionDTO(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
-        super(id, name, permissions, transitive);
+    public RoleDefinitionDTO(UUID id, String name, Iterable<WildcardPermission> permissions) {
+        super(id, name, permissions);
     }
 
     @Override

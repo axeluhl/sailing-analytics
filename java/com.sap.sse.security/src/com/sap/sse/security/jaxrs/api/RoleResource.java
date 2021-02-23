@@ -50,7 +50,7 @@ public class RoleResource extends AbstractSecurityResource {
                 roleName, new Callable<RoleDefinition>() {
                     @Override
                     public RoleDefinition call() throws Exception {
-                        return getService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), roleName, transitive);
+                        return getService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), roleName);
                     }
                 });
         final Response resp;
@@ -61,7 +61,6 @@ public class RoleResource extends AbstractSecurityResource {
             jsonResult.put(KEY_PERMISSIONS, new JSONArray());
             jsonResult.put(KEY_ROLE_ID, role.getId().toString());
             jsonResult.put(KEY_ROLE_NAME, role.getName());
-            jsonResult.put(KEY_TRANSITIVE, role.isTransitive());
             resp = Response.status(Status.CREATED).entity(streamingOutput(jsonResult)).build();
         }
         return resp;
@@ -142,10 +141,6 @@ public class RoleResource extends AbstractSecurityResource {
                     if (roleName != null) {
                         roleDefinition.setName(roleName);
                     }
-                    final Boolean transitive = (Boolean) body.get(KEY_TRANSITIVE);
-                    if (transitive != null) {
-                        roleDefinition.setTransitive(transitive);
-                    }
                     getService().updateRoleDefinition(roleDefinition);
                     resp = Response.ok().build();
                 }
@@ -184,7 +179,6 @@ public class RoleResource extends AbstractSecurityResource {
                 jsonResult.put(KEY_PERMISSIONS, jsonPermissions);
                 jsonResult.put(KEY_ROLE_ID, roleId);
                 jsonResult.put(KEY_ROLE_NAME, roleDefinition.getName());
-                jsonResult.put(KEY_TRANSITIVE, roleDefinition.isTransitive());
                 resp = Response.ok(streamingOutput(jsonResult)).build();
             }
         } catch (IllegalArgumentException e) {

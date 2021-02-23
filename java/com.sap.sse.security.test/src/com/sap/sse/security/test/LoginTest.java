@@ -98,7 +98,7 @@ public class LoginTest {
         securityService.removePermissionFromUser(username, createObjectPermissionOnMyserver);
         assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
         final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
-        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission", false);
+        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission");
         roleGrantingPermission.setPermissions(Collections.singleton(createObjectPermissionOnMyserver));
         securityService.updateRoleDefinition(roleGrantingPermission);
         specialUserGroup1.put(roleGrantingPermission, /* forAll */ false);
@@ -240,7 +240,7 @@ public class LoginTest {
     public void rolesTest() throws UserStoreManagementException {
         userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
-                Collections.emptySet(), /* transitive */ true);
+                Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();
@@ -252,7 +252,7 @@ public class LoginTest {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com");
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
-                Collections.emptySet(), /* transitive */ true);
+                Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();

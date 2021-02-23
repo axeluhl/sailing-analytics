@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -50,7 +49,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
 
     protected final TextBox roleDefinitionNameField;
     protected final GenericStringListInlineEditorComposite<WildcardPermission> permissionsList;
-    protected final CheckBox transitiveCheckBox;
     private final StringMessages stringMessages;
 
     public AbstractRoleDefinitionDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
@@ -80,7 +78,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         };
         permissionsList.addValueChangeHandler(e->validateAndUpdate());
         permissionsList.ensureDebugId("permissions");
-        transitiveCheckBox = createCheckbox("");
     }
 
     @Override
@@ -91,7 +88,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
         result.setWidget(1, 1, permissionsList);
         result.setWidget(2, 0, new Label(stringMessages.transitive()));
-        result.setWidget(2, 1, transitiveCheckBox);
         return result;
     }
 
@@ -99,7 +95,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     protected RoleDefinitionDTO getResult() {
         final String newName = roleDefinitionNameField.getText();
         final List<WildcardPermission> permissions = permissionsList.getValue();
-        return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions, transitiveCheckBox.getValue());
+        return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions);
     }
 
     protected abstract UUID getRoleDefinitionId();

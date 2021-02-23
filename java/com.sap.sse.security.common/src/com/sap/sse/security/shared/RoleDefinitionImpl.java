@@ -20,32 +20,22 @@ public class RoleDefinitionImpl implements RoleDefinition {
     private UUID id;
     private String name;
     private Set<WildcardPermission> permissions;
-    private boolean transitive;
 
     protected RoleDefinitionImpl() {} // for GWT serialization only
 
     public RoleDefinitionImpl(UUID id, String name) {
-        this(id, name, /* transitive */ true);
-    }
-
-    public RoleDefinitionImpl(UUID id, String name, boolean transitive) {
-        this(id, name, new HashSet<WildcardPermission>(), transitive);
+        this(id, name, new HashSet<WildcardPermission>());
     }
 
     public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions) {
-        this(id, name, permissions, /* transitive */ true);
-    }
-
-    public RoleDefinitionImpl(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
         this.id = id;
         this.name = name;
         this.permissions = new HashSet<>();
         Util.addAll(permissions, this.permissions);
-        this.transitive = transitive;
     }
 
-    public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions, boolean transitive) {
-        return new RoleDefinitionImpl(id, name, permissions, transitive);
+    public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions) {
+        return new RoleDefinitionImpl(id, name, permissions);
     }
 
     @Override
@@ -75,16 +65,6 @@ public class RoleDefinitionImpl implements RoleDefinition {
     }
 
     @Override
-    public boolean isTransitive() {
-        return transitive;
-    }
-
-    @Override
-    public void setTransitive(boolean transitive) {
-        this.transitive = transitive;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -111,7 +91,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
 
     @Override
     public String toString() {
-        return name + " (permissions: " + permissions + ", transitive: " + transitive + ")";
+        return name + " (permissions: " + permissions + ")";
     }
 
     @Override

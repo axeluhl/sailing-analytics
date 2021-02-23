@@ -43,7 +43,7 @@ public interface UserManagementWriteService extends UserManagementService {
     void removeRoleDefinitionFromUserGroup(String userGroupIdAsString, String roleDefinitionIdAsString)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name, boolean transitive)
+    RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name)
             throws org.apache.shiro.authz.UnauthorizedException;
 
     void deleteRoleDefinition(String roleDefinitionIdAsString) throws org.apache.shiro.authz.UnauthorizedException;

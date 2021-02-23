@@ -18,7 +18,7 @@ public class RolesTest {
     @Test
     public void testRoleToString() {
         final StrippedRoleDefinitionDTO roleDefinition = new StrippedRoleDefinitionDTO(UUID.randomUUID(), "role",
-                new ArrayList<>(), /* transitive */ true);
+                new ArrayList<>());
         final Role role = new Role(roleDefinition);
         final UserGroupImpl tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
         final StrippedUserGroupDTO tenantDTO = new StrippedUserGroupDTO(UUID.randomUUID(), "tenant");

@@ -82,7 +82,7 @@ public interface BasicUserStore extends UserGroupProvider, Named {
     RoleDefinition getRoleDefinition(UUID roleDefinitionId);
 
     RoleDefinition createRoleDefinition(UUID roleDefinitionId, String displayName,
-            Iterable<WildcardPermission> permissions, boolean transitive);
+            Iterable<WildcardPermission> permissions);
 
     void setRoleDefinitionPermissions(UUID roleDefinitionId, Set<WildcardPermission> permissions);
     void addRoleDefinitionPermission(UUID roleDefinitionId, WildcardPermission permission);

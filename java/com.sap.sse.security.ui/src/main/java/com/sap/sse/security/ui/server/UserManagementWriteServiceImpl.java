@@ -65,14 +65,14 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     }
 
     @Override
-    public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name, boolean transitive) {
+    public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
         RoleDefinition role = getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString), name,
                 new Callable<RoleDefinition>() {
                     @Override
                     public RoleDefinition call() throws Exception {
                         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
-                                name, transitive);
+                                name);
                     }
                 });
         return securityDTOFactory.createRoleDefinitionDTO(role, getSecurityService());
