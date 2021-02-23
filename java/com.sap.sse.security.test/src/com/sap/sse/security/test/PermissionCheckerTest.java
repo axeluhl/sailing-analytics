@@ -469,8 +469,8 @@ public class PermissionCheckerTest {
     @Test
     public void testPermissionCheckWithTransientRole() {
         final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
-        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck), false);
-        final Role transientRole = new Role(transientRoleDefinition);
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        final Role transientRole = new Role(transientRoleDefinition, null, null, false);
         user.addRole(transientRole);
         boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
         assertFalse(metaPermitted);
