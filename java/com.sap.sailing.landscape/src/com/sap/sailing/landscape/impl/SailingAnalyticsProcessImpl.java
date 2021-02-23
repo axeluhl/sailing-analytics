@@ -23,8 +23,10 @@ import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
+import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.util.Wait;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
@@ -71,6 +73,17 @@ implements SailingAnalyticsProcess<ShardingKey> {
         return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()))));
     }
 
+    /**
+     * Here we assume that {@code /gwt/status} has a "release" field we can query
+     */
+    @Override
+    public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception {
+        final JSONObject status = getStatus(optionalTimeout);
+        return new ReleaseImpl((String) status.get("release"), releaseRepository);
+    }
+    
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
