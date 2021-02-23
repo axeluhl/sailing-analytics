@@ -33,6 +33,7 @@ import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
@@ -166,7 +167,9 @@ public class TestProcedures {
             ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
                     (theHost, thePort, dir, telnetPort, serverName, additionalProperties)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName);
+                            final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                            return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName,
+                                    expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
