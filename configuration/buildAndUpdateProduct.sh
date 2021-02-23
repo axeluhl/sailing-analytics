@@ -49,7 +49,7 @@ create_version_info_files ()
     echo "{
     \"commit_id\":\"$HEAD_SHA\",
     \"active_branch\":\"$active_branch\",
-    \"commit_date\":\"$HEAD_DATE\",
+    \"build_date\":\"$HEAD_DATE\",
     \"release\":\"$SIMPLE_VERSION_INFO\"
 }" > "${VERSION_JSON}"
 }

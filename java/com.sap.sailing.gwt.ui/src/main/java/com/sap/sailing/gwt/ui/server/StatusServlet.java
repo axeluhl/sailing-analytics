@@ -52,10 +52,7 @@ public class StatusServlet extends HttpServlet {
         result.put("buildversion", ServerInfo.getBuildVersion());
         try {
             final JSONObject versionAsJson = ServerInfo.getBuildVersionJson();
-            result.put("commit_id", versionAsJson.get("commit_id"));
-            result.put("active_branch", versionAsJson.get("active_branch"));
-            result.put("commit_date", versionAsJson.get("commit_date"));
-            result.put("release", versionAsJson.get("release"));
+            result.putAll(versionAsJson);
             final long numberOfTrackedRacesToRestore = service.getNumberOfTrackedRacesToRestore();
             result.put("numberofracestorestore", numberOfTrackedRacesToRestore);
             final int numberOfTrackedRacesRestored = service.getNumberOfTrackedRacesRestored();
