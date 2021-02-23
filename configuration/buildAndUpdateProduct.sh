@@ -36,6 +36,13 @@ clean_gwt_artifacts ()
     rm -rf com.sap.sse.gwt/com.sap.sse.gwt.* com.sap.sse.gwt/.generated
 }
 
+set_ACDIR_and_depending_variables () {
+    ACDIR="$1"
+    JETTY_CONFIG_DIR="${ACDIR}/${JETTY_CONFIG_SUBDIR}"
+    VERSION_TXT="${JETTY_CONFIG_DIR}/version.txt"
+    VERSION_JSON="${JETTY_CONFIG_DIR}/version.json"
+}
+
 create_version_info_files ()
 {
     echo "$VERSION_INFO System:" > "${VERSION_TXT}"
@@ -205,11 +212,8 @@ do
     esac
 done
 
-ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
 JETTY_CONFIG_SUBDIR=configuration/jetty
-JETTY_CONFIG_DIR="${ACDIR}/${JETTY_CONFIG_SUBDIR}"
-VERSION_TXT="${JETTY_CONFIG_DIR}/version.txt"
-VERSION_JSON="${JETTY_CONFIG_DIR}/version.json"
+set_ACDIR_and_depending_variables "${SERVERS_HOME}/${TARGET_SERVER_NAME}"
 echo INSTALL goes to $ACDIR
 echo TMP will be used for java.io.tmpdir and is $TMP
 if [ "$TMP" = "" ]; then
@@ -280,8 +284,8 @@ if [[ "$@" == "release" ]]; then
     cd $PROJECT_HOME
     git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
-    cd $PROJECT_HOME/build
-    ACDIR=$PROJECT_HOME/build
+    set_ACDIR_and_depending_variables "${PROJECT_HOME}/build"
+    cd "${ACDIR}
 
     mkdir -p ${JETTY_CONFIG_SUBDIR}/etc
     mkdir plugins
