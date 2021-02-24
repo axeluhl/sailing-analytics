@@ -145,13 +145,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RoleDefinition loadRoleDefinition(Document roleDefinitionDBObject) {
         final String id = (String) roleDefinitionDBObject.get(FieldNames.Role.ID.name());
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
-        final Boolean transitive = (Boolean) roleDefinitionDBObject.get(FieldNames.Role.TRANSITIVE.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (List<Object>) (roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name()))) {
             permissions.add(new WildcardPermission(o.toString()));
         }
-        return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions,
-                transitive != null ? transitive : true);
+        return new RoleDefinitionImpl(UUID.fromString(id), displayName, permissions);
     }
 
     @Override
@@ -380,7 +378,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
             final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
                     : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
-            result = new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
+            final boolean transitive = rolesO.getBoolean(FieldNames.Role.TRANSITIVE, true);
+            result = new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser, transitive);
         }
         return result;
     }

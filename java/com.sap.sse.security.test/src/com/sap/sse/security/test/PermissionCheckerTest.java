@@ -477,6 +477,18 @@ public class PermissionCheckerTest {
         boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
         assertTrue(permitted);
     }
+    
+    @Test
+    public void testPermissionCheckWithTransientRoleThroughGroup() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        // No non-transitivity flag defined on role definition level
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        userTenant.put(transientRoleDefinition, false);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
+    }
 
     private boolean checkAnyPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,
             WildcardPermission... grantedPermissions) {

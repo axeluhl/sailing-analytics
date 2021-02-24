@@ -85,7 +85,7 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalAddSetting(String key, Class<?> clazz);
 
-    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException;
 
     Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
 

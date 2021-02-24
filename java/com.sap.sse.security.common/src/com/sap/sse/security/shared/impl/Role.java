@@ -9,6 +9,10 @@ public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
     public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser) {
         super(roleDefinition, qualifiedForTenant, qualifiedForUser);
     }
+    
+    public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser, boolean transitive) {
+        super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);
+    }
 
     public Role(RoleDefinition roleDefinition) {
         super(roleDefinition);

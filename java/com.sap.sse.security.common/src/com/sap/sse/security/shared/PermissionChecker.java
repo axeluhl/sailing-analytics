@@ -505,7 +505,7 @@ public class PermissionChecker {
             WildcardPermission permission, U user, Iterable<G> groupsOfWhichUserIsMember, O ownership,
             BiFunction<WildcardPermission, WildcardPermission, Boolean> permissionChecker, boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven, boolean matchOnlyNonTransitiveRoles) {
         PermissionState result = PermissionState.NONE;
-        // 2. check direct permissions
+        // 1.. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
                 if (permissionChecker.apply(directPermission, permission)) {
@@ -514,7 +514,7 @@ public class PermissionChecker {
                 }
             }
         }
-        // TODO documentation
+        // 2. check group permissions
         if (ownership != null && ownership.getTenantOwner() != null) {
             final G tenantOwner = ownership.getTenantOwner();
             final boolean userIsMemberOfGroup = Util.contains(groupsOfWhichUserIsMember, tenantOwner);

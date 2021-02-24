@@ -139,7 +139,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         Document query = new Document(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.ID.name(), role.getId().toString());
         dbRole.put(FieldNames.Role.NAME.name(), role.getName());
-        dbRole.put(FieldNames.Role.TRANSITIVE.name(), role.isTransitive());
         HashSet<String> stringPermissions = new HashSet<>();
         for (WildcardPermission permission : role.getPermissions()) {
             stringPermissions.add(permission.toString());
@@ -163,6 +162,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.Role.QUALIFYING_TENANT_ID.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getId());
         result.put(FieldNames.Role.QUALIFYING_TENANT_NAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getName());
         result.put(FieldNames.Role.QUALIFYING_USERNAME.name(), role.getQualifiedForUser()==null?null:role.getQualifiedForUser().getName());
+        result.put(FieldNames.Role.TRANSITIVE.name(), role.isTransitive());
         return result;
     }
     

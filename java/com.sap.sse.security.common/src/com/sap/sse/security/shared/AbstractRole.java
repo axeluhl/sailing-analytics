@@ -19,7 +19,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     protected RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
-    protected boolean originatesFromSubscription;
+    protected boolean transitive;
 
     @Deprecated
     protected AbstractRole() {
@@ -30,12 +30,17 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     }
     
     public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser) {
+        this(roleDefinition, qualifiedForTenant, qualifiedForUser, true);
+    }
+    
+    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser, boolean isTransitive) {
         if (roleDefinition == null) {
             throw new NullPointerException("A role's definition must not be null");
         }
         this.roleDefinition = roleDefinition;
         this.qualifiedForTenant = qualifiedForTenant;
         this.qualifiedForUser = qualifiedForUser;
+        this.transitive = isTransitive;
     }
 
     @Override
@@ -43,12 +48,12 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         return roleDefinition.getName();
     }
     
-    public void setOriginatesFromSubscription(boolean originatesFromSubscription) {
-        this.originatesFromSubscription = originatesFromSubscription;
+    public void setIsTransitive (boolean originatesFromSubscription) {
+        this.transitive = originatesFromSubscription;
     }
     
-    public boolean getOriginatesFromSubscription() {
-        return this.originatesFromSubscription;
+    public boolean isTransitive() {
+        return this.transitive;
     }
 
     public RD getRoleDefinition() {
@@ -57,10 +62,6 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
 
     public Set<WildcardPermission> getPermissions() {
         return roleDefinition.getPermissions();
-    }
-
-    public boolean isTransitive() {
-        return roleDefinition.isTransitive();
     }
 
     public G getQualifiedForTenant() {

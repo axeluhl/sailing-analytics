@@ -1152,13 +1152,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public RoleDefinition createRoleDefinition(UUID roleId, String name, boolean transitive) {
-        return apply(new CreateRoleDefinitionOperation(roleId, name, transitive));
+    public RoleDefinition createRoleDefinition(UUID roleId, String name) {
+        return apply(new CreateRoleDefinitionOperation(roleId, name));
     }
 
     @Override
-    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name, boolean transitive) {
-        return store.createRoleDefinition(roleId, name, Collections.emptySet(), transitive);
+    public RoleDefinition internalCreateRoleDefinition(UUID roleId, String name) {
+        return store.createRoleDefinition(roleId, name, Collections.emptySet());
     }
     
     @Override
@@ -1217,14 +1217,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        final boolean transitive = role.isTransitive();
+        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) throws UserManagementException {
+            String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
         store.addRoleForUser(username, role);
         return null;
@@ -2063,7 +2064,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
             result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
-                    rolePrototype.getPermissions(), /* transitive */ true);
+                    rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
         } else {
             result = potentiallyExistingRoleDefinition;
@@ -2676,7 +2677,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             logger.info(() -> "Add user roles for subscription plan " + plan.getName());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
             for (Role role : roles) {
-                role.setOriginatesFromSubscription(true);
                 store.addRoleForUser(user.getName(), role);
             }
         }
@@ -2715,12 +2715,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     /**
-     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
+     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}.
+     * These roles are non transitive, hence they can not be 
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
         final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
-        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser, true);
     }
 
     /**
