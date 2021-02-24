@@ -227,8 +227,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
                 (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
-                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory,
-                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                        final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
+                                expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

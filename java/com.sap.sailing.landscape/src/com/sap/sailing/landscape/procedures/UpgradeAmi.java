@@ -253,8 +253,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
                 new ApplicationProcessHostImpl<>(instanceId, az, landscape,
                         (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                // TODO add expedition UDP port from additional properties; requires using SailingAnalyticsHostImpl instead...
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName);
+                                final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
+                                        expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }

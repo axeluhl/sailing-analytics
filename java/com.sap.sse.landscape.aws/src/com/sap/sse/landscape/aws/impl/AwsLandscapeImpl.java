@@ -1099,7 +1099,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 } else {
                     // check if it's a new or else a newer master:
                     if (!mastersByServerName.containsKey(serverName)
-                    || mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout).before(applicationProcess.getStartTimePoint(optionalTimeout))) {
+                    || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
+                            mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
+                            applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
                         mastersByServerName.put(serverName, applicationProcess);
                     }
                 }

@@ -56,8 +56,9 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     public SailingAnalyticsProcessImpl(int port,
             ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> host,
-            String serverDirectory, int telnetPort, String serverName) {
+            String serverDirectory, int telnetPort, String serverName, Integer expeditionUdpPort) {
         super(port, host, serverDirectory, telnetPort, serverName);
+        this.expeditionUdpPort = expeditionUdpPort;
     }
 
     @Override
@@ -109,7 +110,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
     @Override
     public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException {
         final JSONObject status = getStatus(optionalTimeout);
-        return TimePoint.of(((Number) status.get("start_time_millis")).longValue());
+        final Number startTimeMillis = (Number) status.get("start_time_millis");
+        return startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
     }
 
     @Override
