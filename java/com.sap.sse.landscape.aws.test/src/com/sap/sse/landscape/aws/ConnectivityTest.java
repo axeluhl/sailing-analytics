@@ -441,7 +441,10 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
         final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
         try {
-            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
+                    targetGroup.getTargetGroupArn(), targetGroup.getProtocol(), targetGroup.getPort(),
+                    targetGroup.getHealthCheckProtocol(), targetGroup.getHealthCheckPort(),
+                    targetGroup.getHealthCheckPath());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);

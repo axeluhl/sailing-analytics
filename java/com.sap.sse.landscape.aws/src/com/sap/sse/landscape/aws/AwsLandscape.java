@@ -40,6 +40,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalanci
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
@@ -402,8 +403,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
+    default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
+            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
+            String healthCheckPath) {
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, protocol, port, healthCheckProtocol, healthCheckPort, healthCheckPath);
     }
 
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);

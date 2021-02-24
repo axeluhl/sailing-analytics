@@ -171,7 +171,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
         Thread.sleep(Duration.ONE_SECOND.times(5).asMillis()); // wait a bit until the target groups are no longer considered "in use"
         // now that all target groups the ALB used are freed up, delete them:
         for (final TargetGroup<?> targetGroup : targetGroups) {
-            landscape.deleteTargetGroup(landscape.getTargetGroup(getRegion(), targetGroup.getName(), targetGroup.getTargetGroupArn()));
+            landscape.deleteTargetGroup(targetGroup);
         }
     }
     

@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.client;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -11,6 +12,9 @@ import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sse.common.Duration;
+
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -82,6 +86,14 @@ public interface LandscapeManagementWriteServiceAsync {
     void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
+    void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcess<String> master, InstanceType instanceType,
+            Duration optionalTimeout, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String replicationBearerToken, AsyncCallback<Void> callback);
+    
+    void createApplicationReplicaSet(String regionId, String name, InstanceType masterInstanceType,
+            boolean dynamicLoadBalancerMapping, Duration optionalTimeout, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, AsyncCallback<Void> callback);
+    
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
             AsyncCallback<SerializationDummyDTO> callback);

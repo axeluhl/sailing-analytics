@@ -19,9 +19,15 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
+import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
@@ -43,6 +49,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -51,9 +58,13 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
@@ -80,6 +91,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
     private static final Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
+    
+    private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
@@ -424,6 +437,80 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .build();
             startMongoDBServer.run();
         }
+    }
+    
+    @Override
+    public void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcess<String> master,
+            InstanceType instanceType, Duration optionalTimeout, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
+        final AwsLandscape<String> landscape = getLandscape();
+        final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
+        final StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
+        final AwsRegion region = new AwsRegion(regionId);
+        replicaConfigurationBuilder
+            .setLandscape(landscape)
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
+            .setRegion(region)
+            .setRelease(master.getRelease(SailingReleaseRepository.INSTANCE, Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+        replicaHostBuilder
+            .setInstanceType(instanceType)
+            .setOptionalTimeout(Optional.ofNullable(optionalTimeout))
+            .setLandscape(landscape)
+            .setRegion(region)
+            .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
+        if (optionalKeyName != null) {
+            replicaHostBuilder.setKeyName(optionalKeyName);
+        }
+        final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
+        replicaHostStartProcedure.run();
+        CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> loadBalancerMappingBuilder = CreateDynamicLoadBalancerMapping.builder();
+        final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping =
+            loadBalancerMappingBuilder
+                .setServerName(master.getServerName(Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+                .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+                .setLandscape(landscape)
+                .build();
+        final TargetGroup<String> masterTargetGroup = createLoadBalancerMapping.getMasterTargetGroup();
+        final TargetGroup<String> publicTargetGroup = createLoadBalancerMapping.getPublicTargetGroup();
+        if (!Util.contains(Util.map(masterTargetGroup.getRegisteredTargets().keySet(), target->target.getId()), master.getHost().getId())
+        ||  master.getPort() != masterTargetGroup.getHealthCheckPort()) {
+            throw new IllegalStateException("Master "+master+" is not registered with master target group "+masterTargetGroup.getName()+"/"+masterTargetGroup.getTargetGroupArn());
+        }
+        publicTargetGroup.addTarget(replicaHostStartProcedure.getHost());
+    }
+
+    @Override
+    public void createApplicationReplicaSet(String regionId, String name, InstanceType masterInstanceType,
+            boolean dynamicLoadBalancerMapping, Duration optionalTimeout, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception {
+        final AwsLandscape<String> landscape = getLandscape();
+        final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
+        final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
+        final AwsRegion region = new AwsRegion(regionId);
+        masterConfigurationBuilder
+            .setLandscape(landscape)
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
+            .setRegion(region)
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(securityReplicationBearerToken)).build());
+        masterHostBuilder
+            .setInstanceType(masterInstanceType)
+            .setOptionalTimeout(Optional.ofNullable(optionalTimeout))
+            .setLandscape(landscape)
+            .setRegion(region)
+            .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
+        if (optionalKeyName != null) {
+            masterHostBuilder.setKeyName(optionalKeyName);
+        }
+        final StartSailingAnalyticsMasterHost<String> masterHostStartProcedure = masterHostBuilder.build();
+        masterHostStartProcedure.run();
+        final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
+        final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
+                dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
+        createLoadBalancerMappingBuilder
+            .setServerName(master.getServerName(Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+            .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setLandscape(landscape)
+            .build().run();
     }
 
     @Override

@@ -8,7 +8,6 @@ import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.aws.AwsInstance;
 
 public class SailingAnalyticsReplicaConfiguration<ShardingKey>
 extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
@@ -80,8 +79,7 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
         }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey>,
-    ShardingKey extends AwsInstance<ShardingKey>> BuilderT replicaBuilder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey> BuilderT replicaBuilder() {
         @SuppressWarnings("unchecked")
         final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, ShardingKey>();
         return result;
