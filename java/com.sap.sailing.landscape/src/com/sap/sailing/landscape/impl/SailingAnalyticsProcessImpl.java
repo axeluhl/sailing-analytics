@@ -4,9 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -89,17 +92,19 @@ implements SailingAnalyticsProcess<ShardingKey> {
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
-     * @throws Exception 
      */
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws TimeoutException, Exception {
-        return Wait.wait(()->getStatus(optionalTimeout).get("servername").toString(),
-                result->result!=null,
-                /* retry on exception */ true,
-                optionalTimeout,
-                /* sleep between attempts */ Duration.ONE_SECOND.times(5),
-                Level.INFO, "Waiting for server name");
+        if (serverName == null) {
+            serverName = Wait.wait(()->getStatus(optionalTimeout).get("servername").toString(),
+                    result->result!=null,
+                    /* retry on exception */ true,
+                    optionalTimeout,
+                    /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                    Level.INFO, "Waiting for server name");
+        }
+        return serverName;
     }
 
     @Override
@@ -108,10 +113,26 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
     
     @Override
-    public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException {
+    public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException {
+        final TimePoint result;
         final JSONObject status = getStatus(optionalTimeout);
         final Number startTimeMillis = (Number) status.get("start_time_millis");
-        return startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
+        if (startTimeMillis == null) {
+            // try legacy approach: extract from "buildversion" attribute which has the general format "^.* Started: [0-9]+$"
+            // where the "Started" value has format yyyyMMddhhmm, usually provided in UTC
+            final String buildversion = (String) status.get("buildversion");
+            final Pattern buildversionPattern = Pattern.compile("^.* Started: ([0-9]+)$");
+            final Matcher matcher = buildversionPattern.matcher(buildversion);
+            if (buildversion != null && matcher.matches()) {
+                final String timestamp = matcher.group(1);
+                result = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmX").parse(timestamp+"Z"));
+            } else {
+                result = null;
+            }
+        } else {
+            result = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
+        }
+        return result;
     }
 
     @Override

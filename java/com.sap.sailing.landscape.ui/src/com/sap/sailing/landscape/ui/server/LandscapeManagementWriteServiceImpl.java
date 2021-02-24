@@ -90,9 +90,19 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
+    /**
+     * The timeout for a running process to respond
+     */
     private static final Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
+
+    /**
+     * The timeout for a host to come up
+     */
+    private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5));
     
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
+    
+    private static final String DEFAULT_DOMAIN_NAME = "sapsailing.com";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
@@ -268,7 +278,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 sailingAnalyticsProcess.getTelnetPortToOSGiConsole(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getServerName(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getServerDirectory(),
-                sailingAnalyticsProcess.getExpeditionUdpPort(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase));
+                sailingAnalyticsProcess.getExpeditionUdpPort(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getStartTimePoint(WAIT_FOR_PROCESS_TIMEOUT));
     }
 
     private AwsLandscape<String> getLandscape() {
@@ -441,9 +452,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcess<String> master,
-            InstanceType instanceType, Duration optionalTimeout, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
+    public void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcessDTO master,
+            String instanceType, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String replicationBearerToken) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         final StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
@@ -452,10 +463,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setLandscape(landscape)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
             .setRegion(region)
-            .setRelease(master.getRelease(SailingReleaseRepository.INSTANCE, Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+            .setRelease(SailingReleaseRepository.INSTANCE.getRelease(master.getReleaseName()));
         replicaHostBuilder
-            .setInstanceType(instanceType)
-            .setOptionalTimeout(Optional.ofNullable(optionalTimeout))
+            .setInstanceType(InstanceType.valueOf(instanceType))
+            .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setLandscape(landscape)
             .setRegion(region)
             .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
@@ -467,13 +478,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> loadBalancerMappingBuilder = CreateDynamicLoadBalancerMapping.builder();
         final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping =
             loadBalancerMappingBuilder
-                .setServerName(master.getServerName(Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+                .setServerName(master.getServerName())
                 .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
                 .setLandscape(landscape)
                 .build();
         final TargetGroup<String> masterTargetGroup = createLoadBalancerMapping.getMasterTargetGroup();
         final TargetGroup<String> publicTargetGroup = createLoadBalancerMapping.getPublicTargetGroup();
-        if (!Util.contains(Util.map(masterTargetGroup.getRegisteredTargets().keySet(), target->target.getId()), master.getHost().getId())
+        if (!Util.contains(Util.map(masterTargetGroup.getRegisteredTargets().keySet(), target->target.getId()), master.getHost().getInstanceId())
         ||  master.getPort() != masterTargetGroup.getHealthCheckPort()) {
             throw new IllegalStateException("Master "+master+" is not registered with master target group "+masterTargetGroup.getName()+"/"+masterTargetGroup.getTargetGroupArn());
         }
@@ -481,21 +492,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public void createApplicationReplicaSet(String regionId, String name, InstanceType masterInstanceType,
-            boolean dynamicLoadBalancerMapping, Duration optionalTimeout, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception {
+    public void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String securityReplicationBearerToken, String optionalDomainName) throws Exception {
         final AwsLandscape<String> landscape = getLandscape();
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         masterConfigurationBuilder
             .setLandscape(landscape)
+            .setServerName(name)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
             .setRegion(region)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(securityReplicationBearerToken)).build());
         masterHostBuilder
-            .setInstanceType(masterInstanceType)
-            .setOptionalTimeout(Optional.ofNullable(optionalTimeout))
+            .setInstanceType(InstanceType.valueOf(masterInstanceType))
+            .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setLandscape(landscape)
             .setRegion(region)
             .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
@@ -508,7 +520,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
         createLoadBalancerMappingBuilder
-            .setServerName(master.getServerName(Optional.ofNullable(optionalTimeout), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+            .setProcess(master)
+            .setHostname(name+"."+Optional.ofNullable(optionalDomainName).orElse(DEFAULT_DOMAIN_NAME))
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(landscape)
             .build().run();

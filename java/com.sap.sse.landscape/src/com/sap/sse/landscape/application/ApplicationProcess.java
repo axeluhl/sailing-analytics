@@ -142,5 +142,5 @@ extends Process<RotatingFileBasedLog, MetricsT> {
 
     Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException;
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException;
 }

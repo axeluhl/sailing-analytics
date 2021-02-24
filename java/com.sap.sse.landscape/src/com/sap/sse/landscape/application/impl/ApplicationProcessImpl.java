@@ -48,7 +48,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
      */
     private final String serverDirectory;
     
-    private String serverName;
+    protected String serverName;
     
     private Integer telnetPortToOSGiConsole;
     
@@ -246,7 +246,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 } catch (Exception e) {
                     return false;
                 }
-            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for server name");
+            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name");
         } catch (Exception e) {
             logger.info("Exception while waiting for master server name: "+e.getMessage());
         }
