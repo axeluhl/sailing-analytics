@@ -52,21 +52,6 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     
     private Integer telnetPortToOSGiConsole;
     
-    /**
-     * Alternative constructor that doesn't take the port number as argument but instead tries to obtain it from the
-     * {@link #ENV_SH env.sh} file located on the {@code host} in the {@code serverDirectory} specified.
-     * 
-     * @param optionalKeyName
-     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
-     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
-     *            pair that was originally used when the instance was launched will be used.
-     * @param privateKeyEncryptionPassphrase
-     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
-     */
-    public ApplicationProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        this(readPortFromDirectory(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase), host, serverDirectory);
-    }
-    
     public ApplicationProcessImpl(int port, Host host, String serverDirectory) {
         super(port, host);
         this.serverDirectory = serverDirectory;
@@ -78,14 +63,6 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverName = serverName;
     }
 
-    private static int readPortFromDirectory(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
-            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
-            throws Exception {
-        return Integer.parseInt(
-                getEnvShValueFor(host, serverDirectory, DefaultProcessConfigurationVariables.SERVER_PORT.name(),
-                        optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
-    }
-    
     @Override
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)

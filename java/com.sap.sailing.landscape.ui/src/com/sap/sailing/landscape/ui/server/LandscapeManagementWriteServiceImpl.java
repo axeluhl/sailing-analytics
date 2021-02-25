@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -226,7 +227,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
-        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(), host.getRegion().getId(), host.getLaunchTimePoint());
+        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(),
+                host.getPrivateAddress().getHostAddress(), host.getRegion().getId(), host.getLaunchTimePoint());
     }
     
     @Override
@@ -245,8 +247,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 };
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
-                (instanceId, availabilityZone, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
-                        instanceId, availabilityZone, landscape, processFactoryFromHostAndServerDirectory);
+                (instanceId, availabilityZone, privateIpAddress, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
+                        instanceId, availabilityZone, privateIpAddress, landscape, processFactoryFromHostAndServerDirectory);
         for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
                 hostSupplier, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
@@ -428,7 +430,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion());
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
                     new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZone(),
-                            processToShutdown.getHost().getAvailabilityZone(), region), landscape);
+                            processToShutdown.getHost().getAvailabilityZone(), region), 
+                            InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()), landscape);
             instance.terminate();
         }
         if (mongoScalingInstructions.getReplicaSetName() == null) {

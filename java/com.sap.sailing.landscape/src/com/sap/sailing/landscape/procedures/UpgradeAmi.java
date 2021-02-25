@@ -1,5 +1,6 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -249,9 +250,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         public HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                        landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
                                 final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,

@@ -174,9 +174,9 @@ public class TestProcedures {
                             throw new RuntimeException(e);
                         }
                     };
-            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, landscape)->
-                new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, landscape,
-                        processFactoryFromHostAndServerDirectory);
+            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, privateIpAddress, landscape)->
+                new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress,
+                        landscape, processFactoryFromHostAndServerDirectory);
             final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
                     landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, hostSupplier, optionalTimeout, 
                             /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);

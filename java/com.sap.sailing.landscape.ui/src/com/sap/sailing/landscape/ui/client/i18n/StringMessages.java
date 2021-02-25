@@ -81,4 +81,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String pleaseSelectInstanceTypeForNewMaster();
     String pleaseProvideBearerTokenForSecurityReplication();
     String domainName();
+    String release();
 }

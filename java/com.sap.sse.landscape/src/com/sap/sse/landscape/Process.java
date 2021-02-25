@@ -20,6 +20,7 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
     Host getHost();
     
     default String getHostname() {
+        // TODO consider caching this or requiring it upon object creation
         return getHost().getPrivateAddress().getCanonicalHostName();
     }
     

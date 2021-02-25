@@ -91,10 +91,10 @@ implements StartFromSailingAnalyticsImage {
         protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
             final HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> result;
             if (super.getHostSupplier() == null) {
-                result = (instanceId, az, landscape)->
-                    new SailingAnalyticsHostImpl<>(instanceId, az, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+                result = (instanceId, az, privateIpAddress, landscape)->
+                    new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory,
+                            return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
                                     ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
                         } catch (Exception e) {
                             throw new RuntimeException(e);

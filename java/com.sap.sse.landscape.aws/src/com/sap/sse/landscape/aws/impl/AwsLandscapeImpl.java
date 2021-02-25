@@ -1,6 +1,8 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -560,7 +562,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
-        return new AwsInstanceImpl<ShardingKey>(instance.instanceId(), getAvailabilityZoneByName(region, instance.placement().availabilityZone()), this);
+        try {
+            return new AwsInstanceImpl<ShardingKey>(instance.instanceId(),
+                    getAvailabilityZoneByName(region, instance.placement().availabilityZone()),
+                    InetAddress.getByName(instance.privateIpAddress()), this);
+        } catch (UnknownHostException e) {
+            logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
+            throw new RuntimeException(e);
+        }
     }
 
     private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
@@ -719,7 +728,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final RunInstancesResponse response = getEc2Client(getRegion(az.getRegion())).runInstances(launchRequest);
         final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
-            result.add(hostSupplier.supply(instance.instanceId(), az, this));
+            try {
+                result.add(hostSupplier.supply(instance.instanceId(), az, InetAddress.getByName(instance.privateIpAddress()), this));
+            } catch (UnknownHostException e) {
+                logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
+                throw new RuntimeException(e);
+            }
         }
         return result;
     }
@@ -1072,7 +1086,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             HostSupplier<ShardingKey, HostT> hostSupplier) {
         final List<HostT> result = new ArrayList<>();
         for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
-            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(), host.getAvailabilityZone(), this);
+            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), this);
             result.add(applicationProcessHost);
         }
         return result;

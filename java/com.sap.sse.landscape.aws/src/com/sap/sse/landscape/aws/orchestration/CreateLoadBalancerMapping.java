@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
@@ -16,7 +17,9 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.util.Wait;
 
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerStateEnum;
@@ -78,6 +81,7 @@ extends ProcedureWithTargetGroup<ShardingKey> {
     protected static final int MAX_ALBS_PER_REGION = 20;
     private final ProcessT process;
     private final String hostname;
+    private final Optional<Duration> optionalTimeout;
     private TargetGroup<ShardingKey> masterTargetGroupCreated;
     private TargetGroup<ShardingKey> publicTargetGroupCreated;
     private Iterable<Rule> rulesAdded;
@@ -189,6 +193,7 @@ extends ProcedureWithTargetGroup<ShardingKey> {
 
     protected CreateLoadBalancerMapping(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
+        this.optionalTimeout = builder.getOptionalTimeout();
         this.process = builder.getProcess();
         this.hostname = builder.getHostname();
     }
@@ -202,21 +207,29 @@ extends ProcedureWithTargetGroup<ShardingKey> {
     public void run() throws JSchException, IOException, InterruptedException, SftpException {
         masterTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getMasterTargetGroupName(), getProcess());
         publicTargetGroupCreated = createTargetGroup(getLoadBalancerUsed().getRegion(), getPublicTargetGroupName(), getProcess());
-        getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
-        getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
-        getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
+        // Now wait until host is in state RUNNING which is especially important in case the host has just been launched:
+        try {
+            Wait.wait(()->getLandscape().getInstance(getHost().getId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5),
+                    Level.INFO, "Waiting for instance "+getHost().getId()+" to be in state RUNNING");
+            getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
+            getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
+            getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true, createRules());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA())).build(),
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
                 RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
                 actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getA())).build(),
+                RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())).build(),
                 RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
                 actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
                 build();

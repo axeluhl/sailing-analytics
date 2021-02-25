@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,8 +35,9 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private final ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory;
     
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory) {
-        super(instanceId, availabilityZone, landscape);
+            InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape,
+            ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory) {
+        super(instanceId, availabilityZone, privateIpAddress, landscape);
         this.processFactoryFromHostAndServerDirectory = processFactoryFromHostAndServerDirectory;
     }
     

@@ -161,7 +161,7 @@ implements UserDataProvider {
 
         @Override
         public BuilderT setRelease(Release release) {
-            this.release = release == null ? Optional.empty() : Optional.of(release);
+            this.release = Optional.ofNullable(release);
             return self();
         }
 
@@ -330,13 +330,19 @@ implements UserDataProvider {
     }
 
     private final Map<ProcessConfigurationVariable, String> userData;
+    private final String serverName;
     
     protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
+        this.serverName = builder.getServerName();
     }
 
     @Override
     public Map<ProcessConfigurationVariable, String> getUserData() {
         return userData;
+    }
+    
+    protected String getServerName() {
+        return serverName;
     }
 }

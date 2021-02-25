@@ -12,6 +12,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions> {
+    private static final String DEFAULT_DOMAIN = "sapsailing.com";
     private static final String DEFAULT_INSTANCE_TYPE = "C4_2_XLARGE";
     
     public static class CreateApplicationReplicaSetInstructions {
@@ -86,7 +87,7 @@ public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApp
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
         dynamicLoadBalancerCheckBox = createCheckbox(stringMessages.useDynamicLoadBalancer());
         securityReplicationBearerToken = createTextBox("", 40);
-        domainNameBox = createTextBox("", 40);
+        domainNameBox = createTextBox(DEFAULT_DOMAIN, 40);
     }
     
     @Override

@@ -1,5 +1,6 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.net.InetAddress;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -88,11 +89,11 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                        landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory,
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
                                         ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
@@ -132,6 +133,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
-                getApplicationConfiguration().getExpeditionPort());
+                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort());
     }
 }

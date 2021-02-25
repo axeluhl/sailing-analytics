@@ -269,7 +269,9 @@ implements Procedure<ShardingKey> {
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }
-        process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory, applicationConfiguration.getExpeditionPort());
+        process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),
+                serverDirectory, applicationConfiguration.getTelnetPort(),
+                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort());
     }
     
     public SailingAnalyticsProcess<ShardingKey> getProcess() {

@@ -1,5 +1,6 @@
 package com.sap.sailing.landscape.impl;
 
+import java.net.InetAddress;
 import java.util.Map;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
@@ -16,9 +17,9 @@ public class SailingAnalyticsHostImpl<ShardingKey, HostT extends SailingAnalytic
 extends ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT>
 implements SailingAnalyticsHost<ShardingKey> {
     public SailingAnalyticsHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey> landscape,
+            InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape,
             ProcessFactory<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT> processFactoryFromHostAndServerDirectory) {
-        super(instanceId, availabilityZone, landscape, processFactoryFromHostAndServerDirectory);
+        super(instanceId, availabilityZone, privateIpAddress, landscape, processFactoryFromHostAndServerDirectory);
     }
 
     @Override

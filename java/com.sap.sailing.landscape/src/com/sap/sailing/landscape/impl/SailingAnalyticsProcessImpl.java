@@ -38,20 +38,6 @@ extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnal
 implements SailingAnalyticsProcess<ShardingKey> {
     private Integer expeditionUdpPort;
     
-    /**
-     * Tries to obtain the port from the {@code env.sh} file found in the {@code serverDirectory}
-     * 
-     * @param optionalKeyName
-     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
-     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
-     *            pair that was originally used when the instance was launched will be used.
-     */
-    public SailingAnalyticsProcessImpl(Host host, String serverDirectory, Optional<Duration> optionalTimeout,
-            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
-            throws Exception {
-        super(host, serverDirectory, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-    }
-    
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort) {
         super(port, host, serverDirectory);
         this.expeditionUdpPort = expeditionUdpPort;
