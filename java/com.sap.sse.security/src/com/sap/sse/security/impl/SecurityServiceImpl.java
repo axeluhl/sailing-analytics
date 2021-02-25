@@ -2436,7 +2436,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
-                    existingRole.getQualifiedForUser());
+                    existingRole.getQualifiedForUser(), existingRole.isTransitive());
             addRoleForUser(userAndRole.getA(),
                     copyRole);
             callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
