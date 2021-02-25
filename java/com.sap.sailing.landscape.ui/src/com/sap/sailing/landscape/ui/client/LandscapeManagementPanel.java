@@ -221,7 +221,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         applicationReplicaSetsRefreshButton.addClickHandler(e->refreshApplicationReplicaSetsTable());
         final Button addApplicationReplicaSetButton = new Button(stringMessages.add());
         applicationReplicaSetsButtonPanel.add(addApplicationReplicaSetButton);
-        addApplicationReplicaSetButton.addClickHandler(e->addApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
+        addApplicationReplicaSetButton.addClickHandler(e->createApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -277,7 +277,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
-    private void addApplicationReplicaSet(StringMessages stringMessages, String regionId) {
+    private void createApplicationReplicaSet(StringMessages stringMessages, String regionId) {
         new CreateApplicationReplicaSetDialog(landscapeManagementService, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
             @Override
             public void ok(CreateApplicationReplicaSetInstructions instructions) {
@@ -294,6 +294,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
                             @Override
                             public void onSuccess(Void result) {
                                 Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                                refreshApplicationReplicaSetsTable();
                             }
                         });
             }
