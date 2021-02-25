@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class EventService {
     
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger LOG = Logger.getLogger(EventService.class.getName());
     
     private final SailingServiceWriteAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -48,13 +48,13 @@ public class EventService {
             sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    logger.severe("requestEventList :: Cannot load events!");
+                    LOG.severe("requestEventList :: Cannot load events!");
                     errorReporter.reportError("Error", "Cannot load events!");
                 }
     
                 @Override
                 public void onSuccess(List<EventDTO> result) {
-                    logger.info("requestEventList :: onSuccess");
+                    LOG.info("requestEventList :: onSuccess");
                     setEvents(result);
                     eventBus.fireEvent(new EventListResponseEvent(result));
                 }

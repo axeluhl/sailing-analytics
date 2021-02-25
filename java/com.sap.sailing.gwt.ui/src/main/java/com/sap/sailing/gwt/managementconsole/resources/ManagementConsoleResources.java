@@ -15,7 +15,7 @@ public interface ManagementConsoleResources extends ClientBundle {
     String ICONS = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleIcons.gss";
     String SIZES = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleSizes.gss";
     String STYLES = "com/sap/sailing/gwt/managementconsole/resources/ManagementConsoleStyles.gss";
-
+    
     ManagementConsoleResources INSTANCE = GWT.create(ManagementConsoleResources.class);
 
     @Source({ COLORS, SIZES, STYLES })
@@ -32,6 +32,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
     @Source("images/Image-BackdropGeneralSized.png")
     ImageResource backdropGeneralSized();
+
+    @Source("../resources/images/Image-EventBackdrop.png")
+    ImageResource eventBackdrop();
 
     @Source("icons/Icon-EventListLocation.svg")
     @MimeType("image/svg+xml")
@@ -77,6 +80,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource iconElipse();
 
+    @Source("icons/Icon-SettingsGLobal.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconSettings();
+
     interface Style extends CssResource {
 
         String backdropImage();
@@ -94,6 +101,9 @@ public interface ManagementConsoleResources extends ClientBundle {
         @ClassName("page-header")
         String pageHeader();
 
+        @ClassName("section-header")
+        String sectionHeader();
+
         @ClassName("flex-container")
         String flexContainer();
 
@@ -104,6 +114,39 @@ public interface ManagementConsoleResources extends ClientBundle {
         String flexItemAutoWidth();
 
         String ellipsis();
+        
+        @ClassName("event-header")
+        String eventHeader();
+
+        @ClassName("back-nav")
+        String backNavigation();
+
+        @ClassName("event-sub-menu")
+        String eventSubMenu();
+
+        @ClassName("menu-selected")
+        String menuSelected();
+
+        @ClassName("featured-marker")
+        String featuredMarker();
+
+        String cards();
+
+        @ClassName("card-panel")
+        String cardPanel();
+
+        @ClassName("card")
+        String card();
+
+        String title();
+
+        String details();
+
+        @ClassName("card-content")
+        String cardContent();
+
+        @ClassName("custom-teaser")
+        String customTeaser();
     }
 
     @Shared
@@ -168,5 +211,8 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-elipse")
         String iconElipse();
+
+        @ClassName("icon-settings")
+        String iconSettings();
     }
 }

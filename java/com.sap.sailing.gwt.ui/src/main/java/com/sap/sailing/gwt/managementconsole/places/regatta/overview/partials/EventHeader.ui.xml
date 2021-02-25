@@ -1,0 +1,24 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    
+    <g:HTMLPanel addStyleNames="{app_res.style.eventHeader}">
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.flexContainer}">
+            <g:Anchor ui:field="back" addStyleNames="{app_res.icons.icon} {app_res.icons.iconBack} {app_res.style.backNavigation}" />
+            <div ui:field="eventName" class="{app_res.fonts.pageTitle} {app_res.style.flexItemAutoWidth}" />
+        </div>
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.flexContainer}">
+            <div class="{app_res.style.flexItemAutoWidth} {app_res.style.eventSubMenu}">
+                <g:Button ui:field="regattaSection" text="{i18n.regattas}" addStyleNames="{app_res.style.anchor}" />
+                <g:Button ui:field="invitationSection" text="{i18n.invitations}" addStyleNames="{app_res.style.anchor}" />
+                <g:Button ui:field="webPageSection" text="{i18n.eventWebPage}" addStyleNames="{app_res.style.anchor}" />
+            </div>
+            <g:Anchor ui:field="settings"
+                addStyleNames="{app_res.icons.icon} {app_res.icons.iconSettings} {app_res.style.flexItemFixedWidth}" />
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

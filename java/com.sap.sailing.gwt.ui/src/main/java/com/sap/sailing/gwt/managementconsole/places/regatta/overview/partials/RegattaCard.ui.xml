@@ -6,20 +6,20 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
-    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.cardPanel}">
-        <div class="{local_res.style.eventCard}" ui:field="card">
-            <div class="{local_res.style.eventCardContainer}">
+    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {app_res.style.cardPanel}">
+        <div ui:field="card" class="{app_res.style.card}" >
+            <div ui:field="container" class="{app_res.style.cardContent}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">
-                        <h1 ui:field="title" />
+                        <div ui:field="title" class="{app_res.style.title}" />
                         <div class="{app_res.style.flexContainer}">
                             <a class="{local_res.style.boatclassLogo}" ui:field="logoUi"></a>
                             <span ui:field="racesUi" class="{local_res.style.races}"></span>
-                            <h2 ui:field="subTitle" class="{app_res.style.flexItemAutoWidth}"/>              
+                            <h2 ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {app_res.style.details}"/>       
                         </div>                     
                     </div>
-                    <g:Anchor ui:field="advancedSettingsRegattaAnchor" 
-                            styleName="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
+                    <g:Anchor ui:field="contextMenu" 
+                            addStyleNames="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
                 </div>
             </div>
         </div>

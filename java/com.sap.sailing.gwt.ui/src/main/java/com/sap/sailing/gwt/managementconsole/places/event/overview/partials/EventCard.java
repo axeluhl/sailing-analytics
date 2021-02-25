@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewView.Presenter;
+import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -29,6 +30,9 @@ public class EventCard extends Composite {
 
     @UiField
     EventOverviewResources local_res;
+    
+    @UiField
+    ManagementConsoleResources app_res;
 
     @UiField
     Element card, container, title, details;
@@ -45,7 +49,7 @@ public class EventCard extends Composite {
 
         ofNullable(event.getTeaserImage()).map(ImageDTO::getSourceRef).ifPresent(imageUrl -> {
             this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')");
-            this.card.addClassName(local_res.style().customTeaser());
+            this.card.addClassName(app_res.style().customTeaser());
         });
 
         Event.sinkEvents(card, Event.ONCLICK);

@@ -7,7 +7,7 @@ html, body {
 }
 
 html, .backdropImage {
-    background-color: BACKGROUND_COLOR_LIGHT;
+    background-color: BACKGROUND_COLOR_DARKEST;
     background-image: resourceUrl("backdropGeneralSized");
     background-position: center center;
     background-repeat: no-repeat;
@@ -124,7 +124,12 @@ input::-ms-input-placeholder,
 .page-header {
     position: fixed;
     top: 0;
-    width: calc(100% - 2.25rem);
+    width: calc(100% - 3.25rem);
+    padding-right: 0;
+    margin: 1rem 0;
+}
+
+.section-header {
     margin: 1rem 0;
 }
 
@@ -155,7 +160,144 @@ input::-ms-input-placeholder,
 
     .page-header {
         position: relative;
-        top: 0;
         width: 100%;
+        padding-right: 1.5rem;
+    }
+}
+
+.event-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-header .back-nav {
+    position: fixed;
+    top: 1rem;
+}
+
+.event-header .event-sub-menu {
+    margin: .5rem 0;
+}
+
+.event-header .event-sub-menu > * {
+    font-size: FONT_SIZE_SMALL;
+    line-height: LINE_HEIGHT_SMALL;
+    font-weight: FONT_WEIGHT_MEDIUM;
+    margin-right: .75rem;
+}
+
+.event-header .event-sub-menu > *.menu-selected,
+.event-header .event-sub-menu > *:hover {
+    color: GENERIC_COLOR_HIGHLIGHT;
+}
+
+.card-content {
+    width: 100%;
+    margin: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 0 13px 13px
+}
+
+.card {
+    border-style: solid;
+    border-radius: 10px;
+    padding: 0px;
+    border-width: 1px;
+    outline: none;
+    background-color: BACKGROUND_COLOR_MEDIUM;
+    border-color: BACKGROUND_COLOR_MEDIUM;
+    margin-bottom: 13px;
+    position: relative;
+}
+
+.card:hover {
+    border-color: GENERIC_COLOR_HIGHLIGHT;
+}
+
+.card .featured-marker {
+    font-size: 12px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px;
+    border-style: solid;
+    outline: none;
+    background-color: GENERIC_COLOR_HIGHLIGHT;
+    border-color: GENERIC_COLOR_HIGHLIGHT;
+    color: TEXT_COLOR_PRIMARY;
+}
+
+.card .title {
+    font-weight: FONT_WEIGHT_MEDIUM;
+    font-size: FONT_SIZE_MEDIUM;
+    line-height: LINE_HEIGHT_MEDIUM;
+}
+
+.card .details {
+    padding-left: .25rem;
+}
+
+@media (max-width: 44.99em) {
+    .card {
+        background-image: none !important;
+    }
+}
+
+@media (min-width: 45em) {
+    .cards .card-panel:nth-child(odd) {
+        padding: 0 .5rem 0 1rem;
+    }
+    
+    .cards .card-panel:nth-child(even) {
+        padding: 0 1rem 0 .5rem;
+    }
+
+    .card {
+        height: 250px;
+        background-image: resourceUrl("eventBackdrop");
+        background-position: center center;
+        background-repeat: no-repeat;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .card.custom-teaser::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 10px;
+        background: linear-gradient(to bottom, transparent 60%, black 120%);
+    }
+
+    .card .card-content {
+        position: absolute;
+        bottom: 0;
+    }
+}
+
+@media (min-width: 60em) {
+    .cards .card-panel:nth-child(3n+1) {
+        padding: 0 .333333333333333rem 0 1rem;
+    }
+    
+    .cards .card-panel:nth-child(3n+2) {
+        padding: 0 .666666666666666rem;
+    }
+    
+    .cards .card-panel:nth-child(3n+3) {
+        padding: 0 1rem 0 .333333333333333rem;
+    }
+}
+
+@media (min-width: 80em) {
+    .cards .card-panel {
+        padding: 0 .25rem;
     }
 }

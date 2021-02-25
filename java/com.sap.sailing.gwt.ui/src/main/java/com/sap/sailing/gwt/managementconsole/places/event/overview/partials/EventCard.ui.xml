@@ -6,15 +6,15 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
-    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.cardPanel}">
-        <div ui:field="card" class="{local_res.style.eventCard}" >
-            <div ui:field="container" class="{local_res.style.eventCardContainer}">
+    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {app_res.style.cardPanel}">
+        <div ui:field="card" class="{app_res.style.card}" >
+            <div ui:field="container" class="{app_res.style.cardContent}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">
-                        <div ui:field="title" class="{local_res.style.title}" />
+                        <div ui:field="title" class="{app_res.style.title}" />
                         <div class="{app_res.style.flexContainer}">
                             <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
-                            <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {local_res.style.details}"/>
+                            <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {app_res.style.details}"/>
                         </div>
                     </div>
                     <g:Anchor ui:field="contextMenu" 

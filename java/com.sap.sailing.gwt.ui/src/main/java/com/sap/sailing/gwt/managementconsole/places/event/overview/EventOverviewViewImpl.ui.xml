@@ -6,14 +6,9 @@
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:style>
-        .mainContent {
-            height: 100%;
-        }
-    </ui:style>
 
-    <g:HTMLPanel addStyleNames="{style.mainContent}">
-        <div class="{res.mediaCss.grid}">
+    <g:HTMLPanel>
+        <div ui:field="headerContainer" class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.pageHeader} {app_res.style.flexContainer}">
                 <div class="{app_res.fonts.pageTitle} {app_res.style.ellipsis}">
                     <ui:text from='{i18n.events}' />
@@ -24,8 +19,10 @@
                 <g:Anchor ui:field="searchEventAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconSearch} {app_res.style.flexItemFixedWidth}" />
             </div>
         </div>
-        <div class="{res.mediaCss.grid} ">
-            <g:FlowPanel ui:field="cards" addStyleNames="{local_res.style.cards}"/>
-        </div>
+        <g:ScrollPanel ui:field="scrollContainer">
+            <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
+                <g:FlowPanel ui:field="cards" addStyleNames="{app_res.style.cards}"/>
+            </g:FlowPanel>
+        </g:ScrollPanel>
     </g:HTMLPanel>
 </ui:UiBinder>
