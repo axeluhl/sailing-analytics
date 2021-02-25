@@ -1476,7 +1476,7 @@ public class UserStoreImpl implements UserStore {
                         removeRoleFromUser(checkUser.getName(), removeOrAdjust);
                         if (removeOrAdjust.getQualifiedForTenant() != null) {
                             addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
-                                    removeOrAdjust.getQualifiedForTenant(), null));
+                                    removeOrAdjust.getQualifiedForTenant(), null, removeOrAdjust.isTransitive()));
                         }
                     } catch (UserManagementException e) {
                         logger.log(Level.WARNING,
