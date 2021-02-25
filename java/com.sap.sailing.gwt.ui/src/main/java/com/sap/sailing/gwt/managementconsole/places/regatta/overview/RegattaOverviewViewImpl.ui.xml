@@ -1,31 +1,28 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:rop="urn:import:com.sap.sailing.gwt.managementconsole.places.regatta.overview.partials">
              
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:style>
-        .mainContent {
-            height: 100%;
-        }
-    </ui:style>
-
-    <g:HTMLPanel addStyleNames="{style.mainContent}">
-        <div class="{res.mediaCss.grid}">
-            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.pageHeader} {app_res.style.flexContainer}">
-                <h1 class="{app_res.style.ellipsis}">
+    <g:HTMLPanel>
+        <div ui:field="headerContainer" class="{res.mediaCss.grid}">
+            <rop:EventHeader ui:field="eventHeader" />
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.flexContainer}">
+                <div class="{app_res.fonts.xlarge} {app_res.style.sectionHeader} {app_res.style.ellipsis}">
                     <ui:text from='{i18n.regattas}' />
-                </h1>
-                <g:Anchor ui:field="addEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+                </div>
+                <g:Anchor ui:field="addRegattaAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
                 <div class="{app_res.style.flexItemAutoWidth}" />
-                <g:Anchor ui:field="filterEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconFilter} {app_res.style.flexItemFixedWidth}" />
-                <g:Anchor ui:field="searchEventAnchor" styleName="{app_res.icons.icon} {app_res.icons.iconSearch} {app_res.style.flexItemFixedWidth}" />
+                
             </div>
         </div>
-        <div class="{res.mediaCss.grid} ">
-            <g:FlowPanel ui:field="cards" styleName="{local_res.style.cards}"/>
-        </div>
+        <g:ScrollPanel ui:field="scrollContainer">
+            <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
+                <g:FlowPanel ui:field="cards" addStyleNames="{local_res.style.cards}"/>
+            </g:FlowPanel>
+        </g:ScrollPanel>
     </g:HTMLPanel>
 </ui:UiBinder>

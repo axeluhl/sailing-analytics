@@ -1,5 +1,4 @@
 @charset "UTF-8";
-@def EVENT_CARD_BACKGROUND_COLOR #1e2d39;
 
 .boatclass-logo {
     width: 1.5em;
@@ -27,56 +26,30 @@
 .cards {
     padding: 0 6px;
 }
-
-.cards .card-panel {
-    padding: 0 7px;
+.event-header {
+    display: flex;
+    flex-direction: column;
 }
 
-.event-card {
-    border-style: solid;
-    border-radius: 10px;
-    padding: 0px;
-    border-width: 1px;
-    outline: none;
-    background-color: EVENT_CARD_BACKGROUND_COLOR;
-    border-color: EVENT_CARD_BACKGROUND_COLOR;
-    margin-bottom: 13px;
-    position: relative;
+.event-header .back-nav {
+    position: fixed;
+    top: 1rem;
 }
 
-.event-card h1 {
-    margin: 0;
-    padding: 0;
-    font-weight: 600;
-    font-size: 16px;
-    color: TEXT_COLOR_PRIMARY;
+.event-header .event-sub-menu {
+    margin: .5rem 0;
 }
 
-.event-card h2 {
-    font-weight: normal;
-    font-size: 11px;
-    color: TEXT_COLOR_SECONDARY;
-    margin-left: 0.5em;
+.event-header .event-sub-menu > * {
+    font-size: FONT_SIZE_SMALL;
+    line-height: LINE_HEIGHT_SMALL;
+    font-weight: FONT_WEIGHT_MEDIUM;
+    margin-right: .75rem;
 }
 
-.event-card .featured-marker {
-    font-size: 12px;
-    text-align: center;
-    border-radius: 5px;
-    border: 1px;
-    border-style: solid;
-    outline: none;
-    background-color: TEXT_COLOR_HIGHLIGHT;
-    border-color: TEXT_COLOR_HIGHLIGHT;
-    color: TEXT_COLOR_PRIMARY;
-}
-
-.event-card .details {
-}
-
-.event-card .location {
-    padding-left: 2rem;
-    background-position: 1rem 0;
+.event-header .event-sub-menu > *.menu-selected,
+.event-header .event-sub-menu > *:hover {
+    color: GENERIC_COLOR_HIGHLIGHT;
 }
 
 .event-card-container {
@@ -87,14 +60,67 @@
     padding: 10px 0 13px 13px
 }
 
+.event-card {
+    border-style: solid;
+    border-radius: 10px;
+    padding: 0px;
+    border-width: 1px;
+    outline: none;
+    background-color: BACKGROUND_COLOR_MEDIUM;
+    border-color: BACKGROUND_COLOR_MEDIUM;
+    margin-bottom: 13px;
+    position: relative;
+}
+
+.event-card:hover {
+    border-color: GENERIC_COLOR_HIGHLIGHT;
+}
+
+.event-card .featured-marker {
+    font-size: 12px;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px;
+    border-style: solid;
+    outline: none;
+    background-color: GENERIC_COLOR_HIGHLIGHT;
+    border-color: GENERIC_COLOR_HIGHLIGHT;
+    color: TEXT_COLOR_PRIMARY;
+}
+
+.event-card .title {
+    font-weight: FONT_WEIGHT_MEDIUM;
+    font-size: FONT_SIZE_MEDIUM;
+    line-height: LINE_HEIGHT_MEDIUM;
+}
+
+.event-card .details {
+    padding-left: .25rem;
+}
+
 @media (max-width: 44.99em) {
     .event-card {
-        background-image: none!important;
+        background-image: none !important;
     }
 }
 
 @media (min-width: 45em) {
+    .cards .card-panel:nth-child(odd) {
+        padding: 0 .5rem 0 1rem;
+    }
     
+    .cards .card-panel:nth-child(even) {
+        padding: 0 1rem 0 .5rem;
+    }
+    
+    .event-header {
+        margin-top: 2rem;
+    }
+
+    .event-header .back-nav {
+        position: static;
+    }
+
     .event-card {
         height: 250px;
         background-image: resourceUrl("eventBackdrop");
@@ -105,9 +131,11 @@
         -o-background-size: cover;
         background-size: cover;
         position: relative;
+        margin-bottom: 1rem;
+        
     }
 
-    .event-card.custom-teaser:before {
+    .event-card.custom-teaser::before {
         content: '';
         position: absolute;
         top: 0;
@@ -117,10 +145,35 @@
         border-radius: 10px;
         background: linear-gradient(to bottom, transparent 60%, black 120%);
     }
-    
 
     .event-card .event-card-container {
         position: absolute;
         bottom: 0;
+    }
+}
+
+@media (min-width: 60em) {
+    .cards .card-panel:nth-child(3n+1) {
+        padding: 0 .333333333333333rem 0 1rem;
+    }
+    
+    .cards .card-panel:nth-child(3n+2) {
+        padding: 0 .666666666666666rem;
+    }
+    
+    .cards .card-panel:nth-child(3n+3) {
+        padding: 0 1rem 0 .333333333333333rem;
+    }
+}
+
+@media (min-width: 80em) {
+    .cards .card-panel {
+        padding: 0 .25rem;
+    }
+}
+
+@media (min-width: 85em) {
+    .event-header .back-nav {
+        margin-left: -33px;
     }
 }

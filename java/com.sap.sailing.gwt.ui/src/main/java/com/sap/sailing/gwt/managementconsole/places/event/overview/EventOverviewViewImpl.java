@@ -3,11 +3,14 @@ package com.sap.sailing.gwt.managementconsole.places.event.overview;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.partials.EventCard;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
@@ -27,6 +30,12 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
 
     @UiField
     ManagementConsoleResources app_res;
+
+    @UiField
+    Element headerContainer;
+
+    @UiField
+    ScrollPanel scrollContainer;
 
     @UiField
     FlowPanel cards;
@@ -49,6 +58,12 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
     public void renderEvents(final List<EventDTO> events) {
         cards.clear();
         events.stream().map(event -> new EventCard(event, presenter)).forEach(cards::add);
+    }
+
+    @Override
+    public void onResize() {
+        final int scrollContainerHeight = getElement().getOffsetHeight() - headerContainer.getOffsetHeight();
+        scrollContainer.getElement().getStyle().setHeight(scrollContainerHeight, Unit.PX);
     }
 
 }

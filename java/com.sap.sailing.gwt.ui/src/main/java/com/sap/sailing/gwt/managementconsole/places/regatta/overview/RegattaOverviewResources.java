@@ -7,13 +7,25 @@ import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResource
 
 public interface RegattaOverviewResources extends ClientBundle {
 
-    @Source({ ManagementConsoleResources.COLORS, "RegattaOverview.gss" })
+    @Source({ ManagementConsoleResources.COLORS, ManagementConsoleResources.SIZES, "RegattaOverview.gss" })
     Style style();
 
     @Source("../../../resources/images/Image-EventBackdrop.png")
     ImageResource eventBackdrop();
 
     interface Style extends CssResource {
+
+        @ClassName("event-header")
+        String eventHeader();
+
+        @ClassName("back-nav")
+        String backNavigation();
+
+        @ClassName("event-sub-menu")
+        String eventSubMenu();
+
+        @ClassName("menu-selected")
+        String menuSelected();
 
         @ClassName("featured-marker")
         String featuredMarker();
@@ -26,12 +38,12 @@ public interface RegattaOverviewResources extends ClientBundle {
         @ClassName("event-card")
         String eventCard();
 
+        String title();
+
         String details();
 
         @ClassName("event-card-container")
         String eventCardContainer();
-
-        String location();
 
         @ClassName("custom-teaser")
         String customTeaser();

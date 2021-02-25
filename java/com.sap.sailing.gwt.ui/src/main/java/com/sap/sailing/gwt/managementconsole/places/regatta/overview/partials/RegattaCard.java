@@ -10,7 +10,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
@@ -29,9 +28,7 @@ public class RegattaCard extends Composite {
     @UiField
     RegattaOverviewResources local_res;
     @UiField
-    Element card, title, subTitle;
-    @UiField
-    Anchor advancedSettingsRegattaAnchor;
+    Element card, container, title, details;
     @UiField
     AnchorElement logoUi;
     @UiField
@@ -55,10 +52,10 @@ public class RegattaCard extends Composite {
 
         racesUi.setInnerText(raceCount + " races");
         this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(regatta.getName()));
-        this.subTitle.setInnerSafeHtml(SafeHtmlUtils.fromString(date));
+        this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(date));
     }
 
-    @UiHandler("advancedSettingsRegattaAnchor")
+    @UiHandler("contextMenu")
     void onSettingsIconClick(final ClickEvent regatta) {
         presenter.navigateToRegatta(this.regatta);
     }

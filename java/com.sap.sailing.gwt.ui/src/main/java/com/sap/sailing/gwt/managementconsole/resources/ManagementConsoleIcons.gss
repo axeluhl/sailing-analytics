@@ -37,6 +37,7 @@
 
 .icon-back::before {
     background-image: resourceUrl("iconBack");
+    background-position: left center;
 }
 
 .icon-close::before {
@@ -75,4 +76,8 @@
 .icon-elipse::before {
     background-image: resourceUrl("iconElipse");
     height: 1rem;
+}
+
+.icon-settings::before {
+    background-image: resourceUrl("iconSettings");
 }
