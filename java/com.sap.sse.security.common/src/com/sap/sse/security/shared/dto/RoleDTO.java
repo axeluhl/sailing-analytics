@@ -10,8 +10,8 @@ public class RoleDTO extends AbstractRole<StrippedRoleDefinitionDTO, StrippedUse
     }
 
     public RoleDTO(StrippedRoleDefinitionDTO roleDefinition, StrippedUserGroupDTO qualifiedForTenant,
-            StrippedUserDTO qualifiedForUser) {
-        super(roleDefinition, qualifiedForTenant, qualifiedForUser);
+            StrippedUserDTO qualifiedForUser, boolean transitive) {
+        super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);
     }
 
     public RoleDTO(StrippedRoleDefinitionDTO roleDefinition) {

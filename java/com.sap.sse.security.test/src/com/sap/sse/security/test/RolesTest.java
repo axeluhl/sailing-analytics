@@ -26,9 +26,9 @@ public class RolesTest {
         assertEquals("role", role.toString());
         final Role role2 = new Role(roleDefinition, tenant, /* user qualification */ null);
         assertEquals("role:tenant", role2.toString());
-        final RoleDTO role3 = new RoleDTO(roleDefinition, tenantDTO, user);
+        final RoleDTO role3 = new RoleDTO(roleDefinition, tenantDTO, user, true);
         assertEquals("role:tenant:user", role3.toString());
-        final RoleDTO role4 = new RoleDTO(roleDefinition, /* tenant qualification */ null, user);
+        final RoleDTO role4 = new RoleDTO(roleDefinition, /* tenant qualification */ null, user, true);
         assertEquals("role::user", role4.toString());
     }
 }
