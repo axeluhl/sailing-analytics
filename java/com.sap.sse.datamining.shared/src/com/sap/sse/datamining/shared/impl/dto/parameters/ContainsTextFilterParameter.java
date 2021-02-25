@@ -4,6 +4,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class ContainsTextFilterParameter extends TextConstrainedFilterParameter {
+    private static final long serialVersionUID = 3323982237823278947L;
 
     public  ContainsTextFilterParameter() { }
 

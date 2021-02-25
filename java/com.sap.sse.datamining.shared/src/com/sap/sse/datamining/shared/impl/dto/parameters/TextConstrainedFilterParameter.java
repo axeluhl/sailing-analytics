@@ -6,7 +6,8 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public abstract class TextConstrainedFilterParameter extends AbstractParameterizedDimensionFilter {
-
+    private static final long serialVersionUID = -8262333466186896929L;
+    
     private String constraint;
     
     public TextConstrainedFilterParameter() { }

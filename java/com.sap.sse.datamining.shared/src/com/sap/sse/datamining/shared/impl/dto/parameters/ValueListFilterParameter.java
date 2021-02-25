@@ -7,7 +7,8 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class ValueListFilterParameter extends AbstractParameterizedDimensionFilter {
-
+    private static final long serialVersionUID = -8440835683986197499L;
+    
     private HashSet<? extends Serializable> values;
 
     public  ValueListFilterParameter() { }

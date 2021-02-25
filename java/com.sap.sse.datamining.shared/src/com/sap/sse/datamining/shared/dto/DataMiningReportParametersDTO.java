@@ -1,9 +1,10 @@
 package com.sap.sse.datamining.shared.dto;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public interface DataMiningReportParametersDTO {
+public interface DataMiningReportParametersDTO extends Serializable {
     
     boolean isEmpty();
     

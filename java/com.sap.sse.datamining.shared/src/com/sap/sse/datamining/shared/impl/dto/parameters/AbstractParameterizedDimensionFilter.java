@@ -9,7 +9,8 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public abstract class AbstractParameterizedDimensionFilter implements FilterDimensionParameter {
-
+    private static final long serialVersionUID = 3853015601496471357L;
+    
     private DataRetrieverLevelDTO retrieverLevel;
     private FunctionDTO dimension;
 

@@ -6,7 +6,7 @@ import java.util.Collection;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
-public interface FilterDimensionParameter {
+public interface FilterDimensionParameter extends Serializable {
     DataRetrieverLevelDTO getRetrieverLevel();
     FunctionDTO getDimension();
     

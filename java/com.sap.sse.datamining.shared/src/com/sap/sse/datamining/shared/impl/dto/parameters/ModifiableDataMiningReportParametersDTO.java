@@ -10,6 +10,7 @@ import com.sap.sse.datamining.shared.dto.DataMiningReportParametersDTO;
 import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
 
 public class ModifiableDataMiningReportParametersDTO implements DataMiningReportParametersDTO {
+    private static final long serialVersionUID = -1898369096479655505L;
     
     private HashSet<FilterDimensionParameter> parameters;
     private HashMap<Integer, HashSet<FilterDimensionParameter>> usages;
@@ -53,7 +54,7 @@ public class ModifiableDataMiningReportParametersDTO implements DataMiningReport
                     keysToRemove.add(key);
                 }
             });
-            keysToRemove.forEach(usages::remove);
+            keysToRemove.forEach(usages::remove); // TODO this?
         }
         return removed;
     }
