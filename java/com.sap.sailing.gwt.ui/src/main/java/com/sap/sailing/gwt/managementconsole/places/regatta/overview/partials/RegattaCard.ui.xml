@@ -15,7 +15,7 @@
                         <div class="{app_res.style.flexContainer}">
                             <a class="{local_res.style.boatclassLogo}" ui:field="logoUi"></a>
                             <span ui:field="racesUi" class="{local_res.style.races}"></span>
-                            <h2 ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {app_res.style.details}"/>       
+                            <h2 ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {app_res.style.details}"/>         
                         </div>                     
                     </div>
                     <g:Anchor ui:field="contextMenu" 
