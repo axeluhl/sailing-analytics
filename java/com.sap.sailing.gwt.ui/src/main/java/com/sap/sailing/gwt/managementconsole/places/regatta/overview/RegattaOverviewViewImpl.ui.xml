@@ -21,7 +21,7 @@
         </div>
         <g:ScrollPanel ui:field="scrollContainer">
             <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
-                <g:FlowPanel ui:field="cards" addStyleNames="{app_res.style.cards}"/>
+                <g:FlowPanel ui:field="cards" />
             </g:FlowPanel>
         </g:ScrollPanel>
     </g:HTMLPanel>

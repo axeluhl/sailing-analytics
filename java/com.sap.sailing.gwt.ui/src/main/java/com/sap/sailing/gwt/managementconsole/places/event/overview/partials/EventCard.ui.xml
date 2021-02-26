@@ -6,9 +6,9 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
-    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {app_res.style.cardPanel}">
+    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.eventCardPanel}">
         <div ui:field="card" class="{app_res.style.card}" >
-            <div ui:field="container" class="{app_res.style.cardContent}">
+            <div ui:field="container" class="{local_res.style.eventCardContent} {app_res.style.cardContent}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">
                         <div ui:field="title" class="{app_res.style.title}" />

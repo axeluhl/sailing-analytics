@@ -130,11 +130,6 @@ public interface ManagementConsoleResources extends ClientBundle {
         @ClassName("featured-marker")
         String featuredMarker();
 
-        String cards();
-
-        @ClassName("card-panel")
-        String cardPanel();
-
         @ClassName("card")
         String card();
 
@@ -145,8 +140,6 @@ public interface ManagementConsoleResources extends ClientBundle {
         @ClassName("card-content")
         String cardContent();
 
-        @ClassName("custom-teaser")
-        String customTeaser();
     }
 
     @Shared

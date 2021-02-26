@@ -49,7 +49,7 @@ public class EventCard extends Composite {
 
         ofNullable(event.getTeaserImage()).map(ImageDTO::getSourceRef).ifPresent(imageUrl -> {
             this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')");
-            this.card.addClassName(app_res.style().customTeaser());
+            this.card.addClassName(local_res.style().customTeaser());
         });
 
         Event.sinkEvents(card, Event.ONCLICK);

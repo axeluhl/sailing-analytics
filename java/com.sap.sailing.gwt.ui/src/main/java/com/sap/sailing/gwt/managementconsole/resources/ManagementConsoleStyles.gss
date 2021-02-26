@@ -170,9 +170,11 @@ input::-ms-input-placeholder,
     flex-direction: column;
 }
 
-.event-header .back-nav {
-    position: fixed;
-    top: 1rem;
+@media (max-width: 44.99em) {
+	.event-header .back-nav {
+	    position: fixed;
+	    top: 1rem;
+	}
 }
 
 .event-header .event-sub-menu {
@@ -240,64 +242,5 @@ input::-ms-input-placeholder,
 @media (max-width: 44.99em) {
     .card {
         background-image: none !important;
-    }
-}
-
-@media (min-width: 45em) {
-    .cards .card-panel:nth-child(odd) {
-        padding: 0 .5rem 0 1rem;
-    }
-    
-    .cards .card-panel:nth-child(even) {
-        padding: 0 1rem 0 .5rem;
-    }
-
-    .card {
-        height: 250px;
-        background-image: resourceUrl("eventBackdrop");
-        background-position: center center;
-        background-repeat: no-repeat;
-        -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover;
-        position: relative;
-        margin-bottom: 1rem;
-    }
-
-    .card.custom-teaser::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 10px;
-        background: linear-gradient(to bottom, transparent 60%, black 120%);
-    }
-
-    .card .card-content {
-        position: absolute;
-        bottom: 0;
-    }
-}
-
-@media (min-width: 60em) {
-    .cards .card-panel:nth-child(3n+1) {
-        padding: 0 .333333333333333rem 0 1rem;
-    }
-    
-    .cards .card-panel:nth-child(3n+2) {
-        padding: 0 .666666666666666rem;
-    }
-    
-    .cards .card-panel:nth-child(3n+3) {
-        padding: 0 1rem 0 .333333333333333rem;
-    }
-}
-
-@media (min-width: 80em) {
-    .cards .card-panel {
-        padding: 0 .25rem;
     }
 }
