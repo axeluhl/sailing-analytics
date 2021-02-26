@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +25,6 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -70,6 +69,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String WEBM_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(webm)";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
+    
+    private final Consumer<VideoDTO> updateVideo;
+    private final Consumer<ImageDTO> updateImage;
 
     protected final FileUpload upload;
     protected final FlowPanel content;
@@ -78,16 +80,20 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final TextBox titleTextBox;
     protected final TextBox subtitleTextBox;
     protected final TextBox copyrightTextBox;
-    protected final ListBox mimeTypeListBox;;
+    protected final ListBox mimeTypeListBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
-    private final SailingServiceWriteAsync sailingServiceWrite;
-    private final UUID eventId;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
+    protected final UUID eventId;
     private String uri;
     
-    public AbstractMediaUploadPopup(SailingServiceWriteAsync sailingServiceWrite, UUID eventId) {
+    public AbstractMediaUploadPopup(SailingServiceWriteAsync sailingServiceWrite, UUID eventId, 
+            Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.eventId = eventId;
+        this.updateVideo = updateVideo;
+        this.updateImage = updateImage;
+        
         sharedHomeResources.sharedHomeCss().ensureInjected();
         addStyleName(sharedHomeResources.sharedHomeCss().popup());
         setTitle(i18n.upload());
@@ -163,6 +169,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             @Override
             public void onChange(ChangeEvent event) {
                 selectMimeTypeInBox(getMimeType(urlInput.getValue()));
+                checkSaveButton();
             }
         });
         metaDataPanel.add(urlInput);
@@ -361,8 +368,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                             .stringValue();
                     String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString()
                             .stringValue();
-                    Notification.notify("upload '" + fileName + "' to url: " + uri, NotificationType.INFO);
                     updateUri(uri, fileName);
+                    fileNameInput.setValue(i18n.uploadSuccessful());
                 } else {
                     String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue();
                     String message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue();
@@ -380,6 +387,15 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     public void openFileUpload() {
         upload.click();
     }
+    
+    @Override
+    public void show() {
+        // reset all fields
+        updateUri(null, null);
+        subtitleTextBox.setValue("");
+        copyrightTextBox.setValue("");
+        super.show();
+    }
 
     /**
      * Finally add a new MediaTrack.
@@ -389,7 +405,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             
             @Override
             public void onSuccess(EventDTO event) {
-               logger.info("Event loaded. " + event + ", images: " + event.getImages().size() + ", videos: " + event.getVideos().size());
                 final String uploadUrl;
                 if (uri == null) {
                     uploadUrl = "";
@@ -424,11 +439,13 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                         mimeType = MimeType.unknown;
                     }
                     if (mimeType.mediaType == MediaType.image) {
-                        event.addImage(createImage(url));
-                        updateEvent(event);
+                        final ImageDTO newImage = createImage(url);
+                        event.addImage(newImage);
+                        updateEvent(event, x -> addImage(newImage));
                     } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
-                        event.addVideo(createVideo(url, null, mimeType));
-                        updateEvent(event);
+                        final VideoDTO newVideo = createVideo(url, null, mimeType);
+                        event.addVideo(newVideo);
+                        updateEvent(event, x -> addVideo(newVideo));
                     } else {
                         logger.warning("No image nor video detected. Nothing will be saved.");
                         // TODO: translation
@@ -459,14 +476,13 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         **/
     }
     
-    private void updateEvent(EventDTO event) {
+    private void updateEvent(EventDTO event, Consumer<EventDTO> onSuccess) {
         AbstractMediaUploadPopup.this.sailingServiceWrite.updateEvent(event, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(EventDTO result) {
+                onSuccess.accept(result);
                 logger.info("Event updated. " + event + ", images: " + event.getImages().size() + ", videos: " + event.getVideos().size());
-                Notification.notify(i18n.fileUploadResult(
-                        STATUS_OK,
-                        "Image was saved successfully"),
+                Notification.notify(i18n.uploadSuccessful(),
                         NotificationType.SUCCESS);
                 AbstractMediaUploadPopup.this.hide();
             }
@@ -587,6 +603,14 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     abstract protected void updateFileName(String fileName);
+
+    protected void addVideo(VideoDTO video) {
+        updateVideo.accept(video);
+    }
+
+    protected void addImage(ImageDTO image) {
+        updateImage.accept(image);
+    }
     
     private void checkSaveButton() {
         boolean urlInputNotEmpty = urlInput.getValue() != null && !urlInput.getValue().trim().isEmpty();

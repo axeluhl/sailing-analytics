@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.imagegallery;
 
+import java.util.function.Consumer;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -9,6 +11,7 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -27,7 +30,7 @@ public class ImageGalleryItem extends Composite implements HasClickHandlers {
     @UiField Button editButtonUi;
     @UiField Button deleteButtonUi;
     
-    public ImageGalleryItem(ImageDTO image, ClickHandler deleteHandler) {
+    public ImageGalleryItem(final ImageDTO image, final Consumer<ImageDTO> deleteImage) {
         MediaViewResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + image.getSourceRef() + "')");
@@ -38,7 +41,17 @@ public class ImageGalleryItem extends Composite implements HasClickHandlers {
                 event.stopPropagation();
             }
         });
-        deleteButtonUi.addClickHandler(deleteHandler);
+        editButtonUi.setVisible(false);
+        deleteButtonUi.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                event.stopPropagation();
+                // TODO translate
+                if (Window.confirm("Do you really want to delete this Image?")) {
+                    deleteImage.accept(image);
+                }
+            }
+        });
     }
     
     @Override

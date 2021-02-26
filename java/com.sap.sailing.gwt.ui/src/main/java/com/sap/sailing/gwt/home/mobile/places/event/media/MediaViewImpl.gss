@@ -58,10 +58,11 @@
 .deleteButton {
     position: absolute;
     top: 10px;
-    right: 60px;
+    right: 10px;
     height: 40px;
     width: 40px;
     background-color: #2b2a2a;
+    z-index: 1;
 }
 
 .deleteButton:after {
@@ -71,10 +72,11 @@
 .editButton {
     position: absolute;
     top: 10px;
-    right: 10px;
+    right: 60px;
     height: 40px;
     width: 40px;
     background-color: #2b2a2a;
+    z-index: 1;
 }
 
 .editButton:after {

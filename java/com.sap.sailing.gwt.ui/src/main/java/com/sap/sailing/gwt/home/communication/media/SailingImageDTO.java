@@ -18,6 +18,18 @@ public class SailingImageDTO extends ImageDTO {
         super(imageRef, createdAtDate);
         this.eventLink = eventLink;
     }
+    
+    public SailingImageDTO(EventLinkDTO eventLink, ImageDTO imageDto) {
+        super(imageDto.getSourceRef(), imageDto.getCreatedAtDate());
+        setCopyright(imageDto.getCopyright());
+        setLocale(imageDto.getLocale());
+        setMimeType(imageDto.getMimeType());
+        setSizeInPx(imageDto.getWidthInPx(), imageDto.getHeightInPx());
+        setSubtitle(imageDto.getSubtitle());
+        setTags(imageDto.getTags());
+        setTitle(imageDto.getTitle());
+        this.eventLink = eventLink;
+    }
 
     public EventLinkDTO getEventLink() {
         return eventLink;

@@ -59,8 +59,10 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
         //setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");
         captionUi.setInnerText(video.getTitle());
-        deleteAnchor.addClickHandler(deleteHandler);
+        // TODO: activate after implementing edit logic
         //editAnchor.addClickHandler(editHandler);
+        editAnchor.setVisible(false);
+        deleteAnchor.addClickHandler(deleteHandler);
         if (video.getThumbnailRef() == null) {
             if (video.getMimeType().mediaSubType == MediaSubType.youtube) {
                 String youtubeId = YoutubeApi.getIdByUrl(video.getSourceRef());

@@ -21,6 +21,18 @@ public class SailingVideoDTO extends VideoDTO {
         this.eventRef = eventRef;
     }
     
+    public SailingVideoDTO(EventReferenceDTO eventRef, VideoDTO videoDto) {
+    	super(videoDto.getSourceRef(), videoDto.getMimeType(), videoDto.getCreatedAtDate());
+    	setCopyright(videoDto.getCopyright());
+    	setLengthInSeconds(videoDto.getLengthInSeconds());
+    	setLocale(videoDto.getLocale());
+    	setSubtitle(videoDto.getSubtitle());
+    	setTags(videoDto.getTags());
+    	setThumbnailRef(videoDto.getThumbnailRef());
+    	setTitle(videoDto.getTitle());
+    	this.eventRef = eventRef;
+    }
+    
 
     public EventReferenceDTO getEventRef() {
         return eventRef;

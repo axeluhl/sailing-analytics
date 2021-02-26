@@ -36,7 +36,7 @@ public class MediaActivity extends AbstractEventActivity<AbstractEventPlace> imp
         initMedia(new MediaCallback() {
             @Override
             public void onSuccess(MediaDTO result) {
-                view.setMedia(result.getVideos(), result.getPhotos());
+                view.setMedia(result);
             }
         });
         return view;

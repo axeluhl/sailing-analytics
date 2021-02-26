@@ -79,6 +79,8 @@ public class MediaPage extends Composite {
     @UiField
     StringMessages i18n;
     
+    private MediaDTO media;
+    
     private boolean manageVideos;
     private boolean managePhotos;
     private final SimplePanel contentPanel;
@@ -95,15 +97,19 @@ public class MediaPage extends Composite {
     }
     
     private void setVideosManaged(boolean managed) {
-        if (managed) {
-            videoSettingsButton.addStyleName(local_res.css().active());
-        } else {
-            videoSettingsButton.removeStyleName(local_res.css().active());
+        if (videoSettingsButton != null) {
+            if (managed) {
+                videoSettingsButton.addStyleName(local_res.css().active());
+            } else {
+                videoSettingsButton.removeStyleName(local_res.css().active());
+            }
         }
-        for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
-            if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
-                VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
-                thumb.setManageable(managed);
+        if (videosListUi != null) {
+            for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
+                if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
+                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
+                    thumb.setManageable(managed);
+                }
             }
         }
     }
@@ -115,15 +121,19 @@ public class MediaPage extends Composite {
     }
     
     private void setPhotosManaged(boolean managed) {
-        if (managed) {
-            photoSettingsButton.addStyleName(local_res.css().active());
-        } else {
-            photoSettingsButton.removeStyleName(local_res.css().active());
+        if (photoSettingsButton != null) {
+            if (managed) {
+                photoSettingsButton.addStyleName(local_res.css().active());
+            } else {
+                photoSettingsButton.removeStyleName(local_res.css().active());
+            }
         }
-        for (int i = 0; i < photoListOuterBoxUi.getWidgetCount(); i++) {
-            if (photoListOuterBoxUi.getWidget(i) instanceof GalleryImageHolder) {
-                GalleryImageHolder gih = (GalleryImageHolder) photoListOuterBoxUi.getWidget(i);
-                gih.setManageable(managed);
+        if (photoListOuterBoxUi != null) {
+            for (int i = 0; i < photoListOuterBoxUi.getWidgetCount(); i++) {
+                if (photoListOuterBoxUi.getWidget(i) instanceof GalleryImageHolder) {
+                    GalleryImageHolder gih = (GalleryImageHolder) photoListOuterBoxUi.getWidget(i);
+                    gih.setManageable(managed);
+                }
             }
         }
     }
@@ -131,7 +141,17 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(sailingServiceWrite, eventId);
+        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(sailingServiceWrite, eventId,
+        		video -> {
+        			SailingVideoDTO sailingVideoDTO = new SailingVideoDTO(null, video);
+        			media.getVideos().add(sailingVideoDTO);
+        			setMedia(media);
+        			}, 
+        		image -> {
+        			SailingImageDTO imageSailingImageDTO = new SailingImageDTO(null, image);
+        			media.getPhotos().add(imageSailingImageDTO);
+        			setMedia(media);
+        		});
         popupHolder.add(popup);
         popup.center();
     }
@@ -158,6 +178,7 @@ public class MediaPage extends Composite {
     }
     
     public void setMedia(final MediaDTO media) {
+    	this.media = media;
         Widget mediaUi = uiBinder.createAndBindUi(this);
         int photosCount = media.getPhotos().size();
         if (photosCount > 0) {
@@ -267,6 +288,8 @@ public class MediaPage extends Composite {
                                 
                                 @Override
                                 public void onSuccess(EventDTO result) {
+                                	media.getVideos().remove(videoCandidateInfo);
+                                	setMedia(media);
                                     // TODO: translate
                                     Notification.notify("Video removed.", NotificationType.SUCCESS);
                                 }
@@ -311,6 +334,8 @@ public class MediaPage extends Composite {
                                 
                                 @Override
                                 public void onSuccess(EventDTO result) {
+                                    media.getPhotos().remove(imageCandidateInfo);
+                                    setMedia(media);
                                     // TODO: translate
                                     Notification.notify("Image removed.", NotificationType.SUCCESS);
                                 }
@@ -352,11 +377,9 @@ public class MediaPage extends Composite {
         mediaAddButton.setVisible(managed);
         photoSettingsButton.setVisible(managed);
         videoSettingsButton.setVisible(managed);
-        if (!managed) {
-            managePhotos = false;
-            setPhotosManaged(managePhotos);
-            manageVideos = false;
-            setVideosManaged(manageVideos);
-        }
+        managePhotos = false;
+        setPhotosManaged(managePhotos);
+        manageVideos = false;
+        setVideosManaged(manageVideos);
     }
 }

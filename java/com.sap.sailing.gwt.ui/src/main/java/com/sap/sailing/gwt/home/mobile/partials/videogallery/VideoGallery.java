@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.videogallery;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,11 +42,11 @@ public class VideoGallery extends Composite {
         });
     }
     
-    public void setVideos(Collection<? extends VideoDTO> videos) {
+    public void setVideos(Collection<? extends VideoDTO> videos, Consumer<VideoDTO> deleteVideo) {
         sectionHeaderUi.setInfoText(StringMessages.INSTANCE.videosCount(videos.size()));
         mobileSection.clearContent();
         for (VideoDTO video : videos) {
-            mobileSection.addContent(new VideoGalleryVideo(video));
+            mobileSection.addContent(new VideoGalleryVideo(video, deleteVideo));
         }
     }
     

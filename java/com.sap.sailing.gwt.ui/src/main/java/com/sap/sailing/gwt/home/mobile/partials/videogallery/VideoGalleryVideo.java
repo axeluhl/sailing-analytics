@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.videogallery;
 
+import java.util.Date;
+import java.util.function.Consumer;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -7,6 +10,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,6 +24,8 @@ public class VideoGalleryVideo extends Composite {
     private static VideoGalleryVideoUiBinder uiBinder = GWT.create(VideoGalleryVideoUiBinder.class);
     
     private boolean managed;
+    private final String videoUrl;
+    private final Date videoCreateDate;
     
     interface VideoGalleryVideoUiBinder extends UiBinder<Widget, VideoGalleryVideo> {
     }
@@ -31,23 +37,26 @@ public class VideoGalleryVideo extends Composite {
     @UiField Button editButtonUi;
     @UiField Button deleteButtonUi;
     
-    public VideoGalleryVideo(VideoDTO video) {
+    public VideoGalleryVideo(VideoDTO video, Consumer<VideoDTO> updateVideo) {
+        this.videoUrl = video.getSourceRef();
+        this.videoCreateDate = video.getCreatedAtDate();
         initWidget(uiBinder.createAndBindUi(this));
         SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         videoPlayerUi.setVideo(video);
         setTextOrRemove(videoTitleUi, video.getTitle());
         setTextOrRemove(videoCreateDateUi, DateAndTimeFormatterUtil.formatDateAndTime(video.getCreatedAtDate()));
         overlayUi.getStyle().setVisibility(Visibility.HIDDEN);
-        editButtonUi.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                event.stopPropagation();
-            }
-        });
+        // disable until edit function is implemented
+        editButtonUi.setVisible(false);
+        
         deleteButtonUi.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
+                // TODO translate
+                if (Window.confirm("Do you really want to delete this video?")) {
+                    updateVideo.accept(video);
+                }
             }
         });
     }
@@ -63,9 +72,15 @@ public class VideoGalleryVideo extends Composite {
     public void manageMedia(boolean manage) {
         this.managed = manage;
         if (this.managed) {
-            overlayUi.getStyle().setVisibility(Visibility.VISIBLE);            
+            overlayUi.getStyle().setVisibility(Visibility.VISIBLE);
         } else {
             overlayUi.getStyle().setVisibility(Visibility.HIDDEN);
         }
+    }
+    
+    public boolean contains(VideoDTO video) {
+        return video != null 
+                && videoUrl.equals(video.getSourceRef())
+                && videoCreateDate.equals(video.getCreatedAtDate()); 
     }
 }
