@@ -331,10 +331,12 @@ implements UserDataProvider {
 
     private final Map<ProcessConfigurationVariable, String> userData;
     private final String serverName;
+    private final Optional<Release> release;
     
     protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
         this.serverName = builder.getServerName();
+        this.release = builder.getRelease();
     }
 
     @Override
@@ -344,5 +346,9 @@ implements UserDataProvider {
     
     protected String getServerName() {
         return serverName;
+    }
+
+    public Optional<Release> getRelease() {
+        return release;
     }
 }

@@ -1,7 +1,6 @@
 package com.sap.sailing.landscape.procedures;
 
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -18,7 +17,8 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * For an {@link ApplicationReplicaSet} and a {@link TargetGroup} that represents the application replica set's
  * public target group creates an AWS EC2 Launch Configuration and a corresponding Auto-Scaling Group which by
  * default produces a minimum of one replica, a maximum of 30 replicas, scaling based on the number of requests
- * per target which are supposed to not exceed 30,000.<p>
+ * per target which are supposed to not exceed 30,000. An {@link AwsApplicationConfiguration} for the replica's
+ * config must be provided and is expected to use the same {@link Release} as the master.<p>
  * 
  * The builder for the procedure requires the bearer token for replication permissions and the target group. Other properties
  * are optional.
@@ -30,74 +30,70 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
 public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
+    private static final int MIN_REPLICAS = 1;
+    private static final int MAX_REPLICAS = 30;
+    private static final int MAX_REQUESTS_PER_TARGET = 30000;
+    
+    /**
+     * 
+     * @author Axel Uhl (D043530)
+     */
     public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey> {
-        void setKeyName(String keyName);
+        BuilderT setKeyName(String keyName);
 
-        void setApplicationConfiguration(AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration);
+        BuilderT setReplicaConfiguration(AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration);
 
-        void setInstanceType(InstanceType instanceType);
+        BuilderT setInstanceType(InstanceType instanceType);
 
-        void setImage(AmazonMachineImage<ShardingKey> image);
-
-        void setRelease(Release release);
-        
+        BuilderT setImage(AmazonMachineImage<ShardingKey> image);
     }
     
     protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
     implements Builder<ShardingKey, BuilderT, MetricsT, ProcessT> {
         private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
-        private final String replicationBearerToken;
         private final TargetGroup<ShardingKey> targetGroup;
         private final Region region;
         private String keyName;
-        private Release release;
         private AmazonMachineImage<ShardingKey> image;
         private InstanceType instanceType;
-        private AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration;
+        private AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
 
         public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
-                String replicationBearerToken, TargetGroup<ShardingKey> targetGroup) {
+                TargetGroup<ShardingKey> targetGroup) {
             this.applicationReplicaSet = applicationReplicaSet;
-            this.replicationBearerToken = replicationBearerToken;
             this.targetGroup = targetGroup;
             this.region = region;
             setLandscape(landscape);
         }
         
         @Override
-        public void setKeyName(String keyName) {
+        public BuilderT setKeyName(String keyName) {
             this.keyName = keyName;
+            return self();
         }
 
         @Override
-        public void setRelease(Release release) {
-            this.release = release;
-        }
-
-        @Override
-        public void setImage(AmazonMachineImage<ShardingKey> image) {
+        public BuilderT setImage(AmazonMachineImage<ShardingKey> image) {
             this.image = image;
+            return self();
         }
 
         @Override
-        public void setInstanceType(InstanceType instanceType) {
+        public BuilderT setInstanceType(InstanceType instanceType) {
             this.instanceType = instanceType;
+            return self();
         }
 
         @Override
-        public void setApplicationConfiguration(
-                AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration) {
-            this.applicationConfiguration = applicationConfiguration;
+        public BuilderT setReplicaConfiguration(AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration) {
+            this.replicaConfiguration = replicaConfiguration;
+            return self();
         }
 
         protected ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet() {
             return applicationReplicaSet;
-        }
-
-        protected String getReplicationBearerToken() {
-            return replicationBearerToken;
         }
 
         protected TargetGroup<ShardingKey> getTargetGroup() {
@@ -112,44 +108,38 @@ implements Procedure<ShardingKey> {
             return keyName;
         }
 
-        protected Release getRelease() {
-            return release;
-        }
-
         protected AmazonMachineImage<ShardingKey> getImage() {
             return image;
+        }
+        
+        protected InstanceType getInstanceType() {
+            return instanceType;
+        }
+        
+        protected AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> getReplicaConfiguration() {
+            return replicaConfiguration;
         }
 
         @Override
         public CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             return new CreateLaunchConfigurationAndAutoScalingGroup<>(this);
         }
-
-        protected InstanceType getInstanceType() {
-            return instanceType;
-        }
-
-        protected AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> getApplicationConfiguration() {
-            return applicationConfiguration;
-        }
     }
     
     private final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet;
-    private final String replicationBearerToken;
     private final TargetGroup<ShardingKey> targetGroup;
     private final Region region;
     private final String keyName;
-    private final Release release;
-    private final AmazonMachineImage<ShardingKey> image;
     private final InstanceType instanceType;
-    private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration;
+    private final String imageId;
+    private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
     
     public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
             AwsLandscape<ShardingKey> landscape, Region region,
             ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
             String replicationBearerToken, TargetGroup<ShardingKey> targetGroup) {
-        return new BuilderImpl<>(landscape, region, applicationReplicaSet, replicationBearerToken, targetGroup);
+        return new BuilderImpl<>(landscape, region, applicationReplicaSet, targetGroup);
     }
     
     protected <BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>>
@@ -157,13 +147,11 @@ implements Procedure<ShardingKey> {
         super(builder);
         this.region = builder.getRegion();
         this.applicationReplicaSet = builder.getApplicationReplicaSet();
-        this.replicationBearerToken = builder.getReplicationBearerToken();
         this.targetGroup = builder.getTargetGroup();
-        this.release = builder.getRelease();
-        this.image = builder.getImage();
         this.keyName = builder.getKeyName();
+        this.imageId = builder.getImage().getId();
         this.instanceType = builder.getInstanceType();
-        this.applicationConfiguration = builder.getApplicationConfiguration();
+        this.replicaConfiguration = builder.getReplicaConfiguration();
     }
     
     @Override
@@ -173,7 +161,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfiguration(region, applicationReplicaSet.getMaster(), targetGroup,
-                replicationBearerToken, keyName, release, image, instanceType, applicationConfiguration);
+        getLandscape().createLaunchConfiguration(region, applicationReplicaSet.getName(), targetGroup,
+                keyName, instanceType, imageId, replicaConfiguration, MIN_REPLICAS, MAX_REPLICAS, MAX_REQUESTS_PER_TARGET);
     }
 }

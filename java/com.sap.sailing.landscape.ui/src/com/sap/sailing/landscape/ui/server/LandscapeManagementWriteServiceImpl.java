@@ -23,6 +23,7 @@ import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sailing.landscape.procedures.CreateLaunchConfigurationAndAutoScalingGroup;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
@@ -55,6 +56,7 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.ProcessFactory;
+import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -424,6 +426,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
+        checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
@@ -458,6 +461,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcessDTO master,
             String instanceType, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String replicationBearerToken) throws Exception {
+        checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         final StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
@@ -498,10 +502,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String optionalDomainName) throws Exception {
+        checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
+        // TODO What about creating the group belonging to the server name? We could make the current user the owner of that group and establish replication permissions so that the user's bearer token could be used for replication
         masterConfigurationBuilder
             .setLandscape(landscape)
             .setServerName(name)
@@ -522,14 +528,40 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
-        createLoadBalancerMappingBuilder
+        final String domainName = Optional.ofNullable(optionalDomainName).orElse(DEFAULT_DOMAIN_NAME);
+        final String masterHostname = name+"."+domainName;
+        final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
-            .setHostname(name+"."+Optional.ofNullable(optionalDomainName).orElse(DEFAULT_DOMAIN_NAME))
+            .setHostname(masterHostname)
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(landscape)
-            .build().run();
-        // TODO create launch configuration and auto-scaling group
-        
+            .build();
+        createLoadBalancerMapping.run();
+        // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
+        final String userBearerToken = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString());
+        final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
+        replicaConfigurationBuilder
+            .setLandscape(landscape)
+            .setRegion(region)
+            .setServerName(name)
+            .setRelease(master.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
+                    .setMasterHostname(masterHostname)
+                    .setCredentials(new BearerTokenReplicationCredentials(userBearerToken))
+                    .build());
+        final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
+                new ApplicationReplicaSetImpl<>(name, master, /* no replicas yet */ Optional.empty());
+        final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
+                CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
+        createLaunchConfigurationAndAutoScalingGroupBuilder
+            .setInstanceType(InstanceType.valueOf(masterInstanceType))
+            .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
+            .setImage(masterHostBuilder.getMachineImage())
+            .setReplicaConfiguration(replicaConfigurationBuilder.build());
+        if (optionalKeyName != null) {
+            createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
+        }
+        createLaunchConfigurationAndAutoScalingGroupBuilder.build().run();
     }
 
     @Override

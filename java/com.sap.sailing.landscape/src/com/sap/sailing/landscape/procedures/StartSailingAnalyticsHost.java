@@ -7,9 +7,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -47,9 +45,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
-     * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
-     * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
-     * .getLatestMasterRelease()} will be used instead.</li>
      * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
      * <li>The tag {@link SailingAnalyticsHost#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the

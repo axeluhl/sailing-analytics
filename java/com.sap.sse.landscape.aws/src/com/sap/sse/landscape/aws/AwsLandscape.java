@@ -12,7 +12,6 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -578,8 +577,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-            void createLaunchConfiguration(Region region, ProcessT master, TargetGroup<ShardingKey> targetGroup,
-                    String replicationBearerToken, String keyName, Release release,
-                    AmazonMachineImage<ShardingKey> image, InstanceType instanceType,
-                    AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration);
+            void createLaunchConfiguration(Region region, String replicaSetName, TargetGroup<ShardingKey> targetGroup,
+                    String keyName, InstanceType instanceType, String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
+                    int minReplicas, int maxReplicas, int maxRequestsPerTarget);
 }

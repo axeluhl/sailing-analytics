@@ -104,6 +104,8 @@ extends StartHost<ShardingKey, HostT> {
         BuilderT setInstanceName(String name);
         
         BuilderT setHostSupplier(HostSupplier<ShardingKey, HostT> hostSupplier);
+
+        AmazonMachineImage<ShardingKey> getMachineImage();
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
@@ -242,6 +244,13 @@ extends StartHost<ShardingKey, HostT> {
         
         protected byte[] getPrivateKeyEncryptionPassphrase() {
             return privateKeyEncryptionPassphrase;
+        }
+        
+        @Override
+        public AmazonMachineImage<ShardingKey> getMachineImage() {
+            @SuppressWarnings("unchecked")
+            final AmazonMachineImage<ShardingKey> result = (AmazonMachineImage<ShardingKey>) super.getMachineImage();
+            return result;
         }
     }
     

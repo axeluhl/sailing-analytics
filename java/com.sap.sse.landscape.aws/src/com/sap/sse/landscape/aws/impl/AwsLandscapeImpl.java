@@ -27,7 +27,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -70,6 +69,7 @@ import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
+import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairResponse;
@@ -146,6 +146,7 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> {
+    private static final String AUTO_SCALING_GROUP_NAME_SUFFIX = "-auto-replicas";
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
@@ -1148,26 +1149,35 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    void createLaunchConfiguration(
-            com.sap.sse.landscape.Region region, ProcessT master, TargetGroup<ShardingKey> targetGroup,
-            String replicationBearerToken, String keyName, Release release, AmazonMachineImage<ShardingKey> image, InstanceType instanceType,
-            AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration) {
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfiguration(
+            com.sap.sse.landscape.Region region, String replicaSetName, TargetGroup<ShardingKey> publicTargetGroup,
+            String keyName, InstanceType instanceType, String imageId,
+            AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
+            int maxReplicas, int maxRequestsPerTarget) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final String launchConfigurationName = null;
-        final String imageId = null;
-        final String autoScalingGroupName = null;
+        final String launchConfigurationName = replicaSetName + "-" + replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
+        final String autoScalingGroupName = replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)
                 .keyName(keyName)
                 .imageId(imageId)
                 .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
-                .userData(Base64.getEncoder().encodeToString(applicationConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
+                .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.name()));
         autoScalingClient.createAutoScalingGroup(b->b
+                .minSize(minReplicas)
+                .maxSize(maxReplicas)
                 .autoScalingGroupName(autoScalingGroupName)
-                .loadBalancerNames(targetGroup.getTargetGroupArn())
+                .loadBalancerNames(publicTargetGroup.getTargetGroupArn())
                 .launchConfigurationName(launchConfigurationName));
-        // TODO Implement AwsLandscapeImpl.createLaunchConfiguration(...)
+        autoScalingClient.putScalingPolicy(b->b
+                .autoScalingGroupName(autoScalingGroupName)
+                .estimatedInstanceWarmup((int) Duration.ONE_MINUTE.times(3).asSeconds())
+                .policyType("TargetTrackingScaling")
+                .targetTrackingConfiguration(t->t
+                        .predefinedMetricSpecification(p->p
+                                .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
+                        .targetValue((double) maxRequestsPerTarget)));
+        // TODO finish AwsLandscapeImpl.createLaunchConfiguration(...)
     }
 }
