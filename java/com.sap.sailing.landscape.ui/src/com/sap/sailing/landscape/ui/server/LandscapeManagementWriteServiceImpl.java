@@ -251,7 +251,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         instanceId, availabilityZone, privateIpAddress, landscape, processFactoryFromHostAndServerDirectory);
         for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
-                hostSupplier, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+                hostSupplier, WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
             result.add(convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
         }
         return result;
@@ -528,6 +528,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
             .setLandscape(landscape)
             .build().run();
+        // TODO create launch configuration and auto-scaling group
+        
     }
 
     @Override

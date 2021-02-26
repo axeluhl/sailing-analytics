@@ -205,9 +205,6 @@ public class LandscapeManagementPanel extends VerticalPanel {
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_UPGRADE,
                 applicationReplicaSetToScale -> upgradeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
-        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_SCALE,
-                applicationReplicaSetToScale -> scaleApplicationReplicaSet(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToScale -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
@@ -305,32 +302,23 @@ public class LandscapeManagementPanel extends VerticalPanel {
         }).show();
     }
 
-    private Object removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
+    private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
-        Notification.notify("removeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
-        // TODO Implement LandscapeManagementPanel.removeApplicationReplicaSet(...)
-        return null;
+        if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToScale.getName()))) {
+            // TODO implement LandscapeManagementPanel.removeApplicationReplicaSet
+        }
     }
 
-    private Object archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
+    private void archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
         Notification.notify("archiveApplicationReplicaSet not implemented yet", NotificationType.ERROR);
         // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
-        return null;
     }
 
-    private Object upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
+    private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
         Notification.notify("upgradeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
         // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
-        return null;
-    }
-
-    private Object scaleApplicationReplicaSet(StringMessages stringMessages, String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
-        Notification.notify("scaleApplicationReplicaSet not implemented yet", NotificationType.ERROR);
-        // TODO Implement LandscapeManagementPanel.scaleApplicationReplicaSet(...)
-        return null;
     }
 
     private void refreshRegionsTable(UserService userService) {

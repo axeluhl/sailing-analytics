@@ -12,6 +12,7 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -22,6 +23,7 @@ import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -575,4 +577,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+            void createLaunchConfiguration(Region region, ProcessT master, TargetGroup<ShardingKey> targetGroup,
+                    String replicationBearerToken, String keyName, Release release,
+                    AmazonMachineImage<ShardingKey> image, InstanceType instanceType,
+                    AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration);
 }

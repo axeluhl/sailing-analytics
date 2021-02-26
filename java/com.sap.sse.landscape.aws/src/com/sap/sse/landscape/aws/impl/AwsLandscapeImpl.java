@@ -27,6 +27,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -45,6 +46,7 @@ import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.aws.persistence.DomainObjectFactory;
 import com.sap.sse.landscape.aws.persistence.MongoObjectFactory;
 import com.sap.sse.landscape.aws.persistence.PersistenceFactory;
@@ -67,6 +69,7 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairResponse;
@@ -234,6 +237,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     private ElasticLoadBalancingV2Client getLoadBalancingClient(Region region) {
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
+    }
+    
+    private AutoScalingClient getAutoScalingClient(Region region) {
+        return getClient(AutoScalingClient.builder(), region);
     }
     
     /**
@@ -1138,5 +1145,29 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
         return Util.map(Region.regions(), AwsRegion::new);
+    }
+
+    @Override
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    void createLaunchConfiguration(
+            com.sap.sse.landscape.Region region, ProcessT master, TargetGroup<ShardingKey> targetGroup,
+            String replicationBearerToken, String keyName, Release release, AmazonMachineImage<ShardingKey> image, InstanceType instanceType,
+            AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration) {
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final String launchConfigurationName = null;
+        final String imageId = null;
+        final String autoScalingGroupName = null;
+        autoScalingClient.createLaunchConfiguration(b->b
+                .launchConfigurationName(launchConfigurationName)
+                .keyName(keyName)
+                .imageId(imageId)
+                .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
+                .userData(Base64.getEncoder().encodeToString(applicationConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
+                .instanceType(instanceType.name()));
+        autoScalingClient.createAutoScalingGroup(b->b
+                .autoScalingGroupName(autoScalingGroupName)
+                .loadBalancerNames(targetGroup.getTargetGroupArn())
+                .launchConfigurationName(launchConfigurationName));
+        // TODO Implement AwsLandscapeImpl.createLaunchConfiguration(...)
     }
 }

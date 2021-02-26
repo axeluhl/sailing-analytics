@@ -11,7 +11,6 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
     static final String ACTION_REMOVE = DefaultActions.DELETE.name();
     static final String ACTION_UPGRADE = "UPGRADE";
-    static final String ACTION_SCALE = "SCALE";
     static final String ACTION_ARCHIVE = "ARCHIVE";
 
     private final StringMessages stringMessages;
@@ -33,8 +32,6 @@ public class ApplicationReplicaSetsImagesBarCell extends ImagesBarCell {
                         IconResources.INSTANCE.archiveIcon()),
                 new ImageSpec(ACTION_REMOVE, stringMessages.remove(),
                         IconResources.INSTANCE.removeIcon()),
-                new ImageSpec(ACTION_SCALE, stringMessages.scale(),
-                        IconResources.INSTANCE.scaleIcon()),
                 new ImageSpec(ACTION_UPGRADE, stringMessages.upgrade(),
                         IconResources.INSTANCE.refreshIcon())
                 );

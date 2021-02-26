@@ -82,4 +82,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String pleaseProvideBearerTokenForSecurityReplication();
     String domainName();
     String release();
+    String reallyRemoveApplicationReplicaSet(String name);
 }

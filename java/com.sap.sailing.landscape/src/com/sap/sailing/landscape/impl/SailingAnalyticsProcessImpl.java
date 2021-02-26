@@ -36,6 +36,8 @@ import com.sap.sse.util.Wait;
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
+    private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
+    private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private Integer expeditionUdpPort;
     
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort) {
@@ -72,7 +74,14 @@ implements SailingAnalyticsProcess<ShardingKey> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final JSONObject status = getStatus(optionalTimeout);
-        return new ReleaseImpl((String) status.get("release"), releaseRepository);
+        final Release result;
+        if (status.containsKey(STATUS_RELEASE_PROPERTY_NAME)) {
+            result = new ReleaseImpl((String) status.get(STATUS_RELEASE_PROPERTY_NAME), releaseRepository);
+        } else {
+            // for backward compatibility
+            result = super.getRelease(releaseRepository, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        }
+        return result;
     }
     
     /**
@@ -83,7 +92,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws TimeoutException, Exception {
         if (serverName == null) {
-            serverName = Wait.wait(()->getStatus(optionalTimeout).get("servername").toString(),
+            serverName = Wait.wait(()->getStatus(optionalTimeout).get(STATUS_SERVERNAME_PROPERTY_NAME).toString(),
                     result->result!=null,
                     /* retry on exception */ true,
                     optionalTimeout,
