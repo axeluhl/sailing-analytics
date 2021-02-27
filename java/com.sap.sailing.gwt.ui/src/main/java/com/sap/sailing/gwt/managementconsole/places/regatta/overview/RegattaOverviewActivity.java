@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.managementconsole.app.ManagementConsoleClientFactory;
 import com.sap.sailing.gwt.managementconsole.events.regatta.RegattaListResponseEvent;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsoleActivity;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewPlace;
+import com.sap.sailing.gwt.managementconsole.places.regatta.create.AddRegattaPlace;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -61,7 +62,13 @@ public class RegattaOverviewActivity extends AbstractManagementConsoleActivity<R
 
     @Override
     public void navigateToRegatta(final RegattaDTO regatta) {
-        //getClientFactory().getPlaceController().goTo(new RegattaPlace(regatta.id));
+        //getClientFactory().getPlaceController().goTo(new RegattaPlace(regatta.getRegattaIdentifier()));
     }
+    
+    @Override
+    public void navigateToAddRegatta() {
+        getClientFactory().getPlaceController().goTo(new AddRegattaPlace(eventId));
+    }
+    
 
 }

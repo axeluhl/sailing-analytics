@@ -12,6 +12,8 @@ public interface EventOverviewView extends View<EventOverviewView.Presenter>, Re
         void reloadEventList();
 
         void navigateToEvent(final EventDTO event);
+        
+        void navigateToCreateEvent();
     }
 
     void renderEvents(List<EventDTO> events);

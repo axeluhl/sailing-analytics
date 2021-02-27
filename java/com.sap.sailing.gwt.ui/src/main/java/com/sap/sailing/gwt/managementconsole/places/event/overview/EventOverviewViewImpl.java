@@ -47,6 +47,7 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
         initWidget(uiBinder.createAndBindUi(this));
         local_res.style().ensureInjected();
         app_res.icons().ensureInjected();
+        addEventAnchor.addClickHandler(e -> presenter.navigateToCreateEvent());
     }
 
     @Override

@@ -16,6 +16,7 @@ public class RegattaOverviewPlace extends AbstractManagementConsolePlace {
     public UUID getEventId() {
         return eventId;
     }
+    
     @Prefix("regatta/overview")
     public static class Tokenizer extends AbstractManagementConsolePlace.UUIDTokenizer<RegattaOverviewPlace> {
         public Tokenizer() {

@@ -2431,4 +2431,26 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String includeAccessTokenForYourAccount();
     String invitations();
     String eventWebPage();
+    String createEvent();
+    String createEventSubtitle();
+    String createEventButton();
+    String nameLabel();
+    String eventNamePlaceholder();
+    String dateLabel();
+    String datePlaceholder();
+    String venueLabel();
+    String venuePlaceholder();
+    String courseAreasLabel();
+    String courseAreaPlaceholder();
+    String addRegattaClass();
+    String addRegattaSubtitle();
+    String addRegattaButton();
+    String boatClassLabel();
+    String boatClassPlaceholder();
+    String regattaNameLabel();
+    String regattaNamePlaceholder();
+    String racesLabel();
+    String rankingLabel();
+    String scoringSystemLabel();
+    String scoringSystemPlaceholder();
 }

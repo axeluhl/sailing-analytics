@@ -52,6 +52,7 @@ public class RegattaOverviewViewImpl extends Composite implements RegattaOvervie
         local_res.style().ensureInjected();
         app_res.icons().ensureInjected();
         eventHeader.setRegattaSectionSelected(true);
+        addRegattaAnchor.addClickHandler(e -> presenter.navigateToAddRegatta());
     }
 
     @Override

@@ -83,7 +83,7 @@ input::-ms-input-placeholder,
     cursor: pointer;
     width: 100%;
     margin: 1rem 0;
-    padding: 1rem;
+    padding: 1rem 2rem;
     border-width: BORDER_WIDTH_NORMAL;
     border-style: solid;
     background: BUTTON_BACKGROUND_COLOR_SECONDARY;
@@ -97,6 +97,11 @@ input::-ms-input-placeholder,
 
 .button.highlighted, .button.highlighted:hover {
     border-color: GENERIC_COLOR_HIGHLIGHT;
+}
+
+.button.primary.button-right, .button.primary.button-right:active, .button.primary.button-right:hover {
+    width: auto;
+    float: right;
 }
 
 .anchor, .anchor:visited, .anchor:hover {

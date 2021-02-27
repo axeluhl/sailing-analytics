@@ -91,6 +91,9 @@ public interface ManagementConsoleResources extends ClientBundle {
         String anchor();
 
         String button();
+        
+        @ClassName("button-right")
+        String buttonRight();
 
         String label();
 
