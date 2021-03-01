@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +23,6 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -37,7 +35,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -83,14 +80,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final ListBox mimeTypeListBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
-    protected final SailingServiceWriteAsync sailingServiceWrite;
-    protected final UUID eventId;
     private String uri;
     
-    public AbstractMediaUploadPopup(SailingServiceWriteAsync sailingServiceWrite, UUID eventId, 
-            Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.eventId = eventId;
+    public AbstractMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
         this.updateVideo = updateVideo;
         this.updateImage = updateImage;
         
@@ -401,100 +393,54 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
      * Finally add a new MediaTrack.
      */
     private void addMedia() {
-        sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
-            
-            @Override
-            public void onSuccess(EventDTO event) {
-                final String uploadUrl;
-                if (uri == null) {
-                    uploadUrl = "";
-                } else if (!UriUtils.isSafeUri(uri.trim()))  {
-                    logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
-                    uploadUrl = "";
-                } else {
-                    uploadUrl = uri.trim();
-                }
-                final String inputUrl;
-                if (urlInput.getValue() == null) {
-                    inputUrl = "";
-                } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
-                    logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
-                    inputUrl = "";
-                } else {
-                    inputUrl = urlInput.getValue();
-                }
-                final String url;
-                if (uploadUrl.isEmpty()) {
-                    url = inputUrl;
-                } else {
-                    url = uploadUrl;
-                }
-                
-                if (!url.isEmpty()) {
-                    final String mimeTypeName = mimeTypeListBox.getSelectedValue();
-                    final MimeType mimeType;
-                    if (mimeTypeName != null) {
-                        mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
-                    } else {
-                        mimeType = MimeType.unknown;
-                    }
-                    if (mimeType.mediaType == MediaType.image) {
-                        final ImageDTO newImage = createImage(url);
-                        event.addImage(newImage);
-                        updateEvent(event, x -> addImage(newImage));
-                    } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
-                        final VideoDTO newVideo = createVideo(url, null, mimeType);
-                        event.addVideo(newVideo);
-                        updateEvent(event, x -> addVideo(newVideo));
-                    } else {
-                        logger.warning("No image nor video detected. Nothing will be saved.");
-                        // TODO: translation
-                        Notification.notify("No image nor video detected. Nothing will be saved.", NotificationType.WARNING);
-                    }
-                    
-                } else {
-                    Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
-                }
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(i18n.fileUploadResult(
-                        STATUS_NOT_OK,
-                        caught.getLocalizedMessage()),
-                        NotificationType.ERROR);
-                logger.log(Level.SEVERE, "Submit file failed. Status: " + STATUS_NOT_OK + ", message: " + caught.getMessage());
-            }
-        });
-        /**final ImageDTO image = new ImageDTO(uri, new Date());
-        image.setTitle(titleTextBox.getValue());
-        image.setSubtitle(subtitleTextBox.getValue());
-        image.setCopyright(copyrightTextBox.getValue());
-        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+
+        final String uploadUrl;
+        if (uri == null) {
+            uploadUrl = "";
+        } else if (!UriUtils.isSafeUri(uri.trim()))  {
+            logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+            uploadUrl = "";
+        } else {
+            uploadUrl = uri.trim();
         }
-        image.setTags(tags);
-        **/
-    }
-    
-    private void updateEvent(EventDTO event, Consumer<EventDTO> onSuccess) {
-        AbstractMediaUploadPopup.this.sailingServiceWrite.updateEvent(event, new AsyncCallback<EventDTO>() {
-            @Override
-            public void onSuccess(EventDTO result) {
-                onSuccess.accept(result);
-                logger.info("Event updated. " + event + ", images: " + event.getImages().size() + ", videos: " + event.getVideos().size());
-                Notification.notify(i18n.uploadSuccessful(),
-                        NotificationType.SUCCESS);
-                AbstractMediaUploadPopup.this.hide();
+        final String inputUrl;
+        if (urlInput.getValue() == null) {
+            inputUrl = "";
+        } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
+            logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+            inputUrl = "";
+        } else {
+            inputUrl = urlInput.getValue();
+        }
+        final String url;
+        if (uploadUrl.isEmpty()) {
+            url = inputUrl;
+        } else {
+            url = uploadUrl;
+        }
+        
+        if (!url.isEmpty()) {
+            final String mimeTypeName = mimeTypeListBox.getSelectedValue();
+            final MimeType mimeType;
+            if (mimeTypeName != null) {
+                mimeType = MimeType.byName(mimeTypeListBox.getSelectedValue());
+            } else {
+                mimeType = MimeType.unknown;
             }
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(i18n.fileUploadResult(
-                        STATUS_NOT_OK,
-                        caught.getLocalizedMessage()),
-                        NotificationType.ERROR);
-                logger.log(Level.SEVERE, "Submit file failed. Status: " + STATUS_NOT_OK + ", message: " + caught.getMessage());
+            hide();
+            if (mimeType.mediaType == MediaType.image) {
+                updateImage.accept(createImage(url));
+            } else if (mimeType.mediaType == MediaType.video || mimeType.mediaType == MediaType.audio) {
+                updateVideo.accept(createVideo(url, null, mimeType));
+            } else {
+                logger.warning("No image nor video detected. Nothing will be saved.");
+                // TODO: translation
+                Notification.notify("No image nor video detected. Nothing will be saved.", NotificationType.WARNING);
             }
-        });
+            
+        } else {
+            Notification.notify(i18n.invalidURL(), NotificationType.ERROR);
+        }
     }
     
     private ImageDTO createImage(String url) {
@@ -604,14 +550,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     
     abstract protected void updateFileName(String fileName);
 
-    protected void addVideo(VideoDTO video) {
-        updateVideo.accept(video);
-    }
-
-    protected void addImage(ImageDTO image) {
-        updateImage.accept(image);
-    }
-    
     private void checkSaveButton() {
         boolean urlInputNotEmpty = urlInput.getValue() != null && !urlInput.getValue().trim().isEmpty();
         boolean uriNotEmpty = uri != null && !uri.trim().isEmpty();
