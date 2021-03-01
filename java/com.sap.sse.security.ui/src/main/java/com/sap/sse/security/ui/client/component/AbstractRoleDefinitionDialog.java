@@ -87,7 +87,6 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         result.setWidget(0, 1, roleDefinitionNameField);
         result.setWidget(1, 0, new Label(stringMessages.permissions()));
         result.setWidget(1, 1, permissionsList);
-        result.setWidget(2, 0, new Label(stringMessages.transitive()));
         return result;
     }
 

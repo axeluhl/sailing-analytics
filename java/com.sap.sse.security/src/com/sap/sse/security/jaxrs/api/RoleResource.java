@@ -7,7 +7,6 @@ import java.util.concurrent.Callable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,7 +14,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -38,12 +36,10 @@ public class RoleResource extends AbstractSecurityResource {
     private static final String KEY_PERMISSIONS = "permissions";
     private static final String KEY_ROLE_ID = "roleId";
     private static final String KEY_ROLE_NAME = "roleName";
-    private static final String KEY_TRANSITIVE = "transitive";
 
     @POST
     @Produces("application/json;charset=UTF-8")
-    public Response createRole(@FormParam(KEY_ROLE_NAME) String roleName,
-            @QueryParam(KEY_TRANSITIVE) @DefaultValue("true") boolean transitive) {
+    public Response createRole(@FormParam(KEY_ROLE_NAME) String roleName) {
         final String roleDefinitionIdAsString = UUID.randomUUID().toString();
         final RoleDefinition role = getService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.ROLE_DEFINITION, new TypeRelativeObjectIdentifier(roleDefinitionIdAsString),

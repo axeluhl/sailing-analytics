@@ -95,7 +95,6 @@ public class PermissionCheckerTest {
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
         user = userStore.createUser("jonas", "jonas@dann.io");
         userTenant.add(user);
-//        permissionChangeListeners.userAddedToOrRemovedFromGroup(user, userGroup);
         userStore.updateUserGroup(userTenant);
         ownership = new Ownership(user, userTenant);
         adminTenant.add(adminUser);
