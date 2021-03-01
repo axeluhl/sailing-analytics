@@ -48,7 +48,7 @@
   border-left: 1px solid #ccc;
 }
 .sectionheader_item_title_label {
-	display: inline-table;
+	display: flex;
 	align-items: center;
 }
 .sectionheader_item_title_label div {
@@ -193,7 +193,6 @@
     background-image: resourceUrl('manageWhite');
 }
 .iconManage {
-    display: inline-block;
     background-image: resourceUrl('manageBlack');
     background-color: #fff;  
     opacity: 1;

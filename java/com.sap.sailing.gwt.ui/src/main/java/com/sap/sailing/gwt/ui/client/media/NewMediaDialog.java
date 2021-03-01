@@ -125,7 +125,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         this.assignedRaces.add(raceIdentifier);
         this.mediaService = mediaService;
 
-        urlBox = new URLFieldWithFileUpload(stringMessages, false);
+        urlBox = new URLFieldWithFileUpload(stringMessages, false, true);
         urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -503,5 +503,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return urlBox.getInitialFocusWidget();
+    }
+    
+    public void openFileChooserDialog() {
+        this.urlBox.fireClickToFileUploadField();
     }
 }

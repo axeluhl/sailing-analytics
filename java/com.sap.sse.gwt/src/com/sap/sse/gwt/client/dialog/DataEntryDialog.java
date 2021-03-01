@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -19,6 +20,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -648,7 +650,20 @@ public abstract class DataEntryDialog<T> {
             panelForAdditionalWidget.add(additionalWidget);
         }
         validateAndUpdate();
-        dataEntryDialog.center();
+        GWT.log("dataEntryDialog:" + dataEntryDialog.getElement().getClientWidth() + " window width:"
+                + Window.getClientWidth());
+        if (Window.getClientWidth() > 550) {
+            dataEntryDialog.center();
+        } else {
+            dataEntryDialog.setSize("100%", "100%");
+            dataEntryDialog.center();
+            dataEntryDialog.setPopupPosition(0, 0);
+            dataEntryDialog.getWidget().setHeight("100%");
+            dataEntryDialog.setVisible(true);
+            dataEntryDialog.getElement().getStyle().setWidth(100, Unit.PCT);
+            dataEntryDialog.getElement().getStyle().setHeight(100, Unit.PCT);
+        }
+        
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});

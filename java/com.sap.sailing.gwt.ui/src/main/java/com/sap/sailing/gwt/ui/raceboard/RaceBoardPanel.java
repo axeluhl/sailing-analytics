@@ -395,6 +395,10 @@ public class RaceBoardPanel
                 isScreenLargeEnoughToInitiallyDisplayLeaderboard,
                 raceMap, userService, showChartMarkEditMediaButtonsAndVideo, leaderboardDTO, raceDTO); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
+        
+        GWT.log("before addMediaPlayerManagerComponent");
+        raceMap.addMediaPlayerManagerComponent(mediaPlayerManagerComponent);
+        
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (parsedPerspectiveOwnSettings.getActiveCompetitorsFilterSetName() != null) {

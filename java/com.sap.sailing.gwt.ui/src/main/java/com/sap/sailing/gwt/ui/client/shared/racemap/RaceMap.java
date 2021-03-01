@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -104,6 +105,7 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
 import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
@@ -191,6 +193,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private MapWidget map;
     private final Runnable shareLinkAction;
     private Collection<Runnable> mapInitializedListener;
+    private Button addVideoToRaceButton;
     
     /**
      * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
@@ -652,6 +655,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
+        addVideoToRaceButton = createAddVideoToRaceButton(map);
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
         initializeData(settings.isShowMapControls(), showHeaderPanel);
@@ -928,6 +932,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     final Button shareLinkButton = createShareLinkButton(map);
                     map.setControls(ControlPosition.RIGHT_BOTTOM, shareLinkButton);
                 }
+                
+                // add-video button
+                map.setControls(ControlPosition.RIGHT_CENTER, addVideoToRaceButton);
+                
                 if (showMapControls) {
                     final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
                     final Button settingsButton = createSettingsButton(map);
@@ -1029,6 +1037,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         });
         return shareLinkButton;
+    }
+    
+    private Button createAddVideoToRaceButton(MapWidget map) {
+        Button addVideoButton = new Button();
+        addVideoButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
+        return addVideoButton;
     }
 
     private void removeTransitions() {
@@ -3049,7 +3063,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             return newBounds;
         }
     }
-    
+
     public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
@@ -3408,6 +3422,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             this.mapInitializedListener.add(runnable);
         }
+    }
+
+    public void addMediaPlayerManagerComponent(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
+        GWT.log("addMediaPlayerManagerComponent");
+        this.addVideoToRaceButton.addClickHandler(clickEvent->{
+            GWT.log("clicked addVideoToRaceButton");
+            mediaPlayerManagerComponent.addMediaTrack();
+        });
     }
 }
 

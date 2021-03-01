@@ -54,10 +54,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     private final FlowPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
-        this(stringMessages, true);
+        this(stringMessages, true, false);
     }
    
-    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
+    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean autosubmit) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
         final VerticalPanel mainPanel = new VerticalPanel();
         final FlowPanel imageUrlPanel = new FlowPanel();
@@ -92,7 +92,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
         urlTextBox.getElement().addClassName("url-textbox");
-        urlTextBox.setWidth("400px");
+//        urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         imageUrlPanel.add(removePanel);
         // the upload panel
@@ -120,6 +120,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             public void onChange(ChangeEvent event) {
                 if (fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
                     submitButton.setEnabled(true);
+                    if (autosubmit) submitButton.click();
                 }
             }
         });
@@ -220,5 +221,9 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         } else {
             uploadFormPanel.remove(uploadPanel);
         }
+    }
+    
+    public void fireClickToFileUploadField() {
+        this.fileUploadField.click();
     }
 }

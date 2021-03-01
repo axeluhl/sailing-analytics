@@ -1,4 +1,4 @@
-@external button, table, Caption, chartCloseButton, gwt-HTML, collapsablePanel, collapsablePanel-content, collapsablePanel-header;
+@external button, table, Caption, chartCloseButton, gwt-HTML;
 
 button.primary {
     background-color: #008fcc;
@@ -82,9 +82,10 @@ button.primary {
 }
 
 .popup .Caption {
-    background-color: #000;
+    background-color: #333;
     font-size: 1rem;
     height: 3.333333333333333em;
+    border-bottom: .2em solid #efaa00;
     color: #f6f9fc;
     white-space: nowrap;
     font-family: 'Open Sans',sans-serif;
@@ -98,16 +99,3 @@ button.primary {
 }
 
 .select {}
-
-.popup .collapsablePanel {
-    background: none;
-}
-
-.popup .collapsablePanel-header {
-    background: none;
-}
-
-.popup .collapsablePanel-content {
-    border: 0;
-    margin: 0;
-}

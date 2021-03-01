@@ -560,6 +560,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     }
                 });
         dialog.show();
+        dialog.openFileChooserDialog();
     }
 
     @Override

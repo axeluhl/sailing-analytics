@@ -299,19 +299,22 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
 
-        //newMediaComponent
-        if (!newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
-            // the tagging is not visible, but the map is
-            if (isWidgetInSplitPanel(newMediaPanel)) {
-                splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */true,
+        // newMediaComponent
+        if (false) {
+            if (!newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
+                // the tagging is not visible, but the map is
+                if (isWidgetInSplitPanel(newMediaPanel)) {
+                    splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */true,
+                            MIN_TAGGING_WIDTH);
+                }
+            } else if (newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
+                // the leaderboard and the map are visible
+                splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */false,
                         MIN_TAGGING_WIDTH);
+            } else if (!newMediaGalleryComponent.isVisible() && !centerComponent.isVisible()) {
             }
-        } else if (newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
-            // the leaderboard and the map are visible
-            splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */false, MIN_TAGGING_WIDTH);
-        } else if (!newMediaGalleryComponent.isVisible() && !centerComponent.isVisible()) {
         }
-        
+
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
             splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,
