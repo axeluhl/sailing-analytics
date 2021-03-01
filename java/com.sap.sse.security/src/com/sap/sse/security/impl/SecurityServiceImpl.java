@@ -1983,13 +1983,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
         if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
+            throw new IllegalArgumentException("No HasPermissionsProvider defined");
         } else {
             return PermissionChecker.checkMetaPermission(permissionToCheck,
                     hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
@@ -2000,13 +1994,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
         if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+            throw new IllegalArgumentException("No HasPermissionsProvider defined");
         } else {
             return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
                     hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
