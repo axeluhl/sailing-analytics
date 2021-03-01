@@ -160,9 +160,9 @@ public class TestProcedures {
             assertTrue(curlOutput.replaceAll("\r", "").matches("(?ms).*^Location: https://b.sapsailing.com/gwt/Home.html$.*"));
             // Now check if the landscape can find this "sailing-analytics-server" in the region and determine which applications it has running:
             final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
-                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, (theHost, dir)->{
+                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, (theHost, thePort, dir, telnetPort, serverName)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<String>(theHost, dir, optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
+                            return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }

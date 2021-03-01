@@ -61,4 +61,14 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String loggedInSuccessfully();
     String logout();
     String loggedOutSuccessfully();
+    String port();
+    String instanceId();
+    String launchTimePoint();
+    String applicationReplicaSets();
+    String masterHostName();
+    String masterPort();
+    String masterServerName();
+    String masterInstanceId();
+    String replicas();
+    String versionHeader();
 }

@@ -9,9 +9,11 @@ import java.util.Optional;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
-public interface Host {
+public interface Host extends WithID {
     /**
      * Obtains the public IP address of this host. Note that during the boot phase and after shutdown/termination a host
      * may not yet have such a public IP address assigned. In this case, {@code null} may be returned. To avoid this,
@@ -109,4 +111,6 @@ public interface Host {
     }
     
     Iterable<SecurityGroup> getSecurityGroups();
+
+    TimePoint getLaunchTimePoint();
 }

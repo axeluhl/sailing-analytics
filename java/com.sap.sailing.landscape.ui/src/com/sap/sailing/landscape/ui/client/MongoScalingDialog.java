@@ -16,9 +16,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoLaunchParametersDTO;
+import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -29,7 +29,7 @@ import com.sap.sse.landscape.common.shared.MongoDBConstants;
 
 public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructionsDTO> {
     private final VerticalPanel panel;
-    private final TableWrapperWithMultiSelectionAndFilter<Pair<String, Integer>, StringMessages, AdminConsoleTableResources> tableForChoosingInstancesToShutDown;
+    private final TableWrapperWithMultiSelectionAndFilter<MongoProcessDTO, StringMessages, AdminConsoleTableResources> tableForChoosingInstancesToShutDown;
     private final IntegerBox numberOfInstancesToLaunchBox;
     private final IntegerBox voteBox;
     private final IntegerBox priorityBox;
@@ -52,11 +52,11 @@ public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructions
             if (valueToValidate == null) {
                 result = null;
             } else {
-                final Iterable<Pair<String, Integer>> hostsAndPortsToShutdownOnNonDefaultPorts = Util.filter(valueToValidate.getHostnamesAndPortsToShutDown(),
-                        hostnameAndPortToShutDown->hostnameAndPortToShutDown.getB() != MongoDBConstants.DEFAULT_PORT);
+                final Iterable<MongoProcessDTO> hostsAndPortsToShutdownOnNonDefaultPorts = Util.filter(valueToValidate.getHostnamesAndPortsToShutDown(),
+                        hostnameAndPortToShutDown->hostnameAndPortToShutDown.getPort() != MongoDBConstants.DEFAULT_PORT);
                 if (!Util.isEmpty(hostsAndPortsToShutdownOnNonDefaultPorts)) {
                     result = stringMessages.youCannotShutdownMongoDBInstancesNotRunningOnDefaultPort(Util.joinStrings(", ", hostsAndPortsToShutdownOnNonDefaultPorts));
-                } else if (valueToValidate.getLaunchParameters().getNumberOfInstances() == null || valueToValidate.getLaunchParameters().getNumberOfInstances() < 1) {
+                } else if (valueToValidate.getLaunchParameters().getNumberOfInstances() == null || valueToValidate.getLaunchParameters().getNumberOfInstances() < 0) {
                     result = stringMessages.youHaveToProvideAPositiveNumberOfInstancesToLaunch();
                 } else if (valueToValidate.getLaunchParameters().getReplicaSetPriority() == null || valueToValidate.getLaunchParameters().getReplicaSetPriority() < 0) {
                     result = stringMessages.youHaveToProvideANonNegativePriority();
@@ -75,21 +75,25 @@ public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructions
         super(stringMessages.scale(), /* message */ null, stringMessages.ok(), stringMessages.cancel(),
                 /* validator */ new MongoScalingInstructionsValidator(stringMessages), /* animationEnabled */ true, dialogCallback);
         replicaSetName = mongoEndpointToScale.getReplicaSetName();
-        replicaSetPrimary = mongoEndpointToScale.getHostnamesAndPorts().get(0).getA()+":"+mongoEndpointToScale.getHostnamesAndPorts().get(0).getB();
+        replicaSetPrimary = mongoEndpointToScale.getHostnamesAndPorts().get(0).getHostname()+":"+mongoEndpointToScale.getHostnamesAndPorts().get(0).getPort();
         panel = new VerticalPanel();
-        tableForChoosingInstancesToShutDown = new TableWrapperWithMultiSelectionAndFilter<Util.Pair<String, Integer>, StringMessages, AdminConsoleTableResources>(
+        tableForChoosingInstancesToShutDown = new TableWrapperWithMultiSelectionAndFilter<MongoProcessDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator not required; pairs work by equality */ Optional.empty(),
                 GWT.create(AdminConsoleTableResources.class),
-                Optional.of(hostnameAndPort -> hostnameAndPort.getB() == MongoDBConstants.DEFAULT_PORT),
+                Optional.of(hostnameAndPort -> hostnameAndPort.getPort() == MongoDBConstants.DEFAULT_PORT),
                 /* filter label */ Optional.empty(), stringMessages.showOnlyInstanceYouCanStop()) {
             @Override
-            protected Iterable<String> getSearchableStrings(Pair<String, Integer> t) {
-                return Arrays.asList(t.getA(), ""+t.getB());
+            protected Iterable<String> getSearchableStrings(MongoProcessDTO t) {
+                return Arrays.asList(t.getHostname(), Integer.toString(t.getPort()));
             }
         };
         tableForChoosingInstancesToShutDown.getSelectionModel().addSelectionChangeHandler(e->validateAndUpdate());
-        tableForChoosingInstancesToShutDown.addColumn(hostnameAndPort->hostnameAndPort.getA()+":"+hostnameAndPort.getB(), stringMessages.mongoInstancesToStop());
+        tableForChoosingInstancesToShutDown.addColumn(hostnameAndPort->hostnameAndPort.getHost().getInstanceId(), stringMessages.instanceId());
+        tableForChoosingInstancesToShutDown.addColumn(hostnameAndPort->hostnameAndPort.getHostname(), stringMessages.hostname());
+        tableForChoosingInstancesToShutDown.addColumn(hostnameAndPort->Integer.toString(hostnameAndPort.getPort()), stringMessages.port());
+        tableForChoosingInstancesToShutDown.addColumn(hostnameAndPort->hostnameAndPort.getHost().getLaunchTimePoint().toString(), stringMessages.launchTimePoint(),
+                (mp1, mp2)->mp1.getHost().getLaunchTimePoint().compareTo(mp2.getHost().getLaunchTimePoint()));
         tableForChoosingInstancesToShutDown.refresh(mongoEndpointToScale.getHostnamesAndPorts());
         panel.add(new Label(stringMessages.mongoInstancesToStop()));
         panel.add(tableForChoosingInstancesToShutDown);
@@ -97,7 +101,7 @@ public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructions
         final Grid grid = new Grid(4, 2);
         int row = 0;
         grid.setWidget(row, 0, new Label(stringMessages.numberOfMongoInstancesToLaunch()));
-        numberOfInstancesToLaunchBox = createIntegerBox(1, /* visibleLength */ 2);
+        numberOfInstancesToLaunchBox = createIntegerBox(0, /* visibleLength */ 2);
         grid.setWidget(row++, 1, numberOfInstancesToLaunchBox);
         grid.setWidget(row, 0, new Label(stringMessages.priority()));
         priorityBox = createIntegerBox(0, /* visibleLength */ 2);

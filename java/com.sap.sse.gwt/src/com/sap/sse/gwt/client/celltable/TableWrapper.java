@@ -153,6 +153,20 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>, SM
         addColumn(textColumn, header, Comparator.comparing(t->textColumn.getValue(t), new NaturalComparator()));
     }
 
+    /**
+     * Adds a sortable {@link TextColumn} whose {@link TextColumn#getValue(Object)} method is based on the {@code valueMapper}
+     * and whose sorting is based on the comparator passed.
+     */
+    public void addColumn(Function<T, String> valueMapper, String header, Comparator<T> comparator) {
+        final TextColumn<T> textColumn = new TextColumn<T>() {
+            @Override
+            public String getValue(T object) {
+                return valueMapper.apply(object);
+            }
+        };
+        addColumn(textColumn, header, comparator);
+    }
+
     public void setEmptyTableWidget(Widget widget) {
         table.setEmptyTableWidget(widget);
     }

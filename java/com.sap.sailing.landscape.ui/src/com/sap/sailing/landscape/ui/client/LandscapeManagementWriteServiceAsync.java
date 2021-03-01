@@ -4,9 +4,13 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
+import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -74,4 +78,11 @@ public interface LandscapeManagementWriteServiceAsync {
      * {@link #createMfaSessionCredentials(String, String, String)}.
      */
     void clearSessionCredentials(AsyncCallback<Void> callback);
+    
+    void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
+
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
+            AsyncCallback<SerializationDummyDTO> callback);
 }

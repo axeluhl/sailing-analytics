@@ -13,6 +13,10 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
  */
 public interface AwsInstance<ShardingKey> extends Host {
     String getInstanceId();
+    
+    default String getId() {
+        return getInstanceId();
+    }
 
     void terminate();
 

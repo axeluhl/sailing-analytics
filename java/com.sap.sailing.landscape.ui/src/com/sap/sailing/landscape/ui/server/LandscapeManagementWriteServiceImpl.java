@@ -1,35 +1,55 @@
 package com.sap.sailing.landscape.ui.server;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
+import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsFromUserPreference;
 import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiry;
 import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiryImpl;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
+import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
+import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
+import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
+import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
+import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
@@ -40,6 +60,7 @@ import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
@@ -51,8 +72,11 @@ import software.amazon.awssdk.services.sts.model.Credentials;
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
     private static final long serialVersionUID = -3332717645383784425L;
+    private static final Logger logger = Logger.getLogger(LandscapeManagementWriteServiceImpl.class.getName());
     
     private static final Optional<Duration> IMAGE_UPGRADE_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
+    
+    private static final Optional<Duration> WAIT_FOR_PROCESS_TIMEOUT = Optional.of(Duration.ONE_MINUTE);
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
@@ -149,25 +173,83 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) {
+    public ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws MalformedURLException, IOException, URISyntaxException {
         checkLandscapeManageAwsPermission();
         final ArrayList<MongoEndpointDTO> result = new ArrayList<>();
         for (final MongoEndpoint mongoEndpoint : getLandscape().getMongoEndpoints(new AwsRegion(region))) {
             final MongoEndpointDTO dto;
             if (mongoEndpoint.isReplicaSet()) {
                 final MongoReplicaSet replicaSet = mongoEndpoint.asMongoReplicaSet();
-                final ArrayList<Pair<String, Integer>> hostnamesAndPorts = new ArrayList<>();
+                // TODO produce ProcessDTO objects with AwsInstanceDTO objects inside that have the instance ID
+                final List<MongoProcessDTO> hostnamesAndPorts = new ArrayList<>();
                 for (final MongoProcessInReplicaSet process : replicaSet.getInstances()) {
-                    hostnamesAndPorts.add(new Pair<>(process.getHostname(), process.getPort()));
+                    hostnamesAndPorts.add(convertToMongoProcessDTO(process, replicaSet.getName()));
                 }
                 dto = new MongoEndpointDTO(replicaSet.getName(), hostnamesAndPorts);
             } else {
                 final MongoProcess mongoProcess = mongoEndpoint.asMongoProcess();
-                dto = new MongoEndpointDTO(/* no replica set */ null, Collections.singleton(new Pair<>(mongoProcess.getHostname(), mongoProcess.getPort())));
+                dto = new MongoEndpointDTO(/* no replica set */ null, Collections.singleton(convertToMongoProcessDTO(mongoProcess, /* replicaSetName */ null)));
             }
             result.add(dto);
         }
         return result;
+    }
+    
+    private MongoProcessDTO convertToMongoProcessDTO(MongoProcess mongoProcess, String replicaSetName) throws MalformedURLException, IOException, URISyntaxException {
+        return new MongoProcessDTO(convertToAwsInstanceDTO(mongoProcess.getHost()), mongoProcess.getPort(), mongoProcess.getHostname(WAIT_FOR_PROCESS_TIMEOUT),
+                replicaSetName, mongoProcess.getURI(/* no specific DB */ Optional.empty(), WAIT_FOR_PROCESS_TIMEOUT).toString());
+    }
+
+    private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
+        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(), host.getRegion().getId(), host.getLaunchTimePoint());
+    }
+    
+    @Override
+    public ArrayList<SailingApplicationReplicaSetDTO<String>> getApplicationReplicaSets(String regionId,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final ArrayList<SailingApplicationReplicaSetDTO<String>> result = new ArrayList<>();
+        final AwsRegion region = new AwsRegion(regionId);
+        final ApplicationProcessHost.ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> processFactoryFromHostAndServerDirectory =
+                (host, port, serverDirectory, telnetPort, serverName)->{
+                    try {
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+        for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
+            getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
+                processFactoryFromHostAndServerDirectory, WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
+            result.add(convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+        }
+        return result;
+    }
+
+    private SailingApplicationReplicaSetDTO<String> convertToSailingApplicationReplicaSetDTO(
+            ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return new SailingApplicationReplicaSetDTO<>(applicationServerReplicaSet.getName(),
+                convertToSailingAnalyticsProcessDTO(applicationServerReplicaSet.getMaster(), optionalKeyName, privateKeyEncryptionPassphrase),
+                Util.map(applicationServerReplicaSet.getReplicas(), r->{
+                    try {
+                        return convertToSailingAnalyticsProcessDTO(r, optionalKeyName, privateKeyEncryptionPassphrase);
+                    } catch (Exception e) {
+                        throw new RuntimeException();
+                    }
+                }),
+                applicationServerReplicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName());
+    }
+    
+    private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        // TODO the values required from the process (server name, expedition UDP port, release, telnet port) should all be "baked" into the process object and shouldn't require a separate expensive SSH connect each
+        return new SailingAnalyticsProcessDTO(convertToAwsInstanceDTO(sailingAnalyticsProcess.getHost()),
+                sailingAnalyticsProcess.getPort(), sailingAnalyticsProcess.getHostname(),
+                sailingAnalyticsProcess.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
+                sailingAnalyticsProcess.getTelnetPortToOSGiConsole(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerName(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getServerDirectory(),
+                sailingAnalyticsProcess.getExpeditionUdpPort(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase));
     }
 
     private AwsLandscape<String> getLandscape() {
@@ -188,7 +270,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) {
+    public MongoEndpointDTO getMongoEndpoint(String region, String replicaSetName) throws MalformedURLException, IOException, URISyntaxException {
         return getMongoEndpoints(region).stream().filter(mep->Util.equalsWithNull(mep.getReplicaSetName(), replicaSetName)).findAny().orElse(null);
     }
     
@@ -310,13 +392,21 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
-        // TODO handle mongoScalingInstructions.getHostnamesAndPortsToShutDown()...
+        final AwsLandscape<String> landscape = getLandscape();
+        for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
+            logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
+            final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion());
+            final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
+                    new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZone(),
+                            processToShutdown.getHost().getAvailabilityZone(), region), landscape);
+            instance.terminate();
+        }
         if (mongoScalingInstructions.getReplicaSetName() == null) {
             throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
         }
-        final AwsLandscape<String> landscape = getLandscape();
         final AwsRegion region = new AwsRegion(regionId);
         for (int i=0; i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances(); i++) {
+            logger.info("Launching new MongoDB instance of type "+mongoScalingInstructions.getLaunchParameters().getInstanceType()+" on behalf of user "+SessionUtils.getPrincipal());
             final StartMongoDBServer.Builder<?, String, MongoProcessInReplicaSet> startMongoProcessBuilder = StartMongoDBServer.builder();
             final StartMongoDBServer<String, MongoProcessInReplicaSet> startMongoDBServer = startMongoProcessBuilder
                 .setLandscape(landscape)
@@ -329,5 +419,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .build();
             startMongoDBServer.run();
         }
+    }
+
+    @Override
+    public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
+        return null;
     }
 }
