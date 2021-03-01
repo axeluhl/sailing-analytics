@@ -645,6 +645,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileNameInput.setValue(fileName);
     }
     
+    abstract protected void updateFileName(String fileName);
+
     protected void addVideo(VideoDTO video) {
         updateVideo.accept(video);
     }
