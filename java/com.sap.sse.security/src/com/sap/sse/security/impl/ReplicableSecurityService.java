@@ -87,7 +87,7 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException;
 
-    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException;
 
     Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException;
 

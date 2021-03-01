@@ -291,7 +291,7 @@ public class UserStoreImpl implements UserStore {
                     }
                     groupQualifierForMigratedRole = serverGroup;
                 }
-                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null);
+                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null, true);
                 break;
             }
         }
@@ -1501,7 +1501,7 @@ public class UserStoreImpl implements UserStore {
                     removeRoleFromUser(checkUser.getName(), removeOrAdjust);
                     if (removeOrAdjust.getQualifiedForUser() != null) {
                         addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
-                                removeOrAdjust.getQualifiedForUser()));
+                                removeOrAdjust.getQualifiedForUser(), removeOrAdjust.isTransitive()));
                     }
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,

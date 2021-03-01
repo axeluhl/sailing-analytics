@@ -19,12 +19,12 @@ public class RolesTest {
     public void testRoleToString() {
         final StrippedRoleDefinitionDTO roleDefinition = new StrippedRoleDefinitionDTO(UUID.randomUUID(), "role",
                 new ArrayList<>());
-        final Role role = new Role(roleDefinition);
+        final Role role = new Role(roleDefinition, true);
         final UserGroupImpl tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
         final StrippedUserGroupDTO tenantDTO = new StrippedUserGroupDTO(UUID.randomUUID(), "tenant");
         final StrippedUserDTO user = new StrippedUserDTO("user");
         assertEquals("role", role.toString());
-        final Role role2 = new Role(roleDefinition, tenant, /* user qualification */ null);
+        final Role role2 = new Role(roleDefinition, tenant, /* user qualification */ null, true);
         assertEquals("role:tenant", role2.toString());
         final RoleDTO role3 = new RoleDTO(roleDefinition, tenantDTO, user, true);
         assertEquals("role:tenant:user", role3.toString());

@@ -251,7 +251,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 " for user "+user.getName()+". Removing role.");
                     } else {
                         user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
-                                roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
+                                roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier,
+                                roleWithUserQualifierProxy.isTransitive()));
                     }
                 }
             }

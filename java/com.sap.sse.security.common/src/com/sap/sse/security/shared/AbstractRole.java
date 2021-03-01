@@ -25,12 +25,8 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     protected AbstractRole() {
     } // for GWT serialization only
     
-    public AbstractRole(RD roleDefinition) {
-        this(roleDefinition, /* tenant owner */ null, /* user owner */ null);
-    }
-    
-    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser) {
-        this(roleDefinition, qualifiedForTenant, qualifiedForUser, true);
+    public AbstractRole(RD roleDefinition, boolean transitive) {
+        this(roleDefinition, /* tenant owner */ null, /* user owner */ null, transitive);
     }
     
     public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser, boolean isTransitive) {

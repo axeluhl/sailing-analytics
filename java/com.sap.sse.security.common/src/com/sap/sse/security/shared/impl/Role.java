@@ -6,16 +6,12 @@ import com.sap.sse.security.shared.RoleDefinition;
 public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
     private static final long serialVersionUID = 1L;
 
-    public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser) {
-        super(roleDefinition, qualifiedForTenant, qualifiedForUser);
-    }
-    
     public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser, boolean transitive) {
         super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);
     }
 
-    public Role(RoleDefinition roleDefinition) {
-        super(roleDefinition);
+    public Role(RoleDefinition roleDefinition, boolean transitive) {
+        super(roleDefinition, transitive);
     }
 
     public Ownership getQualificationAsOwnership() {

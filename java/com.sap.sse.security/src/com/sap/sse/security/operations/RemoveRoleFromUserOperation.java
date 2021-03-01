@@ -10,19 +10,21 @@ public class RemoveRoleFromUserOperation implements SecurityOperation<Void> {
     protected final UUID roleDefinitionId;
     protected final UUID idOfTenantQualifyingRole;
     protected final String nameOfUserQualifyingRole;
+    protected final boolean transitive;
 
     public RemoveRoleFromUserOperation(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) {
+            String nameOfUserQualifyingRole, boolean transitive) {
         this.username = username;
         this.roleDefinitionId = roleDefinitionId;
         this.idOfTenantQualifyingRole = idOfTenantQualifyingRole;
         this.nameOfUserQualifyingRole = nameOfUserQualifyingRole;
+        this.transitive = transitive;
     }
 
     @Override
     public Void internalApplyTo(ReplicableSecurityService toState) throws Exception {
         toState.internalRemoveRoleFromUser(username, roleDefinitionId, idOfTenantQualifyingRole,
-                nameOfUserQualifyingRole);
+                nameOfUserQualifyingRole, transitive);
         return null;
     }
 }
