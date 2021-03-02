@@ -4,7 +4,7 @@ furthermore the ../imageupgrade_functions.sh has to go to /usr/local/bin.
 Deploy mongod.conf to /etc and make sure that /root has a+r and a+x permissions because
 otherwise the mongod user won't be able to read through the symbolic link
 Link mongodb to /etc/logrotate.d
-Link ../crontab to /root/crontab and run "crontab crontab" as root.
+Link crontab to /home/ec2-user/crontab and run "crontab crontab" as ec2-user.
 
 Run with optional EC2 user detail, e.g., as follows:
 
