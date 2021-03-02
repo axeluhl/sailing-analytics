@@ -1,7 +1,7 @@
 #!/bin/bash
 user_data=$( ec2-metadata -d | sed -e 's/^user-data: //' )
-if echo ${user_data} | grep "^image-upgrade$"; then
-  imageupgrade.sh
+if echo ${user_data} | grep -q "^image-upgrade$"; then
+  echo "Image upgrade... didn't expect to get this far because ephemeralvolume should have triggered upgrade and shutdown. Not registering MongoDB replica"
 else
   eval ${user_data}
   if [ -z "$REPLICA_SET_NAME" ]; then
