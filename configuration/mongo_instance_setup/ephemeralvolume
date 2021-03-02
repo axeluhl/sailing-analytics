@@ -4,7 +4,7 @@
 # Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
 # An existing xfs partition will be left alone.
 
-if ec2-metadata -d | sed -e 's/^user-data: //' | grep "^image-upgrade$"; then
+if /bin/ec2-metadata -d | sed -e 's/^user-data: //' | grep "^image-upgrade$"; then
   echo "Image upgrade; not trying to mount/format ephemeral volume"
 else
   PARTITION=/dev/nvme0n1
