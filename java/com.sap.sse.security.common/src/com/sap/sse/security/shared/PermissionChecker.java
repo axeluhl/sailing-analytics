@@ -347,7 +347,7 @@ public class PermissionChecker {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, groupsOfUser, ownership,
                     impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, groupsOfAllUser,
-                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ false) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, /* matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven */ true, /* matchOnlyNonTransitiveRoles */ true) != PermissionState.GRANTED) {
                 return false;
             }
         }
