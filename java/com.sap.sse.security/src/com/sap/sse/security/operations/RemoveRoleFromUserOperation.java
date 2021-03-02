@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 
 public class RemoveRoleFromUserOperation implements SecurityOperation<Void> {
-    private static final long serialVersionUID = 5017449842057790350L;
+    private static final long serialVersionUID = -7543807987979122274L;
     protected final String username;
     protected final UUID roleDefinitionId;
     protected final UUID idOfTenantQualifyingRole;

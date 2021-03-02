@@ -4,7 +4,7 @@ import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.RoleDefinition;
 
 public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5730465771729662605L;
 
     public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser, boolean transitive) {
         super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);

@@ -14,8 +14,8 @@ import com.sap.sse.common.Util.Triple;
  */
 public abstract class AbstractRole<RD extends RoleDefinition, G extends SecurityUserGroup<?>, U extends UserReference>
         implements Named {
+    private static final long serialVersionUID = -7426142947288925558L;
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
-    private static final long serialVersionUID = 1243342091492822614L;
     protected RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
