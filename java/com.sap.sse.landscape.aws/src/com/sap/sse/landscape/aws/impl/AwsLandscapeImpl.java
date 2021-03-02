@@ -81,6 +81,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSnapshotsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeTagsResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Image;
@@ -94,6 +95,7 @@ import software.amazon.awssdk.services.ec2.model.ResourceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest.Builder;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Snapshot;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TagSpecification;
@@ -725,10 +727,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             runInstancesRequestBuilder.userData(Base64.getEncoder().encodeToString(String.join("\n", userData).getBytes()));
         }
         tags.ifPresent(theTags->{
-            final List<Tag> awsTags = new ArrayList<>();
-            for (final Entry<String, String> tag : theTags) {
-                awsTags.add(Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
-            }
+            final Collection<Tag> awsTags = getAwsTags(theTags);
             runInstancesRequestBuilder.tagSpecifications(TagSpecification.builder().resourceType(ResourceType.INSTANCE).tags(awsTags).build());
         });
         final RunInstancesRequest launchRequest = runInstancesRequestBuilder.build();
@@ -744,6 +743,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             }
         }
         return result;
+    }
+
+    private Collection<Tag> getAwsTags(Tags tags) {
+        final List<Tag> awsTags = new ArrayList<>();
+        for (final Entry<String, String> tag : tags) {
+            awsTags.add(Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
+        }
+        return awsTags;
     }
 
     @Override
@@ -1150,34 +1157,56 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfiguration(
-            com.sap.sse.landscape.Region region, String replicaSetName, TargetGroup<ShardingKey> publicTargetGroup,
-            String keyName, InstanceType instanceType, String imageId,
-            AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
-            int maxReplicas, int maxRequestsPerTarget) {
+            com.sap.sse.landscape.Region region, String replicaSetName, Optional<Tags> tags,
+            TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
+            String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
+            int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         final String launchConfigurationName = replicaSetName + "-" + replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String autoScalingGroupName = replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
+        final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
+        final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
                 .launchConfigurationName(launchConfigurationName)
                 .keyName(keyName)
                 .imageId(imageId)
+                .instanceMonitoring(i->i.enabled(true))
                 .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
-                .instanceType(instanceType.name()));
-        autoScalingClient.createAutoScalingGroup(b->b
+                .instanceType(instanceType.toString()));
+        autoScalingClient.createAutoScalingGroup(b->{
+            b
                 .minSize(minReplicas)
                 .maxSize(maxReplicas)
+                .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
                 .autoScalingGroupName(autoScalingGroupName)
-                .loadBalancerNames(publicTargetGroup.getTargetGroupArn())
-                .launchConfigurationName(launchConfigurationName));
+                .availabilityZones(Util.toArray(Util.map(availabilityZones, az->az.getName()), new String[3]))
+                .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
+                .launchConfigurationName(launchConfigurationName);
+            tags.ifPresent(t->{
+                final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
+                for (final Entry<String, String> tag : t) {
+                    awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
+                }
+                b.tags(awsTags);
+            });
+        });
         autoScalingClient.putScalingPolicy(b->b
                 .autoScalingGroupName(autoScalingGroupName)
-                .estimatedInstanceWarmup((int) Duration.ONE_MINUTE.times(3).asSeconds())
+                .estimatedInstanceWarmup(instanceWarmupTimeInSeconds)
                 .policyType("TargetTrackingScaling")
+                .policyName("KeepRequestsPerTargetAt"+maxRequestsPerTarget)
                 .targetTrackingConfiguration(t->t
                         .predefinedMetricSpecification(p->p
+                                .resourceLabel("app/"+publicTargetGroup.getLoadBalancer().getName()+"/"+publicTargetGroup.getLoadBalancer().getId()+
+                                        "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGroup.getId())
                                 .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
                         .targetValue((double) maxRequestsPerTarget)));
-        // TODO finish AwsLandscapeImpl.createLaunchConfiguration(...)
+    }
+
+    @Override
+    public Snapshot getSnapshot(AwsRegion region, String snapshotId) {
+        final DescribeSnapshotsResponse describeSnapshotResponse = getEc2Client(getRegion(region)).describeSnapshots(b->b.filters(Filter.builder().name("snapshot-id").values(snapshotId).build()));
+        return describeSnapshotResponse.hasSnapshots() ? describeSnapshotResponse.snapshots().iterator().next() : null;
     }
 }

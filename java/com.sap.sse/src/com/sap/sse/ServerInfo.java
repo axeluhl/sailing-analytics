@@ -19,6 +19,7 @@ import org.json.simple.parser.ParseException;
  */
 public class ServerInfo {
     private static final Logger logger = Logger.getLogger(ServerInfo.class.getName());
+    public static final String SERVER_GROUP_NAME_SUFFIX = "-server";
     
     public static String getBuildVersion() {
         String version = "Unknown or Development (" + getName() + ")";
@@ -46,6 +47,10 @@ public class ServerInfo {
     
     public static String getName() {
         return ServerStartupConstants.SERVER_NAME;
+    }
+    
+    public static String getServerGroupName() {
+        return getName()+SERVER_GROUP_NAME_SUFFIX;
     }
     
     /**

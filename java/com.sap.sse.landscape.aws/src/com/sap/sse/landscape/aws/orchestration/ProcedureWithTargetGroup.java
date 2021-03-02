@@ -97,7 +97,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     protected <ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics>
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
         return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
-                process.getPort(), process.getHealthCheckPath(),
+                /* always use HTTPS as the traffic port to get the Apache reverse proxy's re-direct and logging capabilities */ 443,
+                process.getHealthCheckPath(),
                 /* use traffic port as health check port, too */ process.getPort()); // TODO this doesn't health-check the reverse proxy running on the instance for default set-ups with only one process running on the instance; but how do we know?
     }
     

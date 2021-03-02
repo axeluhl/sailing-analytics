@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -28,6 +30,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder;
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
@@ -46,6 +49,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -61,6 +65,7 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
@@ -68,6 +73,7 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
+import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
@@ -80,6 +86,9 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
@@ -507,6 +516,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
+        establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
         // TODO What about creating the group belonging to the server name? We could make the current user the owner of that group and establish replication permissions so that the user's bearer token could be used for replication
         masterConfigurationBuilder
             .setLandscape(landscape)
@@ -555,6 +565,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
             .setInstanceType(InstanceType.valueOf(masterInstanceType))
+            .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+" "+name+" (Auto-Replica)")
+                         .and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, name))
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setImage(masterHostBuilder.getMachineImage())
             .setReplicaConfiguration(replicaConfigurationBuilder.build());
@@ -562,6 +574,25 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
         }
         createLaunchConfigurationAndAutoScalingGroupBuilder.build().run();
+    }
+
+    private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName) {
+        checkLandscapeManageAwsPermission();
+        final String serverGroupName = serverName + ServerInfo.SERVER_GROUP_NAME_SUFFIX;
+        final UserGroup existingServerGroup = getSecurityService().getUserGroupByName(serverGroupName);
+        final UserGroup serverGroup;
+        if (existingServerGroup == null) {
+            final UUID serverGroupId = UUID.randomUUID();
+            serverGroup = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER_GROUP,
+                    new TypeRelativeObjectIdentifier(serverGroupId.toString()), /* securityDisplayName */ serverGroupName,
+                    (Callable<UserGroup>)()->getSecurityService().createUserGroup(serverGroupId, serverGroupName));
+        } else {
+            serverGroup = existingServerGroup;
+            final User currentUser = getSecurityService().getCurrentUser();
+            if (!Util.contains(serverGroup.getUsers(), currentUser) && getSecurityService().hasCurrentUserUpdatePermission(serverGroup)) {
+                getSecurityService().addUserToUserGroup(serverGroup, currentUser);
+            }
+        }
     }
 
     @Override

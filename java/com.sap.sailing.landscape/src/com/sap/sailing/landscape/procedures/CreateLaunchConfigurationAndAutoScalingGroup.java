@@ -1,11 +1,15 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.util.Optional;
+
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
@@ -47,6 +51,8 @@ implements Procedure<ShardingKey> {
         BuilderT setInstanceType(InstanceType instanceType);
 
         BuilderT setImage(AmazonMachineImage<ShardingKey> image);
+        
+        BuilderT setTags(Tags tags);
     }
     
     protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
@@ -59,6 +65,7 @@ implements Procedure<ShardingKey> {
         private AmazonMachineImage<ShardingKey> image;
         private InstanceType instanceType;
         private AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
+        private Optional<Tags> tags;
 
         public BuilderImpl(AwsLandscape<ShardingKey> landscape, Region region, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> applicationReplicaSet,
                 TargetGroup<ShardingKey> targetGroup) {
@@ -120,6 +127,16 @@ implements Procedure<ShardingKey> {
             return replicaConfiguration;
         }
 
+        protected Optional<Tags> getTags() {
+            return tags;
+        }
+
+        @Override
+        public BuilderT setTags(Tags tags) {
+            this.tags = Optional.ofNullable(tags);
+            return self();
+        }
+
         @Override
         public CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             return new CreateLaunchConfigurationAndAutoScalingGroup<>(this);
@@ -133,6 +150,7 @@ implements Procedure<ShardingKey> {
     private final InstanceType instanceType;
     private final String imageId;
     private final AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration;
+    private final Optional<Tags> tags;
     
     public static <ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey,MetricsT,ProcessT>>
     Builder<ShardingKey, BuilderT, MetricsT, ProcessT> builder(
@@ -152,6 +170,7 @@ implements Procedure<ShardingKey> {
         this.imageId = builder.getImage().getId();
         this.instanceType = builder.getInstanceType();
         this.replicaConfiguration = builder.getReplicaConfiguration();
+        this.tags = builder.getTags();
     }
     
     @Override
@@ -161,7 +180,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfiguration(region, applicationReplicaSet.getName(), targetGroup,
-                keyName, instanceType, imageId, replicaConfiguration, MIN_REPLICAS, MAX_REPLICAS, MAX_REQUESTS_PER_TARGET);
+        getLandscape().createLaunchConfiguration(region, applicationReplicaSet.getName(), tags,
+                targetGroup, keyName, instanceType, imageId, replicaConfiguration, MIN_REPLICAS, MAX_REPLICAS, MAX_REQUESTS_PER_TARGET);
     }
 }

@@ -38,7 +38,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  */
 public abstract class StartAwsHost<ShardingKey, HostT extends AwsInstance<ShardingKey>>
 extends StartHost<ShardingKey, HostT> {
-    protected static final String NAME_TAG_NAME = "Name";
+    public static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
     private final InstanceType instanceType;

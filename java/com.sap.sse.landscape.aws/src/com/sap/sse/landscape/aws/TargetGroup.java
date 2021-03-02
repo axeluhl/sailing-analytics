@@ -50,5 +50,9 @@ public interface TargetGroup<ShardingKey> extends Named {
     
     String getTargetGroupArn();
 
+    default String getId() {
+        return getTargetGroupArn().substring(getTargetGroupArn().lastIndexOf('/')+1);
+    }
+
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
 }

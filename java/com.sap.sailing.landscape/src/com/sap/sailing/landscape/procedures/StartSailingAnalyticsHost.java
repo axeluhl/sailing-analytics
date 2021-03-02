@@ -33,7 +33,7 @@ public class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
 implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
-    private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
+    public final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     
     /**
      * The following defaults, in addition to the defaults implemented by the more general

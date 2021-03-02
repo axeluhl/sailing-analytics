@@ -1,6 +1,8 @@
 Deploy the .mount and .service units to /etc/systemd/system.
-Deploy the ephemeralvolume and the patch-mongo-replicaset-name-from-ec2-metadata script to /usr/local/bin
+Deploy the ephemeralvolume and the patch-mongo-replicaset-name-from-ec2-metadata script to /usr/local/bin,
+furthermore the ../imageupgrade_functions.sh has to go to /usr/local/bin.
 Deploy mongod.conf to /etc
+Link ../crontab to /root/crontab and run "crontab crontab" as root.
 
 Run with optional EC2 user detail, e.g., as follows:
 

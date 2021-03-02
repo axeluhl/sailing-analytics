@@ -179,6 +179,10 @@ implements UserDataProvider {
             return databaseName == null ? getServerName() : databaseName;
         }
         
+        protected boolean isDatabaseNameSet() {
+            return databaseName != null;
+        }
+        
         @Override
         public BuilderT setDatabaseName(String databaseName) {
             this.databaseName = databaseName;

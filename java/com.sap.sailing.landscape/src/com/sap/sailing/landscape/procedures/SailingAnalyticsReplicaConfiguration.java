@@ -20,16 +20,21 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
      * <li>The {@link #getInboundReplicationConfiguration() inbound replication}
      * {@link InboundReplicationConfiguration#getInboundMasterExchangeName() exchange name} defaults to the
      * {@link #setServerName(String) server name} property</li>
-     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to {@code "live-replica-server"}.</li>
+     * <li>The {@link DefaultProcessConfigurationVariables#USE_ENVIRONMENT} variable is set to
+     * {@code "live-replica-server"}.</li>
+     * <li>If no {@link #setDatabaseName(String) database name is set} explicitly, it defaults to the
+     * {@link #getServerName() server name} with the suffix {@code -replica} appended to it.</li>
      * </ul>
      * 
-     * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment contents
+     * TODO we could default the set of replicables to replicate, competing with the live-replica-server environment
+     * contents
      * 
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
     extends SailingAnalyticsApplicationConfiguration.Builder<BuilderT, SailingAnalyticsReplicaConfiguration<ShardingKey>, ShardingKey> {
         String DEFAULT_REPLICA_OUTPUT_REPLICATION_EXCHANGE_NAME_SUFFIX = "-replica";
+        String DEFAULT_REPLICA_DATABASE_NAME_SUFFIX = "-replica";
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
@@ -71,6 +76,11 @@ extends SailingAnalyticsApplicationConfiguration<ShardingKey> {
             final Map<ProcessConfigurationVariable, String> result = new HashMap<>(super.getUserData());
             result.put(DefaultProcessConfigurationVariables.USE_ENVIRONMENT, "live-replica-server"); // TODO maybe this should be handled by this procedure adding the correct defaults, e.g., for replicating security/sharedsailing?
             return result;
+        }
+        
+        @Override
+        protected String getDatabaseName() {
+            return isDatabaseNameSet() ? super.getDatabaseName() : super.getDatabaseName()+DEFAULT_REPLICA_DATABASE_NAME_SUFFIX;
         }
 
         @Override

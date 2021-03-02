@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +16,6 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -30,12 +30,14 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.orchestration.Procedure;
+import com.sap.sse.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ImageState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.Snapshot;
 
 /**
  * Upgrades an existing Amazon Machine Image that is expected to be prepared for such an upgrade, by
@@ -68,9 +70,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     private final String upgradedImageName;
     private final String imageType;
     private final boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
-    private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
+    private final Optional<Duration> optionalTimeout;
     private AmazonMachineImage<ShardingKey> upgradedAmi;
     
     /**
@@ -131,17 +133,12 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     implements Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
-        private final Map<String, String> deviceNamesToSnapshotBaseNames;
+        private Map<String, String> deviceNamesToSnapshotBaseNames;
         private boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
 
         private BuilderImpl() {
             super();
-            // TODO the following is very specific to the way the Sailing Analytics image has been set up;
             // TODO encapsulate with other image specificities required for upgrading?
-            deviceNamesToSnapshotBaseNames = new HashMap<>();
-            setSnapshotBaseName("/dev/xvda", "System");
-            setSnapshotBaseName("/dev/sdc", "Swap");
-            setSnapshotBaseName("/dev/sdf", "Home");
             setNoShutdown(false);
         }
         
@@ -244,6 +241,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         public BuilderT setSnapshotBaseName(String deviceName, String snapshotBaseName) {
+            if (deviceNamesToSnapshotBaseNames == null) {
+                deviceNamesToSnapshotBaseNames = new HashMap<>();
+            }
             deviceNamesToSnapshotBaseNames.put(deviceName, snapshotBaseName);
             return self();
         }
@@ -277,11 +277,26 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         protected AwsRegion getRegion() {
             return super.getRegion();
         }
-
+        
         @Override
         public UpgradeAmi<ShardingKey> build() {
             if (upgradedImageName == null) {
                 upgradedImageName = increaseVersionNumber(getMachineImage().getName());
+            }
+            if (deviceNamesToSnapshotBaseNames == null) {
+                deviceNamesToSnapshotBaseNames = new HashMap<>();
+                final AmazonMachineImage<ShardingKey> image = getLandscape().getImage(getRegion(), getMachineImage().getId());
+                for (final BlockDeviceMapping blockDeviceMapping : image.getBlockDeviceMappings()) {
+                    final Snapshot snapshot = getLandscape().getSnapshot(getRegion(), blockDeviceMapping.ebs().snapshotId());
+                    snapshot.tags().stream().filter(t->t.key().equals("Name")).findAny().ifPresent(nameTag->{
+                        final Pattern snapshotNamePattern = Pattern.compile("^.* \\((.*)\\) *$");
+                        final Matcher matcher = snapshotNamePattern.matcher(nameTag.value());
+                        if (matcher.matches()) {
+                            final String baseName = matcher.group(1);
+                            deviceNamesToSnapshotBaseNames.put(blockDeviceMapping.deviceName(), baseName);
+                        }
+                    });
+                }
             }
             return new UpgradeAmi<>(this);
         }
@@ -302,41 +317,28 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     
     protected UpgradeAmi(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
+        optionalTimeout = builder.getOptionalTimeout();
         region = builder.getRegion();
         imageType = builder.getImageType();
         upgradedImageName = builder.getUpgradedImageName();
-        timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
         deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
         keyPairIsTemporaryAndNeedsToBeRemovedWhenDone = builder.isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone();
     }
-
+    
     @Override
     public void run() throws Exception {
         try {
             super.run(); // launches the machine in upgrade mode and shuts it down again, preparing for AMI creation
-            Instance instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
+            final Instance[] instance = new Instance[1];
             if (waitForShutdown) {
-                logger.info("Waiting for shutdown of instance "+instance.instanceId());
-                // wait for the instance to shut down
-                // TODO use Wait.wait...
-                final TimePoint startedWaiting = TimePoint.now();
-                while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
-                    logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
-                            + ". Waiting " + (timeout == null ? "forever"
-                                    : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
-                    Thread.sleep(5000);
-                    instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
-                }
+                Wait.wait(()->(instance[0] = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion())) != null
+                               && instance[0].state().name() == InstanceStateName.STOPPED,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for shutdown of instance "+getHost().getInstanceId());
             }
             upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(Landscape.IMAGE_TYPE_TAG_NAME, imageType)));
-            final TimePoint startedWaiting = TimePoint.now();
-            while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
-                logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
-                        + ". Waiting " + (timeout == null ? "forever"
-                                : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
-                Thread.sleep(5000);
-            }
+            Wait.wait(()->(upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() == ImageState.AVAILABLE,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for Image " + upgradedAmi.getId() + " to become "+ImageState.AVAILABLE);
             for (final BlockDeviceMapping blockDeviceMapping : upgradedAmi.getBlockDeviceMappings()) {
                 if (blockDeviceMapping.ebs() != null) {
                     final String snapshotId = blockDeviceMapping.ebs().snapshotId();

@@ -42,6 +42,10 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     Region getRegion();
 
     String getArn();
+    
+    default String getId() {
+        return getArn().substring(getArn().lastIndexOf('/')+1);
+    }
 
     /**
      * Application load balancer rules have a {@link Rule#priority() priority} which must be unique in the scope of a
