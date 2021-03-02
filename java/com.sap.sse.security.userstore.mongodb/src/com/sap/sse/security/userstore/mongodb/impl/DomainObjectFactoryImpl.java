@@ -371,6 +371,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Role loadRoleWithProxyUserQualifier(Document rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
             Map<UUID, UserGroup> userGroups) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
+       
         final Role result;
         if (roleDefinition == null) {
             result = null;
@@ -379,7 +380,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
             final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
                     : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
-            final boolean transitive = rolesO.getBoolean(FieldNames.Role.TRANSITIVE, true);
+            final boolean transitive = rolesO.getBoolean(FieldNames.Role.TRANSITIVE.name(), true);
             result = new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser, transitive);
         }
         return result;
