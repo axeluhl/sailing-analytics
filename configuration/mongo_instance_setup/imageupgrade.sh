@@ -15,6 +15,8 @@ clean_mongo_pid() {
   rm -f /var/run/mongodb/mongod.pid
 }
 
+LOGON_USER_HOME=/home/ec2-user
+
 run_yum_update
 run_git_pull_root
 clean_startup_logs

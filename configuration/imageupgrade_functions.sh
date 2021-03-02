@@ -4,6 +4,7 @@
 # The steps are as follows:
 
 REBOOT_INDICATOR=/var/run/is-rebooted
+LOGON_USER_HOME=/root
 
 run_yum_update() {
   echo "Updating packages using yum" >>/var/log/sailing.err
@@ -46,8 +47,8 @@ update_root_crontab() {
 }
 
 clean_root_ssh_dir_and_tmp() {
-  echo "Cleaning up /root/.ssh" >>/var/log/sailing.err
-  rm -rf /root/.ssh/*
+  echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
+  rm -rf ${LOGON_USER_HOME}/.ssh/*
   rm -rf /tmp/image-upgrade-finished
 }
 
@@ -57,7 +58,7 @@ finalize() {
     echo "Shutdown disabled by no-shutdown option in user data. Remember to clean /root/.ssh when done."
     touch /tmp/image-upgrade-finished
   else
-    # Only clean root's .ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
+    # Only clean ${LOGON_USER_HOME}/.ssh directory and /tmp/image-upgrade-finished if the next step is shutdown / image creation
     clean_root_ssh_dir_and_tmp
     shutdown -h now &
   fi
