@@ -306,6 +306,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         case UFD:
             result = MaxPointsReason.UFD;
             break;
+        case NSC:
+            result = MaxPointsReason.NSC;
+            break;
+        case TLE:
+            result = MaxPointsReason.TLE;
+            break;
         default:
             result = MaxPointsReason.NONE;
             break;
