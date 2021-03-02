@@ -51,9 +51,14 @@ import software.amazon.awssdk.services.ec2.model.Snapshot;
  * it will increment the last version part matched (minor in case of major.minor and micro in case of
  * major.minor.micro) by one.<p>
  * 
- * TODO generalize such that kernel upgrades / security patches can be applied to any CentOS/Amazon Linux-based
- * image; then one level more specialized clean httpd logs for anything that has a reverse proxy on it;
- * then for those that have a default server process / git on it cleaning that up and refreshing...
+ * The volume snapshot names are expected to follow the pattern {@code "^.*\(.*\)$"} where the snapshot's
+ * base name is found between the parentheses. It is used by default to name the updated snapshots if no
+ * {@link Builder#setSnapshotBaseName(String, String) explicit snapshot names} are provided.<p>
+ * 
+ * The upgrade procedure is based on setting the {@code image-upgrade} (see {@link StartEmptyServer#IMAGE_UPGRADE_USER_DATA})
+ * line in the user data; optionally there can be another line {@code no-shutdown} (see {@link StartEmptyServer#NO_SHUTDOWN_USER_DATA})
+ * which instructs the instance to not shut down after performing its upgrade. Any image that can handle these two user data lines
+ * appropriately can be the target of this procedure.<p>
  * 
  * @author Axel Uhl (D043530)
  *
@@ -138,7 +143,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         private BuilderImpl() {
             super();
-            // TODO encapsulate with other image specificities required for upgrading?
             setNoShutdown(false);
         }
         
