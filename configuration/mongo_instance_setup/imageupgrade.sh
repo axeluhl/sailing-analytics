@@ -7,7 +7,8 @@
 
 run_git_pull_root() {
   echo "Pulling git to /root/code" >>/var/log/sailing.err
-  "cd /root/code; git pull"
+  cd /root/code
+  git pull
 }
 
 clean_mongo_pid() {
