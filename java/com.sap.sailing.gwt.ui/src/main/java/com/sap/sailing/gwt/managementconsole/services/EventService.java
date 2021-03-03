@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.managementconsole.services;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -15,6 +17,8 @@ import com.sap.sailing.gwt.managementconsole.events.EventListUpdateEvent;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class EventService {
     
@@ -68,4 +72,7 @@ public class EventService {
         this.eventMap = eventList.stream().collect(Collectors.toMap(event -> event.id.toString(),  Function.identity()));
     }
     
+    public void createEvent(String name, String venue, Date date, List<String> courseAreaNames, AsyncCallback<EventDTO> callback) {
+        sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(), new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), new ArrayList<UUID>(), callback); 
+    }
 }

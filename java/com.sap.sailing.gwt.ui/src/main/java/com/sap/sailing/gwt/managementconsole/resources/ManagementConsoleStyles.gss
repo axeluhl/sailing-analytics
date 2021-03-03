@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@external gwt-TextBox, gwt-PasswordTextBox;
+@external gwt-TextBox, gwt-PasswordTextBox, com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput;
 
 html, body {
     height: 100%;
@@ -40,7 +40,7 @@ label, .label {
     display: inline-block;
 }
 
-input, .gwt-TextBox, .gwt-PasswordTextBox {
+input, .gwt-TextBox, .gwt-PasswordTextBox, input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput {
     color: TEXT_COLOR_PRIMARY;
     font-style: italic;
     font-size: FONT_SIZE_LARGE;
@@ -58,17 +58,20 @@ input, .gwt-TextBox, .gwt-PasswordTextBox {
 
 input::placeholder,
 .gwt-TextBox::placeholder,
-.gwt-PasswordTextBox::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+.gwt-PasswordTextBox::placeholder,
+input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: TEXT_COLOR_INPUTS;
     opacity: 1; /* Firefox */
 }
 
 input:-ms-input-placeholder,
 .gwt-TextBox:-ms-input-placeholder,
-.gwt-PasswordTextBox:-ms-input-placeholder,   /* Internet Explorer 10-11 */
+.gwt-PasswordTextBox:-ms-input-placeholder,
+input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput:-ms-input-placeholder   /* Internet Explorer 10-11 */
 input::-ms-input-placeholder,
 .gwt-TextBox::-ms-input-placeholder,
-.gwt-PasswordTextBox::-ms-input-placeholder { /* Microsoft Edge */
+.gwt-PasswordTextBox::-ms-input-placeholder
+input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput::-ms-input-placeholder { /* Microsoft Edge */
     color: TEXT_COLOR_INPUTS;
 }
 

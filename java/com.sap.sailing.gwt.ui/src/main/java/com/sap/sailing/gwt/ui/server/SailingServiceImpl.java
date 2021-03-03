@@ -3652,7 +3652,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         eventDTO.venue = new VenueDTO();
         eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-        eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
+        eventDTO.endDate = event.getEndDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
         eventDTO.id = (UUID) event.getId();
         eventDTO.setDescription(event.getDescription());

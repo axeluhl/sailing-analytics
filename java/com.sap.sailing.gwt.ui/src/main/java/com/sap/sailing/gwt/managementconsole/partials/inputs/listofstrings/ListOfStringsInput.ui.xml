@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+	xmlns:sse="urn:import:com.sap.sse.gwt.client" 
+	xmlns:l="urn:import:com.sap.sailing.gwt.managementconsole.partials.inputs.listofstrings">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.inputs.listofstrings.ListOfStringsInputResources" />
+    
+    <g:HTMLPanel ui:field="panel"> 
+	    <g:HTMLPanel ui:field="textInputsWrapper"></g:HTMLPanel>
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium12} {local_res.style.anchorWrapper}">
+           <g:Anchor ui:field="addAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

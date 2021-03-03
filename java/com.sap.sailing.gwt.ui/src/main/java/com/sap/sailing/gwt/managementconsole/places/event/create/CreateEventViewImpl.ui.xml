@@ -1,6 +1,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:dt="urn:import:com.sap.sse.gwt.client.controls.datetime"
+             xmlns:los="urn:import:com.sap.sailing.gwt.managementconsole.partials.inputs.listofstrings">
              
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
@@ -21,30 +23,23 @@
         </div>
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <label for="name"><ui:text from='{i18n.nameLabel}' /></label>
-                <input id="name" placeholder="{i18n.eventNamePlaceholder}"/>
+                <label for="eventName"><ui:text from='{i18n.nameLabel}' /></label>
+                <input ui:field="nameInput" placeholder="{i18n.eventNamePlaceholder}"/>
             </div>
              <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <label for="date"><ui:text from='{i18n.dateLabel}' /></label>
-                <input id="date" placeholder="{i18n.datePlaceholder}"/>
+                <dt:DateInput ui:field="dateInput"/>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <label for="venue"><ui:text from='{i18n.venueLabel}' /></label>
-                <input id="venue" placeholder="{i18n.venuePlaceholder}"/>
+                <input ui:field="venueInput" placeholder="{i18n.venuePlaceholder}"/>
             </div>
+            
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-	            <div class="{res.mediaCss.small12}">
+	            <div class="{res.mediaCss.small12} {res.mediaCss.medium12}">
 	                <label for="course_areas"><ui:text from='{i18n.courseAreasLabel}' /></label> 
 	            </div>
-	            <div style="width:90%;float:left">
-	                <input id="course_areas" placeholder="{i18n.courseAreaPlaceholder}" style="margin: 0 0 1rem;"/>
-	            </div>
-	            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}" style="width:10%;padding-left:0">  
-	                <g:Anchor addStyleNames="{app_res.icons.icon} {app_res.icons.iconClose} {app_res.style.flexItemFixedWidth}" />
-	            </div>
-	            <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}" style="padding:0">
-	            <g:Anchor addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
-	            </div>
+	            <los:ListOfStringsInput ui:field="courseAreasInput"></los:ListOfStringsInput>
             </div>
         </div>
         <div class="{res.mediaCss.grid}">
