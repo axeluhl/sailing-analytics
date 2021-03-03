@@ -1,6 +1,6 @@
 [Unit]
 Description=Ensures /dev/nvme0n1 or /dev/xvdb is XFS-formatted
-Requires=-.mount cloud-final.target
+Requires=-.mount cloud-init.target
 After=-.mount
 
 [Install]
