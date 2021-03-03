@@ -142,8 +142,10 @@ public class CompetitorFilterPanel extends FlowPanel implements KeyUpHandler, Fi
             if (loadedCompetitorsFilterSets != null) {
                 competitorsFilterSets = loadedCompetitorsFilterSets;
                 insertSelectedCompetitorsFilter(competitorsFilterSets);
+                updateCompetitorFilterSetAndView(competitorsFilterSets.getActiveFilterSet());
             } else {
                 competitorsFilterSets = createAndAddDefaultCompetitorsFilter();
+                updateCompetitorFilterSetAndView(competitorsFilterSets.getActiveFilterSet());
                 storeCompetitorsFilterSets(competitorsFilterSets);
             }
         });
