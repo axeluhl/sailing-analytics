@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -13,10 +14,16 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig.Builder;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 
 public class ApplicationLoadBalancerImpl<ShardingKey>
@@ -71,7 +78,8 @@ implements ApplicationLoadBalancer<ShardingKey> {
         landscape.deleteLoadBalancerListener(getRegion(), listener);
     }
 
-    private Listener getListener(ProtocolEnum protocol) {
+    @Override
+    public Listener getListener(ProtocolEnum protocol) {
         return Util.filter(landscape.getListeners(this), l->l.protocol() == protocol).iterator().next();
     }
 
@@ -185,5 +193,61 @@ implements ApplicationLoadBalancer<ShardingKey> {
     private void deleteAllListeners() {
         deleteListener(ProtocolEnum.HTTP);
         deleteListener(ProtocolEnum.HTTPS);
+    }
+
+    @Override
+    public Rule updateDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
+            .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule, pathWithLeadingSlash, query))
+            .orElseGet(()->{
+                final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
+                addRules(defaultRedirectRule);
+                return defaultRedirectRule;
+            });
+    }
+    
+    @Override
+    public Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return Rule.builder()
+                .conditions(RuleCondition.builder().field("path-pattern").pathPatternConfig(ppc->ppc.values("/")).build(),
+                            createHostHeaderRuleCondition(hostname))
+                .actions(createDefaultRedirectAction(pathWithLeadingSlash, query))
+                .build();
+    }
+
+    private Action createDefaultRedirectAction(String pathWithLeadingSlash, Optional<String> query) {
+        Builder redirectConfigBuilder = RedirectActionConfig.builder()
+                .protocol("#{protocol}")
+                .port("#{port}")
+                .host("#{host}")
+                .path(pathWithLeadingSlash)
+                .statusCode(RedirectActionStatusCodeEnum.HTTP_302);
+        query.ifPresent(q->redirectConfigBuilder.query(q));
+        return Action.builder().type(ActionTypeEnum.REDIRECT).redirectConfig(redirectConfigBuilder.build()).build();
+    }
+    
+    @Override
+    public RuleCondition createHostHeaderRuleCondition(String hostname) {
+        return RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(hostname)).build();
+    }
+
+    private Rule updateDefaultRedirectRule(Rule defaultRedirectRule, String path, Optional<String> query) {
+        final Rule updatedRule = defaultRedirectRule.copy(b->b.actions(createDefaultRedirectAction(path, query)));
+        landscape.updateLoadBalancerListenerRule(getRegion(), updatedRule);
+        return updatedRule;
+    }
+
+    /**
+     * A {@code rule} is considered to be the default redirect rule for {@code hostname} if it has a {@code host-header}
+     * condition for that {@code hostname} and a {@code path-pattern} condition for exactly one path, {@code "/"}.
+     */
+    private boolean isDefaultRedirectRule(Rule rule, String hostname) {
+        return
+                rule.conditions().stream().filter(condition->condition.field().equals("host-header")
+                                               && condition.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()
+                &&
+                rule.conditions().stream().filter(condition->condition.field().equals("path-pattern")
+                                               && condition.pathPatternConfig().values().size() == 1
+                                               && condition.pathPatternConfig().values().contains("/")).findAny().isPresent();
     }
 }

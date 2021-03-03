@@ -122,6 +122,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.SetRulePrioritiesRequest;
@@ -267,31 +268,52 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final SubnetMapping[] subnetMappings = Util.toArray(Util.map(getSubnetsForAvailabilityZones(awsRegion, availabilityZones),
                 subnet->SubnetMapping.builder().subnetId(subnet.subnetId()).build()), new SubnetMapping[0]);
         final CreateLoadBalancerResponse response = client
-                .createLoadBalancer(CreateLoadBalancerRequest.builder().name(name)
-                        .subnetMappings(subnetMappings).build());
+                .createLoadBalancer(CreateLoadBalancerRequest.builder()
+                        .name(name)
+                        .subnetMappings(subnetMappings)
+                        .securityGroups(getDefaultSecurityGroupForApplicationLoadBalancer(region).getId())
+                        .build());
         client.modifyLoadBalancerAttributes(b->b.loadBalancerArn(response.loadBalancers().iterator().next().loadBalancerArn()).
                 attributes(
                         LoadBalancerAttribute.builder().key("access_logs.s3.enabled").value("true").build(),
                         LoadBalancerAttribute.builder().key("access_logs.s3.bucket").value(getS3BucketForAlbLogs(region)).build(),
                         LoadBalancerAttribute.builder().key("idle_timeout.timeout_seconds").value("4000").build()).build());
         final ApplicationLoadBalancer<ShardingKey> result = new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this);
-        createLoadBalancerListener(result, ProtocolEnum.HTTP);
-        createLoadBalancerListener(result, ProtocolEnum.HTTPS);
+        createLoadBalancerHttpListener(result);
+        createLoadBalancerHttpsListener(result);
         return result;
     }
     
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Listener createLoadBalancerListener(ApplicationLoadBalancer<ShardingKey> alb, ProtocolEnum protocol) {
-        final int port = protocol==ProtocolEnum.HTTP?80:443;
-        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+protocol.name(),
-                port, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ port);
-        defaultTargetGroup.addTargets(reverseProxy.getHosts());
-        return getLoadBalancingClient(
-                getRegion(alb.getRegion()))
+    Listener createLoadBalancerHttpListener(ApplicationLoadBalancer<ShardingKey> alb) {
+        return getLoadBalancingClient(getRegion(alb.getRegion()))
                         .createListener(l -> {
-                            l.loadBalancerArn(alb.getArn()).protocol(protocol)
-                                        .port(port)
+                            l.loadBalancerArn(alb.getArn()).protocol(ProtocolEnum.HTTP)
+                                        .port(80)
+                                        .defaultActions(Action.builder()
+                                                .type(ActionTypeEnum.REDIRECT)
+                                                .redirectConfig(rcb->rcb
+                                                        .protocol(ProtocolEnum.HTTPS.name())
+                                                        .port("443")
+                                                        .host("#{host}")
+                                                        .path("/#{path}")
+                                                        .query("#{query}")
+                                                        .statusCode(RedirectActionStatusCodeEnum.HTTP_301))
+                                                .build());
+                        }).listeners().iterator().next();
+    }
+
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) {
+        final int httpsPort = 443;
+        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTPS.name(),
+                httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort);
+        defaultTargetGroup.addTargets(reverseProxy.getHosts());
+        return getLoadBalancingClient(getRegion(alb.getRegion()))
+                        .createListener(l -> {
+                            l.loadBalancerArn(alb.getArn()).protocol(ProtocolEnum.HTTPS)
+                                        .port(httpsPort)
                                         .defaultActions(Action.builder()
                                                 .targetGroupArn(defaultTargetGroup.getTargetGroupArn())
                                                 .type(ActionTypeEnum.FORWARD)
@@ -299,11 +321,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                                         .targetGroupArn(defaultTargetGroup.getTargetGroupArn()).build())
                                                         .build())
                                                 .build());
-                            if (protocol==ProtocolEnum.HTTPS) {
-                                l.certificates(Certificate.builder().certificateArn(DEFAULT_CERTIFICATE_ARN).build());
-                            }
-                        })
-                        .listeners().iterator().next();
+                            l.certificates(Certificate.builder().certificateArn(DEFAULT_CERTIFICATE_ARN).build());
+                        }).listeners().iterator().next();
     }
 
     @Override
@@ -355,6 +374,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         for (final Rule rule : rulesToDelete) {
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
+    }
+    
+    @Override
+    public void updateLoadBalancerListenerRule(com.sap.sse.landscape.Region region, Rule ruleToUpdate) {
+        getLoadBalancingClient(getRegion(region)).modifyRule(b->b
+                .ruleArn(ruleToUpdate.ruleArn())
+                .actions(ruleToUpdate.actions())
+                .conditions(ruleToUpdate.conditions()));
     }
     
     @Override
@@ -921,6 +948,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        return getDefaultSecurityGroupForApplicationHosts(region);
+    }
+
+    @Override
+    public SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(com.sap.sse.landscape.Region region) {
         return getDefaultSecurityGroupForApplicationHosts(region);
     }
 

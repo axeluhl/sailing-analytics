@@ -76,7 +76,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupT
 public abstract class CreateLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ProcedureWithTargetGroup<ShardingKey> {
-    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 4;
+    protected static int NUMBER_OF_RULES_PER_REPLICA_SET = 5;
     protected static final int MAX_RULES_PER_ALB = 100;
     protected static final int MAX_ALBS_PER_REGION = 20;
     private final ProcessT process;
@@ -223,27 +223,33 @@ extends ProcedureWithTargetGroup<ShardingKey> {
     private Rule[] createRules() {
         final Rule[] rules = new Rule[NUMBER_OF_RULES_PER_REPLICA_SET];
         int ruleCount = 0;
+        rules[ruleCount++] = getLoadBalancerUsed().createDefaultRedirectRule(getHostName(), "/index.html", /* query */ Optional.empty());
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB())).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-header").httpHeaderConfig(hhcb->hhcb.httpHeaderName(HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO).values(HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB())).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
                 RuleCondition.builder().field("http-request-method").httpRequestMethodConfig(hrmcb->hrmcb.values("GET")).build(),
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getPublicTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getPublicTargetGroupCreated())).
                 build();
         rules[ruleCount++] = Rule.builder().conditions(
-                RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(getHostName())).build()).
-                actions(Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc->fc.targetGroups(TargetGroupTuple.builder().targetGroupArn((getMasterTargetGroupCreated().getTargetGroupArn())).build())).build()).
+                getLoadBalancerUsed().createHostHeaderRuleCondition(getHostName())).
+                actions(createForwardToTargetGroupAction(getMasterTargetGroupCreated())).
                 build();
         assert ruleCount == NUMBER_OF_RULES_PER_REPLICA_SET;
         return rules;
+    }
+    
+    private Action createForwardToTargetGroupAction(TargetGroup<ShardingKey> targetGroup) {
+        return Action.builder().type(ActionTypeEnum.FORWARD).forwardConfig(fc -> fc.targetGroups(
+                TargetGroupTuple.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())) .build();
     }
 
     protected String getHostName() {

@@ -32,7 +32,6 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
-import com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
@@ -45,6 +44,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -66,7 +66,6 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
-import com.sap.sse.landscape.aws.TargetGroup;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
@@ -468,47 +467,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcessDTO master,
-            String instanceType, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String replicationBearerToken) throws Exception {
-        checkLandscapeManageAwsPermission();
-        final AwsLandscape<String> landscape = getLandscape();
-        final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
-        final StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
-        final AwsRegion region = new AwsRegion(regionId);
-        replicaConfigurationBuilder
-            .setLandscape(landscape)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
-            .setRegion(region)
-            .setRelease(SailingReleaseRepository.INSTANCE.getRelease(master.getReleaseName()));
-        replicaHostBuilder
-            .setInstanceType(InstanceType.valueOf(instanceType))
-            .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
-            .setLandscape(landscape)
-            .setRegion(region)
-            .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
-        if (optionalKeyName != null) {
-            replicaHostBuilder.setKeyName(optionalKeyName);
-        }
-        final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
-        replicaHostStartProcedure.run();
-        CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> loadBalancerMappingBuilder = CreateDynamicLoadBalancerMapping.builder();
-        final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping =
-            loadBalancerMappingBuilder
-                .setServerName(master.getServerName())
-                .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
-                .setLandscape(landscape)
-                .build();
-        final TargetGroup<String> masterTargetGroup = createLoadBalancerMapping.getMasterTargetGroup();
-        final TargetGroup<String> publicTargetGroup = createLoadBalancerMapping.getPublicTargetGroup();
-        if (!Util.contains(Util.map(masterTargetGroup.getRegisteredTargets().keySet(), target->target.getId()), master.getHost().getInstanceId())
-        ||  master.getPort() != masterTargetGroup.getHealthCheckPort()) {
-            throw new IllegalStateException("Master "+master+" is not registered with master target group "+masterTargetGroup.getName()+"/"+masterTargetGroup.getTargetGroupArn());
-        }
-        publicTargetGroup.addTarget(replicaHostStartProcedure.getHost());
-    }
-
-    @Override
     public void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String optionalDomainName) throws Exception {
@@ -594,6 +552,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 getSecurityService().addUserToUserGroup(serverGroup, currentUser);
             }
         }
+    }
+
+    @Override
+    public void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
+            String passphraseForPrivateKeyDecryption) {
+        // TODO Implement LandscapeManagementWriteServiceImpl.defineLandingPage(...)
+        
     }
 
     @Override

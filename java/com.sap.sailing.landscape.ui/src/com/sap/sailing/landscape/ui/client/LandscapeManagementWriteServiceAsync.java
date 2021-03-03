@@ -8,8 +8,8 @@ import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
-import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
@@ -84,10 +84,6 @@ public interface LandscapeManagementWriteServiceAsync {
     void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
 
-    void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcessDTO master, String instanceType,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken,
-            AsyncCallback<Void> callback);
-    
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String optionalDomainName, AsyncCallback<Void> callback);
@@ -95,4 +91,7 @@ public interface LandscapeManagementWriteServiceAsync {
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
             AsyncCallback<SerializationDummyDTO> callback);
+
+    void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
+            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
 }

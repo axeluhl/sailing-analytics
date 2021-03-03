@@ -25,6 +25,7 @@ import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -200,14 +201,17 @@ public class LandscapeManagementPanel extends VerticalPanel {
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ARCHIVE,
-                applicationReplicaSetToScale -> archiveApplicationReplicaSet(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
+                applicationReplicaSetToArchive -> archiveApplicationReplicaSet(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToArchive));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_UPGRADE,
-                applicationReplicaSetToScale -> upgradeApplicationReplicaSet(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
+                applicationReplicaSetToUpgrade -> upgradeApplicationReplicaSet(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToUpgrade));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_DEFINE_LANDING_PAGE,
+                applicationReplicaSetForWhichToDefineLandingPage -> defineLandingPage(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLandingPage));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
-                applicationReplicaSetToScale -> removeApplicationReplicaSet(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToScale));
+                applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -274,6 +278,39 @@ public class LandscapeManagementPanel extends VerticalPanel {
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
+    private void defineLandingPage(StringMessages stringMessages, String selectedRegion,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToDefineLandingPageFor) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            new DefineLandingPageDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
+                @Override
+                public void ok(RedirectDTO redirect) {
+                    applicationReplicaSetsBusy.setBusy(true);
+                    landscapeManagementService.defineLandingPage(selectedRegion, redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                errorReporter.reportError(caught.getMessage());
+                            }
+    
+                            @Override
+                            public void onSuccess(Void result) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                Notification.notify(stringMessages.successfullyUpdatedLandingPage(), NotificationType.SUCCESS);
+                            }
+                        });
+                }
+    
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
+    }
+
     private void createApplicationReplicaSet(StringMessages stringMessages, String regionId) {
         new CreateApplicationReplicaSetDialog(landscapeManagementService, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
             @Override
@@ -303,20 +340,20 @@ public class LandscapeManagementPanel extends VerticalPanel {
     }
 
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
-        if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToScale.getName()))) {
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
+        if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
             // TODO implement LandscapeManagementPanel.removeApplicationReplicaSet
         }
     }
 
     private void archiveApplicationReplicaSet(StringMessages stringMessages, String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive) {
         Notification.notify("archiveApplicationReplicaSet not implemented yet", NotificationType.ERROR);
         // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
     }
 
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToScale) {
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
         Notification.notify("upgradeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
         // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
     }

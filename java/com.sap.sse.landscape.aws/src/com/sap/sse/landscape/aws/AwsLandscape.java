@@ -364,7 +364,11 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     /**
      * Creates an application load balancer with the name and in the region specified. The method returns once the request
      * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
-     * to find out more.
+     * to find out more.<p>
+     * 
+     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port 443 with host, path, and query
+     * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
+     * is added as a target.
      */
     ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region);
 
@@ -431,6 +435,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
 
     void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
+
+    void updateLoadBalancerListenerRule(Region region, Rule ruleToUpdate);
 
     void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
 

@@ -8,8 +8,8 @@ import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
-import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
@@ -70,6 +70,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
             boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String optionalDomainName) throws Exception;
 
-    void scaleApplicationReplicaSet(String regionId, SailingAnalyticsProcessDTO master, String instanceType,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception;
+    void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
+            String passphraseForPrivateKeyDecryption);
 }

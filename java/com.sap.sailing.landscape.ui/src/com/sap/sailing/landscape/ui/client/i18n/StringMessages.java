@@ -84,4 +84,6 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String release();
     String reallyRemoveApplicationReplicaSet(String name);
     String pleaseSelectSshKeyPair();
+    String defineLandingPage();
+    String successfullyUpdatedLandingPage();
 }
