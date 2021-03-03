@@ -55,7 +55,8 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void upgradeAmazonMachineImage(String region, String machineImageId, AsyncCallback<AmazonMachineImageDTO> callback);
 
-    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
+    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName,
+            AsyncCallback<Void> asyncCallback);
 
     /**
      * Probes whether the current user has the {@code LANDSCAPE:MANAGE:AWS} permission and has previously

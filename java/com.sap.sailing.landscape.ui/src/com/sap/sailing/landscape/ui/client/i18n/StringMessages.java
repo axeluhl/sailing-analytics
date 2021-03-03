@@ -83,4 +83,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String domainName();
     String release();
     String reallyRemoveApplicationReplicaSet(String name);
+    String pleaseSelectSshKeyPair();
 }

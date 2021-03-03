@@ -16,6 +16,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -148,7 +149,10 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+            return super.getImageType() == null ? getMachineImage() == null ? IMAGE_TYPE_TAG_VALUE_SAILING :
+                Util.stream(getMachineImage().getTags()).filter(tag->tag.key().equals(AwsLandscape.IMAGE_TYPE_TAG_NAME)).findAny()
+                    .map(tag->tag.value()).orElse(IMAGE_TYPE_TAG_VALUE_SAILING)
+                : super.getImageType();
         }
 
         @Override

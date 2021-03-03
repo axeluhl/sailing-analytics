@@ -364,32 +364,36 @@ public class LandscapeManagementPanel extends VerticalPanel {
     }
 
     private void scaleMongoEndpoint(StringMessages stringMessages, String selectedRegion, MongoEndpointDTO mongoEndpointToScale) {
-        new MongoScalingDialog(mongoEndpointToScale, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
-            @Override
-            public void ok(MongoScalingInstructionsDTO mongoScalingInstructions) {
-                mongoEndpointsBusy.setBusy(true);
-                landscapeManagementService.scaleMongo(selectedRegion, mongoScalingInstructions,
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            mongoEndpointsBusy.setBusy(false);
-                            errorReporter.reportError(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(Void result) {
-                            mongoEndpointsBusy.setBusy(false);
-                            Notification.notify(stringMessages.successfullyScaledMongoDB(),
-                                    NotificationType.SUCCESS);
-                            refreshMongoEndpointsTable();
-                        }
-                    });
-            }
-
-            @Override
-            public void cancel() {
-            }
-        }).show();
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            new MongoScalingDialog(mongoEndpointToScale, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<MongoScalingInstructionsDTO>() {
+                @Override
+                public void ok(MongoScalingInstructionsDTO mongoScalingInstructions) {
+                    mongoEndpointsBusy.setBusy(true);
+                    landscapeManagementService.scaleMongo(selectedRegion, mongoScalingInstructions, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                mongoEndpointsBusy.setBusy(false);
+                                errorReporter.reportError(caught.getMessage());
+                            }
+    
+                            @Override
+                            public void onSuccess(Void result) {
+                                mongoEndpointsBusy.setBusy(false);
+                                Notification.notify(stringMessages.successfullyScaledMongoDB(),
+                                        NotificationType.SUCCESS);
+                                refreshMongoEndpointsTable();
+                            }
+                        });
+                }
+    
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
     }
 
     private boolean isNewest(AmazonMachineImageDTO ami) {

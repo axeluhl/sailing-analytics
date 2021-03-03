@@ -434,7 +434,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception {
+    public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName) throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
@@ -456,6 +456,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             final StartMongoDBServer<String, MongoProcessInReplicaSet> startMongoDBServer = startMongoProcessBuilder
                 .setLandscape(landscape)
                 .setInstanceType(InstanceType.valueOf(mongoScalingInstructions.getLaunchParameters().getInstanceType()))
+                .setKeyName(keyName)
                 .setRegion(region)
                 .setReplicaSetName(mongoScalingInstructions.getReplicaSetName())
                 .setReplicaSetPrimary(mongoScalingInstructions.getLaunchParameters().getReplicaSetPrimary())
