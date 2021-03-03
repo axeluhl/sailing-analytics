@@ -96,7 +96,7 @@ public class Wait {
                 if (logLevel != null && retryLogMessage != null) {
                     logger.log(logLevel, retryLogMessage+" failed."+(timeForAnotherAttempt?
                             optionalTimeoutEmptyMeansForever.map(timeout->" Will time out in "+timeout.minus(start.until(TimePoint.now())).toString()).orElse("")
-                            +"; sleeping for "+sleepBetweenAttempts+" now...":""));
+                            +" Sleeping for "+sleepBetweenAttempts+" now...":""));
                 }
                 if (timeForAnotherAttempt) {
                     Thread.sleep(sleepBetweenAttempts.asMillis());

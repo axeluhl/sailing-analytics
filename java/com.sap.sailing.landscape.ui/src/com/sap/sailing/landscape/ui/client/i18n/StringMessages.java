@@ -71,4 +71,19 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String masterInstanceId();
     String replicas();
     String versionHeader();
+    String archive();
+    String startTimePoint();
+    String createApplicationReplicaSet();
+    String useDynamicLoadBalancer();
+    String bearerTokenForSecurityReplication();
+    String successfullyCreatedReplicaSet(String name);
+    String pleaseProvideApplicationReplicaSetName();
+    String pleaseSelectInstanceTypeForNewMaster();
+    String pleaseProvideBearerTokenForSecurityReplication();
+    String domainName();
+    String release();
+    String reallyRemoveApplicationReplicaSet(String name);
+    String pleaseSelectSshKeyPair();
+    String defineLandingPage();
+    String successfullyUpdatedLandingPage();
 }

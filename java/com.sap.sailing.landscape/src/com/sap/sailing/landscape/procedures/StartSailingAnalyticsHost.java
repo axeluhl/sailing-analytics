@@ -1,14 +1,13 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.net.InetAddress;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
-import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
@@ -34,7 +33,7 @@ public class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
 implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
-    private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
+    public final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     
     /**
      * The following defaults, in addition to the defaults implemented by the more general
@@ -46,9 +45,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
-     * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
-     * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
-     * .getLatestMasterRelease()} will be used instead.</li>
      * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
      * <li>The tag {@link SailingAnalyticsHost#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
@@ -88,11 +84,12 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName)->{
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                        landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory);
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
+                                        ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -130,6 +127,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     }
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
+        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
+                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort());
     }
 }

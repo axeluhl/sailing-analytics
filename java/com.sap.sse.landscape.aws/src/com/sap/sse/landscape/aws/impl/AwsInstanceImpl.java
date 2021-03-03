@@ -40,11 +40,13 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
+    private final InetAddress privateAddress;
     private final AwsLandscape<ShardingKey> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
+        this.privateAddress = privateAddress;
         this.landscape = landscape;
     }
     
@@ -82,12 +84,12 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     
     @Override
     public InetAddress getPrivateAddress() {
-        return getIpAddress(Instance::privateIpAddress);
+        return privateAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
+        return getPrivateAddress();
     }
 
     private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {

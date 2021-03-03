@@ -94,6 +94,8 @@ public abstract class DataEntryDialog<T> {
     }
 
     /**
+     * @param message
+     *            may be {@code null}
      * @param cancelButtonName
      *            if {@code null}, no cancel button will be displayed
      * @param validator
@@ -110,6 +112,8 @@ public abstract class DataEntryDialog<T> {
     }
     
     /**
+     * @param message
+     *            may be {@code null}
      * @param cancelButtonName
      *            if {@code null}, no cancel button will be displayed
      * @param validator

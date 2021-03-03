@@ -1006,24 +1006,35 @@ public class Util {
     }
     
     public static interface MapBuilder<K, V> {
+        static <K, V> MapBuilder<K, V> of(Map<K, V> other) { return new MapBuilderImpl<>(other); }
         MapBuilder<K, V> put(K key, V value);
         Map<K, V> build();
     }
     
-    public static <K, V> MapBuilder<K, V> mapBuilder() {
-        return new MapBuilder<K, V>() {
-            final Map<K, V> result = new HashMap<>();
-            
-            @Override
-            public Map<K, V> build() {
-                return result;
-            }
+    private static class MapBuilderImpl<K, V> implements MapBuilder<K, V> {
+        private final Map<K, V> result;
+        
+        public MapBuilderImpl() {
+            result = new HashMap<>();
+        }
+        
+        public MapBuilderImpl(Map<K, V> other) {
+            result = new HashMap<>(other);
+        }
+        
+        @Override
+        public Map<K, V> build() {
+            return result;
+        }
 
-            @Override
-            public MapBuilder<K, V> put(K key, V value) {
-                result.put(key, value);
-                return this;
-            }
-        };
+        @Override
+        public MapBuilder<K, V> put(K key, V value) {
+            result.put(key, value);
+            return this;
+        }
+    }
+    
+    public static <K, V> MapBuilder<K, V> mapBuilder() {
+        return new MapBuilderImpl<>();
     }
 }

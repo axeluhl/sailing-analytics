@@ -38,7 +38,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  */
 public abstract class StartAwsHost<ShardingKey, HostT extends AwsInstance<ShardingKey>>
 extends StartHost<ShardingKey, HostT> {
-    protected static final String NAME_TAG_NAME = "Name";
+    public static final String NAME_TAG_NAME = "Name";
 
     private final List<String> userData;
     private final InstanceType instanceType;
@@ -104,6 +104,8 @@ extends StartHost<ShardingKey, HostT> {
         BuilderT setInstanceName(String name);
         
         BuilderT setHostSupplier(HostSupplier<ShardingKey, HostT> hostSupplier);
+
+        AmazonMachineImage<ShardingKey> getMachineImage();
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
@@ -242,6 +244,13 @@ extends StartHost<ShardingKey, HostT> {
         
         protected byte[] getPrivateKeyEncryptionPassphrase() {
             return privateKeyEncryptionPassphrase;
+        }
+        
+        @Override
+        public AmazonMachineImage<ShardingKey> getMachineImage() {
+            @SuppressWarnings("unchecked")
+            final AmazonMachineImage<ShardingKey> result = (AmazonMachineImage<ShardingKey>) super.getMachineImage();
+            return result;
         }
     }
     

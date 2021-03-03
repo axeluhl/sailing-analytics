@@ -1,12 +1,9 @@
 package com.sap.sailing.landscape.ui.client;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -19,7 +16,6 @@ import com.sap.sailing.landscape.ui.shared.MongoLaunchParametersDTO;
 import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
@@ -110,29 +106,10 @@ public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructions
         voteBox = createIntegerBox(0, /* visibleLength */ 2);
         grid.setWidget(row++, 1, voteBox);
         grid.setWidget(row, 0, new Label(stringMessages.instanceType()));
-        instanceTypeBox = createListBox(/*isMultipleSelect*/false);
+        instanceTypeBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
         grid.setWidget(row++, 1, instanceTypeBox);
         launchPanel.add(grid);
         panel.add(launchPanel);
-        landscapeManagementService.getInstanceTypes(new AsyncCallback<ArrayList<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(ArrayList<String> result) {
-                Collections.sort(result, new NaturalComparator());
-                int i=0;
-                for (final String instanceType : result) {
-                    instanceTypeBox.addItem(instanceType, instanceType);
-                    if (instanceType.equals(DEFAULT_INSTANCE_TYPE)) {
-                        instanceTypeBox.setSelectedIndex(i);
-                    }
-                    i++;
-                }
-            }
-        });
     }
 
     @Override

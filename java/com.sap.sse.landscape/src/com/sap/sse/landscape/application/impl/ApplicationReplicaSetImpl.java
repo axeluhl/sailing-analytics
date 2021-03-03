@@ -68,24 +68,25 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public void setRemoteReference(String name, ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> to,
             Iterable<Scope<ShardingKey>> scopes, boolean includeOrExcludeScopes) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.setRemoteReference(...)
-        
+        // use /v1/remoteserverreference (RemoteServerReferenceResource) for this
     }
 
     @Override
     public void removeRemoteReference(String name) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.removeRemoteReference(...)
-        
+        // use /v1/remoteserverreference (RemoteServerReferenceResource) for this
     }
 
     @Override
     public void setReadFromMaster(boolean readFromMaster) throws IllegalStateException {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.setReadFromMaster(...)
-        
+        // for this it would be helpful to understand the ALB / TargetGroup assignments
     }
 
     @Override
     public boolean isReadFromMaster() {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.isReadFromMaster(...)
+        // for this it would be helpful to understand the ALB / TargetGroup assignments
         return false;
     }
 

@@ -96,9 +96,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     
     protected <ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics>
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
-        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
-                process.getPort(), process.getHealthCheckPath(),
-                /* use traffic port as health check port, too */ process.getPort()); // TODO this doesn't health-check the reverse proxy running on the instance for default set-ups with only one process running on the instance; but how do we know?
+        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName, process.getPort(),
+                process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort());
     }
     
     @Override
@@ -106,19 +105,19 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
 
-    protected String getMasterTargetGroupName() {
+    public String getMasterTargetGroupName() {
         return getPublicTargetGroupName()+MASTER_TARGET_GROUP_SUFFIX;
     }
     
-    protected TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+    public TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
         return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName());
     }
     
-    protected String getPublicTargetGroupName() {
+    public String getPublicTargetGroupName() {
         return targetGroupNamePrefix+serverName;
     }
     
-    protected TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+    public TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
         return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName());
     }
     

@@ -3,7 +3,6 @@ package com.sap.sse.landscape.aws;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -23,6 +22,7 @@ import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
@@ -37,10 +37,12 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.ec2.model.Snapshot;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
@@ -158,7 +160,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
         final HostSupplier<ShardingKey, AwsInstance<ShardingKey>> hostSupplier =
-                (instanceId, az, landscape)->new AwsInstanceImpl<ShardingKey>(instanceId, az, landscape);
+                (instanceId, az, privateIpAddress, landscape)->new AwsInstanceImpl<ShardingKey>(instanceId, az, privateIpAddress, landscape);
         return launchHost(hostSupplier, image, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
     }
     
@@ -362,7 +364,11 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     /**
      * Creates an application load balancer with the name and in the region specified. The method returns once the request
      * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
-     * to find out more.
+     * to find out more.<p>
+     * 
+     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port 443 with host, path, and query
+     * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
+     * is added as a target.
      */
     ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region);
 
@@ -403,8 +409,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort);
 
-    default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn) {
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn);
+    default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
+            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
+            String healthCheckPath) {
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, protocol, port, healthCheckProtocol, healthCheckPort, healthCheckPath);
     }
 
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);
@@ -427,6 +435,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<Rule> createLoadBalancerListenerRules(Region region, Listener listener, Rule... rulesToAdd);
 
     void deleteLoadBalancerListenerRules(Region region, Rule... rulesToDelete);
+
+    void updateLoadBalancerListenerRule(Region region, Rule ruleToUpdate);
 
     void updateLoadBalancerListenerRulePriorities(Region region, Collection<RulePriorityPair> newRulePriorities);
 
@@ -544,31 +554,27 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Obtains all hosts with a tag named {@code tagName}, regardless the tag's value, and returns them as
      * {@link ApplicationProcessHost}s. Callers have to provide the bi-function that produces instances of the desired
      * {@link ApplicationProcess} subtype for each server directory holding a process installation on that host.
-     * 
-     * @param processFactoryFromHostAndServerDirectory
-     *            takes the host, port, and the server directory as arguments and is expected to produce an
-     *            {@link ApplicationProcess} object of some sort.
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Iterable<ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>> getApplicationProcessHostsByTag(Region region,
-            String tagName, ApplicationProcessHost.ProcessFactory<ShardingKey, MetricsT, ProcessT>  processFactoryFromHostAndServerDirectory);
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
+    Iterable<HostT> getApplicationProcessHostsByTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
-     * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, BiFunction) hosts} with a tag whose key is
+     * Obtains all {@link #getApplicationProcessHostsByTag(Region, String, HostSupplier) hosts} with a tag whose key is
      * specified by {@code tagName} and discovers all application server processes configured on it. These are then
      * grouped by {@link ApplicationProcess#getServerName(Optional, Optional, byte[]) server name}, and using
      * {@link ApplicationProcess#getMasterServerName(Optional)} the master/replica relationships between the processes with equal server
-     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.
-     * @param processFactoryFromHostAndServerDirectory
-     *            takes the host, port, and the server directory as arguments and is expected to produce an
-     *            {@link ApplicationProcess} object of some sort.
+     * name are discovered. From this, an {@link ApplicationReplicaSet} is established per server name.<p>
+     * 
+     * Should more than one master exist with equal server name, only the newest master is considered.
+     * 
      * @param optionalTimeout
      *            an optional timeout for communicating with the application server(s) to try to read the application
      *            configuration; used, e.g., as timeout during establishing SSH connections
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(Region region,
-            String tagName, ApplicationProcessHost.ProcessFactory<ShardingKey, MetricsT, ProcessT> processFactoryFromHostAndServerDirectory,
+            String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
             Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
@@ -577,4 +583,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+            void createLaunchConfiguration(Region region, String replicaSetName, Optional<Tags> tags,
+                    TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
+                    AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas, int maxReplicas, int maxRequestsPerTarget);
+
+    Snapshot getSnapshot(AwsRegion region, String snapshotId);
 }

@@ -29,7 +29,7 @@ public class MongoTests {
     @Before
     public void setUp() throws UnknownHostException {
         localhost = Mockito.mock(Host.class);
-        Mockito.when(localhost.getPublicAddress()).thenReturn(InetAddress.getByName("127.0.0.1"));
+        Mockito.when(localhost.getPrivateAddress()).thenReturn(InetAddress.getByName("127.0.0.1"));
         mongoProcess = new MongoProcessImpl(localhost);
         mongoReplicaSet = new MongoReplicaSetImpl("rs0");
         mongoProcessInReplicaSet = new MongoProcessInReplicaSetImpl(mongoReplicaSet, 10222, localhost);
