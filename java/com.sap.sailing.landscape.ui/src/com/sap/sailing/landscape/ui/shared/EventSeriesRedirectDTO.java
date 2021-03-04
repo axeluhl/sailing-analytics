@@ -12,6 +12,9 @@ import java.util.UUID;
  *
  */
 public class EventSeriesRedirectDTO extends RedirectWithIdDTO {
+    @Deprecated
+    EventSeriesRedirectDTO() {} // for GWT RPC only
+
     public EventSeriesRedirectDTO(UUID id) {
         super(id);
     }

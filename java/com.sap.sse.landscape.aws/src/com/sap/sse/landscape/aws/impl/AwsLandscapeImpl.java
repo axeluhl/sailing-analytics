@@ -427,10 +427,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String loadBalancerNameLowercase, com.sap.sse.landscape.Region region) {
         try {
-            final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(name));
-            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
+            final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
+            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region,
+                    Util.first(Util.filter(response.loadBalancers(),
+                            lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))), this)
+                    : null;
         } catch (LoadBalancerNotFoundException e) {
             return null;
         }
@@ -1190,7 +1193,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * region are returned as a pair.
      */
     private Pair<String, AwsRegion> getLoadBalancerNameAndRegionFromLoadBalancerDNSName(String loadBalancerDNSName) {
-        final Pattern pattern = Pattern.compile("^([^.]*)-([^-.]*)\\.([^.]*)\\.elb\\.amazonaws\\.com$");
+        final Pattern pattern = Pattern.compile("^([^.]*)-([^-.]*)\\.([^.]*)\\.elb\\.amazonaws\\.com\\.$");
         final Matcher matcher = pattern.matcher(loadBalancerDNSName);
         final Pair<String, AwsRegion> result;
         if (matcher.matches()) {
@@ -1234,7 +1237,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
                 for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
                     if (resourceRecordSet.type() == RRType.CNAME && !Util.isEmpty(Util.filter(resourceRecordSet.resourceRecords(), rr->rr.value().equals(loadBalancerDNSName)))) {
-                        return resourceRecordSet.name();
+                        return resourceRecordSet.name().replaceFirst("\\.$", ""); // remove trailing dots
                     }
                 }
             } while (resourceRecordSetsResponse.isTruncated());

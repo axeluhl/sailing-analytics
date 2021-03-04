@@ -53,9 +53,9 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
 
     /**
      * Application load balancer rules have a {@link Rule#priority() priority} which must be unique in the scope of a
-     * load balancer's listener. This way, when rules come and go, holes in the priority numbering scheme will start to exist.
-     * If a set of rules is to be added ({@code rulesToAdd}), consider using {@link #assignUnusedPriorities} to make room
-     * for interleaved or contiguous addition of the new rules.
+     * load balancer's listener. This way, when rules come and go, holes in the priority numbering scheme will start to
+     * exist. If a set of rules is to be added ({@code rulesToAdd}), consider using
+     * {@link #addRulesAssigningUnusedPriorities} to make room for interleaved or contiguous addition of the new rules.
      * 
      * @param rulesToAdd
      *            rules (without an ARN set yet), specifying which rules to add to the HTTPS listener of this load

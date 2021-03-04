@@ -10,9 +10,11 @@ import java.util.UUID;
  */
 public abstract class RedirectWithIdDTO extends HomeRedirectDTO {
     private UUID id;
-
+    
+    @Deprecated
+    RedirectWithIdDTO() {} // for GWT RPC only
+    
     public RedirectWithIdDTO(UUID id) {
-        super();
         this.id = id;
     }
 
