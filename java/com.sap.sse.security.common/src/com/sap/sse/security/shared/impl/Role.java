@@ -2,7 +2,6 @@ package com.sap.sse.security.shared.impl;
 
 import java.io.ObjectStreamException;
 
-import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.RoleDefinition;
 
@@ -21,7 +20,6 @@ public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
      * If {@link #transitive} is {@code null} on this instance, this method replaces this de-serialized object with one
      * that has {@link #transitive} set to the default of {@code true}.
      */
-    @GwtIncompatible
     private Object readResolve() throws ObjectStreamException {
         final Role result;
         if (this.transitive == null) {
