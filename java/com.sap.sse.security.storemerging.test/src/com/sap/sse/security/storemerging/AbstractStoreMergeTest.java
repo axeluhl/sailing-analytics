@@ -7,6 +7,7 @@ import org.bson.Document;
 import org.junit.After;
 
 import com.mongodb.MongoClientURI;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Util.Pair;
@@ -106,7 +107,7 @@ public abstract class AbstractStoreMergeTest {
             throws IOException {
         final MongoDBFiller filler = new MongoDBFiller();
         final MongoCollection<Document> collection = db.getCollection(collectionName.name());
-        collection.drop();
+        collection.withWriteConcern(WriteConcern.MAJORITY).drop();
         filler.fill(collection, "/resources/"+collectionName.name()+"_"+variant+".json");
     }
 
