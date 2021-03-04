@@ -62,6 +62,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -279,7 +280,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         throw new RuntimeException();
                     }
                 }),
-                applicationServerReplicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName());
+                applicationServerReplicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
+                applicationServerReplicaSet.getHostname());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
@@ -519,7 +521,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     .setCredentials(new BearerTokenReplicationCredentials(userBearerToken))
                     .build());
         final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
-                new ApplicationReplicaSetImpl<>(name, master, /* no replicas yet */ Optional.empty());
+                new ApplicationReplicaSetImpl<>(name, masterHostname, master, /* no replicas yet */ Optional.empty());
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
@@ -555,10 +557,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
-            String passphraseForPrivateKeyDecryption) {
-        // TODO Implement LandscapeManagementWriteServiceImpl.defineLandingPage(...)
-        
+    public void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect,
+            String keyName, String passphraseForPrivateKeyDecryption) {
+        final ApplicationLoadBalancer<String> loadBalancer = getLandscape().getLoadBalancerByHostname(hostname);
+        loadBalancer.setDefaultRedirect(hostname, redirect.getPath(), redirect.getQuery());
     }
 
     @Override

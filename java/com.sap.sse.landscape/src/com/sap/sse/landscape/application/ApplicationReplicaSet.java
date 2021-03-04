@@ -122,4 +122,15 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * of this replica set.
      */
     void removeSharding(Shard<ShardingKey> shard);
+
+    /**
+     * The fully-qualified host name by which this application replica set is publicly reachable. When resolving this
+     * hostname through DNS, the result is expected to identify a load balancer which contains the ingress rules for
+     * this application replica set.<p>
+     * 
+     * If we plan to support multi-region distribution of application replica sets in the future, resolving the hostname
+     * may have to happen on a per-region basis. It would then be nice if this application replica set would "know" its
+     * regions to which it has been deployed.
+     */
+    String getHostname();
 }

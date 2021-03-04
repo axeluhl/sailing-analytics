@@ -128,8 +128,4 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     public Iterable<Rule> getRulesAdded() {
         return rulesAdded;
     }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
-    }
 }

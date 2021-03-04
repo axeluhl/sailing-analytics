@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -142,9 +144,13 @@ import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.GetChangeRequest;
+import software.amazon.awssdk.services.route53.model.HostedZone;
+import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsRequest;
+import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
+import software.amazon.awssdk.services.route53.model.TestDnsAnswerResponse;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
@@ -334,7 +340,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
         return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
                 tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(), tg.port(), tg.healthCheckProtocol(),
-                        Integer.valueOf(tg.healthCheckPort()), tg.healthCheckPath()));
+                        tg.healthCheckPort()==null?null:Integer.valueOf(tg.healthCheckPort()), tg.healthCheckPath()));
     }
 
     @Override
@@ -1170,11 +1176,88 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), serverNameAndMaster.getValue(),
-                    Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
+            final String hostname = findHostnameForProcessThroughLoadBalancers(region, serverNameAndMaster.getValue());
+            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), hostname,
+                    serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
             result.add(replicaSet);
         }
         return result;
+    }
+    
+    /**
+     * This assumes the format {LoadBalancerName}-{[0-9]*}.{RegionId}.elb.amazonaws.com. The region is then parsed from
+     * the name. If the pattern is not matched, {@code null} is returned; otherwise, the load balancer name and its
+     * region are returned as a pair.
+     */
+    private Pair<String, AwsRegion> getLoadBalancerNameAndRegionFromLoadBalancerDNSName(String loadBalancerDNSName) {
+        final Pattern pattern = Pattern.compile("^([^.]*)-([^-.]*)\\.([^.]*)\\.elb\\.amazonaws\\.com$");
+        final Matcher matcher = pattern.matcher(loadBalancerDNSName);
+        final Pair<String, AwsRegion> result;
+        if (matcher.matches()) {
+            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3)));
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByHostname(String hostname) {
+        final TestDnsAnswerResponse dnsAnswer = getRoute53Client().testDNSAnswer(b->b
+                .hostedZoneId(getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname)))
+                .recordType(RRType.CNAME)
+                .recordName(hostname));
+        final ApplicationLoadBalancer<ShardingKey> result;
+        if (dnsAnswer.hasRecordData()) {
+            final Pair<String, AwsRegion> nameAndRegion = getLoadBalancerNameAndRegionFromLoadBalancerDNSName(dnsAnswer.recordData().iterator().next());
+            result = getLoadBalancerByName(nameAndRegion.getA(), nameAndRegion.getB());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    String findHostnameForProcessThroughLoadBalancers(com.sap.sse.landscape.Region region, ProcessT process) {
+        final ApplicationLoadBalancer<ShardingKey> loadBalancer = findLoadBalancerForProcess(region, process);
+        final String loadBalancerDNSName = loadBalancer.getDNSName();
+        final Route53Client route53Client = getRoute53Client();
+        for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
+            ListResourceRecordSetsResponse resourceRecordSetsResponse = null;
+            do {
+                final ListResourceRecordSetsRequest.Builder resourceRecordSetsRequestBuilder = ListResourceRecordSetsRequest.builder();
+                resourceRecordSetsRequestBuilder.hostedZoneId(hostedZone.id());
+                if (resourceRecordSetsResponse != null) {
+                    assert resourceRecordSetsResponse.isTruncated();
+                    resourceRecordSetsRequestBuilder.startRecordIdentifier(resourceRecordSetsResponse.nextRecordIdentifier());
+                }
+                resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
+                for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
+                    if (resourceRecordSet.type() == RRType.CNAME && !Util.isEmpty(Util.filter(resourceRecordSet.resourceRecords(), rr->rr.value().equals(loadBalancerDNSName)))) {
+                        return resourceRecordSet.name();
+                    }
+                }
+            } while (resourceRecordSetsResponse.isTruncated());
+        }
+        return null;
+    }
+
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ApplicationLoadBalancer<ShardingKey> findLoadBalancerForProcess(com.sap.sse.landscape.Region region, ProcessT process) {
+        for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : getLoadBalancers(region)) {
+            for (final TargetGroup<ShardingKey> targetGroup : loadBalancer.getTargetGroups()) {
+                // first check that the target group is forwarding to the correct port:
+                if (Util.equalsWithNull(targetGroup.getHealthCheckPort(), process.getPort())) {
+                    // then check whether the process is part of targets registered:
+                    final Optional<Entry<AwsInstance<ShardingKey>, TargetHealth>> target = targetGroup.getRegisteredTargets().entrySet().stream()
+                            .filter(e->e.getKey().getInstanceId().equals(process.getHost().getId())).findAny();
+                    if (target.isPresent()) {
+                        return loadBalancer;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override

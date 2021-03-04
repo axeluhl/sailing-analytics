@@ -192,10 +192,9 @@ public class LandscapeManagementPanel extends VerticalPanel {
         applicationReplicaSetsTable.addColumn(rs->rs.getVersion(), stringMessages.versionHeader());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHostname(), stringMessages.masterHostName());
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
-        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getServerName(), stringMessages.masterServerName());
+        applicationReplicaSetsTable.addColumn(rs->rs.getHostname(), stringMessages.hostname());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint());
-        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getReleaseName(), stringMessages.release());
         applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(), r->r.getHostname()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
                 stringMessages.replicas());
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
@@ -283,11 +282,12 @@ public class LandscapeManagementPanel extends VerticalPanel {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-            new DefineLandingPageDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
+            new DefineRedirectDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
                 @Override
                 public void ok(RedirectDTO redirect) {
                     applicationReplicaSetsBusy.setBusy(true);
-                    landscapeManagementService.defineLandingPage(selectedRegion, redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                    landscapeManagementService.defineDefaultRedirect(selectedRegion, applicationReplicaSetToDefineLandingPageFor.getHostname(),
+                            redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
                             sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(),
                         new AsyncCallback<Void>() {
                             @Override

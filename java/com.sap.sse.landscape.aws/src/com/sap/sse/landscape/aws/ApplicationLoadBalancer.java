@@ -103,7 +103,7 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      * 
      * @return the {@link Rule} that represents the default re-direct
      */
-    Rule updateDefaultRedirect(String hostname, String path, Optional<String> query);
+    Rule setDefaultRedirect(String hostname, String path, Optional<String> query);
 
     RuleCondition createHostHeaderRuleCondition(String hostname);
 

@@ -22,14 +22,27 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final long serialVersionUID = -4107033961273165726L;
     private ProcessT master;
     private Set<ProcessT> replicas;
+    private final String hostname;
     
-    public ApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
+    /**
+     * @param hostname
+     *            the fully-qualified hostname under which this application replica set can be reached; this will
+     *            typically be mapped to a load balancer's A-record name by using a CNAME in the DNS; usually the first
+     *            part of the hostname equals the {@code replicaSetAndServerName}
+     */
+    public ApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
         super(replicaSetAndServerName);
+        this.hostname = hostname;
         this.master = master;
         this.replicas = new HashSet<>();
         replicas.ifPresent(theReplicas->Util.addAll(theReplicas, this.replicas));
     }
     
+    @Override
+    public String getHostname() {
+        return hostname;
+    }
+
     @Override
     public void upgrade(Release newVersion) {
         // TODO Implement ApplicationReplicaSet<ShardingKey,MetricsT,ProcessT>.upgrade(...)

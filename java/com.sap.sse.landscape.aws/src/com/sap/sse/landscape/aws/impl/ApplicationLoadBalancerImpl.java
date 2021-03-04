@@ -196,7 +196,7 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
 
     @Override
-    public Rule updateDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+    public Rule setDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
         return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
             .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule, pathWithLeadingSlash, query))
             .orElseGet(()->{

@@ -584,9 +584,24 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-            void createLaunchConfiguration(Region region, String replicaSetName, Optional<Tags> tags,
+    void createLaunchConfiguration(Region region, String replicaSetName, Optional<Tags> tags,
                     TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
-                    AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas, int maxReplicas, int maxRequestsPerTarget);
+                    AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
+                    int maxReplicas, int maxRequestsPerTarget);
 
     Snapshot getSnapshot(AwsRegion region, String snapshotId);
+
+    /**
+     * Tries to find a load balancer by looking up a hostname, assuming to find a CNAME record that maps to
+     * a load balancer's host name defined as an A-record in the DNS; from that load balancer's host name
+     * (such as {@code "DNSMapped-0-325768077.eu-west-2.elb.amazonaws.com"}) this method will look up the
+     * corresponding load balancer, assuming the region name can be obtained from the host name (such as
+     * {@code "eu-west-2"} in the example above). If the load balancer is found, it is returned. Otherwise,
+     * {@code null} is returned.
+     */
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancerByHostname(String hostname);
+
+    static String getHostedZoneName(String hostname) {
+        return hostname.substring(hostname.indexOf('.')+1);
+    }
 }
