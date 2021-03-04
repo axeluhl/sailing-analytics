@@ -1248,22 +1248,24 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        List<String> leaderBoards = new ArrayList<>();
-
+        final List<String> leaderboards = new ArrayList<>();
         return doCreateLeaderboardGroup(groupName, description, displayName, displayGroupsInReverseOrder,
-                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType, leaderBoards);
+                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType, leaderboards);
     }
 
     private LeaderboardGroupDTO doCreateLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
         final UUID newLeaderboardGroupId = UUID.randomUUID();
-        final Callable<LeaderboardGroupDTO> createLeaderboardGroup = ()->{
-            AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
-                    newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
-                    leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
-            return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
-        };
+        final Callable<LeaderboardGroupDTO> createLeaderboardGroup = ()->getSecurityService()
+            .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
+                LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newLeaderboardGroupId), displayName,
+                ()->{
+                    AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
+                            newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
+                            leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+                    return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
+                });
         final LeaderboardGroupDTO result;
         // if an overall leaderboard is requested, establish ownership and check create permission; roll back if not possible;
         // otherwise, try to establish the leaderboard group's ownership; if that fails with an AuthorizationException,
@@ -1272,13 +1274,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final String overallLeaderboardName = LeaderboardGroupMetaLeaderboard.getOverallLeaderboardName(groupName);
             result = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD,
-                    new TypeRelativeObjectIdentifier(overallLeaderboardName), overallLeaderboardName,
-                    ()->createLeaderboardGroup.call());
+                    new TypeRelativeObjectIdentifier(overallLeaderboardName), overallLeaderboardName, createLeaderboardGroup);
         } else {
-            result = getSecurityService()
-                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
-                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newLeaderboardGroupId), displayName,
-                        createLeaderboardGroup);
+            try {
+                result = createLeaderboardGroup.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // the callable isn't throwing any checked exception
+            }
         }
         return result;
     }
