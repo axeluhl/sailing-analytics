@@ -230,16 +230,21 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
     }
     
+    /**
+     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
+     */
     public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
         this(null, userStore, accessControlStore);
     }
 
     /**
+     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
+     * 
      * @param mailProperties
      *            must not be <code>null</code>
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, null);
+        this(mailServiceTracker, userStore, accessControlStore, /* hasPermissionsProvider*/ null);
     }
     
     /**
@@ -317,7 +322,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
-        return hasPermissionsProvider.getAllHasPermissions();
+        return hasPermissionsProvider == null ? Collections.emptySet() : hasPermissionsProvider.getAllHasPermissions();
     }
 
     @Override
