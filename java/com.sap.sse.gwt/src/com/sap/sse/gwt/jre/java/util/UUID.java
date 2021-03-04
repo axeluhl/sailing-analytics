@@ -57,7 +57,28 @@ public class UUID implements Serializable, Comparable<UUID> {
     }
     
     protected UUID(String value) {
+        validate(value);
         this.uuidAsString = value;
+    }
+    
+    private void validate(String stringThatMayBeValidUuid) {
+        String[] components = stringThatMayBeValidUuid.split("-");
+        if (components.length != 5)
+            throw new IllegalArgumentException("Invalid UUID string: "+name);
+        for (int i=0; i<5; i++)
+            components[i] = "0x"+components[i];
+
+        long mostSigBits = Long.decode(components[0]).longValue();
+        mostSigBits <<= 16;
+        mostSigBits |= Long.decode(components[1]).longValue();
+        mostSigBits <<= 16;
+        mostSigBits |= Long.decode(components[2]).longValue();
+
+        long leastSigBits = Long.decode(components[3]).longValue();
+        leastSigBits <<= 48;
+        leastSigBits |= Long.decode(components[4]).longValue();
+        // if we reached here without IllegalArgumentException and without NumberFormatException,
+        // chances are that stringThatMayBeValidUuid is a valid UUID
     }
     
     /**
