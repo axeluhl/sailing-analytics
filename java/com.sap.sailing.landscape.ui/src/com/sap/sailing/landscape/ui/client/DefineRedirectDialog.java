@@ -55,8 +55,8 @@ public class DefineRedirectDialog extends DataEntryDialog<RedirectDTO> {
         super(stringMessages.defineDefaultRedirect(), /* message */ stringMessages.defineDefaultRedirectMessage(),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ new Validator(stringMessages), /* animationEnabled */ true,
                 dialogCallback);
-        plain = new RadioButton(RADIO_BUTTON_GROUP_NAME, stringMessages.redirectPlain());
         final ValueChangeHandler<Boolean> valueChangeHandler = e->updateIdBoxEnabling();
+        plain = new RadioButton(RADIO_BUTTON_GROUP_NAME, stringMessages.redirectPlain());
         plain.addValueChangeHandler(valueChangeHandler);
         home = new RadioButton(RADIO_BUTTON_GROUP_NAME, stringMessages.redirectHome());
         home.addValueChangeHandler(valueChangeHandler);
