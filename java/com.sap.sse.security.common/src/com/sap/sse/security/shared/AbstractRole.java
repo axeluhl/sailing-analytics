@@ -23,12 +23,12 @@ import com.sap.sse.common.Util.Triple;
  */
 public abstract class AbstractRole<RD extends RoleDefinition, G extends SecurityUserGroup<?>, U extends UserReference>
         implements Named {
-    private static final long serialVersionUID = -7426142947288925558L;
+    private static final long serialVersionUID = 1243342091492822614L;
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     protected RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
-    protected boolean transitive;
+    protected Boolean transitive;
 
     @Deprecated
     protected AbstractRole() {
@@ -47,7 +47,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         this.qualifiedForUser = qualifiedForUser;
         this.transitive = isTransitive;
     }
-
+    
     @Override
     public String getName() {
         return roleDefinition.getName();

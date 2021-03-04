@@ -1,10 +1,13 @@
 package com.sap.sse.security.shared.impl;
 
+import java.io.ObjectStreamException;
+
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.RoleDefinition;
 
 public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
-    private static final long serialVersionUID = 5730465771729662605L;
+    private static final long serialVersionUID = 1L;
 
     public Role(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, User qualifiedForUser, boolean transitive) {
         super(roleDefinition, qualifiedForTenant, qualifiedForUser, transitive);
@@ -12,6 +15,21 @@ public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
 
     public Role(RoleDefinition roleDefinition, boolean transitive) {
         super(roleDefinition, transitive);
+    }
+    
+    /**
+     * If {@link #transitive} is {@code null} on this instance, this method replaces this de-serialized object with one
+     * that has {@link #transitive} set to the default of {@code true}.
+     */
+    @GwtIncompatible
+    private Object readResolve() throws ObjectStreamException {
+        final Role result;
+        if (this.transitive == null) {
+            result = new Role(roleDefinition, qualifiedForTenant, qualifiedForUser, /* transitive */ true);
+        } else {
+            result = this;
+        }
+        return result;
     }
 
     public Ownership getQualificationAsOwnership() {
