@@ -18,6 +18,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -73,7 +74,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Axel Uhl (D043530)
  *
  */
-public class LandscapeManagementPanel extends VerticalPanel {
+public class LandscapeManagementPanel extends SimplePanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regionsTable;
     private final TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources> mongoEndpointsTable;
@@ -91,8 +92,11 @@ public class LandscapeManagementPanel extends VerticalPanel {
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
         landscapeManagementService = initAndRegisterLandscapeManagementService();
+        final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setWidth("100%");
+        this.add(mainPanel);
         final HorizontalPanel awsCredentialsAndSshKeys = new HorizontalPanel();
-        add(awsCredentialsAndSshKeys);
+        mainPanel.add(awsCredentialsAndSshKeys);
         final CaptionPanel awsCredentialsPanel = new CaptionPanel(stringMessages.awsCredentials());
         awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         mfaLoginWidget = new AwsMfaLoginWidget(landscapeManagementService, errorReporter, userService, stringMessages);
@@ -121,7 +125,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         }, stringMessages.region(), new NaturalComparator());
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
         regionsCaptionPanel.add(regionsTable);
-        add(regionsCaptionPanel);
+        mainPanel.add(regionsCaptionPanel);
         refreshRegionsTable(userService);
         // MongoDB endpoints:
         mongoEndpointsTable = new TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources>(
@@ -165,7 +169,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         mongoEndpointsVerticalPanel.add(mongoEndpointsTable);
         mongoEndpointsBusy = new SimpleBusyIndicator();
         mongoEndpointsVerticalPanel.add(mongoEndpointsBusy);
-        add(mongoEndpointsCaptionPanel);
+        mainPanel.add(mongoEndpointsCaptionPanel);
         // application replica sets:
         applicationReplicaSetsTable = new TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
@@ -226,7 +230,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsBusy);
-        add(applicationReplicaSetsCaptionPanel);
+        mainPanel.add(applicationReplicaSetsCaptionPanel);
         // machine images:
         machineImagesTable = new TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
@@ -260,7 +264,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
-        add(machineImagesCaptionPanel);
+        mainPanel.add(machineImagesCaptionPanel);
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
         {
             final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
