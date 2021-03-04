@@ -291,7 +291,7 @@ public class UserStoreImpl implements UserStore {
                     }
                     groupQualifierForMigratedRole = serverGroup;
                 }
-                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null, true);
+                result = new Role(roleDefinition, groupQualifierForMigratedRole, /* user qualification */ null, /* transitive */ true);
                 break;
             }
         }
@@ -1102,8 +1102,7 @@ public class UserStoreImpl implements UserStore {
             removeFromUsersByAccessToken(user);
             removeFromUsersByEmail(user);
             removeAllQualifiedRolesForUser(user);
-            user.getRoles()
-            .forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
+            user.getRoles().forEach(role -> Util.removeFromValueSet(roleDefinitionsToUsers, role.getRoleDefinition(), user));
             // also remove from all usergroups
             LockUtil.executeWithWriteLock(userGroupsLock, () -> {
                 for (UserGroup userGroup : user.getUserGroups()) {
@@ -1474,10 +1473,6 @@ public class UserStoreImpl implements UserStore {
                 for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
                     try {
                         removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                        if (removeOrAdjust.getQualifiedForTenant() != null) {
-                            addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(),
-                                    removeOrAdjust.getQualifiedForTenant(), null, removeOrAdjust.isTransitive()));
-                        }
                     } catch (UserManagementException e) {
                         logger.log(Level.WARNING,
                                 "Could not properly update qualified roles on user delete " + removeOrAdjust);
@@ -1499,10 +1494,6 @@ public class UserStoreImpl implements UserStore {
             for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
                 try {
                     removeRoleFromUser(checkUser.getName(), removeOrAdjust);
-                    if (removeOrAdjust.getQualifiedForUser() != null) {
-                        addRoleForUser(checkUser.getName(), new Role(removeOrAdjust.getRoleDefinition(), null,
-                                removeOrAdjust.getQualifiedForUser(), removeOrAdjust.isTransitive()));
-                    }
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,
                             "Could not properly update qualified roles on userGroup delete " + removeOrAdjust);

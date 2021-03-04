@@ -2710,7 +2710,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
         final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
-        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser, false);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser,
+                /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
     }
 
     /**
