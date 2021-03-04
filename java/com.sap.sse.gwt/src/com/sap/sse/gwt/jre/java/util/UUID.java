@@ -64,7 +64,7 @@ public class UUID implements Serializable, Comparable<UUID> {
     private void validate(String stringThatMayBeValidUuid) {
         String[] components = stringThatMayBeValidUuid.split("-");
         if (components.length != 5)
-            throw new IllegalArgumentException("Invalid UUID string: "+name);
+            throw new IllegalArgumentException("Invalid UUID string: "+stringThatMayBeValidUuid);
         for (int i=0; i<5; i++)
             components[i] = "0x"+components[i];
 
