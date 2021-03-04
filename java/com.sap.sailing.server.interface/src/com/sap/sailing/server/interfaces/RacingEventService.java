@@ -294,7 +294,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
-     * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
+     * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database. If the
+     * {@code overallLeaderboardScoringSchemeType} is not {@code null}, an overall leaderboard will be created
+     * and set as the new leaderboard group's {@link LeaderboardGroup#getOverallLeaderboard() overall leaderboard}.
+     * Callers shall manage the security aspects of the overall leaderboard.
+     * 
      * @param groupName
      *            The name of the new group
      * @param description
@@ -309,7 +313,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
-     * Removes the group with the name <code>groupName</code> from the service and the database.
+     * Removes the group with the name <code>groupName</code> from the service and the database. This leaves
+     * any {@link LeaderboardGroup#getOverallLeaderboard() overall leaderboard} untouched. Callers have to
+     * ensure to maintain the overall leaderboard, if it exists, accordingly.
      * 
      * @param leaderboardGroupId
      *            The ID of the group which shall be removed.
@@ -366,6 +372,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
+    /**
+     * Updates the leaderboard group identified by {@code leaderboardGroupId}. If
+     * {@code overallLeaderboardScoringSchemeType} is {@code null} and the leaderboard group currently
+     * has an overall leaderboard, that overall leaderboard is removed from the group and deleted.
+     * Conversely, if {@code overallLeaderboardScoringSchemeType} is not {@code null} but the
+     * leaderboard group currently has no overall leaderboard set, it is created. Callers have to
+     * manage all security aspects around this.
+     */
     void updateLeaderboardGroup(UUID leaderboardGroupId, String newName, String description, String displayName,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
