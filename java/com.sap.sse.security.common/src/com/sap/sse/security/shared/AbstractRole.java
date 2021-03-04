@@ -6,9 +6,18 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
- * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
- * are considered
+ * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant
+ * ID} of a possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user
+ * qualifier are considered
+ * <p>
+ * 
+ * The security system generally allows users to pass on permissions they have to other users. This permission to grant
+ * permissions we call a "meta-permission" in this context. Permissions granted to a user through a role can be
+ * restricted by {@link #isTransitive() setting their "transitive" flag} to {@code false}. In this case
+ * a user with such a role cannot pass on the role's permissions unless the user has obtained the same permission
+ * through some other path without a transitivity restriction. Non-transitive roles should, e.g., be used when
+ * the role has been obtained through a payment / subscription system as passing on such permissions would undermine
+ * the whole paywall idea.
  * 
  * @author Axel Uhl (D043530)
  */
@@ -44,10 +53,14 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         return roleDefinition.getName();
     }
     
-    public void setIsTransitive (boolean originatesFromSubscription) {
-        this.transitive = originatesFromSubscription;
-    }
-    
+    /**
+     * Tells whether the permissions granted through this role shall be considered during a meta-permission check.
+     * If {@code false} then the permissions granted through this role do not entitle the user with this role to
+     * pass on this role's permissions. This doesn't exclude the possibility of the user having obtained one or more of the
+     * same permissions through another path, such as explicit permission assignment or another role assignment with
+     * {@link #isTransitive()} being {@code true} with that role implying one or more of the permissions this role
+     * grants.
+     */
     public boolean isTransitive() {
         return this.transitive;
     }

@@ -344,7 +344,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
-                Role adminRole = new Role(adminRoleDefinition, true);
+                Role adminRole = new Role(adminRoleDefinition, /* transitive */ true);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
                 // add new admin user to server group and make server group the default creation group for the admin user:
                 final UserGroup defaultTenant = getServerGroup();
@@ -945,12 +945,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private void addUserRoleToUser(final User user) {
         addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
-                /* tenant qualifier */ null, /* user qualifier */ user, true));
+                /* tenant qualifier */ null, /* user qualifier */ user, /* transitive */ true));
     }
     
     private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
         addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
-                /* tenant qualifier */ group, /* user qualifier */ null, true));
+                /* tenant qualifier */ group, /* user qualifier */ null, /* transitive */ true));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
