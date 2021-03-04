@@ -8,6 +8,6 @@ public interface RedirectDTO extends IsSerializable {
     String getPath();
 
     default Optional<String> getQuery() {
-        return Optional.empty();
+        return Optional.of("#{query}");
     }
 }
