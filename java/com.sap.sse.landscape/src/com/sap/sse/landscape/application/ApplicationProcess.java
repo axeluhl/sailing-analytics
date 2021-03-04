@@ -9,8 +9,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.parser.ParseException;
+
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -24,6 +30,12 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
+    
+    @FunctionalInterface
+    public static interface ApplicationProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+        ProcessT createApplicationProcess(String instanceId, AvailabilityZone availabilityZone,
+                Landscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, Host> processFactoryFromHostAndServerDirectory);
+    }
     
     /**
      * @param releaseRepository
@@ -129,4 +141,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     }
 
     Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException, Exception;
 }

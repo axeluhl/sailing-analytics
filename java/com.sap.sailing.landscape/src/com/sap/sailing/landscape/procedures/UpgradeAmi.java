@@ -1,10 +1,12 @@
 package com.sap.sailing.landscape.procedures;
 
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +16,7 @@ import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -29,12 +31,14 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
 import com.sap.sse.landscape.orchestration.Procedure;
+import com.sap.sse.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ImageState;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.Snapshot;
 
 /**
  * Upgrades an existing Amazon Machine Image that is expected to be prepared for such an upgrade, by
@@ -48,9 +52,14 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * it will increment the last version part matched (minor in case of major.minor and micro in case of
  * major.minor.micro) by one.<p>
  * 
- * TODO generalize such that kernel upgrades / security patches can be applied to any CentOS/Amazon Linux-based
- * image; then one level more specialized clean httpd logs for anything that has a reverse proxy on it;
- * then for those that have a default server process / git on it cleaning that up and refreshing...
+ * The volume snapshot names are expected to follow the pattern {@code "^.*\(.*\)$"} where the snapshot's
+ * base name is found between the parentheses. It is used by default to name the updated snapshots if no
+ * {@link Builder#setSnapshotBaseName(String, String) explicit snapshot names} are provided.<p>
+ * 
+ * The upgrade procedure is based on setting the {@code image-upgrade} (see {@link StartEmptyServer#IMAGE_UPGRADE_USER_DATA})
+ * line in the user data; optionally there can be another line {@code no-shutdown} (see {@link StartEmptyServer#NO_SHUTDOWN_USER_DATA})
+ * which instructs the instance to not shut down after performing its upgrade. Any image that can handle these two user data lines
+ * appropriately can be the target of this procedure.<p>
  * 
  * @author Axel Uhl (D043530)
  *
@@ -67,9 +76,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     private final String upgradedImageName;
     private final String imageType;
     private final boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
-    private final Duration timeout;
     private final boolean waitForShutdown; // no need to wait if no shutdown was requested
     private final Map<String, String> deviceNamesToSnapshotBaseNames;
+    private final Optional<Duration> optionalTimeout;
     private AmazonMachineImage<ShardingKey> upgradedAmi;
     
     /**
@@ -130,23 +139,20 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     implements Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
-        private final Map<String, String> deviceNamesToSnapshotBaseNames;
+        private Map<String, String> deviceNamesToSnapshotBaseNames;
         private boolean keyPairIsTemporaryAndNeedsToBeRemovedWhenDone;
 
         private BuilderImpl() {
             super();
-            // TODO the following is very specific to the way the Sailing Analytics image has been set up;
-            // TODO encapsulate with other image specificities required for upgrading?
-            deviceNamesToSnapshotBaseNames = new HashMap<>();
-            setSnapshotBaseName("/dev/xvda", "System");
-            setSnapshotBaseName("/dev/sdc", "Swap");
-            setSnapshotBaseName("/dev/sdf", "Home");
             setNoShutdown(false);
         }
         
         @Override
         protected String getImageType() {
-            return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
+            return super.getImageType() == null ? getMachineImage() == null ? IMAGE_TYPE_TAG_VALUE_SAILING :
+                Util.stream(getMachineImage().getTags()).filter(tag->tag.key().equals(AwsLandscape.IMAGE_TYPE_TAG_NAME)).findAny()
+                    .map(tag->tag.value()).orElse(IMAGE_TYPE_TAG_VALUE_SAILING)
+                : super.getImageType();
         }
 
         @Override
@@ -243,17 +249,22 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
         @Override
         public BuilderT setSnapshotBaseName(String deviceName, String snapshotBaseName) {
+            if (deviceNamesToSnapshotBaseNames == null) {
+                deviceNamesToSnapshotBaseNames = new HashMap<>();
+            }
             deviceNamesToSnapshotBaseNames.put(deviceName, snapshotBaseName);
             return self();
         }
 
         @Override
         public HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, port, serverDirectory, telnetPort, serverName)->{
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                        landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName);
+                                final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
+                                        expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -274,11 +285,26 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         protected AwsRegion getRegion() {
             return super.getRegion();
         }
-
+        
         @Override
         public UpgradeAmi<ShardingKey> build() {
             if (upgradedImageName == null) {
                 upgradedImageName = increaseVersionNumber(getMachineImage().getName());
+            }
+            if (deviceNamesToSnapshotBaseNames == null) {
+                deviceNamesToSnapshotBaseNames = new HashMap<>();
+                final AmazonMachineImage<ShardingKey> image = getLandscape().getImage(getRegion(), getMachineImage().getId());
+                for (final BlockDeviceMapping blockDeviceMapping : image.getBlockDeviceMappings()) {
+                    final Snapshot snapshot = getLandscape().getSnapshot(getRegion(), blockDeviceMapping.ebs().snapshotId());
+                    snapshot.tags().stream().filter(t->t.key().equals("Name")).findAny().ifPresent(nameTag->{
+                        final Pattern snapshotNamePattern = Pattern.compile("^.* \\((.*)\\) *$");
+                        final Matcher matcher = snapshotNamePattern.matcher(nameTag.value());
+                        if (matcher.matches()) {
+                            final String baseName = matcher.group(1);
+                            deviceNamesToSnapshotBaseNames.put(blockDeviceMapping.deviceName(), baseName);
+                        }
+                    });
+                }
             }
             return new UpgradeAmi<>(this);
         }
@@ -299,41 +325,28 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     
     protected UpgradeAmi(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
+        optionalTimeout = builder.getOptionalTimeout();
         region = builder.getRegion();
         imageType = builder.getImageType();
         upgradedImageName = builder.getUpgradedImageName();
-        timeout = builder.getOptionalTimeout().orElse(null);
         waitForShutdown = !builder.isNoShutdown();
         deviceNamesToSnapshotBaseNames = builder.getDeviceNamesToSnapshotBaseNames();
         keyPairIsTemporaryAndNeedsToBeRemovedWhenDone = builder.isKeyPairIsTemporaryAndNeedsToBeRemovedWhenDone();
     }
-
+    
     @Override
     public void run() throws Exception {
         try {
             super.run(); // launches the machine in upgrade mode and shuts it down again, preparing for AMI creation
-            Instance instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
+            final Instance[] instance = new Instance[1];
             if (waitForShutdown) {
-                logger.info("Waiting for shutdown of instance "+instance.instanceId());
-                // wait for the instance to shut down
-                // TODO use Wait.wait...
-                final TimePoint startedWaiting = TimePoint.now();
-                while (instance.state().name() != InstanceStateName.STOPPED && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
-                    logger.info("Instance " + instance.instanceId() + " still in state " + instance.state().name()
-                            + ". Waiting " + (timeout == null ? "forever"
-                                    : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
-                    Thread.sleep(5000);
-                    instance = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion());
-                }
+                Wait.wait(()->(instance[0] = getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion())) != null
+                               && instance[0].state().name() == InstanceStateName.STOPPED,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for shutdown of instance "+getHost().getInstanceId());
             }
             upgradedAmi = getLandscape().createImage(getHost(), upgradedImageName, Optional.of(Tags.with(Landscape.IMAGE_TYPE_TAG_NAME, imageType)));
-            final TimePoint startedWaiting = TimePoint.now();
-            while ((upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() != ImageState.AVAILABLE && (timeout == null || startedWaiting.until(TimePoint.now()).compareTo(timeout) < 0)) {
-                logger.info("Image " + upgradedAmi.getId() + " still in state " + upgradedAmi.getState()
-                        + ". Waiting " + (timeout == null ? "forever"
-                                : ("for another " + timeout.minus(startedWaiting.until(TimePoint.now())))));
-                Thread.sleep(5000);
-            }
+            Wait.wait(()->(upgradedAmi=getLandscape().getImage(upgradedAmi.getRegion(), upgradedAmi.getId())).getState() == ImageState.AVAILABLE,
+                    optionalTimeout, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for Image " + upgradedAmi.getId() + " to become "+ImageState.AVAILABLE);
             for (final BlockDeviceMapping blockDeviceMapping : upgradedAmi.getBlockDeviceMappings()) {
                 if (blockDeviceMapping.ebs() != null) {
                     final String snapshotId = blockDeviceMapping.ebs().snapshotId();

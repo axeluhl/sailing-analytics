@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import org.bson.Document;
 
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 
 /**
@@ -20,7 +21,7 @@ public class MongoDBFiller {
         String line;
         while ((line=resourceReader.readLine()) != null) {
             final Document document = Document.parse(line);
-            collection.insertOne(document);
+            collection.withWriteConcern(WriteConcern.MAJORITY).insertOne(document);
         }
     }
 }

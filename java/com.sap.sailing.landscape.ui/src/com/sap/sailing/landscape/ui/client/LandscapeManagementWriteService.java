@@ -8,6 +8,7 @@ import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -40,7 +41,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     AmazonMachineImageDTO upgradeAmazonMachineImage(String region, String machineImageId) throws Exception;
 
-    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions) throws Exception;
+    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName) throws Exception;
 
     /**
      * For a combination of an AWS access key ID, the corresponding secret plus an MFA token code produces new session
@@ -64,4 +65,11 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
+
+    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String securityReplicationBearerToken, String optionalDomainName) throws Exception;
+
+    void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
+            String passphraseForPrivateKeyDecryption);
 }

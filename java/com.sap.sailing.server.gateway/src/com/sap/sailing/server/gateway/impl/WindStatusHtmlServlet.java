@@ -61,13 +61,13 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
             out.println("<br/>");
         }
         if (getLastIgtimiMessages() != null && !getLastIgtimiMessages().isEmpty()) {
-            for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
+            for (Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
                 final Deque<IgtimiMessageInfo> copyOfLastIgtimiMessages;
                 synchronized (deviceAndMessagesList.getValue()) {
                     copyOfLastIgtimiMessages = new ArrayDeque<>(deviceAndMessagesList.getValue());
                 }
                 out.println("Windbot: <b>" + deviceAndMessagesList.getKey() + "</b>");
-                if(copyOfLastIgtimiMessages.size() > 0) {
+                if (copyOfLastIgtimiMessages.size() > 0) {
                     TimePoint latestTimePoint = copyOfLastIgtimiMessages.peek().getWind().getTimePoint(); 
                     long lastFixDiffInMs = System.currentTimeMillis() - latestTimePoint.asMillis();
                     out.println("&nbsp;&nbsp;&nbsp;&nbsp;Last fix:");

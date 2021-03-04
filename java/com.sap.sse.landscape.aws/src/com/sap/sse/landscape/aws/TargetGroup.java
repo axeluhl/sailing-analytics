@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 /**
@@ -30,8 +31,28 @@ public interface TargetGroup<ShardingKey> extends Named {
     }
     
     void removeTargets(Iterable<AwsInstance<ShardingKey>> targets);
-
+    
+    /**
+     * @return the traffic port
+     */
+    Integer getPort();
+    
+    /**
+     * @return the traffic protocol; usually either one of {@link ProtocolEnum#HTTP} or {@link ProtocolEnum#HTTPS}
+     */
+    ProtocolEnum getProtocol();
+    
+    Integer getHealthCheckPort();
+    
+    String getHealthCheckPath();
+    
+    ProtocolEnum getHealthCheckProtocol();
+    
     String getTargetGroupArn();
+
+    default String getId() {
+        return getTargetGroupArn().substring(getTargetGroupArn().lastIndexOf('/')+1);
+    }
 
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
 }

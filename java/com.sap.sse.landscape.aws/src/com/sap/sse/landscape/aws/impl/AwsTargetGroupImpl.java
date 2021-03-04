@@ -9,6 +9,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 
 public class AwsTargetGroupImpl<ShardingKey>
@@ -17,12 +18,24 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     private final String arn;
     private final AwsLandscape<ShardingKey> landscape;
     private final Region region;
+    private final ProtocolEnum protocol;
+    private final Integer port;
+    private final ProtocolEnum healthCheckProtocol;
+    private final Integer healthCheckPort;
+    private final String healthCheckPath;
 
-    public AwsTargetGroupImpl(AwsLandscape<ShardingKey> landscape, Region region, String targetGroupName, String arn) {
+    public AwsTargetGroupImpl(AwsLandscape<ShardingKey> landscape, Region region, String targetGroupName, String arn,
+            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
+            String healthCheckPath) {
         super(targetGroupName);
         this.arn = arn;
         this.landscape = landscape;
         this.region = region;
+        this.protocol = protocol;
+        this.port = port;
+        this.healthCheckProtocol = healthCheckProtocol;
+        this.healthCheckPort = healthCheckPort;
+        this.healthCheckPath = healthCheckPath;
     }
     
     private software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup() {
@@ -59,6 +72,31 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     @Override
     public void removeTargets(Iterable<AwsInstance<ShardingKey>> targets) {
         landscape.removeTargetsFromTargetGroup(this, targets);
+    }
+
+    @Override
+    public Integer getPort() {
+        return port;
+    }
+
+    @Override
+    public ProtocolEnum getProtocol() {
+        return protocol;
+    }
+
+    @Override
+    public Integer getHealthCheckPort() {
+        return healthCheckPort;
+    }
+
+    @Override
+    public String getHealthCheckPath() {
+        return healthCheckPath;
+    }
+
+    @Override
+    public ProtocolEnum getHealthCheckProtocol() {
+        return healthCheckProtocol;
     }
 
     @Override
