@@ -106,7 +106,7 @@ public class DefineRedirectDialog extends DataEntryDialog<RedirectDTO> {
         } else if (eventSeries.getValue()) {
             UUID id;
             try {
-                id = UUID.fromString(eventIdBox.getValue());
+                id = UUID.fromString(eventSeriesIdBox.getValue());
             } catch (Exception e) {
                 id = null;
             }
