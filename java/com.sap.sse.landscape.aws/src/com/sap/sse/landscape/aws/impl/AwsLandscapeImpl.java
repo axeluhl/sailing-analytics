@@ -1225,26 +1225,36 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     String findHostnameForProcessThroughLoadBalancers(com.sap.sse.landscape.Region region, ProcessT process) {
         final ApplicationLoadBalancer<ShardingKey> loadBalancer = findLoadBalancerForProcess(region, process);
-        final String loadBalancerDNSName = loadBalancer.getDNSName();
-        final Route53Client route53Client = getRoute53Client();
-        for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
-            ListResourceRecordSetsResponse resourceRecordSetsResponse = null;
-            do {
-                final ListResourceRecordSetsRequest.Builder resourceRecordSetsRequestBuilder = ListResourceRecordSetsRequest.builder();
-                resourceRecordSetsRequestBuilder.hostedZoneId(hostedZone.id());
-                if (resourceRecordSetsResponse != null) {
-                    assert resourceRecordSetsResponse.isTruncated();
-                    resourceRecordSetsRequestBuilder.startRecordName(resourceRecordSetsResponse.nextRecordName());
-                }
-                resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
-                for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
-                    if (resourceRecordSet.type() == RRType.CNAME && !Util.isEmpty(Util.filter(resourceRecordSet.resourceRecords(), rr->rr.value().equals(loadBalancerDNSName)))) {
-                        return resourceRecordSet.name().replaceFirst("\\.$", ""); // remove trailing dots
+        // FIXME loadBalancer may be null / not found, especially when the process is served only through the reverse proxy, such as for the ARCHIVE server
+        String result;
+        if (loadBalancer == null) {
+            logger.info("Using default hostname for process running on "+process.getHost().getId());
+            // FIXME this seems a strange default:
+            result = "www.sapsailing.com";
+        } else {
+            result = null;
+            final String loadBalancerDNSName = loadBalancer.getDNSName();
+            final Route53Client route53Client = getRoute53Client();
+            outer: for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
+                ListResourceRecordSetsResponse resourceRecordSetsResponse = null;
+                do {
+                    final ListResourceRecordSetsRequest.Builder resourceRecordSetsRequestBuilder = ListResourceRecordSetsRequest.builder();
+                    resourceRecordSetsRequestBuilder.hostedZoneId(hostedZone.id());
+                    if (resourceRecordSetsResponse != null) {
+                        assert resourceRecordSetsResponse.isTruncated();
+                        resourceRecordSetsRequestBuilder.startRecordName(resourceRecordSetsResponse.nextRecordName());
                     }
-                }
-            } while (resourceRecordSetsResponse.isTruncated());
+                    resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
+                    for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
+                        if (resourceRecordSet.type() == RRType.CNAME && !Util.isEmpty(Util.filter(resourceRecordSet.resourceRecords(), rr->rr.value().equals(loadBalancerDNSName)))) {
+                            result = resourceRecordSet.name().replaceFirst("\\.$", ""); // remove trailing dots
+                            break outer;
+                        }
+                    }
+                } while (resourceRecordSetsResponse.isTruncated());
+            }
         }
-        return null;
+        return result;
     }
 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -1252,6 +1262,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : getLoadBalancers(region)) {
             for (final TargetGroup<ShardingKey> targetGroup : loadBalancer.getTargetGroups()) {
                 // first check that the target group is forwarding to the correct port:
+                // FIXME What about the case where the target group health-checks the targets through the HTTPS port through the reverse proxy? The "backward-compatible" case...
                 if (Util.equalsWithNull(targetGroup.getHealthCheckPort(), process.getPort())) {
                     // then check whether the process is part of targets registered:
                     final Optional<Entry<AwsInstance<ShardingKey>, TargetHealth>> target = targetGroup.getRegisteredTargets().entrySet().stream()
