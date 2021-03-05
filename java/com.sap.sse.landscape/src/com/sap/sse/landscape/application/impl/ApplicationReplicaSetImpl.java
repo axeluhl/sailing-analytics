@@ -22,13 +22,15 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final long serialVersionUID = -4107033961273165726L;
     private ProcessT master;
     private Set<ProcessT> replicas;
-    private final String hostname;
+    private String hostname;
     
     /**
      * @param hostname
      *            the fully-qualified hostname under which this application replica set can be reached; this will
      *            typically be mapped to a load balancer's A-record name by using a CNAME in the DNS; usually the first
-     *            part of the hostname equals the {@code replicaSetAndServerName}
+     *            part of the hostname equals the {@code replicaSetAndServerName}; if {@code null} is passed, the
+     *            replica set will start the process to find out, and {@link #getHostname()} may have to block until
+     *            this process has completed.
      */
     public ApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
         super(replicaSetAndServerName);
@@ -37,7 +39,16 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         this.replicas = new HashSet<>();
         replicas.ifPresent(theReplicas->Util.addAll(theReplicas, this.replicas));
     }
-    
+
+    /**
+     * Same as {@link #ApplicationReplicaSetImpl(String, String, ApplicationProcess, Optional)}, but without setting the
+     * {@link #getHostname() host name} right away; instead, the host name will be discovered together with the other
+     * discovery processes.
+     */
+    public ApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
+        this(replicaSetAndServerName, /* hostname */ null, master, replicas);
+    }
+
     @Override
     public String getHostname() {
         return hostname;

@@ -1,0 +1,72 @@
+package com.sap.sse.landscape.aws;
+
+import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.application.ApplicationProcess;
+import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
+
+/**
+ * Represents a cluster of server processes all running under the same "server name" and reachable from the outside through
+ * a single {@link #getHostname() host name}. They all reside in the same {@link Region}. (Cross-region replication will be
+ * a future topic which will lead to multiple load balancers being responsible, one per region, and with only one master.)<p>
+ * 
+ * The default configuration is such that a 
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <ShardingKey>
+ * @param <MetricsT>
+ * @param <ProcessT>
+ */
+public interface AwsApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
+    /**
+     * @return may return {@code null} in case this application replica set is not managed by a load balancer, such as
+     *         is currently the case for the "ARCHIVE" server(s) which is targeted through a reverse proxy.
+     */
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
+    
+    TargetGroup<ShardingKey> getMasterTargetGroup();
+    
+    TargetGroup<ShardingKey> getPublicTargetGroup();
+    
+    /**
+     * Identifies the DNS hosted zone that hosts the DNS record for {@link #getHostname()}. The resource record set name
+     * may either be a wildcard record such as {@code *.sapsailing.com} or the fully-qualified hostname which then is expected
+     * to match up with {@link #getHostname()}. See also {@link #getResourceRecordSet}.
+     */
+    String getHostedZoneId();
+    
+    /**
+     * The DNS entry in the Route53 hosted zone identified by {@link #getHostedZoneId()} that maps to the {@link #getLoadBalancer()}(s)
+     * responsible for this application replica set. The {@link ResourceRecord}s are expected to be of type {@link RRType#CNAME}, providing
+     * an alias to the load balancer's {@link ApplicationLoadBalancer#getDNSName() DNS name}.<p>
+     * 
+     * Should multi-region support be added in the future, the resulting resource record set can be expected to hold a {@link ResourceRecord}
+     * for the load balancer in each region that manages this application replica set in that region.
+     */
+    ResourceRecordSet getResourceRecordSet();
+    
+    /**
+     * @return the {@link ApplicationLoadBalancer#getRules() rules} from the {@link #getLoadBalancer() load balancer}
+     *         that react to this application replica set's {@link #getHostname() hostname}.
+     */
+    Iterable<Rule> getLoadBalancerRules();
+    
+    /**
+     * The rule that handles the "/" path and redirects users to a specific target path, such as to a specific event's
+     * landing page, or the general "/gwt/Home.html" entry point.
+     */
+    Rule getDefaultRedirectRule();
+    
+    /**
+     * The auto-scaling group is responsible for scaling the set of replicas registered with the
+     * {@link #getPublicTargetGroup() public target group}. This is optional, so {@code null} may
+     * be returned.
+     */
+    AwsAutoScalingGroup getAutoScalingGroup();
+}

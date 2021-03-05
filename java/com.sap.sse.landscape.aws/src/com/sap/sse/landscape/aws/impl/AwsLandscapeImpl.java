@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -35,7 +36,6 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
-import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
@@ -103,6 +103,7 @@ import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -136,6 +137,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.MFADevice;
+import software.amazon.awssdk.services.route53.Route53AsyncClient;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
@@ -247,6 +249,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     private ElasticLoadBalancingV2Client getLoadBalancingClient(Region region) {
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
+    }
+    
+    private ElasticLoadBalancingV2AsyncClient getLoadBalancingAsyncClient(Region region) {
+        return getClient(ElasticLoadBalancingV2AsyncClient.builder(), region);
     }
     
     private AutoScalingClient getAutoScalingClient(Region region) {
@@ -458,6 +464,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     private Route53Client getRoute53Client() {
         return getClient(Route53Client.builder(), getRegion(globalRegion));
+    }
+    
+    private Route53AsyncClient getRoute53AsyncClient() {
+        return getClient(Route53AsyncClient.builder(), getRegion(globalRegion));
     }
     
     @Override
@@ -1158,6 +1168,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        /*
+         * TODO: to make things more efficient we should acquire all ApplicaitonLoadBalancer objetcs in the region in
+         * one round trip, then fetch all TargetGroup objects in a second round trip, and all TargetHealthDescriptions
+         * in a third round-trip; all can run asynchronously, see ElasticLoadBalancingV2AsyncClient. In a fourth round
+         * trip, we should fetch all Rule objects for all HTTPS load balancer Listener objects. With this, we then have
+         * all information about how requests are routed. Additionally, we may explore the auto scaling infrastructure
+         * in order to establish the link from the ApplicationReplicaSet to their AutoScalingGroup(s) (multiple in the
+         * future as we may start sharding; then, each shard would have its own AutoScalingGroup and TargetGroup with
+         * dedicated routing rules).
+         * 
+         * The ApplicationReplicaSet could then know its Rule objects, the responsible ApplicationLoadBalancer and the
+         * master TargetGroup plus one (or in the future more, see above) public target groups with the registered targets.
+         * We could in principle even discover the ApplicationReplicaSet objects starting from the load balancers, only that
+         * then we wouldn't find the archive server(s) as they are currently not modeled with a dedicated load balancer Rule
+         * but instead are reached through the default Rule that forwards all *.sapsailing.com traffic not otherwise routed
+         * into the central reverse proxy from where it gets forwarded to the Archive server.
+         * 
+         * Otherwise, the exploration of the ApplicationProcess instances is a bit time consuming, and the most we get out
+         * of it currently is the serverDirectory property which would soon be ApplicationProcessHost.DEFAULT_SERVERS_PATH/${SERVER_NAME}
+         * for all instances (after their next migration) anyhow. Currently, we're exploring ApplicationProcessHost.DEFAULT_SERVERS_PATH
+         * for subdirectories for which we then create the ApplicationProcess instances.
+         */
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1181,8 +1213,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final String hostname = findHostnameForProcessThroughLoadBalancers(region, serverNameAndMaster.getValue());
-            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), hostname,
+            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(),
                     serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
             result.add(replicaSet);
         }
@@ -1257,7 +1288,27 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         return result;
     }
-
+    
+    @Override
+    public CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(com.sap.sse.landscape.Region region) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeLoadBalancers().handleAsync((response, exception)->
+            Util.map(response.loadBalancers(), lb->new ApplicationLoadBalancerImpl<ShardingKey>(region, lb, this)));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<Listener>> getListenersAsync(com.sap.sse.landscape.Region region) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeListeners(b->b.loadBalancerArn("")).handleAsync(
+                (response, exception)->response.listeners());
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<TargetGroup<ShardingKey>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroups().handleAsync(
+                (response, exception)->Util.map(response.targetGroups(), tg->
+                    new AwsTargetGroupImpl<ShardingKey>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(),
+                            tg.port(), tg.healthCheckProtocol(), tg.healthCheckPort(), tg.healthCheckPath())));
+    }
+    
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ApplicationLoadBalancer<ShardingKey> findLoadBalancerForProcess(com.sap.sse.landscape.Region region, ProcessT process) {
         for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : getLoadBalancers(region)) {

@@ -88,6 +88,12 @@ implements SailingAnalyticsProcess<ShardingKey> {
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
+     * <p>
+     * 
+     * This redefinition does not require the {@code optionalKeyName} nor the {@code privateKeyEncryptionPassphrase}.
+     * 
+     * @param optionalTimeout
+     *            used for the HTTP(S) connection to the status servlet
      */
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)

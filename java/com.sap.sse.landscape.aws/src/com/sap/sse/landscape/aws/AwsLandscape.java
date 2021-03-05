@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -356,6 +357,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     ChangeInfo getUpdatedChangeInfo(ChangeInfo changeInfo);
 
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
+
+    CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(Region region);
     
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer(String loadBalancerArn, Region region);
 
@@ -373,6 +376,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region);
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
+
+    CompletableFuture<Iterable<Listener>> getListenersAsync(Region region);
     
     LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey> alb);
 

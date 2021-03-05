@@ -133,4 +133,12 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * regions to which it has been deployed.
      */
     String getHostname();
+
+    /**
+     * The "SERVER_NAME" property that is equal for the master and all replica processes of this replica set. It is
+     * at the same time the {@link #getName() name} of this application replica set.
+     */
+    default String getServerName() {
+        return getName();
+    }
 }
