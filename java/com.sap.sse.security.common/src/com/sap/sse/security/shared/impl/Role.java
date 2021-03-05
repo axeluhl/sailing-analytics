@@ -1,7 +1,5 @@
 package com.sap.sse.security.shared.impl;
 
-import java.io.ObjectStreamException;
-
 import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.RoleDefinition;
 
@@ -20,7 +18,7 @@ public class Role extends AbstractRole<RoleDefinition, UserGroup, User> {
      * If {@link #transitive} is {@code null} on this instance, this method replaces this de-serialized object with one
      * that has {@link #transitive} set to the default of {@code true}.
      */
-    private Object readResolve() throws ObjectStreamException {
+    private Object readResolve() {
         final Role result;
         if (this.transitive == null) {
             result = new Role(roleDefinition, qualifiedForTenant, qualifiedForUser, /* transitive */ true);
