@@ -1233,6 +1233,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             result = "www.sapsailing.com";
         } else {
             result = null;
+            // FIXME many DNS entries may point to the same load balancer; how do we know it's the correct one? --> Disambiguation...
             final String loadBalancerDNSName = loadBalancer.getDNSName();
             final Route53Client route53Client = getRoute53Client();
             outer: for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
