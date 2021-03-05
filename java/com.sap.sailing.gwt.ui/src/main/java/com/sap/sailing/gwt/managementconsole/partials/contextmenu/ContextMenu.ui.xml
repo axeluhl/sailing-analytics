@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.contextmenu.ContextMenuResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {local_res.style.content}">
+        <g:SimplePanel ui:field="headerContainer" addStyleNames="{res.mediaCss.column} {local_res.style.header}" />
+        <div class="{local_res.style.separator}"/>
+        <g:FlowPanel ui:field="itemsContainer" addStyleNames="{res.mediaCss.column} {local_res.style.items}" />
+    </g:HTMLPanel>
+</ui:UiBinder>

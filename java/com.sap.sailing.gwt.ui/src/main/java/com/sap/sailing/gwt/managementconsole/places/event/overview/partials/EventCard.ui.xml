@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:p="urn:import:com.sap.sailing.gwt.managementconsole.places.event.overview.partials">
     
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
@@ -8,15 +9,9 @@
     
     <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.eventCardPanel}">
         <div ui:field="card" class="{app_res.style.card} {local_res.style.customTeaser}" >
-            <div ui:field="container" class="{local_res.style.eventCardContent} {app_res.style.cardContent}">
+            <div ui:field="container" class="{app_res.style.cardContent} {local_res.style.eventCardContent}">
                 <div class="{app_res.style.flexContainer}">
-                    <div class="{app_res.style.flexItemAutoWidth}">
-                        <div ui:field="title" class="{app_res.style.title}" />
-                        <div class="{app_res.style.flexContainer}">
-                            <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
-                            <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {app_res.style.details}"/>
-                        </div>
-                    </div>
+                    <p:EventInfo ui:field="info" addStyleNames="{app_res.style.flexItemAutoWidth}"/>
                     <g:Anchor ui:field="contextMenu" 
                             addStyleNames="{app_res.icons.iconElipse} {app_res.icons.icon} {app_res.style.flexItemFixedWidth}" />
                 </div>

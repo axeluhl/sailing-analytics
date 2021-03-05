@@ -9,10 +9,11 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 public class RegattaListResponseEvent extends GwtEvent<RegattaListResponseEvent.Handler> {
 
     public interface Handler extends EventHandler {
+
         void onRegattasRefreshed(RegattaListResponseEvent event);
     }
 
-    public static Type<RegattaListResponseEvent.Handler> TYPE = new Type<>();
+    public static final Type<RegattaListResponseEvent.Handler> TYPE = new Type<>();
 
     private final List<RegattaDTO> regattas;
 
@@ -26,7 +27,7 @@ public class RegattaListResponseEvent extends GwtEvent<RegattaListResponseEvent.
     }
 
     @Override
-    protected void dispatch(RegattaListResponseEvent.Handler handler) {
+    protected void dispatch(final RegattaListResponseEvent.Handler handler) {
         handler.onRegattasRefreshed(this);
     }
 

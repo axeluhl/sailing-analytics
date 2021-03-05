@@ -19,6 +19,12 @@
     font-weight: FONT_WEIGHT_BOLD;
 }
 
+.info-title {
+    font-size: FONT_SIZE_MEDIUM;
+    line-height: LINE_HEIGHT_MEDIUM;
+    font-weight: FONT_WEIGHT_MEDIUM;
+}
+
 .xlarge {
     font-size: FONT_SIZE_XLARGE;
     line-height: LINE_HEIGHT_XLARGE;

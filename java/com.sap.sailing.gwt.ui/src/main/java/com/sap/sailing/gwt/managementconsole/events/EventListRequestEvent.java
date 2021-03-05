@@ -8,10 +8,9 @@ public class EventListRequestEvent extends GwtEvent<EventListRequestEvent.Handle
     public interface Handler extends EventHandler {
 
         void onEventListResponse(EventListRequestEvent event);
-
     }
 
-    public static Type<Handler> TYPE = new Type<>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     @Override
     public Type<Handler> getAssociatedType() {
@@ -19,7 +18,7 @@ public class EventListRequestEvent extends GwtEvent<EventListRequestEvent.Handle
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(final Handler handler) {
         handler.onEventListResponse(this);
     }
 

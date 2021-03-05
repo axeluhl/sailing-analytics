@@ -52,6 +52,10 @@
     background-image: resourceUrl("iconAdd");
 }
 
+.icon-delete::before {
+    background-image: resourceUrl("iconDelete");
+}
+
 .icon-filter::before {
     background-image: resourceUrl("iconFilter");
 }

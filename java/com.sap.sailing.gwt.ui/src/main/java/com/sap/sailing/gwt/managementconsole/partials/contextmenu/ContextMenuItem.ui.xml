@@ -1,0 +1,10 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.partials.contextmenu.ContextMenuResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <g:Anchor addStyleNames="{app_res.style.anchor} {app_res.style.flexContainer}">
+        <div ui:field="icon" class="{app_res.style.flexItemFixedWidth} {app_res.icons.icon}" />
+        <div ui:field="text" class="{app_res.fonts.medium} {app_res.style.flexItemAutoWidth}"/>
+    </g:Anchor>
+</ui:UiBinder>
