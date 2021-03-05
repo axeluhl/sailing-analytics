@@ -106,6 +106,7 @@ public class MediaPage extends Composite {
                 }
             }
         }
+        updateVideoDisplay();
     }
 
     @UiHandler("photoSettingsButton")
@@ -231,23 +232,13 @@ public class MediaPage extends Composite {
         int videoCount = manageMediaModel.getVideos().size();
         videosListUi.clear();
         if (videoCount > 0) {
-            videoSectionUi.getStyle().clearDisplay();
-            videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
-            videoListOuterBoxUi.getStyle().clearDisplay();
-            if (videoCount == 1) {
-                videoDisplayOuterBoxUi.addClassName(res.mediaCss().large12());
-                videoListOuterBoxUi.getStyle().setDisplay(Display.NONE);
-            } else if (videoCount > 1) {
-                videoDisplayOuterBoxUi.addClassName(res.mediaCss().large9());
-                videoListOuterBoxUi.addClassName(res.mediaCss().large3());
-            }
             boolean first = true;
             for (final VideoDTO videoCandidateInfo : manageMediaModel.getVideos()) {
                 if (first) {
                     putVideoOnDisplay(videoCandidateInfo, false);
                     first = false;
                 }
-                if (videoCount > 1) {
+                if (videoCount > 0) {
                     VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo, getDeleteVideoHandler(videoCandidateInfo), null);
                     thumbnail.addClickHandler(new ClickHandler() {
                         @Override
@@ -265,6 +256,22 @@ public class MediaPage extends Composite {
             contentPanel.setWidget(new InfoPlaceholder(i18n.mediaNoContent()));
         } else {
             contentPanel.setWidget(mediaUi);
+        }
+    }
+    
+    private void updateVideoDisplay() {
+        int videoCount = manageMediaModel.getVideos().size();
+        videoSectionUi.getStyle().clearDisplay();
+        videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
+        videoListOuterBoxUi.getStyle().clearDisplay();
+        videoDisplayOuterBoxUi.removeClassName(res.mediaCss().large9());
+        videoDisplayOuterBoxUi.removeClassName(res.mediaCss().large12());
+        if (videoCount == 1 && !manageVideos) {
+            videoDisplayOuterBoxUi.addClassName(res.mediaCss().large12());
+            videoListOuterBoxUi.getStyle().setDisplay(Display.NONE);
+        } else if (videoCount > 1 || videoCount == 1 && manageVideos) {
+            videoDisplayOuterBoxUi.addClassName(res.mediaCss().large9());
+            videoListOuterBoxUi.addClassName(res.mediaCss().large3());
         }
     }
     
@@ -308,7 +315,6 @@ public class MediaPage extends Composite {
     }
     
     private void setMediaManaged(boolean managed) {
-        logger.info("setMediaManaged " + managed);
         if (mediaAddButton != null) {
             logger.info("mediaAddButton != null");
             mediaAddButton.setVisible(managed);
@@ -319,5 +325,6 @@ public class MediaPage extends Composite {
             manageVideos = false;
             setVideosManaged(manageVideos);
         }
+        updateVideoDisplay();
     }
 }

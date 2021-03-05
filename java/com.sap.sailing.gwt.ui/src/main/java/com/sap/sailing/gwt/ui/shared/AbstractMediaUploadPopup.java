@@ -131,6 +131,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         uploadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                event.stopPropagation();
                 upload.click();
             }
         });
@@ -217,6 +218,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         // Add a 'submit' button.
         Button cancelButton = new Button(i18n.cancel(), new ClickHandler() {
             public void onClick(ClickEvent event) {
+                event.stopPropagation();
                 fileNameInput.setValue("");
                 cleanupTempFileUpload();
                 hide();
@@ -226,6 +228,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         // Add a 'submit' button.
         saveButton = new Button(i18n.save(), new ClickHandler() {
             public void onClick(ClickEvent event) {
+                event.stopPropagation();
                 metaDataForm.submit();
             }
         });

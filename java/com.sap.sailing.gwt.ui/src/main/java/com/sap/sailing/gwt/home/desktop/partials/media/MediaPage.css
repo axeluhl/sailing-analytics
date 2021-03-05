@@ -16,20 +16,7 @@
 
 .imggalleryitem {
 	border: 1em solid transparent;
-	
 	box-sizing: border-box;
-	
-}
-
-.media_settings_button,
-.media_add_button {
-  display: inline-block;
-  width: 2.666666666666667em;
-  height: 2.666666666666667em;
-  margin: 0 0 0 0.666666666666667em;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 50%;
 }
 
 .media_settings {
@@ -40,20 +27,6 @@
 
 .media_settings * {
   font-size: 1rem;
-}
-
-.media_settings_button {
-  background-color: #9f9f9f;
-  background-image: resourceUrl("manageBlack");
-}
-
-.media_add_button {
-  background-color: #9f9f9f;
-  background-image: resourceUrl("plusTransparent");
-}
-
-.media_settings_button.active {
-    background-color: #A40000;
 }
 
 .thumbnail_edit_button {
@@ -103,40 +76,48 @@
 .manageMedia, .manageMedia:focus {
     background-color: white;
     top: 23px;
-    margin-left: 5px;
+    margin-left: 15px;
+    border: 1px solid #dedede;
 }
 .manageMedia:after {
-    background-image: resourceUrl("manageBlack");
+    background-image: resourceUrl("editBlack");
 }
 .manageMedia.active, .manageMedia.active:focus {
     background-color: #008fcc;
 }
 .manageMedia.active:after {
-    background-image: resourceUrl("manageWhite");
+    background-image: resourceUrl("editWhite");
 }
 .manageMedia:hover {
     background-color: #d79900;
 }
 
 .addButton, .addButton:focus {
-    top: 5px;
-    right: 0px;
+    top: -15px;
+    right: 15px;
     background-color: #efaa00;
-    width: auto;
-    padding-left: 3em;
-    padding-right: 0.5em;
     color: #2b2a2a;
-    font-weight: 800;
+    width: 2.666666666666667em;
+    height: 2.666666666666667em;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    outline: none;
 }
 
 .addButton:after {
-    background-image: resourceUrl("addMedia");
-    top: 0;
-    left: 0.5em;
-    height: 2.666em;
+    background-image: resourceUrl("plus");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 66.6%;
     width: 100%;
-    background-position: center left;
-    background-size: 2em;
+    height: 100%;
+    top: 0;
+    left: 0;
 }
 
 .popup {

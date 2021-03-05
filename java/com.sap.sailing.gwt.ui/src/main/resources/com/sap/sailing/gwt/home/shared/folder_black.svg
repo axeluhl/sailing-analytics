@@ -1,7 +1,8 @@
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-     viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-<g id="Layer_1_1_">
-    <path d="M41.841,10H19.255l-4-4H0.841v36h0.033l-0.033,2h41v-1.863L49.159,16h-7.318V10z M14.427,8l4,4h21.414v4H8.083L2.841,34.72
-        V8H14.427z M39.878,41.73L39.841,42H2.88L9.6,18h36.923L39.878,41.73z" fill="black"/>
-</g>
+<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>Folder</title>
+  <g>
+   <path d="m42.841,10l-22.586,0l-4,-4l-14.414,0l0,36l0.033,0l-0.033,2l41,0l0,-1.863l7.318,-26.137l-7.318,0l0,-6zm-27.414,-2l4,4l21.414,0l0,4l-31.758,0l-5.242,18.72l0,-26.72l11.586,0zm25.451,33.73l-0.037,0.27l-36.961,0l6.72,-24l36.923,0l-6.645,23.73z" fill="black"/>
+  </g>
+ </g>
 </svg>

@@ -18,8 +18,6 @@ public interface MediaPageResources extends SharedDesktopResources {
         String imggalleryitem();
         
         String media_settings();
-        String media_add_button();
-        String media_settings_button();
         String thumbnail_edit_button();
         String thumbnail_delete_button();
         

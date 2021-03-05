@@ -1,4 +1,4 @@
-@external button, table, Caption, chartCloseButton, gwt-HTML;
+@external button, table, Caption, chartCloseButton, gwt-HTML, collapsablePanel, collapsablePanel-content, collapsablePanel-header;
 
 button.primary {
     background-color: #008fcc;
@@ -26,6 +26,34 @@ button.primary {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 .input:disabled {
+    color: rgb(84, 84, 84);
+    cursor: default;
+    background-color: #dedede;
+    border-color: #dedede;
+    opacity: 1;
+}
+.select {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background: transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-position-y: 5px;
+}
+.select:disabled {
     color: rgb(84, 84, 84);
     cursor: default;
     background-color: #dedede;
@@ -74,7 +102,7 @@ button.primary {
 
 .overlay {
     position: absolute;
-    background-color: rgba(0, 143, 204, 0.5);
+    background-color: rgba(117, 117, 117, 0.5);
     width: 100%;
     height: 100%;
     display: block;
@@ -98,4 +126,16 @@ button.primary {
     font-weight: 1000;
 }
 
-.select {}
+.popup .collapsablePanel {
+    background-color: #fff;
+    border: none;
+}
+
+.popup .collapsablePanel-content {
+    margin: 0;
+    border: none;
+}
+
+.popup .collapsablePanel-header {
+    background: none;
+}

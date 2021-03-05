@@ -108,14 +108,6 @@ public interface SharedHomeResources extends CommonIcons {
     @MimeType("image/svg+xml")
     DataResource editBlack();
     
-    @Source("gear.svg")
-    @MimeType("image/svg+xml")
-    DataResource manageBlack();
-    
-    @Source("gear_white.svg")
-    @MimeType("image/svg+xml")
-    DataResource manageWhite();
-    
     @Source("trash.svg")
     @MimeType("image/svg+xml")
     DataResource trash();
@@ -127,7 +119,8 @@ public interface SharedHomeResources extends CommonIcons {
     @Source("folder_white.svg")
     @MimeType("image/svg+xml")
     DataResource folderWhite();
-
-    @Source("plus_transparent.png")
-    ImageResource plusTransparent();
+    
+    @Source("plus.svg")
+    @MimeType("image/svg+xml")
+    DataResource plus();
 }

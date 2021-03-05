@@ -72,18 +72,14 @@
 			padding: 0 5px;
 		}
 		.addButtonArea {
-            height: 18px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+
         }
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.mediaPage}">
-        <div class="{res.mediaCss.grid} {style.addButtonArea}">
-            <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-                <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" 
-                        visible="false">
-                    <ui:text from='{i18n.upload}' />
-                </g:Button>
-            </div>
-        </div>
         <div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
 			<div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
@@ -116,5 +112,14 @@
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
 			<g:FlowPanel addStyleNames="{style.photolist}" ui:field="photoListOuterBoxUi" />
 		</div>
+        <div class="{local_res.css.media} {style.addButtonArea}">
+            <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
+                <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                   <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" 
+                           visible="false">
+                   </g:Button>
+                </div>
+            </div>
+        </div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
