@@ -36,16 +36,15 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
     
@@ -63,7 +62,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String MP4_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mp4)";
     private final static String OGG_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogg)";
     private final static String OGV_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogv)";
-    private final static String QT_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mov|qt|quicktime)";
+    private final static String QT_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mov|qt)";
     private final static String WEBM_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(webm)";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
@@ -79,8 +78,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final TextBox subtitleTextBox;
     protected final TextBox copyrightTextBox;
     protected final ListBox mimeTypeListBox;
-    protected final IntegerBox widthInPxBox;
-    protected final IntegerBox heightInPxBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
     private String uri;
@@ -92,7 +89,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         sharedHomeResources.sharedHomeCss().ensureInjected();
         addStyleName(sharedHomeResources.sharedHomeCss().popup());
         setTitle(i18n.upload());
-        setText(i18n.upload().toUpperCase());
+        setText(i18n.upload());
         setGlassEnabled(true);
         setAnimationEnabled(true);
         
@@ -169,6 +166,11 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         });
         metaDataPanel.add(urlInput);
         
+        fileExistingPanel = new FlowPanel();
+        // TODO: translate
+        fileExistingPanel.add(new Label("-- no media selected --"));
+        metaDataPanel.add(fileExistingPanel);
+        
         Label detailsSubTitle = new Label(i18n.details());
         detailsSubTitle.addStyleName(sharedHomeResources.sharedHomeCss().subTitle());
         metaDataPanel.add(detailsSubTitle);
@@ -180,46 +182,34 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         titleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
         metaDataPanel.add(titleTextBox);
 
+        FlowPanel advancedContent = new FlowPanel();
+        CollapsablePanel collapsableAdvancedPanel = new CollapsablePanel(i18n.advanced(), true);
+        collapsableAdvancedPanel.setContent(advancedContent);
+        collapsableAdvancedPanel.setWidth("100%");
+        metaDataPanel.add(collapsableAdvancedPanel);
+        
         Label subtitleLabel = new Label(i18n.subtitle());
         subtitleLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
-        metaDataPanel.add(subtitleLabel);
+        advancedContent.add(subtitleLabel);
         subtitleTextBox = new TextBox();
         subtitleTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
-        metaDataPanel.add(subtitleTextBox);
+        advancedContent.add(subtitleTextBox);
 
         Label copyrightLabel = new Label(i18n.copyright());
         copyrightLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
-        metaDataPanel.add(copyrightLabel);
+        advancedContent.add(copyrightLabel);
         copyrightTextBox = new TextBox();
         copyrightTextBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
-        metaDataPanel.add(copyrightTextBox);
+        advancedContent.add(copyrightTextBox);
 
+        Label mimeTypeListLabel = new Label(i18n.mimeType());
+        mimeTypeListLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
+        advancedContent.add(mimeTypeListLabel);
         mimeTypeListBox = new ListBox();
         mimeTypeListBox.addStyleName(sharedHomeResources.sharedHomeCss().select());
         initMediaTypes();
-        metaDataPanel.add(mimeTypeListBox);
+        advancedContent.add(mimeTypeListBox);
 
-        Label widthInPxLabel = new Label(i18n.widthInPx());
-        widthInPxLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
-        metaDataPanel.add(widthInPxLabel);
-        widthInPxBox = new IntegerBox();
-        widthInPxBox.setEnabled(false);
-        widthInPxBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
-        metaDataPanel.add(widthInPxBox);
-
-        Label heightInPxLabel = new Label(i18n.heightInPx());
-        heightInPxLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
-        metaDataPanel.add(heightInPxLabel);
-        heightInPxBox = new IntegerBox();
-        heightInPxBox.setEnabled(false);
-        heightInPxBox.addStyleName(sharedHomeResources.sharedHomeCss().input());
-        metaDataPanel.add(heightInPxBox);
-        
-        fileExistingPanel = new FlowPanel();
-        // TODO: i18n
-        fileExistingPanel.add(new Label("-- no media selected --"));
-        metaDataPanel.add(fileExistingPanel);
-        
         FlowPanel buttonGroup = new FlowPanel();
         buttonGroup.addStyleName(sharedHomeResources.sharedHomeCss().buttonGroup());
         buttonGroup.addStyleName(sharedHomeResources.sharedHomeCss().right());
@@ -306,7 +296,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else if (matches(url, OGV_REGEX)) {
             mimeType = MimeType.ogv;
         } else if (matches(url, QT_REGEX)) {
-            mimeType = MimeType.qt;
+            mimeType = MimeType.mp4;
         } else if (matches(url, WEBM_REGEX)) {
             mimeType = MimeType.webm;
         } else if (matches(url, YOUTUBE_REGEX)) {
@@ -316,10 +306,12 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else {
             mimeType = MimeType.unknown;
         }
+        logger.info("Check returned mimeType: " + mimeType);
         return mimeType;
     }
     
     private boolean matches(String matcher, String pattern) {
+        logger.info("Check matcher: " + matcher + " with pattern: " + pattern);
         return RegExp.compile(pattern, "i").test(matcher);
     }
     
@@ -335,7 +327,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     protected class SubmitHandler implements FormPanel.SubmitHandler {
-
         @Override
         public void onSubmit(SubmitEvent event) {
             // This event is fired just before the form is submitted. We can take
@@ -350,15 +341,19 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     private class SubmitCompleteHandler implements FormPanel.SubmitCompleteHandler {
-
         @Override
         public void onSubmitComplete(SubmitCompleteEvent event) {
             // When the form submission is successfully completed, this event is
             // fired. Assuming the service returned a response of type text/html,
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
-            String result = event.getResults();
-            JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
+            logger.info("Enter SubmitCompleteHandler");
+            String result = event.getResults().trim();
+            logger.info("Enter SubmitCompleteHandler. result: " + result);
+            JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
+            logger.info("Enter SubmitCompleteHandler. resultJsonValue: " + resultJsonValue);
+            JSONArray resultJson = resultJsonValue.isArray();
+            logger.info("resultJson");
             if (resultJson != null) {
                 if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                     String uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString()
@@ -366,34 +361,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString()
                             .stringValue();
                     updateUri(uri, fileName);
-                    if (uri == null || uri.isEmpty()) {
-                        logger.info("Skip resolve image dimensions because required url is not available.");
-                    } else if(getMimeType(uri) == MimeType.image) {
-                        logger.info("Get size... resolveImageDimensions from " + uri);
-                        sailingServiceWrite.resolveImageDimensions(uri, new AsyncCallback<Pair<Integer,Integer>>() {
-                            
-                            @Override
-                            public void onSuccess(Pair<Integer, Integer> result) {
-                                logger.info("Get size: " + result);
-                                if (result == null || result.getA() == null || result.getB() == null) {
-                                    logger.log(Level.SEVERE, "Size of image could not be determined!");
-                                    Notification.notify("Size of image could not be determined!", NotificationType.WARNING);
-                                    AbstractMediaUploadPopup.this.widthInPxBox.setValue(null);
-                                    AbstractMediaUploadPopup.this.heightInPxBox.setValue(null);
-                } else {
-                                    AbstractMediaUploadPopup.this.widthInPxBox.setValue(result.getA());
-                                    AbstractMediaUploadPopup.this.heightInPxBox.setValue(result.getB());
-                                    
-                                }
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                 logger.severe("Error getting size.");
-                            }
-                        });
-                    }
-
+                    fileNameInput.setValue(i18n.uploadSuccessful());
                 } else {
                     String status = resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue();
                     String message = resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue();
@@ -481,9 +449,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         image.setTitle(titleTextBox.getValue());
         image.setSubtitle(subtitleTextBox.getValue());
         image.setCopyright(copyrightTextBox.getValue());
-        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
-        }
         Iterable<String> defaultTags = Collections.singletonList(MediaTagConstants.GALLERY.getName());
         image.setTags(defaultTags);
         logger.info("Image ready: " + image);
@@ -565,6 +530,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     private void updateUri(String uri, String fileName) {
+        logger.info("Update uri and fileName. URI: " + uri + ", fileName: " + fileName);
         this.uri = uri;
         if (uri == null) {
             fileExistingPanel.setVisible(true);
@@ -578,17 +544,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             urlInput.setEnabled(false);
             selectMimeTypeInBox(getMimeType(uri));
         }
-        if (fileName != null) {
-            final String name;
-            if (fileName.contains(".")) {
-                name = fileName.substring(0, fileName.lastIndexOf("."));
-            } else {
-                name = fileName;
-            }
-            titleTextBox.setValue(name);
-        }
+        updateFileName(fileName);
         checkSaveButton();
-        fileNameInput.setValue(fileName);
     }
     
     abstract protected void updateFileName(String fileName);
