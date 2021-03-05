@@ -47,8 +47,6 @@
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
 <setEntry value="slf4j.jdk14@default:default"/>
-<setEntry value="org.apache.felix.shell@4:true"/>
-<setEntry value="org.apache.felix.shell.remote@4:true"/>
 <setEntry value="lz4-java@default:default"/>
 <setEntry value="org.apache.felix.gogo.command@default:default"/>
 <setEntry value="org.apache.felix.gogo.runtime@default:default"/>
