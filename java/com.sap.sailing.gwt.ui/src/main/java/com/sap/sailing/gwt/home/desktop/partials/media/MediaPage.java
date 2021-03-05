@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
+import java.util.Collection;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -13,7 +14,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -24,7 +24,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
-import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.DesktopMediaUploadPopup;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
@@ -33,12 +32,10 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sailing.gwt.ui.shared.ManageMediaContainer;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -47,6 +44,8 @@ import com.sap.sse.security.ui.client.UserService;
 public class MediaPage extends Composite {
     private Logger logger = Logger.getLogger(this.getClass().getName());
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
+    
+    private final ManageMediaContainer container;
 
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
     }
@@ -79,15 +78,10 @@ public class MediaPage extends Composite {
     @UiField
     StringMessages i18n;
     
-    private MediaDTO media;
-    
     private boolean manageVideos;
     private boolean managePhotos;
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
-    private final UserService userService;
-    private final SailingServiceWriteAsync sailingServiceWrite;
-    private final UUID eventId;
     private VideoWithLowerThird videoDisplayUi;
 
     @UiHandler("videoSettingsButton")
@@ -141,46 +135,43 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(sailingServiceWrite, eventId,
-        		video -> {
-        			SailingVideoDTO sailingVideoDTO = new SailingVideoDTO(null, video);
-        			media.getVideos().add(sailingVideoDTO);
-        			setMedia(media);
-        			}, 
-        		image -> {
-        			SailingImageDTO imageSailingImageDTO = new SailingImageDTO(null, image);
-        			media.getPhotos().add(imageSailingImageDTO);
-        			setMedia(media);
-        		});
+        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(video -> {
+            container.addVideo(video, eventDto -> updateMedia());
+        }, image -> {
+            container.addImage(image, eventDto -> updateMedia());
+        });
         popupHolder.add(popup);
         popup.center();
     }
     
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, UUID eventId) {
-        sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
+        SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         MediaPageResources.INSTANCE.css().ensureInjected();
-        this.userService = userService;
-        this.eventId = eventId;
+        container = new ManageMediaContainer(sailingServiceWrite, userService, eventId);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
         popupHolder = new FlowPanel();
         
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
+            logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
-            AuthenticationContext authContext = event.getCtx();
-            if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
-                setMediaManaged(true);
-            } else {
-                setMediaManaged(false);
-            }
+            container.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
         });
     }
     
     public void setMedia(final MediaDTO media) {
-    	this.media = media;
+        container.setVideos(media.getVideos());
+        container.setImages(media.getPhotos());
+        updateMedia();
+    }
+    
+    private void updateMedia() {
+        container.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+        logger.info("updateMedia");
         Widget mediaUi = uiBinder.createAndBindUi(this);
-        int photosCount = media.getPhotos().size();
+        int photosCount = container.getImages().size();
+        photoListOuterBoxUi.clear();
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;
@@ -209,7 +200,7 @@ public class MediaPage extends Composite {
                 break;
             }
 
-            for (final SailingImageDTO holder : media.getPhotos()) {
+            for (final ImageDTO holder : container.getImages()) {
                 if (holder.getSourceRef() != null) {
 
                     GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
@@ -221,16 +212,28 @@ public class MediaPage extends Composite {
                         @Override
                         public void onClick(ClickEvent event) {
                             if (!managePhotos) {
-                                new SailingFullscreenViewer().show(holder, media.getPhotos());
+                                Collection<SailingImageDTO> sailingImageDTOs = container.getImages().stream().map(imageDto -> {
+                                    if (imageDto instanceof SailingImageDTO) {
+                                        return (SailingImageDTO) imageDto;
+                                    }
+                                   return new SailingImageDTO(null, imageDto);
+                                }).collect(Collectors.toList());
+                                final SailingImageDTO showImage = sailingImageDTOs.stream()
+                                        .filter(sailingImageDto -> sailingImageDto.compareTo(holder) == 0)
+                                        .findFirst().orElse(new SailingImageDTO(null, holder));
+                                new SailingFullscreenViewer().show(showImage, sailingImageDTOs);
                             }
                         }
                     });
                 }
             }
         }
-        int videoCount = media.getVideos().size();
+        int videoCount = container.getVideos().size();
+        videosListUi.clear();
         if (videoCount > 0) {
             videoSectionUi.getStyle().clearDisplay();
+            videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
+            videoListOuterBoxUi.getStyle().clearDisplay();
             if (videoCount == 1) {
                 videoDisplayOuterBoxUi.addClassName(res.mediaCss().large12());
                 videoListOuterBoxUi.getStyle().setDisplay(Display.NONE);
@@ -239,7 +242,7 @@ public class MediaPage extends Composite {
                 videoListOuterBoxUi.addClassName(res.mediaCss().large3());
             }
             boolean first = true;
-            for (final SailingVideoDTO videoCandidateInfo : media.getVideos()) {
+            for (final VideoDTO videoCandidateInfo : container.getVideos()) {
                 if (first) {
                     putVideoOnDisplay(videoCandidateInfo, false);
                     first = false;
@@ -263,59 +266,22 @@ public class MediaPage extends Composite {
         } else {
             contentPanel.setWidget(mediaUi);
         }
-
-        UserDTO currentUser = userService.getCurrentUser();
-        if (currentUser != null && !currentUser.getName().equals("Anonymous")) {
-            setMediaManaged(true);
-        } else {
-            setMediaManaged(false);
-        }
     }
     
-    private ClickHandler getDeleteVideoHandler(SailingVideoDTO videoCandidateInfo) {
+    private ClickHandler getDeleteVideoHandler(VideoDTO videoCandidateInfo) {
         return new ClickHandler() {
             
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm("Do you really want to delete the video")) {
-                    sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
-                        @Override
-                        public void onSuccess(EventDTO result) {
-                            result.getVideos().stream()
-                                    .filter(video -> video.getSourceRef().equals(videoCandidateInfo.getSourceRef()))
-                                    .forEach(matchVideo -> result.removeVideo(matchVideo));
-                            sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
-                                
-                                @Override
-                                public void onSuccess(EventDTO result) {
-                                	media.getVideos().remove(videoCandidateInfo);
-                                	setMedia(media);
-                                    // TODO: translate
-                                    Notification.notify("Video removed.", NotificationType.SUCCESS);
-                                }
-                                
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    // TODO: translate
-                                    Notification.notify("Error -> Cannot update event. Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                                    logger.log(Level.SEVERE, "Video not removed.", caught);
-                                }
-                            });
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // TODO: translate
-                            Notification.notify("Error -> Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                            logger.log(Level.SEVERE, "Cannot get event. Video not removed.", caught);
-                        }
-                    });
+                    container.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
+                    
                 }
             }
         };
     }
     
-    private ClickHandler getDeleteImageHandler(SailingImageDTO imageCandidateInfo) {
+    private ClickHandler getDeleteImageHandler(ImageDTO imageCandidateInfo) {
         return new ClickHandler() {
             
             @Override
@@ -323,39 +289,7 @@ public class MediaPage extends Composite {
                 event.stopPropagation();
                 // TODO: translation
                 if (Window.confirm("Do you really want to delete the image")) {
-                    sailingServiceWrite.getEventById(eventId, true, new AsyncCallback<EventDTO>() {
-                        @Override
-                        public void onSuccess(EventDTO result) {
-                            result.getImages().stream()
-                                    .filter(image -> image.getSourceRef().equals(imageCandidateInfo.getSourceRef()) 
-                                            && image.getCreatedAtDate().equals(imageCandidateInfo.getCreatedAtDate()))
-                                    .forEach(matchImage -> result.removeImage(matchImage));
-                            sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
-                                
-                                @Override
-                                public void onSuccess(EventDTO result) {
-                                    media.getPhotos().remove(imageCandidateInfo);
-                                    setMedia(media);
-                                    // TODO: translate
-                                    Notification.notify("Image removed.", NotificationType.SUCCESS);
-                                }
-                                
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    // TODO: translate
-                                    Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                                    logger.log(Level.SEVERE, "Cannot update event. Image not removed.", caught);
-                                }
-                            });
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // TODO: translate
-                            Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                            logger.log(Level.SEVERE, "Cannot get event. Image not removed.", caught);
-                        }
-                    });
+                    container.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
                 }
             }
         };
@@ -367,19 +301,23 @@ public class MediaPage extends Composite {
      * @param video the video to show in the big viewer
      * @param autoplay true, if the video should play automatically, false otherwise
      */
-    private void putVideoOnDisplay(final SailingVideoDTO video, boolean autoplay) {
+    private void putVideoOnDisplay(final VideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoWithLowerThird(true, autoplay);
         videoDisplayUi.setVideo(video);
         videoDisplayHolderUi.setWidget(videoDisplayUi);
     }
     
     private void setMediaManaged(boolean managed) {
-        mediaAddButton.setVisible(managed);
-        photoSettingsButton.setVisible(managed);
-        videoSettingsButton.setVisible(managed);
-        managePhotos = false;
-        setPhotosManaged(managePhotos);
-        manageVideos = false;
-        setVideosManaged(manageVideos);
+        logger.info("setMediaManaged " + managed);
+        if (mediaAddButton != null) {
+            logger.info("mediaAddButton != null");
+            mediaAddButton.setVisible(managed);
+            photoSettingsButton.setVisible(managed);
+            videoSettingsButton.setVisible(managed);
+            managePhotos = false;
+            setPhotosManaged(managePhotos);
+            manageVideos = false;
+            setVideosManaged(manageVideos);
+        }
     }
 }

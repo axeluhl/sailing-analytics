@@ -1,7 +1,12 @@
 package com.sap.sailing.gwt.home.mobile.places.event.media;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,8 +18,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
-import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
 import com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGallery;
 import com.sap.sailing.gwt.home.mobile.partials.uploadpopup.MobileMediaUploadPopup;
@@ -23,19 +26,26 @@ import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.client.UserService;
 
 public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implements MediaView {
     
     private Logger logger = Logger.getLogger(getClass().getName());
     
     private static MediaViewImplUiBinder uiBinder = GWT.create(MediaViewImplUiBinder.class);
+    
+    private Collection<ImageDTO> images = new LinkedHashSet<ImageDTO>();
+    private Collection<VideoDTO> videos = new LinkedHashSet<VideoDTO>();
 
     interface MediaViewImplUiBinder extends UiBinder<Widget, MediaViewImpl> {
     }
@@ -47,46 +57,43 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     
     private MobileMediaUploadPopup mobileMediaUploadPopup;
     private final SailingServiceWriteAsync sailingServiceWrite;
-    
-    private MediaDTO media;
+    private final UserService userService;
 
     public MediaViewImpl(MediaView.Presenter presenter) {
         super(presenter, false, true, false);
         this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
+        this.userService = presenter.getUserService();
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         UserDTO currentUser = presenter.getUserService().getCurrentUser();
         if (currentUser != null && !currentUser.getName().equals("Anonymous")) {
-            setMediaManaged(true);
+            loadEventData(eventDto -> {
+                setMediaManaged(hasPermissions(eventDto));
+                setEventDto(eventDto);
+            });
         }
         
         presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event->{
             // for some reason this event is only send after logout. Never the less it will also handle login.
             AuthenticationContext authContext = event.getCtx();
             if (authContext.getCurrentUser() != null && !authContext.getCurrentUser().getName().equals("Anonymous")) {
-                setMediaManaged(true);
+                // only if user is logged in check permissions to update event and set "manage media" status accordingly
+                loadEventData(eventDto -> {
+                    setMediaManaged(hasPermissions(eventDto));
+                    setEventDto(eventDto);
+                });
             } else {
                 setMediaManaged(false);
             }
         });
 
-        SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         MediaPageResources.INSTANCE.css().ensureInjected();
-        mobileMediaUploadPopup = new MobileMediaUploadPopup(sailingServiceWrite, presenter.getEventDTO().getId(),
+        mobileMediaUploadPopup = new MobileMediaUploadPopup(
                 video -> {
-                    // SailingVideoDTO can be created without eventRef because this is not needed here. Later after reload this
-                    // objects will be overwritten.
-                    SailingVideoDTO sailingVideoDTO = new SailingVideoDTO(null, video);
-                    media.getVideos().add(sailingVideoDTO);
-                    setMedia(media);
+                    addVideo(video);
                 },
                 image -> {
-                    // SailingImageDTO can be created without eventRef because this is not needed here. Later after reload this
-                    // objects will be overwritten.
-                    SailingImageDTO imageSailingImageDTO = new SailingImageDTO(null, image.getSourceRef(),
-                            image.getCreatedAtDate());
-                    media.getPhotos().add(imageSailingImageDTO);
-                    setMedia(media);
+                    addImage(image);
                 });
 
         addMediaButtonUi.addClickHandler(new ClickHandler() {
@@ -102,20 +109,58 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     
     @Override
     public void setMedia(MediaDTO media) {
-        this.media = media;
-        noContentInfoUi.setVisible(media.getVideos().isEmpty() && media.getPhotos().isEmpty());
-        videoGalleryUi.setVideos(media.getVideos(),
+        setVideos(media.getVideos());
+        setImages(media.getPhotos());
+        updateMedia();
+    }
+    
+    public void setEventDto(EventDTO eventDto) {
+        logger.info("setEventDto " + eventDto);
+        setVideos(eventDto.getVideos());
+        setImages(eventDto.getImages());
+        updateMedia();
+    }
+    
+    private void setVideos(Collection<? extends VideoDTO> videos) {
+        this.videos = new LinkedHashSet<VideoDTO>(videos.stream()
+                .filter(video -> video.hasTag(MediaTagConstants.GALLERY.getName()))
+                .sorted(Comparator.comparing(AbstractMediaDTO::getCreatedAtDate).reversed())
+                .collect(Collectors.toList()));
+    }
+    
+    private void setImages(Collection<? extends ImageDTO> images) {
+        this.images = new LinkedHashSet<ImageDTO>(images.stream()
+                .filter(video -> video.hasTag(MediaTagConstants.GALLERY.getName()))
+                .sorted(Comparator.comparing(AbstractMediaDTO::getCreatedAtDate).reversed())
+                .collect(Collectors.toList()));
+    }
+    
+    public void updateMedia() {
+        noContentInfoUi.setVisible(videos.isEmpty() && images.isEmpty());
+        videoGalleryUi.setVideos(videos,
                 video -> deleteVideo(video));
-        videoGalleryUi.setVisible(!media.getVideos().isEmpty());
-        imageGalleryUi.setImages(media.getPhotos(), 
+        videoGalleryUi.setVisible(!videos.isEmpty());
+        imageGalleryUi.setImages(images, 
                 image -> deleteImage(image));
-        imageGalleryUi.setVisible(!media.getPhotos().isEmpty());
+        imageGalleryUi.setVisible(!images.isEmpty());
 
         imageGalleryUi.setMediaManaged(false);
         videoGalleryUi.setMediaManaged(false);
     }
     
+    private boolean hasPermissions(EventDTO eventDto) {
+        final boolean hasPermission;
+        if (userService.hasPermission(eventDto, HasPermissions.DefaultActions.UPDATE)) {
+            hasPermission = true;
+        } else {
+            hasPermission = false;
+        }
+        logger.info("Check permission: " + hasPermission);
+        return hasPermission;
+    }
+    
     private void setMediaManaged(boolean managed) {
+        logger.info("Set manage media to: " + managed);
         addMediaButtonUi.setVisible(managed);
         videoGalleryUi.setManageButtonsVisible(managed);
         imageGalleryUi.setManageButtonsVisible(managed);
@@ -125,78 +170,76 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         }
     }
     
-    private void deleteImage(ImageDTO image) {
+    private void deleteImage(ImageDTO imageDto) {
+        loadEventData(eventDto -> {
+            Collection<ImageDTO> toRemove = eventDto.getImages().stream()
+                    .filter(image -> image.getSourceRef().equals(imageDto.getSourceRef()) 
+                            && image.getCreatedAtDate().equals(imageDto.getCreatedAtDate()))
+                    .collect(Collectors.toList());
+            eventDto.getImages().removeAll(toRemove);
+            updateEventDto(eventDto);
+        });
+    }
+    
+    private void deleteVideo(VideoDTO videoDto) {
+        loadEventData(eventDto -> {
+            Collection<VideoDTO> toRemove = eventDto.getVideos().stream()
+                    .filter(video -> video.getSourceRef().equals(videoDto.getSourceRef()) 
+                            && video.getCreatedAtDate().equals(videoDto.getCreatedAtDate()))
+                    .collect(Collectors.toList());
+            eventDto.getVideos().removeAll(toRemove);
+            updateEventDto(eventDto);
+        });
+    }
+    
+    private void addImage(ImageDTO image) {
+        loadEventData(eventDto -> {
+            eventDto.getImages().add(image);
+            updateEventDto(eventDto);
+        });
+    }
+    
+    private void addVideo(VideoDTO video) {
+        loadEventData(eventDto -> {
+            eventDto.getVideos().add(video);
+            updateEventDto(eventDto);
+        });
+    }
+    
+    public void loadEventData(Consumer<EventDTO> callback) {
         sailingServiceWrite.getEventById(getEventId(), true, new AsyncCallback<EventDTO>() {
             @Override
-            public void onSuccess(EventDTO result) {
-                result.getImages().stream()
-                        .filter(img 
-                                -> img.getSourceRef().equals(image.getSourceRef()) 
-                                        && img.getCreatedAtDate().equals(image.getCreatedAtDate()))
-                        .forEach(matchImage -> result.removeImage(matchImage));
-                sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
-                    
-                    @Override
-                    public void onSuccess(EventDTO result) {
-                        SailingImageDTO imageSailingImageDTO = new SailingImageDTO(null, image);
-                        media.getPhotos().remove(imageSailingImageDTO);
-                        setMedia(media);
-                        // TODO: translate
-                        Notification.notify("Image removed.", NotificationType.SUCCESS);
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO: translate
-                        Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                        logger.log(Level.SEVERE, "Cannot update event. Image not removed.", caught);
-                    }
-                });
+            public void onSuccess(EventDTO eventDto) {
+                callback.accept(eventDto);
             }
             @Override
             public void onFailure(Throwable caught) {
                 // TODO: translate
-                Notification.notify("Error -> Image not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                logger.log(Level.SEVERE, "Cannot load event. Image not removed.", caught);
+                Notification.notify("Error while updating event data.",  NotificationType.ERROR);
+                logger.log(Level.SEVERE, "Cannot update event.", caught);
             }
         });
     }
     
-    private void deleteVideo(VideoDTO video) {
-        sailingServiceWrite.getEventById(getEventId(), true, new AsyncCallback<EventDTO>() {
-            @Override
-            public void onSuccess(EventDTO result) {
-                result.getVideos().stream()
-                        .filter(img 
-                                -> img.getSourceRef().equals(video.getSourceRef()) 
-                                        && img.getCreatedAtDate().equals(video.getCreatedAtDate()))
-                        .forEach(matchVideo -> result.removeVideo(matchVideo));
-                sailingServiceWrite.updateEvent(result, new AsyncCallback<EventDTO>() {
-                    
-                    @Override
-                    public void onSuccess(EventDTO result) {
-                        SailingVideoDTO sailingVideoDTO = new SailingVideoDTO(null, video);
-                        media.getVideos().remove(sailingVideoDTO);
-                        setMedia(media);
-                        // TODO: translate
-                        Notification.notify("Image removed.", NotificationType.SUCCESS);
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO: translate
-                        Notification.notify("Error -> Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                        logger.log(Level.SEVERE, "Cannot update event. Video not removed.", caught);
-                    }
-                });
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO: translate
-                Notification.notify("Error -> Video not removed. Error: " + caught.getMessage(), NotificationType.ERROR);
-                logger.log(Level.SEVERE, "Cannot load event. Video not removed.", caught);
-            }
-        });
+    private void updateEventDto(EventDTO eventDto) {
+        if (hasPermissions(eventDto)) {
+            sailingServiceWrite.updateEvent(eventDto, new AsyncCallback<EventDTO>() {
+                
+                @Override
+                public void onSuccess(EventDTO eventDto) {
+                    setEventDto(eventDto);
+                    // TODO: translate
+                    Notification.notify("Updated event successfully.", NotificationType.SUCCESS);
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    // TODO: translate
+                    Notification.notify("Error -> Video not added. Error: " + caught.getMessage(), NotificationType.ERROR);
+                    logger.log(Level.SEVERE, "Cannot update event. Video not added.", caught);
+                }
+            });
+        }
     }
 
 }
