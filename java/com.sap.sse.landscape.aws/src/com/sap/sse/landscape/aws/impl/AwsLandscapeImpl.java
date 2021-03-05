@@ -340,7 +340,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
         return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
                 tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(), tg.port(), tg.healthCheckProtocol(),
-                        tg.healthCheckPort()==null?null:Integer.valueOf(tg.healthCheckPort()), tg.healthCheckPath()));
+                                             tg.healthCheckPort()==null?null:tg.healthCheckPort().equals("traffic-port") ?
+                                                     tg.port() : Integer.valueOf(tg.healthCheckPort()),
+                                             tg.healthCheckPath()));
     }
 
     @Override
@@ -1232,7 +1234,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 resourceRecordSetsRequestBuilder.hostedZoneId(hostedZone.id());
                 if (resourceRecordSetsResponse != null) {
                     assert resourceRecordSetsResponse.isTruncated();
-                    resourceRecordSetsRequestBuilder.startRecordIdentifier(resourceRecordSetsResponse.nextRecordIdentifier());
+                    resourceRecordSetsRequestBuilder.startRecordName(resourceRecordSetsResponse.nextRecordName());
                 }
                 resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
                 for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
