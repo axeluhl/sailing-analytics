@@ -14,6 +14,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources;
+import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class GalleryImageHolder extends Composite implements HasClickHandlers {
@@ -37,6 +40,9 @@ public class GalleryImageHolder extends Composite implements HasClickHandlers {
 
     public GalleryImageHolder(ImageDTO image, ClickHandler deleteHandler) {
         initWidget(uiBinder.createAndBindUi(this));
+        SharedResources.INSTANCE.mainCss().ensureInjected();
+        MediaPageResources.INSTANCE.css().ensureInjected();
+        SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         this.imageSourceRef = image.getSourceRef();
         this.imageCreateAt = image.getCreatedAtDate();
         deleteAnchor.addClickHandler(deleteHandler);

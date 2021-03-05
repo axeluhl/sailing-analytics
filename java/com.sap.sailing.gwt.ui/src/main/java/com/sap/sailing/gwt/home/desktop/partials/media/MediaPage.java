@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
-import com.sap.sailing.gwt.ui.shared.ManageMediaContainer;
+import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
@@ -45,7 +45,7 @@ public class MediaPage extends Composite {
     private Logger logger = Logger.getLogger(this.getClass().getName());
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
     
-    private final ManageMediaContainer container;
+    private final ManageMediaModel manageMediaModel;
 
     interface MediaPageUiBinder extends UiBinder<Widget, MediaPage> {
     }
@@ -136,9 +136,9 @@ public class MediaPage extends Composite {
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
         DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(video -> {
-            container.addVideo(video, eventDto -> updateMedia());
+            manageMediaModel.addVideo(video, eventDto -> updateMedia());
         }, image -> {
-            container.addImage(image, eventDto -> updateMedia());
+            manageMediaModel.addImage(image, eventDto -> updateMedia());
         });
         popupHolder.add(popup);
         popup.center();
@@ -147,7 +147,7 @@ public class MediaPage extends Composite {
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, UUID eventId) {
         SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         MediaPageResources.INSTANCE.css().ensureInjected();
-        container = new ManageMediaContainer(sailingServiceWrite, userService, eventId);
+        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventId);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
@@ -156,21 +156,21 @@ public class MediaPage extends Composite {
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
-            container.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+            manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
         });
     }
     
     public void setMedia(final MediaDTO media) {
-        container.setVideos(media.getVideos());
-        container.setImages(media.getPhotos());
+        manageMediaModel.setVideos(media.getVideos());
+        manageMediaModel.setImages(media.getPhotos());
         updateMedia();
     }
     
     private void updateMedia() {
-        container.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+        manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
         logger.info("updateMedia");
         Widget mediaUi = uiBinder.createAndBindUi(this);
-        int photosCount = container.getImages().size();
+        int photosCount = manageMediaModel.getImages().size();
         photoListOuterBoxUi.clear();
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
@@ -200,7 +200,7 @@ public class MediaPage extends Composite {
                 break;
             }
 
-            for (final ImageDTO holder : container.getImages()) {
+            for (final ImageDTO holder : manageMediaModel.getImages()) {
                 if (holder.getSourceRef() != null) {
 
                     GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
@@ -212,7 +212,7 @@ public class MediaPage extends Composite {
                         @Override
                         public void onClick(ClickEvent event) {
                             if (!managePhotos) {
-                                Collection<SailingImageDTO> sailingImageDTOs = container.getImages().stream().map(imageDto -> {
+                                Collection<SailingImageDTO> sailingImageDTOs = manageMediaModel.getImages().stream().map(imageDto -> {
                                     if (imageDto instanceof SailingImageDTO) {
                                         return (SailingImageDTO) imageDto;
                                     }
@@ -228,7 +228,7 @@ public class MediaPage extends Composite {
                 }
             }
         }
-        int videoCount = container.getVideos().size();
+        int videoCount = manageMediaModel.getVideos().size();
         videosListUi.clear();
         if (videoCount > 0) {
             videoSectionUi.getStyle().clearDisplay();
@@ -242,7 +242,7 @@ public class MediaPage extends Composite {
                 videoListOuterBoxUi.addClassName(res.mediaCss().large3());
             }
             boolean first = true;
-            for (final VideoDTO videoCandidateInfo : container.getVideos()) {
+            for (final VideoDTO videoCandidateInfo : manageMediaModel.getVideos()) {
                 if (first) {
                     putVideoOnDisplay(videoCandidateInfo, false);
                     first = false;
@@ -274,7 +274,7 @@ public class MediaPage extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm("Do you really want to delete the video")) {
-                    container.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
+                    manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
                     
                 }
             }
@@ -289,7 +289,7 @@ public class MediaPage extends Composite {
                 event.stopPropagation();
                 // TODO: translation
                 if (Window.confirm("Do you really want to delete the image")) {
-                    container.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
+                    manageMediaModel.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
                 }
             }
         };
