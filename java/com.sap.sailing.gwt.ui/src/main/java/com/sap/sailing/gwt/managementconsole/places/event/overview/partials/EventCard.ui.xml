@@ -7,7 +7,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     
     <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large4} {local_res.style.eventCardPanel}">
-        <div ui:field="card" class="{app_res.style.card}" >
+        <div ui:field="card" class="{app_res.style.card} {local_res.style.customTeaser}" >
             <div ui:field="container" class="{local_res.style.eventCardContent} {app_res.style.cardContent}">
                 <div class="{app_res.style.flexContainer}">
                     <div class="{app_res.style.flexItemAutoWidth}">

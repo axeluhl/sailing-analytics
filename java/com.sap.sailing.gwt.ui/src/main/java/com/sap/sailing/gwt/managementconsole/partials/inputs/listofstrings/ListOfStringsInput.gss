@@ -1,13 +1,13 @@
-.delete-wrapper {
+div.delete-wrapper {
     float: right; 
     text-align: right;
 }
-.anchor-wrapper {
+div.anchor-wrapper {
     padding: 0;
 }
-.text-input-wrapper {
+div.text-input-wrapper {
     float: left; 
 }
-.text-input {
+input.text-input {
     margin-bottom: 1em;
 }

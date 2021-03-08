@@ -45,12 +45,10 @@ public class EventCard extends Composite {
 
         final String venue = ofNullable(event.venue).map(Named::getName).orElse("-");
         final String time = formatDateRange(event.startDate, event.endDate);
-        this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
+        this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));  
 
-        ofNullable(event.getTeaserImage()).map(ImageDTO::getSourceRef).ifPresent(imageUrl -> {
-            this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')");
-            this.card.addClassName(local_res.style().customTeaser());
-        });
+        ofNullable(event.getTeaserImage()).map(ImageDTO::getSourceRef).ifPresent(
+                imageUrl -> this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')"));
 
         Event.sinkEvents(card, Event.ONCLICK);
         Event.setEventListener(card, e -> presenter.navigateToEvent(event));

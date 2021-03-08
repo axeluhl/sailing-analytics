@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.HasValue;
 
-public class DeletableTextInput extends Composite implements HasValue<String>, HasEnabled {
+class DeletableTextInput extends Composite implements HasValue<String>, HasEnabled {
 
     interface DeletableTextInputUiBinder extends UiBinder<HTMLPanel, DeletableTextInput> {}
     private static DeletableTextInputUiBinder uiBinder = GWT.create(DeletableTextInputUiBinder.class);
@@ -33,7 +33,7 @@ public class DeletableTextInput extends Composite implements HasValue<String>, H
     
     private Consumer<DeletableTextInput> onRemove;
     
-    public DeletableTextInput(String value, boolean notDeletable, Consumer<DeletableTextInput> onRemove) {
+    DeletableTextInput(String value, boolean notDeletable, Consumer<DeletableTextInput> onRemove) {
         this(value);
         this.onRemove = onRemove;
         if (notDeletable) {

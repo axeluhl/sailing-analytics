@@ -29,11 +29,11 @@ public class ListOfStringsInput extends Composite implements HasValue<List<Strin
     Anchor addAnchor;
     
     private boolean enabled = true;
-    
-    List<DeletableTextInput> textInputs = new ArrayList<>();
+    private List<DeletableTextInput> textInputs = new ArrayList<>();
 
     public ListOfStringsInput() {
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.style().ensureInjected();
         addInput(false);
         addAnchor.addClickHandler(e -> addInput());
     }
