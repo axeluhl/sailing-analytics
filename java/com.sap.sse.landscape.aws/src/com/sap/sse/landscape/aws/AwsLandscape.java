@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -8,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -47,6 +49,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -358,9 +361,11 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
 
-    CompletableFuture<Iterable<TargetGroup<ShardingKey>>> getTargetGroupsAsync(Region region);
+    CompletableFuture<Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> getTargetGroupsAsync(Region region);
 
-    CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(Region region);
+    CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(Region region, TargetGroup<ShardingKey> targetGroup);
+
+    CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> getLoadBalancerListenerRulesAsync(Region region);
 
     CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(Region region);
     
