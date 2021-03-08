@@ -243,4 +243,8 @@ public class SshKeyManagementPanel extends VerticalPanel {
             });
         }
     }
+
+    public SSHKeyPairDTO getSelectedKeyPair() {
+        return sshKeyTable.getSelectionModel().getSelectedObject();
+    }
 }

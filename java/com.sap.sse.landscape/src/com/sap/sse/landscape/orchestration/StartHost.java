@@ -26,6 +26,7 @@ implements Procedure<ShardingKey> {
     extends Procedure.Builder<BuilderT, T, ShardingKey> {
         BuilderT setImageType(String imageType);
         BuilderT setMachineImage(MachineImage machineImage);
+        MachineImage getMachineImage();
     }
     
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, HostT>,
@@ -36,7 +37,8 @@ implements Procedure<ShardingKey> {
         private MachineImage machineImage;
         private String imageType;
         
-        protected MachineImage getMachineImage() {
+        @Override
+        public MachineImage getMachineImage() {
             return machineImage == null ? getLandscape().getLatestImageWithType(getRegion(), getImageType()) : machineImage;
         }
 

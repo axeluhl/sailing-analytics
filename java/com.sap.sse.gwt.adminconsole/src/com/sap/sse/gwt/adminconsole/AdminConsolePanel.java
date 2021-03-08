@@ -371,7 +371,8 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         return () -> {
             boolean permitted = false;
             for (WildcardPermission requiredPermission : requiresAnyOfThesePermissions) {
-                if (userService.hasCurrentUserAnyPermission(requiredPermission, null)) {
+                // TODO for permissions with no wildcards in part 3 (object ID) we could request the ownership from the server...
+                if (userService.hasCurrentUserAnyPermission(requiredPermission, /* ownership */ null)) {
                     permitted = true;
                     break;
                 }

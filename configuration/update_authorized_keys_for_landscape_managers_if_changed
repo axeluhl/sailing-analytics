@@ -1,6 +1,7 @@
 #!/bin/bash
 BEARER_TOKEN="$1"
 BASE_URL="$2"
+LOGON_USER_HOME="$3"
 LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys
 # Uncomment the following for production use, with no error output
 last_change_millis=$( curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null | jq -r '."timePointOfLastChangeOfSetOfLandscapeManagers-millis"' )
@@ -15,6 +16,6 @@ else
 fi
 if [ ${PREVIOUS_CHANGE} -lt ${last_change_millis} ]; then
   logger -t sailing "New SSH key changes for landscape managers (${last_change_millis} newer than ${PREVIOUS_CHANGE})"
-  update_authorized_keys_for_landscape_managers "${BEARER_TOKEN}" "${BASE_URL}"
+  update_authorized_keys_for_landscape_managers "${BEARER_TOKEN}" "${BASE_URL}" "${LOGON_USER_HOME}"
 fi
 echo ${last_change_millis} >${LAST_CHANGE_FILE}

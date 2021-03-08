@@ -24,7 +24,9 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * The application version that the nodes in this replica set are currently running. During an
      * {@link #upgrade(Release)} things may temporarily seem inconsistent.
      */
-    Release getVersion();
+    default Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getMaster().getVersion(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
     
     /**
      * Upgrades this replica set to a new version. Things may temporarily seem inconsistent; e.g., a master

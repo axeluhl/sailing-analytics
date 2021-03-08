@@ -54,20 +54,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.felix.shell"
-         download-size="0"
-         install-size="0"
-         version="1.4.3"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.shell.remote"
-         download-size="0"
-         install-size="0"
-         version="1.1.2"
-         unpack="false"/>
-
-   <plugin
          id="lz4-java"
          download-size="0"
          install-size="0"

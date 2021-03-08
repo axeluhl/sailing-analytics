@@ -151,19 +151,19 @@ More variables are available, and some variables---if not set in the environment
     The address to use in the "From:" header field when the application sends e-mail.
 
 * `MAIL_SMTP_HOST`
-    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    The SMTP host to use for sending e-mail. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
     
 * `MAIL_SMTP_PORT`
-    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    The SMTP port to use for sending e-mail. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_AUTH`
-    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`.
+    `true` or `false`; defaults to `false` and tells whether or not to authenticate a user to the SMTP server using the `MAIL_SMTP_USER` and `MAIL_SMTP_PASSWORD` variables. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration and hence defaults this variable to `true`. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_USER`
-    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    Username for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `MAIL_SMTP_PASSWORD`
-    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/home/sailing/servers/server/configuration/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration.
+    Password for SMTP authentication; used if `MAIL_SMTP_AUTH` is `true`. The standard image has a pre-defined file under `/root/mail.properties` which contains credentials and configuration for our standard Amazon Simple Email Service (AWS SES) configuration. It is copied to the `configuration/` folder of a default server process installed during start-up by the `sailing` init script.
 
 * `EVENT_ID`
     Used to specify one or more UUIDs of events for which to create a reverse proxy mapping in `/etc/httpd/conf.d/${SERVER_NAME}.conf`. If only a single event ID is specified, as in ``EVENT_ID=34ebf96f-594b-4948-b9ea-e6074107b3e0`` then the `${EVENT_HOSTNAME}` is used as the hostname, or if `EVENT_HOSTNAME` is not specified, defaulting to `${SERVER_NAME}.sapsailing.com`, and a mapping using the `Event-SSL` macro is performed. The variable can also be used in Bash Array notation to specify more than one event ID, as in ``EVENT_ID[0]=34ebf96f-594b-4948-b9ea-e6074107b3e0`` and then ``EVENT_HOSTNAME[0]=...`` would specify the corresponding hostname (again defaulting to `${SERVER_NAME}.sapsailing.com`), followed by ``EVENT_ID[1]=...`` and then optionally ``EVENT_HOSTNAME[1]=...``, and so on. If neither `EVENT_ID` nor `SERIES_ID` is specified, a default reverse proxy mapping for the server process will be created using the `Home-SSL` macro which redirects requests for the base URL (`${SERVER_NAME}.sapsailing.com`) to the `/gwt/Home.html` entry point. 

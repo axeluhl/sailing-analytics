@@ -2558,7 +2558,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         SpeedWithBearingDTO speedWithBearing = lastFix.speedWithBearing;
         if (speedWithBearing == null) {
-            // TODO should we show the boat at all?
             speedWithBearing = new SpeedWithBearingDTO(0, 0);
         }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
@@ -2568,9 +2567,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
-
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsSignedDecimalDegrees()));
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
-
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
@@ -2602,7 +2601,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
-
         // If a metric is shown a click on any competitor / competitors tail will
         // add them to the selection effectively showing the metric on their tail.
         if (selectedDetailType != null) {

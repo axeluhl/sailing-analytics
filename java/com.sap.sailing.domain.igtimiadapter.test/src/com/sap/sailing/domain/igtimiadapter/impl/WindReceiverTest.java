@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
@@ -39,7 +41,7 @@ public class WindReceiverTest {
         IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
-            public void windDataReceived(Wind wind, String deviceSerialNumber) {
+            public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
                 windReceived.add(wind);
             }
         });
@@ -77,7 +79,7 @@ public class WindReceiverTest {
         IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
-            public void windDataReceived(Wind wind, String deviceSerialNumber) {
+            public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
                 windReceived.add(wind);
             }
         });
@@ -119,7 +121,7 @@ public class WindReceiverTest {
         IgtimiWindReceiver receiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         receiver.addListener(new IgtimiWindListener() {
             @Override
-            public void windDataReceived(Wind wind, String deviceSerialNumber) {
+            public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
                 windReceived.put(deviceSerialNumber, wind);
             }
         });

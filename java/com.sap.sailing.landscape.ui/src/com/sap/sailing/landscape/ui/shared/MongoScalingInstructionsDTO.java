@@ -3,18 +3,17 @@ package com.sap.sailing.landscape.ui.shared;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.common.Util.Pair;
 
 public class MongoScalingInstructionsDTO implements IsSerializable {
     private String replicaSetName;
-    private Set<Pair<String, Integer>> hostnamesAndPortsToShutDown;
+    private Set<MongoProcessDTO> hostnamesAndPortsToShutDown;
     private MongoLaunchParametersDTO launchParameters;
 
     @Deprecated
     MongoScalingInstructionsDTO() {
     } // for GWT RPC serialization only
 
-    public MongoScalingInstructionsDTO(String replicaSetName, Set<Pair<String, Integer>> hostnamesAndPortsToShutDown,
+    public MongoScalingInstructionsDTO(String replicaSetName, Set<MongoProcessDTO> hostnamesAndPortsToShutDown,
             MongoLaunchParametersDTO launchParameters) {
         super();
         this.replicaSetName = replicaSetName;
@@ -26,7 +25,7 @@ public class MongoScalingInstructionsDTO implements IsSerializable {
         return replicaSetName;
     }
 
-    public Set<Pair<String, Integer>> getHostnamesAndPortsToShutDown() {
+    public Set<MongoProcessDTO> getHostnamesAndPortsToShutDown() {
         return hostnamesAndPortsToShutDown;
     }
 

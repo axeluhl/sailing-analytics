@@ -9,8 +9,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.parser.ParseException;
+
 import com.jcraft.jsch.ChannelSftp;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -24,6 +30,12 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
+    
+    @FunctionalInterface
+    public static interface ApplicationProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+        ProcessT createApplicationProcess(String instanceId, AvailabilityZone availabilityZone,
+                Landscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, Host> processFactoryFromHostAndServerDirectory);
+    }
     
     /**
      * @param releaseRepository
@@ -88,7 +100,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
-     * @param optionalKeyName TODO
      */
     String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
@@ -117,14 +128,19 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     }
     
     default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
-        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+        return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
     }
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
-        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
+        final int port = getPort();
+        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
+
+    Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException, Exception;
 }

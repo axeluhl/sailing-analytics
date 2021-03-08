@@ -155,7 +155,6 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
             RaceBoardPerspectiveLifecycle raceLifeCycle, Iterable<DetailType> availableDetailTypes, RaceboardContextDefinition raceboardContextDefinition) {
         final Timer timer = new Timer(PlayModes.Replay, 1000l);
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
-
         final RaceWithCompetitorsAndBoatsDTO selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
@@ -173,7 +172,6 @@ public class RaceBoardEntryPoint extends AbstractSailingReadEntryPoint implement
                 createSailingServiceWriteInstance() /* create write instance for later admin usage */,
                 raceboardContextDefinition);
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
-
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);
             raceBoardMode.getMode().addInitializationFinishedRunner(

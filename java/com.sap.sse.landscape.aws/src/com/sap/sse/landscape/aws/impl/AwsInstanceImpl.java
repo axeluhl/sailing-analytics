@@ -40,11 +40,13 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private static final String ROOT_USER_NAME = "root";
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
+    private final InetAddress privateAddress;
     private final AwsLandscape<ShardingKey> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, AwsLandscape<ShardingKey> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
+        this.privateAddress = privateAddress;
         this.landscape = landscape;
     }
     
@@ -64,6 +66,11 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private Instance getInstance() {
         return landscape.getInstance(getInstanceId(), getRegion());
     }
+    
+    @Override
+    public TimePoint getLaunchTimePoint() {
+        return TimePoint.of(getInstance().launchTime().toEpochMilli());
+    }
 
     @Override
     public InetAddress getPublicAddress() {
@@ -77,12 +84,12 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     
     @Override
     public InetAddress getPrivateAddress() {
-        return getIpAddress(Instance::privateIpAddress);
+        return privateAddress;
     }
     
     @Override
     public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPrivateAddress);
+        return getPrivateAddress();
     }
 
     private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
@@ -149,6 +156,9 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {
         final String keyName = optionalKeyName.orElseGet(()->getInstance().keyName()); // the SSH key pair name that can be used to log on
         final SSHKeyPair keyPair = landscape.getSSHKeyPair(getRegion(), keyName);
+        if (keyPair == null) {
+            throw new IllegalStateException("Couldn't find key pair "+keyName+" in landscape.");
+        }
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
         jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase), keyPair.getPublicKey(), /* passphrase */ null);
@@ -194,6 +204,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         logger.info(
                 "Creating SSH "+channelType+" channel for SSH user "+sshUserName+
+                " with key "+optionalKeyName+
                 " to instance with ID "+getInstanceId());
         Channel result;
         try {
