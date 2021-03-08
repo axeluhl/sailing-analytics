@@ -98,8 +98,8 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
 
     /**
      * For hashing, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
-     * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
-     * are hashed.
+     * possible tenant qualifier, the {@link SecurityUser#getName() user name} of a possible user qualifier, as well as
+     * the {@link AbstractRole#transitive transitive flag} are hashed.
      */
     @Override
     public int hashCode() {
@@ -108,13 +108,14 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
         result = prime * result + ((qualifiedForTenant == null) ? 0 : qualifiedForTenant.getId().hashCode());
         result = prime * result + ((qualifiedForUser == null) ? 0 : qualifiedForUser.getName().hashCode());
         result = prime * result + ((roleDefinition == null) ? 0 : roleDefinition.hashCode());
+        result = prime * result + ((transitive == null) ? 0 : transitive.hashCode());
         return result;
     }
 
     /**
-     * For equality, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
-     * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
-     * are compared.
+     * For equality, the {@link RoleDefinition role definition}, the {@link Tenant#getId() tenant ID} of a possible
+     * tenant qualifier, the {@link SecurityUser#getName() user name} of a possible user qualifier, aswell as the
+     * {@link AbstractRole#transitive transitive flag} are compared.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -146,6 +147,11 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
             if (other.roleDefinition != null)
                 return false;
         } else if (!roleDefinition.equals(other.roleDefinition))
+            return false;
+        if (transitive == null) {
+            if (other.transitive != null)
+                return false;
+        } else if (!transitive.equals(other.transitive))
             return false;
         return true;
     }
