@@ -34,5 +34,10 @@ public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterab
         super(all, filtered, stringMessages);
         insert(label, 0);
     }
-    
+
+    public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, final ListDataProvider<T> filtered,
+            StringMessages stringMessages, String filterCheckboxLabel) {
+        super(all, filtered, stringMessages, filterCheckboxLabel);
+        insert(label, 0);
+    }
 }

@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseBaseJsonSerializer implements JsonSerializer<CourseBase> {
     public static final String FIELD_NAME = "name";

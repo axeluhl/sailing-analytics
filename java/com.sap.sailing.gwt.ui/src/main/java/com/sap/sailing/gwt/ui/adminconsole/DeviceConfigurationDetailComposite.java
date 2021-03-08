@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.racelog.AuthorPriority;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.client.EventsProvider;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
@@ -90,21 +90,17 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private RegattaConfigurationDTO currentRegattaConfiguration;
     private final UserService userService;
 
-    private final EventsProvider eventsProvider;
-
     public static interface DeviceConfigurationFactory {
         void obtainAndSetNameForConfigurationAndAdd(final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd);
         void update(DeviceConfigurationWithSecurityDTO configurationToUpdate);
     }
 
-    public DeviceConfigurationDetailComposite(EventsProvider eventsProvider, SailingServiceWriteAsync sailingServiceWrite,
-            UserService userService, ErrorReporter errorReporter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
+    public DeviceConfigurationDetailComposite(Presenter presenter, StringMessages stringMessages, final DeviceConfigurationFactory callbackInterface) {
         this.eventsById = new HashMap<>();
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         this.currentRegattaConfiguration = null;
-        this.eventsProvider = eventsProvider;
         priorityListBox = createPriorityListBox();
         courseAreaListBox = new ListBox();
         courseAreaListBox.addChangeHandler(e->markAsDirty(true));
@@ -144,9 +140,9 @@ public class DeviceConfigurationDetailComposite extends Composite {
         verticalPanel.add(actionPanel);
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
-        setConfiguration(null);
-        this.userService = userService;
-        fillEventListBox();
+        setConfiguration(/* configuration to display */ null);
+        this.userService = presenter.getUserService();
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(eventDTOs->fillEvents(eventDTOs));
     }
 
     private ListBox createPriorityListBox() {
@@ -158,16 +154,12 @@ public class DeviceConfigurationDetailComposite extends Composite {
         return result;
     }
 
-    /**
-     * Obtains those events the user can UPDATE and presents them in the {@link #eventListBox} such that the visible string is
-     * the event's name and the 
-     */
-    private void fillEventListBox() {
+    private void fillEvents(Iterable<EventDTO> events) {
         eventListBox.clear();
         eventsById.clear();
         eventListBox.addItem(stringMessages.selectSailingEvent(), "");
         final List<EventDTO> eventsSortedByName = new ArrayList<>();
-        Util.addAll(eventsProvider.getAllEvents(), eventsSortedByName);
+        Util.addAll(events, eventsSortedByName);
         Collections.sort(eventsSortedByName, (e1, e2)->{
             int result = e1.getName().compareTo(e2.getName());
             if (result == 0) {
@@ -218,7 +210,6 @@ public class DeviceConfigurationDetailComposite extends Composite {
 
     private void setupUi(DeviceConfigurationWithSecurityDTO config) {
         clearUi();
-        fillEventListBox();
         this.originalConfiguration = config;
         this.currentRegattaConfiguration = config.regattaConfiguration;
         setupGeneral();

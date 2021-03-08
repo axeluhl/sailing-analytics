@@ -49,7 +49,7 @@ public class UserGroupManagementPanelPO extends PageArea {
     public void selectGroup(String name) {
         final CellTablePO<DataEntryPO> table = getUserGroupTable();
         final DataEntryPO findUser = findGroup(name);
-        if(findUser != null) {
+        if (findUser != null) {
             table.selectEntry(findUser);
         }
     }

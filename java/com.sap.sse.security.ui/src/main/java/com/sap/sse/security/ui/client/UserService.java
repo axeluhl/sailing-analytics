@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,21 @@ public class UserService {
         allKnownHasPermissions = new HashSet<>();
         crossDomainStorage = new DelegatingCrossDomainStorageFuture();
         initializeCrossDomainStorage();
-        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
+        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions); // to start with...
+        // ...but the server may know more because HasPermissionsProviders can register in the OSGi registry
+        // dynamically, and the SecurityService exposes the results:
+        userManagementService.getAllHasPermissions(new AsyncCallback<ArrayList<HasPermissions>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log("Error trying to obtain secured types: "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<HasPermissions> result) {
+                GWT.log("Loaded secured types "+result);
+                allKnownHasPermissions.addAll(result);
+            }
+        });
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
@@ -500,10 +515,6 @@ public class UserService {
         return anonymousUser;
     }
     
-    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
-        Util.addAll(hasPermissions, allKnownHasPermissions);
-    }
-
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
@@ -522,10 +533,7 @@ public class UserService {
     }
 
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
-        if (!hasServerPermission(ServerActions.CREATE_OBJECT)) {
-            return false;
-        }
-        return hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
+        return hasServerPermission(ServerActions.CREATE_OBJECT) && hasCurrentUserPermissionToCreateObjectOfTypeWithoutServerCreateObjectPermissionCheck(type);
     }
     
     public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
@@ -541,5 +549,4 @@ public class UserService {
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
     }
-
 }

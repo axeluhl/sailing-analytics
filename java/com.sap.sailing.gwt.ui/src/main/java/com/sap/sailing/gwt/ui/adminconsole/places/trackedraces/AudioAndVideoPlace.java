@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.trackedraces;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class AudioAndVideoPlace extends AbstractTrackedRacesPlace {
-    
-    public AudioAndVideoPlace() {
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
+
+public class AudioAndVideoPlace extends AbstractFilterablePlace {
+    public AudioAndVideoPlace(String token) {
+        super(token);
     }
     
-    public static class Tokenizer implements PlaceTokenizer<AudioAndVideoPlace> {
+    public static class Tokenizer extends TablePlaceTokenizer<AudioAndVideoPlace> {      
         @Override
-        public String getToken(final AudioAndVideoPlace place) {
-            return "";
-        }
-
-        @Override
-        public AudioAndVideoPlace getPlace(final String token) {
-            return new AudioAndVideoPlace();
+        protected Function<String, AudioAndVideoPlace> getPlaceFactory() {
+            return AudioAndVideoPlace::new;
         }
     }
-    
 }

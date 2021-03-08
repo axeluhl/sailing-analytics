@@ -13,11 +13,11 @@ import com.sap.sailing.domain.common.orc.OwnMaxImpliedWind;
 import com.sap.sailing.domain.common.orc.impl.FixedSpeedImpliedWindSourceImpl;
 import com.sap.sailing.domain.common.orc.impl.OtherRaceAsImpliedWindSourceImpl;
 import com.sap.sailing.domain.common.orc.impl.OwnMaxImpliedWindImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.ImpliedWindSourceSerializer;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class ImpliedWindSourceDeserializer implements JsonDeserializer<ImpliedWindSource> {
     private static final Logger logger = Logger.getLogger(ImpliedWindSourceDeserializer.class.getName());

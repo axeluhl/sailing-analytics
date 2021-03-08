@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class RemoteServerInstancesPlace extends AbstractAdvancedPlace {
-    
-    public RemoteServerInstancesPlace() { 
-    }
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
-    public static class Tokenizer implements PlaceTokenizer<RemoteServerInstancesPlace> {
-        @Override
-        public String getToken(final RemoteServerInstancesPlace place) {
-            return "";
-        }
-
-        @Override
-        public RemoteServerInstancesPlace getPlace(final String token) {
-            return new RemoteServerInstancesPlace();
-        }
+public class RemoteServerInstancesPlace extends AbstractFilterablePlace {
+    public RemoteServerInstancesPlace(String token) {
+        super(token);
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<RemoteServerInstancesPlace> {      
+        @Override
+        protected Function<String, RemoteServerInstancesPlace> getPlaceFactory() {
+            return RemoteServerInstancesPlace::new;
+        }
+    }
 }

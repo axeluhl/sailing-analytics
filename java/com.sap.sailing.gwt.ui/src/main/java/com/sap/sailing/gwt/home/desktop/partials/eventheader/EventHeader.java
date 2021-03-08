@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.desktop.partials.sharing.EventHeaderSharingButtons;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
@@ -61,7 +61,7 @@ public class EventHeader extends Composite {
     @UiField DivElement eventCategory;
     @UiField DivElement courseAreaUi;
     @UiField FlowPanel dropdownContent;
-    @UiField SharingButtons sharing;
+    @UiField EventHeaderSharingButtons sharing;
     @UiField DataByLogo dataByLogo;
 
     private EventViewDTO event;

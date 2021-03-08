@@ -23,13 +23,17 @@ import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
@@ -38,15 +42,20 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.StartMongoDBServer;
+import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
+import com.sap.sse.landscape.mongodb.MongoReplicaSet;
+import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
 import software.amazon.awssdk.regions.Region;
@@ -67,15 +76,22 @@ import software.amazon.awssdk.services.route53.model.RRType;
 public class TestProcedures {
     private static final Logger logger = Logger.getLogger(TestProcedures.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
-    private AwsLandscape<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> landscape;
+    private AwsLandscape<String> landscape;
     private AwsRegion region;
     private final static String MAIL_SMTP_PASSWORD = "mail.smtp.password";
     private final static String SECURITY_SERVICE_REPLICATION_BEARER_TOKEN = "security.service.replication.bearer.token";
     private String securityServiceReplicationBearerToken;
     private String mailSmtpPassword;
     
+    /**
+     * Used for the symmetric encryption / decryption of private SSH keys. See also
+     * {@link #getDecryptedPrivateKey(SSHKeyPair, byte[])}.
+     */
+    private byte[] privateKeyEncryptionPassphrase;
+    
     @Before
     public void setUp() {
+        privateKeyEncryptionPassphrase = ("awptyf87l"+"097384sf;,57").getBytes();
         landscape = AwsLandscape.obtain();
         region = new AwsRegion(Region.EU_WEST_2);
         securityServiceReplicationBearerToken = System.getProperty(SECURITY_SERVICE_REPLICATION_BEARER_TOKEN);
@@ -83,43 +99,90 @@ public class TestProcedures {
     }
     
     @Test
-    public 
-    void testStartupEmptyMultiServerAndDeployAnotherProcess() throws Exception {
+    public void testGetImageTypes() {
+        final Iterable<String> imageTypes = landscape.getMachineImageTypes(region);
+        assertTrue(Util.contains(imageTypes, "sailing-analytics-server"));
+        assertTrue(Util.contains(imageTypes, "mongodb-server"));
+    }
+    
+    @Test
+    public void testGetMongoEndpoints() {
+        final Iterable<MongoEndpoint> mongoEndpoints = landscape.getMongoEndpoints(new AwsRegion(Region.EU_WEST_1));
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+            (mongoEndpoint instanceof MongoReplicaSet &&
+             ((MongoReplicaSet) mongoEndpoint).getName().equals("live") &&
+             Util.size(((MongoReplicaSet) mongoEndpoint).getInstances()) == 3))));
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+        (mongoEndpoint instanceof MongoReplicaSet &&
+             ((MongoReplicaSet) mongoEndpoint).getName().equals("archive") &&
+             Util.size(((MongoReplicaSet) mongoEndpoint).getInstances()) == 1)))); // unless archive restart is ongoing...
+        assertTrue(!Util.isEmpty(Util.filter(mongoEndpoints, mongoEndpoint->
+            (mongoEndpoint instanceof MongoProcess &&
+             ((MongoProcess) mongoEndpoint).getPort() == 10202))));
+    }
+    
+    @Test
+    public void testStartupEmptyMultiServerAndDeployAnotherProcess() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
-        landscape.createKeyPair(region, keyName);
+        landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
         final StartMultiServer.Builder<?, String> builder = StartMultiServer.builder();
+        final String sailingAnalyticsServerTag = "sailing-analytics-server";
         final StartMultiServer<String> startEmptyMultiServer = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
+              .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
+              .setTags(Tags.with(sailingAnalyticsServerTag, ""))
               .setOptionalTimeout(optionalTimeout)
               .build();
         try {
             // this is expected to have connected to the default "live" replica set.
             startEmptyMultiServer.run();
             final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startEmptyMultiServer.getHost();
-            final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout);
+            final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             final String result = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(result.isEmpty());
             final HttpURLConnection connection = (HttpURLConnection) new URL("http", host.getPublicAddress().getCanonicalHostName(), 80, "").openConnection();
             assertTrue(connection.getHeaderField("Server").startsWith("Apache"));
             connection.disconnect();
-            SailingAnalyticsProcess<String> processA = launchMasterOnMultiServer(host, "a");
-            SailingAnalyticsProcess<String> processB = launchMasterOnMultiServer(host, "b");
+            final String aServerName = "a";
+            SailingAnalyticsProcess<String> processA = launchMasterOnMultiServer(host, aServerName);
+            final String bServerName = "b";
+            SailingAnalyticsProcess<String> processB = launchMasterOnMultiServer(host, bServerName);
             assertTrue(processA.waitUntilReady(optionalTimeout));
             assertTrue(processB.waitUntilReady(optionalTimeout));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_PORT+1)),
                     new HashSet<>(Arrays.asList(processA.getPort(), processB.getPort())));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_TELNET_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_TELNET_PORT+1)),
-                    new HashSet<>(Arrays.asList(processA.getTelnetPortToOSGiConsole(optionalTimeout), processB.getTelnetPortToOSGiConsole(optionalTimeout))));
+                    new HashSet<>(Arrays.asList(processA.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase), processB.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase))));
             assertEquals(new HashSet<>(Arrays.asList(SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT, SailingAnalyticsApplicationConfiguration.Builder.DEFAULT_EXPEDITION_PORT+1)),
-                    new HashSet<>(Arrays.asList(processA.getExpeditionUdpPort(optionalTimeout), processB.getExpeditionUdpPort(optionalTimeout))));
-            final SshCommandChannel curlChannel = host.createRootSshChannel(optionalTimeout);
+                    new HashSet<>(Arrays.asList(processA.getExpeditionUdpPort(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase), processB.getExpeditionUdpPort(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase))));
+            final SshCommandChannel curlChannel = host.createRootSshChannel(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
             curlChannel.sendCommandLineSynchronously(
                     "curl -k -i -H \"Host: b.sapsailing.com\" \"https://127.0.0.1\"", stderr);
             final String curlOutput = curlChannel.getStreamContentsAsString();
             assertTrue(curlOutput.matches("(?ms).* 302 Found$.*"));
             assertTrue(curlOutput.replaceAll("\r", "").matches("(?ms).*^Location: https://b.sapsailing.com/gwt/Home.html$.*"));
+            // Now check if the landscape can find this "sailing-analytics-server" in the region and determine which applications it has running:
+            ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
+                    (theHost, thePort, dir, telnetPort, serverName, additionalProperties)->{
+                        try {
+                            final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                            return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName,
+                                    expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
+            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, privateIpAddress, landscape)->
+                new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress,
+                        landscape, processFactoryFromHostAndServerDirectory);
+            final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
+                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, hostSupplier, optionalTimeout, 
+                            /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
+            // expecting to find at least "a" and "b"
+            assertTrue(Util.containsAll(Util.map(replicaSets, ApplicationReplicaSet::getName), Arrays.asList(aServerName, bServerName)));
+            Util.filter(replicaSets, rs->rs.getName().equals(aServerName) || rs.getName().equals(bServerName)).forEach(rs->assertTrue(Util.isEmpty(rs.getReplicas()) && rs.getMaster() != null));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while trying to create a MongoDB replica", e);
             throw e;
@@ -145,6 +208,7 @@ public class TestProcedures {
                         SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT> builder(multiServerAppConfigBuilder);
         multiServerAppDeployerBuilder
             .setHostToDeployTo(host)
+            .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
             .setOptionalTimeout(optionalTimeout);
         multiServerAppConfigBuilder
             .setServerName(serverName)
@@ -158,11 +222,12 @@ public class TestProcedures {
     @Test
     public void testAddMongoReplica() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
-        landscape.createKeyPair(region, keyName);
-        final StartMongoDBServer.Builder<?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> builder = StartMongoDBServer.builder();
-        final StartMongoDBServer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> startMongoDBServerProcedure = builder
+        landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
+        final StartMongoDBServer.Builder<?, String, MongoProcess> builder = StartMongoDBServer.builder();
+        final StartMongoDBServer<String, MongoProcess> startMongoDBServerProcedure = builder
               .setLandscape(landscape)
               .setKeyName(keyName)
+              .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
               .setOptionalTimeout(optionalTimeout)
               .build();
         try {
@@ -186,7 +251,7 @@ public class TestProcedures {
         boolean fine = true;
         do {
             try {
-                final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout);
+                final SshCommandChannel sshChannel = mongoProcess.getHost().createSshChannel("ec2-user", optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
                 final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                         "i=0; while [ $i -lt $(echo \"rs.status().members.length\" | mongo  2>/dev/null | tail -n +5 | head -n +1) ]; do  echo \"rs.status().members[$i].stateStr\" | mongo  2>/dev/null | tail -n +5 | head -n +1; i=$((i+1)); done",
                         "stderr while trying to fetch replica set members", Level.WARNING);
@@ -202,19 +267,20 @@ public class TestProcedures {
     public void testImageUpgrade() throws Exception {
         final String keyName = "MyKey-"+UUID.randomUUID();
         // Comment the following line to get default eu-west-2 test environment; uncomment to upgrade current production images in eu-west-1
-        final AwsRegion region = new AwsRegion(Region.EU_WEST_1);
-        landscape.createKeyPair(region, keyName);
+        // final AwsRegion region = new AwsRegion(Region.EU_WEST_1);
+        landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
         final com.sap.sailing.landscape.procedures.UpgradeAmi.Builder<?, String, SailingAnalyticsProcess<String>> imageUpgradeProcedureBuilder = UpgradeAmi.builder();
         final UpgradeAmi<String> imageUpgradeProcedure =
                 imageUpgradeProcedureBuilder
                     .setLandscape(landscape)
-                    .setRegion(region)
+                    .setRegion(region) // only required in case a non-default region is used; see Landscape.getDefaultRegion()
                     .setKeyName(keyName)
+                    .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
                     .setOptionalTimeout(optionalTimeout)
                     .build();
         try {
             imageUpgradeProcedure.run();
-            final AmazonMachineImage<String, SailingAnalyticsMetrics> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
+            final AmazonMachineImage<String> upgradedAmi = imageUpgradeProcedure.getUpgradedAmi();
             assertTrue(upgradedAmi.getCreatedAt().until(TimePoint.now()).compareTo(Duration.ONE_MINUTE.times(10)) < 0);
             assertEquals(3, Util.size(upgradedAmi.getBlockDeviceMappings()));
         } catch (Exception e) {
@@ -234,7 +300,7 @@ public class TestProcedures {
     void testConnectivity() throws Exception {
         final String serverName = "test"+new Random().nextInt();
         final String keyName = "MyKey-"+UUID.randomUUID();
-        landscape.createKeyPair(region, keyName);
+        landscape.createKeyPair(region, keyName, privateKeyEncryptionPassphrase);
         SailingAnalyticsMasterConfiguration.Builder<AppConfigBuilderT, String> applicationConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         applicationConfigurationBuilder
             .setServerName(serverName)
@@ -250,7 +316,8 @@ public class TestProcedures {
                 .setRegion(region)
                 .setInstanceType(InstanceType.T3_LARGE)
                 .setKeyName(keyName)
-                .setTags(Optional.of(Tags.with("Hello", "World")))
+                .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase)
+                .setTags(Tags.with("Hello", "World"))
                 .setOptionalTimeout(optionalTimeout)
                 .build();
         startSailingAnalyticsMaster.run();
@@ -273,23 +340,22 @@ public class TestProcedures {
             // check env.sh access
             final SailingAnalyticsProcess<String> process = startSailingAnalyticsMaster.getSailingAnalyticsProcess();
             assertTrue(process.waitUntilReady(optionalTimeout));
-            final String envSh = process.getEnvSh(optionalTimeout);
+            final String envSh = process.getEnvSh(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             assertFalse(envSh.isEmpty());
             assertTrue("Couldn't find SERVER_NAME=\""+serverName+"\" in env.sh:\n"+envSh, envSh.contains("SERVER_NAME=\""+serverName+"\""));
-            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout));
+            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase));
             // Now create an ALB mapping, assuming to create the dynamic ALB:
             final String domain = "wiesen-weg.de";
             final String hostname = serverName+"."+domain;
             CreateDynamicLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics,
-                    SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
+                    SailingAnalyticsProcess<String>> createAlbProcedureBuilder = CreateDynamicLoadBalancerMapping.builder();
             createAlbProcedureBuilder
                 .setProcess(process)
                 .setHostname(hostname)
                 .setTargetGroupNamePrefix("S-ded-") // TODO when we combine procedures for launching dedicated hosts (StartSailingAnlayticsHost and specializations) then "S-ded-" should be the default; for DeployProcessOnMultiServer, "S-shared-" should be the default
                 .setLandscape(landscape);
             optionalTimeout.ifPresent(createAlbProcedureBuilder::setTimeout);
-            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, AwsInstance<String, SailingAnalyticsMetrics>> createAlbProcedure =
-                    createAlbProcedureBuilder.build();
+            final CreateDynamicLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createAlbProcedure = createAlbProcedureBuilder.build();
             try {
                 createAlbProcedure.run();
                 // A few validations:

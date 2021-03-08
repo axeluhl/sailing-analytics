@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.subscription;
 
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 
-public interface SubscriptionWriteService<P, F> extends SubscriptionService<P> {
+public interface SubscriptionWriteService<C, P, F> extends SubscriptionService<C, P> {
     /**
      * Finish checkout processing for a plan with success checkout data built from payment service provider. This is
      * place where we will setup subscription for user on payment service provider, and persist user subscription data

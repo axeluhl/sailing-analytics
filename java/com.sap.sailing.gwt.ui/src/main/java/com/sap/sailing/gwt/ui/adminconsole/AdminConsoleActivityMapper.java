@@ -4,11 +4,14 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleActivity;
-import com.sap.sse.gwt.adminconsole.AdminConsolePlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.DefaultPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 
 public class AdminConsoleActivityMapper implements ActivityMapper {
 
     private final AdminConsoleClientFactory clientFactory;
+    private AdminConsoleActivity activity;
 
     public AdminConsoleActivityMapper(AdminConsoleClientFactory clientFactory) {
         super();
@@ -17,18 +20,27 @@ public class AdminConsoleActivityMapper implements ActivityMapper {
 
     @Override
     public Activity getActivity(Place place) {
-        AdminConsoleActivity activity = null;
-        if (place instanceof AdminConsolePlace) {
-            if (AdminConsoleActivity.instantiated()) {
-                activity = AdminConsoleActivity.getInstance(clientFactory); 
-                activity.goToMenuAndTab((AdminConsolePlace)place);
+        final AbstractAdminConsolePlace defaultPlaceToSet;
+        if (place instanceof AbstractAdminConsolePlace) {
+            final AbstractAdminConsolePlace adminConsolePlace = (AbstractAdminConsolePlace) place;
+            if (activity != null) {
+                defaultPlaceToSet = null;
+                activity.goToMenuAndTab(adminConsolePlace);
+            } else {
+                defaultPlaceToSet = adminConsolePlace;
+                activity = new AdminConsoleActivity(clientFactory);
             }
-            else {
-                activity = AdminConsoleActivity.getInstance(clientFactory, (AdminConsolePlace)place); 
+        } else if (place instanceof DefaultPlace) {
+            defaultPlaceToSet = new EventsPlace((String) null /* no place token */);
+            if (activity == null) {
+                activity = new AdminConsoleActivity(clientFactory);
             }
+        } else {
+            defaultPlaceToSet = null;
         }
-      
+        if (defaultPlaceToSet != null) {
+            activity.setRedirectToPlace(defaultPlaceToSet);
+        }
         return activity;
-
     }
 }

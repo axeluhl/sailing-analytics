@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.trackedraces;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class TrackedRacesPlace extends AbstractTrackedRacesPlace {
-    
-    public TrackedRacesPlace() {   
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
+
+public class TrackedRacesPlace extends AbstractFilterablePlace {
+    public TrackedRacesPlace(String token) {
+        super(token);
     }
     
-    public static class Tokenizer implements PlaceTokenizer<TrackedRacesPlace> {
+    public static class Tokenizer extends TablePlaceTokenizer<TrackedRacesPlace> {      
         @Override
-        public String getToken(final TrackedRacesPlace place) {
-            return "";
-        }
-
-        @Override
-        public TrackedRacesPlace getPlace(final String token) {
-            return new TrackedRacesPlace();
+        protected Function<String, TrackedRacesPlace> getPlaceFactory() {
+            return TrackedRacesPlace::new;
         }
     }
-    
 }

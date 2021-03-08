@@ -1,11 +1,14 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.Optional;
+
 import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 
 /**
  * Represents an AWS Application Load Balancer (ALB). When created, a default configuration with the following
@@ -29,7 +32,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends ApplicationProcessMetrics> extends Named {
+public interface ApplicationLoadBalancer<ShardingKey> extends Named {
     /**
      * The DNS name of this load balancer; can be used, e.g., to set a CNAME DNS record pointing
      * to this load balancer.
@@ -43,6 +46,10 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
     Region getRegion();
 
     String getArn();
+    
+    default String getId() {
+        return getArn().substring(getArn().lastIndexOf('/')+1);
+    }
 
     /**
      * Application load balancer rules have a {@link Rule#priority() priority} which must be unique in the scope of a
@@ -77,7 +84,7 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
      */
     Iterable<Rule> addRulesAssigningUnusedPriorities(boolean forceContiguous, Rule... rules);
     
-    Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups();
+    Iterable<TargetGroup<ShardingKey>> getTargetGroups();
 
     /**
      * Deletes this application load balancer and all its {@link #getTargetGroups target groups}.
@@ -85,4 +92,26 @@ public interface ApplicationLoadBalancer<ShardingKey, MetricsT extends Applicati
     void delete() throws InterruptedException;
 
     void deleteListener(Listener listener);
+
+    Listener getListener(ProtocolEnum protocol);
+
+    /**
+     * {@link #createDefaultRedirectRule(String, String, Optional) Creates} or updates a default re-direct rule in this
+     * load balancer's HTTPS listener. Such a default re-direct rule is triggered by a request for the {@code hostname}
+     * with the path being {@code "/"} and sends a re-direct response to the client that replaces path and query with
+     * the values specified by the {@code path} and {@code query} parameters.
+     * 
+     * @return the {@link Rule} that represents the default re-direct
+     */
+    Rule updateDefaultRedirect(String hostname, String path, Optional<String> query);
+
+    RuleCondition createHostHeaderRuleCondition(String hostname);
+
+    /**
+     * Creates a new rule in the HTTPS listener of this load balancer. The rule fires when {@code "/"} is
+     * the path ("empty" path) and the hostname header matches the value provided by the {@code hostname}
+     * parameter. It sends a redirecting response with status code 302, redirecting to the same host, same
+     * protocol and port and the path specified by the {@code pathWithLeadingSlash} parameter.<p>
+     */
+    Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query);
 }

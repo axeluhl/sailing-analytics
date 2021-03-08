@@ -95,7 +95,7 @@
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="5.0.1.v201404251740"
+         version="9.0.0.v20201001-1419"
          unpack="false"/>
 
    <plugin

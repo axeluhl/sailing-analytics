@@ -35,12 +35,9 @@ public abstract class SecurityDTOUtil {
      *            the {@link SecurityService} to determine access control list and ownership
      * @param securedObject
      *            the {@link NamedSecuredObjectDTO} to add security information to
-     * @param objectId
-     *            the {@link QualifiedObjectIdentifier} to get security information for
      */
-    public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject,
-            final QualifiedObjectIdentifier objectId) {
-        addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, objectId, new HashMap<>(),
+    public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject) {
+        addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, new HashMap<>(),
                 new HashMap<>());
     }
 
@@ -48,24 +45,20 @@ public abstract class SecurityDTOUtil {
      * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
      * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
      * secured object DTO}.
-     * 
-     * @param securityService
-     *            the {@link SecurityService} to determine access control list and ownership
      * @param securityDTOFactory
      *            the {@link SecurityDTOFactory} to use for DTO creation
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
      * @param securedObject
      *            the {@link NamedSecuredObjectDTO} to add security information to
-     * @param objectId
-     *            the {@link QualifiedObjectIdentifier} to get security information for
      * @param fromOriginalToStrippedDownUserGroup2
      * @param fromOriginalToStrippedDownUser2
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
             final SecurityService securityService, final SecuredDTO securedObject,
-            final QualifiedObjectIdentifier objectId, Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
-            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
-        addSecurityInformation(securityDTOFactory, securityService, securedObject, objectId,
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, false);
+            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser, Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+        addSecurityInformation(securityDTOFactory, securityService, securedObject, fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup, false);
     }
 
     /**
@@ -79,15 +72,12 @@ public abstract class SecurityDTOUtil {
      * used with caution, especially in the context of one or more {@link UserDTO} instances, which themselves contain
      * ownership information. Reusing an {@link UserDTO} as user owner object might cause infinite relation paths.
      * </p>
-     * 
-     * @param securityService
-     *            the {@link SecurityService} to determine access control list and ownership
      * @param securityDTOFactory
      *            the {@link SecurityDTOFactory} to use for DTO creation
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
      * @param securedObject
      *            the {@link NamedSecuredObjectDTO} to add security information to
-     * @param objectId
-     *            the {@link QualifiedObjectIdentifier} to get security information for
      * @param fromOriginalToStrippedDownUser
      *            the {@link Map} to stripped down {@link SecurityUser user}s to use
      * @param fromOriginalToStrippedDownUserGroup
@@ -99,11 +89,10 @@ public abstract class SecurityDTOUtil {
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
             final SecurityService securityService, final SecuredDTO securedObject,
-            final QualifiedObjectIdentifier objectId,
             final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
             final boolean disablePruningForCurrentUser) {
-        final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(objectId);
+        final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(securedObject.getIdentifier());
         AccessControlListDTO accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup);
@@ -121,7 +110,7 @@ public abstract class SecurityDTOUtil {
                                 allUserGroups2));
             }
         }
-        final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
+        final OwnershipAnnotation ownership = securityService.getOwnership(securedObject.getIdentifier());
         securedObject.setOwnership(
                 securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));

@@ -14,11 +14,13 @@ public class UrlDTO implements SecuredDTO {
 
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private String url; // Can't use type URL since GWT does not support java.net.*
+    private String resultProviderName;
 
     @SuppressWarnings("unused")
     private UrlDTO() { } // For GWT serialization
 
-    public UrlDTO(String url) {
+    public UrlDTO(String resultProviderName, String url) {
+        this.resultProviderName = resultProviderName;
         this.url = url;
     }
 
@@ -37,7 +39,7 @@ public class UrlDTO implements SecuredDTO {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(url));
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(resultProviderName, url));
     }
 
     @Override

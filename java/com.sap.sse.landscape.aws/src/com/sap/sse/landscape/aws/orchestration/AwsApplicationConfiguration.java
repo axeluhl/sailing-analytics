@@ -71,7 +71,7 @@ implements UserDataProvider {
     extends com.sap.sse.common.Builder<BuilderT, T> {
         BuilderT setRegion(AwsRegion region);
         
-        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape);
+        BuilderT setLandscape(AwsLandscape<ShardingKey> landscape);
         
         BuilderT setRelease(Release release);
 
@@ -115,7 +115,7 @@ implements UserDataProvider {
         private static final String DEFAULT_SMTP_HOSTNAME_PATTERN = "email-smtp.%s.amazonaws.com";
         private static final String DEFAULT_SMTP_USER = "AKIAIHCQEFAZDLIK7SUQ";
         private static final Integer DEFAULT_SMTP_PORT = 25;
-        private AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape;
+        private AwsLandscape<ShardingKey> landscape;
         private AwsRegion region;
         private Optional<Release> release = Optional.empty();
         private String serverName;
@@ -142,12 +142,12 @@ implements UserDataProvider {
         }
         
         @Override
-        public BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+        public BuilderT setLandscape(AwsLandscape<ShardingKey> landscape) {
             this.landscape = landscape;
             return self();
         }
         
-        protected AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape() {
+        protected AwsLandscape<ShardingKey> getLandscape() {
             return landscape;
         }
 
@@ -161,7 +161,7 @@ implements UserDataProvider {
 
         @Override
         public BuilderT setRelease(Release release) {
-            this.release = release == null ? Optional.empty() : Optional.of(release);
+            this.release = Optional.ofNullable(release);
             return self();
         }
 
@@ -177,6 +177,10 @@ implements UserDataProvider {
 
         protected String getDatabaseName() {
             return databaseName == null ? getServerName() : databaseName;
+        }
+        
+        protected boolean isDatabaseNameSet() {
+            return databaseName != null;
         }
         
         @Override
@@ -330,13 +334,25 @@ implements UserDataProvider {
     }
 
     private final Map<ProcessConfigurationVariable, String> userData;
+    private final String serverName;
+    private final Optional<Release> release;
     
     protected AwsApplicationConfiguration(BuilderImpl<?, ?, ShardingKey, MetricsT, ProcessT> builder) {
         this.userData = Collections.unmodifiableMap(builder.getUserData());
+        this.serverName = builder.getServerName();
+        this.release = builder.getRelease();
     }
 
     @Override
     public Map<ProcessConfigurationVariable, String> getUserData() {
         return userData;
+    }
+    
+    protected String getServerName() {
+        return serverName;
+    }
+
+    public Optional<Release> getRelease() {
+        return release;
     }
 }

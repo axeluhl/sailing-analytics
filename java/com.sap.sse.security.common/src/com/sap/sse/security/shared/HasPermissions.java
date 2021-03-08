@@ -1,5 +1,9 @@
 package com.sap.sse.security.shared;
 
+import java.util.Arrays;
+
+import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
@@ -8,17 +12,19 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
  * for updating a leaderboard then this may look like this: <code>LEADERBOARD:UPDATE:KW2017 Laser Int.</code> where
  * <code>LEADERBOARD</code> then is the {@link #name()} of this permission, {@link DefaultActions#UPDATE UPDATE} is
  * the operation mode, and <code>"KW2017 Laser Int."</code> is the object identifier that may not be unique outside
- * of the type qualifier represented by this permission ("LEADERBOARD" in the example).
+ * of the type qualifier represented by this permission ("LEADERBOARD" in the example).<p>
+ * 
+ * Equality and hash code are defined based on the {@link #getName() name}.
  *
  * @author Axel Uhl (d043530)
  *
  */
-public interface HasPermissions {
+public interface HasPermissions extends Named {
     /**
-     * Used for the first part ("type") of the permissions constructed for this object.
+     * Used for the first part ("type") of the permissions constructed for this object. Basis for equality and hash code.
      */
     String getName();
-
+    
     /**
      * @return the actions for which permissions can be defined on the logical, securable type represented by this
      *         object. Only those actions need to be accepted by methods such as {@link #getStringPermission(Action...)},
@@ -26,6 +32,14 @@ public interface HasPermissions {
      *         passed that is not contained in the array returned by this method.
      */
     Action[] getAvailableActions();
+    
+    /**
+     * The {@link Action} from {@link #getAvailableActions()} whose {@link Action#name() name} equals that provided by parameter
+     * {@code actionName}, or {@code null} if no such action exists
+     */
+    default Action getActionByName(String actionName) {
+        return Util.first(Util.filter(Arrays.asList(getAvailableActions()), action->action.name().equals(actionName)));
+    }
 
     /**
      * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their

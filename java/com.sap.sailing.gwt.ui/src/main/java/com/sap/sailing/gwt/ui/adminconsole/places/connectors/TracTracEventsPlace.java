@@ -1,22 +1,19 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class TracTracEventsPlace extends AbstractConnectorsPlace {
-    
-    public TracTracEventsPlace() { 
-    }
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
-    public static class Tokenizer implements PlaceTokenizer<TracTracEventsPlace> {
-        @Override
-        public String getToken(final TracTracEventsPlace place) {
-            return "";
-        }
-
-        @Override
-        public TracTracEventsPlace getPlace(final String token) {
-            return new TracTracEventsPlace();
-        }
+public class TracTracEventsPlace extends AbstractFilterablePlace {
+    public TracTracEventsPlace(String token) {
+        super(token);
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<TracTracEventsPlace> {      
+
+        @Override
+        protected Function<String, TracTracEventsPlace> getPlaceFactory() {
+            return TracTracEventsPlace::new;
+        }
+    }
 }

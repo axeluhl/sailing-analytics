@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform('software.amazon.awssdk:bom:2.15.57')
+    implementation platform('software.amazon.awssdk:bom:2.15.81')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:lambda'
     implementation 'software.amazon.awssdk:ec2'
@@ -13,6 +13,8 @@ dependencies {
     implementation 'software.amazon.awssdk:cloudwatch'
     implementation 'software.amazon.awssdk:elasticloadbalancingv2'
     implementation 'software.amazon.awssdk:autoscaling'
+    implementation 'software.amazon.awssdk:sts'
+    implementation 'software.amazon.awssdk:iam'
     implementation group: 'software.amazon.awssdk', name: 'sdk-core', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'arns', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'aws-core', classifier: 'sources'
@@ -27,6 +29,8 @@ dependencies {
     implementation group: 'software.amazon.awssdk', name: 'cloudwatch', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'elasticloadbalancingv2', classifier: 'sources'
     implementation group: 'software.amazon.awssdk', name: 'autoscaling', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'sts', classifier: 'sources'
+    implementation group: 'software.amazon.awssdk', name: 'iam', classifier: 'sources'
 }
 task downloadLibs(type: Copy) {
     into file('lib')

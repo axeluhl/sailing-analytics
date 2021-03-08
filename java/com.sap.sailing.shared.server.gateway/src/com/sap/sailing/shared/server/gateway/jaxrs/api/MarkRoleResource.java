@@ -16,9 +16,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.MarkRole;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkRoleJsonSerializer;
 import com.sap.sailing.shared.server.gateway.jaxrs.SharedAbstractSailingServerResource;
+import com.sap.sse.shared.json.JsonSerializer;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/v1/markroles")

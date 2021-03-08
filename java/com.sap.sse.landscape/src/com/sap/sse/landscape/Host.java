@@ -1,7 +1,6 @@
 package com.sap.sse.landscape;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
@@ -9,11 +8,12 @@ import java.util.Optional;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithID;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
-public interface Host {
+public interface Host extends WithID {
     /**
      * Obtains the public IP address of this host. Note that during the boot phase and after shutdown/termination a host
      * may not yet have such a public IP address assigned. In this case, {@code null} may be returned. To avoid this,
@@ -56,19 +56,49 @@ public interface Host {
      * output. You will usually want to use either a {@link ByteArrayInputStream} to provide a set of predefined
      * commands to sent to the server, and a {@link PipedInputStream} wrapped around a {@link PipedOutputStream} which
      * you set to the channel.
+     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
      */
-    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createSshChannel(String sshUserName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * Connects to an SSH session for the "root" user with a "shell" channel
      * 
-     * @see #createSshChannel(String, Optional)
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     * 
+     * @see #createSshChannel(String, Optional, byte[])
      */
-    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
-    
-    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    SshCommandChannel createRootSshChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException;
+    /**
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createSftpChannel(String sshUserName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    /**
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
+     * @param privateKeyEncryptionPassphrase
+     *            the pass phrase for the private key that belongs to the instance's public key used for start-up
+     */
+    ChannelSftp createRootSftpChannel(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Tells where in the cloud this host runs; the availability zone {@link AvailabilityZone#getRegion() implies} the
@@ -81,4 +111,6 @@ public interface Host {
     }
     
     Iterable<SecurityGroup> getSecurityGroups();
+
+    TimePoint getLaunchTimePoint();
 }

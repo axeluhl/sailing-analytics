@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CompetitorsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.CourseLayoutPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.TrackedRacesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
+import com.sap.sailing.landscape.ui.client.LandscapeManagementPlace;
 
 @WithTokenizers({EventsPlace.Tokenizer.class, RegattasPlace.Tokenizer.class, 
     LeaderboardsPlace.Tokenizer.class, LeaderboardGroupsPlace.Tokenizer.class, TrackedRacesPlace.Tokenizer.class, CompetitorsPlace.Tokenizer.class,
@@ -42,7 +43,8 @@ import com.sap.sailing.gwt.ui.adminconsole.places.trackedraces.WindPlace;
     ResultImportUrlsPlace.Tokenizer.class, Manage2SailRegattaStructureImportPlace.Tokenizer.class, DeviceConfigurationPlace.Tokenizer.class,
     ReplicationPlace.Tokenizer.class, MasterDataImportPlace.Tokenizer.class, RemoteServerInstancesPlace.Tokenizer.class, LocalServerPlace.Tokenizer.class,
     UserManagementPlace.Tokenizer.class, RolesPlace.Tokenizer.class, UserGroupManagementPlace.Tokenizer.class, FileStoragePlace.Tokenizer.class, 
-    MarkTemplatesPlace.Tokenizer.class, MarkPropertiesPlace.Tokenizer.class, CourseTemplatesPlace.Tokenizer.class, MarkRolesPlace.Tokenizer.class})
+    MarkTemplatesPlace.Tokenizer.class, MarkPropertiesPlace.Tokenizer.class, CourseTemplatesPlace.Tokenizer.class, MarkRolesPlace.Tokenizer.class,
+    LandscapeManagementPlace.Tokenizer.class})
 public interface AdminConsolePlaceHistoryMapper extends PlaceHistoryMapper {
 
 }

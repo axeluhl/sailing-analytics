@@ -19,12 +19,16 @@
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
-    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${applicationScope['clientConfigurationContext.whitelabeled']}.ico" />
 
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
+<<<<<<< HEAD
     <title>${SAP}Sailing Analytics Management Console</title>
+=======
+    <title>${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics Administration Console</title>
+>>>>>>> fb5307aadbc213f2cd5b9c94505ae7e8fbdd6e5d
     
     <!-- AdminConsole is not prepared to work with nomalize. -->
     <!-- <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css"> -->
@@ -38,7 +42,7 @@
     <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
     <script>
        document.clientConfigurationContext = {
-            debrandingActive: ${debrandingActive}
+            debrandingActive: ${applicationScope['clientConfigurationContext.debrandingActive']}
        };
     </script>
     <!--                                           -->
@@ -135,8 +139,13 @@
       </div>
     </noscript>
 
+<<<<<<< HEAD
     <div id="loading" class="loading">
         <p class="sapsailing">${SAP}Sailing Analytics</p>
+=======
+        <div id="loading" class="loading">
+        <p class="sapsailing">${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics</p>
+>>>>>>> fb5307aadbc213f2cd5b9c94505ae7e8fbdd6e5d
         <p class="waitmessage">Loading, please wait...</p>
         <div class="signal"></div>
     </div>

@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLogEventSerializer {
     public static final String FIELD_POSITIONED_COMPETITORS = "positionedCompetitors";

@@ -1,13 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.connectors;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
+import com.sap.sse.gwt.adminconsole.AbstractAdminConsolePlace;
 
-public class AbstractConnectorsPlace extends AbstractAdminConsolePlace {
-
-    @Override
-    public String getVerticalTabName() {
-        return AdminConsoleViewImpl.CONNECTORS;
+public abstract class AbstractConnectorsPlace extends AbstractAdminConsolePlace {
+    public AbstractConnectorsPlace(String token) {
+        super(token);
     }
-
 }

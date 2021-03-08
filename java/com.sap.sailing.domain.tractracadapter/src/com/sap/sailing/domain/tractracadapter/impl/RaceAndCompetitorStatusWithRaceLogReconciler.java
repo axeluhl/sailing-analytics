@@ -162,7 +162,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         this.raceLogResolver = raceLogResolver;
         this.tractracRace = tractracRace;
         raceLogListeners = Collections.synchronizedMap(new HashMap<>());
-        raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1);
+        raceLogEventAuthor = new LogEventAuthorImpl(getClass().getName(), 1); // equally important as race officer on water
     }
     
     public void raceLogAttached(TrackedRace trackedRace, RaceLog raceLog) {
@@ -260,6 +260,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private MaxPointsReason getMaxPointsReason(RaceCompetitorStatusType raceCompetitorStatusType) {
         MaxPointsReason result;
         switch (raceCompetitorStatusType) {
+        // TODO we expect NSC and perhaps also TLE to show up; support the mapping to MaxPointsReason.NSC / TLE, respectively when they appear
         case ABANDONED:
             result = MaxPointsReason.NONE; // TODO bug 5154: find out what ABANDONED means and if/how we can translate it to a MaxPointsReason
             break;
@@ -304,6 +305,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             break;
         case UFD:
             result = MaxPointsReason.UFD;
+            break;
+        case NSC:
+            result = MaxPointsReason.NSC;
+            break;
+        case TLE:
+            result = MaxPointsReason.TLE;
             break;
         default:
             result = MaxPointsReason.NONE;
@@ -376,7 +383,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 resultsForRaceLog.add(resultForRaceLog);
                 final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
                 defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
-                        new LogEventAuthorImpl("Official TracTrac Result Provider", 1), // equally important as race officer on water
+                        raceLogEventAuthor,
                         UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
                 logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
                         + " for competitor " + raceCompetitor + ": " + resultForRaceLog);

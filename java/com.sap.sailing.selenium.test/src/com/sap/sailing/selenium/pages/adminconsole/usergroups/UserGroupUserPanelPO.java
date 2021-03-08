@@ -11,7 +11,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.security.DataEntryWithSecurityActionsPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
-import com.sap.sailing.selenium.pages.gwt.SuggestBoxPO;
+import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class UserGroupUserPanelPO extends PageArea {
     
@@ -64,7 +64,7 @@ public class UserGroupUserPanelPO extends PageArea {
     }
 
     public void enterNewUser(String name) {
-        SuggestBoxPO.create(driver, permissionInput).appendText(name);
+        TextBoxPO.create(driver, permissionInput).appendText(name);
     }
     
     public void clickAddButtonOrThrow() {

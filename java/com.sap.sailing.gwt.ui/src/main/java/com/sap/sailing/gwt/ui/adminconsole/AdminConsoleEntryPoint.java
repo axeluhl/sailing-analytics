@@ -19,8 +19,7 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {    
-    
+public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
     private SimplePanel appWidget = new SimpleLayoutPanel();
@@ -29,26 +28,21 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
-                
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);       
         initActivitiesAndPlaces();
     }
      
     private void initActivitiesAndPlaces() {
         final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
         EventBus eventBus = clientFactory.getEventBus();
-        PlaceController placeController = clientFactory.getPlaceController();
-        
+        PlaceController placeController = clientFactory.getPlaceController();    
         AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
         ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(appWidget);
-        
         AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new EventsPlace());
-        
         RootLayoutPanel.get().add(appWidget);    
-        
         historyHandler.handleCurrentHistory();
     }
 

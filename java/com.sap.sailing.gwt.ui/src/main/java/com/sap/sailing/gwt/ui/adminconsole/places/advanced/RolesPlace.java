@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.advanced;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class RolesPlace extends AbstractAdvancedPlace {
-    
-    public RolesPlace() { 
-    }
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
-    public static class Tokenizer implements PlaceTokenizer<RolesPlace> {
-        @Override
-        public String getToken(final RolesPlace place) {
-            return "";
-        }
-
-        @Override
-        public RolesPlace getPlace(final String token) {
-            return new RolesPlace();
-        }
+public class RolesPlace extends AbstractFilterablePlace {
+    public RolesPlace(String token) {
+        super(token);
     }
     
+    public static class Tokenizer extends TablePlaceTokenizer<RolesPlace> {      
+        @Override
+        protected Function<String, RolesPlace> getPlaceFactory() {
+            return RolesPlace::new;
+        }
+    }
 }

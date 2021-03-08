@@ -5,8 +5,8 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ManeuversJsonSerializer implements JsonSerializer<Iterable<Pair<Competitor, Iterable<Maneuver>>>> {
     public final static String MANEUVERS = "maneuvers";

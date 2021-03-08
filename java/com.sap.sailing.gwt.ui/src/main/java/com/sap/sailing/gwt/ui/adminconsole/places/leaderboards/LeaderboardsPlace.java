@@ -1,22 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.leaderboards;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
+import java.util.function.Function;
 
-public class LeaderboardsPlace extends AbstractLeaderboardsPlace {
-    
-    public LeaderboardsPlace() {
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
+
+public class LeaderboardsPlace extends AbstractFilterablePlace {
+    public LeaderboardsPlace(String token) {
+        super(token);
     }
     
-    public static class Tokenizer implements PlaceTokenizer<LeaderboardsPlace> {
+    public static class Tokenizer extends TablePlaceTokenizer<LeaderboardsPlace> {      
         @Override
-        public String getToken(final LeaderboardsPlace place) {
-            return "";
+        protected Function<String, LeaderboardsPlace> getPlaceFactory() {
+            return LeaderboardsPlace::new;
         }
-
-        @Override
-        public LeaderboardsPlace getPlace(final String token) {
-            return new LeaderboardsPlace();
-        }
-    }
-    
+    }    
 }

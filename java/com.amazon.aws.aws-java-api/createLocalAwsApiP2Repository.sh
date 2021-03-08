@@ -15,6 +15,7 @@ MANIFEST_FILE="MANIFEST.MF"
 BUILD_PROPERTIES_FILE="build.properties"
 WORKSPACE=`realpath \`dirname $0\`/../..`
 UPDATE_SITE_PROJECT=${WORKSPACE}/java/com.amazon.aws.aws-java-api.updatesite
+SSE_RUNTIME_FEATURE_XML=${WORKSPACE}/java/com.sap.sse.feature.runtime/feature.xml
 FEATURE_XML=${UPDATE_SITE_PROJECT}/features/aws-sdk/feature.xml
 SITE_XML=${UPDATE_SITE_PROJECT}/site.xml
 TARGET_DEFINITION="${WORKSPACE}/java/com.sap.sailing.targetplatform/definitions/race-analysis-p2-remote.target"
@@ -110,6 +111,12 @@ mv com.amazon.aws.aws-java-api.source_${VERSION}.jar ${UPDATE_SITE_PROJECT}/plug
 cd ${UPDATE_SITE_PROJECT}
 echo "Patching update site's feature.xml..."
 sed -i -e 's/^\( *\)version="[0-9.]*"/\1version="'${VERSION}'"/' ${FEATURE_XML}
+echo "Patching com.sap.sse.feature.runtime's feature.xml..."
+NEW_SSE_RUNTIME_FEATURE_XML_CONTENT=$( cat "${SSE_RUNTIME_FEATURE_XML}" |  awk -v VERSION=${VERSION} '
+/id="com.amazon.aws.aws-java-api"/ { IN_PLUGIN="true"; }
+{ if (IN_PLUGIN=="true" && $0 ~ / *version=".*"/) { print "         version=\"" VERSION "\""; IN_PLUGIN="false"; } else print $0; }
+' )
+echo "${NEW_SSE_RUNTIME_FEATURE_XML_CONTENT}" >"${SSE_RUNTIME_FEATURE_XML}"
 echo "Patching update site's site.xml..."
 sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
@@ -118,4 +125,8 @@ echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}...
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
 echo "You can also try a Hudson build with the -v option, generating and using the local target platform during the build."
-echo "When all this works, update the P2 repository at p2.sapsailing.com using the script uploadAwsApiRepositoryToServer.sh."
+echo "In this case, start with an unpatched remote target platform (race-analysis-p2-remote.target) and an unpatched"
+echo "java/com.sap.sse.feature.runtime/feature.xml so that running this script during the Hudson build can resolve"
+echo "the target platform."
+echo "When all this works, commit and push the patched to race-analysis-p2-remote.target and feature.xml"
+echo "and update the P2 repository at p2.sapsailing.com using the script uploadAwsApiRepositoryToServer.sh."

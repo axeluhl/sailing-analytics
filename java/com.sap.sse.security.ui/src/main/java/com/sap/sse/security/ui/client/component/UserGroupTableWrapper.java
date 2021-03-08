@@ -40,9 +40,9 @@ public class UserGroupTableWrapper extends
     private final LabeledAbstractFilterablePanel<UserGroupDTO> filterField;
     private final UserService userService;
 
-    public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
-            StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
-            CellTableWithCheckboxResources tableResources, Runnable refresher) {
+    public UserGroupTableWrapper(UserService userService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean enablePager, CellTableWithCheckboxResources tableResources,
+            Runnable refresher) {
         super(stringMessages, errorReporter, /* multi selection */ true, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
             @Override
             public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
@@ -90,20 +90,16 @@ public class UserGroupTableWrapper extends
                         });
             }
         });
-
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementWriteService(), type,
                 user -> refreshUserList(null), stringMessages);
-
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementWriteService(), type, user -> user.getAccessControlList(),
                 stringMessages);
-
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openOwnershipDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
-
         filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
                 new ArrayList<UserGroupDTO>(), dataProvider, stringMessages) {
             @Override
@@ -120,7 +116,6 @@ public class UserGroupTableWrapper extends
         };
         filterField.setUpdatePermissionFilterForCheckbox(userGroup -> userService.hasPermission(userGroup, DefaultActions.UPDATE));
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
-
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());

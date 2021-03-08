@@ -36,13 +36,11 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     private TopLevelView topLevelView;
     
     public AdminConsoleClientFactoryImpl() {
-        
     }
     
     public AdminConsoleClientFactoryImpl(final SailingServiceWriteAsync sailingService) {
         this.sailingService = sailingService;
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
-            
         topLevelView = new AdminConsoleTopLevelView(eventBus);
     }
     
@@ -100,5 +98,4 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     public AcceptsOneWidget getContent() {
         return topLevelView.getContent();
     }
-   
 }

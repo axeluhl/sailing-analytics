@@ -3,7 +3,6 @@ package com.sap.sse.common.impl;
 import com.sap.sse.common.AbstractBearing;
 import com.sap.sse.common.Bearing;
 
-
 public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     private static final long serialVersionUID = -8045400378221073451L;
     private final double bearingDeg;
@@ -20,5 +19,4 @@ public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     public double getDegrees() {
         return bearingDeg;
     }
-    
 }

@@ -1,13 +1,15 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.leaderboards;
 
-import com.sap.sailing.gwt.ui.adminconsole.places.AbstractAdminConsolePlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleViewImpl;
+import java.util.Map;
 
-public class AbstractLeaderboardsPlace extends AbstractAdminConsolePlace {
+import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 
-    @Override
-    public String getVerticalTabName() {
-        return AdminConsoleViewImpl.LEADERBOARDS;
+public abstract class AbstractLeaderboardsPlace extends AbstractFilterablePlace {
+    public AbstractLeaderboardsPlace(String token) {
+        super(token);
     }
 
+    public AbstractLeaderboardsPlace(Map<String, String> paramKeysAndValues) {
+        super(paramKeysAndValues);
+    }
 }

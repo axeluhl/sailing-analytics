@@ -86,6 +86,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
+import com.sap.sailing.gwt.common.client.sharing.FloatingSharingButtonsResources;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsCallback;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
@@ -188,6 +189,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
     private MapWidget map;
+    private final Runnable shareLinkAction;
     private Collection<Runnable> mapInitializedListener;
     
     /**
@@ -494,6 +496,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
+    private final FloatingSharingButtonsResources floatingSharingButtonsResources;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -580,7 +583,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
@@ -588,9 +591,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
             StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
-            UUID leaderboardGroupId) {
+            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, Runnable shareLinkAction) {
         super(parent, context);
+        this.shareLinkAction = shareLinkAction;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
         this.showHeaderPanel = showHeaderPanel;
         this.quickFlagDataProvider = quickFlagDataProvider;
@@ -607,6 +610,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.leaderboardName = leaderboardName;
         this.leaderboardGroupName = leaderboardGroupName;
         this.leaderboardGroupId = leaderboardGroupId;
+        floatingSharingButtonsResources = FloatingSharingButtonsResources.INSTANCE;
+        floatingSharingButtonsResources.css().ensureInjected();
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -919,8 +924,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
+                if (shareLinkAction != null) {
+                    final Button shareLinkButton = createShareLinkButton(map);
+                    map.setControls(ControlPosition.RIGHT_BOTTOM, shareLinkButton);
+                }
                 if (showMapControls) {
-                    createSettingsButton(map);
+                    final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
+                    final Button settingsButton = createSettingsButton(map);
+                    settingsCotrolFlowPanel.add(settingsButton);
+                    map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 }
                 // Data has been initialized
                 RaceMap.this.redraw();
@@ -986,7 +998,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
     }
     
-    private void createSettingsButton(MapWidget map) {
+    private Button createSettingsButton(MapWidget map) {
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
         settingsButton.setStyleName("gwt-MapSettingsButton");
@@ -1000,7 +1012,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 dialog.show();
             }
         });
-        map.setControls(ControlPosition.RIGHT_TOP, settingsButton);
+        return settingsButton;
+    }
+    
+    private Button createShareLinkButton(MapWidget map) {
+        Button shareLinkButton = new Button();
+        shareLinkButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
+        shareLinkButton.addStyleName(floatingSharingButtonsResources.css().sharing_itemshare());
+        shareLinkButton.addStyleName(raceMapStyle.raceMapShareLinkButton());
+        shareLinkButton.ensureDebugId("raceMapShareLink");
+        shareLinkButton.setTitle(stringMessages.shareTheLink());
+        shareLinkButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                shareLinkAction.run();
+            }
+        });
+        return shareLinkButton;
     }
 
     private void removeTransitions() {
@@ -2516,7 +2544,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         SpeedWithBearingDTO speedWithBearing = lastFix.speedWithBearing;
         if (speedWithBearing == null) {
-            // TODO should we show the boat at all?
             speedWithBearing = new SpeedWithBearingDTO(0, 0);
         }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
@@ -2526,9 +2553,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
-
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsSignedDecimalDegrees()));
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
-
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
@@ -2560,7 +2587,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
-
         // If a metric is shown a click on any competitor / competitors tail will
         // add them to the selection effectively showing the metric on their tail.
         if (selectedDetailType != null) {
