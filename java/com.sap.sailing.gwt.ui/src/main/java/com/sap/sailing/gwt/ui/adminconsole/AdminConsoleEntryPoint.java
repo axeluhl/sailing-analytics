@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.ui.adminconsole.places.events.EventsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.DefaultPlace;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
+public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {    
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
     private SimplePanel appWidget = new SimpleLayoutPanel();
@@ -28,22 +28,21 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);       
+        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         initActivitiesAndPlaces();
     }
      
     private void initActivitiesAndPlaces() {
         final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
-        EventBus eventBus = clientFactory.getEventBus();
-        PlaceController placeController = clientFactory.getPlaceController();    
-        AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
-        ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
+        final EventBus eventBus = clientFactory.getEventBus();
+        final PlaceController placeController = clientFactory.getPlaceController();
+        final AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);
+        final ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
         activityManager.setDisplay(appWidget);
-        AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
-        PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(placeController, eventBus, new EventsPlace());
+        final AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
+        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
+        historyHandler.register(placeController, eventBus, new DefaultPlace());
         RootLayoutPanel.get().add(appWidget);    
         historyHandler.handleCurrentHistory();
     }
-
 }
