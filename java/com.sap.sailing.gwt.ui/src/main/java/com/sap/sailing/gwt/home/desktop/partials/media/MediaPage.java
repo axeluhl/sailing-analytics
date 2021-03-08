@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
 import java.util.Collection;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
@@ -41,7 +40,6 @@ import com.sap.sse.security.ui.client.UserService;
  * Desktop page to show videos and images as a gallery.
  */
 public class MediaPage extends Composite {
-    private Logger logger = Logger.getLogger(this.getClass().getName());
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
     
     private final ManageMediaModel manageMediaModel;
@@ -151,14 +149,13 @@ public class MediaPage extends Composite {
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, EventViewDTO eventViewDto) {
         MediaPageResources.INSTANCE.css().ensureInjected();
         SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
-        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto);
+        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto, i18n);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
         popupHolder = new FlowPanel();
         
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
-            logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
         });
@@ -170,7 +167,6 @@ public class MediaPage extends Composite {
     }
     
     private void updateMedia() {
-        logger.info("updateMedia");
         contentPanel.setWidget(uiBinder.createAndBindUi(this));
         setMediaManaged(manageMediaModel.hasPermissions());
         int photosCount = manageMediaModel.getImages().size();
@@ -285,7 +281,7 @@ public class MediaPage extends Composite {
             
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm("Do you really want to delete the video")) {
+                if (Window.confirm(i18n.confirmDeleteVideo())) {
                     manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
                     
                 }
@@ -299,8 +295,7 @@ public class MediaPage extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
-                // TODO: translation
-                if (Window.confirm("Do you really want to delete the image")) {
+                if (Window.confirm(i18n.confirmDeleteImage())) {
                     manageMediaModel.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
                 }
             }
@@ -321,7 +316,6 @@ public class MediaPage extends Composite {
     
     private void setMediaManaged(boolean managed) {
         if (mediaAddButton != null) {
-            logger.info("mediaAddButton != null");
             mediaAddButton.setVisible(managed);
             photoSettingsButton.setVisible(managed);
             videoSettingsButton.setVisible(managed);

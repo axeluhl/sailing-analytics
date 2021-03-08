@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -38,6 +39,8 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     @UiField VideoGallery videoGalleryUi;
     @UiField ImageGallery imageGalleryUi;
     @UiField Button addMediaButtonUi;
+    @UiField
+    StringMessages i18n;
     
     private MobileMediaUploadPopup mobileMediaUploadPopup;
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -48,7 +51,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         super(presenter, false, true, false);
         this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         this.userService = presenter.getUserService();
-        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO());
+        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(), i18n);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         

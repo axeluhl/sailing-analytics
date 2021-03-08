@@ -2358,5 +2358,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String demoMode();
     String includeAccessTokenForYourAccount();
     String alternateTextIfQRCodeTooBig();
-    String manage();
+    
+    String confirmDeleteImage();
+    String confirmDeleteVideo();
+    String fileUpload();
+    String or();
+    String noMediaSelected();
+    String fileTypeNotSupported();
+    String noImageOrVideoDetected();
+    String errorWhileUpdatingEvent();
+    String updateEventSuccessfully();
 }

@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -30,15 +31,18 @@ public class ManageMediaModel {
     protected final SailingServiceWriteAsync sailingServiceWrite;
     protected final UserService userService;
     private final EventViewDTO eventViewDto;
+    private final StringMessages i18n;
     private MediaDTO mediaDto;
 
     private Collection<ImageDTO> images = new LinkedHashSet<ImageDTO>();
     private Collection<VideoDTO> videos = new LinkedHashSet<VideoDTO>();
 
-    public ManageMediaModel(SailingServiceWriteAsync sailingServiceWrite, UserService userService, EventViewDTO eventViewDto) {
+    public ManageMediaModel(SailingServiceWriteAsync sailingServiceWrite, UserService userService, 
+            EventViewDTO eventViewDto, StringMessages i18n) {
         this.sailingServiceWrite = sailingServiceWrite;
         this.userService = userService;
         this.eventViewDto = eventViewDto;
+        this.i18n = i18n;
     }
 
     private void setEventDto(EventDTO eventDto) {
@@ -63,7 +67,6 @@ public class ManageMediaModel {
     private void setVideos(Collection<? extends VideoDTO> videos) {
         this.videos = new LinkedHashSet<VideoDTO>(
                 videos.stream()
-                        //.filter(video -> video.hasTag(MediaTagConstants.GALLERY.getName()))
                         .sorted(Comparator.comparing(AbstractMediaDTO::getCreatedAtDate).reversed())
                         .collect(Collectors.toList()));
     }
@@ -139,8 +142,7 @@ public class ManageMediaModel {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO: translate
-                Notification.notify("Error while updating event data.", NotificationType.ERROR);
+                Notification.notify(i18n.errorWhileUpdatingEvent(), NotificationType.ERROR);
                 logger.log(Level.SEVERE, "Cannot update event.", caught);
             }
         });
@@ -154,15 +156,12 @@ public class ManageMediaModel {
                 public void onSuccess(EventDTO eventDto) {
                     setEventDto(eventDto);
                     callback.accept(eventDto);
-                    // TODO: translate
-                    Notification.notify("Updated event successfully.", NotificationType.SUCCESS);
+                    Notification.notify(i18n.updateEventSuccessfully(), NotificationType.SUCCESS);
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO: translate
-                    Notification.notify("Error -> Video not added. Error: " + caught.getMessage(),
-                            NotificationType.ERROR);
+                    Notification.notify(i18n.error(), NotificationType.ERROR);
                     logger.log(Level.SEVERE, "Cannot update event. Video not added.", caught);
                 }
             });
@@ -173,7 +172,6 @@ public class ManageMediaModel {
      * Check permisison on default object (eventViewDTO from init).
      */
     public boolean hasPermissions() {
-        logger.info("Check permission " + eventViewDto.getIdentifier().getPermission(HasPermissions.DefaultActions.UPDATE));
         final boolean hasPermission;
         if (userService.hasPermission(eventViewDto, HasPermissions.DefaultActions.UPDATE)) {
             hasPermission = true;
@@ -188,7 +186,6 @@ public class ManageMediaModel {
      * Check permission on current EventDTO.
      */
     public boolean hasPermissions(EventDTO eventDto) {
-        logger.info("Check permission " + eventDto.getIdentifier().getPermission(HasPermissions.DefaultActions.UPDATE));
         final boolean hasPermission;
         if (userService.hasPermission(eventDto, HasPermissions.DefaultActions.UPDATE)) {
             hasPermission = true;
