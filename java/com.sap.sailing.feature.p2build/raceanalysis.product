@@ -76,8 +76,6 @@
       <plugin id="com.sap.sse.replication" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sse.security.ui" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sse.security.userstore.mongodb" autoStart="true" startLevel="4" />
-      <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="4"/>
-      <plugin id="org.apache.felix.shell" autoStart="true" startLevel="4"/>
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
