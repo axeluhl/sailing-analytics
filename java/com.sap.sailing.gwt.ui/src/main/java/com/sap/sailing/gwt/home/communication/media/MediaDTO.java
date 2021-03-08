@@ -25,4 +25,12 @@ public class MediaDTO implements Result {
     public void addVideo(SailingVideoDTO video) {
         videos.add(video);
     }
+    
+    public void removeVideo(SailingVideoDTO video) {
+        videos.remove(video);
+    }
+    
+    public void removePhoto(SailingImageDTO photo) {
+        photos.remove(photo);
+    }
 }

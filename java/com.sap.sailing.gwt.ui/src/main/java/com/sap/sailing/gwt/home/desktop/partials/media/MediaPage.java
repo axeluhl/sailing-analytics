@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
 import java.util.Collection;
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -22,10 +21,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.desktop.partials.uploadpopup.DesktopMediaUploadPopup;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -54,6 +53,10 @@ public class MediaPage extends Composite {
     SharedResources res;
     @UiField
     MediaPageResources local_res;
+    @UiField
+    DivElement addButtonArea;
+    @UiField
+    DivElement noContent;
     @UiField
     DivElement videoSectionUi;
     @UiField
@@ -145,10 +148,10 @@ public class MediaPage extends Composite {
         popup.center();
     }
     
-    public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, UUID eventId) {
-        SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
+    public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, EventViewDTO eventViewDto) {
         MediaPageResources.INSTANCE.css().ensureInjected();
-        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventId);
+        SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
+        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
@@ -157,20 +160,19 @@ public class MediaPage extends Composite {
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
-            manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+            setMediaManaged(manageMediaModel.hasPermissions());
         });
     }
     
     public void setMedia(final MediaDTO media) {
-        manageMediaModel.setVideos(media.getVideos());
-        manageMediaModel.setImages(media.getPhotos());
+        manageMediaModel.setMedia(media);
         updateMedia();
     }
     
     private void updateMedia() {
-        manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
         logger.info("updateMedia");
-        Widget mediaUi = uiBinder.createAndBindUi(this);
+        contentPanel.setWidget(uiBinder.createAndBindUi(this));
+        setMediaManaged(manageMediaModel.hasPermissions());
         int photosCount = manageMediaModel.getImages().size();
         photoListOuterBoxUi.clear();
         if (photosCount > 0) {
@@ -253,15 +255,18 @@ public class MediaPage extends Composite {
             }
         }
         if (photosCount == 0 && videoCount == 0) {
-            contentPanel.setWidget(new InfoPlaceholder(i18n.mediaNoContent()));
-        } else {
-            contentPanel.setWidget(mediaUi);
+            noContent.getStyle().setDisplay(Display.BLOCK);
+        } 
+        if (photosCount > 0) {
+            photoSectionUi.getStyle().setDisplay(Display.BLOCK);
+        }
+        if (videoCount > 0) {
+            videoSectionUi.getStyle().setDisplay(Display.BLOCK);
         }
     }
     
     private void updateVideoDisplay() {
         int videoCount = manageMediaModel.getVideos().size();
-        videoSectionUi.getStyle().clearDisplay();
         videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
         videoListOuterBoxUi.getStyle().clearDisplay();
         videoDisplayOuterBoxUi.removeClassName(res.mediaCss().large9());

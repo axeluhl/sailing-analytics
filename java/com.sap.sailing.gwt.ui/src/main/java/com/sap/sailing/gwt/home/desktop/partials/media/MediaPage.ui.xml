@@ -78,6 +78,11 @@
             width: 100%;
 
         }
+        .noContent {
+            margin-top: 3em;
+            font-weight: bold;
+            vertical-align: center;
+        }
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{style.mediaPage}">
         <div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
@@ -112,7 +117,16 @@
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
 			<g:FlowPanel addStyleNames="{style.photolist}" ui:field="photoListOuterBoxUi" />
 		</div>
-        <div class="{local_res.css.media} {style.addButtonArea}">
+        <div ui:field="noContent" style="display:none">
+          <div class="{res.mediaCss.grid}">
+            <div class="{res.mediaCss.columns}">
+                <div class="{style.noContent}" >
+                    <ui:text from='{i18n.mediaNoContent}' />
+                </div>
+            </div>
+          </div>
+        </div>
+        <div ui:field="addButtonArea" class="{local_res.css.media} {style.addButtonArea}">
             <div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
                 <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
                    <g:Button ui:field="mediaAddButton" addStyleNames="{res.mainCss.button} {local_res.css.button} {local_res.css.addButton}" 

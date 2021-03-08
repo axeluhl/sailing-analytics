@@ -56,6 +56,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
@@ -170,7 +171,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initMedia(final MediaCallback callback) {
-        if (eventDTO.isHasMedia()) {
+        
+        if (eventDTO.isHasMedia() || 
+                this.getUserService().hasPermission(eventDTO, HasPermissions.DefaultActions.UPDATE)) {
             clientFactory.getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), 
                     new ActivityCallback<MediaDTO>(clientFactory, panel) {
                 @Override

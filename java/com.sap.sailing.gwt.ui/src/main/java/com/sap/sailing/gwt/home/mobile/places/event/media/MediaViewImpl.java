@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -49,7 +48,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         super(presenter, false, true, false);
         this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         this.userService = presenter.getUserService();
-        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, getEventId());
+        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO());
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         
@@ -75,30 +74,23 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event->{
             logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
-            manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+            setMediaManaged(manageMediaModel.hasPermissions());
         });
 
     }
     
     @Override
     public void setMedia(MediaDTO media) {
-        manageMediaModel.setVideos(media.getVideos());
-        manageMediaModel.setImages(media.getPhotos());
-        updateMedia();
-    }
-    
-    public void setEventDto(EventDTO eventDto) {
-        manageMediaModel.setVideos(eventDto.getVideos());
-        manageMediaModel.setImages(eventDto.getImages());
+        manageMediaModel.setMedia(media);
         updateMedia();
     }
     
     public void updateMedia() {
-        manageMediaModel.checkCurrentUserPermission(permitted -> setMediaManaged(permitted));
+        setMediaManaged(manageMediaModel.hasPermissions());
         Collection<ImageDTO> images = manageMediaModel.getImages();
         Collection<VideoDTO> videos = manageMediaModel.getVideos();
         
-        noContentInfoUi.setVisible(images.isEmpty() && images.isEmpty());
+        noContentInfoUi.setVisible(videos.isEmpty() && images.isEmpty());
         videoGalleryUi.setVideos(videos,
                 video -> deleteVideo(video));
         videoGalleryUi.setVisible(!videos.isEmpty());
