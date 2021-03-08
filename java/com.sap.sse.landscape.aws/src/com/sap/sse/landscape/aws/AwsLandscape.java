@@ -358,6 +358,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
 
+    CompletableFuture<Iterable<TargetGroup<ShardingKey>>> getTargetGroupsAsync(Region region);
+
+    CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(Region region);
+
     CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(Region region);
     
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer(String loadBalancerArn, Region region);
@@ -415,9 +419,11 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             String healthCheckPath, int healthCheckPort);
 
     default TargetGroup<ShardingKey> getTargetGroup(Region region, String targetGroupName, String targetGroupArn,
-            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
-            String healthCheckPath) {
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, protocol, port, healthCheckProtocol, healthCheckPort, healthCheckPath);
+            String loadBalancerArn, ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol,
+            Integer healthCheckPort, String healthCheckPath) {
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn,
+                loadBalancerArn, protocol, port, healthCheckProtocol, healthCheckPort,
+                healthCheckPath);
     }
 
     software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup getAwsTargetGroup(Region region, String targetGroupName);

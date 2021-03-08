@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -26,6 +27,7 @@ import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Mapper;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
@@ -345,10 +347,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
         return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
-                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(), tg.port(), tg.healthCheckProtocol(),
-                                             tg.healthCheckPort()==null?null:tg.healthCheckPort().equals("traffic-port") ?
-                                                     tg.port() : Integer.valueOf(tg.healthCheckPort()),
-                                             tg.healthCheckPath()));
+                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
+                        tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
 
     @Override
@@ -811,6 +811,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private Region getRegion(com.sap.sse.landscape.Region region) {
         return Region.of(region.getId());
     }
+    
+    /**
+     * The health check port is provided as a {@link String} and can assume the value {@code "traffic-port"} in which
+     * case the numerical port is that returned by {@link software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup#port()}.
+     */
+    public static Integer getHealthCheckPort(software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup) {
+        return targetGroup.healthCheckPort() == null
+                ? null
+                : targetGroup.healthCheckPort().equals("traffic-port")
+                  ? targetGroup.port()
+                  : Integer.valueOf(targetGroup.healthCheckPort());
+    }
 
     @Override
     public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
@@ -825,8 +837,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = targetGroupResponse.targetGroups().iterator().next();
         return targetGroupResponse.hasTargetGroups()
                 ? new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroup.targetGroupArn(),
-                        targetGroup.protocol(), targetGroup.port(), targetGroup.healthCheckProtocol(),
-                        Integer.valueOf(targetGroup.healthCheckPort()), targetGroup.healthCheckPath())
+                        targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), targetGroup.port(),
+                        targetGroup.healthCheckProtocol(), getHealthCheckPort(targetGroup), targetGroup.healthCheckPath())
                 : null;
     }
 
@@ -855,7 +867,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
                             TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
                             .build()).build());
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, targetGroup.protocol(), port, targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn,
+                targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), port,
+                targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
     }
 
     private ProtocolEnum guessProtocolFromPort(int healthCheckPort) {
@@ -1190,6 +1204,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
          * for all instances (after their next migration) anyhow. Currently, we're exploring ApplicationProcessHost.DEFAULT_SERVERS_PATH
          * for subdirectories for which we then create the ApplicationProcess instances.
          */
+        final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
+        final CompletableFuture<Iterable<TargetGroup<ShardingKey>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1214,7 +1231,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
             final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(),
-                    serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
+                    serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
+                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
             result.add(replicaSet);
         }
         return result;
@@ -1302,11 +1320,30 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
+    public CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(com.sap.sse.landscape.Region region) {
+        final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
+        final Mapper<Listener, Pair<Listener, List<Rule>>> listenerToRulesResponseMapper =
+                listener->new Pair<>(listener, loadBalancingClient.describeRules(b->b.listenerArn(listener.listenerArn())).rules());
+        final BiFunction<Iterable<Listener>, Throwable, Iterable<Pair<Listener, List<Rule>>>> rulesFetcher =
+                (listeners, exception)->Util.map(listeners, listenerToRulesResponseMapper);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> rulesResponse = getListenersAsync(region).handleAsync(rulesFetcher).handle(
+                (listenersWithRules, e)->{
+                    final Map<Listener, Iterable<Rule>> result = new HashMap<>();
+                    for (final Pair<Listener, List<Rule>> listenerWithRules : listenersWithRules) {
+                        result.put(listenerWithRules.getA(), listenerWithRules.getB());
+                    }
+                    return result;
+                });
+        return rulesResponse;
+    }
+    
+    
+    @Override
     public CompletableFuture<Iterable<TargetGroup<ShardingKey>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
         return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroups().handleAsync(
                 (response, exception)->Util.map(response.targetGroups(), tg->
-                    new AwsTargetGroupImpl<ShardingKey>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(),
-                            tg.port(), tg.healthCheckProtocol(), tg.healthCheckPort(), tg.healthCheckPath())));
+                    new AwsTargetGroupImpl<ShardingKey>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
+                            tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath())));
     }
     
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>

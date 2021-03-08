@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -12,6 +13,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.route53.Route53AsyncClient;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
@@ -40,8 +42,31 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     }
     
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master,
-            Optional<Iterable<ProcessT>> replicas) {
+            Optional<Iterable<ProcessT>> replicas, CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
+            CompletableFuture<Iterable<TargetGroup<ShardingKey>>> allTargetGroupsInRegion, CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion) {
         super(replicaSetAndServerName, master, replicas);
+        /*
+         * TODO: to make things more efficient we should acquire all ApplicationLoadBalancer objects in the region in
+         * one round trip, then fetch all TargetGroup objects in a second round trip, and all TargetHealthDescriptions
+         * in a third round-trip; all can run asynchronously, see ElasticLoadBalancingV2AsyncClient. In a fourth round
+         * trip, we should fetch all Rule objects for all HTTPS load balancer Listener objects. With this, we then have
+         * all information about how requests are routed. Additionally, we may explore the auto scaling infrastructure
+         * in order to establish the link from the ApplicationReplicaSet to their AutoScalingGroup(s) (multiple in the
+         * future as we may start sharding; then, each shard would have its own AutoScalingGroup and TargetGroup with
+         * dedicated routing rules).
+         * 
+         * The ApplicationReplicaSet could then know its Rule objects, the responsible ApplicationLoadBalancer and the
+         * master TargetGroup plus one (or in the future more, see above) public target groups with the registered targets.
+         * We could in principle even discover the ApplicationReplicaSet objects starting from the load balancers, only that
+         * then we wouldn't find the archive server(s) as they are currently not modeled with a dedicated load balancer Rule
+         * but instead are reached through the default Rule that forwards all *.sapsailing.com traffic not otherwise routed
+         * into the central reverse proxy from where it gets forwarded to the Archive server.
+         * 
+         * Otherwise, the exploration of the ApplicationProcess instances is a bit time consuming, and the most we get out
+         * of it currently is the serverDirectory property which would soon be ApplicationProcessHost.DEFAULT_SERVERS_PATH/${SERVER_NAME}
+         * for all instances (after their next migration) anyhow. Currently, we're exploring ApplicationProcessHost.DEFAULT_SERVERS_PATH
+         * for subdirectories for which we then create the ApplicationProcess instances.
+         */
         // TODO Auto-generated constructor stub
     }
 
