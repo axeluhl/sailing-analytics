@@ -12,19 +12,25 @@ public interface EventOverviewResources extends ClientBundle {
 
     @Source("../../../resources/images/Image-EventBackdrop.png")
     ImageResource eventBackdrop();
-    
+
     interface Style extends CssResource {
 
         @ClassName("custom-teaser")
-        String customTeaser();       
+        String customTeaser();
 
         @ClassName("event-cards")
         String eventCards();
 
         @ClassName("event-card-panel")
         String eventCardPanel();
-        
+
         @ClassName("event-card-content")
         String eventCardContent();
+
+        @ClassName("event-info")
+        String eventInfo();
+
+        @ClassName("details")
+        String details();
     }
 }

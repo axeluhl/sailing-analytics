@@ -1,0 +1,83 @@
+@def FADING_DURATION eval("ContextMenu.getFadingDuration()");
+
+.context-menu-glass {
+    background-color: black;
+    opacity: 0;
+    transition: opacity FADING_DURATION ease;
+}
+
+.context-menu-glass.active {
+    opacity: 0.7;
+}
+
+.context-menu {
+    background-color: BACKGROUND_COLOR_DARKEST;
+    border: 0 none;
+    padding: 1rem;
+    max-height: 70%;
+    position: fixed !important;
+}
+
+.context-menu, .context-menu > div, .context-menu .content {
+    display: flex;
+    flex-grow: 1;
+}
+
+.context-menu .content {
+    flex-direction: column; 
+}
+
+.context-menu .separator {
+    height: 1px;
+    background-color: TEXT_COLOR_INPUTS;
+    margin: 1rem;
+}
+
+.context-menu .items {
+    overflow-y: auto; 
+}
+
+.context-menu .header, .context-menu .items > * {
+    margin: 1rem 0;
+}
+
+@media (max-width: 44.99em) {
+    .context-menu {
+        top: initial !important;
+        bottom: -100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        border-radius: 20px 20px 0 0;
+        transition: bottom FADING_DURATION ease;
+    }
+    
+    .context-menu.active {
+        bottom: 0 !important;
+    }
+}
+
+@media (min-width: 45em) {
+    .context-menu {
+        border-radius: 20px;
+        min-width: 50%;
+        max-width: 70%;
+        opacity: 0.0;
+        transition: opacity FADING_DURATION ease;
+    }
+    
+    .context-menu.active {
+        opacity: 1.0;
+    }
+}
+
+@media (min-width: 60em) {
+    .context-menu {
+        min-width: 40%;
+    }
+}
+
+@media (min-width: 80em) {
+    .context-menu {
+        min-width: 30%;
+    }
+}

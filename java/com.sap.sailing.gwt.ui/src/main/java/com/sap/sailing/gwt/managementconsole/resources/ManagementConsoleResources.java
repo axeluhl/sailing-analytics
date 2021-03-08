@@ -56,6 +56,10 @@ public interface ManagementConsoleResources extends ClientBundle {
     @MimeType("image/svg+xml")
     DataResource iconAdd();
 
+    @Source("icons/Icon-Delete.svg")
+    @MimeType("image/svg+xml")
+    DataResource iconDelete();
+
     @Source("icons/Icon-EventFilter.svg")
     @MimeType("image/svg+xml")
     DataResource iconFilter();
@@ -152,6 +156,9 @@ public interface ManagementConsoleResources extends ClientBundle {
         @ClassName("page-title")
         String pageTitle();
 
+        @ClassName("info-title")
+        String infoTitle();
+
         String subtitle();
 
         String text();
@@ -189,6 +196,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("icon-add")
         String iconAdd();
+
+        @ClassName("icon-delete")
+        String iconDelete();
 
         @ClassName("icon-filter")
         String iconFilter();

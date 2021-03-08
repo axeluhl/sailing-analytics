@@ -6,10 +6,11 @@ import com.google.gwt.event.shared.GwtEvent;
 public class RegattaListRequestEvent extends GwtEvent<RegattaListRequestEvent.Handler> {
 
     public interface Handler extends EventHandler {
+
         void onRegattaListResponse(RegattaListRequestEvent event);
     }
 
-    public static Type<Handler> TYPE = new Type<>();
+    public static final Type<Handler> TYPE = new Type<>();
 
     @Override
     public Type<Handler> getAssociatedType() {
@@ -17,7 +18,7 @@ public class RegattaListRequestEvent extends GwtEvent<RegattaListRequestEvent.Ha
     }
 
     @Override
-    protected void dispatch(Handler handler) {
+    protected void dispatch(final Handler handler) {
         handler.onRegattaListResponse(this);
     }
 

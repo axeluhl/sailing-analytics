@@ -11,10 +11,9 @@ public class EventListResponseEvent extends GwtEvent<EventListResponseEvent.Hand
     public interface Handler extends EventHandler {
 
         void onEventsRefreshed(EventListResponseEvent event);
-
     }
 
-    public static Type<EventListResponseEvent.Handler> TYPE = new Type<>();
+    public static final Type<EventListResponseEvent.Handler> TYPE = new Type<>();
 
     private final List<EventDTO> events;
 
@@ -28,7 +27,7 @@ public class EventListResponseEvent extends GwtEvent<EventListResponseEvent.Hand
     }
 
     @Override
-    protected void dispatch(EventListResponseEvent.Handler handler) {
+    protected void dispatch(final EventListResponseEvent.Handler handler) {
         handler.onEventsRefreshed(this);
     }
 

@@ -30,7 +30,6 @@ public class RegattaOverviewActivity extends AbstractManagementConsoleActivity<R
     public void start(final AcceptsOneWidget container, final EventBus eventBus) {
         final RegattaOverviewView view = getClientFactory().getViewFactory().getRegattaOverviewView();
         view.setPresenter(this);
-        container.setWidget(view);
         eventBus.addHandler(RegattaListResponseEvent.TYPE, event -> view.renderRegattas(event.getRegattas()));
         getClientFactory().getRegattaService().requestRegattaList(eventId, /* forceRequestFromService */ true);
         getClientFactory().getSailingService().getEventById(eventId, false, new AsyncCallback<EventDTO>() {
@@ -38,13 +37,14 @@ public class RegattaOverviewActivity extends AbstractManagementConsoleActivity<R
             @Override
             public void onSuccess(final EventDTO result) {
                 view.renderEventName(result.getName());
+                container.setWidget(view);
                 view.onResize();
             }
 
             @Override
             public void onFailure(final Throwable caught) {
-                LOG.severe("requestEventList :: Cannot load events!");
-                getClientFactory().getErrorReporter().reportError("Error", "Cannot load events!");
+                LOG.severe("requestEvent :: Cannot load event!");
+                getClientFactory().getErrorReporter().reportError("Error", "Cannot load event!");
 
             }
         });
