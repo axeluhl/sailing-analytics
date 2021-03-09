@@ -15,7 +15,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -64,6 +67,7 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -1183,53 +1187,53 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        /*
-         * TODO: to make things more efficient we should acquire all ApplicaitonLoadBalancer objetcs in the region in
-         * one round trip, then fetch all TargetGroup objects in a second round trip, and all TargetHealthDescriptions
-         * in a third round-trip; all can run asynchronously, see ElasticLoadBalancingV2AsyncClient. In a fourth round
-         * trip, we should fetch all Rule objects for all HTTPS load balancer Listener objects. With this, we then have
-         * all information about how requests are routed. Additionally, we may explore the auto scaling infrastructure
-         * in order to establish the link from the ApplicationReplicaSet to their AutoScalingGroup(s) (multiple in the
-         * future as we may start sharding; then, each shard would have its own AutoScalingGroup and TargetGroup with
-         * dedicated routing rules).
-         * 
-         * The ApplicationReplicaSet could then know its Rule objects, the responsible ApplicationLoadBalancer and the
-         * master TargetGroup plus one (or in the future more, see above) public target groups with the registered targets.
-         * We could in principle even discover the ApplicationReplicaSet objects starting from the load balancers, only that
-         * then we wouldn't find the archive server(s) as they are currently not modeled with a dedicated load balancer Rule
-         * but instead are reached through the default Rule that forwards all *.sapsailing.com traffic not otherwise routed
-         * into the central reverse proxy from where it gets forwarded to the Archive server.
-         * 
-         * Otherwise, the exploration of the ApplicationProcess instances is a bit time consuming, and the most we get out
-         * of it currently is the serverDirectory property which would soon be ApplicationProcessHost.DEFAULT_SERVERS_PATH/${SERVER_NAME}
-         * for all instances (after their next migration) anyhow. Currently, we're exploring ApplicationProcessHost.DEFAULT_SERVERS_PATH
-         * for subdirectories for which we then create the ApplicationProcess instances.
-         */
-        
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
+        final ConcurrentLinkedQueue<Future<?>> tasksToWaitFor = new ConcurrentLinkedQueue<>();
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Application Process Discovery");
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
-            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
-                final String serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
-                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
-                    // then applicationProcess is a replica in the serverName cluster:
-                    Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
-                } else {
-                    // check if it's a new or else a newer master:
-                    if (!mastersByServerName.containsKey(serverName)
-                    || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
-                            mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
-                            applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
-                        mastersByServerName.put(serverName, applicationProcess);
+            tasksToWaitFor.add(backgroundExecutor.submit(()->{
+                try {
+                    for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
+                        tasksToWaitFor.add(backgroundExecutor.submit(()->{
+                            String serverName;
+                            try {
+                                serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
+                                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
+                                    // then applicationProcess is a replica in the serverName cluster:
+                                    synchronized(replicasByServerName) {
+                                        Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
+                                    }
+                                } else {
+                                    // check if it's a new or else a newer master:
+                                    synchronized (mastersByServerName) {
+                                        if (!mastersByServerName.containsKey(serverName)
+                                        || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
+                                                mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
+                                                applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
+                                            mastersByServerName.put(serverName, applicationProcess);
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }));
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            }));
         }
+        for (final Future<?> taskToWaitFor : tasksToWaitFor) {
+            taskToWaitFor.get(); // wait for all application processes on all hosts to be discovered
+        }
+        backgroundExecutor.shutdown();
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
             final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),

@@ -81,40 +81,44 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
     }
     
+    /**
+     * Tries to complete the various futures of this application replica set, based on the load balancing infrastructure
+     * that will be scanned now:
+     * 
+     * <ul>
+     * <li>Find all targets from allTargetGroupsInRegion's TargetHealthDescriptions by comparing the target ID to the
+     * master/replica host IDs, and comparing the ProcessT's health check ports to the TargetHealthDescriptions
+     * health check ports.</li>
+     * 
+     * <li>The TargetGroup to which the master's TargetHealthDescription belongs, is remembered as the
+     * getMasterTargetGroup(); likewise, those of the replicas are expected to all be the same (at least as long as
+     * we don't support sharing here), which is remembered as the getPublicTargetGroup().</li>
+     * 
+     * <li>Find the Rule(s) in allLoadBalancerRulesInRegion that forward to those target groups; they are all expected
+     * to exhibit an equal host-header condition which provides us with the hostname for this replica set. Remember
+     * the load balancer(s) (can only be more than one if in the future we support cross-region application replica
+     * sets) obtained from the loadBalancerArn that comes with the Listener which keys the Rule lists as the
+     * response for getLoadBalancer(). Remember the rules as the result for getLoadBalancerRules().</li>
+     * 
+     * <li>From the Rule objects determine the one that has a path-pattern of "/" and the host-header condition as the
+     * only two conditions and remember that as the result of getDefaultRedirectRule().</li>
+     * 
+     * <li>Find the archive server(s) based on their SERVER_NAME which can be assumed to be "ARCHIVE" which is
+     * expected to not be used by anything else for now. Those should at the same time be the only ProcessT instances
+     * not registered in any TargetGroup.</li>
+     * 
+     * <li>TODO Start to explore the auto scaling infrastructure in order to establish the link from the
+     * ApplicationReplicaSet to its AutoScalingGroup(s) (multiple in the future as we may start sharding; then, each
+     * shard would have its own AutoScalingGroup and TargetGroup with dedicated routing rules). The AutoScalingGroup
+     * can be identified either by name (if we decide for a unique naming pattern) or by enumerating all
+     * AutoScalingGroups and filtering for their targetGroupArn.</li>
+     * 
+     * <li>TODO Discover the Route53 DNS entry pointing to the load balancer with the {@link #hostname} discovered</li>
+     * </ul>
+     */
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules) {
-        /*
-         * TODO: With this, we have all information about how requests are routed:
-         * 
-         * - Find all targets from allTargetGroupsInRegion's TargetHealthDescriptions by comparing the target ID to the
-         * master/replica host IDs, and comparing the ProcessT's health check ports to the TargetHealthDescriptions
-         * health check ports.
-         * 
-         * - The TargetGroup to which the master's TargetHealthDescription belongs, is remembered as the
-         * getMasterTargetGroup(); likewise, those of the replicas are expected to all be the same (at least as long as
-         * we don't support sharing here), which is remembered as the getPublicTargetGroup().
-         * 
-         * - Find the Rule(s) in allLoadBalancerRulesInRegion that forward to those target groups; they are all expected
-         * to exhibit an equal host-header condition which provides us with the hostname for this replica set. Remember
-         * the load balancer(s) (can only be more than one if in the future we support cross-region application replica
-         * sets) obtained from the loadBalancerArn that comes with the Listener which keys the Rule lists as the
-         * response for getLoadBalancer(). Remember the rules as the result for getLoadBalancerRules().
-         * 
-         * - From the Rule objects determine the one that has a path-pattern of "/" and the host-header condition as the
-         * only two conditions and remember that as the result of getDefaultRedirectRule().
-         * 
-         * - Start to explore the auto scaling infrastructure in order to establish the link from the
-         * ApplicationReplicaSet to its AutoScalingGroup(s) (multiple in the future as we may start sharding; then, each
-         * shard would have its own AutoScalingGroup and TargetGroup with dedicated routing rules). The AutoScalingGroup
-         * can be identified either by name (if we decide for a unique naming pattern) or by enumerating all
-         * AutoScalingGroups and filtering for their targetGroupArn.
-         * 
-         * - Find the archive server(s) based on their SERVER_NAME which can be assumed to be "ARCHIVE" which is
-         * expected to not be used by anything else for now. Those should at the same time be the only ProcessT instances
-         * not registered in any TargetGroup.
-         * 
-         */
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
