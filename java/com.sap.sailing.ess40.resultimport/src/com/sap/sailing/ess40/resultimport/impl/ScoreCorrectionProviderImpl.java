@@ -36,7 +36,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private List<URL> getCsvUrls(String... actNames) throws MalformedURLException {
         List<URL> result = new ArrayList<URL>();
         for (String actName : actNames) {
-            result.add(new URL("https://www.extremesailingseries.com/app/results/csv_uploads/"+actName+".csv"));
+            result.add(new URL("https://static.sapsailing.com/ESSResults/"+actName+".csv"));
         }
         return result;
     }
@@ -106,7 +106,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
 
     private Iterable<String> getAvailableActNames() throws IOException {
         List<String> result = new ArrayList<String>();
-        URL url = new URL("https://www.extremesailingseries.com/app/results/csv_uploads/");
+        URL url = new URL("https://static.sapsailing.com/ESSResults/");
         Pattern p = Pattern.compile("<a href=\"([^\"]*)\\.csv\">");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
