@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import java.util.concurrent.ExecutionException;
+
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -28,18 +30,18 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * @return may return {@code null} in case this application replica set is not managed by a load balancer, such as
      *         is currently the case for the "ARCHIVE" server(s) which is targeted through a reverse proxy.
      */
-    ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
+    ApplicationLoadBalancer<ShardingKey> getLoadBalancer() throws InterruptedException, ExecutionException;
     
-    TargetGroup<ShardingKey> getMasterTargetGroup();
+    TargetGroup<ShardingKey> getMasterTargetGroup() throws InterruptedException, ExecutionException;
     
-    TargetGroup<ShardingKey> getPublicTargetGroup();
+    TargetGroup<ShardingKey> getPublicTargetGroup() throws InterruptedException, ExecutionException;
     
     /**
      * Identifies the DNS hosted zone that hosts the DNS record for {@link #getHostname()}. The resource record set name
      * may either be a wildcard record such as {@code *.sapsailing.com} or the fully-qualified hostname which then is expected
      * to match up with {@link #getHostname()}. See also {@link #getResourceRecordSet}.
      */
-    String getHostedZoneId();
+    String getHostedZoneId() throws InterruptedException, ExecutionException;
     
     /**
      * The DNS entry in the Route53 hosted zone identified by {@link #getHostedZoneId()} that maps to the {@link #getLoadBalancer()}(s)
@@ -49,24 +51,24 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * Should multi-region support be added in the future, the resulting resource record set can be expected to hold a {@link ResourceRecord}
      * for the load balancer in each region that manages this application replica set in that region.
      */
-    ResourceRecordSet getResourceRecordSet();
+    ResourceRecordSet getResourceRecordSet() throws InterruptedException, ExecutionException;
     
     /**
      * @return the {@link ApplicationLoadBalancer#getRules() rules} from the {@link #getLoadBalancer() load balancer}
      *         that react to this application replica set's {@link #getHostname() hostname}.
      */
-    Iterable<Rule> getLoadBalancerRules();
+    Iterable<Rule> getLoadBalancerRules() throws InterruptedException, ExecutionException;
     
     /**
      * The rule that handles the "/" path and redirects users to a specific target path, such as to a specific event's
      * landing page, or the general "/gwt/Home.html" entry point.
      */
-    Rule getDefaultRedirectRule();
+    Rule getDefaultRedirectRule() throws InterruptedException, ExecutionException;
     
     /**
      * The auto-scaling group is responsible for scaling the set of replicas registered with the
      * {@link #getPublicTargetGroup() public target group}. This is optional, so {@code null} may
      * be returned.
      */
-    AwsAutoScalingGroup getAutoScalingGroup();
+    AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException;
 }

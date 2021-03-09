@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
@@ -22,7 +24,7 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final long serialVersionUID = -4107033961273165726L;
     private ProcessT master;
     private Set<ProcessT> replicas;
-    private String hostname;
+    private CompletableFuture<String> hostname;
     
     /**
      * @param hostname
@@ -34,7 +36,10 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     public ApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
         super(replicaSetAndServerName);
-        this.hostname = hostname;
+        this.hostname = new CompletableFuture<>();
+        if (hostname != null) {
+            this.hostname.complete(hostname);
+        }
         this.master = master;
         this.replicas = new HashSet<>();
         replicas.ifPresent(theReplicas->Util.addAll(theReplicas, this.replicas));
@@ -50,8 +55,8 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public String getHostname() {
-        return hostname;
+    public String getHostname() throws InterruptedException, ExecutionException {
+        return hostname.get();
     }
 
     @Override

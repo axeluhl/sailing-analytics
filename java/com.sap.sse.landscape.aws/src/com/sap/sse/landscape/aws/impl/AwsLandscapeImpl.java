@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -27,7 +28,6 @@ import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Mapper;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
@@ -1206,9 +1206,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
          * for all instances (after their next migration) anyhow. Currently, we're exploring ApplicationProcessHost.DEFAULT_SERVERS_PATH
          * for subdirectories for which we then create the ApplicationProcess instances.
          */
+        
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
-        final CompletableFuture<Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
-        final CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region);
+        final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1232,7 +1233,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(),
+            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),
                     serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
                     allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
             result.add(replicaSet);
@@ -1316,23 +1317,52 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public CompletableFuture<Iterable<Listener>> getListenersAsync(com.sap.sse.landscape.Region region) {
-        return getLoadBalancingAsyncClient(getRegion(region)).describeListeners(b->b.loadBalancerArn("")).handleAsync(
-                (response, exception)->response.listeners());
+    public CompletableFuture<Listener> getHttpsListenerAsync(com.sap.sse.landscape.Region region, ApplicationLoadBalancer<ShardingKey> loadBalancer) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeListeners(b->b.loadBalancerArn(loadBalancer.getArn())).handleAsync(
+                (response, exception)->Util.first(Util.filter(response.listeners(), l->l.protocol() == ProtocolEnum.HTTPS)));
     }
     
     @Override
-    public CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> getLoadBalancerListenerRulesAsync(com.sap.sse.landscape.Region region) {
-        final ElasticLoadBalancingV2AsyncClient loadBalancingClient = getLoadBalancingAsyncClient(getRegion(region));
-        final Mapper<Listener, Pair<Listener, CompletableFuture<List<Rule>>>> listenerToRulesResponseMapper =
-                listener->new Pair<>(listener, loadBalancingClient.describeRules(
-                        b->b.listenerArn(listener.listenerArn())).handle((describeRulesResponse, e)->describeRulesResponse.rules()));
-        final BiFunction<Iterable<Listener>, Throwable, Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> rulesFetcher =
-                (listeners, exception)->Util.map(listeners, listenerToRulesResponseMapper);
-        final CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> rulesResponse = getListenersAsync(region).handleAsync(rulesFetcher);
-        return rulesResponse;
+    public CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(com.sap.sse.landscape.Region region,
+            CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion) {
+        return allLoadBalancersInRegion.thenCompose(loadBalancers->getListenerToRulesMap(region, loadBalancers));
     }
     
+    private CompletableFuture<Map<Listener, Iterable<Rule>>> getListenerToRulesMap(com.sap.sse.landscape.Region region, Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers) {
+        final ElasticLoadBalancingV2AsyncClient loadBalancingClient = getLoadBalancingAsyncClient(getRegion(region));
+        final Set<CompletableFuture<Pair<Listener, Iterable<Rule>>>> mapEntryFutures = new HashSet<>();
+        for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : loadBalancers) {
+            final CompletableFuture<Listener> listenerFuture = getHttpsListenerAsync(region, loadBalancer);
+            final CompletableFuture<Pair<Listener, Iterable<Rule>>> mapEntryFuture =
+                    listenerFuture.thenCompose(listener->{
+                        final CompletableFuture<Pair<Listener, Iterable<Rule>>> result;
+                        if (listener==null) {
+                            result = new CompletableFuture<>();
+                            result.complete(null);
+                        } else {
+                            result = loadBalancingClient.describeRules(
+                                b->b.listenerArn(listener.listenerArn())).handle(
+                                    (describeRulesResponse, e)->new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules()));
+                        }
+                        return result;
+                    });
+            mapEntryFutures.add(mapEntryFuture);
+        }
+        return CompletableFuture.allOf(mapEntryFutures.toArray(new CompletableFuture<?>[0])).handle((v, e)->{
+            final Map<Listener, Iterable<Rule>> result = new HashMap<>();
+            for (final CompletableFuture<Pair<Listener, Iterable<Rule>>> mapEntryFuture : mapEntryFutures) {
+                try {
+                    if (mapEntryFuture.get() != null) {
+                        result.put(mapEntryFuture.get().getA(), mapEntryFuture.get().getB());
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            return result;
+        });
+    }
+
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
         final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
@@ -1341,13 +1371,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public CompletableFuture<Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
-        final BiFunction<Iterable<AwsTargetGroupImpl<ShardingKey>>, Throwable, Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> targetGroupToPairMapper =
-                (targetGroups, e)->Util.map(targetGroups, targetGroup->new Pair<>(targetGroup, getTargetHealthDescriptionsAsync(region, targetGroup)));
-        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroups().handleAsync(
-                (response, exception)->Util.map(response.targetGroups(), tg->
-                    new AwsTargetGroupImpl<ShardingKey>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
-                            tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()))).handleAsync(targetGroupToPairMapper);
+    public CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroups().thenCompose(response->{
+            final Map<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>> futures = new HashMap<>();
+            for (final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup tg : response.targetGroups()) {
+                final TargetGroup<ShardingKey> targetGroup = new AwsTargetGroupImpl<ShardingKey>(this, region,
+                        tg.targetGroupName(), tg.targetGroupArn(), Util.first(tg.loadBalancerArns()),
+                        tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg),
+                        tg.healthCheckPath());
+                futures.put(targetGroup, getTargetHealthDescriptionsAsync(region, targetGroup));
+            }
+            return CompletableFuture.allOf(futures.values().toArray(new CompletableFuture<?>[0])).handle((v, e)->{
+                final Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> result = new HashMap<>();
+                for (final Entry<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>> future : futures.entrySet()) {
+                    try {
+                        result.put(future.getKey(), future.getValue().get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                return result;
+            });
+        });
     }
     
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>

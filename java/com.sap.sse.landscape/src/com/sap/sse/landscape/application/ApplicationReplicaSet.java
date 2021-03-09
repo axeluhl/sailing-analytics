@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
@@ -132,7 +133,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Na
      * may have to happen on a per-region basis. It would then be nice if this application replica set would "know" its
      * regions to which it has been deployed.
      */
-    String getHostname();
+    String getHostname() throws InterruptedException, ExecutionException;
 
     /**
      * The "SERVER_NAME" property that is equal for the master and all replica processes of this replica set. It is

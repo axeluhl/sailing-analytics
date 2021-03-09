@@ -1,7 +1,6 @@
 package com.sap.sse.landscape.aws;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
@@ -361,11 +359,12 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     Iterable<ApplicationLoadBalancer<ShardingKey>> getLoadBalancers(Region region);
 
-    CompletableFuture<Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> getTargetGroupsAsync(Region region);
+    CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(Region region);
 
     CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(Region region, TargetGroup<ShardingKey> targetGroup);
 
-    CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> getLoadBalancerListenerRulesAsync(Region region);
+    CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(
+            Region region, CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion);
 
     CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(Region region);
     
@@ -386,7 +385,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
 
-    CompletableFuture<Iterable<Listener>> getListenersAsync(Region region);
+    CompletableFuture<Listener> getHttpsListenerAsync(Region region, ApplicationLoadBalancer<ShardingKey> loadBalancer);
     
     LoadBalancerState getApplicationLoadBalancerStatus(ApplicationLoadBalancer<ShardingKey> alb);
 

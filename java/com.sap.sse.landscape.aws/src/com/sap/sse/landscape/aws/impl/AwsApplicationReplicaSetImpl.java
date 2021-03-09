@@ -1,11 +1,10 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
@@ -14,6 +13,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.TargetGroup;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -38,18 +38,43 @@ public class AwsApplicationReplicaSetImpl<ShardingKey, MetricsT extends Applicat
 extends ApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>
 implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final long serialVersionUID = 6895927683667795173L;
+    private final CompletableFuture<AutoScalingGroup> autoScalingGroup;
+    private final CompletableFuture<Rule> defaultRedirectRule;
+    private final CompletableFuture<String> hostedZoneId;
+    private final CompletableFuture<ApplicationLoadBalancer<ShardingKey>> loadBalancer;
+    private final CompletableFuture<Iterable<Rule>> loadBalancerRules;
+    private final CompletableFuture<TargetGroup<ShardingKey>> masterTargetGroup;
+    private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
+    private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
 
-    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas) {
+    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas,
+            CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
+            CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion) {
         super(replicaSetAndServerName, hostname, master, replicas);
-        // TODO Auto-generated constructor stub
+        autoScalingGroup = new CompletableFuture<>();
+        defaultRedirectRule = new CompletableFuture<>();
+        hostedZoneId = new CompletableFuture<>();
+        loadBalancer = new CompletableFuture<>();
+        loadBalancerRules = new CompletableFuture<>();
+        masterTargetGroup = new CompletableFuture<>();
+        publicTargetGroup = new CompletableFuture<>();
+        resourceRecordSet = new CompletableFuture<>();
+        allLoadBalancersInRegion.thenCompose(loadBalancers->
+            allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
+                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules))));
+    }
+
+    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master, Optional<Iterable<ProcessT>> replicas,
+            CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
+            CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion) {
+        this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
     }
     
-    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master,
-            Optional<Iterable<ProcessT>> replicas,
-            CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
-            CompletableFuture<Iterable<Pair<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>>>> allTargetGroupsInRegion,
-            CompletableFuture<Iterable<Pair<Listener, CompletableFuture<List<Rule>>>>> allLoadBalancerRulesInRegion) {
-        super(replicaSetAndServerName, master, replicas);
+    private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
+            Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
+            Map<Listener, Iterable<Rule>> listenersAndTheirRules) {
         /*
          * TODO: With this, we have all information about how requests are routed:
          * 
@@ -81,54 +106,47 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
          * not registered in any TargetGroup.
          * 
          */
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public ApplicationLoadBalancer<ShardingKey> getLoadBalancer() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getLoadBalancer(...)
+        // TODO Implement AwsApplicationReplicaSetImpl.establishState3(...)
         return null;
     }
 
     @Override
-    public TargetGroup<ShardingKey> getMasterTargetGroup() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getMasterTargetGroup(...)
-        return null;
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancer() throws InterruptedException, ExecutionException {
+        return loadBalancer.get();
     }
 
     @Override
-    public TargetGroup<ShardingKey> getPublicTargetGroup() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getPublicTargetGroup(...)
-        return null;
+    public TargetGroup<ShardingKey> getMasterTargetGroup() throws InterruptedException, ExecutionException {
+        return masterTargetGroup.get();
     }
 
     @Override
-    public Iterable<Rule> getLoadBalancerRules() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getLoadBalancerRules(...)
-        return null;
+    public TargetGroup<ShardingKey> getPublicTargetGroup() throws InterruptedException, ExecutionException {
+        return publicTargetGroup.get();
     }
 
     @Override
-    public Rule getDefaultRedirectRule() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getDefaultRedirectRule(...)
-        return null;
+    public Iterable<Rule> getLoadBalancerRules() throws InterruptedException, ExecutionException {
+        return loadBalancerRules.get();
     }
 
     @Override
-    public AwsAutoScalingGroup getAutoScalingGroup() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getAutoScalingGroup(...)
-        return null;
+    public Rule getDefaultRedirectRule() throws InterruptedException, ExecutionException {
+        return defaultRedirectRule.get();
     }
 
     @Override
-    public String getHostedZoneId() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getHostedZoneId(...)
-        return null;
+    public AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException {
+        return new AwsAutoScalingGroupImpl(autoScalingGroup.get());
     }
 
     @Override
-    public ResourceRecordSet getResourceRecordSet() {
-        // TODO Implement AwsApplicationReplicaSetImpl.getResourceRecordSet(...)
-        return null;
+    public String getHostedZoneId() throws InterruptedException, ExecutionException {
+        return hostedZoneId.get();
+    }
+
+    @Override
+    public ResourceRecordSet getResourceRecordSet() throws InterruptedException, ExecutionException {
+        return resourceRecordSet.get();
     }
 }
