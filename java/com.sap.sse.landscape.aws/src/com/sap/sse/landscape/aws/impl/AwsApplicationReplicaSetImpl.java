@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -43,6 +44,8 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 public class AwsApplicationReplicaSetImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends ApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>
 implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
+    private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
+    private static final String ARCHIVE_SERVER_NAME = "ARCHIVE";
     private static final long serialVersionUID = 6895927683667795173L;
     private final CompletableFuture<AutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
@@ -164,6 +167,17 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             loadBalancerRules.complete(rules);
             if (!defaultRedirectRule.isDone()) {
                 defaultRedirectRule.complete(null); // no default redirect rule found
+            }
+        } else {
+            // we found no target group forwarding to the target, either because the target isn't registered with a target group
+            // or no load balancer forwards to it; in any case we can only default to the assumption that the process may be an archive
+            // server:
+            if (getName().equals(ARCHIVE_SERVER_NAME)) {
+                setHostname("www.sapsailing.com");
+            } else {
+                logger.warning("Found an application replica set " + getName() + " that is not the "
+                        + ARCHIVE_SERVER_NAME + " replica set; no hostname can be inferred.");
+                setHostname(null);
             }
         }
         // TODO identify autoScalingGroup
