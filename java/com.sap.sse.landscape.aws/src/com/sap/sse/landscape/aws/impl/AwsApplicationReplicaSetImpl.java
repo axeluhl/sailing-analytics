@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
@@ -71,7 +72,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         resourceRecordSet = new CompletableFuture<>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
-                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules))));
+                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules))))
+            .handle((v, e)->{
+                if (e != null) {
+                    logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
+                }
+                return null;
+            });
     }
 
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master, Optional<Iterable<ProcessT>> replicas,
@@ -139,17 +146,19 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         // group(s).
         String hostname = null;
         ApplicationLoadBalancer<ShardingKey> myLoadBalancer = null;
-        outer: for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
-            for (final Rule rule : e.getValue()) {
-                if (!Util.isEmpty(Util.filter(rule.actions(), action->action.type() == ActionTypeEnum.FORWARD &&
-                        !Util.isEmpty(Util.filter(action.forwardConfig().targetGroups(), targetGroup->targetGroup.targetGroupArn().equals(finalMasterTargetGroup.getTargetGroupArn())))))) {
-                    // we should be able to extract the hostname from the rule's hostname header condition:
-                    hostname = Util.first(Util.filter(rule.conditions(), condition->condition.field().equals("host-header"))).hostHeaderConfig().values().iterator().next();
-                    setHostname(hostname);
-                    // and we can determine the load balancer via the Listener now:
-                    myLoadBalancer = Util.first(Util.filter(loadBalancers, loadBalancer->loadBalancer.getArn().equals(e.getKey().loadBalancerArn())));
-                    loadBalancer.complete(myLoadBalancer);
-                    break outer;
+        if (finalMasterTargetGroup != null) {
+            outer: for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
+                for (final Rule rule : e.getValue()) {
+                    if (!Util.isEmpty(Util.filter(rule.actions(), action->action.type() == ActionTypeEnum.FORWARD &&
+                            !Util.isEmpty(Util.filter(action.forwardConfig().targetGroups(), targetGroup->targetGroup.targetGroupArn().equals(finalMasterTargetGroup.getTargetGroupArn())))))) {
+                        // we should be able to extract the hostname from the rule's hostname header condition:
+                        hostname = Util.first(Util.filter(rule.conditions(), condition->condition.field().equals("host-header"))).hostHeaderConfig().values().iterator().next();
+                        setHostname(hostname);
+                        // and we can determine the load balancer via the Listener now:
+                        myLoadBalancer = Util.first(Util.filter(loadBalancers, loadBalancer->loadBalancer.getArn().equals(e.getKey().loadBalancerArn())));
+                        loadBalancer.complete(myLoadBalancer);
+                        break outer;
+                    }
                 }
             }
         }
