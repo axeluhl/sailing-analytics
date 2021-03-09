@@ -58,6 +58,10 @@ implements ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public String getHostname() throws InterruptedException, ExecutionException {
         return hostname.get();
     }
+    
+    protected void setHostname(String hostname) {
+        this.hostname.complete(hostname);
+    }
 
     @Override
     public void upgrade(Release newVersion) {

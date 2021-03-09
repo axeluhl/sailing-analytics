@@ -1,10 +1,14 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
@@ -15,7 +19,9 @@ import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53AsyncClient;
@@ -106,7 +112,62 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
          * not registered in any TargetGroup.
          * 
          */
-        // TODO Implement AwsApplicationReplicaSetImpl.establishState3(...)
+        TargetGroup<ShardingKey> myMasterTargetGroup = null;
+        for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
+            if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
+            && e.getKey().getLoadBalancerArn() != null && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
+                if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))) {
+                    myMasterTargetGroup = e.getKey();
+                    masterTargetGroup.complete(myMasterTargetGroup);
+                } else if (!publicTargetGroup.isDone() &&
+                        !Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))) {
+                    publicTargetGroup.complete(e.getKey());
+                }
+            }
+        }
+        final TargetGroup<ShardingKey> finalMasterTargetGroup = myMasterTargetGroup;
+        // At this point we hope to have found the masterTargetGroup at least, but the publicTargetGroup may not hold the master node, and there may not
+        // yet be replicas registered with it; yet, it is possible to discover things from here because from the masterTargetGroup we can infer
+        // the hostname header used for routing traffic to the masterTargetGroup, and then we can identify the rule(s) routing to the public target
+        // group(s).
+        String hostname = null;
+        ApplicationLoadBalancer<ShardingKey> myLoadBalancer = null;
+        outer: for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
+            for (final Rule rule : e.getValue()) {
+                if (!Util.isEmpty(Util.filter(rule.actions(), action->action.type() == ActionTypeEnum.FORWARD &&
+                        !Util.isEmpty(Util.filter(action.forwardConfig().targetGroups(), targetGroup->targetGroup.targetGroupArn().equals(finalMasterTargetGroup.getTargetGroupArn())))))) {
+                    // we should be able to extract the hostname from the rule's hostname header condition:
+                    hostname = Util.first(Util.filter(rule.conditions(), condition->condition.field().equals("host-header"))).hostHeaderConfig().values().iterator().next();
+                    setHostname(hostname);
+                    // and we can determine the load balancer via the Listener now:
+                    myLoadBalancer = Util.first(Util.filter(loadBalancers, loadBalancer->loadBalancer.getArn().equals(e.getKey().loadBalancerArn())));
+                    loadBalancer.complete(myLoadBalancer);
+                    break outer;
+                }
+            }
+        }
+        final ApplicationLoadBalancer<ShardingKey> finalLoadBalancer = myLoadBalancer;
+        if (hostname != null) {
+            final String finalHostname = hostname;
+            // now scan the rules in the load balancer identified for the correct hostname and specifically
+            // identify the default redirect rule:
+            final Set<Rule> rules = new HashSet<>();
+            for (final Rule rule : listenersAndTheirRules.entrySet().stream().filter(e->e.getKey().loadBalancerArn().equals(finalLoadBalancer.getArn())).map(e->e.getValue()).findAny().get()) {
+                if (rule.conditions().stream().anyMatch(condition->condition.field().equals("host-header") && condition.values().contains(finalHostname))) {
+                    if (rule.conditions().stream().anyMatch(condition->condition.field().equals("path-pattern") && condition.values().contains("/"))
+                    && rule.actions().stream().anyMatch(action->action.type() == ActionTypeEnum.REDIRECT)) {
+                        defaultRedirectRule.complete(rule);
+                    }
+                    rules.add(rule);
+                }
+            }
+            loadBalancerRules.complete(rules);
+            if (!defaultRedirectRule.isDone()) {
+                defaultRedirectRule.complete(null); // no default redirect rule found
+            }
+        }
+        // TODO identify autoScalingGroup
+        // TODO identify resourceRecordSet
         return null;
     }
 
