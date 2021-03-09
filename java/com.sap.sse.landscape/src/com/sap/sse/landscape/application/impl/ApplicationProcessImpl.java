@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -185,8 +186,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return "/";
     }
     
-    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout)
-            throws ClientProtocolException, IOException, ParseException {
+    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(optionalTimeout));
     }
 

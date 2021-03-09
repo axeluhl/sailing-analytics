@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
@@ -95,6 +96,21 @@ public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPool
             mbs.registerMBean(mbean, mBeanName);
         } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
             logger.log(Level.SEVERE, "Couldn't register MBean for thread pool executor "+this.getName(), e);
+        }
+    }
+    
+    @Override
+    public void terminated() {
+        super.terminated();
+        // try to unregister MBean
+        try {
+            ThreadPoolMXBeanImpl mbean = new ThreadPoolMXBeanImpl(this);
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName mBeanName;
+                mBeanName = mbean.getObjectName();
+            mbs.unregisterMBean(mBeanName);
+        } catch (MalformedObjectNameException | MBeanRegistrationException | InstanceNotFoundException e) {
+            logger.log(Level.SEVERE, "Couldn't unregister MBean for thread pool executor "+this.getName(), e);
         }
     }
     

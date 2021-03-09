@@ -7,12 +7,19 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -93,6 +100,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
@@ -264,13 +272,24 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 };
         final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
-                (instanceId, availabilityZone, privateIpAddress, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
-                        instanceId, availabilityZone, privateIpAddress, landscape, processFactoryFromHostAndServerDirectory);
+                (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape)->new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
+                        instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape, processFactoryFromHostAndServerDirectory);
+        final Set<Future<SailingApplicationReplicaSetDTO<String>>> resultFutures = new HashSet<>();
+        final ScheduledExecutorService backgroundThreadPool = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Constructing SailingApplicationReplicaSetDTOs "+UUID.randomUUID());
         for (final ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationServerReplicaSet :
             getLandscape().getApplicationReplicaSetsByTag(region, SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
                 hostSupplier, WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)) {
-            result.add(convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase));
+            resultFutures.add(backgroundThreadPool.submit(()->
+                convertToSailingApplicationReplicaSetDTO(applicationServerReplicaSet, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)));
         }
+        Util.addAll(Util.map(resultFutures, future->{
+            try {
+                return future.get(WAIT_FOR_HOST_TIMEOUT.get().asMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+        }), result);
+        backgroundThreadPool.shutdown();
         return result;
     }
 
@@ -450,7 +469,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
                     new AwsAvailabilityZoneImpl(processToShutdown.getHost().getAvailabilityZone(),
                             processToShutdown.getHost().getAvailabilityZone(), region), 
-                            InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()), landscape);
+                            InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()),
+                            processToShutdown.getHost().getLaunchTimePoint(), landscape);
             instance.terminate();
         }
         if (mongoScalingInstructions.getReplicaSetName() == null) {

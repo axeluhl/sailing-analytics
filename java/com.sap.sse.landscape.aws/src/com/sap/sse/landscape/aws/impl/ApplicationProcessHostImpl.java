@@ -16,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -35,9 +36,9 @@ implements ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> {
     private final ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory;
     
     public ApplicationProcessHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape,
-            ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory) {
-        super(instanceId, availabilityZone, privateIpAddress, landscape);
+            InetAddress privateIpAddress, TimePoint launchTimePoint,
+            AwsLandscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactoryFromHostAndServerDirectory) {
+        super(instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape);
         this.processFactoryFromHostAndServerDirectory = processFactoryFromHostAndServerDirectory;
     }
     

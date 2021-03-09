@@ -5,6 +5,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -29,7 +30,7 @@ public interface Host extends WithID {
      * @param timeoutEmptyMeaningForever
      *            if {@code null}, waits forever
      */
-    InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever);
+    InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception;
     
     /**
      * Obtains the private IP address of this host. Note that during the boot phase and after shutdown/termination a host

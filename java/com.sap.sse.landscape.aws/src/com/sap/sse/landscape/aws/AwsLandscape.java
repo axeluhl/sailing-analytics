@@ -162,7 +162,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             AwsAvailabilityZone availabilityZone, String keyName, Iterable<SecurityGroup> securityGroups,
             Optional<Tags> tags, String... userData) {
         final HostSupplier<ShardingKey, AwsInstance<ShardingKey>> hostSupplier =
-                (instanceId, az, privateIpAddress, landscape)->new AwsInstanceImpl<ShardingKey>(instanceId, az, privateIpAddress, landscape);
+                (instanceId, az, privateIpAddress, launchTimePoint, landscape)->new AwsInstanceImpl<ShardingKey>(instanceId, az,
+                        privateIpAddress, launchTimePoint, landscape);
         return launchHost(hostSupplier, image, instanceType, availabilityZone, keyName, securityGroups, tags, userData);
     }
     

@@ -14,11 +14,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -628,7 +631,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         try {
             return new AwsInstanceImpl<ShardingKey>(instance.instanceId(),
                     getAvailabilityZoneByName(region, instance.placement().availabilityZone()),
-                    InetAddress.getByName(instance.privateIpAddress()), this);
+                    InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()), this);
         } catch (UnknownHostException e) {
             logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
             throw new RuntimeException(e);
@@ -789,7 +792,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
             try {
-                result.add(hostSupplier.supply(instance.instanceId(), az, InetAddress.getByName(instance.privateIpAddress()), this));
+                result.add(hostSupplier.supply(instance.instanceId(), az,
+                        InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()),
+                        this));
             } catch (UnknownHostException e) {
                 logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
                 throw new RuntimeException(e);
@@ -1173,7 +1178,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             HostSupplier<ShardingKey, HostT> hostSupplier) {
         final List<HostT> result = new ArrayList<>();
         for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
-            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), this);
+            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(),
+                    host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(), this);
             result.add(applicationProcessHost);
         }
         return result;
@@ -1194,7 +1200,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
         final ConcurrentLinkedQueue<Future<?>> tasksToWaitFor = new ConcurrentLinkedQueue<>();
-        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Application Process Discovery");
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Application Process Discovery "+UUID.randomUUID());
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
             tasksToWaitFor.add(backgroundExecutor.submit(()->{
                 try {
@@ -1230,8 +1236,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 }
             }));
         }
+        // wait for all application processes on all hosts to be discovered
         for (final Future<?> taskToWaitFor : tasksToWaitFor) {
-            taskToWaitFor.get(); // wait for all application processes on all hosts to be discovered
+            waitForFuture(taskToWaitFor, optionalTimeout);
         }
         backgroundExecutor.shutdown();
         final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
@@ -1242,6 +1249,22 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             result.add(replicaSet);
         }
         return result;
+    }
+    
+    private <T> void waitForFuture(Future<T> future, Optional<Duration> optionalTimeout) {
+        optionalTimeout.map(timeout->{
+            try {
+                return future.get(timeout.asMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e1) {
+                throw new RuntimeException(e1);
+            }
+        }).orElseGet(()->{
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
     
     /**

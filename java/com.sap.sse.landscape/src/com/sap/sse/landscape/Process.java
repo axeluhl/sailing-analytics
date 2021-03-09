@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import com.sap.sse.common.Duration;
 
@@ -44,7 +45,7 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
      * 
      * The default implementation tries to open a socket connection to the host's public address and the {@link #getPort() port}.
      */
-    default boolean isAlive(Optional<Duration> optionalTimeout) throws IOException {
+    default boolean isAlive(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         Socket socket = null;
         try {
             socket = new Socket(getHost().getPublicAddress(optionalTimeout), getPort());
