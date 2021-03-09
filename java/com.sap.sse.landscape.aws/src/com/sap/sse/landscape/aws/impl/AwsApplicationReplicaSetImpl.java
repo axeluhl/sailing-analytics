@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -182,6 +183,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 defaultRedirectRule.complete(null); // no default redirect rule found
             }
         } else {
+            logger.fine("Couldn't find hostname, target group(s) and rules for "+getName());
+            loadBalancerRules.complete(Collections.emptySet());
+            defaultRedirectRule.complete(null); // no default redirect rule found
             // we found no target group forwarding to the target, either because the target isn't registered with a target group
             // or no load balancer forwards to it; in any case we can only default to the assumption that the process may be an archive
             // server:

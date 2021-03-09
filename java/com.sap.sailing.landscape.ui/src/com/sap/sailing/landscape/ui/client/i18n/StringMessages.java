@@ -93,4 +93,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String redirectEvent();
     String redirectEventSeries();
     String pleaseProvideAValidId();
+    String defaultRedirectPath();
 }

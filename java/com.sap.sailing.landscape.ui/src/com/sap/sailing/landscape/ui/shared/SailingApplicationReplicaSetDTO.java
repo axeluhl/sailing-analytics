@@ -13,18 +13,20 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
     private ArrayList<SailingAnalyticsProcessDTO> replicas;
     private String version;
     private String hostname;
+    private String defaultRedirectPath;
     
     @Deprecated
     SailingApplicationReplicaSetDTO() {} // for GWT RPC serialization only
 
     public SailingApplicationReplicaSetDTO(String replicaSetName, SailingAnalyticsProcessDTO master,
-            Iterable<SailingAnalyticsProcessDTO> replicas, String version, String hostname) {
+            Iterable<SailingAnalyticsProcessDTO> replicas, String version, String hostname, String defaultRedirectPath) {
         super();
         this.master = master;
         this.replicaSetName = replicaSetName;
         this.version = version;
         this.replicas = new ArrayList<>();
         this.hostname = hostname;
+        this.defaultRedirectPath = defaultRedirectPath;
         Util.addAll(replicas, this.replicas);
     }
     
@@ -54,5 +56,9 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
      */
     public String getHostname() {
         return hostname;
+    }
+
+    public String getDefaultRedirectPath() {
+        return defaultRedirectPath;
     }
 }
