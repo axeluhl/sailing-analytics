@@ -153,7 +153,7 @@ implements StartFromSailingAnalyticsImage {
             } catch (SftpException e) {
                 fileFound = false;
             } finally {
-                sftpChannel.disconnect();
+                sftpChannel.getSession().disconnect();
             }
             return fileFound;
         };
