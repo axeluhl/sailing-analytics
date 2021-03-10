@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -3264,18 +3263,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             ScoringScheme scoringScheme, int[] discardThresholds) {
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
-                overallLeaderboard.getDisplayName(),
-                new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-                        addLeaderboard(overallLeaderboard);
-                        updateStoredLeaderboard(overallLeaderboard);
-                        return null;
-                    }
-                });
+        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+        addLeaderboard(overallLeaderboard);
+        updateStoredLeaderboard(overallLeaderboard);
     }
 
     @Override

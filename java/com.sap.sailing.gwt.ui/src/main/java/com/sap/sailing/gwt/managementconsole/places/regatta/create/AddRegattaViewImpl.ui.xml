@@ -22,23 +22,27 @@
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <label for="boatClass"><ui:text from='{i18n.boatClassLabel}' /></label>
-                <input id="boatClass" placeholder="{i18n.boatClassPlaceholder}"/>
+                <g:SuggestBox ui:field="boatClassNameTextBox"/>
             </div>
              <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <label for="name"><ui:text from='{i18n.regattaNameLabel}' /></label>
-                <input id="name" placeholder="49 Regatta"/>
+                <input ui:field="regattaNameInput" placeholder="49 Regatta"/>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small3} {res.mediaCss.medium3}">
                 <label for="races"><ui:text from='{i18n.racesLabel}' /></label>
-                <input id="races" placeholder="10" style="min-width: 2rem;"/>
+                <g:IntegerBox ui:field="racesInput"/>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small9} {res.mediaCss.medium9}">
                 <label for="ranking"><ui:text from='{i18n.rankingLabel}' /></label>
-                <input id="ranking" placeholder="One-Design"/>
+                <div class="{app_res.style.iconDropDown}">
+                    <g:ValueListBox ui:field="rankingListBox" />
+                </div>
             </div>           
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <label for="scoring"><ui:text from='{i18n.scoringSystemLabel}' /></label>
-                <input id="scoring" placeholder="Low Point System"/>
+                <label><ui:text from='{i18n.scoringSystemLabel}' /></label>
+                <div class="{app_res.style.iconDropDown}">
+                    <g:ValueListBox ui:field="scoringSystemListBox" />
+                </div>
             </div>
         </div>
         <div class="{res.mediaCss.grid}">

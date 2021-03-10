@@ -3891,10 +3891,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                 regattas.add(regatta);
                             }
                         }
-                        // TODO sarah regatten der courseAreas zufügen
                     }
                 }
-            }
+            }            
         }
         return regattas;
     }

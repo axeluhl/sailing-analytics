@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@external gwt-TextBox, gwt-PasswordTextBox, com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput;
+@external gwt-TextBox, gwt-PasswordTextBox, gwt-ListBox, gwt-SuggestBox, gwt-SuggestBoxPopup, com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput;
 
 html, body {
     height: 100%;
@@ -19,7 +19,7 @@ html, .backdropImage {
     color: TEXT_COLOR_PRIMARY;
 }
 
-body * {
+body *, input.gwt-SuggestBox, .gwt-SuggestBoxPopup table tbody tr td {
     font-family: 'Open Sans', sans-serif;
 }
 
@@ -40,7 +40,66 @@ label, .label {
     display: inline-block;
 }
 
-input, .gwt-TextBox, .gwt-PasswordTextBox, input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput {
+select, .gwt-ListBox {
+    -moz-appearance: none; /* Firefox */
+    -webkit-appearance: none; /* Safari and Chrome */
+    appearance: none;
+    background-color: unset;
+    color: TEXT_COLOR_PRIMARY;
+    font-style: italic;
+    font-size: FONT_SIZE_LARGE;
+    line-height: LINE_HEIGHT_LARGE;
+    border-width: 0 0 BORDER_WIDTH_NORMAL;
+    border-style: solid;
+    border-color: TEXT_COLOR_PRIMARY;
+    width: 100%;
+    padding: 0 0 .75rem;
+    margin: 0 0 2rem;
+}
+
+select:focus, .gwt-ListBox:focus {
+    border-width: 0 0 BORDER_WIDTH_NORMAL;
+    border-style: solid;
+    border-color: TEXT_COLOR_PRIMARY;
+}
+
+.icon-drop-down::before {
+    content: "";
+	position: absolute;
+	width: 25px;
+	height: 25px;
+	top: 45%;
+    right: 1rem;
+	z-index: -1;
+	background: resourceUrl("iconBack") no-repeat right;
+    transform: rotate(-90deg);
+    background-color: unset;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.gwt-SuggestBoxPopup div table tbody tr,  .gwt-SuggestBoxPopup div table tbody tr td {
+    border: 0 none !important;
+    background: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.gwt-SuggestBoxPopup div table tbody tr td div div {
+	background-color: BACKGROUND_COLOR_LIGHTER;
+}
+
+select option, .gwt-ListBox option, .gwt-SuggestBoxPopup table tbody tr td {
+	color: TEXT_COLOR_PRIMARY !important;
+	font-style: italic;
+    font-size: FONT_SIZE_LARGE !important;
+    line-height: LINE_HEIGHT_LARGE;
+	background-color: BACKGROUND_COLOR_LIGHTER;
+}
+
+input, .gwt-TextBox, .gwt-PasswordTextBox, .gwt-SuggestBox, input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput {
     color: TEXT_COLOR_PRIMARY;
     font-style: italic;
     font-size: FONT_SIZE_LARGE;
@@ -59,6 +118,7 @@ input, .gwt-TextBox, .gwt-PasswordTextBox, input.com-sap-sse-gwt-client-controls
 input::placeholder,
 .gwt-TextBox::placeholder,
 .gwt-PasswordTextBox::placeholder,
+.gwt-SuggestBox::placeholder,
 input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: TEXT_COLOR_INPUTS;
     opacity: 1; /* Firefox */
@@ -67,10 +127,12 @@ input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-date
 input:-ms-input-placeholder,
 .gwt-TextBox:-ms-input-placeholder,
 .gwt-PasswordTextBox:-ms-input-placeholder,
+.gwt-SuggestBox:-ms-input-placeholder,
 input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput:-ms-input-placeholder   /* Internet Explorer 10-11 */
 input::-ms-input-placeholder,
 .gwt-TextBox::-ms-input-placeholder,
-.gwt-PasswordTextBox::-ms-input-placeholder
+.gwt-PasswordTextBox::-ms-input-placeholder,
+.gwt-SuggestBox::-ms-input-placeholder,
 input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-dateTimeInput::-ms-input-placeholder { /* Microsoft Edge */
     color: TEXT_COLOR_INPUTS;
 }

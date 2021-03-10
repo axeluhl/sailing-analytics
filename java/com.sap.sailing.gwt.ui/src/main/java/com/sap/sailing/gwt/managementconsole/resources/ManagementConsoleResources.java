@@ -146,6 +146,9 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("card-content")
         String cardContent();
+        
+        @ClassName("icon-drop-down")
+        String iconDropDown();
 
     }
 
