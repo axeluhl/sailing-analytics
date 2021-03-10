@@ -59,14 +59,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private final CompletableFuture<TargetGroup<ShardingKey>> masterTargetGroup;
     private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
     private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
-    private final AwsLandscape<ShardingKey> landscape;
 
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
-            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion, AwsLandscape<ShardingKey> landscape, DNSCache dnsCache) {
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion, DNSCache dnsCache) {
         super(replicaSetAndServerName, hostname, master, replicas);
-        this.landscape = landscape;
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
         hostedZoneId = new CompletableFuture<>();
@@ -93,7 +91,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             AwsLandscape<ShardingKey> landscape, DNSCache dnsCache) {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
-                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, landscape, dnsCache);
+                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, dnsCache);
     }
     
     /**
