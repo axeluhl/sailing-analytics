@@ -38,6 +38,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
     private final InetAddress privateAddress;
+    private InetAddress publicAddress;
     private final TimePoint launchTimePoint;
     private final AwsLandscape<ShardingKey> landscape;
     
@@ -73,30 +74,34 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
 
     @Override
     public InetAddress getPublicAddress() {
-        try {
-            return getPublicAddress(Optional.of(Duration.NULL));
-        } catch (TimeoutException e) {
-            logger.info("Couldn't get public address of instance "+getId());
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (publicAddress == null) {
+            try {
+                publicAddress = getPublicAddress(Optional.of(Duration.NULL));
+            } catch (TimeoutException e) {
+                logger.info("Couldn't get public address of instance "+getId());
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+        return publicAddress;
     }
     
     @Override
     public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception {
-        final Instance instance = getInstance();
-        InetAddress result;
-        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
-        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
-            final String publicIpAddress = Wait.wait(()->instance.publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
-                    timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
-                    Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
-            result = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);
-        } else {
-            result = null;
+        if (publicAddress == null) {
+            final Instance instance = getInstance();
+            // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+            if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+                final String publicIpAddress = Wait.wait(()->instance.publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
+                        timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                        Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
+                publicAddress = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);
+            } else {
+                publicAddress = null;
+            }
         }
-        return result;
+        return publicAddress;
     }
     
     @Override
