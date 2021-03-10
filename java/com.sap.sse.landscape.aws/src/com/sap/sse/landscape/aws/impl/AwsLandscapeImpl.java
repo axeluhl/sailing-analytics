@@ -157,9 +157,6 @@ import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.GetChangeRequest;
-import software.amazon.awssdk.services.route53.model.HostedZone;
-import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsRequest;
-import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
@@ -355,8 +352,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
-        // FIXME handle "paging" in case nextMarker() is set in the response; see also describeTargetGroupsPaginator
-        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
+        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
                 tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
                         tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
@@ -1244,10 +1240,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         backgroundExecutor.shutdown();
         final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
+        final DNSCache dnsCache = getNewDNSCache();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
             final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),
                     serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
-                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
+                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, dnsCache);
             result.add(replicaSet);
         }
         return result;
@@ -1302,40 +1299,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return result;
     }
 
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    String findHostnameForProcessThroughLoadBalancers(com.sap.sse.landscape.Region region, ProcessT process) {
-        final ApplicationLoadBalancer<ShardingKey> loadBalancer = findLoadBalancerForProcess(region, process);
-        // FIXME loadBalancer may be null / not found, especially when the process is served only through the reverse proxy, such as for the ARCHIVE server
-        String result;
-        if (loadBalancer == null) {
-            logger.info("Using default hostname for process running on "+process.getHost().getId());
-            // FIXME this seems a strange default:
-            result = "www.sapsailing.com";
-        } else {
-            result = null;
-            // FIXME many DNS entries may point to the same load balancer; how do we know it's the correct one? --> Disambiguation...
-            final String loadBalancerDNSName = loadBalancer.getDNSName();
-            final Route53Client route53Client = getRoute53Client();
-            outer: for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
-                ListResourceRecordSetsResponse resourceRecordSetsResponse = null;
-                do {
-                    final ListResourceRecordSetsRequest.Builder resourceRecordSetsRequestBuilder = ListResourceRecordSetsRequest.builder();
-                    resourceRecordSetsRequestBuilder.hostedZoneId(hostedZone.id());
-                    if (resourceRecordSetsResponse != null) {
-                        assert resourceRecordSetsResponse.isTruncated();
-                        resourceRecordSetsRequestBuilder.startRecordName(resourceRecordSetsResponse.nextRecordName());
-                    }
-                    resourceRecordSetsResponse = route53Client.listResourceRecordSets(resourceRecordSetsRequestBuilder.build());
-                    for (final ResourceRecordSet resourceRecordSet : resourceRecordSetsResponse.resourceRecordSets()) {
-                        if (resourceRecordSet.type() == RRType.CNAME && !Util.isEmpty(Util.filter(resourceRecordSet.resourceRecords(), rr->rr.value().equals(loadBalancerDNSName)))) {
-                            result = resourceRecordSet.name().replaceFirst("\\.$", ""); // remove trailing dots
-                            break outer;
-                        }
-                    }
-                } while (resourceRecordSetsResponse.isTruncated());
-            }
-        }
-        return result;
+    @Override
+    public CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname) {
+        final Route53AsyncClient route53Client = getRoute53AsyncClient();
+        final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
+        return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
+            Util.filter(response.resourceRecordSets(), resourceRecordSet->resourceRecordSet.name().replaceFirst("\\.$", "").equals(hostname)));
     }
     
     @Override
@@ -1400,15 +1369,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
-        // FIXME handle paging for large target groups response if nextMarker() is set in response; see also DescribeTargetGroupsResponseFetcher and ; see also describeTargetGroupsPaginator
-        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroups().thenCompose(response->{
+        final Set<DescribeTargetGroupsResponse> responses = new HashSet<>();
+        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroupsPaginator().subscribe(response->responses.add(response)).thenCompose(someVoid->{
+                // now we have all responses
             final Map<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>> futures = new HashMap<>();
-            for (final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup tg : response.targetGroups()) {
-                final TargetGroup<ShardingKey> targetGroup = new AwsTargetGroupImpl<ShardingKey>(this, region,
-                        tg.targetGroupName(), tg.targetGroupArn(), Util.first(tg.loadBalancerArns()),
-                        tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg),
-                        tg.healthCheckPath());
-                futures.put(targetGroup, getTargetHealthDescriptionsAsync(region, targetGroup));
+            for (final DescribeTargetGroupsResponse response : responses) {
+                for (final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup tg : response.targetGroups()) {
+                    final TargetGroup<ShardingKey> targetGroup = new AwsTargetGroupImpl<ShardingKey>(this, region,
+                            tg.targetGroupName(), tg.targetGroupArn(), Util.first(tg.loadBalancerArns()),
+                            tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg),
+                            tg.healthCheckPath());
+                    futures.put(targetGroup, getTargetHealthDescriptionsAsync(region, targetGroup));
+                }
             }
             return CompletableFuture.allOf(futures.values().toArray(new CompletableFuture<?>[0])).handle((v, e)->{
                 final Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> result = new HashMap<>();
@@ -1424,25 +1396,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
     }
     
-    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    ApplicationLoadBalancer<ShardingKey> findLoadBalancerForProcess(com.sap.sse.landscape.Region region, ProcessT process) {
-        for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : getLoadBalancers(region)) {
-            for (final TargetGroup<ShardingKey> targetGroup : loadBalancer.getTargetGroups()) {
-                // first check that the target group is forwarding to the correct port:
-                // FIXME What about the case where the target group health-checks the targets through the HTTPS port through the reverse proxy? The "backward-compatible" case...
-                if (Util.equalsWithNull(targetGroup.getHealthCheckPort(), process.getPort())) {
-                    // then check whether the process is part of targets registered:
-                    final Optional<Entry<AwsInstance<ShardingKey>, TargetHealth>> target = targetGroup.getRegisteredTargets().entrySet().stream()
-                            .filter(e->e.getKey().getInstanceId().equals(process.getHost().getId())).findAny();
-                    if (target.isPresent()) {
-                        return loadBalancer;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public AwsRegion getDefaultRegion() {
         return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
@@ -1506,5 +1459,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Snapshot getSnapshot(AwsRegion region, String snapshotId) {
         final DescribeSnapshotsResponse describeSnapshotResponse = getEc2Client(getRegion(region)).describeSnapshots(b->b.filters(Filter.builder().name("snapshot-id").values(snapshotId).build()));
         return describeSnapshotResponse.hasSnapshots() ? describeSnapshotResponse.snapshots().iterator().next() : null;
+    }
+
+    @Override
+    public DNSCache getNewDNSCache() {
+        return new DNSCache(getRoute53AsyncClient());
     }
 }

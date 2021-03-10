@@ -23,6 +23,7 @@ import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsLandscapeImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
+import com.sap.sse.landscape.aws.impl.DNSCache;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
@@ -51,6 +52,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.RRType;
+import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 /**
@@ -620,4 +622,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     static String getHostedZoneName(String hostname) {
         return hostname.substring(hostname.indexOf('.')+1);
     }
+
+    CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname);
+
+    DNSCache getNewDNSCache();
 }

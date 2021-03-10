@@ -18,6 +18,7 @@ import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -28,6 +29,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53AsyncClient;
+import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 /**
@@ -57,12 +59,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private final CompletableFuture<TargetGroup<ShardingKey>> masterTargetGroup;
     private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
     private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
+    private final AwsLandscape<ShardingKey> landscape;
 
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
-            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion) {
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion, AwsLandscape<ShardingKey> landscape, DNSCache dnsCache) {
         super(replicaSetAndServerName, hostname, master, replicas);
+        this.landscape = landscape;
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
         hostedZoneId = new CompletableFuture<>();
@@ -73,7 +77,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         resourceRecordSet = new CompletableFuture<>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
-                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules))))
+                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, dnsCache))))
             .handle((v, e)->{
                 if (e != null) {
                     logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
@@ -82,11 +86,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             });
     }
 
-    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master, Optional<Iterable<ProcessT>> replicas,
+    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, ProcessT master,
+            Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
-            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion) {
-        this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
+            AwsLandscape<ShardingKey> landscape, DNSCache dnsCache) {
+        this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
+                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, landscape, dnsCache);
     }
     
     /**
@@ -126,7 +133,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
-            Map<Listener, Iterable<Rule>> listenersAndTheirRules) {
+            Map<Listener, Iterable<Rule>> listenersAndTheirRules, DNSCache dnsCache) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
@@ -158,6 +165,25 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         // and we can determine the load balancer via the Listener now:
                         myLoadBalancer = Util.first(Util.filter(loadBalancers, loadBalancer->loadBalancer.getArn().equals(e.getKey().loadBalancerArn())));
                         loadBalancer.complete(myLoadBalancer);
+                        dnsCache.getHostedZoneId(AwsLandscape.getHostedZoneName(hostname)).handle((hzid, ex)->hostedZoneId.complete(hzid));
+                        dnsCache.getResourceRecordSetsAsync(hostname).thenAccept(resourceRecordSets->
+                            Util.stream(resourceRecordSets).findFirst().ifPresent(rrs->{
+                                resourceRecordSet.complete(rrs);
+                                try {
+                                    if (rrs.type() == RRType.CNAME && !Util.isEmpty(Util.filter(rrs.resourceRecords(), rr->{
+                                        try {
+                                            return rr.value().equals(getLoadBalancer().getDNSName());
+                                        } catch (InterruptedException | ExecutionException e1) {
+                                            logger.log(Level.WARNING, "This shouldn't have happened", e1);
+                                            throw new RuntimeException(e1);
+                                        }
+                                    }))) {
+                                        logger.fine("Found DNS resource record "+getHostname()+" pointing to application replica set's load balancer "+getLoadBalancer().getArn());
+                                    }
+                                } catch (InterruptedException | ExecutionException e1) {
+                                    logger.log(Level.WARNING, "This shouldn't have happened", e1);
+                                }
+                            }));
                         break outer;
                     }
                 }

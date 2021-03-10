@@ -81,6 +81,7 @@ import com.sap.sse.landscape.aws.impl.AwsApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.impl.AwsAvailabilityZoneImpl;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
+import com.sap.sse.landscape.aws.impl.DNSCache;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
 import com.sap.sse.landscape.aws.orchestration.CreateLoadBalancerMapping;
@@ -562,9 +563,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final DNSCache dnsCache = landscape.getNewDNSCache();
         final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(name, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion);
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, landscape, dnsCache);
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
