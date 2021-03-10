@@ -95,7 +95,7 @@ public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPool
             final ObjectName mBeanName = mbean.getObjectName();
             mbs.registerMBean(mbean, mBeanName);
         } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-            logger.log(Level.SEVERE, "Couldn't register MBean for thread pool executor "+this.getName(), e);
+            logger.warning("Couldn't register MBean for thread pool executor "+this.getName()+": "+e.getMessage());
         }
     }
     
