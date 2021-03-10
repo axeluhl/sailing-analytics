@@ -505,6 +505,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .setReplicaSetVotes(mongoScalingInstructions.getLaunchParameters().getReplicaSetVotes())
                 .build();
             startMongoDBServer.run();
+            if (i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances()-1) {
+                Thread.sleep(5000); // give the primary a chance to apply the configuration change before asking for the next configuration change
+            }
         }
     }
     
