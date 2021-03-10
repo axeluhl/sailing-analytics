@@ -104,6 +104,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
@@ -566,10 +567,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(name, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, dnsCache);
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder

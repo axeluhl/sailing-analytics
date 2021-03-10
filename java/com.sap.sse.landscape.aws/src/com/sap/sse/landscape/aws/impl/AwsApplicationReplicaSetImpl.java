@@ -63,7 +63,8 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
-            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion, DNSCache dnsCache) {
+            CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
+            CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups, DNSCache dnsCache) {
         super(replicaSetAndServerName, hostname, master, replicas);
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
@@ -75,7 +76,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         resourceRecordSet = new CompletableFuture<>();
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
-                allLoadBalancerRulesInRegion.handle((listenersAndTheirRules, e)->establishState(loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, dnsCache))))
+                allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
+                    allAutoScalingGroups.handle((autoScalingGroups, e)->establishState(
+                        loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, dnsCache)))))
             .handle((v, e)->{
                 if (e != null) {
                     logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
@@ -89,9 +92,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
-            AwsLandscape<ShardingKey> landscape, DNSCache dnsCache) {
+            AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups, DNSCache dnsCache) {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
-                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, dnsCache);
+                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, dnsCache);
     }
     
     /**
@@ -100,38 +103,38 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      * 
      * <ul>
      * <li>Find all targets from allTargetGroupsInRegion's TargetHealthDescriptions by comparing the target ID to the
-     * master/replica host IDs, and comparing the ProcessT's health check ports to the TargetHealthDescriptions
-     * health check ports.</li>
+     * master/replica host IDs, and comparing the ProcessT's health check ports to the TargetHealthDescriptions health
+     * check ports.</li>
      * 
      * <li>The TargetGroup to which the master's TargetHealthDescription belongs, is remembered as the
-     * getMasterTargetGroup(); likewise, those of the replicas are expected to all be the same (at least as long as
-     * we don't support sharing here), which is remembered as the getPublicTargetGroup().</li>
+     * getMasterTargetGroup(); likewise, those of the replicas are expected to all be the same (at least as long as we
+     * don't support sharing here), which is remembered as the getPublicTargetGroup().</li>
      * 
      * <li>Find the Rule(s) in allLoadBalancerRulesInRegion that forward to those target groups; they are all expected
-     * to exhibit an equal host-header condition which provides us with the hostname for this replica set. Remember
-     * the load balancer(s) (can only be more than one if in the future we support cross-region application replica
-     * sets) obtained from the loadBalancerArn that comes with the Listener which keys the Rule lists as the
-     * response for getLoadBalancer(). Remember the rules as the result for getLoadBalancerRules().</li>
+     * to exhibit an equal host-header condition which provides us with the hostname for this replica set. Remember the
+     * load balancer(s) (can only be more than one if in the future we support cross-region application replica sets)
+     * obtained from the loadBalancerArn that comes with the Listener which keys the Rule lists as the response for
+     * getLoadBalancer(). Remember the rules as the result for getLoadBalancerRules().</li>
      * 
      * <li>From the Rule objects determine the one that has a path-pattern of "/" and the host-header condition as the
      * only two conditions and remember that as the result of getDefaultRedirectRule().</li>
      * 
-     * <li>Find the archive server(s) based on their SERVER_NAME which can be assumed to be "ARCHIVE" which is
-     * expected to not be used by anything else for now. Those should at the same time be the only ProcessT instances
-     * not registered in any TargetGroup.</li>
+     * <li>Find the archive server(s) based on their SERVER_NAME which can be assumed to be "ARCHIVE" which is expected
+     * to not be used by anything else for now. Those should at the same time be the only ProcessT instances not
+     * registered in any TargetGroup.</li>
      * 
-     * <li>TODO Start to explore the auto scaling infrastructure in order to establish the link from the
-     * ApplicationReplicaSet to its AutoScalingGroup(s) (multiple in the future as we may start sharding; then, each
-     * shard would have its own AutoScalingGroup and TargetGroup with dedicated routing rules). The AutoScalingGroup
-     * can be identified either by name (if we decide for a unique naming pattern) or by enumerating all
-     * AutoScalingGroups and filtering for their targetGroupArn.</li>
+     * <li>Discover the Route53 DNS entry pointing to the load balancer with the {@link #hostname} discovered</li>
      * 
-     * <li>TODO Discover the Route53 DNS entry pointing to the load balancer with the {@link #hostname} discovered</li>
+     * <li>Explore the auto scaling infrastructure in order to establish the link from this
+     * {@link ApplicationReplicaSet} to its {@link AutoScalingGroup}(s) (multiple in the future as we may start
+     * sharding; then, each shard would have its own {@link AutoScalingGroup} and {@link TargetGroup} with dedicated
+     * routing rules). The {@link AutoScalingGroup} can be identified by enumerating all {@link AutoScalingGroup}s and
+     * filtering for their {@link TargetGroup#getTargetGroupArn() targetGroupArn}.</li>
      * </ul>
      */
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
-            Map<Listener, Iterable<Rule>> listenersAndTheirRules, DNSCache dnsCache) {
+            Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups, DNSCache dnsCache) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
@@ -142,6 +145,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 } else if (!publicTargetGroup.isDone() &&
                         !Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))) {
                     publicTargetGroup.complete(e.getKey());
+                    tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups);
                 }
             }
         }
@@ -221,9 +225,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 setHostname(null);
             }
         }
-        // TODO identify autoScalingGroup
-        // TODO identify resourceRecordSet
         return null;
+    }
+
+    private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups) {
+        Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
+            findFirst().ifPresent(asg->
+                autoScalingGroup.complete(asg));
     }
 
     @Override

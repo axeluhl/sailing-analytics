@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,7 +80,9 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
@@ -265,6 +268,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     private AutoScalingClient getAutoScalingClient(Region region) {
         return getClient(AutoScalingClient.builder(), region);
+    }
+    
+    private AutoScalingAsyncClient getAutoScalingAsyncClient(Region region) {
+        return getClient(AutoScalingAsyncClient.builder(), region);
     }
     
     /**
@@ -1194,6 +1201,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1244,7 +1252,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
             final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),
                     serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
-                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, dnsCache);
+                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, autoScalingGroups, dnsCache);
             result.add(replicaSet);
         }
         return result;
@@ -1323,6 +1331,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(com.sap.sse.landscape.Region region,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion) {
         return allLoadBalancersInRegion.thenCompose(loadBalancers->getListenerToRulesMap(region, loadBalancers));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(com.sap.sse.landscape.Region region) {
+        final Set<AutoScalingGroup> result = new HashSet<>();
+        return getAutoScalingAsyncClient(getRegion(region)).describeAutoScalingGroupsPaginator().subscribe(response->
+            result.addAll(response.autoScalingGroups())).handle((v, e)->Collections.unmodifiableCollection(result));
     }
     
     private CompletableFuture<Map<Listener, Iterable<Rule>>> getListenerToRulesMap(com.sap.sse.landscape.Region region, Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers) {
