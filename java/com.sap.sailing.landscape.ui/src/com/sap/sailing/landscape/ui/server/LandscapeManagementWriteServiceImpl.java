@@ -620,4 +620,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
         return null;
     }
+
+    @Override
+    public void removeApplicationReplicaSet(SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
+        /*
+         * TODO implement removeApplicationReplicaSet; will probably need to enumerate things again, starting from the
+         * master and replica processes and their hosts where the DTO tells us the respective regions; we also know the
+         * hostname. So we can look for the load balancer rules having this hostname in their hostname header, and for
+         * any S3 records, and hopefully re-use some of the logic used in getApplicationReplicaSets. At least do the
+         * following:
+         * 
+         * - remove the auto scaling group
+         * - remove the launch configuration used by the auto scaling group
+         * - terminate the instances
+         * - remove the load balancer rules
+         * - remove the target groups
+         * - remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
+         * - remove the DNS record if this replica set was a DNS-mapped one
+         */
+    }
 }

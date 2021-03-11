@@ -101,6 +101,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(2, "MongoDB MD5 Hasher "+UUID.randomUUID());
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
         final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
+        executor.shutdown();
         if (sourceMd5.get().equals(targetMd5.get())) {
             logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+". Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
             sourceDatabase.drop();

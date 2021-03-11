@@ -71,4 +71,6 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String securityReplicationBearerToken, String optionalDomainName) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
+
+    void removeApplicationReplicaSet(SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove);
 }

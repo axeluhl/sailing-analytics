@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.ActionsColumn;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -173,7 +174,20 @@ public class LandscapeManagementPanel extends SimplePanel {
         // application replica sets:
         applicationReplicaSetsTable = new TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
-                /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                /* entity identity comparator */ Optional.of(new EntityIdentityComparator<SailingApplicationReplicaSetDTO<String>>() {
+                    @Override
+                    public boolean representSameEntity(SailingApplicationReplicaSetDTO<String> dto1,
+                            SailingApplicationReplicaSetDTO<String> dto2) {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+
+                    @Override
+                    public int hashCode(SailingApplicationReplicaSetDTO<String> t) {
+                        // TODO Auto-generated method stub
+                        return 0;
+                    }
+                }), GWT.create(AdminConsoleTableResources.class),
                 /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
                 /* filter checkbox label */ null) {
             @Override
@@ -350,7 +364,20 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
-            // TODO implement LandscapeManagementPanel.removeApplicationReplicaSet
+            applicationReplicaSetsBusy.setBusy(true);
+            landscapeManagementService.removeApplicationReplicaSet(applicationReplicaSetToRemove, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    applicationReplicaSetsBusy.setBusy(false);
+                    errorReporter.reportError(caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    applicationReplicaSetsBusy.setBusy(false);
+                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToRemove);
+                }
+            });
         }
     }
 
