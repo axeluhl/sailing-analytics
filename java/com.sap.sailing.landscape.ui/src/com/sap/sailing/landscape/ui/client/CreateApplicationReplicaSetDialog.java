@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -107,6 +108,11 @@ public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApp
         return result;
     }
 
+    @Override
+    public FocusWidget getInitialFocusWidget() {
+        return nameBox;
+    }
+    
     @Override
     protected CreateApplicationReplicaSetInstructions getResult() {
         return new CreateApplicationReplicaSetInstructions(nameBox.getValue(), instanceTypeListBox.getSelectedValue(),
