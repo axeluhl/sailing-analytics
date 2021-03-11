@@ -1,13 +1,17 @@
 package com.sap.sse.landscape.mongodb.impl;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.bson.Document;
 
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.session.ClientSession;
 import com.sap.sse.common.Duration;
@@ -16,6 +20,8 @@ import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 
 public abstract class MongoEndpointImpl implements MongoEndpoint {
+    private static final Logger logger = Logger.getLogger(MongoEndpointImpl.class.getName());
+    
     @Override
     public Iterable<MongoDatabase> getMongoDatabases() throws URISyntaxException {
         final MongoClient client = getClient();
@@ -28,9 +34,30 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     }
 
     @Override
-    public MongoDatabase importDatabase(MongoDatabase from) {
-        // TODO Implement MongoReplicaSetImpl.importDatabase(...)
-        return null;
+    public MongoDatabase importDatabase(MongoDatabase from) throws URISyntaxException {
+        final int BATCH_SIZE = 100;
+        final MongoDatabase targetDatabase = getMongoDatabase(from.getName());
+        logger.info("Importing database "+from+" into "+targetDatabase);
+        for (final String collectionName : from.listCollectionNames()) {
+            final MongoCollection<Document> sourceCollection = from.getCollection(collectionName);
+            final MongoCollection<Document> targetCollection = targetDatabase.getCollection(collectionName);
+            logger.info("...importing "+sourceCollection.count()+" documents from collection "+collectionName+" from "+from+" into "+this);
+            List<Document> documentsToInsert = new ArrayList<>(BATCH_SIZE);
+            int i=0;
+            for (final Document document : sourceCollection.find()) {
+                documentsToInsert.add(document);
+                i++;
+                if (i>=BATCH_SIZE) {
+                    targetCollection.insertMany(documentsToInsert);
+                    i = 0;
+                    documentsToInsert = new ArrayList<>(BATCH_SIZE);
+                }
+            }
+            if (i>0) {
+                targetCollection.insertMany(documentsToInsert);
+            }
+        }
+        return targetDatabase;
     }
 
     @Override
@@ -62,10 +89,20 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     public ClientSession getClientSession() throws URISyntaxException {
         return getClient().startSession(ClientSessionOptions.builder().causallyConsistent(true).build());
     }
-
     
     @Override
     public String getMD5Hash(MongoDatabase database) throws URISyntaxException {
         return database.runCommand(new Document("dbHash", 1)).get("md5").toString();
+    }
+
+    @Override
+    public String toString() {
+        String uri;
+        try {
+            uri = getURI(Optional.empty()).toString();
+        } catch (URISyntaxException e) {
+            uri = "<Error determining URI: "+e.getMessage()+">";
+        }
+        return "MongoEndpointImpl ["+uri+"]";
     }
 }

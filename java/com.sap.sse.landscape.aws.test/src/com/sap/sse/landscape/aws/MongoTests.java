@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -7,13 +8,17 @@ import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.Random;
 
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
@@ -56,5 +61,47 @@ public class MongoTests {
         final String hash = mongoReplicaSet.getMD5Hash("local");
         assertNotNull(hash);
         assertTrue(!hash.isEmpty());
+    }
+
+    @Test
+    public void testImport() throws URISyntaxException {
+        final String dbName = "importtest"+new Random().nextInt();
+        try { 
+            final MongoDatabase exportFrom = mongoReplicaSet.getMongoDatabase(dbName);
+            exportFrom.drop();
+            mongoProcess.getMongoDatabase(dbName).drop();
+            exportFrom.getCollection("C1").insertOne(new Document("a", "b"));
+            exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
+            exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
+            mongoProcess.importDatabase(exportFrom);
+            final String hashExport = mongoReplicaSet.getMD5Hash(dbName);
+            final String hashImport = mongoProcess.getMD5Hash(dbName);
+            assertNotNull(hashExport);
+            assertEquals(hashExport, hashImport);
+        } finally {
+            mongoProcess.getMongoDatabase(dbName).drop();
+            mongoReplicaSet.getMongoDatabase(dbName).drop();
+        }
+    }
+
+    /**
+     * An SSH tunnel locally bound to port 10202 to dbserver.internal.sapsailing.com:10202 is required for
+     * this test.
+     */
+    @Test
+    public void testImportWCS2018MarseilleThroughTunnel() throws URISyntaxException {
+        final String dbName = "wcs2018-marseille";
+        try { 
+            final MongoProcess archive = new MongoProcessImpl(localhost, 10202);
+            final MongoDatabase exportFrom = archive.getMongoDatabase(dbName);
+            mongoProcess.getMongoDatabase(dbName).drop();
+            mongoProcess.importDatabase(exportFrom);
+            final String hashExport = mongoReplicaSet.getMD5Hash(dbName);
+            final String hashImport = mongoProcess.getMD5Hash(dbName);
+            assertNotNull(hashExport);
+            assertEquals(hashExport, hashImport);
+        } finally {
+            mongoProcess.getMongoDatabase(dbName).drop();
+        }
     }
 }

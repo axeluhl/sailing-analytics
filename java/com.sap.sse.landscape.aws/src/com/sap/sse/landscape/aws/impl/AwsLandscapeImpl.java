@@ -1128,7 +1128,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     }
                 } else {
                     // single instance:
-                    result.add(new MongoProcessImpl(replicaSetNameAndPort.getB(), mongoDBHost));
+                    result.add(new MongoProcessImpl(mongoDBHost, replicaSetNameAndPort.getB()));
                 }
             }
         }
