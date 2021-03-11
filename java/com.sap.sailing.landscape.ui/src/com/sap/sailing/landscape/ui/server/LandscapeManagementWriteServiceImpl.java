@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -478,9 +479,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName) throws Exception {
+        final int WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS = 5000;
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
-        for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
+        for (final Iterator<MongoProcessDTO> i=mongoScalingInstructions.getHostnamesAndPortsToShutDown().iterator(); i.hasNext(); ) {
+            final ProcessDTO processToShutdown = i.next();
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion());
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
@@ -489,6 +492,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                             InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()),
                             processToShutdown.getHost().getLaunchTimePoint(), landscape);
             instance.terminate();
+            if (i.hasNext()) {
+                Thread.sleep(WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS); // give the primary a chance to apply the configuration change before asking for the next configuration change
+            }
         }
         if (mongoScalingInstructions.getReplicaSetName() == null) {
             throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
@@ -509,7 +515,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .build();
             startMongoDBServer.run();
             if (i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances()-1) {
-                Thread.sleep(5000); // give the primary a chance to apply the configuration change before asking for the next configuration change
+                Thread.sleep(WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS); // give the primary a chance to apply the configuration change before asking for the next configuration change
             }
         }
     }
