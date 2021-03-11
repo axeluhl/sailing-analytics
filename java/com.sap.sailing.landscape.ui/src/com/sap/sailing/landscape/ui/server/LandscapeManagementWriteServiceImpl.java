@@ -256,7 +256,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
         return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(),
-                host.getPrivateAddress().getHostAddress(), host.getRegion().getId(), host.getLaunchTimePoint());
+                host.getPrivateAddress().getHostAddress(),
+                host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
+                host.getRegion().getId(), host.getLaunchTimePoint());
     }
     
     @Override
