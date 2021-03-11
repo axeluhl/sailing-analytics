@@ -279,7 +279,6 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
         // TODO support archive server upgrade
         // TODO support upgrading all app server instances in a region
-        // TODO region table should remember its last selection in user preferences
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
