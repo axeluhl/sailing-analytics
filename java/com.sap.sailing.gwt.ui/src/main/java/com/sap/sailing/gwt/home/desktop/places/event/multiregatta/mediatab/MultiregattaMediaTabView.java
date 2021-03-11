@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultirega
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.security.shared.HasPermissions;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -34,14 +35,24 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        final TabView.State state;
+        if (currentPresenter.hasMedia()) {
+            state = TabView.State.VISIBLE;
+        } else if (currentPresenter.getUserService().hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE)) {
+            state = TabView.State.VISIBLE;
+        } else {
+            state = TabView.State.INVISIBLE;
+        }
+        
+        return state;
+        //return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(MultiregattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         ErrorAndBusyClientFactory errorAndBusyClientFactory = currentPresenter.getErrorAndBusyClientFactory();
         final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView(), currentPresenter.getEventBus(), 
-                currentPresenter.getUserService(), currentPresenter.getEventDTO().getId());
+                currentPresenter.getUserService(), currentPresenter.getEventDTO());
         initWidget(mediaPage);
         currentPresenter.ensureMedia(new ActivityCallback<MediaDTO>(errorAndBusyClientFactory, contentArea) {
             @Override

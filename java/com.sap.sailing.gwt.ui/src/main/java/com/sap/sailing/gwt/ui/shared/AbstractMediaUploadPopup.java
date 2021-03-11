@@ -121,7 +121,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         VerticalPanel metaDataPanel = new VerticalPanel();
         metaDataForm.add(metaDataPanel);
         
-        Label fileNameLabel = new Label(i18n.name());
+        Label fileNameLabel = new Label(i18n.fileUpload());
         fileNameLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
         metaDataPanel.add(fileNameLabel);
 
@@ -145,8 +145,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         fileInputGroup.add(uploadButton);
         metaDataPanel.add(fileInputGroup);
         
-        // TODO: translate
-        metaDataPanel.add(new Label("-- or --"));
+        metaDataPanel.add(new Label("-- " + i18n.or() + " --"));
         
         Label urlLabel = new Label(i18n.url());
         urlLabel.addStyleName(sharedHomeResources.sharedHomeCss().label());
@@ -168,8 +167,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         metaDataPanel.add(urlInput);
         
         fileExistingPanel = new FlowPanel();
-        // TODO: translate
-        fileExistingPanel.add(new Label("-- no media selected --"));
+        fileExistingPanel.add(new Label("-- " + i18n.noMediaSelected() + " --"));
         metaDataPanel.add(fileExistingPanel);
         
         Label detailsSubTitle = new Label(i18n.details());
@@ -309,12 +307,10 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else {
             mimeType = MimeType.unknown;
         }
-        logger.info("Check returned mimeType: " + mimeType);
         return mimeType;
     }
     
     private boolean matches(String matcher, String pattern) {
-        logger.info("Check matcher: " + matcher + " with pattern: " + pattern);
         return RegExp.compile(pattern, "i").test(matcher);
     }
     
@@ -336,7 +332,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // this opportunity to perform validation.
             if (getMimeType(upload.getFilename()) == MimeType.unknown) {
                 logger.log(Level.SEVERE, "File type is not supported.");
-                Notification.notify("File type is not supported.", NotificationType.WARNING);
+                Notification.notify(i18n.fileTypeNotSupported(), NotificationType.WARNING);
                 event.cancel();
             }
         }
@@ -350,13 +346,9 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // fired. Assuming the service returned a response of type text/html,
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
-            logger.info("Enter SubmitCompleteHandler");
             String result = event.getResults().trim();
-            logger.info("Enter SubmitCompleteHandler. result: " + result);
             JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
-            logger.info("Enter SubmitCompleteHandler. resultJsonValue: " + resultJsonValue);
             JSONArray resultJson = resultJsonValue.isArray();
-            logger.info("resultJson");
             if (resultJson != null) {
                 if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                     String uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString()
@@ -401,7 +393,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         if (uri == null) {
             uploadUrl = "";
         } else if (!UriUtils.isSafeUri(uri.trim()))  {
-            logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+            logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
             uploadUrl = "";
         } else {
             uploadUrl = uri.trim();
@@ -410,7 +402,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         if (urlInput.getValue() == null) {
             inputUrl = "";
         } else if (!UriUtils.isSafeUri(urlInput.getValue())) {
-            logger.severe("Upload url is not valid: " + uri + ". Ignore upload url.");
+            logger.warning("Upload url is not valid: " + uri + ". Ignore upload url.");
             inputUrl = "";
         } else {
             inputUrl = urlInput.getValue();
@@ -437,8 +429,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 updateVideo.accept(createVideo(url, null, mimeType));
             } else {
                 logger.warning("No image nor video detected. Nothing will be saved.");
-                // TODO: translation
-                Notification.notify("No image nor video detected. Nothing will be saved.", NotificationType.WARNING);
+                Notification.notify(i18n.noImageOrVideoDetected(), NotificationType.WARNING);
             }
             
         } else {
@@ -447,7 +438,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     private ImageDTO createImage(String url) {
-        logger.info("Start creating an image. URL: " + url);
         final ImageDTO image = new ImageDTO(url, new Date());
         image.setTitle(titleTextBox.getValue());
         image.setSubtitle(subtitleTextBox.getValue());
@@ -533,7 +523,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     }
     
     private void updateUri(String uri, String fileName) {
-        logger.info("Update uri and fileName. URI: " + uri + ", fileName: " + fileName);
         this.uri = uri;
         if (uri == null) {
             fileExistingPanel.setVisible(true);

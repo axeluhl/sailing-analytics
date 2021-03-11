@@ -113,7 +113,6 @@ button.primary {
     background-color: #333;
     font-size: 1rem;
     height: 3.333333333333333em;
-    border-bottom: .2em solid #efaa00;
     color: #f6f9fc;
     white-space: nowrap;
     font-family: 'Open Sans',sans-serif;
