@@ -320,6 +320,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         new CreateApplicationReplicaSetDialog(landscapeManagementService, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
             @Override
             public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                applicationReplicaSetsBusy.setBusy(true);
                 landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getMasterInstanceType(),
                         instructions.isDynamicLoadBalancerMapping(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
@@ -327,11 +328,13 @@ public class LandscapeManagementPanel extends SimplePanel {
                         instructions.getSecurityReplicationBearerToken(), instructions.getOptionalDomainName(),new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
                                 errorReporter.reportError(caught.getMessage());
                             }
                             
                             @Override
                             public void onSuccess(Void result) {
+                                applicationReplicaSetsBusy.setBusy(false);
                                 Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
                                 refreshApplicationReplicaSetsTable();
                             }
