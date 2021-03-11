@@ -335,7 +335,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTPS.name(),
-                httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort);
+                httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort, alb.getArn());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         return getLoadBalancingClient(getRegion(alb.getRegion()))
                         .createListener(l -> {
@@ -360,7 +360,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
         return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
-                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
+                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), loadBalancerArn,
                         tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
 
@@ -846,19 +846,26 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
+    public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, String loadBalancerArn) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final DescribeTargetGroupsResponse targetGroupResponse = loadBalancingClient.describeTargetGroups(b->b.names(targetGroupName));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = targetGroupResponse.targetGroups().iterator().next();
         return targetGroupResponse.hasTargetGroups()
                 ? new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroup.targetGroupArn(),
-                        targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), targetGroup.port(),
+                        loadBalancerArn == null ? Util.first(targetGroup.loadBalancerArns()) : loadBalancerArn,
+                        targetGroup.protocol(), targetGroup.port(),
                         targetGroup.healthCheckProtocol(), getHealthCheckPort(targetGroup), targetGroup.healthCheckPath())
                 : null;
     }
 
     @Override
-    public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port, String healthCheckPath, int healthCheckPort) {
+    public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
+        return getTargetGroup(region, targetGroupName, /* discover load balancer ARN from target group */ null);
+    }
+
+    @Override
+    public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn) {
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
                 loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
@@ -882,9 +889,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
                             TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
                             .build()).build());
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn,
-                targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), port,
-                targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, loadBalancerArn,
+                targetGroup.protocol(), port, targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
     }
 
     private ProtocolEnum guessProtocolFromPort(int healthCheckPort) {
