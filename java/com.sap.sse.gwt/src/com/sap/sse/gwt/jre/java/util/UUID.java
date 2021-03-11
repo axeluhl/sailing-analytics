@@ -13,8 +13,15 @@ public class UUID implements Serializable, Comparable<UUID> {
     
     private static final Random numberGenerator = new Random();
 
+    /**
+     * @param value
+     *            if {@code null}, other than the "real" UUID class in the JRE this method will return {@code null} as a
+     *            convenience; otherwise, UUID format validation is applied to the string, and an
+     *            {@link IllegalArgumentException} or {@link NumberFormatException} will be thrown if the {@code value}
+     *            is not in legal UUID format.
+     */
     public static UUID fromString(String value) {
-        return new UUID(value);
+        return value == null ? null : new UUID(value);
     }
     
     public static UUID randomUUID() {
