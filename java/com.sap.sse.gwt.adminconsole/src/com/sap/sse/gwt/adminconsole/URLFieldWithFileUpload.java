@@ -100,6 +100,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         mainPanel.add(uploadFormPanel);
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
+        //uploadPanel.getElement().setId("fileUploadPanel");
         if (initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
@@ -114,13 +115,17 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
         final SubmitButton submitButton = new SubmitButton(stringMessages.send());
+        submitButton.setVisible(false);
         submitButton.setEnabled(false);
+        
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 if (fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
                     submitButton.setEnabled(true);
-                    if (autosubmit) submitButton.click();
+                    if (autosubmit) {
+                        submitButton.click();
+                    }
                 }
             }
         });
