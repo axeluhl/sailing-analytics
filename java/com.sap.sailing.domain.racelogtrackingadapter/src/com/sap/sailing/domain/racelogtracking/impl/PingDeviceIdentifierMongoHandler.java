@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.shared.persistence.device.DeviceIdentifierMongoHandler;
+import com.sap.sse.common.TransformationException;
 
 public class PingDeviceIdentifierMongoHandler extends PingDeviceIdentifierSerializationHandler
 implements DeviceIdentifierMongoHandler {

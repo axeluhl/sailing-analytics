@@ -30,7 +30,17 @@ import com.sap.sse.common.IsManagedByCache;
  */
 public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectInputStream {
     public interface ResolveListener {
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was replaced by a new object. The new object that will be returned by the {@code resolveObject} method
+         * is passed as parameter.
+         */
         void onNewObject(Object result);
+        
+        /**
+         * Invoked if during {@link ObjectInputStreamResolvingAgainstCache#resolveObject(Object)} an object
+         * was not replaced by anything else but returned unmodified.
+         */
         void onResolvedObject(Object result);
     }
 
@@ -52,7 +62,7 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
         enableResolveObject(true);
     }
 
-    public C getCache() {
+    private C getCache() {
         return cache;
     }
 

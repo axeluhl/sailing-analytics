@@ -105,7 +105,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel panel = new HorizontalPanel();
-
         /* DATA PANEL */
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText(stringMessages.parameters());
@@ -172,7 +171,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
     }
 
     private void configButtons() {
-        getRightButtonPannel().remove(getCancelButton());
         applyToRacelogButton.getElement().getStyle().setMargin(3, Unit.PX);
         applyToRacelogButton.ensureDebugId("ApplyToRacelogButton");
         printPreViewButton.getElement().getStyle().setMargin(3, Unit.PX);

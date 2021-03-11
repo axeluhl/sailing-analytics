@@ -1,20 +1,20 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
-import com.sap.sse.landscape.Release;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
 import com.sap.sse.landscape.orchestration.Procedure;
@@ -25,20 +25,16 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * port for OSGi console access} and the {@link Builder#getExpeditionPort() "Expedition" UDP port} for this default
  * process can be specified. They default to 8888, 14888, and 2010, respectively.
  * <p>
- * 
- * After launching the instance, the public key is also added to the {@code .ssh/authorized_keys} file of the user whose
- * name is provided by {@link #SAILING_USER_NAME}.
- * 
+ *
  * @author Axel Uhl (D043530)
  *
  * @param <ShardingKey>
  */
 public class StartSailingAnalyticsHost<ShardingKey>
 extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>,
-    StartFromSailingAnalyticsImage {
+implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
-    private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
+    public final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     
     /**
      * The following defaults, in addition to the defaults implemented by the more general
@@ -50,11 +46,11 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
-     * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
-     * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
-     * .getLatestMasterRelease()} will be used instead.</li>
-     * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/server}
+     * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
      * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
+     * <li>The tag {@link SailingAnalyticsHost#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
+     * {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name} set in the application
+     * configuration.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
@@ -81,23 +77,29 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
         protected String getImageType() {
             return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
-
+        
         @Override
         protected String getInstanceName() {
             return isInstanceNameSet() ? super.getInstanceName() : INSTANCE_NAME_DEFAULT_PREFIX+getApplicationConfigurationBuilder().getServerName();
         }
 
         @Override
-        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, AwsLandscape<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, landscape,
-                        (host, serverDirectory)->{
+        protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape)->
+                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                        launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
-                                return new SailingAnalyticsProcessImpl<ShardingKey>(host, serverDirectory, getOptionalTimeout());
-                            } catch (NumberFormatException | JSchException | IOException | InterruptedException e) {
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
+                                        ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                            } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         });
+        }
+        
+        @Override
+        protected Optional<Tags> getTags() {
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName()));
         }
 
         @Override
@@ -126,12 +128,7 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProce
     }
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
-        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory());
-    }
-
-    @Override
-    public void run() throws Exception {
-        super.run();
-        copyRootAuthorizedKeysToOtherUser(SAILING_USER_NAME, getOptionalTimeout());
+        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
+                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort());
     }
 }

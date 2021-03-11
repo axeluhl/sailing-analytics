@@ -1,15 +1,12 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatEditDialogPO;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatTablePO.BoatEntry;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -45,16 +42,6 @@ public class TestBoatCreation extends AbstractSeleniumTest {
         final String boatClassName = "49er";
         dialog.setBoatClassNameSuggestBox(boatClassName);
         dialog.pressOk();
-        boolean found = false;
-        for (final BoatEntry it : boatsPanel.getBoatsTable().getEntries()) {
-            String itName = it.getName();
-            if (itName.equals(name)) {
-                found = true;
-                // found a candidate:
-                assertEquals(sailId, it.getSailId());
-                assertEquals(boatClassName, it.getBoatClassName());
-            }
-        }
-        assertTrue(found);
+        boatsPanel.waitForBoatEntry(name, sailId, boatClassName);
     }
 }

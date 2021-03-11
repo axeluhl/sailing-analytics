@@ -1,8 +1,8 @@
 package com.sap.sailing.expeditionconnector.persistence;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.common.TransformationException;
 
 public class ExpeditionGpsDeviceIdentifierJsonHandler extends ExpeditionGpsDeviceIdentifierSerializationHandler 
 implements DeviceIdentifierJsonHandler {

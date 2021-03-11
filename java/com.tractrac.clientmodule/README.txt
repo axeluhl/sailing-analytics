@@ -4,12 +4,10 @@
 
 1) Content
 
-This zip package contains 2 folders:
+This zip package contains 3 folders:
 
  - lib -> contains the Trac-API compiled library
  - src -> contains the source code of the API and some code examples
-
-The documentation can be retrieved online from http://tracdev.dk/maven-sites-clients/3.0.0/maven-java-parent/.
 
 It contains also some files:
 
@@ -17,10 +15,33 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+       TracAPI 3.13.7
+********************************************
+This is a final version. It adds two new values to the RaceCompetitorStatusType
+
+  Release date: 02/03/2021
+  Build number:
+
+  1) Bugs
+
+   - Adding NSC and TLE to the RaceCompetitorStatusType (Requested by Radek Maskina, 26/02/2021)
+
+********************************************
+      TracAPI 3.13.6
+********************************************
+This is a final version. It fixes a bug. It keeps the backward compatibility.
+
+ Release date: 11/01/2021
+ Build number: 73b39ce774c7ee4d372ac6afd4c9302227b26229
+
+ 1) Bugs
+
+  - ConcurrentModificationException sending a notification to the app (Reported by Axel Uhl, 08/01/2021)
+
+********************************************
       TracAPI 3.13.5
 ********************************************
 This is a final version. It fixes a bug. It keeps the backward compatibility.
-It keeps the backward compatibility.
 
  Release date: 02/12/2020
  Build number: a589499d3cbc6c517faf088b95c8164d706fdab7

@@ -2,9 +2,15 @@ package com.sap.sse;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * A class providing static information about the running server.
@@ -13,6 +19,7 @@ import java.util.logging.Logger;
  */
 public class ServerInfo {
     private static final Logger logger = Logger.getLogger(ServerInfo.class.getName());
+    public static final String SERVER_GROUP_NAME_SUFFIX = "-server";
     
     public static String getBuildVersion() {
         String version = "Unknown or Development (" + getName() + ")";
@@ -27,8 +34,23 @@ public class ServerInfo {
         return version;
     }
     
+    public static JSONObject getBuildVersionJson() throws FileNotFoundException, IOException, ParseException {
+        final JSONObject result;
+        final File versionJsonFile = new File(ServerStartupConstants.JETTY_HOME + File.separator + "version.json");
+        if (versionJsonFile.exists()) {
+            result = (JSONObject) new JSONParser().parse(new BufferedReader(new FileReader(versionJsonFile)));
+        } else {
+            result = new JSONObject();
+        }
+        return result;
+    }
+    
     public static String getName() {
         return ServerStartupConstants.SERVER_NAME;
+    }
+    
+    public static String getServerGroupName() {
+        return getName()+SERVER_GROUP_NAME_SUFFIX;
     }
     
     /**

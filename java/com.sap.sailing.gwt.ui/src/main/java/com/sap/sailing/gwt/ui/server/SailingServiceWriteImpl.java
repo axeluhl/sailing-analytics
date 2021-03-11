@@ -209,7 +209,6 @@ import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
@@ -230,6 +229,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
@@ -351,6 +351,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -976,7 +977,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             if (group.getOverallLeaderboard() != null) {
                 removeLeaderboard(group.getOverallLeaderboard().getName());
             }
-
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(group, new Action() {
                 @Override
                 public void run() throws Exception {
@@ -1248,40 +1248,80 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        List<String> leaderBoards = new ArrayList<>();
-
+        final List<String> leaderboards = new ArrayList<>();
         return doCreateLeaderboardGroup(groupName, description, displayName, displayGroupsInReverseOrder,
-                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType, leaderBoards);
+                overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType, leaderboards);
     }
 
     private LeaderboardGroupDTO doCreateLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
-        UUID newLeaderboardGroupId = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD_GROUP,
+        final UUID newLeaderboardGroupId = UUID.randomUUID();
+        final Callable<LeaderboardGroupDTO> createLeaderboardGroup = ()->getSecurityService()
+            .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD_GROUP,
                 LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(newLeaderboardGroupId), displayName,
-                new Callable<LeaderboardGroupDTO>() {
-                    @Override
-                    public LeaderboardGroupDTO call() throws Exception {
-                        AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
-                                newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
-                                leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
-                        return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
-                    }
+                ()->{
+                    AbstractLeaderboardGroupOperation<LeaderboardGroup> createLeaderboardGroupOp = new CreateLeaderboardGroup(
+                            newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
+                            leaderBoards, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
+                    return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
                 });
+        final LeaderboardGroupDTO result;
+        // if an overall leaderboard is requested, establish ownership and check create permission; roll back if not possible;
+        // otherwise, try to establish the leaderboard group's ownership; if that fails with an AuthorizationException,
+        // the overall leaderboard's ownership is removed again, too.
+        if (overallLeaderboardScoringSchemeType != null) {
+            final String overallLeaderboardName = LeaderboardGroupMetaLeaderboard.getOverallLeaderboardName(groupName);
+            result = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD,
+                    new TypeRelativeObjectIdentifier(overallLeaderboardName), overallLeaderboardName, createLeaderboardGroup);
+        } else {
+            try {
+                result = createLeaderboardGroup.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // the callable isn't throwing any checked exception
+            }
+        }
+        return result;
     }
 
     @Override
     public void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription,
             String newDisplayName, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        SecurityUtils.getSubject()
+        final LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
+        if (leaderboardGroup == null) {
+            throw new IllegalArgumentException("Leadearboard group with ID "+leaderboardGroupId+" not found.");
+        }
+        final Action updateLeaderboardGroup = ()->{
+            SecurityUtils.getSubject()
                 .checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForTypeRelativeIdentifier(
+                    DefaultActions.UPDATE,
+                    LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId)));
+            getService().apply(new UpdateLeaderboardGroup(leaderboardGroupId, newName, newDescription, newDisplayName,
+                    leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
+        };
+        if (leaderboardGroup.getOverallLeaderboard() == null && overallLeaderboardScoringSchemeType != null) {
+            // an overall leaderboard will be created; check permissions:
+            final String overallLeaderboardName = LeaderboardGroupMetaLeaderboard.getOverallLeaderboardName(newName);
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.LEADERBOARD,
+                    new TypeRelativeObjectIdentifier(overallLeaderboardName), overallLeaderboardName, updateLeaderboardGroup);
+        } else if (leaderboardGroup.getOverallLeaderboard() != null && overallLeaderboardScoringSchemeType == null) {
+            // an overall leaderboard existed but will now be removed; check permissions
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(leaderboardGroup.getOverallLeaderboard(), updateLeaderboardGroup);
+        } else {
+            if (leaderboardGroup.getOverallLeaderboard() != null) {
+                SecurityUtils.getSubject()
+                    .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(
                         DefaultActions.UPDATE,
-                        LeaderboardGroupImpl.getTypeRelativeObjectIdentifier(leaderboardGroupId)));
-        getService().apply(new UpdateLeaderboardGroup(leaderboardGroupId, newName, newDescription, newDisplayName,
-                leaderboardNames, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
+                        new TypeRelativeObjectIdentifier(leaderboardGroup.getOverallLeaderboard().getName())));
+            }
+            try {
+                updateLeaderboardGroup.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e); // the createLeaderboardGroup block above doesn't throw any checked exceptions
+            }
+        }
     }
 
     protected void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames)
@@ -1615,13 +1655,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             if (competitor.hasBoat()) {
                 final CompetitorWithBoatDTO competitorWithBoat = addOrUpdateCompetitorWithBoat(
                         (CompetitorWithBoatDTO) competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat,
-                        competitorWithBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithBoat);
                 result.add(competitorWithBoat);
             } else {
                 final CompetitorDTO competitorWithoutBoat = addOrUpdateCompetitorWithoutBoat(competitor);
-                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat,
-                        competitorWithoutBoat.getIdentifier());
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorWithoutBoat);
                 result.add(competitorWithoutBoat);
             }
         }
@@ -1723,24 +1761,24 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             final Action action = () -> competitorsForSaving
                     .add(getService().convertCompetitorDescriptorToCompetitorWithBoat(competitorDescriptor, searchTag));
             final Boat existingBoat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatById(competitorDescriptor.getBoatUUID());
+                    .getExistingBoatById(competitorDescriptor.getBoatId());
             final Action actionIncludingBoatSecurityCheck;
             if (existingBoat == null) {
                 actionIncludingBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.BOAT,
-                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatUUID()),
+                                BoatImpl.getTypeRelativeObjectIdentifier(competitorDescriptor.getBoatId()),
                                 competitorDescriptor.getBoatName(), action);
             } else {
                 actionIncludingBoatSecurityCheck = action;
             }
             final Competitor existingCompetitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorById(competitorDescriptor.getCompetitorUUID());
+                    .getExistingCompetitorById(competitorDescriptor.getCompetitorId());
             final Action actionIncludingCompetitorAndBoatSecurityCheck;
             if (existingCompetitor == null) {
                 actionIncludingCompetitorAndBoatSecurityCheck = () -> getSecurityService()
                         .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.COMPETITOR,
                                 CompetitorImpl
-                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorUUID()),
+                                        .getTypeRelativeObjectIdentifier(competitorDescriptor.getCompetitorId()),
                                 competitorDescriptor.getName(), actionIncludingBoatSecurityCheck);
             } else {
                 actionIncludingCompetitorAndBoatSecurityCheck = actionIncludingBoatSecurityCheck;

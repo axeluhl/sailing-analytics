@@ -19,13 +19,13 @@ public interface SubscriptionClientProvider {
     /**
      * Return {@code SubscriptionService} for this provider, running reading requests that also replicas may handle
      */
-    SubscriptionServiceAsync<?> getSubscriptionService();
+    SubscriptionServiceAsync<?, ?> getSubscriptionService();
 
     /**
      * Return {@code SubscriptionWriteService} for this provider; use this at least for all updating requests that a
      * master node must handle.
      */
-    SubscriptionWriteServiceAsync<?, ?> getSubscriptionWriteService();
+    SubscriptionWriteServiceAsync<?, ?, ?> getSubscriptionWriteService();
 
     /**
      * Register GWT async service

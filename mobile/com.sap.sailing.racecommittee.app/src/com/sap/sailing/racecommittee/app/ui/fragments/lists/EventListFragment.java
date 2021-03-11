@@ -10,10 +10,15 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 public class EventListFragment extends NamedListFragment<EventBase> {
@@ -21,10 +26,9 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     //Only used in conjunction with a given ID in arguments
     private boolean loadMore;
 
-    public static EventListFragment newInstance(boolean forceLoad, @Nullable final String id) {
+    public static EventListFragment newInstance(@Nullable final String id) {
         final EventListFragment fragment = new EventListFragment();
         final Bundle args = new Bundle();
-        args.putBoolean(AppConstants.ACTION_EXTRA_FORCED, forceLoad);
         if (!TextUtils.isEmpty(id)) {
             args.putString(AppConstants.EXTRA_EVENT_ID, id);
         }
@@ -61,11 +65,37 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
     @Override
     public void onLoadSucceeded(Collection<EventBase> data, boolean isCached) {
-        super.onLoadSucceeded(data, isCached);
+        final List<EventBase> list = new ArrayList<>(data.size());
+        list.addAll(data);
+        final Comparator<EventBase> namedComparator = new NaturalNamedComparator<>();
+        Collections.sort(list, (event, anotherEvent) -> {
+            if (event.getEndDate() != null) {
+                if (anotherEvent.getEndDate() != null) {
+                    return event.getEndDate().compareTo(anotherEvent.getEndDate());
+                }
+                return -1;
+            }
+            if (event.getStartDate() != null) {
+                if (anotherEvent.getStartDate() != null) {
+                    return event.getStartDate().compareTo(anotherEvent.getStartDate());
+                }
+                return -1;
+            }
+            if (anotherEvent.getStartDate() != null || anotherEvent.getEndDate() != null) {
+                return 1;
+            }
+            final int value = namedComparator.compare(event, anotherEvent);
+            if (value != 0) {
+                return value;
+            }
+            return event.getId().toString().compareToIgnoreCase(anotherEvent.getId().toString());
+        });
+        Collections.reverse(list);
+        super.onLoadSucceeded(list, isCached);
         final Bundle arguments = getArguments();
         if (arguments != null && mSelectedIndex == -1) {
             final String id = arguments.getString(AppConstants.EXTRA_EVENT_ID);
-            for (EventBase event : data) {
+            for (EventBase event : list) {
                 if (event.getId().toString().equals(id)) {
                     selectItem(event, !loadMore);
                     break;
@@ -76,9 +106,8 @@ public class EventListFragment extends NamedListFragment<EventBase> {
 
     public void onExpanded() {
         final Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(AppConstants.EXTRA_EVENT_ID)) {
+        if (arguments != null && arguments.containsKey(AppConstants.EXTRA_EVENT_ID) && !loadMore) {
             loadMore = true;
-            arguments.putBoolean(AppConstants.ACTION_EXTRA_FORCED, true);
             showProgressBar(true);
             restartLoader().forceLoad();
         }

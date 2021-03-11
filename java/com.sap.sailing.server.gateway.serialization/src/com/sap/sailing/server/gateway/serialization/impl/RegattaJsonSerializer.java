@@ -7,10 +7,10 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_NAME = "name";

@@ -25,6 +25,7 @@ public class ThreadPoolAwareRunnableScheduledFutureDelegate<V> extends KnowsExec
             future.run();
         } finally {
             removeInheritableThreadLocalValues();
+            removeThreadLocalValues();
         }
     }
 

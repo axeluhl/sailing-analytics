@@ -20,4 +20,5 @@ public interface RaceMapStyle extends CssResource {
     public String trueNorthIndicatorPanel();
     public String estimatedDuration();
     public String estimatedDurationWithHeader();
+    public String raceMapShareLinkButton();
 }
