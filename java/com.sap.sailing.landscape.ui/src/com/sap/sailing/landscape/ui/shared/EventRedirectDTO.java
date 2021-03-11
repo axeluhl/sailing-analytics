@@ -19,6 +19,6 @@ public class EventRedirectDTO extends RedirectWithIdDTO {
 
     @Override
     public Optional<String> getQuery() {
-        return Optional.of("#{query}#/event/:eventId="+getId().toString());
+        return Optional.of("_=_&#{query}#/event/:eventId="+getId().toString());
     }
 }

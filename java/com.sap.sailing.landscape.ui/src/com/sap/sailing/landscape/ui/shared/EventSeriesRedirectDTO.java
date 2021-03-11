@@ -21,6 +21,6 @@ public class EventSeriesRedirectDTO extends RedirectWithIdDTO {
     
     @Override
     public Optional<String> getQuery() {
-        return Optional.of("#{query}#/series/:leaderboardGroupId="+getId().toString());
+        return Optional.of("_=_&#{query}#/series/:leaderboardGroupId="+getId().toString());
     }
 }
