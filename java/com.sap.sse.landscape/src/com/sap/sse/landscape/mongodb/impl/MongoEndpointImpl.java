@@ -40,6 +40,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
         logger.info("Importing database "+from+" into "+targetDatabase);
         for (final String collectionName : from.listCollectionNames()) {
             final MongoCollection<Document> sourceCollection = from.getCollection(collectionName);
+            targetDatabase.createCollection(collectionName); // if we found it on the exporting side and it's empty it's important still to create it for equal hashes
             final MongoCollection<Document> targetCollection = targetDatabase.getCollection(collectionName);
             logger.info("...importing "+sourceCollection.count()+" documents from collection "+collectionName+" from "+from+" into "+this);
             List<Document> documentsToInsert = new ArrayList<>(BATCH_SIZE);

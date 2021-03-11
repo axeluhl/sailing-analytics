@@ -18,7 +18,9 @@ import org.mockito.Mockito;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.aws.orchestration.CopyAndCompareMongoDatabase;
 import com.sap.sse.landscape.mongodb.MongoProcess;
+import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
@@ -73,11 +75,33 @@ public class MongoTests {
             exportFrom.getCollection("C1").insertOne(new Document("a", "b"));
             exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
             exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
+            exportFrom.createCollection("C3"); // force an empty C3 collection
             mongoProcess.importDatabase(exportFrom);
             final String hashExport = mongoReplicaSet.getMD5Hash(dbName);
             final String hashImport = mongoProcess.getMD5Hash(dbName);
             assertNotNull(hashExport);
             assertEquals(hashExport, hashImport);
+        } finally {
+            mongoProcess.getMongoDatabase(dbName).drop();
+            mongoReplicaSet.getMongoDatabase(dbName).drop();
+        }
+    }
+    
+    @Test
+    public void testDatabaseArchiving() throws Exception {
+        final String dbName = "importtest"+new Random().nextInt();
+        try { 
+            final MongoDatabase exportFrom = mongoReplicaSet.getMongoDatabase(dbName);
+            exportFrom.drop();
+            mongoProcess.getMongoDatabase(dbName).drop();
+            exportFrom.getCollection("C1").insertOne(new Document("a", "b"));
+            exportFrom.getCollection("C2").insertOne(new Document("c", "d"));
+            exportFrom.getCollection("C2").insertOne(new Document("e", "f"));
+            exportFrom.createCollection("C3"); // force an empty C3 collection
+        CopyAndCompareMongoDatabase.builder()
+                .setSourceDatabase(new DatabaseImpl(mongoReplicaSet, dbName))
+                .setTargetDatabase(new DatabaseImpl(mongoProcess, dbName))
+                .build().run();
         } finally {
             mongoProcess.getMongoDatabase(dbName).drop();
             mongoReplicaSet.getMongoDatabase(dbName).drop();
@@ -89,14 +113,14 @@ public class MongoTests {
      * this test.
      */
     @Test
-    public void testImportWCS2018MarseilleThroughTunnel() throws URISyntaxException {
-        final String dbName = "wcs2018-marseille";
+    public void testImportSCL2018StPetersburgThroughTunnel() throws URISyntaxException {
+        final String dbName = "scl2018-sanktpetersburg";
         try { 
             final MongoProcess archive = new MongoProcessImpl(localhost, 10202);
             final MongoDatabase exportFrom = archive.getMongoDatabase(dbName);
             mongoProcess.getMongoDatabase(dbName).drop();
             mongoProcess.importDatabase(exportFrom);
-            final String hashExport = mongoReplicaSet.getMD5Hash(dbName);
+            final String hashExport = archive.getMD5Hash(dbName);
             final String hashImport = mongoProcess.getMD5Hash(dbName);
             assertNotNull(hashExport);
             assertEquals(hashExport, hashImport);

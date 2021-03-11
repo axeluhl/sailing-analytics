@@ -1,5 +1,6 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -76,11 +77,16 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
     }
     
+    public static <BuilderT extends Builder<BuilderT, ShardingKey>, ShardingKey>
+    Builder<BuilderT, ShardingKey> builder() {
+        return new BuilderImpl<BuilderT, ShardingKey>();
+    }
+    
     protected CopyAndCompareMongoDatabase(BuilderImpl<?, ShardingKey> builder) {
         super(builder);
         this.sourceDatabase = builder.getSourceDatabase();
         this.targetDatabase = builder.getTargetDatabase();
-        this.additionalDatabasesToDelete = builder.getAdditionalDatabasesToDelete();
+        this.additionalDatabasesToDelete = builder.getAdditionalDatabasesToDelete() == null ? Collections.emptySet() : builder.getAdditionalDatabasesToDelete();
     }
 
     @Override
@@ -94,13 +100,16 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         }
         final ScheduledExecutorService executor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(2, "MongoDB MD5 Hasher "+UUID.randomUUID());
         final Future<String> sourceMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
-        final Future<String> targetMd5 = executor.submit(()->sourceDatabase.getMD5Hash());
+        final Future<String> targetMd5 = executor.submit(()->targetDatabase.getMD5Hash());
         if (sourceMd5.get().equals(targetMd5.get())) {
             logger.info("Databases "+sourceDatabase+" and "+targetDatabase+" have equal MD5 hash "+sourceMd5.get()+". Removing "+sourceDatabase+" and "+Util.joinStrings(", ", additionalDatabasesToDelete));
             sourceDatabase.drop();
             for (final Database additionalDatabaseToDelete : additionalDatabasesToDelete) {
                 additionalDatabaseToDelete.drop();
             }
+        } else {
+            throw new IllegalStateException("Import failed; hashes are different. "+sourceDatabase+" has "+sourceMd5.get()+
+                    ", "+targetDatabase+" has "+targetMd5.get());
         }
     }
 }
