@@ -139,7 +139,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
 
     private void updateStartTimePointFromStatus(final JSONObject status) throws ParseException {
-        final Number startTimeMillis = (Number) status.get("start_time_millis");
+        final Object startTimeMillis = status.get("start_time_millis");
         if (startTimeMillis == null) {
             // try legacy approach: extract from "buildversion" attribute which has the general format "^.* Started: [0-9]+$"
             // where the "Started" value has format yyyyMMddhhmm, usually provided in UTC
@@ -153,7 +153,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
                 startTimePoint = null;
             }
         } else {
-            startTimePoint = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
+            startTimePoint = TimePoint.of(Long.valueOf(startTimeMillis.toString()));
         }
     }
 
