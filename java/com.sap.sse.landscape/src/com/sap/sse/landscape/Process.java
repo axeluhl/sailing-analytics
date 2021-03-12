@@ -22,11 +22,11 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
     
     default String getHostname() {
         // TODO consider caching this or requiring it upon object creation
-        return getHost().getPrivateAddress().getCanonicalHostName();
+        return getHost().getPrivateAddress().getHostAddress();
     }
     
     default String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getHost().getPrivateAddress(timeoutEmptyMeaningForever).getCanonicalHostName();
+        return getHost().getPrivateAddress(timeoutEmptyMeaningForever).getHostAddress();
     }
     
     /**
