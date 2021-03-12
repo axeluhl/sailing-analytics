@@ -5,3 +5,48 @@
 .spacing > * {
 	margin: 3px 3px 3px 0;
 }
+
+.file-input-class {
+    display: none;
+}
+
+.uploadButton {
+    outline: none;
+    background-image: resourceUrl("folderWhite");
+    content: "";
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 50%;
+    top: 0;
+    left: 0;
+    width: 2rem;
+    height: 1.5rem;
+}
+
+.uploadButton-loading {
+    outline: none;
+    background-image: resourceUrl("busyIndicator");
+    content: "";
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 50%;
+    top: 0;
+    left: 0;
+    width: 2rem;
+    height: 1.5rem;
+}
+
+/*
+.uploadButton:after {
+    background-image: resourceUrl("folderWhite");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+*/

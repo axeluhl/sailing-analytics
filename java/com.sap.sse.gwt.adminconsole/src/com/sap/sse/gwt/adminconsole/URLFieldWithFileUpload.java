@@ -64,7 +64,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
-        
         final FormPanel removePanel = new FormPanel();
         removePanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -87,33 +86,47 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 removePanel.setAction("/sailingserver/api/v1/file?uri="+uri);
                 removePanel.submit();
                 uri = null;
+                urlTextBox.setEnabled(true);
             }
         });
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
         urlTextBox.getElement().addClassName("url-textbox");
+        urlTextBox.addValueChangeHandler(valueChangedEvent->{
+           uri = valueChangedEvent.getValue(); 
+        });
 //        urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
+        final Button selectUploadButton = new Button();
+        selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
+        imageUrlPanel.add(selectUploadButton);
         imageUrlPanel.add(removePanel);
         // the upload panel
         uploadFormPanel = new FormPanel();
-        mainPanel.add(uploadFormPanel);
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
+        
         //uploadPanel.getElement().setId("fileUploadPanel");
-        if (initiallyEnableUpload) {
-            uploadFormPanel.add(uploadPanel);
-        }
+        
         uploadFormPanel.setAction("/sailingserver/fileupload");
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
-        fileUploadField = new FileUpload();
+        
         final Label uploadLabel = new Label(stringMessages.upload()+ ":");
         uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
         uploadPanel.add(uploadLabel);
-        uploadPanel.add(fileUploadField);
+        
+        fileUploadField = new FileUpload();
+        fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
+        uploadPanel.add(fileUploadField);
+        
+        selectUploadButton.addClickHandler(click -> {
+            fileUploadField.click();
+        });        
+//        uploadPanel.add(selectUploadButton);
+        
         final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setVisible(false);
         submitButton.setEnabled(false);
@@ -130,15 +143,22 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             }
         });
         uploadPanel.add(submitButton);
+        uploadFormPanel.addSubmitHandler(submitEvent-> {
+            selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass());
+            selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonLoadingClass(), true);
+        });
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
+                selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonLoadingClass());
+                selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
+                urlTextBox.setEnabled(false);
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                         uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
-                        setValue(uri, true);
+                        fireResultUri(uri);
                         removeButton.setEnabled(true);
                         Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
@@ -148,7 +168,17 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 }
             }
         });
+        
+        if (initiallyEnableUpload) {
+            uploadFormPanel.add(uploadPanel);
+        }
+        mainPanel.add(uploadFormPanel);
         initWidget(mainPanel);
+    }
+    
+    private void fireResultUri(String uri) {
+        this.uri = uri;
+        ValueChangeEvent.fire(this, uri);
     }
     
     /**
@@ -194,7 +224,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
 
     @Override
     public String getValue() {
-        return getURL();
+        //return getURL();
+        return this.uri;
     }
 
     @Override
@@ -221,6 +252,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     }
     
     public void setUploadEnabled(boolean uploadEnabled) {
+        uploadFormPanel.remove(uploadPanel);
         if (uploadEnabled) {
             uploadFormPanel.add(uploadPanel);
         } else {
