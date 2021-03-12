@@ -162,7 +162,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
         sftpChannel.get(configFileName, configFileContents);
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
-        sftpChannel.disconnect();
+        sftpChannel.getSession().disconnect();
         proxy.removeRedirect(hostname, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
@@ -442,9 +442,9 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
         try {
             final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
-                    targetGroup.getTargetGroupArn(), targetGroup.getProtocol(), targetGroup.getPort(),
-                    targetGroup.getHealthCheckProtocol(), targetGroup.getHealthCheckPort(),
-                    targetGroup.getHealthCheckPath());
+                    targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),
+                    targetGroup.getPort(), targetGroup.getHealthCheckProtocol(),
+                    targetGroup.getHealthCheckPort(), targetGroup.getHealthCheckPath());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);

@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,8 +15,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -33,10 +44,10 @@ import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.Scope;
-import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -61,6 +72,7 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -68,7 +80,9 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
@@ -101,6 +115,7 @@ import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TagSpecification;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -115,6 +130,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoad
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
@@ -131,9 +147,11 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescri
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.MFADevice;
+import software.amazon.awssdk.services.route53.Route53AsyncClient;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.route53.model.Change;
 import software.amazon.awssdk.services.route53.model.ChangeAction;
@@ -145,6 +163,7 @@ import software.amazon.awssdk.services.route53.model.GetChangeRequest;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
+import software.amazon.awssdk.services.route53.model.TestDnsAnswerResponse;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
@@ -243,8 +262,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
     }
     
+    private ElasticLoadBalancingV2AsyncClient getLoadBalancingAsyncClient(Region region) {
+        return getClient(ElasticLoadBalancingV2AsyncClient.builder(), region);
+    }
+    
     private AutoScalingClient getAutoScalingClient(Region region) {
         return getClient(AutoScalingClient.builder(), region);
+    }
+    
+    private AutoScalingAsyncClient getAutoScalingAsyncClient(Region region) {
+        return getClient(AutoScalingAsyncClient.builder(), region);
     }
     
     /**
@@ -332,9 +359,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Iterable<TargetGroup<ShardingKey>> getTargetGroupsByLoadBalancerArn(com.sap.sse.landscape.Region region, String loadBalancerArn) {
-        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroups(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
-                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.protocol(), tg.port(), tg.healthCheckProtocol(),
-                        Integer.valueOf(tg.healthCheckPort()), tg.healthCheckPath()));
+        return Util.map(getLoadBalancingClient(getRegion(region)).describeTargetGroupsPaginator(tg->tg.loadBalancerArn(loadBalancerArn)).targetGroups(),
+                tg->new AwsTargetGroupImpl<>(this, region, tg.targetGroupName(), tg.targetGroupArn(), tg.loadBalancerArns().iterator().next(),
+                        tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg), tg.healthCheckPath()));
     }
 
     @Override
@@ -421,10 +448,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String loadBalancerNameLowercase, com.sap.sse.landscape.Region region) {
         try {
-            final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers(b->b.names(name));
-            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region, response.loadBalancers().iterator().next(), this) : null;
+            final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
+            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region,
+                    Util.first(Util.filter(response.loadBalancers(),
+                            lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))), this)
+                    : null;
         } catch (LoadBalancerNotFoundException e) {
             return null;
         }
@@ -447,6 +477,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     private Route53Client getRoute53Client() {
         return getClient(Route53Client.builder(), getRegion(globalRegion));
+    }
+    
+    private Route53AsyncClient getRoute53AsyncClient() {
+        return getClient(Route53AsyncClient.builder(), getRegion(globalRegion));
     }
     
     @Override
@@ -602,7 +636,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         try {
             return new AwsInstanceImpl<ShardingKey>(instance.instanceId(),
                     getAvailabilityZoneByName(region, instance.placement().availabilityZone()),
-                    InetAddress.getByName(instance.privateIpAddress()), this);
+                    InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()), this);
         } catch (UnknownHostException e) {
             logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
             throw new RuntimeException(e);
@@ -763,7 +797,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final List<HostT> result = new ArrayList<>();
         for (final Instance instance : response.instances()) {
             try {
-                result.add(hostSupplier.supply(instance.instanceId(), az, InetAddress.getByName(instance.privateIpAddress()), this));
+                result.add(hostSupplier.supply(instance.instanceId(), az,
+                        InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()),
+                        this));
             } catch (UnknownHostException e) {
                 logger.warning("This shouldn't have occurred. "+instance.privateIpAddress()+" was expected to be parsable by InetAddress.getByName(...) but it wasn't.");
                 throw new RuntimeException(e);
@@ -790,6 +826,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private Region getRegion(com.sap.sse.landscape.Region region) {
         return Region.of(region.getId());
     }
+    
+    /**
+     * The health check port is provided as a {@link String} and can assume the value {@code "traffic-port"} in which
+     * case the numerical port is that returned by {@link software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup#port()}.
+     */
+    public static Integer getHealthCheckPort(software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup) {
+        return targetGroup.healthCheckPort() == null
+                ? null
+                : targetGroup.healthCheckPort().equals("traffic-port")
+                  ? targetGroup.port()
+                  : Integer.valueOf(targetGroup.healthCheckPort());
+    }
 
     @Override
     public Iterable<AvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion) {
@@ -804,8 +852,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = targetGroupResponse.targetGroups().iterator().next();
         return targetGroupResponse.hasTargetGroups()
                 ? new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroup.targetGroupArn(),
-                        targetGroup.protocol(), targetGroup.port(), targetGroup.healthCheckProtocol(),
-                        Integer.valueOf(targetGroup.healthCheckPort()), targetGroup.healthCheckPath())
+                        targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), targetGroup.port(),
+                        targetGroup.healthCheckProtocol(), getHealthCheckPort(targetGroup), targetGroup.healthCheckPath())
                 : null;
     }
 
@@ -834,7 +882,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .attributes(TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
                             TargetGroupAttribute.builder().key("load_balancing.algorithm.type").value("least_outstanding_requests")
                             .build()).build());
-        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn, targetGroup.protocol(), port, targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
+        return new AwsTargetGroupImpl<>(this, region, targetGroupName, targetGroupArn,
+                targetGroup.loadBalancerArns().iterator().next(), targetGroup.protocol(), port,
+                targetGroup.healthCheckProtocol(), healthCheckPort, healthCheckPath);
     }
 
     private ProtocolEnum guessProtocolFromPort(int healthCheckPort) {
@@ -1133,7 +1183,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             HostSupplier<ShardingKey, HostT> hostSupplier) {
         final List<HostT> result = new ArrayList<>();
         for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
-            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), this);
+            final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(),
+                    host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(), this);
             result.add(applicationProcessHost);
         }
         return result;
@@ -1142,41 +1193,224 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
-    Iterable<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
+    Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
             com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
             Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
+        final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
+        final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
+        final ConcurrentLinkedQueue<Future<?>> tasksToWaitFor = new ConcurrentLinkedQueue<>();
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Application Process Discovery "+UUID.randomUUID());
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
-            for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
-                final String serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
-                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
-                    // then applicationProcess is a replica in the serverName cluster:
-                    Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
-                } else {
-                    // check if it's a new or else a newer master:
-                    if (!mastersByServerName.containsKey(serverName)
-                    || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
-                            mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
-                            applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
-                        mastersByServerName.put(serverName, applicationProcess);
+            tasksToWaitFor.add(backgroundExecutor.submit(()->{
+                try {
+                    for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
+                        tasksToWaitFor.add(backgroundExecutor.submit(()->{
+                            String serverName;
+                            try {
+                                serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                                final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
+                                if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
+                                    // then applicationProcess is a replica in the serverName cluster:
+                                    synchronized(replicasByServerName) {
+                                        Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
+                                    }
+                                } else {
+                                    // check if it's a new or else a newer master:
+                                    synchronized (mastersByServerName) {
+                                        if (!mastersByServerName.containsKey(serverName)
+                                        || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
+                                                mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
+                                                applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
+                                            mastersByServerName.put(serverName, applicationProcess);
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }));
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            }));
         }
-        final Set<ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
+        // wait for all application processes on all hosts to be discovered
+        for (final Future<?> taskToWaitFor : tasksToWaitFor) {
+            waitForFuture(taskToWaitFor, optionalTimeout);
+        }
+        backgroundExecutor.shutdown();
+        final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
+        final DNSCache dnsCache = getNewDNSCache();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new ApplicationReplicaSetImpl<>(serverNameAndMaster.getKey(), serverNameAndMaster.getValue(),
-                    Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())));
+            final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),
+                    serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
+                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, autoScalingGroups, dnsCache);
             result.add(replicaSet);
         }
         return result;
     }
+    
+    private <T> void waitForFuture(Future<T> future, Optional<Duration> optionalTimeout) {
+        optionalTimeout.map(timeout->{
+            try {
+                return future.get(timeout.asMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e1) {
+                throw new RuntimeException(e1);
+            }
+        }).orElseGet(()->{
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    
+    /**
+     * This assumes the format {LoadBalancerName}-{[0-9]*}.{RegionId}.elb.amazonaws.com. The region is then parsed from
+     * the name. If the pattern is not matched, {@code null} is returned; otherwise, the load balancer name and its
+     * region are returned as a pair.
+     */
+    private Pair<String, AwsRegion> getLoadBalancerNameAndRegionFromLoadBalancerDNSName(String loadBalancerDNSName) {
+        final Pattern pattern = Pattern.compile("^([^.]*)-([^-.]*)\\.([^.]*)\\.elb\\.amazonaws\\.com\\.$");
+        final Matcher matcher = pattern.matcher(loadBalancerDNSName);
+        final Pair<String, AwsRegion> result;
+        if (matcher.matches()) {
+            result = new Pair<>(matcher.group(1), new AwsRegion(matcher.group(3)));
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
+    @Override
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByHostname(String hostname) {
+        final TestDnsAnswerResponse dnsAnswer = getRoute53Client().testDNSAnswer(b->b
+                .hostedZoneId(getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname)))
+                .recordType(RRType.CNAME)
+                .recordName(hostname));
+        final ApplicationLoadBalancer<ShardingKey> result;
+        if (dnsAnswer.hasRecordData()) {
+            final Pair<String, AwsRegion> nameAndRegion = getLoadBalancerNameAndRegionFromLoadBalancerDNSName(dnsAnswer.recordData().iterator().next());
+            result = getLoadBalancerByName(nameAndRegion.getA(), nameAndRegion.getB());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname) {
+        final Route53AsyncClient route53Client = getRoute53AsyncClient();
+        final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
+        return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
+            Util.filter(response.resourceRecordSets(), resourceRecordSet->resourceRecordSet.name().replaceFirst("\\.$", "").equals(hostname)));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> getLoadBalancersAsync(com.sap.sse.landscape.Region region) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeLoadBalancers().handleAsync((response, exception)->
+            Util.map(response.loadBalancers(), lb->new ApplicationLoadBalancerImpl<ShardingKey>(region, lb, this)));
+    }
+    
+    @Override
+    public CompletableFuture<Listener> getHttpsListenerAsync(com.sap.sse.landscape.Region region, ApplicationLoadBalancer<ShardingKey> loadBalancer) {
+        return getLoadBalancingAsyncClient(getRegion(region)).describeListeners(b->b.loadBalancerArn(loadBalancer.getArn())).handleAsync(
+                (response, exception)->Util.first(Util.filter(response.listeners(), l->l.protocol() == ProtocolEnum.HTTPS)));
+    }
+    
+    @Override
+    public CompletableFuture<Map<Listener, Iterable<Rule>>> getLoadBalancerListenerRulesAsync(com.sap.sse.landscape.Region region,
+            CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion) {
+        return allLoadBalancersInRegion.thenCompose(loadBalancers->getListenerToRulesMap(region, loadBalancers));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(com.sap.sse.landscape.Region region) {
+        final Set<AutoScalingGroup> result = new HashSet<>();
+        return getAutoScalingAsyncClient(getRegion(region)).describeAutoScalingGroupsPaginator().subscribe(response->
+            result.addAll(response.autoScalingGroups())).handle((v, e)->Collections.unmodifiableCollection(result));
+    }
+    
+    private CompletableFuture<Map<Listener, Iterable<Rule>>> getListenerToRulesMap(com.sap.sse.landscape.Region region, Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers) {
+        final ElasticLoadBalancingV2AsyncClient loadBalancingClient = getLoadBalancingAsyncClient(getRegion(region));
+        final Set<CompletableFuture<Pair<Listener, Iterable<Rule>>>> mapEntryFutures = new HashSet<>();
+        for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : loadBalancers) {
+            final CompletableFuture<Listener> listenerFuture = getHttpsListenerAsync(region, loadBalancer);
+            final CompletableFuture<Pair<Listener, Iterable<Rule>>> mapEntryFuture =
+                    listenerFuture.thenCompose(listener->{
+                        final CompletableFuture<Pair<Listener, Iterable<Rule>>> result;
+                        if (listener==null) {
+                            result = new CompletableFuture<>();
+                            result.complete(null);
+                        } else {
+                            result = loadBalancingClient.describeRules(
+                                b->b.listenerArn(listener.listenerArn())).handle(
+                                    (describeRulesResponse, e)->new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules()));
+                        }
+                        return result;
+                    });
+            mapEntryFutures.add(mapEntryFuture);
+        }
+        return CompletableFuture.allOf(mapEntryFutures.toArray(new CompletableFuture<?>[0])).handle((v, e)->{
+            final Map<Listener, Iterable<Rule>> result = new HashMap<>();
+            for (final CompletableFuture<Pair<Listener, Iterable<Rule>>> mapEntryFuture : mapEntryFutures) {
+                try {
+                    if (mapEntryFuture.get() != null) {
+                        result.put(mapEntryFuture.get().getA(), mapEntryFuture.get().getB());
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            return result;
+        });
+    }
+
+    @Override
+    public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
+        final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
+                getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
+        return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());
+    }
+    
+    @Override
+    public CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> getTargetGroupsAsync(com.sap.sse.landscape.Region region) {
+        final Set<DescribeTargetGroupsResponse> responses = new HashSet<>();
+        return getLoadBalancingAsyncClient(getRegion(region)).describeTargetGroupsPaginator().subscribe(response->responses.add(response)).thenCompose(someVoid->{
+                // now we have all responses
+            final Map<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>> futures = new HashMap<>();
+            for (final DescribeTargetGroupsResponse response : responses) {
+                for (final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup tg : response.targetGroups()) {
+                    final TargetGroup<ShardingKey> targetGroup = new AwsTargetGroupImpl<ShardingKey>(this, region,
+                            tg.targetGroupName(), tg.targetGroupArn(), Util.first(tg.loadBalancerArns()),
+                            tg.protocol(), tg.port(), tg.healthCheckProtocol(), getHealthCheckPort(tg),
+                            tg.healthCheckPath());
+                    futures.put(targetGroup, getTargetHealthDescriptionsAsync(region, targetGroup));
+                }
+            }
+            return CompletableFuture.allOf(futures.values().toArray(new CompletableFuture<?>[0])).handle((v, e)->{
+                final Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> result = new HashMap<>();
+                for (final Entry<TargetGroup<ShardingKey>, CompletableFuture<Iterable<TargetHealthDescription>>> future : futures.entrySet()) {
+                    try {
+                        result.put(future.getKey(), future.getValue().get());
+                    } catch (InterruptedException | ExecutionException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                return result;
+            });
+        });
+    }
+    
     @Override
     public AwsRegion getDefaultRegion() {
         return new AwsRegion(Region.EU_WEST_2); // TODO actually, EU_WEST_1 (Ireland) is our default region, but as long as this is under development, EU_WEST_2 gives us an isolated test environment
@@ -1240,5 +1474,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Snapshot getSnapshot(AwsRegion region, String snapshotId) {
         final DescribeSnapshotsResponse describeSnapshotResponse = getEc2Client(getRegion(region)).describeSnapshots(b->b.filters(Filter.builder().name("snapshot-id").values(snapshotId).build()));
         return describeSnapshotResponse.hasSnapshots() ? describeSnapshotResponse.snapshots().iterator().next() : null;
+    }
+
+    @Override
+    public DNSCache getNewDNSCache() {
+        return new DNSCache(getRoute53AsyncClient());
     }
 }

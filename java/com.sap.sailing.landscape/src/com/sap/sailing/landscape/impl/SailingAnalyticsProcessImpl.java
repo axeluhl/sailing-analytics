@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -37,6 +38,8 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private Integer expeditionUdpPort;
+    private Release release;
+    private TimePoint startTimePoint;
     
     public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort) {
         super(port, host, serverDirectory);
@@ -57,7 +60,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     
     private JSONObject getStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final HttpGet getStatusRequest = new HttpGet(getHealthCheckUrl(optionalTimeout).toString());
-        return Wait.wait(()->{
+        final JSONObject status = Wait.wait(()->{
                     final HttpClient client = HttpClientBuilder.create().build();
                     final HttpResponse result = client.execute(getStatusRequest);
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -65,8 +68,23 @@ implements SailingAnalyticsProcess<ShardingKey> {
                     return (JSONObject) (new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray()))));
                 }, json->json != null, /* retryOnException */ true, optionalTimeout,
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "getStatus() on "+getHost()+":"+getPort());
+        updateStartTimePointFromStatus(status);
+        updateReleaseFromStatus(status);
+        updateServerNameFromStatus(status);
+        return status;
     }
 
+    private boolean updateReleaseFromStatus(JSONObject status) {
+        final boolean success;
+        if (status.containsKey(STATUS_RELEASE_PROPERTY_NAME)) {
+            release = new ReleaseImpl((String) status.get(STATUS_RELEASE_PROPERTY_NAME), SailingReleaseRepository.INSTANCE);
+            success = true;
+        } else {
+            success = false;
+        }
+        return success;
+    }
+    
     /**
      * Here we assume that {@code /gwt/status} has a "release" field we can query
      */
@@ -74,31 +92,35 @@ implements SailingAnalyticsProcess<ShardingKey> {
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
-        final JSONObject status = getStatus(optionalTimeout);
-        final Release result;
-        if (status.containsKey(STATUS_RELEASE_PROPERTY_NAME)) {
-            result = new ReleaseImpl((String) status.get(STATUS_RELEASE_PROPERTY_NAME), releaseRepository);
-        } else {
-            // for backward compatibility
-            result = super.getRelease(releaseRepository, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        if (release == null) {
+            final JSONObject status = getStatus(optionalTimeout);
+            if (!updateReleaseFromStatus(status)) {
+                // for backward compatibility
+                release = super.getRelease(releaseRepository, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            }
         }
-        return result;
+        return release;
+    }
+    
+    private void updateServerNameFromStatus(JSONObject status) {
+        serverName = status.get(STATUS_SERVERNAME_PROPERTY_NAME).toString();
     }
     
     /**
      * For a sailing application process we know that there is a {@code /gwt/status} end point from which much
      * information about server name as well as availability and replication status can be obtained.
+     * <p>
+     * 
+     * This redefinition does not require the {@code optionalKeyName} nor the {@code privateKeyEncryptionPassphrase}.
+     * 
+     * @param optionalTimeout
+     *            used for the HTTP(S) connection to the status servlet
      */
     @Override
     public String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws TimeoutException, Exception {
         if (serverName == null) {
-            serverName = Wait.wait(()->getStatus(optionalTimeout).get(STATUS_SERVERNAME_PROPERTY_NAME).toString(),
-                    result->result!=null,
-                    /* retry on exception */ true,
-                    optionalTimeout,
-                    /* sleep between attempts */ Duration.ONE_SECOND.times(5),
-                    Level.INFO, "Waiting for server name");
+            getStatus(optionalTimeout); // triggers updateServerNameFromStatus
         }
         return serverName;
     }
@@ -110,8 +132,13 @@ implements SailingAnalyticsProcess<ShardingKey> {
     
     @Override
     public TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
-        final TimePoint result;
-        final JSONObject status = getStatus(optionalTimeout);
+        if (startTimePoint == null) {
+            getStatus(optionalTimeout); // triggers updateStartTimePointFromStatus(status);
+        }
+        return startTimePoint;
+    }
+
+    private void updateStartTimePointFromStatus(final JSONObject status) throws ParseException {
         final Number startTimeMillis = (Number) status.get("start_time_millis");
         if (startTimeMillis == null) {
             // try legacy approach: extract from "buildversion" attribute which has the general format "^.* Started: [0-9]+$"
@@ -121,14 +148,13 @@ implements SailingAnalyticsProcess<ShardingKey> {
             final Matcher matcher = buildversionPattern.matcher(buildversion);
             if (buildversion != null && matcher.matches()) {
                 final String timestamp = matcher.group(1);
-                result = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmX").parse(timestamp+"Z"));
+                startTimePoint = TimePoint.of(new SimpleDateFormat("yyyyMMddhhmmX").parse(timestamp+"Z"));
             } else {
-                result = null;
+                startTimePoint = null;
             }
         } else {
-            result = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
+            startTimePoint = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
         }
-        return result;
     }
 
     @Override

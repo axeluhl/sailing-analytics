@@ -55,4 +55,6 @@ public interface TargetGroup<ShardingKey> extends Named {
     }
 
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
+
+    String getLoadBalancerArn();
 }

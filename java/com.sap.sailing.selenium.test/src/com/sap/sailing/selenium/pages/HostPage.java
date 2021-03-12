@@ -101,7 +101,7 @@ public abstract class HostPage extends PageObject {
      */
     @Override
     protected void initElements() {
-        waitForAjaxRequests(getPageLoadTimeOutInSeconds(), 5 /* seconds */);
+        waitForAjaxRequests(getPageLoadTimeOutInSeconds(), 10 /* seconds */);
         super.initElements();
     }
     
