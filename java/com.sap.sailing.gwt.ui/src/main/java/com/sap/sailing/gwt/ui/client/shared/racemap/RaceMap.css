@@ -40,6 +40,27 @@ body {
     cursor: pointer;
 }
 
+.raceMapVideoUploadButton {
+    display: inline-block;
+    height: 3.5em;
+    width: 3.5em;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204) !important;
+    margin-right: 10px;
+    margin-bottom: 110px;
+    z-index: 1;
+    border-color: white;
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer;
+    background-image: resourceUrl("uploadVideoIcon");
+    background-size: 74%;
+}
+
 .combinedWindPanel {}
 
 .trueNorthIndicatorPanel {
