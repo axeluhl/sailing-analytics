@@ -48,6 +48,7 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -1201,9 +1202,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>
     Iterable<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> getApplicationReplicaSetsByTag(
             com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier,
-            Optional<Duration> optionalTimeout,
-            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
-            throws Exception {
+            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
@@ -1256,12 +1255,40 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Set<AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT>> result = new HashSet<>();
         final DNSCache dnsCache = getNewDNSCache();
         for (final Entry<String, ProcessT> serverNameAndMaster : mastersByServerName.entrySet()) {
-            final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(serverNameAndMaster.getKey(),
-                    serverNameAndMaster.getValue(), Optional.ofNullable(replicasByServerName.get(serverNameAndMaster.getKey())),
-                    allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, autoScalingGroups, dnsCache);
+            final String serverName = serverNameAndMaster.getKey();
+            final ProcessT master = serverNameAndMaster.getValue();
+            final Set<ProcessT> replicas = replicasByServerName.get(serverName);
+            final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
+                    serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
+                    allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
             result.add(replicaSet);
         }
         return result;
+    }
+    
+    @Override
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(com.sap.sse.landscape.Region region,
+            final String serverName, final ProcessT master, final Iterable<ProcessT> replicas) {
+        final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
+        final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
+        final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
+        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
+        final DNSCache dnsCache = getNewDNSCache();
+        return getApplicationReplicaSet(serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
+    }
+
+    private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(
+            final String serverName, final ProcessT master, final Iterable<ProcessT> replicas,
+            final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
+            final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
+            final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
+            final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups, final DNSCache dnsCache) {
+        final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(
+                serverName, master, Optional.ofNullable(replicas),
+                allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, autoScalingGroups, dnsCache);
+        return replicaSet;
     }
     
     private <T> void waitForFuture(Future<T> future, Optional<Duration> optionalTimeout) {
@@ -1485,5 +1512,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public DNSCache getNewDNSCache() {
         return new DNSCache(getRoute53AsyncClient());
+    }
+
+    @Override
+    public CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup) {
+        final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
+        return autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(autoScalingGroup.getAutoScalingGroup().launchConfigurationName()))
+            .thenAccept(response->autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())));
     }
 }

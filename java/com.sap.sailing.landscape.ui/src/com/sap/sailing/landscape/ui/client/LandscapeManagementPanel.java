@@ -365,7 +365,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
             applicationReplicaSetsBusy.setBusy(true);
-            landscapeManagementService.removeApplicationReplicaSet(applicationReplicaSetToRemove, new AsyncCallback<Void>() {
+            landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     applicationReplicaSetsBusy.setBusy(false);

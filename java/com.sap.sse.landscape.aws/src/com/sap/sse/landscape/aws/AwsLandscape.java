@@ -644,4 +644,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     DNSCache getNewDNSCache();
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
+
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
+            ProcessT master, Iterable<ProcessT> replicas);
+
+    CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
 }

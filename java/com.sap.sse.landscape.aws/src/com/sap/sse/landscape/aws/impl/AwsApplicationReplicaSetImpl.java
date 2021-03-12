@@ -51,7 +51,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private static final Logger logger = Logger.getLogger(AwsApplicationReplicaSetImpl.class.getName());
     private static final String ARCHIVE_SERVER_NAME = "ARCHIVE";
     private static final long serialVersionUID = 6895927683667795173L;
-    private final CompletableFuture<AutoScalingGroup> autoScalingGroup;
+    private final CompletableFuture<AwsAutoScalingGroup> autoScalingGroup;
     private final CompletableFuture<Rule> defaultRedirectRule;
     private final CompletableFuture<String> hostedZoneId;
     private final CompletableFuture<ApplicationLoadBalancer<ShardingKey>> loadBalancer;
@@ -231,7 +231,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups) {
         Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
             findFirst().ifPresent(asg->
-                autoScalingGroup.complete(asg));
+                autoScalingGroup.complete(new AwsAutoScalingGroupImpl(asg, targetGroup.getRegion())));
     }
 
     @Override
@@ -261,7 +261,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
 
     @Override
     public AwsAutoScalingGroup getAutoScalingGroup() throws InterruptedException, ExecutionException {
-        return new AwsAutoScalingGroupImpl(autoScalingGroup.get());
+        return autoScalingGroup.get();
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,6 +74,7 @@ import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -106,6 +108,7 @@ import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
@@ -628,7 +631,24 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     @Override
-    public void removeApplicationReplicaSet(SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
+    public void removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove)
+            throws Exception {
+        final AwsRegion region = new AwsRegion(regionId);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
+                getLandscape().getApplicationReplicaSet(region, applicationReplicaSetToRemove.getReplicaSetName(),
+                    getSailingAnalyticsProcessFromDTO(applicationReplicaSetToRemove.getMaster()),
+                    getSailingAnalyticsProcessesFromDTOs(applicationReplicaSetToRemove.getReplicas()));
+        final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
+        final CompletableFuture<Void> autoScalingGroupRemoval;
+        if (autoScalingGroup != null) {
+            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
+        } else {
+            autoScalingGroupRemoval = new CompletableFuture<>();
+            autoScalingGroupRemoval.complete(null);
+        }
+        // TODO issue: how do we know that master and replicas are the only processes on the instance? Only then can we terminate; otherwise only remove the processes!
+//        autoScalingGroupRemoval.thenAccept(action)
         /*
          * TODO implement removeApplicationReplicaSet; will probably need to enumerate things again, starting from the
          * master and replica processes and their hosts where the DTO tells us the respective regions; we also know the
@@ -644,5 +664,35 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
          * - remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
          * - remove the DNS record if this replica set was a DNS-mapped one
          */
+    }
+
+    private Iterable<SailingAnalyticsProcess<String>> getSailingAnalyticsProcessesFromDTOs(ArrayList<SailingAnalyticsProcessDTO> processDTOs) {
+        return Util.map(processDTOs, processDTO->{
+            try {
+                return getSailingAnalyticsProcessFromDTO(processDTO);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private SailingAnalyticsProcess<String> getSailingAnalyticsProcessFromDTO(SailingAnalyticsProcessDTO processDTO) throws UnknownHostException {
+        return new SailingAnalyticsProcessImpl<String>(processDTO.getPort(),
+                getHostFromInstanceDTO(processDTO.getHost()), processDTO.getServerDirectory(),
+                processDTO.getExpeditionUdpPort());
+    }
+
+    private Host getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {
+        return new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(hostDTO.getInstanceId(),
+                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneName(hostDTO.getAvailabilityZone()).build()),
+                InetAddress.getByName(hostDTO.getPrivateIpAddress()), hostDTO.getLaunchTimePoint(), getLandscape(),
+                (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+                    try {
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
+                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 }
