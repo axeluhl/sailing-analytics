@@ -26,6 +26,7 @@ public interface SharedHomeResources extends CommonIcons {
         String buttonGroup();
         String overlay();
         String uploadButton();
+        String loading();
         String popup();
         String select();
     }
