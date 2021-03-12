@@ -13,7 +13,6 @@ public class MobileMediaUploadPopup extends AbstractMediaUploadPopup {
         super(updateVideo, updateImage);
         MediaViewResources.INSTANCE.css().ensureInjected();
         addStyleName(MediaViewResources.INSTANCE.css().popup());
-        upload.getElement().setAttribute("accept", "image/*;capture=camera");
     }
 
     @Override

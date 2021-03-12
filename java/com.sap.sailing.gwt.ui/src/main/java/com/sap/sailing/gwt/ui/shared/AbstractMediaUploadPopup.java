@@ -71,6 +71,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final Consumer<ImageDTO> updateImage;
 
     protected final FileUpload upload;
+    protected final Button uploadButton;
     protected final FlowPanel content;
     protected final TextBox fileNameInput;
     protected final TextBox urlInput;
@@ -94,6 +95,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         setAnimationEnabled(true);
         
         upload = new FileUpload();
+        upload.getElement().setAttribute("accept", "image/*;capture=camera");
         upload.setVisible(false);
         upload.setName("file");
         this.setModal(false);
@@ -127,7 +129,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
 
         FlowPanel fileInputGroup = new FlowPanel();
         fileInputGroup.addStyleName(sharedHomeResources.sharedHomeCss().inputGroup());
-        final Button uploadButton = new Button();
+        uploadButton = new Button();
         uploadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -330,6 +332,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         public void onSubmit(SubmitEvent event) {
             // This event is fired just before the form is submitted. We can take
             // this opportunity to perform validation.
+            uploadButton.addStyleName(sharedHomeResources.sharedHomeCss().loading());
+            fileNameInput.setValue(i18n.loading());
             if (getMimeType(upload.getFilename()) == MimeType.unknown) {
                 logger.log(Level.SEVERE, "File type is not supported.");
                 Notification.notify(i18n.fileTypeNotSupported(), NotificationType.WARNING);
@@ -346,11 +350,14 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // fired. Assuming the service returned a response of type text/html,
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
+            uploadButton.removeStyleName(sharedHomeResources.sharedHomeCss().loading());
+            fileNameInput.setValue("");
             String result = event.getResults().trim();
             JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
             JSONArray resultJson = resultJsonValue.isArray();
             if (resultJson != null) {
                 if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
+                    cleanFormElements();
                     String uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString()
                             .stringValue();
                     String fileName = resultJson.get(0).isObject().get(FileUploadConstants.FILE_NAME).isString()
@@ -379,9 +386,18 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     public void show() {
         // reset all fields
         updateUri(null, null);
+        cleanFormElements();
+        super.show();
+    }
+    
+    private void cleanFormElements() {
+        fileNameInput.setValue("");
+        urlInput.setValue("");
+        titleTextBox.setValue("");
         subtitleTextBox.setValue("");
         copyrightTextBox.setValue("");
-        super.show();
+        mimeTypeListBox.setSelectedIndex(0);
+        uploadButton.removeStyleName(sharedHomeResources.sharedHomeCss().loading());
     }
 
     /**
@@ -487,6 +503,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     if (STATUS_OK.equals(status)) {
                         logger.log(Level.INFO, "Cleanup file successful. URL: " + uri);
                         updateUri(null, "");
+                        cleanFormElements();
                     } else if (EMPTY_MESSAGE.equals(message)) {
                         // No further message from service. Probably the file is not existing any more.
                         Notification.notify(i18n.error(), NotificationType.ERROR);
