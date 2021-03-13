@@ -70,6 +70,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
             boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String optionalDomainName) throws Exception;
 
-    void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
-            String passphraseForPrivateKeyDecryption);
+    void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
+
+    void removeApplicationReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) throws Exception;
 }

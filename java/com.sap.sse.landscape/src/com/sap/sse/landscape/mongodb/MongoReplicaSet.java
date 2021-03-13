@@ -57,7 +57,13 @@ public interface MongoReplicaSet extends Named, MongoEndpoint {
 
     @Override
     default URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeansForever) throws URISyntaxException {
-        return getURI(optionalDb, mongoProcess->mongoProcess.getHost().getPublicAddress(timeoutEmptyMeansForever));
+        return getURI(optionalDb, mongoProcess->{
+            try {
+                return mongoProcess.getHost().getPublicAddress(timeoutEmptyMeansForever);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
     
     void addReplica(MongoProcessInReplicaSet newReplica);

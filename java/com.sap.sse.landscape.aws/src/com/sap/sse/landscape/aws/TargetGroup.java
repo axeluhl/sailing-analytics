@@ -54,5 +54,14 @@ public interface TargetGroup<ShardingKey> extends Named {
         return getTargetGroupArn().substring(getTargetGroupArn().lastIndexOf('/')+1);
     }
 
+    /**
+     * Obtains the load balancer based on the {@link #getLoadBalancerArn() load balancer ARN}. Note that this
+     * will not lead to a dynamic discovery of this target group's load balancer; if this object was created
+     * without explicitly assigning a load balancer ARN and at that time the target group was not the target of
+     * any load balancer's rule, no load balancer ARN will be set, and hence no load balancer will be returned
+     * by this method.
+     */
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
+
+    String getLoadBalancerArn();
 }

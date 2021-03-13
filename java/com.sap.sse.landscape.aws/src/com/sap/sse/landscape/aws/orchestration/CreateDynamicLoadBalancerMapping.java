@@ -42,7 +42,7 @@ implements Procedure<ShardingKey> {
 
         private ApplicationLoadBalancer<ShardingKey> getOrCreateNonDNSMappedLoadBalancer(
                 Region region, String hostname, AwsLandscape<ShardingKey> landscape) throws InterruptedException {
-            final String domainName = getHostedZoneName(hostname);
+            final String domainName = AwsLandscape.getHostedZoneName(hostname);
             final ApplicationLoadBalancer<ShardingKey> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
             final ApplicationLoadBalancer<ShardingKey> result;
             if (existingLoadBalancer != null) {
