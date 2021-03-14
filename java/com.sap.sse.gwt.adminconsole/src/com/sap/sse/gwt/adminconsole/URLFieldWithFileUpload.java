@@ -144,14 +144,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         });
         uploadPanel.add(submitButton);
         uploadFormPanel.addSubmitHandler(submitEvent-> {
-            selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass());
-            selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonLoadingClass(), true);
+            selectUploadButton.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
+            
         });
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonLoadingClass());
-                selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
+                selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
                 urlTextBox.setEnabled(false);
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
