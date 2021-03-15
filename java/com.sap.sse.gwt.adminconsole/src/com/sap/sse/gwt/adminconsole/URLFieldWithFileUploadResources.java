@@ -8,7 +8,6 @@ import com.google.gwt.resources.client.DataResource.MimeType;
 
 public interface URLFieldWithFileUploadResources extends ClientBundle {
     public static final URLFieldWithFileUploadResources INSTANCE = GWT.create(URLFieldWithFileUploadResources.class);
-
     interface URLFieldWithFileUploadStyle extends CssResource {
         /**
          * Inlines elements so that they move into the next line if space is tight.

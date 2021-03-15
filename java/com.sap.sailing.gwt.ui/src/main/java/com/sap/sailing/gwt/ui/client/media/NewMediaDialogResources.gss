@@ -1,0 +1,12 @@
+
+.textfield-size input[type=text], .textfield-size select {
+    width: 15rem;
+}
+
+
+.datepicker-styling input[type=datetime-local] {
+    border: 1px solid rgb(118, 118, 118);
+    width: 15rem;
+    margin: 3px 3px 3px 0;
+    height: 1.469rem;
+}

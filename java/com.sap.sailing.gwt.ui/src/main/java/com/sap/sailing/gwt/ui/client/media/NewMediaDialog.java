@@ -303,7 +303,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     @Override
     protected Widget getAdditionalWidget() {
+        NewMediaDialogResources.INSTANCE.css().ensureInjected();
         VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.addStyleName(NewMediaDialogResources.INSTANCE.css().textfieldSizeClass());
+        mainPanel.addStyleName(NewMediaDialogResources.INSTANCE.css().datePickerClass());
+        
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
