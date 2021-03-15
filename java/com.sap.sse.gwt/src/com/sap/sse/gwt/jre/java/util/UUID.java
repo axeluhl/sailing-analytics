@@ -13,8 +13,15 @@ public class UUID implements Serializable, Comparable<UUID> {
     
     private static final Random numberGenerator = new Random();
 
+    /**
+     * @param value
+     *            if {@code null}, other than the "real" UUID class in the JRE this method will return {@code null} as a
+     *            convenience; otherwise, UUID format validation is applied to the string, and an
+     *            {@link IllegalArgumentException} or {@link NumberFormatException} will be thrown if the {@code value}
+     *            is not in legal UUID format.
+     */
     public static UUID fromString(String value) {
-        return new UUID(value);
+        return value == null ? null : new UUID(value);
     }
     
     public static UUID randomUUID() {
@@ -57,7 +64,28 @@ public class UUID implements Serializable, Comparable<UUID> {
     }
     
     protected UUID(String value) {
+        validate(value);
         this.uuidAsString = value;
+    }
+    
+    private void validate(String stringThatMayBeValidUuid) {
+        String[] components = stringThatMayBeValidUuid.split("-");
+        if (components.length != 5)
+            throw new IllegalArgumentException("Invalid UUID string: "+stringThatMayBeValidUuid);
+        for (int i=0; i<5; i++)
+            components[i] = "0x"+components[i];
+
+        long mostSigBits = Long.decode(components[0]).longValue();
+        mostSigBits <<= 16;
+        mostSigBits |= Long.decode(components[1]).longValue();
+        mostSigBits <<= 16;
+        mostSigBits |= Long.decode(components[2]).longValue();
+
+        long leastSigBits = Long.decode(components[3]).longValue();
+        leastSigBits <<= 48;
+        leastSigBits |= Long.decode(components[4]).longValue();
+        // if we reached here without IllegalArgumentException and without NumberFormatException,
+        // chances are that stringThatMayBeValidUuid is a valid UUID
     }
     
     /**

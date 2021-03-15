@@ -4,11 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,12 +38,15 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final String instanceId;
     private final AwsAvailabilityZone availabilityZone;
     private final InetAddress privateAddress;
+    private InetAddress publicAddress;
+    private final TimePoint launchTimePoint;
     private final AwsLandscape<ShardingKey> landscape;
     
-    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, AwsLandscape<ShardingKey> landscape) {
+    public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
         this.availabilityZone = availabilityZone;
         this.privateAddress = privateAddress;
+        this.launchTimePoint = launchTimePoint;
         this.landscape = landscape;
     }
     
@@ -69,17 +69,39 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     
     @Override
     public TimePoint getLaunchTimePoint() {
-        return TimePoint.of(getInstance().launchTime().toEpochMilli());
+        return launchTimePoint;
     }
 
     @Override
     public InetAddress getPublicAddress() {
-        return getIpAddress(Instance::publicIpAddress);
+        if (publicAddress == null) {
+            try {
+                publicAddress = getPublicAddress(Optional.of(Duration.NULL));
+            } catch (TimeoutException e) {
+                logger.info("Couldn't get public address of instance "+getId());
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return publicAddress;
     }
     
     @Override
-    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getAddressWithTimeout(timeoutEmptyMeaningForever, this::getPublicAddress);
+    public InetAddress getPublicAddress(Optional<Duration> timeoutEmptyMeaningForever) throws TimeoutException, Exception {
+        if (publicAddress == null) {
+            final Instance instance = getInstance();
+            // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
+            if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
+                final String publicIpAddress = Wait.wait(()->instance.publicIpAddress(), ipAddress->ipAddress != null, /* retryOnException */ false,
+                        timeoutEmptyMeaningForever, /* sleep between attempts */ Duration.ONE_SECOND.times(5),
+                        Level.INFO, "Waiting for public IP address of instance "+instance.instanceId());
+                publicAddress = publicIpAddress == null ? null : InetAddress.getByName(publicIpAddress);
+            } else {
+                publicAddress = null;
+            }
+        }
+        return publicAddress;
     }
     
     @Override
@@ -92,37 +114,6 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         return getPrivateAddress();
     }
 
-    private InetAddress getIpAddress(Function<Instance, String> addressAsStringSupplier) {
-        try {
-            final Instance instance = getInstance();
-            final InetAddress result;
-            if (instance.state().name() == InstanceStateName.RUNNING) {
-                final String privateIpAddress = addressAsStringSupplier.apply(instance);
-                result = privateIpAddress==null?null:InetAddress.getByName(privateIpAddress);
-            } else {
-                result = null; // not RUNNING
-            }
-            return result;
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private InetAddress getAddressWithTimeout(Optional<Duration> timeoutNullMeaningForever, Supplier<InetAddress> addressSupplierMethod) {
-        final Instance instance = getInstance();
-        InetAddress result;
-        // for RUNNING and PENDING instances it's worthwhile waiting for the address to show; in all other cases we return null immediately
-        if (instance.state().name() == InstanceStateName.RUNNING || instance.state().name() == InstanceStateName.PENDING) {
-            final TimePoint started = TimePoint.now();
-            while ((result = addressSupplierMethod.get()) == null &&
-                    (!timeoutNullMeaningForever.isPresent() ||
-                     started.until(TimePoint.now()).compareTo(timeoutNullMeaningForever.get()) < 0));
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
     /**
      * Establishes an unconnected session configured for the "root" user.
      * 
@@ -135,7 +126,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
      * @see #createRootSshChannel
      */
     public com.jcraft.jsch.Session createRootSshSession(Optional<String> optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase) throws JSchException {
+            byte[] privateKeyEncryptionPassphrase) throws TimeoutException, Exception {
         return createSshSession(ROOT_USER_NAME, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
@@ -151,6 +142,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
      *            pair that was originally used when the instance was launched will be used.
      * @param privateKeyEncryptionPassphrase
      *            the pass phrase to unlock the private key that belongs to the key pair identified by {@code keyName}
+     * @throws JSchException 
      * @see #createRootSshChannel
      */
     public com.jcraft.jsch.Session createSshSession(String sshUserName, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws JSchException {

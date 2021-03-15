@@ -119,11 +119,11 @@ extends Process<RotatingFileBasedLog, MetricsT> {
         }
     }
 
-    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getUrl(getHealthCheckPath(), optionalTimeout);
     }
     
-    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws MalformedURLException {
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
     }
     
@@ -131,7 +131,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
         return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
     }
     
-    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();
         return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
     }
