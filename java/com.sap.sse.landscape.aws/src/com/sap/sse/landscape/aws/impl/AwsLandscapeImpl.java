@@ -1517,7 +1517,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup) {
         final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
+        logger.info("Removing launch configuration "+autoScalingGroup.getAutoScalingGroup().launchConfigurationName());
         return autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(autoScalingGroup.getAutoScalingGroup().launchConfigurationName()))
-            .thenAccept(response->autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())));
+            .thenAccept(response->{
+                logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
+                autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()));
+            });
     }
 }

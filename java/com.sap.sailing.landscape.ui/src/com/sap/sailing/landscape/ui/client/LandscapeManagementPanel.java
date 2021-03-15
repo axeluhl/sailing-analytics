@@ -365,7 +365,10 @@ public class LandscapeManagementPanel extends SimplePanel {
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
             applicationReplicaSetsBusy.setBusy(true);
-            landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, new AsyncCallback<Void>() {
+            landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+                    sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     applicationReplicaSetsBusy.setBusy(false);

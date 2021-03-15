@@ -45,6 +45,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
+    
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
      * process's OSGi console using the {@link #getTelnetPortToOSGiConsole() telnet port}. If the instance hasn't
