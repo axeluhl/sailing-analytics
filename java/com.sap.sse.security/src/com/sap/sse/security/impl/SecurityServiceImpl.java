@@ -231,23 +231,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     /**
-     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
-     */
-    public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
-        this(null, userStore, accessControlStore);
-    }
-
-    /**
-     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
-     * 
-     * @param mailProperties
-     *            must not be <code>null</code>
-     */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, /* hasPermissionsProvider*/ null);
-    }
-    
-    /**
      * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
      * domain through which its services are requested for {@code Document.domain} and hence for the browser local
      * storage, session storage and the Shiro {@code JSESSIONID} cookie's domain.

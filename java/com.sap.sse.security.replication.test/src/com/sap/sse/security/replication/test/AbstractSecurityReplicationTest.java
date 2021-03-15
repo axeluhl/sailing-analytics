@@ -11,6 +11,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.UserStoreManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -21,7 +22,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
     
     public static class SecurityServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<SecurityService, SecurityServiceImpl> {
         private MongoDBService mongoDBService;
-        
+
         @Override
         protected void persistenceSetUp(boolean dropDB) {
             mongoDBService = MongoDBService.INSTANCE;
@@ -37,17 +38,19 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(userStore, accessControlStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(null, userStore, accessControlStore,
+                    SecuredSecurityTypes::getAllInstances);
             return result;
         }
 
         @Override
-        protected SecurityServiceImpl createNewReplica() throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
+        protected SecurityServiceImpl createNewReplica()
+                throws UserStoreManagementException, MalformedURLException, IOException, InterruptedException {
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            return new SecurityServiceImpl(userStore, accessControlStore);
+            return new SecurityServiceImpl(null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
         }
     }
 }
