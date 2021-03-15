@@ -169,8 +169,6 @@
 <plugin id="org.apache.felix.gogo.runtime.source"/>
 <plugin id="org.apache.felix.gogo.shell"/>
 <plugin id="org.apache.felix.gogo.shell.source"/>
-<plugin id="org.apache.felix.shell"/>
-<plugin id="org.apache.felix.shell.remote"/>
 <plugin id="org.apache.httpcomponents.httpclient"/>
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
