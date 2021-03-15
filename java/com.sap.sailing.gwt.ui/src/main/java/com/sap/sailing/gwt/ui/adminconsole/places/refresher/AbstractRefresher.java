@@ -49,8 +49,12 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
             }
             @Override
             public void onSuccess(Iterable<T> result) {
-                dtos = new ArrayList<T>();
-                result.forEach(dto -> dtos.add(dto));
+                if (result != null) {
+                    dtos = new ArrayList<T>();
+                    result.forEach(dto -> dtos.add(dto));
+                } else {
+                    dtos = null;
+                }
                 loading = false;
                 if (fillOnlyDisplayer != null) {
                     fill(result, fillOnlyDisplayer);
@@ -97,10 +101,28 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 .filter(displayer -> !Objects.equals(displayer, origin))
                 .forEach(displayer -> fill(dtos, displayer));
     }
+    
+    @Override
+    public void callAllFill() {
+        displayers.stream()
+                .forEach(displayer -> fill(dtos, displayer));
+    }
 
     public abstract void reload(AsyncCallback<Iterable<T>> callback);
 
     public void fill(Iterable<T> dtos, Displayer<T> displayer) {
         displayer.fill(dtos);
+    }
+    
+    public void add(T dto) {
+        if (dto != null) {
+            dtos.add(dto);
+        }
+    }
+    
+    public void remove(T dto) {
+        if (dto != null) {
+            dtos.remove(dto);
+        }
     }
 }
