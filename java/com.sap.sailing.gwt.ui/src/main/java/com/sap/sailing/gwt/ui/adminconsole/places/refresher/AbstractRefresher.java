@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole.places.refresher;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,12 +14,14 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public abstract class AbstractRefresher<T> implements Refresher<T> {
 
     private final Set<Displayer<T>> displayers = new HashSet<Displayer<T>>();
-    private Iterable<T> dtos;
+    private List<T> dtos;
+    private boolean loading;
     private final ErrorReporter errorReporter;
 
     public AbstractRefresher(ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
     }
+    
 
     @Override
     public void addDisplayerAndCallFillOnInit(Displayer<T> displayer) {
@@ -45,6 +49,9 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
             }
             @Override
             public void onSuccess(Iterable<T> result) {
+                dtos = new ArrayList<T>();
+                result.forEach(dto -> dtos.add(dto));
+                loading = false;
                 if (fillOnlyDisplayer != null) {
                     fill(result, fillOnlyDisplayer);
                 } else {
@@ -55,7 +62,10 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                 }
             }
         };
-        reload(callback);
+        if (!loading) {
+            loading = true;
+            reload(callback);
+        }
     }
 
     @Override
