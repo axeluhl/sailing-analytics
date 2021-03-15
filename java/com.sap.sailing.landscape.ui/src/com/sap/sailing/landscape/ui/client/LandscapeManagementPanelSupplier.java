@@ -19,7 +19,6 @@ public class LandscapeManagementPanelSupplier extends AdminConsolePanelSupplier<
 
     @Override
     public LandscapeManagementPanel init() {
-        logger.info("Create LandscapeManagementPanel");
         final LandscapeManagementPanel landscapeManagementPanel = new LandscapeManagementPanel(
                 StringMessages.INSTANCE, presenter.getUserService(), tableResources, presenter.getErrorReporter());
         landscapeManagementPanel.ensureDebugId("LandscapeManagementPanel");

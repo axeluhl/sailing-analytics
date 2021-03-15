@@ -45,7 +45,7 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
         AsyncCallback<Iterable<T>> callback = new AsyncCallback<Iterable<T>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error trying to obtain list from server " + caught.getMessage());
+                // already logged. do nothing here
             }
             @Override
             public void onSuccess(Iterable<T> result) {

@@ -19,7 +19,6 @@ public class LocalServerManagementPanelSupplier extends AdminConsolePanelSupplie
 
     @Override
     public LocalServerManagementPanel init() {
-        logger.info("Create LocalServerManagementPanel");
         final LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(presenter,
                 stringMessages);
         localServerInstancesManagementPanel.ensureDebugId("LocalServer");
