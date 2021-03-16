@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -414,7 +415,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
     
     @Test
-    public void createEmptyLoadBalancerTest() throws InterruptedException {
+    public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
         final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
         try {

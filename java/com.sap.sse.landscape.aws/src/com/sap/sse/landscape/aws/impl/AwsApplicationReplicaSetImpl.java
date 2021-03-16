@@ -11,9 +11,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
+import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
@@ -23,10 +25,13 @@ import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupTuple;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import software.amazon.awssdk.services.route53.Route53AsyncClient;
 import software.amazon.awssdk.services.route53.model.RRType;
@@ -139,11 +144,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
             && e.getKey().getLoadBalancerArn() != null && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
-                if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))) {
+                if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))
+                 && hasMasterRuleForward(listenersAndTheirRules, e.getKey())) {
                     myMasterTargetGroup = e.getKey();
                     masterTargetGroup.complete(myMasterTargetGroup);
-                } else if (!publicTargetGroup.isDone() &&
-                        !Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))) {
+                } else if (!publicTargetGroup.isDone()
+                 && !Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
+                 && hasPublicRuleForward(listenersAndTheirRules, e.getKey())) {
                     publicTargetGroup.complete(e.getKey());
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups);
                 }
@@ -226,6 +233,40 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             }
         }
         return null;
+    }
+
+    private boolean hasPublicRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate) {
+        return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, publicTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_REPLICA.getB());
+    }
+
+    private boolean hasListenerRuleWithHostHeaderForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> publicTargetGroupCandidate, String hostHeaderForwardTo) {
+        final String publicTargetGroupCandidateArn = publicTargetGroupCandidate.getTargetGroupArn();
+        for (final Entry<Listener, Iterable<Rule>> e : listenersAndTheirRules.entrySet()) {
+            if (Util.equalsWithNull(e.getKey().loadBalancerArn(), publicTargetGroupCandidate.getLoadBalancerArn())) {
+                for (final Rule rule : e.getValue()) {
+                    for (final Action action : rule.actions()) {
+                        if (action.type() == ActionTypeEnum.FORWARD) {
+                            for (final TargetGroupTuple targetGroupTuple : action.forwardConfig().targetGroups()) {
+                                if (Util.equalsWithNull(targetGroupTuple.targetGroupArn(), publicTargetGroupCandidateArn)) {
+                                    for (final RuleCondition condition : rule.conditions()) {
+                                        if (Util.equalsWithNull(condition.field(), "http-header")
+                                         && Util.equalsWithNull(condition.httpHeaderConfig().httpHeaderName(), HttpRequestHeaderConstants.HEADER_KEY_FORWARD_TO)
+                                         && condition.httpHeaderConfig().values().contains(hostHeaderForwardTo)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasMasterRuleForward(Map<Listener, Iterable<Rule>> listenersAndTheirRules, TargetGroup<ShardingKey> masterTargetGroupCandidate) {
+        return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, masterTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
     }
 
     private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups) {

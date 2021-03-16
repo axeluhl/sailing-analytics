@@ -81,6 +81,9 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.acm.AcmAsyncClient;
+import software.amazon.awssdk.services.acm.model.CertificateDetail;
+import software.amazon.awssdk.services.acm.model.CertificateStatus;
 import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -174,7 +177,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
     // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
-    private static final String DEFAULT_CERTIFICATE_ARN = "arn:aws:acm:eu-west-2:017363970217:certificate/48c51d6a-b4f2-4fa0-8dcc-426cd9c7aadc";
+    private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
@@ -259,6 +262,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getClient(Ec2Client.builder(), region);
     }
     
+    private AcmAsyncClient getAcmAsyncClient(Region region) {
+        return getClient(AcmAsyncClient.builder(), region);
+    }
+    
     private ElasticLoadBalancingV2Client getLoadBalancingClient(Region region) {
         return getClient(ElasticLoadBalancingV2Client.builder(), region);
     }
@@ -289,7 +296,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) {
+    public ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, com.sap.sse.landscape.Region region) throws InterruptedException, ExecutionException {
         Region awsRegion = getRegion(region);
         final ElasticLoadBalancingV2Client client = getLoadBalancingClient(awsRegion);
         final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
@@ -330,14 +337,39 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                                 .build());
                         }).listeners().iterator().next();
     }
+    
+    private CompletableFuture<String> getDefaultCertificateArn(com.sap.sse.landscape.Region region, String domainName) {
+        final AcmAsyncClient acmClient = getAcmAsyncClient(getRegion(region));
+        return acmClient.listCertificates(b->b
+                .certificateStatuses(CertificateStatus.ISSUED)).thenCompose(response->{
+                    final List<CompletableFuture<CertificateDetail>> certificateDetails = new ArrayList<>();
+                    response.certificateSummaryList().stream().filter(certificateSummary->Util.equalsWithNull(certificateSummary.domainName(), domainName))
+                        .forEach(certSummaryForDomain->certificateDetails.add(
+                                acmClient.describeCertificate(b->b.certificateArn(certSummaryForDomain.certificateArn()))
+                                    .thenApply(detailResponse->detailResponse.certificate())));
+                    final CompletableFuture<Void> waitForCertificateDetails = CompletableFuture.allOf(certificateDetails.toArray(new CompletableFuture<?>[0]));
+                    final CompletableFuture<String> result = waitForCertificateDetails
+                        .thenApply(v->certificateDetails.stream().map(cf->{
+                            try {
+                                return cf.get();
+                            } catch (InterruptedException | ExecutionException e) {
+                                throw new RuntimeException();
+                            }
+                        }).sorted(/* newest first */ (cd1, cd2)->cd2.notAfter().compareTo(cd1.notAfter()))
+                                .findFirst().map(cd->cd.certificateArn()).get());
+                    return result;
+                });
+    }
 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) {
+    Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) throws InterruptedException, ExecutionException {
+        final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTPS.name(),
                 httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort, alb.getArn());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
+        final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
                         .createListener(l -> {
                             l.loadBalancerArn(alb.getArn()).protocol(ProtocolEnum.HTTPS)
@@ -349,7 +381,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                                         .targetGroupArn(defaultTargetGroup.getTargetGroupArn()).build())
                                                         .build())
                                                 .build());
-                            l.certificates(Certificate.builder().certificateArn(DEFAULT_CERTIFICATE_ARN).build());
+                            l.certificates(Certificate.builder().certificateArn(defaultCertificateArn).build());
                         }).listeners().iterator().next();
     }
 
@@ -1035,7 +1067,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(
-            com.sap.sse.landscape.Region region, String wildcardDomain) {
+            com.sap.sse.landscape.Region region, String wildcardDomain) throws InterruptedException, ExecutionException {
         return createLoadBalancer(getNonDNSMappedLoadBalancerName(wildcardDomain), region);
     }
 
@@ -1516,12 +1548,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup) {
+        final String launchConfigurationName = autoScalingGroup.getAutoScalingGroup().launchConfigurationName();
         final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
-        logger.info("Removing launch configuration "+autoScalingGroup.getAutoScalingGroup().launchConfigurationName());
-        return autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(autoScalingGroup.getAutoScalingGroup().launchConfigurationName()))
+        logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
+        return autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()))
             .thenAccept(response->{
-                logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
-                autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()));
+                logger.info("Removing launch configuration "+launchConfigurationName);
+                autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(launchConfigurationName));
             });
     }
 }

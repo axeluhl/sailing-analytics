@@ -27,7 +27,7 @@ echo "Downloading libraries..."
 rm -rf ${LIB}/*
 ${WORKSPACE}/gradlew downloadLibs
 cd ${LIB}
-VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/'`
+VERSION=`ls -1 aws-core-*.jar | grep -v -- -sources | sed -e 's/aws-core-\([.0-9]*\)\.jar/\1/' | sort | tail -n 1`
 echo VERSION=${VERSION}
 LIBS=`ls -1 | grep -v -- -sources\.jar`
 echo "Generating the .classpath file..."
@@ -121,7 +121,7 @@ echo "Patching update site's site.xml..."
 sed -i -e 's/com.amazon.aws.aws-java-api\(\.source\)\?_\([0-9.]*\)\.jar/com.amazon.aws.aws-java-api\1_'${VERSION}'.jar/' -e '/feature url=/s/version="[0-9.]*"/version="'${VERSION}'"/' ${SITE_XML}
 echo "Building update site..."
 mvn clean install
-echo "Patching SDK version in target platform definition ${TARGET_DEFINITION}..."
+echo "Patching SDK version ${VERSION} in target platform definition ${TARGET_DEFINITION}..."
 sed -i -e 's/<unit id="com.amazon.aws.aws-java-api.feature.group" version="[0-9.]*"\/>/<unit id="com.amazon.aws.aws-java-api.feature.group" version="'${VERSION}'"\/>/' ${TARGET_DEFINITION}
 echo "You may test your target platform locally by creating race-analysis-p2-local.target by running the script createLocalTargetDef.sh."
 echo "You can also try a Hudson build with the -v option, generating and using the local target platform during the build."

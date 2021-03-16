@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -70,7 +71,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             return self();
         }
 
-        protected ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException {
+        protected ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             return loadBalancerUsed;
         }
 

@@ -2,10 +2,12 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -20,8 +22,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig.Builder;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
@@ -171,7 +173,8 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public void delete() throws InterruptedException {
         // first obtain the target groups to which, based on the current ALB configuration, traffic is forwarded
-        final Iterable<TargetGroup<ShardingKey>> targetGroups = getTargetGroups();
+        final Set<TargetGroup<ShardingKey>> targetGroups = new HashSet<>();
+        Util.addAll(getTargetGroups(), targetGroups); // do this before deleting the ALB because then its ARN isn't known anymore
         // now delete the rules to free up all target groups to which the ALB could have forwarded, except the default rule
         deleteAllRules();
         deleteAllListeners();
