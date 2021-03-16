@@ -40,6 +40,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.ActionsColumn;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -83,7 +84,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources> machineImagesTable;
     private final BusyIndicator machineImagesBusy;
     private final SshKeyManagementPanel sshKeyManagementPanel;
-    private final TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources> applicationReplicaSetsTable;
+    private final TableWrapperWithMultiSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources> applicationReplicaSetsTable;
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
@@ -172,20 +173,18 @@ public class LandscapeManagementPanel extends SimplePanel {
         mongoEndpointsVerticalPanel.add(mongoEndpointsBusy);
         mainPanel.add(mongoEndpointsCaptionPanel);
         // application replica sets:
-        applicationReplicaSetsTable = new TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
+        applicationReplicaSetsTable = new TableWrapperWithMultiSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.of(new EntityIdentityComparator<SailingApplicationReplicaSetDTO<String>>() {
                     @Override
                     public boolean representSameEntity(SailingApplicationReplicaSetDTO<String> dto1,
                             SailingApplicationReplicaSetDTO<String> dto2) {
-                        // TODO Auto-generated method stub
-                        return false;
+                        return dto1.getName().equals(dto2.getName());
                     }
 
                     @Override
                     public int hashCode(SailingApplicationReplicaSetDTO<String> t) {
-                        // TODO Auto-generated method stub
-                        return 0;
+                        return t.getName().hashCode();
                     }
                 }), GWT.create(AdminConsoleTableResources.class),
                 /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
