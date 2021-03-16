@@ -76,13 +76,12 @@ public class MediaPage extends Composite {
     @UiField
     Button mediaAddButton;
     
-    private boolean manageVideos;
-    private boolean managePhotos;
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
-    private VideoWithLowerThird videoDisplayUi;
-
     private final StringMessages stringMessages;
+    private boolean manageVideos;
+    private boolean managePhotos;
+    private VideoWithLowerThird videoDisplayUi;
 
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
@@ -101,7 +100,7 @@ public class MediaPage extends Composite {
         if (videosListUi != null) {
             for (int i = 0; i < videosListUi.getWidgetCount(); i++) {
                 if (videosListUi.getWidget(i) instanceof VideoThumbnail) {
-                    VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
+                    final VideoThumbnail thumb = (VideoThumbnail) videosListUi.getWidget(i);
                     thumb.setManageable(managed);
                 }
             }
@@ -136,7 +135,7 @@ public class MediaPage extends Composite {
     @UiHandler("mediaAddButton")
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
-        DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(video -> {
+        final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(video -> {
             manageMediaModel.addVideo(video, eventDto -> updateMedia());
         }, image -> {
             manageMediaModel.addImage(image, eventDto -> updateMedia());
@@ -154,7 +153,6 @@ public class MediaPage extends Composite {
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
         popupHolder = new FlowPanel();
-        
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event->{
             // for some reason this event is only send after logout. Never the less it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
@@ -174,7 +172,6 @@ public class MediaPage extends Composite {
         if (photosCount > 0) {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;
-
             // To make the image gallery look good, we use different styling if there are only few (<7) images
             // available. If there are more images, always 4 images are shown in a row.
             switch (photosCount) {
@@ -201,11 +198,9 @@ public class MediaPage extends Composite {
 
             for (final ImageDTO holder : manageMediaModel.getImages()) {
                 if (holder.getSourceRef() != null) {
-
                     GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
                     gih.addStyleName(photoCss);
                     gih.addStyleName(res.mediaCss().columns());
-
                     photoListOuterBoxUi.add(gih);
                     gih.addClickHandler(new ClickHandler() {
                         @Override
@@ -227,7 +222,7 @@ public class MediaPage extends Composite {
                 }
             }
         }
-        int videoCount = manageMediaModel.getVideos().size();
+        final int videoCount = manageMediaModel.getVideos().size();
         videosListUi.clear();
         if (videoCount > 0) {
             boolean first = true;
@@ -262,7 +257,7 @@ public class MediaPage extends Composite {
     }
     
     private void updateVideoDisplay() {
-        int videoCount = manageMediaModel.getVideos().size();
+        final int videoCount = manageMediaModel.getVideos().size();
         videoListOuterBoxUi.removeClassName(res.mediaCss().large3());
         videoListOuterBoxUi.getStyle().clearDisplay();
         videoDisplayOuterBoxUi.removeClassName(res.mediaCss().large9());
@@ -291,7 +286,6 @@ public class MediaPage extends Composite {
     
     private ClickHandler getDeleteImageHandler(ImageDTO imageCandidateInfo) {
         return new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
