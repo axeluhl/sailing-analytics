@@ -69,21 +69,20 @@ public class MediaPage extends Composite {
     DivElement photoSectionUi;
     @UiField
     FlowPanel photoListOuterBoxUi;
-    
     @UiField
     Button videoSettingsButton;
     @UiField
     Button photoSettingsButton;
     @UiField
     Button mediaAddButton;
-    @UiField
-    StringMessages i18n;
     
     private boolean manageVideos;
     private boolean managePhotos;
     private final SimplePanel contentPanel;
     private final FlowPanel popupHolder;
     private VideoWithLowerThird videoDisplayUi;
+
+    private final StringMessages stringMessages;
 
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
@@ -148,8 +147,9 @@ public class MediaPage extends Composite {
     
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, EventViewDTO eventViewDto) {
         MediaPageResources.INSTANCE.css().ensureInjected();
+        stringMessages = StringMessages.INSTANCE;
         SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
-        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto, i18n);
+        manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto, stringMessages);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);
         initWidget(contentPanel);
@@ -281,7 +281,7 @@ public class MediaPage extends Composite {
             
             @Override
             public void onClick(ClickEvent event) {
-                if (Window.confirm(i18n.confirmDeleteVideo())) {
+                if (Window.confirm(stringMessages.confirmDeleteVideo())) {
                     manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
                     
                 }
@@ -295,7 +295,7 @@ public class MediaPage extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
-                if (Window.confirm(i18n.confirmDeleteImage())) {
+                if (Window.confirm(stringMessages.confirmDeleteImage())) {
                     manageMediaModel.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
                 }
             }
