@@ -42,7 +42,7 @@
                         <ui:text from='{i18n.whatsNew}' />
                     </g:Anchor>
                 </div>
-                <div ui:field="copyrightDiv" class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                <div ui:field="copyrightDiv" class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.sitefooter_copyright}">
                     <ui:text from='{i18n.footerCopyright}' />
                 </div>
             </div>

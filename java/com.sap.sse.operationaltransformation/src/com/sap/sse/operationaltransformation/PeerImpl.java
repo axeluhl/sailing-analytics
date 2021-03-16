@@ -3,6 +3,7 @@ package com.sap.sse.operationaltransformation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,7 +105,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 
     private ExecutorService createMerger() {
         return ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor(1,
-                this.getClass().getName() + " " + name);
+                this.getClass().getName() + " " + name + UUID.randomUUID());
     }
 
     private Transformer<S, O> getTransformer() {

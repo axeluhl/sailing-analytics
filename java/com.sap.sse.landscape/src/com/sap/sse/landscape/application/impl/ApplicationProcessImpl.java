@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -170,11 +171,13 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
-        sftpChannel.get(path, bos);
-        sftpChannel.disconnect();
-        return bos.toString();
+        try {final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
+            sftpChannel.get(path, bos);
+            return bos.toString();
+        } finally {
+            sftpChannel.getSession().disconnect();
+        }
     }
     
     /**
@@ -185,8 +188,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return "/";
     }
     
-    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout)
-            throws ClientProtocolException, IOException, ParseException {
+    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(optionalTimeout));
     }
 

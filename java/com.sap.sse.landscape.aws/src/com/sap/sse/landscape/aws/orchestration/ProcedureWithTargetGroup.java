@@ -97,7 +97,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     protected <ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics>
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
         return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName, process.getPort(),
-                process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort());
+                process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort(),
+                getLoadBalancerUsed().getArn());
     }
     
     @Override
@@ -110,7 +111,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     }
     
     public TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName());
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
     public String getPublicTargetGroupName() {
@@ -118,7 +120,8 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     }
     
     public TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName());
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
     public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() {
@@ -127,9 +130,5 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
 
     public Iterable<Rule> getRulesAdded() {
         return rulesAdded;
-    }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
     }
 }
