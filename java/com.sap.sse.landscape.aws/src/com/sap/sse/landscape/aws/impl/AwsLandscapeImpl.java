@@ -1551,7 +1551,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String launchConfigurationName = autoScalingGroup.getAutoScalingGroup().launchConfigurationName();
         final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
         logger.info("Removing auto-scaling group "+autoScalingGroup.getAutoScalingGroup().autoScalingGroupName());
-        return autoScalingAsyncClient.deleteAutoScalingGroup(b->b.autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()))
+        return autoScalingAsyncClient.deleteAutoScalingGroup(b->b.forceDelete(true).autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName()))
             .thenAccept(response->{
                 logger.info("Removing launch configuration "+launchConfigurationName);
                 autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(launchConfigurationName));

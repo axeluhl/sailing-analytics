@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
@@ -35,6 +37,7 @@ import com.sap.sse.util.Wait;
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
+    private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());;
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private Integer expeditionUdpPort;
@@ -168,9 +171,24 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
 
     @Override
-    public void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
-        // TODO Implement SailingAnalyticsProcessImpl.stopAndTerminateIfLast(...)
-        // TODO issue: how do we know that master and replicas are the only processes on the instance? Only then can we terminate; otherwise only remove the processes!
+    public void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) {
+        try {
+            tryShutdown(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            logger.info("Removing server directory "+getServerDirectory()+" of "+this);
+            getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory()+"\"", "Removing server directory "+getServerDirectory(), Level.INFO);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            if (Util.isEmpty(applicationProcesses)) {
+                logger.info("No more application processes running on "+this+"; terminating");
+                getHost().terminate();
+            } else {
+                logger.info("There are other application processes deployed on " + this + ": "
+                        + Util.joinStrings(", ", applicationProcesses) + ". Leaving " + this + " running.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

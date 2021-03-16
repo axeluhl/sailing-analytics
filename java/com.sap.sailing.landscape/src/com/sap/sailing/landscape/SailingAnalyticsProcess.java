@@ -17,11 +17,11 @@ public interface SailingAnalyticsProcess<ShardingKey> extends ApplicationProcess
     SailingAnalyticsHost<ShardingKey> getHost();
     
     /**
-     * First, {@link #tryCleanShutdown(Duration, boolean) tries a clean shutdown} of this process. If this does not
-     * work, the process will be killed. The process directory will be removed. If, according to
+     * First, {@link #tryShutdown(Optional, Optional, byte[]) shuts this process down}. Then, the process directory will
+     * be removed. If, according to
      * {@link #getHost()}.{@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
-     * getApplicationProcesses(...)} there are no other processes deployed on the {@link #getHost() host},
-     * the host is {@link AwsLandscape#terminate(com.sap.sse.landscape.aws.AwsInstance) terminated}.
+     * getApplicationProcesses(...)} there are no other processes deployed on the {@link #getHost() host}, the host is
+     * {@link AwsLandscape#terminate(com.sap.sse.landscape.aws.AwsInstance) terminated}.
      */
     void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase);
 }
