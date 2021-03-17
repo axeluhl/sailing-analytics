@@ -12,21 +12,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
-import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
@@ -67,7 +68,7 @@ import software.amazon.awssdk.services.ec2.model.Snapshot;
  * @param <HostT>
  */
 public class UpgradeAmi<ShardingKey>
-extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+extends StartEmptyServer<UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     private static final Logger logger = Logger.getLogger(UpgradeAmi.class.getName());
     private static final Pattern imageNamePattern = Pattern.compile("^(.*) ([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$");
@@ -115,7 +116,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey,
     ProcessT extends ApplicationProcess<ShardingKey, SailingAnalyticsMetrics, ProcessT>>
-    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
+    extends StartEmptyServer.Builder<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsHost<ShardingKey>> {
         enum VersionPart {
             MAJOR, MINOR, MICRO
         }
@@ -135,7 +136,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     }
 
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>>, ShardingKey>
-    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    extends StartEmptyServer.BuilderImpl<BuilderT, UpgradeAmi<ShardingKey>, ShardingKey, SailingAnalyticsHost<ShardingKey>>
     implements Builder<BuilderT, ShardingKey, SailingAnalyticsProcess<ShardingKey>> {
         private String upgradedImageName;
         private VersionPart versionPartToIncrement;
@@ -257,10 +258,10 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         }
 
         @Override
-        public HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
-            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
-                        landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+        public HostSupplier<ShardingKey, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape)->
+                new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress,
+                        launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
                                 final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,

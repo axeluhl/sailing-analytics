@@ -92,6 +92,10 @@ public interface LandscapeManagementWriteServiceAsync {
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
             AsyncCallback<SerializationDummyDTO> callback);
 
-    void defineLandingPage(String regionId, RedirectDTO redirect, String keyName,
+    void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
             String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
+
+    void removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> asyncCallback);
 }

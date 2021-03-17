@@ -18,6 +18,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -38,6 +39,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.ActionsColumn;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -73,7 +76,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Axel Uhl (D043530)
  *
  */
-public class LandscapeManagementPanel extends VerticalPanel {
+public class LandscapeManagementPanel extends SimplePanel {
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final TableWrapperWithSingleSelectionAndFilter<String, StringMessages, AdminConsoleTableResources> regionsTable;
     private final TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources> mongoEndpointsTable;
@@ -81,7 +84,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
     private final TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources> machineImagesTable;
     private final BusyIndicator machineImagesBusy;
     private final SshKeyManagementPanel sshKeyManagementPanel;
-    private final TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources> applicationReplicaSetsTable;
+    private final TableWrapperWithMultiSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources> applicationReplicaSetsTable;
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
@@ -91,8 +94,11 @@ public class LandscapeManagementPanel extends VerticalPanel {
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
         landscapeManagementService = initAndRegisterLandscapeManagementService();
+        final VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setWidth("100%");
+        this.add(mainPanel);
         final HorizontalPanel awsCredentialsAndSshKeys = new HorizontalPanel();
-        add(awsCredentialsAndSshKeys);
+        mainPanel.add(awsCredentialsAndSshKeys);
         final CaptionPanel awsCredentialsPanel = new CaptionPanel(stringMessages.awsCredentials());
         awsCredentialsAndSshKeys.add(awsCredentialsPanel);
         mfaLoginWidget = new AwsMfaLoginWidget(landscapeManagementService, errorReporter, userService, stringMessages);
@@ -121,7 +127,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         }, stringMessages.region(), new NaturalComparator());
         final CaptionPanel regionsCaptionPanel = new CaptionPanel(stringMessages.region());
         regionsCaptionPanel.add(regionsTable);
-        add(regionsCaptionPanel);
+        mainPanel.add(regionsCaptionPanel);
         refreshRegionsTable(userService);
         // MongoDB endpoints:
         mongoEndpointsTable = new TableWrapperWithSingleSelectionAndFilter<MongoEndpointDTO, StringMessages, AdminConsoleTableResources>(
@@ -165,11 +171,22 @@ public class LandscapeManagementPanel extends VerticalPanel {
         mongoEndpointsVerticalPanel.add(mongoEndpointsTable);
         mongoEndpointsBusy = new SimpleBusyIndicator();
         mongoEndpointsVerticalPanel.add(mongoEndpointsBusy);
-        add(mongoEndpointsCaptionPanel);
+        mainPanel.add(mongoEndpointsCaptionPanel);
         // application replica sets:
-        applicationReplicaSetsTable = new TableWrapperWithSingleSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
+        applicationReplicaSetsTable = new TableWrapperWithMultiSelectionAndFilter<SailingApplicationReplicaSetDTO<String>, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
-                /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                /* entity identity comparator */ Optional.of(new EntityIdentityComparator<SailingApplicationReplicaSetDTO<String>>() {
+                    @Override
+                    public boolean representSameEntity(SailingApplicationReplicaSetDTO<String> dto1,
+                            SailingApplicationReplicaSetDTO<String> dto2) {
+                        return dto1.getName().equals(dto2.getName());
+                    }
+
+                    @Override
+                    public int hashCode(SailingApplicationReplicaSetDTO<String> t) {
+                        return t.getName().hashCode();
+                    }
+                }), GWT.create(AdminConsoleTableResources.class),
                 /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
                 /* filter checkbox label */ null) {
             @Override
@@ -190,14 +207,15 @@ public class LandscapeManagementPanel extends VerticalPanel {
         };
         applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
         applicationReplicaSetsTable.addColumn(rs->rs.getVersion(), stringMessages.versionHeader());
-        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHostname(), stringMessages.masterHostName());
+        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getPublicIpAddress(), stringMessages.masterHostName());
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
-        applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getServerName(), stringMessages.masterServerName());
+        applicationReplicaSetsTable.addColumn(rs->rs.getHostname(), stringMessages.hostname());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
         applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint());
-        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getReleaseName(), stringMessages.release());
-        applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(), r->r.getHostname()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
+        applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(),
+                r->r.getHost().getPublicIpAddress()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
                 stringMessages.replicas());
+        applicationReplicaSetsTable.addColumn(rs->rs.getDefaultRedirectPath(), stringMessages.defaultRedirectPath());
         final ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell> applicationReplicaSetsActionColumn = new ActionsColumn<SailingApplicationReplicaSetDTO<String>, ApplicationReplicaSetsImagesBarCell>(
                 new ApplicationReplicaSetsImagesBarCell(stringMessages), /* permission checker */ (applicationReplicaSet, action)->true);
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_ARCHIVE,
@@ -227,7 +245,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsBusy);
-        add(applicationReplicaSetsCaptionPanel);
+        mainPanel.add(applicationReplicaSetsCaptionPanel);
         // machine images:
         machineImagesTable = new TableWrapperWithSingleSelectionAndFilter<AmazonMachineImageDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
@@ -261,7 +279,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
-        add(machineImagesCaptionPanel);
+        mainPanel.add(machineImagesCaptionPanel);
         regionsTable.getSelectionModel().addSelectionChangeHandler(e->
         {
             final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
@@ -274,7 +292,6 @@ public class LandscapeManagementPanel extends VerticalPanel {
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
         // TODO support archive server upgrade
         // TODO support upgrading all app server instances in a region
-        // TODO region table should remember its last selection in user preferences
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
     }
 
@@ -283,11 +300,12 @@ public class LandscapeManagementPanel extends VerticalPanel {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-            new DefineLandingPageDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
+            new DefineRedirectDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
                 @Override
                 public void ok(RedirectDTO redirect) {
                     applicationReplicaSetsBusy.setBusy(true);
-                    landscapeManagementService.defineLandingPage(selectedRegion, redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                    landscapeManagementService.defineDefaultRedirect(selectedRegion, applicationReplicaSetToDefineLandingPageFor.getHostname(),
+                            redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
                             sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(),
                         new AsyncCallback<Void>() {
                             @Override
@@ -315,6 +333,7 @@ public class LandscapeManagementPanel extends VerticalPanel {
         new CreateApplicationReplicaSetDialog(landscapeManagementService, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
             @Override
             public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                applicationReplicaSetsBusy.setBusy(true);
                 landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getMasterInstanceType(),
                         instructions.isDynamicLoadBalancerMapping(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
@@ -322,11 +341,13 @@ public class LandscapeManagementPanel extends VerticalPanel {
                         instructions.getSecurityReplicationBearerToken(), instructions.getOptionalDomainName(),new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
                                 errorReporter.reportError(caught.getMessage());
                             }
                             
                             @Override
                             public void onSuccess(Void result) {
+                                applicationReplicaSetsBusy.setBusy(false);
                                 Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
                                 refreshApplicationReplicaSetsTable();
                             }
@@ -342,7 +363,23 @@ public class LandscapeManagementPanel extends VerticalPanel {
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove) {
         if (Window.confirm(stringMessages.reallyRemoveApplicationReplicaSet(applicationReplicaSetToRemove.getName()))) {
-            // TODO implement LandscapeManagementPanel.removeApplicationReplicaSet
+            applicationReplicaSetsBusy.setBusy(true);
+            landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+                    sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                            sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    applicationReplicaSetsBusy.setBusy(false);
+                    errorReporter.reportError(caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    applicationReplicaSetsBusy.setBusy(false);
+                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToRemove);
+                }
+            });
         }
     }
 

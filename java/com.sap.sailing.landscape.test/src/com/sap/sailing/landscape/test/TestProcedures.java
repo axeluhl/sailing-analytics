@@ -46,6 +46,7 @@ import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
@@ -137,7 +138,7 @@ public class TestProcedures {
         try {
             // this is expected to have connected to the default "live" replica set.
             startEmptyMultiServer.run();
-            final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startEmptyMultiServer.getHost();
+            final SailingAnalyticsHost<String> host = startEmptyMultiServer.getHost();
             final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             final String result = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(result.isEmpty());
@@ -174,10 +175,10 @@ public class TestProcedures {
                             throw new RuntimeException(e);
                         }
                     };
-            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, privateIpAddress, landscape)->
+            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape)->
                 new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress,
-                        landscape, processFactoryFromHostAndServerDirectory);
-            final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
+                        launchTimePoint, landscape, processFactoryFromHostAndServerDirectory);
+            final Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
                     landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, hostSupplier, optionalTimeout, 
                             /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             // expecting to find at least "a" and "b"
@@ -198,7 +199,7 @@ public class TestProcedures {
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
     SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT>>
-    SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
+    SailingAnalyticsProcess<String> launchMasterOnMultiServer(SailingAnalyticsHost<String> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
         final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsApplicationConfiguration.<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>builder();
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
                 ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
