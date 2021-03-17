@@ -211,7 +211,7 @@
          id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
-         version="1.4.5"
+         version="1.6.2"
          unpack="false"/>
 
    <plugin
