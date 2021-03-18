@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +74,7 @@ import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
+import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -105,11 +108,13 @@ import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
@@ -127,7 +132,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     /**
      * The timeout for a host to come up
      */
-    private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(5));
+    private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
     
@@ -478,9 +483,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void scaleMongo(String regionId, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName) throws Exception {
+        final int WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS = 5000;
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
-        for (final ProcessDTO processToShutdown : mongoScalingInstructions.getHostnamesAndPortsToShutDown()) {
+        for (final Iterator<MongoProcessDTO> i=mongoScalingInstructions.getHostnamesAndPortsToShutDown().iterator(); i.hasNext(); ) {
+            final ProcessDTO processToShutdown = i.next();
             logger.info("Shutting down MongoDB instance "+processToShutdown.getHost().getInstanceId()+" on behalf of user "+SessionUtils.getPrincipal());
             final AwsRegion region = new AwsRegion(processToShutdown.getHost().getRegion());
             final AwsInstance<String> instance = new AwsInstanceImpl<>(processToShutdown.getHost().getInstanceId(),
@@ -489,6 +496,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                             InetAddress.getByName(processToShutdown.getHost().getPrivateIpAddress()),
                             processToShutdown.getHost().getLaunchTimePoint(), landscape);
             instance.terminate();
+            if (i.hasNext()) {
+                Thread.sleep(WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS); // give the primary a chance to apply the configuration change before asking for the next configuration change
+            }
         }
         if (mongoScalingInstructions.getReplicaSetName() == null) {
             throw new IllegalArgumentException("Can only scale MongoDB Replica Sets, not standalone instances");
@@ -509,7 +519,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 .build();
             startMongoDBServer.run();
             if (i<mongoScalingInstructions.getLaunchParameters().getNumberOfInstances()-1) {
-                Thread.sleep(5000); // give the primary a chance to apply the configuration change before asking for the next configuration change
+                Thread.sleep(WAIT_TIME_FOR_REPLICA_SET_TO_APPLY_CONFIG_CHANCE_IN_MILLIS); // give the primary a chance to apply the configuration change before asking for the next configuration change
             }
         }
     }
@@ -555,7 +565,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final String userBearerToken = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString());
+        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         replicaConfigurationBuilder
             .setLandscape(landscape)
@@ -619,5 +629,90 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO) {
         return null;
+    }
+
+    @Override
+    public void removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDescryption)
+            throws Exception {
+        final AwsRegion region = new AwsRegion(regionId);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = convertFromApplicationReplicaSetDTO(
+                region, applicationReplicaSetToRemove);
+        final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
+        final CompletableFuture<Void> autoScalingGroupRemoval;
+        if (autoScalingGroup != null) {
+            // remove the launch configuration used by the auto scaling group and the auto scaling group itself:
+            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
+        } else {
+            autoScalingGroupRemoval = new CompletableFuture<>();
+            autoScalingGroupRemoval.complete(null);
+        }
+        // terminate the instances
+        autoScalingGroupRemoval.thenAccept(v->
+            applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption));
+        autoScalingGroupRemoval.thenAccept(v->{
+            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption);
+            }
+        });
+        // remove the load balancer rules
+        getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+        // remove the target groups
+        getLandscape().deleteTargetGroup(applicationReplicaSet.getMasterTargetGroup());
+        getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
+        final String loadBalancerDNSName = applicationReplicaSet.getLoadBalancer().getDNSName();
+        final Iterable<Rule> currentLoadBalancerRuleSet = applicationReplicaSet.getLoadBalancer().getRules();
+        // remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
+        if (Util.isEmpty(currentLoadBalancerRuleSet) ||
+                (Util.size(currentLoadBalancerRuleSet) == 1 && currentLoadBalancerRuleSet.iterator().next().isDefault())) {
+            logger.info("No more rules "+(!Util.isEmpty(currentLoadBalancerRuleSet) ? "except default rule " : "")+
+                    "left in load balancer "+applicationReplicaSet.getLoadBalancer().getName()+"; deleting.");
+            applicationReplicaSet.getLoadBalancer().delete();
+        }
+        if (applicationReplicaSet.getResourceRecordSet() != null) {
+            // remove the DNS record if this replica set was a DNS-mapped one
+            logger.info("Removing DNS CNAME record "+applicationReplicaSet.getResourceRecordSet());
+            getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
+        }
+    }
+
+    private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
+            final AwsRegion region, SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO)
+            throws UnknownHostException {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
+                getLandscape().getApplicationReplicaSet(region, applicationReplicaSetDTO.getReplicaSetName(),
+                    getSailingAnalyticsProcessFromDTO(applicationReplicaSetDTO.getMaster()),
+                    getSailingAnalyticsProcessesFromDTOs(applicationReplicaSetDTO.getReplicas()));
+        return applicationReplicaSet;
+    }
+
+    private Iterable<SailingAnalyticsProcess<String>> getSailingAnalyticsProcessesFromDTOs(ArrayList<SailingAnalyticsProcessDTO> processDTOs) {
+        return Util.map(processDTOs, processDTO->{
+            try {
+                return getSailingAnalyticsProcessFromDTO(processDTO);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private SailingAnalyticsProcess<String> getSailingAnalyticsProcessFromDTO(SailingAnalyticsProcessDTO processDTO) throws UnknownHostException {
+        return new SailingAnalyticsProcessImpl<String>(processDTO.getPort(),
+                getHostFromInstanceDTO(processDTO.getHost()), processDTO.getServerDirectory(),
+                processDTO.getExpeditionUdpPort());
+    }
+
+    private Host getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {
+        return new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(hostDTO.getInstanceId(),
+                new AwsAvailabilityZoneImpl(AvailabilityZone.builder().regionName(hostDTO.getRegion()).zoneName(hostDTO.getAvailabilityZone()).build()),
+                InetAddress.getByName(hostDTO.getPrivateIpAddress()), hostDTO.getLaunchTimePoint(), getLandscape(),
+                (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+                    try {
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
+                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 }

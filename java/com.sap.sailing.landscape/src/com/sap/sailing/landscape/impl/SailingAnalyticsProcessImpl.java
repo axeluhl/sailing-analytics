@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,23 +19,25 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.util.Wait;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
+    private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());;
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private Integer expeditionUdpPort;
@@ -47,7 +50,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
 
     public SailingAnalyticsProcessImpl(int port,
-            ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> host,
+            SailingAnalyticsHost<ShardingKey> host,
             String serverDirectory, int telnetPort, String serverName, Integer expeditionUdpPort) {
         super(port, host, serverDirectory, telnetPort, serverName);
         this.expeditionUdpPort = expeditionUdpPort;
@@ -139,7 +142,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
 
     private void updateStartTimePointFromStatus(final JSONObject status) throws ParseException {
-        final Number startTimeMillis = (Number) status.get("start_time_millis");
+        final Object startTimeMillis = status.get("start_time_millis");
         if (startTimeMillis == null) {
             // try legacy approach: extract from "buildversion" attribute which has the general format "^.* Started: [0-9]+$"
             // where the "Started" value has format yyyyMMddhhmm, usually provided in UTC
@@ -153,7 +156,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
                 startTimePoint = null;
             }
         } else {
-            startTimePoint = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
+            startTimePoint = TimePoint.of(Long.valueOf(startTimeMillis.toString()));
         }
     }
 
@@ -165,5 +168,33 @@ implements SailingAnalyticsProcess<ShardingKey> {
                 optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         }
         return expeditionUdpPort;
+    }
+
+    @Override
+    public void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) {
+        try {
+            tryShutdown(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            logger.info("Removing server directory "+getServerDirectory()+" of "+this);
+            getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+                .runCommandAndReturnStdoutAndLogStderr("rm -rf \""+getServerDirectory()+"\"", "Removing server directory "+getServerDirectory(), Level.INFO);
+            final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = getHost().getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            if (Util.isEmpty(applicationProcesses)) {
+                logger.info("No more application processes running on "+this+"; terminating");
+                getHost().terminate();
+            } else {
+                logger.info("There are other application processes deployed on " + this + ": "
+                        + Util.joinStrings(", ", applicationProcesses) + ". Leaving " + this + " running.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public SailingAnalyticsHost<ShardingKey> getHost() {
+        @SuppressWarnings("unchecked")
+        final SailingAnalyticsHost<ShardingKey> result = (SailingAnalyticsHost<ShardingKey>) super.getHost();
+        return result;
     }
 }

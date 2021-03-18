@@ -3,10 +3,10 @@
  */
 .siteheader {
   font-size: 1rem;
-  background: #333;
-  border-bottom: 0.333333333333333em solid #f0ab00;
-  height: 3.333333333333333em;
-  line-height: 3em;
+  background: #000;
+  border-top: .266666666666666em solid #000;
+  height: 4em;
+  line-height: 3.5em;
   width: 100%;
   overflow: hidden;
 }
@@ -51,28 +51,26 @@
 }
 .sitenavigation_link {
   display: inline-block;
-  font-size: 0.933333333333333em;
-  font-weight: 600;
-  color: #f6f9fc;
-  text-transform: uppercase;
+  color: #fff;
   padding: 0 1rem;
   white-space: nowrap;
 }
+.sitenavigation_linkactive,
 .sitenavigation_link:hover,
 .sitenavigation_link:focus {
   text-decoration: none;
-  background-color: #0a0a0a;
 }
-.sitenavigation_linkactive,
-.sitenavigation_link:hover
-{
-  text-decoration: none;
-  color: #f0ab00;
+.sitenavigation .sitenavigation_linkactive:after,
+.sitenavigation .sitenavigation_link:hover:after {
+  background-color: #f0ab00;
+  height: 4px;
+  content: ' ';
+  display: block;
 }
 
 .sitenavigation_dropdown_container {
   position: absolute;
-  background: #333;
+  background: #000;
   display: block;
   z-index: 1;
   top: 3rem;
@@ -85,6 +83,11 @@
 .sitenavigation_dropdown_container ul li a {
     width: 100%;
     cursor: pointer;
+    padding: 0 .733333333333333em 0 1em;
+    border-right: .266666666666666em solid #000;
+}
+.sitenavigation_dropdown_container ul li a:hover {
+	border-color: #f0ab00;
 }
 .sitenavigation_fixed {
   white-space: nowrap;
@@ -94,10 +97,9 @@
 }
 .sitenavigation_search {
   display: inline-block;
+  vertical-align: middle;   
   padding: 0 0 0 1rem;
   font-weight: 600;
-  color: #f6f9fc;
-  text-transform: uppercase;
 }
 .search {
   font-size: 1rem;
@@ -109,8 +111,8 @@
   padding: 0.357142857142857em 2.857142857142857em 0.357142857142857em 0.357142857142857em;
   border: 1px solid #666;
   font-size: 0.933333333333333em;
-  color: #f6f9fc;
-  background: #333;
+  color: #fff;
+  background: #000;
 }
 @media (min-width: 61em) {
   .search_textfield {
@@ -175,6 +177,6 @@
 
 .header_navigation_icon:hover,
 .header_navigation_iconactive {
-  background-image: resourceUrl('navigation_hover');
+/*   background-image: resourceUrl('navigation_hover'); */
 }
 

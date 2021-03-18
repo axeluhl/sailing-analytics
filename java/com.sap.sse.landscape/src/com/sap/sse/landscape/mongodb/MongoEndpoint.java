@@ -12,7 +12,7 @@ import com.sap.sse.common.Duration;
 
 /**
  * A MongoDB endpoint that an application can connect to. It can produce a {@link URI} the client can use to connect to,
- * e.g., with a {@code MongoClientURI}. The endpoint can be a standalong MongoDB instance, represented by a single
+ * e.g., with a {@code MongoClientURI}. The endpoint can be a standalone MongoDB instance, represented by a single
  * {@link MongoProcess}, or it may be a {@link MongoReplicaSet replica set}.
  * 
  * @author Axel Uhl (D043530)
@@ -28,6 +28,9 @@ public interface MongoEndpoint {
     
     URI getURI(Optional<Database> optionalDb, Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException;
     
+    /**
+     * Lists all MongoDB databases available in this end point
+     */
     Iterable<MongoDatabase> getMongoDatabases() throws URISyntaxException;
 
     MongoDatabase getMongoDatabase(String dbName) throws URISyntaxException;
@@ -38,7 +41,7 @@ public interface MongoEndpoint {
      * {@code from} database, callers may want to compare the {@link Database#getMD5Hash() hash} of {@code from}
      * with that of the {@link Database} returned by this method.
      */
-    MongoDatabase importDatabase(MongoDatabase from);
+    MongoDatabase importDatabase(MongoDatabase from) throws URISyntaxException;
 
     boolean isInReplicaSet() throws URISyntaxException;
     
@@ -74,9 +77,36 @@ public interface MongoEndpoint {
 
     ClientSession getClientSession() throws URISyntaxException;
     
+    /**
+     * Compures an MD5 hash of a single database within this end point. Those hashes are computed using the following
+     * MongoDB command:
+     * 
+     * <pre>
+     *      db.runCommand({dbHash: 1})</pre>
+     * This produces output of the form
+     * 
+     * <pre>
+     *    {
+     *        "host" : "WDFN34199197A",
+     *        "collections" : {
+     *
+     *        },
+     *        "capped" : [ ],
+     *        "uuids" : {
+     *
+     *        },
+     *        "md5" : "d41d8cd98f00b204e9800998ecf8427e",
+     *        "timeMillis" : 1,
+     *        "ok" : 1
+     *    }</pre>
+     * of which this method extracts the "md5" field.
+     */
     default String getMD5Hash(String databaseName) throws URISyntaxException {
         return getMD5Hash(getMongoDatabase(databaseName));
     }
     
+    /**
+     * See {@link #getMD5Hash(String)}
+     */
     String getMD5Hash(MongoDatabase database) throws URISyntaxException;
 }
