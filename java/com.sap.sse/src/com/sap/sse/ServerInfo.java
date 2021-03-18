@@ -38,7 +38,9 @@ public class ServerInfo {
         final JSONObject result;
         final File versionJsonFile = new File(ServerStartupConstants.JETTY_HOME + File.separator + "version.json");
         if (versionJsonFile.exists()) {
-            result = (JSONObject) new JSONParser().parse(new BufferedReader(new FileReader(versionJsonFile)));
+            try (final BufferedReader br = new BufferedReader(new FileReader(versionJsonFile))) {
+                result = (JSONObject) new JSONParser().parse(br);
+            }
         } else {
             result = new JSONObject();
         }
