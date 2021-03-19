@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.racelogtracking;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 
 /**

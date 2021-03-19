@@ -3,8 +3,8 @@ package com.sap.sailing.server.gateway.serialization.racegroup.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.server.gateway.serialization.ExtendableJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
+import com.sap.sse.shared.json.ExtendableJsonSerializer;
+import com.sap.sse.shared.json.ExtensionJsonSerializer;
 
 public class SeriesWithRowsJsonSerializer extends ExtendableJsonSerializer<SeriesWithRows> {
     public static final String FIELD_NAME = "name";

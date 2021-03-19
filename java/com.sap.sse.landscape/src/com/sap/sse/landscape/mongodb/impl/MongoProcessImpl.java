@@ -9,6 +9,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 import com.sap.sse.landscape.mongodb.MongoMetrics;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 
@@ -19,10 +20,10 @@ public class MongoProcessImpl extends MongoEndpointImpl implements MongoProcess 
     private final Host host;
     
     public MongoProcessImpl(Host host) {
-        this(DEFAULT_PORT, host);
+        this(host, MongoDBConstants.DEFAULT_PORT);
     }
 
-    public MongoProcessImpl(int port, Host host) {
+    public MongoProcessImpl(Host host, int port) {
         super();
         this.port = port;
         this.host = host;

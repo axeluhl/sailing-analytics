@@ -68,4 +68,8 @@ public abstract class BaseRaceStateChangedListener implements RaceStateChangedLi
         
     }
 
+    @Override
+    public void onResultsAreOfficialChanged(ReadonlyRaceState state) {
+        
+    }
 }

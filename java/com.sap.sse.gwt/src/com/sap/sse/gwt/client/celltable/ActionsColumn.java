@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  * A special image bar column that can assign security-related {@link com.sap.sse.security.Action} objects
  * to the otherwise name-based actions managed by the {@link ImagedBarCell} used to render the actions.
  */
-public abstract class ActionsColumn<T, S extends ImagesBarCell> extends ImagesBarColumn<T, S> {
+public class ActionsColumn<T, S extends ImagesBarCell> extends ImagesBarColumn<T, S> {
 
     protected final Map<String, Consumer<T>> nameToCallbackMap = new HashMap<>();
     protected final Map<String, Action> nameToActionMap = new HashMap<>();
@@ -34,7 +34,7 @@ public abstract class ActionsColumn<T, S extends ImagesBarCell> extends ImagesBa
      *            of this function decides whether name-based actions linked to a non-{@code null} {@link Action} using
      *            the {@link #addAction(String, Action, Consumer)} method shall be displayed to the user.
      */
-    protected ActionsColumn(final S imagesBarCell, BiFunction<T, Action, Boolean> permissionChecker) {
+    public ActionsColumn(final S imagesBarCell, BiFunction<T, Action, Boolean> permissionChecker) {
         super(imagesBarCell);
         this.permissionChecker = permissionChecker;
         this.setFieldUpdater((index, object, value) -> nameToCallbackMap.get(value).accept(object));

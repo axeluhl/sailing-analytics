@@ -32,8 +32,7 @@ public class MediaServiceWriteImpl extends MediaServiceImpl implements MediaServ
             throw new UnauthenticatedException("Not authorized to create media track object");
         } else {
             final MediaTrackWithSecurityDTO mediaTrackWithSecurity = new MediaTrackWithSecurityDTO(mediaTrack);
-            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity,
-                    mediaTrackWithSecurity.getIdentifier());
+            SecurityDTOUtil.addSecurityInformation(racingEventService().getSecurityService(), mediaTrackWithSecurity);
             return mediaTrackWithSecurity;
         }
     }

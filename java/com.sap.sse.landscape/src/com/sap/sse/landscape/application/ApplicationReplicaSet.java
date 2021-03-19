@@ -4,25 +4,37 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.Release;
 
+/**
+ * A replica set with master and zero or more replicas. Temporarily, e.g., during an upgrade procedure, even the master
+ * process may disappear. The replica set's name is also considered to be the "server name" of the processes
+ * constituting it.
+ * 
+ * @author Axel Uhl (D043530)
+ */
 public interface ApplicationReplicaSet<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> extends Named {
     /**
      * The application version that the nodes in this replica set are currently running. During an
-     * {@link #upgrade(ApplicationVersion)} things may temporarily seem inconsistent.
+     * {@link #upgrade(Release)} things may temporarily seem inconsistent.
      */
-    ApplicationVersion getVersion();
+    default Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        return getMaster().getVersion(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+    }
     
     /**
      * Upgrades this replica set to a new version. Things may temporarily seem inconsistent; e.g., a master
      * process may be stopped, upgraded to the new version, and then replica processes may be fired up against the new
      * master, and when enough replicas have reached an available state they will replace the previous replicas.
      */
-    void upgrade(ApplicationVersion newVersion);
+    void upgrade(Release newVersion);
     
     ProcessT getMaster();
     
@@ -111,4 +123,23 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
      * of this replica set.
      */
     void removeSharding(Shard<ShardingKey> shard);
+
+    /**
+     * The fully-qualified host name by which this application replica set is publicly reachable. When resolving this
+     * hostname through DNS, the result is expected to identify a load balancer which contains the ingress rules for
+     * this application replica set.<p>
+     * 
+     * If we plan to support multi-region distribution of application replica sets in the future, resolving the hostname
+     * may have to happen on a per-region basis. It would then be nice if this application replica set would "know" its
+     * regions to which it has been deployed.
+     */
+    String getHostname() throws InterruptedException, ExecutionException;
+
+    /**
+     * The "SERVER_NAME" property that is equal for the master and all replica processes of this replica set. It is
+     * at the same time the {@link #getName() name} of this application replica set.
+     */
+    default String getServerName() {
+        return getName();
+    }
 }

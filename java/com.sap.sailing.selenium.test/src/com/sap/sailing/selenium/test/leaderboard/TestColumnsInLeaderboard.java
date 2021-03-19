@@ -111,10 +111,11 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         startTrackingRaceAndStopWhenFinished(adminConsole, false);
         {
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
+            leaderboardConfiguration.refreshLeaderboard();
             LeaderboardDetailsPanelPO details = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
             final List<RaceDescriptor> races = details.getRaces();
             assertEquals(1, races.size());
-            assertTrue(races.iterator().next().isLinked()); // removing the race must make the race column unlinked.
+            assertTrue(races.iterator().next().isLinked()); // now it should be linked
         }
     }
     

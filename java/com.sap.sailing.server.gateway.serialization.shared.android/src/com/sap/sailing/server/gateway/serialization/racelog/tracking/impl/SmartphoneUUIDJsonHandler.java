@@ -1,9 +1,9 @@
 package com.sap.sailing.server.gateway.serialization.racelog.tracking.impl;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDSerializationHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.common.TransformationException;
 
 
 public class SmartphoneUUIDJsonHandler extends SmartphoneUUIDSerializationHandler

@@ -42,10 +42,14 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
 
     public LeaderboardGroupMetaLeaderboard(LeaderboardGroup leaderboardGroup, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
+        super(getOverallLeaderboardName(leaderboardGroup.getName()), scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
         registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+    }
+
+    public static String getOverallLeaderboardName(String leaderboardGroupName) {
+        return leaderboardGroupName + " " + LeaderboardNameConstants.OVERALL;
     }
 
     public void registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards() {

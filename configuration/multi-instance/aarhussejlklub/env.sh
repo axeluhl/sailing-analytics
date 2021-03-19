@@ -212,6 +212,7 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=aarhussejlklub
 SERVER_NAME=AARHUSSEJLKLUB
 SERVER_PORT=8927
-MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/AARHUSSEJLKLUB"
+#MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10202/AARHUSSEJLKLUB"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/AARHUSSEJLKLUB?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2049
 TELNET_PORT=14927

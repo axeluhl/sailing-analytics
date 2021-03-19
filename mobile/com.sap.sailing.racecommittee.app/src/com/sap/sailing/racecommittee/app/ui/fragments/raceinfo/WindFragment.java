@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -252,7 +253,6 @@ public class WindFragment extends BaseFragment
         // disconnect googleApiClient and unregister position poller
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mReceiver);
-        sendIntent(AppConstants.ACTION_TIME_SHOW);
     }
 
     @Override
@@ -267,13 +267,11 @@ public class WindFragment extends BaseFragment
         mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
         Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
-        sendIntent(AppConstants.ACTION_TIME_HIDE);
         // register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
-        WindHelper.isTrackedRace(getActivity(), getRace());
-        sendIntent(AppConstants.ACTION_TIME_HIDE);
+        WindHelper.isTrackedRace(requireActivity(), getRace());
 
         startLocationUpdates();
     }

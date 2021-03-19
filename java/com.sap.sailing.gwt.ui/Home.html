@@ -4,13 +4,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="SAP Sailing" />
+    <meta property="og:title" content="${applicationScope['clientConfigurationContext.SAP']} Sailing" />
     <meta property="og:description" content="Help sailors analyze performance and optimize strategy &#8226; Bring fans closer to the action
         &#8226; Provide the media with information and insights to deliver a greater informed commentary" />
-    <meta property="og:image" content="http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg" />    <link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" selenium-id="shortcutIcon"/>
-    <link href='images/sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon' selenium-id="appIcon">
+    <meta property="og:image" content="http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/sap${applicationScope['clientConfigurationContext.whitelabeled']}.ico" selenium-id="shortcutIcon"/>
+    <link href='images/sap-sailing-app-icon${applicationScope['clientConfigurationContext.whitelabeled']}.png' rel='apple-touch-icon' selenium-id="appIcon">
 
-    <title>${SAP}Sailing - Homepage</title>
+    <title>${applicationScope['clientConfigurationContext.SAP']}Sailing - Homepage</title>
 
     <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css">
     <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
@@ -27,8 +28,9 @@
     <script src="https://js.chargebee.com/v2/chargebee.js"></script>
     <script>
        document.clientConfigurationContext = {
-            debrandingActive: ${debrandingActive}
+            debrandingActive: ${applicationScope['clientConfigurationContext.debrandingActive']}
        };
+       //Current date is: <%=new java.util.Date()%>
     </script>
     <script src="com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js"></script>
     <style type="text/css">
@@ -106,7 +108,7 @@
             application to display correctly.</div>
     </noscript>
     <div id="loading" class="loading">
-        <p class="sapsailing">${SAP}Sailing Analytics</p>
+        <p class="sapsailing">${applicationScope['clientConfigurationContext.SAP']}Sailing Analytics</p>
         <p class="waitmessage">Loading, please wait...</p>
         <div class="signal"></div>
     </div>

@@ -42,7 +42,7 @@ public class UserManagementPanelPO extends PageArea {
         for (DataEntryPO entry : table.getEntries()) {
             String name;
             try {
-                name = entry.getColumnContent("Username");
+                name = entry.getColumnContent("User name");
             } catch (StaleElementReferenceException e) {
                 // entry is not existing any more but must not break iteration
                 name = null;
@@ -99,7 +99,7 @@ public class UserManagementPanelPO extends PageArea {
         deleteSelectedUser();
         driver.switchTo().alert().accept();
         // wait until cell is removed from page
-        waitUntil(() -> findUser(name) == null); 
+        waitUntil(() -> findUser(name) == null);
     }
 
     public void deleteSelectedUser() {

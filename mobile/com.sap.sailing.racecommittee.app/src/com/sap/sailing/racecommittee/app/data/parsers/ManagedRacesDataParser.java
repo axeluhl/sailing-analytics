@@ -25,7 +25,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.ManagedRaceImpl;
 import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 /**

@@ -52,18 +52,27 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         TreeSet<SimpleCompetitorWithIdDTO> selected = new TreeSet<>();
         boolean notifyAboutResults = false;
         if (preferences != null) {
+            final RacingEventService racingEventService = ctx.getRacingEventService();
+            final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
             for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
                 final String competitorId = pref.getCompetitorIdAsString();
-                final RacingEventService racingEventService = ctx.getRacingEventService();
-                final CompetitorAndBoatStore competitorAndBoatStore = racingEventService.getCompetitorAndBoatStore();
                 DynamicCompetitor competitor = competitorAndBoatStore.getExistingCompetitorByIdAsString(competitorId);
-                selected.add(competitor == null ?
-                        new SimpleCompetitorWithIdDTO(competitorId,"Not found","ID:" + competitorId, null, null) 
-                        : new SimpleCompetitorWithIdDTO(competitor));
+                SimpleCompetitorWithIdDTO competitorDTO;
+                if (competitor == null) {
+                    final String competitorName = pref.getCompetitorName();
+                    final String conveyedCompetitorName = competitorName == null ? "Not found."
+                            : competitorName;
+                    competitorDTO = new SimpleCompetitorWithIdDTO(competitorId, conveyedCompetitorName, "Unknown", null,
+                            null);
+                } else {
+                    competitorDTO = new SimpleCompetitorWithIdDTO(competitor);
+                }
+                selected.add(competitorDTO);
                 notifyAboutResults |= pref.isNotifyAboutResults();
             }
         }
-        return new FavoriteCompetitorsDTO(selected, notifyAboutResults);
+        FavoriteCompetitorsDTO favoriteCompetitorsDTO = new FavoriteCompetitorsDTO(selected, notifyAboutResults);
+        return favoriteCompetitorsDTO;
     }
 
 }

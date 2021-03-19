@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=schwielochsee
 SERVER_NAME=schwielochsee
 SERVER_PORT=8940
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/schwielochsee?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/schwielochsee?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2062
 TELNET_PORT=14940

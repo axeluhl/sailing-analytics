@@ -13,8 +13,8 @@
         &#8226; Provide the media with information and insights to deliver a greater informed commentary" />
     <meta property="og:image" content="http://media.sapsailing.com/2014/505Worlds/Images_Homepage/505Worlds2014_eventteaser.jpg" />
     <!-- <link href='iphone-splash-screen.png' rel='apple-touch-startup-image'> -->
-    <link href='sap-sailing-app-icon${whitelabeled}.png' rel='apple-touch-icon'>
-	<link rel="shortcut icon" type="image/x-icon" href="images/sap${whitelabeled}.ico" />
+    <link href='images/sap-sailing-app-icon${applicationScope['clientConfigurationContext.whitelabeled']}.png' rel='apple-touch-icon'>
+	<link rel="shortcut icon" type="image/x-icon" href="images/sap${applicationScope['clientConfigurationContext.whitelabeled']}.ico" />
     
     <!-- This module isn't compatible with normalize. -->
     <!-- <link rel="stylesheet" type="text/css" href="/sailing-normalize-3.0.2.cache.css"> -->
@@ -23,7 +23,7 @@
     <link rel="stylesheet" type="text/css" href="DataMining.css">
     <script>
        document.clientConfigurationContext = {
-            debrandingActive: ${debrandingActive}
+            debrandingActive: ${applicationScope['clientConfigurationContext.debrandingActive']}
        };
     </script>
     <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>

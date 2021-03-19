@@ -88,6 +88,7 @@ public class SeriesWithFleetsDefaultListEditor extends SeriesWithFleetsListEdito
                                         int oldIndex = seriesList.indexOf(seriesDTO);
                                         seriesList.set(oldIndex, newVersionOfEditedSeries);
                                         update(newVersionOfEditedSeries);
+                                        
                                     }
                                 });
                         dialog.ensureDebugId("SeriesEditDialog");

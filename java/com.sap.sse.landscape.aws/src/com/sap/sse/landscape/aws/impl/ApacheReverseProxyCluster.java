@@ -1,13 +1,11 @@
 package com.sap.sse.landscape.aws.impl;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Log;
@@ -30,15 +28,15 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
-    private Set<AwsInstance<ShardingKey, MetricsT>> hosts;
+    private Set<AwsInstance<ShardingKey>> hosts;
 
-    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey, MetricsT, ProcessT> landscape) {
+    public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts() {
+    public Iterable<AwsInstance<ShardingKey>> getHosts() {
         return Collections.unmodifiableCollection(hosts);
     }
     
@@ -47,15 +45,15 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     @Override
-    public void addHost(AwsInstance<ShardingKey, MetricsT> host) {
+    public void addHost(AwsInstance<ShardingKey> host) {
         hosts.add(host);
     }
     
     @Override
-    public AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
-        final AwsInstance<ShardingKey, MetricsT> host = getLandscape().launchHost(
-                (instanceId, availabilityZone, landscape) -> new AwsInstanceImpl<ShardingKey, MetricsT>(instanceId,
-                        availabilityZone, landscape),
+    public AwsInstance<ShardingKey> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName) {
+        final AwsInstance<ShardingKey> host = getLandscape().launchHost(
+                (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
+                        availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(), instanceType, az, keyName,
                 Collections.singleton(getSecurityGroup(az.getRegion())), Optional.of(Tags.with("Name", "ReverseProxy")));
         addHost(host);
@@ -63,7 +61,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
     
     @Override
-    public void removeHost(AwsInstance<ShardingKey, MetricsT> host) {
+    public void removeHost(AwsInstance<ShardingKey> host) {
         assert Util.contains(getHosts(), host);
         if (Util.size(getHosts()) == 1) {
             throw new IllegalStateException("Trying to remove the last hosts of reverse proxy "+this+". Use terminate() instead");
@@ -82,40 +80,40 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
 
     @Override
     public void terminate() {
-        Set<AwsInstance<ShardingKey, MetricsT>> hosts = new HashSet<>();
+        Set<AwsInstance<ShardingKey>> hosts = new HashSet<>();
         Util.addAll(getHosts(), hosts);
-        for (final AwsInstance<ShardingKey, MetricsT> host : hosts) {
+        for (final AwsInstance<ShardingKey> host : hosts) {
             getLandscape().terminate(host);
         }
     }
 
     @Override
-    public void setPlainRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setPlainRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.setPlainRedirect(hostname, applicationProcess);
+            proxy.setPlainRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
-    public void setHomeRedirect(String hostname, ProcessT applicationProcess) throws InterruptedException, JSchException, IOException {
+    public void setHomeRedirect(String hostname, ProcessT applicationProcess, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.setHomeRedirect(hostname, applicationProcess);
+            proxy.setHomeRedirect(hostname, applicationProcess, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void setEventRedirect(String hostname, ProcessT applicationProcess,
-            UUID eventId) throws InterruptedException, JSchException, IOException {
+            UUID eventId, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.setEventRedirect(hostname, applicationProcess, eventId);
+            proxy.setEventRedirect(hostname, applicationProcess, eventId, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
     public void setEventSeriesRedirect(String hostname, ProcessT applicationProcess,
-            UUID leaderboardGroupId) throws InterruptedException, JSchException, IOException {
+            UUID leaderboardGroupId, byte[] privateKeyEncryptionPassphrase, Optional<String> optionalKeyName) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId);
+            proxy.setEventSeriesRedirect(hostname, applicationProcess, leaderboardGroupId, privateKeyEncryptionPassphrase, optionalKeyName);
         }
     }
 
@@ -127,23 +125,23 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
     }
 
     @Override
-    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout) throws InterruptedException, JSchException, IOException {
+    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.createInternalStatusRedirect(optionalTimeout);
+            proxy.createInternalStatusRedirect(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
-    public void removeRedirect(String hostname) throws IOException, InterruptedException, JSchException {
+    public void removeRedirect(String hostname, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.removeRedirect(hostname);
+            proxy.removeRedirect(hostname, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 
     @Override
-    public void removeRedirect(Scope<ShardingKey> scope) throws IOException, InterruptedException, JSchException {
+    public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         for (final ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy : getReverseProxies()) {
-            proxy.removeRedirect(scope);
+            proxy.removeRedirect(scope, optionalKeyName, privateKeyEncryptionPassphrase);
         }
     }
 }

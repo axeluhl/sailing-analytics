@@ -58,7 +58,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.GateDeserializer;
@@ -133,12 +133,14 @@ public class OnlineDataManager extends DataManager {
             final DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
             final DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
             final List<Util.Pair<String, Object>> params = new ArrayList<>();
-            params.add(new Util.Pair<>("showNonPublic", AppPreferences.on(context).showNonPublic()));
             if (eventIds.length > 0) {
+                params.add(new Util.Pair<>("showNonPublic", "true"));
                 params.add(new Util.Pair<>("include", true));
                 for (UUID eventId : eventIds) {
                     params.add(new Util.Pair<>("id", eventId));
                 }
+            } else {
+                params.add(new Util.Pair<>("showNonPublic", AppPreferences.on(context).showNonPublic()));
             }
             URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/api/v1/events", params);
             return new OnlineDataLoader<>(context, url, parser, handler);

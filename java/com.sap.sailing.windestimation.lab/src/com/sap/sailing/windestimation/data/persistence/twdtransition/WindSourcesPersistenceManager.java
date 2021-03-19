@@ -11,13 +11,13 @@ import org.json.simple.JSONObject;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.WindSourceWithFixes;
 import com.sap.sailing.windestimation.data.persistence.maneuver.AbstractPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.serialization.RaceWithWindSourcesDeserializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class WindSourcesPersistenceManager extends AbstractPersistenceManager<WindSourceWithFixes> {
 

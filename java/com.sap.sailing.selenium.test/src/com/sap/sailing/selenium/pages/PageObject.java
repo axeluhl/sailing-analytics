@@ -612,9 +612,13 @@ public class PageObject {
         WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
         waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
         tab.click();
+        return waitForWebElement(tabPanel, id);      
+    }
+    
+    protected WebElement waitForWebElement (WebElement webElement, String seleniumId) {
         // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(tabPanel);
-        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        FluentWait<WebElement> wait = createFluentWait(webElement);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(seleniumId)));
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

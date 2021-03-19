@@ -35,13 +35,16 @@ public class SshCommandChannelImpl implements SshCommandChannel {
     @Override
     public String runCommandAndReturnStdoutAndLogStderr(String commandLine, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException {
         final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-        sendCommandLineSynchronously(commandLine, stderr);
-        if (stderrLogLevel != null && stderr.size() > 0) {
-            logger.log(stderrLogLevel, (stderrLogPrefix==null?"":stderrLogPrefix)+stderr.toString());
+        try {
+            sendCommandLineSynchronously(commandLine, stderr);
+            if (stderrLogLevel != null && stderr.size() > 0) {
+                logger.log(stderrLogLevel, (stderrLogPrefix==null?"":(stderrLogPrefix+": "))+stderr.toString());
+            }
+            final String result = getStreamContentsAsString();
+            return result;
+        } finally {
+            disconnect();
         }
-        final String result = getStreamContentsAsString();
-        disconnect();
-        return result;
     }
 
     @Override
@@ -89,7 +92,7 @@ public class SshCommandChannelImpl implements SshCommandChannel {
     }
 
     @Override
-    public void disconnect() {
-        channel.disconnect();
+    public void disconnect() throws JSchException {
+        channel.getSession().disconnect();
     }
 }

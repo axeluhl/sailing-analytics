@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -42,6 +44,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Receives Igtimi {@link Fix}es and tries to generate a {@link Wind} object from each {@link AWS} fix. For this to
@@ -59,13 +62,13 @@ import com.sap.sse.common.Util;
  */
 public class IgtimiWindReceiver implements BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(IgtimiWindReceiver.class.getName());
-    private final Map<String, DynamicTrack<AWA>> awaTrack;
-    private final Map<String, DynamicTrack<AWS>> awsTrack;
-    private final Map<String, DynamicTrack<GpsLatLong>> gpsTrack;
-    private final Map<String, DynamicTrack<COG>> cogTrack;
-    private final Map<String, DynamicTrack<SOG>> sogTrack;
-    private final Map<String, DynamicTrack<HDG>> hdgTrack;
-    private final Map<String, DynamicTrack<HDGM>> hdgmTrack;
+    private final Map<String, DynamicTrack<AWA>> awaTracks;
+    private final Map<String, DynamicTrack<AWS>> awsTracks;
+    private final Map<String, DynamicTrack<GpsLatLong>> gpsTracks;
+    private final Map<String, DynamicTrack<COG>> cogTracks;
+    private final Map<String, DynamicTrack<SOG>> sogTracks;
+    private final Map<String, DynamicTrack<HDG>> hdgTracks;
+    private final Map<String, DynamicTrack<HDGM>> hdgmTracks;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
     private final ConcurrentMap<IgtimiWindListener, IgtimiWindListener> listeners;
@@ -111,13 +114,13 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         receiver = new FixReceiver();
         this.declinationService = declinationService;
         listeners = new ConcurrentHashMap<>();
-        awaTrack = new HashMap<>();
-        awsTrack = new HashMap<>();
-        gpsTrack = new HashMap<>();
-        cogTrack = new HashMap<>();
-        sogTrack = new HashMap<>();
-        hdgTrack = new HashMap<>();
-        hdgmTrack = new HashMap<>();
+        awaTracks = new HashMap<>();
+        awsTracks = new HashMap<>();
+        gpsTracks = new HashMap<>();
+        cogTracks = new HashMap<>();
+        sogTracks = new HashMap<>();
+        hdgTracks = new HashMap<>();
+        hdgmTracks = new HashMap<>();
     }
     
     private <T extends Fix> DynamicTrack<T> getTrack(String deviceSerialNumber, Map<String, DynamicTrack<T>> tracksByDeviceSerialNumber) {
@@ -150,9 +153,9 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         boolean loggedWindFixGenerationProblem = false;
         for (AWS aws : awsFixes) {
             try {
-                final Wind wind = getWind(aws.getTimePoint(), aws.getSensor().getDeviceSerialNumber());
-                if (wind != null) {
-                    notifyListeners(wind, aws.getSensor().getDeviceSerialNumber());
+                final Pair<Wind, Set<Fix>> windAndFixesUsed = getWind(aws.getTimePoint(), aws.getSensor().getDeviceSerialNumber());
+                if (windAndFixesUsed.getA() != null) {
+                    notifyListeners(windAndFixesUsed.getA(), windAndFixesUsed.getB(), aws.getSensor().getDeviceSerialNumber());
                 } else {
                     if (!loggedWindFixGenerationProblem) {
                         logger.info("Not enough information to build a Wind fix out of data provided by sensor "+aws.getSensor()+
@@ -170,20 +173,27 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         listeners.put(listener, listener);
     }
     
-    public void notifyListeners(Wind wind, String deviceSerialNumber) {
+    private void notifyListeners(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
         for (IgtimiWindListener listener : listeners.keySet()) {
-            listener.windDataReceived(wind, deviceSerialNumber);
+            listener.windDataReceived(wind, fixesUsed, deviceSerialNumber);
         }
     }
     
-    private Wind getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
+    private Pair<Wind, Set<Fix>> getWind(final TimePoint timePoint, String deviceSerialNumber) throws ClassNotFoundException, IOException, ParseException {
         final Wind result;
-        Bearing awaFrom = getAwaTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
+        final Set<Fix> fixesUsed = new HashSet<>();
+        final DynamicTrack<AWA> awaTrack = getAwaTrack(deviceSerialNumber);
+        Bearing awaFrom = awaTrack.getInterpolatedValue(timePoint, a->new ScalableBearing(a.getApparentWindAngle()));
+        addFixUsedIfNotNull(awaTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
         Bearing awa = awaFrom==null?null:awaFrom.reverse();
-        Speed aws = getAwsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, a->new ScalableSpeed(a.getApparentWindSpeed()));
-        Position pos = getGpsTrack(deviceSerialNumber).getInterpolatedValue(timePoint, g->new ScalablePosition(g.getPosition()));
+        final DynamicTrack<AWS> awsTrack = getAwsTrack(deviceSerialNumber);
+        Speed aws = awsTrack.getInterpolatedValue(timePoint, a->new ScalableSpeed(a.getApparentWindSpeed()));
+        addFixUsedIfNotNull(awsTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
+        final DynamicTrack<GpsLatLong> gpsTrack = getGpsTrack(deviceSerialNumber);
+        Position pos = gpsTrack.getInterpolatedValue(timePoint, g->new ScalablePosition(g.getPosition()));
+        addFixUsedIfNotNull(gpsTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
         if (pos != null) {
-            Bearing heading = getHeading(timePoint, deviceSerialNumber, pos);
+            Bearing heading = getHeading(timePoint, deviceSerialNumber, pos, fixesUsed);
             if (awa != null && aws != null && heading != null) {
                 Bearing apparentWindDirection = heading.add(awa);
                 SpeedWithBearing apparentWindSpeedWithDirection = new KnotSpeedWithBearingImpl(aws.getKnots(), apparentWindDirection);
@@ -211,8 +221,12 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                  * So again, my personal preference would be to work with the data that should be the most accurate
                  * (COG/SOG) and consider algorithms that handle smoothing of that data best."
                  */
-                Speed sog = getSogTrack(deviceSerialNumber).getInterpolatedValue(timePoint, s->new ScalableSpeed(s.getSpeedOverGround()));
-                Bearing cog = getCogTrack(deviceSerialNumber).getInterpolatedValue(timePoint, c->new ScalableBearing(c.getCourseOverGround()));
+                final DynamicTrack<SOG> sogTrack = getSogTrack(deviceSerialNumber);
+                Speed sog = sogTrack.getInterpolatedValue(timePoint, s->new ScalableSpeed(s.getSpeedOverGround()));
+                addFixUsedIfNotNull(sogTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
+                final DynamicTrack<COG> cogTrack = getCogTrack(deviceSerialNumber);
+                Bearing cog = cogTrack.getInterpolatedValue(timePoint, c->new ScalableBearing(c.getCourseOverGround()));
+                addFixUsedIfNotNull(cogTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
                 if (sog != null && cog != null) {
                     SpeedWithBearing sogCog = new KnotSpeedWithBearingImpl(sog.getKnots(), cog);
                     SpeedWithBearing trueWindSpeedAndDirection = apparentWindSpeedWithDirection.add(sogCog);
@@ -226,16 +240,24 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         } else {
             result = null;
         }
-        return result;
+        return new Pair<>(result, fixesUsed);
     }
 
-    private Bearing getHeading(TimePoint timePoint, String deviceSerialNumber, Position position) throws ClassNotFoundException, IOException, ParseException {
+    private void addFixUsedIfNotNull(Fix fix, Set<Fix> fixesUsed) {
+        if (fix != null) {
+            fixesUsed.add(fix);
+        }
+    }
+
+    private Bearing getHeading(TimePoint timePoint, String deviceSerialNumber, Position position, Set<Fix> fixesUsed) throws ClassNotFoundException, IOException, ParseException {
         final Bearing trueHeading;
-        Bearing hdg = getHdgTrack(deviceSerialNumber).getInterpolatedValue(timePoint, h->new ScalableBearing(h.getTrueHeading()));
+        final DynamicTrack<HDG> hdgTrack = getHdgTrack(deviceSerialNumber);
+        final DynamicTrack<HDGM> hdgmTrack = getHdgmTrack(deviceSerialNumber);
+        Bearing hdg = hdgTrack.getInterpolatedValue(timePoint, h->new ScalableBearing(h.getTrueHeading()));
         if (hdg != null) {
             trueHeading = hdg;
         } else {
-            Bearing hdgm = getHdgmTrack(deviceSerialNumber).getInterpolatedValue(timePoint, h->new ScalableBearing(h.getMagnetigHeading()));
+            Bearing hdgm = hdgmTrack.getInterpolatedValue(timePoint, h->new ScalableBearing(h.getMagnetigHeading()));
             if (hdgm != null) {
                 if (declinationService == null) {
                     trueHeading = hdgm;
@@ -253,35 +275,37 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
                 trueHeading = null;
             }
         }
+        addFixUsedIfNotNull(hdgTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
+        addFixUsedIfNotNull(hdgmTrack.getLastFixAtOrBefore(timePoint), fixesUsed);
         return trueHeading;
     }
 
     private DynamicTrack<AWA> getAwaTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, awaTrack);
+        return getTrack(deviceSerialNumber, awaTracks);
     }
 
     private DynamicTrack<AWS> getAwsTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, awsTrack);
+        return getTrack(deviceSerialNumber, awsTracks);
     }
 
     private DynamicTrack<GpsLatLong> getGpsTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, gpsTrack);
+        return getTrack(deviceSerialNumber, gpsTracks);
     }
 
     private DynamicTrack<COG> getCogTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, cogTrack);
+        return getTrack(deviceSerialNumber, cogTracks);
     }
 
     private DynamicTrack<SOG> getSogTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, sogTrack);
+        return getTrack(deviceSerialNumber, sogTracks);
     }
 
     private DynamicTrack<HDG> getHdgTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, hdgTrack);
+        return getTrack(deviceSerialNumber, hdgTracks);
     }
 
     private DynamicTrack<HDGM> getHdgmTrack(String deviceSerialNumber) {
-        return getTrack(deviceSerialNumber, hdgmTrack);
+        return getTrack(deviceSerialNumber, hdgmTracks);
     }
 
     /**

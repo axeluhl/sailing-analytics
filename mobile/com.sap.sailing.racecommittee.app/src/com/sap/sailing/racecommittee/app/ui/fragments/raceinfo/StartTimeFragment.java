@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -666,7 +667,6 @@ public class StartTimeFragment extends BaseFragment
                         && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
                     changeFragment();
                 } else {
-                    sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
                 }
                 break;
@@ -815,7 +815,6 @@ public class StartTimeFragment extends BaseFragment
         requireFragmentManager().beginTransaction()
                 .replace(viewId, fragment)
                 .commit();
-        sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
         if (requireActivity().findViewById(R.id.race_edit) != null) {
             sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }

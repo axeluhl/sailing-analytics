@@ -46,12 +46,12 @@ public class SubscriptionServiceFactory {
         }
     }
 
-    public SubscriptionWriteServiceAsync<?, ?> getWriteAsyncServiceByProvider(String providerName)
+    public SubscriptionWriteServiceAsync<?, ?, ?> getWriteAsyncServiceByProvider(String providerName)
             throws InvalidSubscriptionProviderException {
         return getProvider(providerName).getSubscriptionWriteService();
     }
 
-    public SubscriptionServiceAsync<?> getAsyncServiceByProvider(String providerName)
+    public SubscriptionServiceAsync<?, ?> getAsyncServiceByProvider(String providerName)
             throws InvalidSubscriptionProviderException {
         return getProvider(providerName).getSubscriptionService();
     }
@@ -66,14 +66,14 @@ public class SubscriptionServiceFactory {
     /**
      * Return default subscription service
      */
-    public SubscriptionServiceAsync<?> getDefaultAsyncService() throws InvalidSubscriptionProviderException {
+    public SubscriptionServiceAsync<?, ?> getDefaultAsyncService() throws InvalidSubscriptionProviderException {
         return getAsyncServiceByProvider(DEFAULT_PROVIDER_NAME);
     }
 
     /**
      * Return default subscription write service
      */
-    public SubscriptionWriteServiceAsync<?, ?> getDefaultWriteAsyncService()
+    public SubscriptionWriteServiceAsync<?, ?, ?> getDefaultWriteAsyncService()
             throws InvalidSubscriptionProviderException {
         return getWriteAsyncServiceByProvider(DEFAULT_PROVIDER_NAME);
     }
@@ -87,6 +87,7 @@ public class SubscriptionServiceFactory {
     }
 
     private void registerProviders() {
+        // TODO turn this into an OSGi registry pattern; this would then allow us to add other providers also in other bundles
         registerSubscriptionProvider(new ChargebeeSubscriptionClientProvider());
     }
 

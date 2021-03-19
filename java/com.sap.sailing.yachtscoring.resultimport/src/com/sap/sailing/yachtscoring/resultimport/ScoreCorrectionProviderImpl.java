@@ -2,8 +2,6 @@ package com.sap.sailing.yachtscoring.resultimport;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,8 +16,6 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.resultimport.ResultUrlProvider;
-import com.sap.sailing.resultimport.AbstractResultUrlProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
@@ -29,33 +25,20 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractYachtScoringProvider implements ScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = 222663322974305822L;
 
-    public static final String NAME = "Yachtscoring XRR Result Importer";
-
-    public static final String EVENT_ID_REGEX = "^\\d+$";
-    public static final String EVENT_ID_TEMPLATE = "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=%s";
-
-    private final ParserFactory parserFactory;
     private final ResultDocumentProvider documentProvider;
     
     public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
-        super(resultUrlRegistry);
+        super(parserFactory,resultUrlRegistry);
         this.documentProvider = documentProvider;
-        this.parserFactory = parserFactory;
     }
 
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
-        super(resultUrlRegistry);
+        super(parserFactory,resultUrlRegistry);
         this.documentProvider = new YachtscoringResultDocumentProvider(this, parserFactory);
-        this.parserFactory = parserFactory;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     @Override
@@ -115,19 +98,5 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
             }
         }
         return result;
-    }
-
-    @Override
-    public URL resolveUrl(String url) throws MalformedURLException {
-        String completedUrl = url;
-        if (url.matches(EVENT_ID_REGEX)) {
-            completedUrl = String.format(EVENT_ID_TEMPLATE, url);
-        }
-        return new URL(completedUrl); //TODO Find a better way to check if a URL is valid
-    }
-
-    @Override
-    public String getOptionalSampleURL() {
-        return "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=1220";
     }
 }

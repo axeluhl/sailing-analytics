@@ -29,9 +29,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final boolean hasMultiSelection;
     
-    private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
+    private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet;
 
-    protected final CompetitorColorProvider competitorColorProvider; 
+    protected final CompetitorColorProvider competitorColorProvider;
 
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, new CompetitorColorProviderImpl(), null);

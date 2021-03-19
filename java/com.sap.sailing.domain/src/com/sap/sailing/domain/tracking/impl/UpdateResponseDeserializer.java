@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class UpdateResponseDeserializer implements JsonDeserializer<UpdateResponse> {
     

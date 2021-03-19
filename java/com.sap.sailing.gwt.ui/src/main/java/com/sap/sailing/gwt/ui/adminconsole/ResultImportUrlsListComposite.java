@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.UrlDTO;
@@ -23,7 +24,6 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
@@ -40,18 +40,18 @@ public class ResultImportUrlsListComposite extends Composite {
 
     private final ResultImportUrlsTableWrapper<RefreshableMultiSelectionModel<UrlDTO>> table;
 
-    public ResultImportUrlsListComposite(SailingServiceWriteAsync sailingServiceWriteAsync, UserService userService,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        this.sailingServiceWrite = sailingServiceWriteAsync;
-        this.errorReporter = errorReporter;
+    public ResultImportUrlsListComposite(final Presenter presenter, StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
 
         final CaptionPanel captionPanel = new CaptionPanel(stringMessages.resultImportUrls());
         final VerticalPanel panel = new VerticalPanel();
-        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(),
                 SecuredDomainType.RESULT_IMPORT_URL);
 
-        table = new ResultImportUrlsTableWrapper<>(sailingServiceWriteAsync, userService, stringMessages, errorReporter);
+        table = new ResultImportUrlsTableWrapper<>(presenter.getSailingService(), presenter.getUserService(),
+                stringMessages, errorReporter);
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
         add.ensureDebugId("AddUrlButton");
         add.setEnabled(false);
@@ -103,7 +103,6 @@ public class ResultImportUrlsListComposite extends Composite {
         Grid providerGrid = new Grid(1, 2);
         providerGrid.setWidget(0, 0, new Label(stringMessages.urlProviders()));
         providerGrid.setWidget(0, 1, urlProviderListBox);
-
         panel.add(providerGrid);
         panel.add(buttonPanel);
         panel.add(urlSample);

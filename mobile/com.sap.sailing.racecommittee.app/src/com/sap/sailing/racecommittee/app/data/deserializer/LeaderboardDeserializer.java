@@ -1,19 +1,19 @@
 package com.sap.sailing.racecommittee.app.data.deserializer;
 
+import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
+import com.sap.sse.common.Util;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import com.sap.sailing.racecommittee.app.domain.impl.LeaderboardResult;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sse.common.Util;
 
 public class LeaderboardDeserializer implements JsonDeserializer<LeaderboardResult> {
 

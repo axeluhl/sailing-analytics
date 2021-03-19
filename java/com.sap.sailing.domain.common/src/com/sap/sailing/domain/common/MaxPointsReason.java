@@ -52,7 +52,10 @@ public enum MaxPointsReason {
     /** Disqualified after causing a tangle in an incident */
     DCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
     /** Retired after causing a tangle */
-    RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false);
+    RCT(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false),
+    /** Did not sail the course */
+    NSC(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true, /* appliesAtStartOfRace */ false)
+    ;
     
     private final boolean discardable;
     

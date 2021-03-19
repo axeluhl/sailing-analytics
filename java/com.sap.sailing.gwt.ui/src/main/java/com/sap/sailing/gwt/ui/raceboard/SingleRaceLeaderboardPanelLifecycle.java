@@ -35,7 +35,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
         SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(canBoatsOfCompetitorsChangePerRace);
-
         // don't show competitor fullName column if even leaderboard isn't shown initially
         final boolean showCompetitorFullNameColumn = isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
@@ -48,7 +47,6 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
                 /* isCompetitorNationalityColumnVisible */ false, 
                 /* showRaceRankColumn */ false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
-        
         return settings;
     }
     
@@ -56,5 +54,4 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     public SingleRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(SingleRaceLeaderboardSettings settings) {
         return new SingleRaceLeaderboardSettingsDialogComponent(settings, stringMessages, availableDetailTypes);
     }
-
 }

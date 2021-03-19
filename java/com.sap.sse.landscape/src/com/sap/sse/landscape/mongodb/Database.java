@@ -23,6 +23,13 @@ public interface Database extends UserDataProvider, Named {
     
     MongoEndpoint getEndpoint();
     
+    /**
+     * See {@link MongoEndpoint#getMD5Hash(String)}
+     */
+    default String getMD5Hash() throws URISyntaxException {
+        return getEndpoint().getMD5Hash(getMongoDatabase());
+    }
+    
     default MongoDatabase getMongoDatabase() throws URISyntaxException {
         return getEndpoint().getMongoDatabase(getName());
     }
@@ -37,4 +44,9 @@ public interface Database extends UserDataProvider, Named {
         }
         return result;
     }
+
+    /**
+     * Drops the database.
+     */
+    void drop() throws URISyntaxException;
 }
