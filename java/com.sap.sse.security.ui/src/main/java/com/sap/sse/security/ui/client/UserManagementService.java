@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -67,7 +68,7 @@ public interface UserManagementService extends RemoteService {
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    TypeRelativeObjectIdentifier serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier)
+    SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions)
             throws org.apache.shiro.authz.UnauthorizedException;
 
     RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username)
@@ -82,4 +83,6 @@ public interface UserManagementService extends RemoteService {
     SuccessInfo login(String username, String password) throws org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo logout() throws org.apache.shiro.authz.UnauthorizedException;
+
+    ArrayList<HasPermissions> getAllHasPermissions();
 }

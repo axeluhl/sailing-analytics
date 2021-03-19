@@ -1,6 +1,7 @@
 package com.sap.sailing.expeditionconnector;
 
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,9 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionSensorDeviceIde
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ClearStateTestSupport;
 
-public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry {
+public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegistry, ClearStateTestSupport {
     private static Logger logger = Logger.getLogger(ExpeditionTrackerFactory.class.getName());
     
     private static ExpeditionTrackerFactory defaultInstance;
@@ -261,5 +263,12 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
     @Override
     public SensorFixStore getSensorFixStore() {
         return sensorFixStore;
+    }
+
+    @Override
+    public void clearState() throws Exception {
+        for (UUID devicesPerBoatId : new ArrayList<UUID>(deviceConfigurations.keySet())) {
+            removeDeviceConfiguration(devicesPerBoatId);
+        }     
     }
 }

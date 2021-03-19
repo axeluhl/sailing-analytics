@@ -52,7 +52,6 @@ public class PreferenceConverterRegistrationManager implements Stoppable {
     }
 
     private class Cutomizer implements ServiceTrackerCustomizer<PreferenceConverter<?>, PreferenceConverter<?>> {
-
         @Override
         public PreferenceConverter<?> addingService(ServiceReference<PreferenceConverter<?>> reference) {
             final String preferenceKey = (String) reference.getProperty(PreferenceConverter.KEY_PARAMETER_NAME);

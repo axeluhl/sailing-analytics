@@ -1,10 +1,7 @@
 package com.sap.sse.landscape.aws;
 
-import java.io.IOException;
 import java.util.Optional;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -14,7 +11,7 @@ import com.sap.sse.landscape.application.Scope;
 public interface ApplicationProcessHost<ShardingKey,
 MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-extends AwsInstance<ShardingKey, MetricsT> {
+extends AwsInstance<ShardingKey> {
     String DEFAULT_SERVERS_PATH = "/home/sailing/servers";
     
     String DEFAULT_SERVER_DIRECTORY_NAME = "server";
@@ -31,9 +28,13 @@ extends AwsInstance<ShardingKey, MetricsT> {
     
     /**
      * Obtains the Sailing Analytics processes running on this host. Can be zero or more.
-     * @param optionalTimeout TODO
+     * 
+     * @param optionalKeyName
+     *            the name of the SSH key pair to use to log on; must identify a key pair available for the
+     *            {@link #getRegion() region} of this instance. If not provided, the the SSH private key for the key
+     *            pair that was originally used when the instance was launched will be used.
      */
-    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout) throws SftpException, JSchException, IOException, InterruptedException;
+    Iterable<ProcessT> getApplicationProcesses(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    AwsLandscape<ShardingKey, MetricsT, ProcessT> getLandscape();
+    AwsLandscape<ShardingKey> getLandscape();
 }

@@ -26,7 +26,6 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         resultUrlRegistryServiceTracker = new ServiceTracker<>(bundleContext, ResultUrlRegistry.class,
                 new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
-
                     @Override
                     protected ScoreCorrectionProvider configureScoreCorrectionProvider(
                             ResultUrlRegistry resultUrlRegistry) {
@@ -34,10 +33,9 @@ public class Activator implements BundleActivator {
                                 ParserFactory.INSTANCE, resultUrlRegistry);
                         return service;
                     }
-
                     @Override
                     protected CompetitorProvider configureCompetitorProvider(ResultUrlRegistry resultUrlRegistry) {
-                        final CompetitorProvider service = new CompetitorImporter(ParserFactory.INSTANCE,
+                        final CompetitorProvider service = new Manage2SailCompetitorProvider(ParserFactory.INSTANCE,
                                 resultUrlRegistry);
                         return service;
                     }

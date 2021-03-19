@@ -249,10 +249,7 @@ public class TestAbortingHeavyLoadQuery {
         if (RecordExecution) {
             executionRecord = new ConcurrentLinkedQueue<>();
         }
-        
         executor = new DataMiningExecutorService(ExecutorPoolSize);
-//        executor = new ThreadPoolExecutor(ExecutorPoolSize, ExecutorPoolSize, 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>());
-//        executor = new ThreadPoolExecutor(ExecutorPoolSize, ExecutorPoolSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         processors = new ArrayList<>();
         unfinishedInstructions = ConcurrentHashMap.newKeySet();
         

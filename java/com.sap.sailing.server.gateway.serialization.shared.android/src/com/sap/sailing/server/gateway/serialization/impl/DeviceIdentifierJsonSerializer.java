@@ -6,15 +6,15 @@ import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceIdentifierJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.SingleTypeBasedServiceFinderImpl;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class DeviceIdentifierJsonSerializer implements JsonSerializer<DeviceIdentifier> {
     private static final Logger logger = Logger.getLogger(DeviceIdentifierJsonSerializer.class.getName());

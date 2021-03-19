@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.adminconsole.WaypointCreationDialog.DefaultPassingInstructionProvider;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -134,12 +135,12 @@ public abstract class CourseManagementWidget implements IsWidget {
      *            ORC PCS leg data. By default, these actions are enabled, particularly to cover the case where this
      *            widget is used without an existing {@code TrackedRace} and only with a race log.
      */
-    public CourseManagementWidget(final SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserService userService, final Supplier<Boolean> showOrcPcsLegEditActions) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.errorReporter = errorReporter;
+    public CourseManagementWidget(final Presenter presenter,
+            final StringMessages stringMessages, final Supplier<Boolean> showOrcPcsLegEditActions) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.userService = userService;
+        this.userService = presenter.getUserService();
         this.orcPerformanceCurveLegInfo = new HashMap<>();
         mainPanel = new Grid(2, 3);
         mainPanel.setCellPadding(5);

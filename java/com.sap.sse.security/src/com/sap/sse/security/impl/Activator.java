@@ -38,12 +38,15 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessor;
+import com.sap.sse.security.subscription.SubscriptionApiRequestProcessorImpl;
 import com.sap.sse.security.subscription.SubscriptionApiService;
-import com.sap.sse.security.subscription.SubscriptionBackgroundUpdate;
+import com.sap.sse.security.subscription.SubscriptionBackgroundUpdater;
 import com.sap.sse.security.subscription.chargebee.ChargebeeApiService;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
@@ -97,12 +100,6 @@ public class Activator implements BundleActivator {
      */
     private final String baseUrlForCrossDomainStorage;
     
-    /**
-     * Handling fetching and update user subscriptions from providers. Call
-     * {@code SubscriptionBackgroundUpdate#start(CompletableFuture)} to schedule a task to run in background thread
-     */
-    private SubscriptionBackgroundUpdate subscriptionBackgroundUpdate;
-    
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
         testAccessControlStore = theTestAccessControlStore;
@@ -145,11 +142,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
-        subscriptionBackgroundUpdate = new SubscriptionBackgroundUpdate(context);
-        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance());
-        final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
-        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY, chargebeeApiService.getProviderName());
-        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService, chargebeeProviderProperties);
+        createAndRegisterSubscriptionServices();
         if (testUserStore != null && testAccessControlStore != null) {
             createAndRegisterSecurityService(bundleContext, testUserStore, testAccessControlStore);
         } else {
@@ -161,6 +154,18 @@ public class Activator implements BundleActivator {
                 Activator.this.clearState();
             }
         }, null);
+    }
+
+    private void createAndRegisterSubscriptionServices() {
+        final SubscriptionApiRequestProcessor subscriptionApiRequestProcessor = new SubscriptionApiRequestProcessorImpl(
+                ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
+        final ChargebeeApiService chargebeeApiService = new ChargebeeApiService(ChargebeeConfiguration.getInstance(),
+                subscriptionApiRequestProcessor);
+        final Dictionary<String, String> chargebeeProviderProperties = new Hashtable<>();
+        chargebeeProviderProperties.put(SubscriptionApiService.PROVIDER_NAME_OSGI_REGISTRY_KEY,
+                chargebeeApiService.getProviderName());
+        context.registerService(SubscriptionApiService.class.getName(), chargebeeApiService,
+                chargebeeProviderProperties);
     }
 
     /**
@@ -191,12 +196,13 @@ public class Activator implements BundleActivator {
                 new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
-        registration = context.registerService(SecurityService.class.getName(), initialSecurityService, null);
+        registration = context.registerService(SecurityService.class, initialSecurityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
                 initialSecurityService.getId().toString());
         context.registerService(Replicable.class.getName(), initialSecurityService, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), initialSecurityService, null);
+        context.registerService(HasPermissionsProvider.class, SecuredSecurityTypes::getAllInstances, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
     
@@ -255,7 +261,7 @@ public class Activator implements BundleActivator {
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                     applyCustomizations();
                     migrate(userStore, securityService.get());
-                    startSubscriptionDataUpdateTask();
+                    startSubscriptionDataUpdateTask(bundleContext);
                 } catch (InterruptedException | UserStoreManagementException | ExecutionException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
@@ -333,7 +339,7 @@ public class Activator implements BundleActivator {
      * Schedule background task to fetch and update user subscriptions from provider. Requires the {@link #securityService} to
      * be set.
      */
-    private void startSubscriptionDataUpdateTask() {
-        subscriptionBackgroundUpdate.start(securityService);
+    private void startSubscriptionDataUpdateTask(BundleContext bundleContext) {
+        new SubscriptionBackgroundUpdater(context).start(securityService);
     }
 }

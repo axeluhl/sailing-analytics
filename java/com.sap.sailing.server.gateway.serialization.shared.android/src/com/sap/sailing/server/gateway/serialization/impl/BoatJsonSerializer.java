@@ -10,8 +10,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class BoatJsonSerializer implements JsonSerializer<Boat> {
     public static final String FIELD_ID = "id";

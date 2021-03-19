@@ -56,6 +56,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
             super.run();
         } finally {
             getHelper.removeInheritableThreadLocalValues();
+            getHelper.removeThreadLocalValues();
         }
     }
     
@@ -68,7 +69,7 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     }
 
     @Override
-    public Map<InheritableThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
+    public Map<ThreadLocal<Object>, Object> getThreadLocalValuesToInherit() {
         return getHelper.getThreadLocalValuesToInherit();
     }
 

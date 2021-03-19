@@ -13,13 +13,13 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CourseDesignUpdateHandler extends UpdateHandler implements CourseDesignChangedListener {
     

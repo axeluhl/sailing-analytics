@@ -48,7 +48,7 @@ public enum DefaultProcessConfigurationVariables implements ProcessConfiguration
     /**
      * The user data variable used to define the server's name. This is relevant in particular for the user group
      * created/used for all new server-specific objects such as the {@code SERVER} object itself. The group's
-     * name is constructed by appending "-server" to the server name.
+     * name is constructed by appending "-server" to the server name. See also {@link ServerInfo}.
      */
     SERVER_NAME,
     
