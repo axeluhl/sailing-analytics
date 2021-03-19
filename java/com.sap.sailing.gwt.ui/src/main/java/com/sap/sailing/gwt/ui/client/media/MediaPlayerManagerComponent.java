@@ -46,6 +46,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -560,7 +561,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     }
                 });
         dialog.show();
-        dialog.openFileChooserDialog();
+        if (!DeviceDetector.isDesktop()) {
+            dialog.openFileChooserDialog();
+        }
     }
 
     @Override

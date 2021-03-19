@@ -178,6 +178,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         });
 
         storageServiceConnection.registerObserver(this);
+        
+        //if (!DeviceDetector.isDesktop()) {
+            super.getDialogBox().addStyleName(NewMediaDialogResources.INSTANCE.css().mobileAugmentations());
+        //}
+        
     }
 
     @Override

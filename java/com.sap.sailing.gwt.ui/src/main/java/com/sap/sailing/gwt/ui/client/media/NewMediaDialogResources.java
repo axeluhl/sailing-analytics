@@ -13,6 +13,9 @@ public interface NewMediaDialogResources extends ClientBundle {
 
         @ClassName("datepicker-styling")
         String datePickerClass();
+        
+        @ClassName("mobile-augmentation")
+        String mobileAugmentations();
     }
 
     @Source("NewMediaDialogResources.gss")
