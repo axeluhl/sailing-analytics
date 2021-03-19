@@ -89,7 +89,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
 
     private static final String RESULTIMPORTURLS_PANEL_TAB_LABEL = "Result import URLs"; //$NON-NLS-1$
-    private static final String RESULTIMPORTURLS_PANEL_TAB_IDENTIFIER = "ResultImportURLs"; //$NON-NLS-1$
+    private static final String RESULTIMPORTURLS_PANEL_TAB_IDENTIFIER = "resultUrlsListComposite"; //$NON-NLS-1$
 
     private static final String USER_MANAGEMENT_PANEL_TAB_LABEL = "User Management"; //$NON-NLS-1$
     private static final String USER_MANAGEMENT_PANEL_TAB_IDENTIFIER = "UserManagementPanel"; //$NON-NLS-1$
