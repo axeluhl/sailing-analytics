@@ -167,7 +167,7 @@ extends StartAwsHost<ShardingKey, AwsInstance<ShardingKey>> {
                         // for connecting to the entire replica set through which then the primary is automatically found for adding the replica to the set
                         result = String.join(",", Util.map(Util.filter(getLandscape().getDatabaseConfigurationForReplicaSet(getRegion(), getReplicaSetName()).getInstances(),
                                 instance->instance.getHost().getPrivateAddress(getOptionalTimeout()) != null), 
-                                instance->instance.getHost().getPrivateAddress(getOptionalTimeout()).getCanonicalHostName()+":"+instance.getPort()));
+                                instance->instance.getHost().getPrivateAddress(getOptionalTimeout()).getHostAddress()+":"+instance.getPort()));
                     } else {
                         result = null; // empty replica set name provided, overriding default replica set name; launch as stand-alone 
                     }
