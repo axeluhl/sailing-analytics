@@ -51,12 +51,14 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
             StringMessages stringMessages, DialogCallback<UrlDTO> callback) {
         super(stringMessages.addResultImportUrl(), urlProvider, stringMessages.add(),
                 stringMessages.cancel(), null, callback);
+        this.ensureDebugId("ResultImportUrlAddDialog");
         this.urlProvider = urlProvider;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.setValidator(new UrlDTOValidator());
         textBox = super.createTextBox(null, 120);
         textBox.getElement().setPropertyString("placeholder", stringMessages.eventIdOrUrl());
+        textBox.ensureDebugId("ResultImportUrlAddDialogTextBox");
         textBox.setFocus(true);
     }
 
