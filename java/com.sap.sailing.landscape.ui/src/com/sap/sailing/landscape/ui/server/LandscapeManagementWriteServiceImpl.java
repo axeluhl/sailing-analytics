@@ -114,6 +114,7 @@ import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
@@ -564,7 +565,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final String userBearerToken = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString());
+        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         replicaConfigurationBuilder
             .setLandscape(landscape)
@@ -632,38 +633,57 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
 
     @Override
     public void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove)
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDescryption)
             throws Exception {
         final AwsRegion region = new AwsRegion(regionId);
-        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
-                getLandscape().getApplicationReplicaSet(region, applicationReplicaSetToRemove.getReplicaSetName(),
-                    getSailingAnalyticsProcessFromDTO(applicationReplicaSetToRemove.getMaster()),
-                    getSailingAnalyticsProcessesFromDTOs(applicationReplicaSetToRemove.getReplicas()));
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = convertFromApplicationReplicaSetDTO(
+                region, applicationReplicaSetToRemove);
         final AwsAutoScalingGroup autoScalingGroup = applicationReplicaSet.getAutoScalingGroup();
         final CompletableFuture<Void> autoScalingGroupRemoval;
         if (autoScalingGroup != null) {
+            // remove the launch configuration used by the auto scaling group and the auto scaling group itself:
             autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
         } else {
             autoScalingGroupRemoval = new CompletableFuture<>();
             autoScalingGroupRemoval.complete(null);
         }
-        // TODO issue: how do we know that master and replicas are the only processes on the instance? Only then can we terminate; otherwise only remove the processes!
-//        autoScalingGroupRemoval.thenAccept(action)
-        /*
-         * TODO implement removeApplicationReplicaSet; will probably need to enumerate things again, starting from the
-         * master and replica processes and their hosts where the DTO tells us the respective regions; we also know the
-         * hostname. So we can look for the load balancer rules having this hostname in their hostname header, and for
-         * any S3 records, and hopefully re-use some of the logic used in getApplicationReplicaSets. At least do the
-         * following:
-         * 
-         * - remove the auto scaling group
-         * - remove the launch configuration used by the auto scaling group
-         * - terminate the instances
-         * - remove the load balancer rules
-         * - remove the target groups
-         * - remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
-         * - remove the DNS record if this replica set was a DNS-mapped one
-         */
+        // terminate the instances
+        autoScalingGroupRemoval.thenAccept(v->
+            applicationReplicaSet.getMaster().stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption));
+        autoScalingGroupRemoval.thenAccept(v->{
+            for (final SailingAnalyticsProcess<String> replica : applicationReplicaSet.getReplicas()) {
+                replica.stopAndTerminateIfLast(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDescryption);
+            }
+        });
+        // remove the load balancer rules
+        getLandscape().deleteLoadBalancerListenerRules(region, Util.toArray(applicationReplicaSet.getLoadBalancerRules(), new Rule[0]));
+        // remove the target groups
+        getLandscape().deleteTargetGroup(applicationReplicaSet.getMasterTargetGroup());
+        getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
+        final String loadBalancerDNSName = applicationReplicaSet.getLoadBalancer().getDNSName();
+        final Iterable<Rule> currentLoadBalancerRuleSet = applicationReplicaSet.getLoadBalancer().getRules();
+        // remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
+        if (Util.isEmpty(currentLoadBalancerRuleSet) ||
+                (Util.size(currentLoadBalancerRuleSet) == 1 && currentLoadBalancerRuleSet.iterator().next().isDefault())) {
+            logger.info("No more rules "+(!Util.isEmpty(currentLoadBalancerRuleSet) ? "except default rule " : "")+
+                    "left in load balancer "+applicationReplicaSet.getLoadBalancer().getName()+"; deleting.");
+            applicationReplicaSet.getLoadBalancer().delete();
+        }
+        if (applicationReplicaSet.getResourceRecordSet() != null) {
+            // remove the DNS record if this replica set was a DNS-mapped one
+            logger.info("Removing DNS CNAME record "+applicationReplicaSet.getResourceRecordSet());
+            getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
+        }
+    }
+
+    private AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> convertFromApplicationReplicaSetDTO(
+            final AwsRegion region, SailingApplicationReplicaSetDTO<String> applicationReplicaSetDTO)
+            throws UnknownHostException {
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
+                getLandscape().getApplicationReplicaSet(region, applicationReplicaSetDTO.getReplicaSetName(),
+                    getSailingAnalyticsProcessFromDTO(applicationReplicaSetDTO.getMaster()),
+                    getSailingAnalyticsProcessesFromDTOs(applicationReplicaSetDTO.getReplicas()));
+        return applicationReplicaSet;
     }
 
     private Iterable<SailingAnalyticsProcess<String>> getSailingAnalyticsProcessesFromDTOs(ArrayList<SailingAnalyticsProcessDTO> processDTOs) {

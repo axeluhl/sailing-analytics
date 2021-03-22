@@ -28,6 +28,8 @@
                         <li>When importing ORC certificates that provide 0.0s as allowance anywhere in the polar which cannot reasonably be represented
                             in the internal format which is speed-based, those certificates can now at least be read successfully. The speeds will
                             internally be set to "infinity" for those values for consistency.</li>
+                        <li>ORC Certificates provided in JSON format that lack allowances in certain categories, such as <tt>NonSpinnaker</tt>,
+                            or that lack a valid specification of their <tt>Family</tt> can now still be searched and imported.</li>
                     </ul>
                     <h2 class="articleSubheadline">February 2021</h2>
                     <ul class="bulletList">

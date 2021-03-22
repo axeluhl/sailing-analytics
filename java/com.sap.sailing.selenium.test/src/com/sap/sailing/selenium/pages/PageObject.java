@@ -319,6 +319,30 @@ public class PageObject {
     
     /**
      * <p>
+     * Waits until an element with the specified selenium id cannot be found any more in the given search context.
+     * </p>
+     * 
+     * @param context
+     *            The search context to use for the search.
+     * @param id
+     *            The selenium id of the element.
+     */
+    protected void waitForElementNotExistsBySeleniumId(SearchContext context, String id) {
+        FluentWait<SearchContext> wait = createFluentWait(context, DEFAULT_WAIT_TIMEOUT_SECONDS, DEFAULT_POLLING_INTERVAL);
+        wait.until(new Function<SearchContext, Boolean>() {
+            @Override
+            public Boolean apply(SearchContext context) {
+                try {
+                    return context.findElement(new BySeleniumId(id)) == null;
+                } catch (Exception e) {
+                    return Boolean.TRUE;
+                }
+            }
+        });
+    }
+    
+    /**
+     * <p>
      * Finds and returns the first element with the specified selenium id in the given search context. If multiple
      * elements exists, the first found element is returned. If no matching element can be found, {@code null} is
      * returned.

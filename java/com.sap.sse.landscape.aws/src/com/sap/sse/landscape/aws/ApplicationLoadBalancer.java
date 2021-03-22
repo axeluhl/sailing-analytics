@@ -39,6 +39,9 @@ public interface ApplicationLoadBalancer<ShardingKey> extends Named {
      */
     String getDNSName();
 
+    /**
+     * Obtains a fresh copy of the rules in this load balancers HTTPS listener from the AWS API.
+     */
     Iterable<Rule> getRules();
     
     void deleteRules(Rule... rulesToDelete);
