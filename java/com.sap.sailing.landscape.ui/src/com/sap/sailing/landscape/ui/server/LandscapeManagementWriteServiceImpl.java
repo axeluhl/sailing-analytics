@@ -565,7 +565,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final String userBearerToken = getSecurityService().getAccessToken(SessionUtils.getPrincipal().toString());
+        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         replicaConfigurationBuilder
             .setLandscape(landscape)

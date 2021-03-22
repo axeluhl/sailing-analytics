@@ -53,12 +53,15 @@ public class ResultImportUrlsListComposite extends Composite {
         table = new ResultImportUrlsTableWrapper<>(presenter.getSailingService(), presenter.getUserService(),
                 stringMessages, errorReporter);
         final Button add = buttonPanel.addCreateAction(stringMessages.add(), this::addUrl);
+        add.ensureDebugId("AddUrlButton");
         add.setEnabled(false);
 
-        buttonPanel.addRemoveAction(stringMessages.remove(), table.getSelectionModel(), true,
-                () -> removeUrls(table.getSelectionModel().getSelectedSet()));
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), table.getSelectionModel(),
+                /* withConfirmation */ true, () -> removeUrls(table.getSelectionModel().getSelectedSet()));
+        remove.ensureDebugId("RemoveUrlButton");
 
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateTable);
+        refresh.ensureDebugId("RefreshUrlButton");
         refresh.setEnabled(false);
 
         Grid urlSample = new Grid(1, 2);
@@ -67,6 +70,7 @@ public class ResultImportUrlsListComposite extends Composite {
         urlSample.setWidget(0, 1, urlSampleLabel);
 
         urlProviderListBox = new ListBox();
+        urlProviderListBox.ensureDebugId("urlProviderListBox");
         urlProviderListBox.setMultipleSelect(false);
         urlProviderListBox.addChangeHandler(new ChangeHandler() {
             @Override
