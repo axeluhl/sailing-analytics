@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -15,7 +16,6 @@ import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
-import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
@@ -31,7 +31,7 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * @param <ShardingKey>
  */
 public class StartSailingAnalyticsHost<ShardingKey>
-extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
 implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
     public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
     public final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
@@ -57,12 +57,12 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
      */
     public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey>,
     T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
-    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> {
+    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
     T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
-    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>>
+    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
     implements Builder<BuilderT, T, ShardingKey> {
         protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
             super(applicationConfigurationBuilder);
@@ -84,9 +84,9 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
         }
 
         @Override
-        protected HostSupplier<ShardingKey, ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>> getHostSupplier() {
+        protected HostSupplier<ShardingKey, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
             return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape)->
-                new ApplicationProcessHostImpl<>(instanceId, az, privateIpAddress,
+                new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress,
                         launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,

@@ -95,5 +95,7 @@ public interface LandscapeManagementWriteServiceAsync {
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
             String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
 
-    void removeApplicationReplicaSet(String regionId, SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, AsyncCallback<Void> asyncCallback);
+    void removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> asyncCallback);
 }
