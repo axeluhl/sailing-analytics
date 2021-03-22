@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import java.util.regex.Pattern;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class ReleaseRepositoryImpl implements ReleaseRepository {
     private static final Logger logger = Logger.getLogger(ReleaseRepositoryImpl.class.getName());
@@ -42,7 +44,8 @@ public class ReleaseRepositoryImpl implements ReleaseRepository {
     private Iterable<Release> getAvailableReleases() {
         final List<Release> result = new LinkedList<>();
         try {
-            final InputStream index = (InputStream) new URL(getRepositoryBase()).getContent();
+            final URLConnection connection = HttpUrlConnectionHelper.redirectConnection(new URL(getRepositoryBase()));
+            final InputStream index = (InputStream) connection.getContent();
             int read = 0;
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             while ((read=index.read()) != -1) {
