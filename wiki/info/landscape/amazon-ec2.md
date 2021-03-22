@@ -4,15 +4,51 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London).
 
-#### Servers, Hostnames
+### Important Servers, Hostnames
 
-- Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database Server: dbserver.internal.sapsailing.com
+- Web Server: reachable through SSH to sapsailing.com:22
+- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- Standalone MongoDB Server: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203)
-- MongoDB Servers for "live" replica set: mongo0.internal.sapsailing.com and mongo1.internal.sapsailing.com
+
+## Landscape Overview
+
+In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can manage records for any sub-domains. The "apex" record for sapsailing.com points to a Network Load Balancer (NLB), currently ``NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com``, which does the following things:
+
+* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com``, currently with the internal IP target ``172.31.28.212``
+* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
+* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
+* optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
+
+### Webserver
+
+The web server currently exists only as one instance but could now be replicated to other availabililty zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will described further below, to the ``CentralWebServerHTTP*`` target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+
+* hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
+* bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
+* wiki.sapsailing.com - a Gollum-based Wiki served off our git, see /home/wiki
+* static.sapsailing.com - static content hosted under /home/trac/static
+* releases.sapsailing.com - hub and repository for releases built by our CI infrastructure, hosted at /home/trac/releases
+* jobs.sapsailing.com - a static web page, see /home/trac/static/jobs
+* sail-insight.com - a static web page, with SSL/HTTPS support, hosted under /home/trac/sail-insight-website
+* p2.sapsailing.com - several OSGi p2 repositories relevant for our Tycho/OSGi build and our target platform definition, hosted under /home/trac/p2-repositories
+* gitlist.sapsailing.com - for our git at /home/trac/git
+* git.sapsailing.com - for git cloning for dedicated users, used among other things for replication into git.wdf.sap.corp
+
+Furthermore, it host aliases for ``sapsailing.com``, ``www.sapsailing.com`` and all subdomains for archived content, pointing to the archive server which is defined in ``/etc/httpd/conf.d/000-macros.conf``. This is also where the archive server switching has to be configured. Reload the configuration using
+
+```
+        service httpd reload
+```
+
+### DNS and ALBs
+
+We distinguish between DNS-mapped and non-DNS-mapped content. The basic services offered by the web server as listed above are DNS-mapped, with the DNS entries being CNAME records pointing to an ALB (Sailing-DNSMapped-eu-west-1-604165534.eu-west-1.elb.amazonaws.com) which handles SSL offloading with the Amazon-managed certificate and forwards those requests to the web server. Furthermore, longer-running application replica sets can have a sub-domain declared in Route53's DNS, pointing to an ALB which then forwards to the public and master target groups for this replica set based on hostname, header fields and request method. A default redirect for the ``/`` path can also be defined, obsoleting previous Apache httpd reverse proxy redirects.
+
+Shorter-running events may not require a DNS record. The ALB ``Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com`` is target for ``*.sapsailing.com`` and receives all HTTP/HTTPS requests not otherwise handled. While HTTP immediately redirects to HTTPS, the HTTPS requests will pass through its rules. If application replica sets have their rules declared here, they will fire. Everything else falls through to the default rule which forwards to the web server's target groups again. This is how archived events as well as requests for ``www.sapsailing.com`` end up.
+
+The requests going straight to ``sapsailing.com`` are handled by the NLB (see above), get forwarded to the web server and are re-directed to ``www.sapsailing.com`` from there, ending up at the non-DNS-mapped load balancer where by default they are then sent again to the web server which sends it to the archive server.
 
 #### Starting an instance
 

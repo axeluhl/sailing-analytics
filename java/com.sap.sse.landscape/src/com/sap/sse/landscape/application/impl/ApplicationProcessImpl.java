@@ -21,6 +21,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
@@ -99,9 +100,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout) {
-        // TODO Implement ApplicationProcessImpl.tryCleanShutdown(...)
-        return false;
+    public void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Stopping application process "+this);
+        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory()+"; ./stop", "Shutting down "+this, Level.INFO);
     }
     
     @Override
@@ -235,5 +238,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)
             throws ClientProtocolException, IOException, ParseException {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationProcessImpl [serverDirectory=" + serverDirectory + ", serverName=" + serverName + ", port=" + getPort() + "]";
     }
 }

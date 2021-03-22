@@ -1,17 +1,10 @@
 package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 
-import static com.sap.sailing.selenium.pages.PageObject.DEFAULT_POLLING_INTERVAL;
-import static com.sap.sailing.selenium.pages.PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS;
-import static com.sap.sailing.selenium.pages.PageObject.createFluentWait;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.function.Function;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.ChangePasswordDialogPO;
@@ -20,7 +13,6 @@ import com.sap.sailing.selenium.pages.adminconsole.usermanagement.EditUserDialog
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.UserRoleDefinitionPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.WildcardPermissionPanelPO;
-import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestUserManagement extends AbstractSeleniumTest {
@@ -44,36 +36,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
         createUserdialog.setValues(TEST_USER_NAME, TEST_USER_MAIL, TEST_USER_PASSWORD, TEST_USER_PASSWORD);
         createUserdialog.clickOkButtonOrThrow();
         // wait until user is displayed
-        FluentWait<UserManagementPanelPO> wait = createFluentWait(userManagementPanel, DEFAULT_WAIT_TIMEOUT_SECONDS,
-                DEFAULT_POLLING_INTERVAL);
-        wait.until(new Function<UserManagementPanelPO, Boolean>() {
-            @Override
-            public Boolean apply(UserManagementPanelPO userManagementPanel) {
-                return userManagementPanel.findUser(TEST_USER_NAME) != null;
-            }
-        });
-    }
-
-    private void deleteUser(final UserManagementPanelPO userManagementPanel) {
-        DataEntryPO testUserEntry = userManagementPanel.findUser(TEST_USER_NAME);
-        // click delete button
-        userManagementPanel.deleteUser(TEST_USER_NAME);
-        // confirm deletion
-        getWebDriver().switchTo().alert().accept();
-        // wait until cell is removed from page
-        FluentWait<DataEntryPO> wait = createFluentWait(testUserEntry, DEFAULT_WAIT_TIMEOUT_SECONDS,
-                DEFAULT_POLLING_INTERVAL);
-        wait.until(new Function<DataEntryPO, Object>() {
-            @Override
-            public Object apply(DataEntryPO testUserEntry) {
-                try {
-                    testUserEntry.getColumnContent(TEST_USER_NAME);
-                } catch (StaleElementReferenceException e) {
-                    return Boolean.TRUE;
-                }
-                return Boolean.FALSE;
-            }
-        });
+        userManagementPanel.waitUntilUserFound(TEST_USER_NAME);
     }
 
     @Test
@@ -99,7 +62,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
         userRolesPO.enterNewRoleValues(TEST_ROLE, null, TEST_USER_NAME);
         userRolesPO.clickAddButtonOrThrow();
     }
-    
+
     @Test
     public void testPermissionCreation() {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
@@ -132,7 +95,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
         final UserManagementPanelPO userManagementPanel = goToUserManagementPanel();
         createUser(userManagementPanel);
         // get cell of test user name before removing
-        deleteUser(userManagementPanel);
+        userManagementPanel.deleteUser(TEST_USER_NAME);
         // double check and assert if test user is really removed from table
         assertNull(userManagementPanel.findUser(TEST_USER_NAME));
     }

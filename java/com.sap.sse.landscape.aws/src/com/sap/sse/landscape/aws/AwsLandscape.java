@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
@@ -385,7 +386,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
      * is added as a target.
      */
-    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region);
+    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region) throws InterruptedException, ExecutionException;
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
 
@@ -520,7 +521,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
      * {@code region}, will deliver the load balancer created by this call.
      */
-    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain);
+    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain) throws InterruptedException, ExecutionException;
     
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
