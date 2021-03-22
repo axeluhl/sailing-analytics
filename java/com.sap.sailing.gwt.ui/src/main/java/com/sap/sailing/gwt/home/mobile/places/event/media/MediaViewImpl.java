@@ -39,8 +39,6 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     @UiField VideoGallery videoGalleryUi;
     @UiField ImageGallery imageGalleryUi;
     @UiField Button addMediaButtonUi;
-    @UiField
-    StringMessages i18n;
     
     private MobileMediaUploadPopup mobileMediaUploadPopup;
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -51,7 +49,8 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         super(presenter, false, true, false);
         this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         this.userService = presenter.getUserService();
-        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(), i18n);
+        final StringMessages stringMessages = StringMessages.INSTANCE;
+        this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(), stringMessages);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
         
