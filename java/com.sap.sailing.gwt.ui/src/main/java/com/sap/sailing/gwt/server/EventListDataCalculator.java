@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -61,7 +61,7 @@ public class EventListDataCalculator implements EventVisitor {
         for (Entry<UUID, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
             final UUID seriesLeaderboardGroupId = latestEventInSeries.getKey();
             EventListEventDTO latestEvent = latestEventInSeries.getValue();
-            latestEvent.setEventSeries(new EventListEventSeriesDTO(
+            latestEvent.setEventSeries(new EventSeriesMetadataDTO(
                     seriesNames.get(seriesLeaderboardGroupId), seriesLeaderboardGroupId));
             latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesLeaderboardGroupId));
             addEventToResults(latestEvent);

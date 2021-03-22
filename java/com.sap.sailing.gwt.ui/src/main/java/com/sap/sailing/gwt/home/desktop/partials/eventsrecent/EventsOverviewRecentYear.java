@@ -13,8 +13,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
@@ -55,7 +55,7 @@ public class EventsOverviewRecentYear extends Composite {
         for (EventListEventDTO eventDTO : events) {
             final PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             final RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
-            final EventListEventSeriesDTO eventSeriesData = eventDTO.getEventSeries();
+            final EventSeriesMetadataDTO eventSeriesData = eventDTO.getEventSeries();
             if (eventSeriesData != null) {
                 final SeriesContext ctx = SeriesContext
                         .createWithLeaderboardGroupId(eventSeriesData.getSeriesLeaderboardGroupId());

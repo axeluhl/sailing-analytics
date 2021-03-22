@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.communication.start;
 
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
-import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.common.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.common.communication.event.EventState;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 

@@ -1,0 +1,37 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:p="urn:import:com.sap.sailing.gwt.managementconsole.partials">
+             
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.dashboard.DashboardResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.column} {app_res.fonts.title}">DASHBOARD</div>
+        <div class="{res.mediaCss.column}">
+            <div ui:field="seriesCard" class="{app_res.style.card}" >
+                <div class="{app_res.style.cardContent} {app_res.style.flexContainer}">
+                    <div class="{app_res.style.flexItemAutoWidth}">
+                        <div class="{app_res.style.title}"><ui:text from="{i18n.series}" /></div>
+<!--                         <div ui:field="seriesDetails" class="{app_res.fonts.subtitle} {app_res.style.details}"/> -->
+                    </div>
+                    <g:Anchor ui:field="createSeries" 
+                            addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+                </div>
+            </div>
+        </div>
+        <div class="{res.mediaCss.column}">
+            <div ui:field="eventCard" class="{app_res.style.card}" >
+                <div class="{app_res.style.cardContent} {app_res.style.flexContainer}">
+                    <div class="{app_res.style.flexItemAutoWidth}">
+                        <div class="{app_res.style.title}"><ui:text from="{i18n.events}" /></div>
+<!--                         <div ui:field="eventDetails" class="{app_res.fonts.subtitle} {app_res.style.details}"/> -->
+                    </div>
+                    <g:Anchor ui:field="createEvent" 
+                            addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+                </div>
+            </div>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

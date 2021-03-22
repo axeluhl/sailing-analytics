@@ -13,7 +13,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.utils.ButtonUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.ButtonUtil.ButtonType;

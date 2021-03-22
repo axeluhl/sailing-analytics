@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
@@ -65,7 +65,7 @@ public class EventsOverviewRecentYear extends Composite {
                     eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             final EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation,
                     eventDTO, eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
-            final EventListEventSeriesDTO eventSeries = eventDTO.getEventSeries();
+            final EventSeriesMetadataDTO eventSeries = eventDTO.getEventSeries();
             if (eventSeries != null) {
                 final String baseUrl = eventDTO.getBaseURL();
                 final SeriesContext ctx = SeriesContext

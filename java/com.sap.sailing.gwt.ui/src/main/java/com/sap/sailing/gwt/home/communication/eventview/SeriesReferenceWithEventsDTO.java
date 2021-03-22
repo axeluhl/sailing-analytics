@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.common.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
-import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 
 public class SeriesReferenceWithEventsDTO extends EventSeriesReferenceDTO {
 

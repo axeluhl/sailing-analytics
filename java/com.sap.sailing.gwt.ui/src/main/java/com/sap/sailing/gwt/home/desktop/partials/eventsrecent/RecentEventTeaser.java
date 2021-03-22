@@ -5,9 +5,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
-import com.sap.sailing.gwt.home.communication.event.LabelType;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.partials.event.EventTeaser;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 
@@ -26,7 +26,7 @@ public class RecentEventTeaser extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventSeriesMetadataDTO eventSeries) {
         eventTeaser.setSeriesInformation(seriesNavigation, eventSeries);
     }
 

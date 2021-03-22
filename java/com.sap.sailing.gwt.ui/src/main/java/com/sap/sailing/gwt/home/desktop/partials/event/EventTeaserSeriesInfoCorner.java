@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -20,7 +20,7 @@ public class EventTeaserSeriesInfoCorner extends UIObject {
     @UiField DivElement seriesEventsCountUi;
     @UiField AnchorElement seriesInfoTextUi;
 
-    public EventTeaserSeriesInfoCorner(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+    public EventTeaserSeriesInfoCorner(PlaceNavigation<?> seriesNavigation, EventSeriesMetadataDTO eventSeries) {
         setElement(uiBinder.createAndBindUi(this));
         int eventCount = eventSeries.getEventsCount();
         seriesInfoTextUi.setTitle(eventSeries.getSeriesDisplayName() + " - " + 

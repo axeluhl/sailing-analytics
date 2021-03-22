@@ -1,5 +1,4 @@
-package com.sap.sailing.gwt.home.communication.event;
-
+package com.sap.sailing.gwt.common.communication.event;
 
 public enum EventState {
     PLANNED(LabelType.NONE), UPCOMING(LabelType.UPCOMING), RUNNING(LabelType.LIVE, LabelType.LIVE), FINISHED(LabelType.FINISHED);

@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Panel;
-import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.common.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;

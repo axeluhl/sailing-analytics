@@ -12,12 +12,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.partials.contextmenu.ContextMenu;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.partials.EventCard;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.partials.EventInfo;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 public class EventOverviewViewImpl extends Composite implements EventOverviewView {
 
@@ -62,13 +62,13 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
     }
 
     @Override
-    public void renderEvents(final List<EventDTO> events) {
+    public void renderEvents(final List<EventMetadataDTO> events) {
         cards.clear();
         events.stream().map(event -> new EventCard(event, presenter)).forEach(cards::add);
     }
 
     @Override
-    public void showContextMenu(final EventDTO event) {
+    public void showContextMenu(final EventMetadataDTO event) {
         final ContextMenu contextMenu = new ContextMenu();
         contextMenu.setHeaderWidget(new EventInfo(event));
         contextMenu.addItem(i18n.advanced(), app_res.icons().iconSettings(), e -> presenter.advancedSettings(event));

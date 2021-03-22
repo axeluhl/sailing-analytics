@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.communication.media;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.common.communication.event.EventReferenceDTO;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;

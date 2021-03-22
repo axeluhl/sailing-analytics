@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.common.communication.event;
 
 import java.util.UUID;
 
-import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class EventSeriesReferenceDTO implements DTO {
+public class EventSeriesReferenceDTO implements IsSerializable {
 
     private String seriesDisplayName;
     private UUID seriesLeaderboardGroupId;
@@ -12,7 +12,7 @@ public class EventSeriesReferenceDTO implements DTO {
     protected EventSeriesReferenceDTO() {
     }
 
-    public EventSeriesReferenceDTO(String seriesDisplayName, UUID seriesLeaderboardGroupId) {
+    public EventSeriesReferenceDTO(final String seriesDisplayName, final UUID seriesLeaderboardGroupId) {
         super();
         this.seriesDisplayName = seriesDisplayName;
         this.seriesLeaderboardGroupId = seriesLeaderboardGroupId;

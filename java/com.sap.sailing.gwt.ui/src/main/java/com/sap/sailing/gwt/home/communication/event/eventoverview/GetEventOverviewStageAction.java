@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.gwt.common.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;

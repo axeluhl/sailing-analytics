@@ -45,6 +45,8 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -657,4 +659,9 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<RaceCourseDTO> callback);
 
     void getRegattasForEvent(UUID eventId, AsyncCallback<List<RegattaDTO>> callback);
+    
+    // === Service method introduced for new ManagementConsole UI ===
+    void getEventList(AsyncCallback<List<EventMetadataDTO>> callback);
+    
+    void getEventSeriesList(AsyncCallback<List<EventSeriesMetadataDTO>> callback);
 }

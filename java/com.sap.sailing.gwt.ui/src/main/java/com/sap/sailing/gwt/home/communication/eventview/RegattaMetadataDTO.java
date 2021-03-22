@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesReferenceDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;

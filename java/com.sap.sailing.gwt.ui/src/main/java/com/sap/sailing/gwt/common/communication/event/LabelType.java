@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.common.communication.event;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 

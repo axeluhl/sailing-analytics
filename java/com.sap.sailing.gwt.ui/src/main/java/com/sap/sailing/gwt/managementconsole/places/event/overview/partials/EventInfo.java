@@ -9,9 +9,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.common.Named;
 
 public class EventInfo extends Widget {
 
@@ -26,13 +25,13 @@ public class EventInfo extends Widget {
     @UiField
     Element title, details;
 
-    public EventInfo(final EventDTO event) {
+    public EventInfo(final EventMetadataDTO event) {
         setElement(uiBinder.createAndBindUi(this));
 
-        this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(event.getName()));
+        this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(event.getDisplayName()));
 
-        final String venue = ofNullable(event.venue).map(Named::getName).orElse("-");
-        final String time = formatDateRange(event.startDate, event.endDate);
+        final String venue = ofNullable(event.getVenue()).orElse("-");
+        final String time = formatDateRange(event.getStartDate(), event.getEndDate());
         this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(venue + ", " + time));
     }
 

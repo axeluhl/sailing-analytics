@@ -23,7 +23,9 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.managementconsole.partials.header.Header;
 import com.sap.sailing.gwt.managementconsole.partials.mainframe.MainFrame;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsolePlace;
+import com.sap.sailing.gwt.managementconsole.places.dashboard.DashboardPlace;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewPlace;
+import com.sap.sailing.gwt.managementconsole.places.eventseries.overview.EventSeriesOverviewPlace;
 import com.sap.sailing.gwt.managementconsole.places.showcase.ShowcasePlace;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.client.AbstractSailingWriteEntryPoint;
@@ -69,7 +71,7 @@ public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint 
             final MainFrame mainFrame) {
         final ManagementConsolePlaceHistoryMapper historyMapper = GWT.create(ManagementConsolePlaceHistoryMapper.class);
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(clientFactory.getPlaceController(), eventBus, new ShowcasePlace());
+        historyHandler.register(clientFactory.getPlaceController(), eventBus, new DashboardPlace());
 
         final ManagementConsoleActivityMapper activityMapper = new ManagementConsoleActivityMapper(clientFactory);
         final ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
@@ -81,29 +83,33 @@ public class ManagementConsoleEntryPoint extends AbstractSailingWriteEntryPoint 
     }
 
     private void initMenuItems(final ManagementConsoleClientFactory clientFactory, final Header header) {
-        addMenuItem(clientFactory, header, "SHOWCASE", ShowcasePlace::new);
+        addMenuItem(clientFactory, header, "(SHOWCASE)", ShowcasePlace::new);
+        addMenuItem(clientFactory, header, "Dashboard", DashboardPlace::new);
+
+        addMenuItem(clientFactory, header, msg.series(), EventSeriesOverviewPlace::new)
+                .permission(SecuredDomainType.EVENT, DefaultActions.MUTATION_ACTIONS);
 
         addMenuItem(clientFactory, header, msg.events(), EventOverviewPlace::new)
                 .permission(SecuredDomainType.EVENT, DefaultActions.MUTATION_ACTIONS);
 
-        addMenuItem(clientFactory, header, msg.deviceConfiguration(), ShowcasePlace::new)
-                .permission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION, DefaultActions.MUTATION_ACTIONS);
+        // addMenuItem(clientFactory, header, msg.deviceConfiguration(), ShowcasePlace::new)
+        // .permission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION, DefaultActions.MUTATION_ACTIONS);
 
-        addMenuItem(clientFactory, header, msg.connectors(), ShowcasePlace::new)
-                .permission(SecuredDomainType.TRACTRAC_ACCOUNT, DefaultActions.values())
-                .permission(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, DefaultActions.values())
-                .permission(SecuredDomainType.SWISS_TIMING_ACCOUNT, DefaultActions.values())
-                .permission(SecuredDomainType.LEADERBOARD, DefaultActions.UPDATE, DefaultActions.DELETE)
-                .permission(SecuredDomainType.IGTIMI_ACCOUNT, DefaultActions.values())
-                .permission(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, DefaultActions.values())
-                .permission(SecuredDomainType.RESULT_IMPORT_URL, DefaultActions.values())
-                .permission(SecuredDomainType.REGATTA, DefaultActions.CREATE);
+        // addMenuItem(clientFactory, header, msg.connectors(), ShowcasePlace::new)
+        // .permission(SecuredDomainType.TRACTRAC_ACCOUNT, DefaultActions.values())
+        // .permission(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, DefaultActions.values())
+        // .permission(SecuredDomainType.SWISS_TIMING_ACCOUNT, DefaultActions.values())
+        // .permission(SecuredDomainType.LEADERBOARD, DefaultActions.UPDATE, DefaultActions.DELETE)
+        // .permission(SecuredDomainType.IGTIMI_ACCOUNT, DefaultActions.values())
+        // .permission(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION, DefaultActions.values())
+        // .permission(SecuredDomainType.RESULT_IMPORT_URL, DefaultActions.values())
+        // .permission(SecuredDomainType.REGATTA, DefaultActions.CREATE);
 
-        addMenuItem(clientFactory, header, msg.courseCreation(), ShowcasePlace::new)
-                .permission(SecuredDomainType.MARK_TEMPLATE, DefaultActions.MUTATION_ACTIONS)
-                .permission(SecuredDomainType.MARK_PROPERTIES, DefaultActions.MUTATION_ACTIONS)
-                .permission(SecuredDomainType.COURSE_TEMPLATE, DefaultActions.MUTATION_ACTIONS)
-                .permission(SecuredDomainType.MARK_ROLE, DefaultActions.MUTATION_ACTIONS);
+        // addMenuItem(clientFactory, header, msg.courseCreation(), ShowcasePlace::new)
+        // .permission(SecuredDomainType.MARK_TEMPLATE, DefaultActions.MUTATION_ACTIONS)
+        // .permission(SecuredDomainType.MARK_PROPERTIES, DefaultActions.MUTATION_ACTIONS)
+        // .permission(SecuredDomainType.COURSE_TEMPLATE, DefaultActions.MUTATION_ACTIONS)
+        // .permission(SecuredDomainType.MARK_ROLE, DefaultActions.MUTATION_ACTIONS);
 
         addMenuItem(clientFactory, header, msg.advanced(), ShowcasePlace::new)
                 .anyServerPermission(ServerActions.REPLICATE, ServerActions.START_REPLICATION, ServerActions.READ_REPLICATOR)

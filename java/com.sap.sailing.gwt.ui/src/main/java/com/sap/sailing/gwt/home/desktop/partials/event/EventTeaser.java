@@ -12,9 +12,9 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
-import com.sap.sailing.gwt.home.communication.event.LabelType;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -83,7 +83,7 @@ public class EventTeaser extends Composite {
         eventImage.getStyle().setBackgroundImage(thumbnailUrlBuilder.toString());
     }
     
-    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventSeriesMetadataDTO eventSeries) {
         eventImage.appendChild(new EventTeaserSeriesInfoCorner(seriesNavigation, eventSeries).getElement());
         eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(eventSeries.getSeriesDisplayName()));
         venue.setInnerText(StringMessages.INSTANCE.lastEvent(event.getLocationOrVenue()));

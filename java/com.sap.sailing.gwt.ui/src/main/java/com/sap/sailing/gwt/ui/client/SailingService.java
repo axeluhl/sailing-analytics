@@ -49,6 +49,8 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -579,4 +581,9 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException, NotFoundException;
+    
+    // === Service method introduced for new ManagementConsole UI ===
+    List<EventMetadataDTO> getEventList();
+    
+    List<EventSeriesMetadataDTO> getEventSeriesList();
 }

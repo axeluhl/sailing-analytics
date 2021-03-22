@@ -1,5 +1,12 @@
 package com.sap.sailing.gwt.ui.server;
 
+import static com.sap.sailing.gwt.server.HomeServiceUtil.convertToMetadataDTO;
+import static com.sap.sailing.gwt.server.HomeServiceUtil.getLeaderboardDisplayName;
+import static com.sap.sailing.server.util.EventUtil.isFakeSeries;
+import static com.sap.sse.common.Util.size;
+import static com.sap.sse.common.Util.stream;
+import static java.util.stream.Collectors.toList;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -314,6 +321,8 @@ import com.sap.sailing.domain.windfinder.WindFinderTrackerFactory;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
@@ -6329,5 +6338,23 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                                                 // RegattaLeaderboard?
         }
         return result;
+    }
+    
+    // === Service method introduced for new ManagementConsole UI ===
+    public List<EventMetadataDTO> getEventList() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                stream(getService().getAllEvents()).filter(event -> !isFakeSeries(event)).collect(toList()),
+                event -> convertToMetadataDTO(event, getService()));
+    }
+    
+    public List<EventSeriesMetadataDTO> getEventSeriesList() {
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getService().getLeaderboardGroups().values().stream().filter(LeaderboardGroup::hasOverallLeaderboard).collect(toList()),
+                leaderboardGroup -> {
+                    final EventSeriesMetadataDTO series = new EventSeriesMetadataDTO(
+                            getLeaderboardDisplayName(leaderboardGroup), leaderboardGroup.getId());
+                    series.setEventsCount(size(leaderboardGroup.getLeaderboards()));
+                    return series;
+                });
     }
 }

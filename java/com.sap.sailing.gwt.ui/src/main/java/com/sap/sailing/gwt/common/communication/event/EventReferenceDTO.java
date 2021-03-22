@@ -1,14 +1,16 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.common.communication.event;
 
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
-public class EventReferenceDTO implements DTO {
+public class EventReferenceDTO implements IsSerializable {
+    
     private UUID id;
     private String displayName;
+    
     public EventReferenceDTO() {
     }
     
@@ -27,12 +29,15 @@ public class EventReferenceDTO implements DTO {
     public UUID getId() {
         return id;
     }
+    
     public void setId(UUID id) {
         this.id = id;
     }
+    
     public String getDisplayName() {
         return displayName;
     }
+    
     public void setDisplayName(String name) {
         this.displayName = name;
     }

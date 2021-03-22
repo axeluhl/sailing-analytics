@@ -6,7 +6,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
+import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -22,7 +22,7 @@ public class EventOverviewRecentSeriesInfo extends UIObject {
     @UiField DivElement seriesInfoUi;
     private final AnchorElement seriesUi;
     
-    public EventOverviewRecentSeriesInfo(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+    public EventOverviewRecentSeriesInfo(PlaceNavigation<?> seriesNavigation, EventSeriesMetadataDTO eventSeries) {
         setElement(seriesUi = uiBinder.createAndBindUi(this));
         seriesNameUi.setInnerText(eventSeries.getSeriesDisplayName());
         seriesInfoUi.setInnerText(StringMessages.INSTANCE.eventsHaveTakenPlace(eventSeries.getEventsCount()));

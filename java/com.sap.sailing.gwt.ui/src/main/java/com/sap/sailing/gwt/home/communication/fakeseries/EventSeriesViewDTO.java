@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
-import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
-import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 

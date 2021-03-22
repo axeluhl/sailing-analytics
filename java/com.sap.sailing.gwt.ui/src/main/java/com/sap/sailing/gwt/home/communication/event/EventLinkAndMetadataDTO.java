@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.communication.event;
 
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.common.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
 
 public class EventLinkAndMetadataDTO extends EventMetadataDTO {

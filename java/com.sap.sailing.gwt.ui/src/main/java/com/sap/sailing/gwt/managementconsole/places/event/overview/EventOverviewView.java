@@ -3,28 +3,28 @@ package com.sap.sailing.gwt.managementconsole.places.event.overview;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.mvp.View;
 import com.sap.sailing.gwt.managementconsole.partials.contextmenu.HasContextMenuView;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 
 
 public interface EventOverviewView
-        extends View<EventOverviewView.Presenter>, HasContextMenuView<EventDTO>, RequiresResize {
+        extends View<EventOverviewView.Presenter>, HasContextMenuView<EventMetadataDTO>, RequiresResize {
 
-    void renderEvents(List<EventDTO> events);
+    void renderEvents(List<EventMetadataDTO> events);
 
-    interface Presenter
-            extends com.sap.sailing.gwt.managementconsole.mvp.Presenter, HasContextMenuView.Presenter<EventDTO> {
+    interface Presenter extends com.sap.sailing.gwt.managementconsole.mvp.Presenter,
+            HasContextMenuView.Presenter<EventMetadataDTO> {
 
         void reloadEventList();
-        
+
         void navigateToCreateEvent();
 
-        void navigateToEvent(EventDTO event);
+        void navigateToEvent(EventMetadataDTO event);
 
-        void advancedSettings(EventDTO event);
+        void advancedSettings(EventMetadataDTO event);
 
-        void deleteEvent(EventDTO event);
+        void deleteEvent(EventMetadataDTO event);
     }
 
 }

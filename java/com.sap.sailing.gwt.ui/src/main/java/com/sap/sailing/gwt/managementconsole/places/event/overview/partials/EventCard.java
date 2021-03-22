@@ -11,11 +11,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewView.Presenter;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class EventCard extends Composite {
 
@@ -38,12 +37,12 @@ public class EventCard extends Composite {
 
     private final Runnable openContextMenu;
 
-    public EventCard(final EventDTO event, final Presenter presenter) {
+    public EventCard(final EventMetadataDTO event, final Presenter presenter) {
         info = new EventInfo(event);
         initWidget(uiBinder.createAndBindUi(this));
 
-        ofNullable(event.getTeaserImage()).map(ImageDTO::getSourceRef).ifPresent(
-                imageUrl -> this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')"));
+        ofNullable(event.getThumbnailImageURL())
+                .ifPresent(imageUrl -> this.card.getStyle().setBackgroundImage("url(' " + imageUrl + "')"));
 
         Event.sinkEvents(card, Event.ONCLICK);
         Event.setEventListener(card, e -> presenter.navigateToEvent(event));

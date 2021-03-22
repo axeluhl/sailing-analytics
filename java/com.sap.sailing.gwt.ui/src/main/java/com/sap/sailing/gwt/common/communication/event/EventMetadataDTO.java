@@ -1,8 +1,6 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.common.communication.event;
 
 import java.util.Date;
-
-import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 
 public class EventMetadataDTO extends EventReferenceDTO {
 
@@ -108,7 +106,7 @@ public class EventMetadataDTO extends EventReferenceDTO {
         return venue;
     }
     
-    public EventListEventSeriesDTO getEventSeries() {
+    public EventSeriesMetadataDTO getEventSeries() {
         return null;
     }
 }

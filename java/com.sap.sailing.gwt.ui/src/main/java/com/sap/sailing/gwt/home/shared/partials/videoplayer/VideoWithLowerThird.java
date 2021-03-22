@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
-import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.common.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.partials.lowerthird.LowerThird;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
