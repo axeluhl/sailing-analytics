@@ -68,7 +68,7 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
             loading = true;
             reload(callback);
         } else {
-            logger.fine("Data are already loading. Skip reload.");
+            logger.fine("Data is already loading. Skip reload.");
         }
     }
 
