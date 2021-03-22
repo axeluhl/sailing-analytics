@@ -14,7 +14,7 @@ public class AddRoleForUserOperation implements SecurityOperation<Void> {
     protected final Boolean transitive;
 
     public AddRoleForUserOperation(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) {
+            String nameOfUserQualifyingRole, Boolean transitive) {
         this.username = username;
         this.roleDefinitionId = roleDefinitionId;
         this.idOfTenantQualifyingRole = idOfTenantQualifyingRole;

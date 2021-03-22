@@ -1205,7 +1205,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        final boolean transitive = role.isTransitive();
+        final Boolean transitive = role.isTransitive();
         apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
@@ -1229,7 +1229,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        final boolean transitive = role.isTransitive();
+        final Boolean transitive = role.isTransitive();
         apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
