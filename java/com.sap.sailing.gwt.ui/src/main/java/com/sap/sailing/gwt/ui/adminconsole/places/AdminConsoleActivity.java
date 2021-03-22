@@ -49,7 +49,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
         this.clientFactory = clientFactory;
         this.mediaServiceWrite = clientFactory.getMediaServiceWrite();
         this.sailingService = clientFactory.getSailingService();
-        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>(clientFactory.getErrorReporter()) {
+        leaderboardsRefresher = new AbstractRefresher<StrippedLeaderboardDTOWithSecurity>() {
             @Override
             public void reload(AsyncCallback<Iterable<StrippedLeaderboardDTOWithSecurity>> callback) {
                 sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
@@ -68,7 +68,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                         }));
             }
         };
-        leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>(clientFactory.getErrorReporter()) {
+        leaderboardGroupsRefresher = new AbstractRefresher<LeaderboardGroupDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<LeaderboardGroupDTO>> callback) {
                 sailingService.getLeaderboardGroups(false /* withGeoLocationData */,
@@ -87,7 +87,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                         }));
             }
         };
-        regattasRefresher = new AbstractRefresher<RegattaDTO>(clientFactory.getErrorReporter()) {
+        regattasRefresher = new AbstractRefresher<RegattaDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<RegattaDTO>> callback) {
                 sailingService.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(
@@ -106,7 +106,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                         }));
             }
         };
-        eventsRefresher = new AbstractRefresher<EventDTO>(clientFactory.getErrorReporter()) {
+        eventsRefresher = new AbstractRefresher<EventDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<EventDTO>> callback) {
                 sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
@@ -125,7 +125,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
                 });
             }
         };
-        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>(clientFactory.getErrorReporter()) {
+        mediaTracksRefresher = new AbstractRefresher<MediaTrackWithSecurityDTO>() {
             @Override
             public void reload(AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> callback) {
                 mediaServiceWrite.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {

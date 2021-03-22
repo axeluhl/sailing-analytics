@@ -5,23 +5,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.Refresher;
-import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class AbstractRefresher<T> implements Refresher<T> {
 
+    private Logger logger = Logger.getLogger(getClass().getName());
     private final Set<Displayer<T>> displayers = new HashSet<Displayer<T>>();
     private List<T> dtos;
     private boolean loading;
-    private final ErrorReporter errorReporter;
-
-    public AbstractRefresher(ErrorReporter errorReporter) {
-        this.errorReporter = errorReporter;
-    }
-    
 
     @Override
     public void addDisplayerAndCallFillOnInit(Displayer<T> displayer) {
@@ -32,6 +27,7 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
         if (dtos == null) {
             reloadAndCallFillAll();
         } else {
+            logger.fine("Call fill methods from displayers with data from cache.");
             fill(dtos, displayer);
         }
     }
@@ -56,6 +52,7 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
                     dtos = null;
                 }
                 loading = false;
+                logger.fine("Loading data finished. Call fill methods from displayers.");
                 if (fillOnlyDisplayer != null) {
                     fill(result, fillOnlyDisplayer);
                 } else {
@@ -67,8 +64,11 @@ public abstract class AbstractRefresher<T> implements Refresher<T> {
             }
         };
         if (!loading) {
+            logger.fine("Start loading data from service.");
             loading = true;
             reload(callback);
+        } else {
+            logger.fine("Data are already loading. Skip reload.");
         }
     }
 
