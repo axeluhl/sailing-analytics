@@ -13,6 +13,8 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
@@ -24,12 +26,17 @@ import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.managementconsole.app.ManagementConsoleClientFactory;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsoleActivity;
 import com.sap.sailing.gwt.managementconsole.places.regatta.overview.RegattaOverviewPlace;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 
 public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddRegattaPlace> {
 
@@ -66,7 +73,6 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
                 
                 @Override
                 public void onSuccess(EventDTO event) { 
-                    //buoyZoneRadiusInHullLengthsDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
                     SeriesDTO series = new SeriesDTO();
                     series.setName(Series.DEFAULT_NAME);
                     series.setMedal(false);
@@ -74,16 +80,14 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
                     series.setSplitFleetContiguousScoring(false);
                     series.setFirstColumnIsNonDiscardableCarryForward(false);
                     series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
-                    //seriesEditor.setValue(Collections.singleton(series));
                     List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                     for (int i = 1; i <= racesCount; i++) {
                         RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), regattaName);
                         raceColumnDTO.setName("R"+i);
                         races.add(raceColumnDTO);
                     }
-                    series.setRaceColumns(races);                
+                    series.setRaceColumns(races);               
                    
-                    
                     RegattaDTO regattaDTO = new RegattaDTO();
                     regattaDTO.series = Collections.singletonList(series);
                     //regattaDTO.startDate = startDateBox.getValue();
@@ -101,23 +105,24 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
                     regattaDTO.boatClass = new BoatClassDTO(boatClassName, Distance.NULL, Distance.NULL);
                     regattaDTO.canBoatsOfCompetitorsChangePerRace = false;
                     regattaDTO.rankingMetricType = ranking;
-                    //result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5), /* hull beam */ new MeterDistance(1.8));
                     
                     regattaDTO.courseAreas = new ArrayList<>();
                     Util.addAll(event.venue.getCourseAreas(), regattaDTO.courseAreas);
                     
-                    createNewRegatta(regattaDTO, new ArrayList<EventDTO>(), racesCount);
+                    createNewRegatta(event, regattaDTO, new ArrayList<EventDTO>(), racesCount);
                 }
           
             });
         }
+        
+    
         
         @Override
         public void cancelAddRegatta() {
             getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));
         }            
         
-        private void createNewRegatta(final RegattaDTO newRegatta, final List<EventDTO> existingEvents, Integer racesCount) {
+        private void createNewRegatta(final EventDTO event, final RegattaDTO newRegatta, final List<EventDTO> existingEvents, Integer racesCount) {
             LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
             for (SeriesDTO seriesDTO : newRegatta.series) {
                 SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
@@ -143,18 +148,104 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
 
                 @Override
                 public void onSuccess(RegattaDTO regatta) {
-                    getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));
-
-                    createDefaultRacesIfDefaultSeriesIsPresent(regatta);
-                    
-                    /** if regatta creation was successful, add race columns as modeled in the creation dialog;
-                    // note that the SeriesCreationParametersDTO don't describe race columns.
-                    createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
-                    reloadRegattas();
-                    fillEvents(); // events have their associated regattas
-                    openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);**/
+                    //createDefaultRacesIfDefaultSeriesIsPresent(event, regatta);
+                    createRegattaLeaderboard(event, newRegatta, racesCount);
+                    // TODO check regatta name for uniqueness
                 }
             });
+        }
+        
+        private void createRegattaLeaderboard(final EventDTO event, final RegattaDTO newRegatta, Integer racesCount) {
+            RegattaIdentifier regattaIdentifier = newRegatta.getRegattaIdentifier();
+            getClientFactory().getSailingService().createRegattaLeaderboard((RegattaName)regattaIdentifier,
+                    /* displayName */ null, new int[] {},
+                    new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
+            @Override
+            public void onFailure(Throwable t) {
+                throw new RuntimeException(t);
+            }
+    
+            @Override
+            public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
+                if (!newRegatta.courseAreas.isEmpty()) {
+                    addRegattaToRegattaLeaderboard(result, event, newRegatta, racesCount);
+                }    
+            }
+        });
+        }
+        
+        private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, Integer racesCount) {
+            List<LeaderboardGroupDTO> leaderboardGroups = event.getLeaderboardGroups();
+            if (leaderboardGroups == null || leaderboardGroups.isEmpty()) {
+                createLeaderboardGroupAndAddRegattaToLeaderboard(newRegattaLeaderboard, event, newRegatta, racesCount);
+            } else {
+                addRegattaToRegattaLeaderboard(newRegattaLeaderboard, event.getLeaderboardGroups().get(0), event, newRegatta, racesCount);
+            }
+        }
+        
+        private void createLeaderboardGroupAndAddRegattaToLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, Integer racesCount) {
+            String leaderboardName = "Leaderboard" + System.currentTimeMillis();
+            LeaderboardGroupDescriptor newGroup = new LeaderboardGroupDescriptor(leaderboardName, leaderboardName, leaderboardName,
+                    false, false, new int[0] , null);
+            getClientFactory().getSailingService().createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+                    newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                    newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                            new AsyncCallback<LeaderboardGroupDTO>() {
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    throw new RuntimeException(t);
+                                }
+                                @Override
+                                public void onSuccess(LeaderboardGroupDTO newGroup) {
+                                    event.addLeaderboardGroup(newGroup);
+                                    updateEvent(newRegattaLeaderboard, event, newRegatta, racesCount);
+                                }
+                            }));
+            
+        }
+        
+        private void updateEvent(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, EventDTO event, final RegattaDTO newRegatta, Integer racesCount) {
+            getClientFactory().getSailingService().updateEvent(event.id, event.getName(), event.getDescription(),
+                    event.startDate, event.endDate, event.venue, event.isPublic,
+                    event.getLeaderboardGroupIds(), event.getOfficialWebsiteURL(), event.getBaseURL(),
+                    event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                    event.getWindFinderReviewedSpotsCollectionIds(), new AsyncCallback<EventDTO>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            throw new RuntimeException(t);
+                        }   
+                        @Override
+                        public void onSuccess(EventDTO newEvent) {      
+                            LeaderboardGroupDTO newGroup = newEvent.getLeaderboardGroups().get(0);
+                            addRegattaToRegattaLeaderboard(newRegattaLeaderboard, newGroup, newEvent, newRegatta, racesCount);
+                        }
+                    });
+                        
+        }
+
+        private void addRegattaToRegattaLeaderboard(StrippedLeaderboardDTOWithSecurity newRegattaLeaderboard, LeaderboardGroupDTO leaderboardGroup, EventDTO event,
+                final RegattaDTO newRegatta, Integer racesCount) {
+            final List<String> leaderboardNames = new ArrayList<>();
+            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
+                leaderboardNames.add(leaderboard.getName());
+            }
+            leaderboardNames.add(newRegattaLeaderboard.getName());
+            getClientFactory().getSailingService().updateLeaderboardGroup(leaderboardGroup.getId(),
+                    leaderboardGroup.getName(), leaderboardGroup.getName(),
+                    leaderboardGroup.getDescription(), leaderboardGroup.getDisplayName(),
+                    leaderboardNames, leaderboardGroup.getOverallLeaderboardDiscardThresholds(),
+                    leaderboardGroup.getOverallLeaderboardScoringSchemeType(),
+                    new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            throw new RuntimeException(t);
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
+                        }
+                   }));
         }
         
         private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
@@ -169,21 +260,44 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
                         // at the end, using -1 as "insertIndex."
                         raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), -1));
                     }
+            
                     getClientFactory().getSailingService().addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
                             new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             throw new RuntimeException(t);
                         }
-
+    
                         @Override
                         public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                            updateSeries(newRegatta, series);
                             getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));
                         }
-                    });
+                    });     
                 }
-            }
+            }    
+        }
+        
+        private void updateSeries(final RegattaDTO newRegatta, final SeriesDTO series) {
+            getClientFactory().getSailingService().updateSeries(newRegatta.getRegattaIdentifier(), series.getName(), series.getName(),
+                    series.isMedal(), series.isFleetsCanRunInParallel(), series.getDiscardThresholds(),
+                series.isStartsWithZeroScore(),
+                series.isFirstColumnIsNonDiscardableCarryForward(),
+                series.hasSplitFleetContiguousScoring(), series.getMaximumNumberOfDiscards(),
+                series.getFleets(), new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        throw new RuntimeException(t);
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));
+                    }
+                });
         }
     }
+
+    
     
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.managementconsole.services;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +15,12 @@ import java.util.logging.Logger;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.managementconsole.events.EventListResponseEvent;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -73,6 +77,37 @@ public class EventService {
     }
 
     public void createEvent(String name, String venue, Date date, List<String> courseAreaNames, AsyncCallback<EventDTO> callback) {
-        sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(), new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), new ArrayList<UUID>(), callback); 
+        createDefaultLeaderboardGroup(new AsyncCallback<LeaderboardGroupDTO>() {
+            @Override
+            public void onFailure(Throwable t) {
+                callback.onFailure(t);
+            }
+            @Override
+            public void onSuccess(LeaderboardGroupDTO result) {
+                List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
+                sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(), 
+                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback); 
+            }
+        });
+    }
+    
+    private void createDefaultLeaderboardGroup(AsyncCallback<LeaderboardGroupDTO> leaderboardGroupCallback) {
+        String leaderboardName = "Leaderboard" + System.currentTimeMillis();
+        LeaderboardGroupDescriptor newGroup = new LeaderboardGroupDescriptor(leaderboardName, leaderboardName, leaderboardName,
+                false, false, new int[0] , null);
+        sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+                newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                        new AsyncCallback<LeaderboardGroupDTO>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                throw new RuntimeException(t);
+                            }
+                            @Override
+                            public void onSuccess(LeaderboardGroupDTO newGroup) {
+                                leaderboardGroupCallback.onSuccess(newGroup);
+                            }
+                        }));
+        
     }
 }
