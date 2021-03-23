@@ -656,17 +656,7 @@ public abstract class DataEntryDialog<T> {
         validateAndUpdate();
         GWT.log("dataEntryDialog:" + dataEntryDialog.getElement().getClientWidth() + " window width:"
                 + Window.getClientWidth());
-        if (Window.getClientWidth() > 550) {
-            dataEntryDialog.center();
-        } else {
-            dataEntryDialog.setSize("100%", "100%");
-            dataEntryDialog.center();
-            dataEntryDialog.setPopupPosition(0, 0);
-            dataEntryDialog.getWidget().setHeight("100%");
-            dataEntryDialog.setVisible(true);
-            dataEntryDialog.getElement().getStyle().setWidth(100, Unit.PCT);
-            dataEntryDialog.getElement().getStyle().setHeight(100, Unit.PCT);
-        }
+        dataEntryDialog.center();
         
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {

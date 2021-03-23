@@ -20,6 +20,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.typedarrays.shared.Int8Array;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -49,6 +50,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileStorageServiceConnectionTestObserver {
 
@@ -180,7 +182,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         storageServiceConnection.registerObserver(this);
         
         //if (!DeviceDetector.isDesktop()) {
-            super.getDialogBox().addStyleName(NewMediaDialogResources.INSTANCE.css().mobileAugmentations());
+//            super.getDialogBox().addStyleName(NewMediaDialogResources.INSTANCE.css().mobileAugmentations());
         //}
         
     }
@@ -379,6 +381,25 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             durationBox.setValue(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration), DONT_FIRE_EVENTS);
         } else {
             durationBox.setValue("", DONT_FIRE_EVENTS);
+        }
+        refreshPopupPosition();
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        refreshPopupPosition();
+    }
+    
+    
+    private void refreshPopupPosition() {
+        if (!DeviceDetector.isDesktop()) {
+            final DialogBox popup = super.getDialogBox();
+
+            popup.setPopupPositionAndShow((width, height) -> {
+                popup.setPopupPosition(popup.getParent().getOffsetWidth() - popup.getOffsetWidth(),
+                        popup.getParent().getOffsetHeight() - popup.getOffsetHeight());
+            });
         }
     }
 
