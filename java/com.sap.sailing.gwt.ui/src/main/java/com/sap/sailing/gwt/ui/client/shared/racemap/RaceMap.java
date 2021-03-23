@@ -2023,8 +2023,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) ||
                         (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)
                         // show the line for the current leg or for the first leg if we are still before the start
-                         && (courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
-                             courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0);
+                         && ((courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
+                              courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0));
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
