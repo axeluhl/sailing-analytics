@@ -25,6 +25,6 @@ Require-Bundle: com.sap.sse.common,
  org.apache.httpcomponents.httpclient;bundle-version="4.5.5",
  com.sap.sse.security.common,
  com.sap.sse.landscape.common,
- com.sap.sse,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse
 Bundle-ActivationPolicy: lazy

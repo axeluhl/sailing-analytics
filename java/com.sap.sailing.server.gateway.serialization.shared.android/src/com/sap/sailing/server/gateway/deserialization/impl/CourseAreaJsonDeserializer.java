@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class CourseAreaJsonDeserializer implements JsonDeserializer<CourseArea> {
 

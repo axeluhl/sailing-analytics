@@ -41,7 +41,7 @@ import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTest {
     protected ArrayList<Series> series;
