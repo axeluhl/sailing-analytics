@@ -364,16 +364,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) throws InterruptedException, ExecutionException {
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
-        final int httpsPort = 443;
+        final int httpPort = 80;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTPS.name(),
-                httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort, alb.getArn());
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
                         .createListener(l -> {
                             l.loadBalancerArn(alb.getArn()).protocol(ProtocolEnum.HTTPS)
-                                        .port(httpsPort)
+                                        .port(httpPort)
                                         .defaultActions(Action.builder()
                                                 .targetGroupArn(defaultTargetGroup.getTargetGroupArn())
                                                 .type(ActionTypeEnum.FORWARD)
@@ -484,9 +484,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String loadBalancerNameLowercase, com.sap.sse.landscape.Region region) {
         try {
             final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
-            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region,
-                    Util.first(Util.filter(response.loadBalancers(),
-                            lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))), this)
+            return response.hasLoadBalancers() ?
+                    response.loadBalancers().stream()
+                        .filter(lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))
+                        .findFirst().map(lb->new ApplicationLoadBalancerImpl<>(region, lb, this)).orElse(null)
                     : null;
         } catch (LoadBalancerNotFoundException e) {
             return null;
