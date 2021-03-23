@@ -7,17 +7,16 @@ import com.sap.sse.common.Util.Triple;
 
 /**
  * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant
- * ID} of a possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user
- * qualifier are considered
+ * ID} of a possible tenant qualifier, the {@link SecurityUser#getName() user name} as well as the
+ * {@link AbstractRole#isTransitive() transitive flag} of a possible user qualifier are considered
  * <p>
  * 
  * The security system generally allows users to pass on permissions they have to other users. This permission to grant
  * permissions we call a "meta-permission" in this context. Permissions granted to a user through a role can be
- * restricted by {@link #isTransitive() setting their "transitive" flag} to {@code false}. In this case
- * a user with such a role cannot pass on the role's permissions unless the user has obtained the same permission
- * through some other path without a transitivity restriction. Non-transitive roles should, e.g., be used when
- * the role has been obtained through a payment / subscription system as passing on such permissions would undermine
- * the whole paywall idea.
+ * restricted by {@link #isTransitive() setting their "transitive" flag} to {@code false}. In this case a user with such
+ * a role cannot pass on the role's permissions unless the user has obtained the same permission through some other path
+ * without a transitivity restriction. Non-transitive roles should, e.g., be used when the role has been obtained
+ * through a payment / subscription system as passing on such permissions would undermine the whole paywall idea.
  * 
  * @author Axel Uhl (D043530)
  */
