@@ -46,8 +46,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SerializableComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
  * A virtual wind track that computes and caches the wind bearing based on the boat tracks recorded in the tracked race

@@ -18,8 +18,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
-import com.sap.sse.util.impl.UnmodifiableNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.UnmodifiableNavigableSet;
 
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private static final long serialVersionUID = -4075853657857657528L;
