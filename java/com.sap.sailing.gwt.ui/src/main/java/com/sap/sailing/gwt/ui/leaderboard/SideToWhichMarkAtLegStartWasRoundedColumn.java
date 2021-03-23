@@ -4,6 +4,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.client.NauticalSideFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<NauticalSide, String, LeaderboardRowDTO> {
@@ -18,6 +19,6 @@ public class SideToWhichMarkAtLegStartWasRoundedColumn extends DetailTypeColumn<
 
     @Override
     public String getValue(LeaderboardRowDTO row) {
-        return getField().get(row) == null ? null : getField().get(row) == NauticalSide.PORT ? stringMessages.portSide() : stringMessages.starboardSide();
+        return getField().get(row) == null ? null : NauticalSideFormatter.format(getField().get(row), stringMessages);
     }
 }
