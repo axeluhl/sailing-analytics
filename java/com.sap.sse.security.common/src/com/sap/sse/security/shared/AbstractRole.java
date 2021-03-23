@@ -34,11 +34,11 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
     protected AbstractRole() {
     } // for GWT serialization only
     
-    public AbstractRole(RD roleDefinition, boolean transitive) {
+    public AbstractRole(RD roleDefinition, Boolean transitive) {
         this(roleDefinition, /* tenant owner */ null, /* user owner */ null, transitive);
     }
     
-    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser, boolean isTransitive) {
+    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser, Boolean isTransitive) {
         if (roleDefinition == null) {
             throw new NullPointerException("A role's definition must not be null");
         }
@@ -61,7 +61,7 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Security
      * {@link #isTransitive()} being {@code true} with that role implying one or more of the permissions this role
      * grants.
      */
-    public boolean isTransitive() {
+    public Boolean isTransitive() {
         return this.transitive;
     }
 
