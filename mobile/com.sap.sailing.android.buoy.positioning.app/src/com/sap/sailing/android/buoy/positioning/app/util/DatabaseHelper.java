@@ -18,7 +18,7 @@ import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
