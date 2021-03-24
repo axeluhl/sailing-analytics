@@ -662,14 +662,16 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         getLandscape().deleteTargetGroup(applicationReplicaSet.getPublicTargetGroup());
         final String loadBalancerDNSName = applicationReplicaSet.getLoadBalancer().getDNSName();
         final Iterable<Rule> currentLoadBalancerRuleSet = applicationReplicaSet.getLoadBalancer().getRules();
-        // remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
-        if (Util.isEmpty(currentLoadBalancerRuleSet) ||
-                (Util.size(currentLoadBalancerRuleSet) == 1 && currentLoadBalancerRuleSet.iterator().next().isDefault())) {
-            logger.info("No more rules "+(!Util.isEmpty(currentLoadBalancerRuleSet) ? "except default rule " : "")+
-                    "left in load balancer "+applicationReplicaSet.getLoadBalancer().getName()+"; deleting.");
-            applicationReplicaSet.getLoadBalancer().delete();
-        }
         if (applicationReplicaSet.getResourceRecordSet() != null) {
+            // remove the load balancer if it is a DNS-mapped one and there are no rules left other than the default rule
+            if (applicationReplicaSet.getResourceRecordSet().resourceRecords().stream().filter(rr->
+                    AwsLandscape.removeTrailingDotFromHostname(rr.value()).equals(loadBalancerDNSName)).findAny().isPresent() &&
+                (Util.isEmpty(currentLoadBalancerRuleSet) ||
+                    (Util.size(currentLoadBalancerRuleSet) == 1 && currentLoadBalancerRuleSet.iterator().next().isDefault()))) {
+                logger.info("No more rules "+(!Util.isEmpty(currentLoadBalancerRuleSet) ? "except default rule " : "")+
+                        "left in load balancer "+applicationReplicaSet.getLoadBalancer().getName()+" which was DNS-mapped; deleting.");
+                applicationReplicaSet.getLoadBalancer().delete();
+            }
             // remove the DNS record if this replica set was a DNS-mapped one
             logger.info("Removing DNS CNAME record "+applicationReplicaSet.getResourceRecordSet());
             getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
