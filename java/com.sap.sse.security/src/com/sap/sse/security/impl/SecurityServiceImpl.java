@@ -1211,7 +1211,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
@@ -1235,7 +1235,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
