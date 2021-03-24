@@ -21,7 +21,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class LegacyCompetitorWithContainedBoatJsonDeserializer implements JsonDeserializer<CompetitorWithBoat> {
     protected final CompetitorFactory competitorWithBoatFactory;

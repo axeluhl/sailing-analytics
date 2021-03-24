@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.shared.media.ImageDescriptor;
-import com.sap.sse.util.impl.NonGwtUrlHelper;
+import com.sap.sse.shared.util.impl.NonGwtUrlHelper;
 
 /**
  * Builder to create invitation mails for competitor and buoy tracking. This class ensures that the mail is being sent

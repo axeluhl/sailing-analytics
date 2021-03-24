@@ -12,8 +12,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.AbstractUnmodifiableNavigableSet;
-import com.sap.sse.util.impl.DescendingNavigableSet;
+import com.sap.sse.shared.util.impl.AbstractUnmodifiableNavigableSet;
+import com.sap.sse.shared.util.impl.DescendingNavigableSet;
 
 /**
  * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}. Subclasses have to specify a resolution and a

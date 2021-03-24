@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ApproximateTime;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 
 /**
  * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of
