@@ -588,7 +588,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
             .setInstanceType(InstanceType.valueOf(masterInstanceType))
-            .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+" "+name+" (Auto-Replica)")
+            .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+name+" (Auto-Replica)")
                          .and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, name))
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
             .setImage(masterHostBuilder.getMachineImage())
