@@ -32,7 +32,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 
 /**
  * Records {@link Wind} objects over time and offers to average the last so many of them into an

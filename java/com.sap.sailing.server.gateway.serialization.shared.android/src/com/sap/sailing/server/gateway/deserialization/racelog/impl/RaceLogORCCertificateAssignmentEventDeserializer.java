@@ -15,7 +15,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogORCCerti
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 /**
  * Deserializer for {@link com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent ORCLegDataEvent}.

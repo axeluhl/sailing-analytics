@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sap.sse.common.util.UrlHelper;
-import com.sap.sse.util.impl.NonGwtUrlHelper;
+import com.sap.sse.shared.util.impl.NonGwtUrlHelper;
 
 public class NonGwtUrlHelperTest {
     

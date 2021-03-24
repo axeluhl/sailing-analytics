@@ -16,7 +16,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class DeviceAndSessionIdentifierWithGPSFixesDeserializer
 implements JsonDeserializer<Util.Triple<DeviceIdentifier, Serializable, List<GPSFix>>> {

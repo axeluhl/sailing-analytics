@@ -129,6 +129,6 @@ implements Procedure<ShardingKey> {
         final String hostname = this.getHostName();
         final ApplicationLoadBalancer<ShardingKey> alb = getLoadBalancerUsed();
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
-                AwsLandscape.getHostedZoneName(hostname)), hostname, alb);
+                AwsLandscape.getHostedZoneName(hostname)), hostname, alb, /* force */ false);
     }
 }
