@@ -1023,6 +1023,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (raceLog.getLastRawFix() != null) {
                 raceInfoDTO.lastUpdateTime = raceLog.getLastRawFix().getCreatedAt().asDate();
             }
+            TimePoint finishingTime = state.getFinishingTime();
+            if (finishingTime != null) {
+                raceInfoDTO.finishingTime = finishingTime.asDate();
+            } else {
+                raceInfoDTO.finishingTime = null;
+            }
             TimePoint finishedTime = state.getFinishedTime();
             if (finishedTime != null) {
                 raceInfoDTO.finishedTime = finishedTime.asDate();
