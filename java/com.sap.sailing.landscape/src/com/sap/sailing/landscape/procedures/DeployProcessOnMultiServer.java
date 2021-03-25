@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.landscape.SailingAnalyticsMetrics;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sse.common.Duration;
@@ -39,7 +39,7 @@ ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguratio
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final Logger logger = Logger.getLogger(DeployProcessOnMultiServer.class.getName());
-    private final ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo;
+    private final SailingAnalyticsHost<ShardingKey> hostToDeployTo;
     private final ApplicationConfigurationT applicationConfiguration;
     private final Optional<Duration> optionalTimeout;
     private final Optional<String> optionalKeyName;
@@ -91,7 +91,7 @@ implements Procedure<ShardingKey> {
     ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
     extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey> {
-        BuilderT setHostToDeployTo(ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo);
+        BuilderT setHostToDeployTo(SailingAnalyticsHost<ShardingKey> hostToDeployTo);
         BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
     }
@@ -102,7 +102,7 @@ implements Procedure<ShardingKey> {
     extends com.sap.sse.landscape.orchestration.AbstractProcedureImpl.BuilderImpl<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey>
     implements Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> {
         private final SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder;
-        private ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo;
+        private SailingAnalyticsHost<ShardingKey> hostToDeployTo;
         private Optional<String> optionalKeyName = Optional.empty();
         private byte[] privateKeyEncryptionPassphrase;
 
@@ -183,12 +183,12 @@ implements Procedure<ShardingKey> {
         }
 
         @Override
-        public BuilderT setHostToDeployTo(ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> hostToDeployTo) {
+        public BuilderT setHostToDeployTo(SailingAnalyticsHost<ShardingKey> hostToDeployTo) {
             this.hostToDeployTo = hostToDeployTo;
             return self();
         }
         
-        protected ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getHostToDeployTo() {
+        protected SailingAnalyticsHost<ShardingKey> getHostToDeployTo() {
             return hostToDeployTo;
         }
 
@@ -256,6 +256,7 @@ implements Procedure<ShardingKey> {
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
                     "mkdir -p "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
+                    "sudo /usr/local/bin/cp_root_mail_properties "+applicationConfiguration.getServerName()+"; "+
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
                     "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"")+
                     "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh"+
@@ -269,14 +270,16 @@ implements Procedure<ShardingKey> {
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }
-        process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(), serverDirectory);
+        process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),
+                serverDirectory, applicationConfiguration.getTelnetPort(),
+                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort());
     }
     
     public SailingAnalyticsProcess<ShardingKey> getProcess() {
         return process;
     }
 
-    private ApplicationProcessHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> getHostToDeployTo() {
+    private SailingAnalyticsHost<ShardingKey> getHostToDeployTo() {
         return hostToDeployTo;
     }
 }

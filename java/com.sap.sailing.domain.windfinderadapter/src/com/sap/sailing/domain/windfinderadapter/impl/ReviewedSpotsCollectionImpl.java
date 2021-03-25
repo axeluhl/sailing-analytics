@@ -20,6 +20,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
 import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
@@ -105,7 +106,9 @@ public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
     private Iterable<Spot> loadSpots() throws IOException, ParseException, MalformedURLException {
         final Iterable<Spot> result;
         final InputStreamReader in = new InputStreamReader(
-                            (InputStream) new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX).getContent());
+                            (InputStream) HttpUrlConnectionHelper.redirectConnection(
+                                    new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS+"/"+getId()+SPOT_LIST_DOCUMENT_SUFFIX))
+                            .getContent());
         try {
             JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
             result = parser.parseSpots(spotsAsJson, this);

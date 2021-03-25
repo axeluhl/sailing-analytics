@@ -1,6 +1,7 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -70,7 +71,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
             return self();
         }
 
-        protected ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException {
+        protected ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             return loadBalancerUsed;
         }
 
@@ -96,9 +97,9 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     
     protected <ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics>
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
-        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
-                process.getPort(), process.getHealthCheckPath(),
-                /* use traffic port as health check port, too */ process.getPort()); // TODO this doesn't health-check the reverse proxy running on the instance for default set-ups with only one process running on the instance; but how do we know?
+        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName, process.getPort(),
+                process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort(),
+                getLoadBalancerUsed().getArn());
     }
     
     @Override
@@ -106,20 +107,22 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
         return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
 
-    protected String getMasterTargetGroupName() {
+    public String getMasterTargetGroupName() {
         return getPublicTargetGroupName()+MASTER_TARGET_GROUP_SUFFIX;
     }
     
-    protected TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName());
+    public TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
-    protected String getPublicTargetGroupName() {
+    public String getPublicTargetGroupName() {
         return targetGroupNamePrefix+serverName;
     }
     
-    protected TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName());
+    public TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
     public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() {
@@ -128,9 +131,5 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
 
     public Iterable<Rule> getRulesAdded() {
         return rulesAdded;
-    }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
     }
 }

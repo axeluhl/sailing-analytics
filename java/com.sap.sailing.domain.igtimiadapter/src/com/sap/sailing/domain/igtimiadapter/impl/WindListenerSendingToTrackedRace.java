@@ -2,9 +2,11 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -23,7 +25,7 @@ class WindListenerSendingToTrackedRace implements IgtimiWindListener {
     }
 
     @Override
-    public void windDataReceived(Wind wind, String deviceSerialNumber) {
+    public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
         for (DynamicTrackedRace trackedRace : trackedRaces) {
             if (trackedRace.recordWind(wind, windTrackerFactory.getWindSource(deviceSerialNumber))) {
                 numberOfFixesAppliedPerTrackedRace.put(trackedRace, numberOfFixesAppliedPerTrackedRace.get(trackedRace)+1);

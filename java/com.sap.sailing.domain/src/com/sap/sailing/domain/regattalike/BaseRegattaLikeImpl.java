@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
-import com.sap.sse.util.WeakReferenceWithCleanerCallback;
+import com.sap.sse.shared.util.WeakReferenceWithCleanerCallback;
 
 public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     private static final long serialVersionUID = -5629172342837950344L;

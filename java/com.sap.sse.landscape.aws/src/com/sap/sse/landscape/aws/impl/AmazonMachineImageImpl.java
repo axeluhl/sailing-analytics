@@ -13,6 +13,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Image;
 import software.amazon.awssdk.services.ec2.model.ImageState;
+import software.amazon.awssdk.services.ec2.model.Tag;
 
 public class AmazonMachineImageImpl<ShardingKey> implements AmazonMachineImage<ShardingKey> {
     private static final long serialVersionUID = 1615200981492476022L;
@@ -39,6 +40,11 @@ public class AmazonMachineImageImpl<ShardingKey> implements AmazonMachineImage<S
     @Override
     public Region getRegion() {
         return region;
+    }
+    
+    @Override
+    public Iterable<Tag> getTags() {
+        return image.tags();
     }
 
     @Override

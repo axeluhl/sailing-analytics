@@ -260,6 +260,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private MaxPointsReason getMaxPointsReason(RaceCompetitorStatusType raceCompetitorStatusType) {
         MaxPointsReason result;
         switch (raceCompetitorStatusType) {
+        // TODO we expect NSC and perhaps also TLE to show up; support the mapping to MaxPointsReason.NSC / TLE, respectively when they appear
         case ABANDONED:
             result = MaxPointsReason.NONE; // TODO bug 5154: find out what ABANDONED means and if/how we can translate it to a MaxPointsReason
             break;
@@ -304,6 +305,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             break;
         case UFD:
             result = MaxPointsReason.UFD;
+            break;
+        case NSC:
+            result = MaxPointsReason.NSC;
+            break;
+        case TLE:
+            result = MaxPointsReason.TLE;
             break;
         default:
             result = MaxPointsReason.NONE;

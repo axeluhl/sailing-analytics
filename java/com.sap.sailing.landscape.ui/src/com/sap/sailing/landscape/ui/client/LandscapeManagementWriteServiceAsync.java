@@ -4,9 +4,14 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.ProcessDTO;
+import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
+import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
+import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
@@ -50,7 +55,8 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void upgradeAmazonMachineImage(String region, String machineImageId, AsyncCallback<AmazonMachineImageDTO> callback);
 
-    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, AsyncCallback<Void> asyncCallback);
+    void scaleMongo(String region, MongoScalingInstructionsDTO mongoScalingInstructions, String keyName,
+            AsyncCallback<Void> asyncCallback);
 
     /**
      * Probes whether the current user has the {@code LANDSCAPE:MANAGE:AWS} permission and has previously
@@ -74,4 +80,22 @@ public interface LandscapeManagementWriteServiceAsync {
      * {@link #createMfaSessionCredentials(String, String, String)}.
      */
     void clearSessionCredentials(AsyncCallback<Void> callback);
+    
+    void getApplicationReplicaSets(String regionId, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<ArrayList<SailingApplicationReplicaSetDTO<String>>> callback);
+
+    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String securityReplicationBearerToken, String optionalDomainName, AsyncCallback<Void> callback);
+    
+    void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
+            SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
+            AsyncCallback<SerializationDummyDTO> callback);
+
+    void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
+            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
+
+    void removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> asyncCallback);
 }

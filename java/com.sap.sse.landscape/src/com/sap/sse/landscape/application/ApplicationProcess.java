@@ -9,21 +9,34 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.parser.ParseException;
+
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Process;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
     static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
+    
+    @FunctionalInterface
+    public static interface ApplicationProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+        ProcessT createApplicationProcess(String instanceId, AvailabilityZone availabilityZone,
+                Landscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, Host> processFactoryFromHostAndServerDirectory);
+    }
     
     /**
      * @param releaseRepository
@@ -33,20 +46,19 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
+    
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
      * process's OSGi console using the {@link #getTelnetPortToOSGiConsole() telnet port}. If the instance hasn't
-     * terminated after {@code timeout} after having received this shutdown request, if {@code forceAfterTimeout} is
-     * {@code true}, a hard kill command will be used terminate the virtual machine and {@code false} is returned;
-     * otherwise ({@code forceAfterTimeout==false}), {@code false} will be returned after the timeout period.
+     * terminated after some time, a hard kill command will be used terminate the virtual machine. All this is
+     * implemented in the {@code stop} script in the {@link #getServerDirectory() server's directory}.<p>
      * 
-     * @return {@code true} if the clean shutdown has succeeded, {@code false} otherwise. Note that therefore the result
-     *         does not indicate whether the process was finally gone; with {@code forceAfterTimeout==true} callers can
-     *         assume that no matter what the result of this call, the VM will finally be gone, but with this logic it's
-     *         possible even with a hard shutdown to figure out that a hard shutdown was actually required and the clean
-     *         shutdown didn't work.
+     * The server directory and the {@link #getHost()} are left untouched by this. In particular, a subsequent execution
+     * of the {@code start} script in the {@link #getServerDirectory() server directory} can be expected to start the
+     * application process again.
      */
-    boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
+    void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws IOException, InterruptedException, JSchException, Exception;
     
     int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
@@ -88,7 +100,6 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     /**
      * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
      * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
-     * @param optionalKeyName TODO
      */
     String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception;
@@ -108,23 +119,28 @@ extends Process<RotatingFileBasedLog, MetricsT> {
         }
     }
 
-    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws MalformedURLException {
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getUrl(getHealthCheckPath(), optionalTimeout);
     }
     
-    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws MalformedURLException {
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
     }
     
     default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
-        return new URL("http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+        return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
     }
     
-    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws MalformedURLException {
-        return new URL("http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), getPort(), pathAndQuery);
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        final int port = getPort();
+        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
     }
     
     default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
     }
+
+    Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException, Exception;
 }

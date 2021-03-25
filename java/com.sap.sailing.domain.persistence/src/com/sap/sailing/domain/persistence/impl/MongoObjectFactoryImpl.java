@@ -370,7 +370,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             storeColumnFactors(leaderboard, dbLeaderboard);
             storeLeaderboardCorrectionsAndDiscards(leaderboard, dbLeaderboard);
         }
-        leaderboardCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(query, dbLeaderboard, new UpdateOptions().upsert(true));
+        leaderboardCollection.replaceOne(query, dbLeaderboard, new UpdateOptions().upsert(true));
     }
 
     private void storeColumnFactors(Leaderboard leaderboard, Document dbLeaderboard) {

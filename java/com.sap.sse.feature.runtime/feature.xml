@@ -54,20 +54,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.felix.shell"
-         download-size="0"
-         install-size="0"
-         version="1.4.3"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.shell.remote"
-         download-size="0"
-         install-size="0"
-         version="1.1.2"
-         unpack="false"/>
-
-   <plugin
          id="lz4-java"
          download-size="0"
          install-size="0"
@@ -225,7 +211,7 @@
          id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
-         version="1.4.5"
+         version="1.6.2"
          unpack="false"/>
 
    <plugin
@@ -482,7 +468,7 @@
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.15.81"
+         version="2.16.19"
          unpack="false"/>
 
    <plugin

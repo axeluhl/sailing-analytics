@@ -25,7 +25,7 @@
                         <ui:text from='{i18n.footerPrivacy}' />
                     </a>
                     <br></br>
-                    <a ui:field="supportAnchor" href="mailto:support%40sapsailing.com?subject=[SAP Sailing] Support"
+                    <a ui:field="supportAnchor" href="https://support.sapsailing.com"
                         title="{i18n.footerSupport}">
                         <ui:text from='{i18n.footerSupport}' />
                     </a>
@@ -42,7 +42,7 @@
                         <ui:text from='{i18n.whatsNew}' />
                     </g:Anchor>
                 </div>
-                <div ui:field="copyrightDiv" class="{res.mediaCss.small12} {res.mediaCss.columns}">
+                <div ui:field="copyrightDiv" class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.sitefooter_copyright}">
                     <ui:text from='{i18n.footerCopyright}' />
                 </div>
             </div>

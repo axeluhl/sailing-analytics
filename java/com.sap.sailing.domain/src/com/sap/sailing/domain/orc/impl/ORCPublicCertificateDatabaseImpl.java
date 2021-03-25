@@ -548,7 +548,7 @@ public class ORCPublicCertificateDatabaseImpl implements ORCPublicCertificateDat
                 break;
             }
         }
-        return new CertificateHandleImpl(issuingCountry, fileId, gph, sssid, datInGID, referenceNumber, family,
+        return new CertificateHandleImpl(issuingCountry, fileId, gph, sssid, datInGID, referenceNumber, family==null?CertificateFamily.UNKNOWN:family,
                 yachtName, sailNumber, boatClassName, designer, builder, yearBuilt, issueDate, certType, isOneDesign,
                 isProvisional, isValid);
     }

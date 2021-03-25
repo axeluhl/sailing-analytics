@@ -23,14 +23,17 @@ import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.BearerTokenReplicationCredentials;
+import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
 import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
@@ -40,9 +43,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
+import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDynamicLoadBalancerMapping;
@@ -132,7 +138,7 @@ public class TestProcedures {
         try {
             // this is expected to have connected to the default "live" replica set.
             startEmptyMultiServer.run();
-            final ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host = startEmptyMultiServer.getHost();
+            final SailingAnalyticsHost<String> host = startEmptyMultiServer.getHost();
             final SshCommandChannel sshChannel = host.createRootSshChannel(optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             final String result = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+ApplicationProcessHost.DEFAULT_SERVERS_PATH, /* stderr prefix */ null, /* stderr log level */ null);
             assertTrue(result.isEmpty());
@@ -159,14 +165,22 @@ public class TestProcedures {
             assertTrue(curlOutput.matches("(?ms).* 302 Found$.*"));
             assertTrue(curlOutput.replaceAll("\r", "").matches("(?ms).*^Location: https://b.sapsailing.com/gwt/Home.html$.*"));
             // Now check if the landscape can find this "sailing-analytics-server" in the region and determine which applications it has running:
-            final Iterable<ApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
-                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, (theHost, dir)->{
+            ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
+                    (theHost, thePort, dir, telnetPort, serverName, additionalProperties)->{
                         try {
-                            return new SailingAnalyticsProcessImpl<String>(theHost, dir, optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
+                            final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                            return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName,
+                                    expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                    }, optionalTimeout, /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
+                    };
+            final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier = (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape)->
+                new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress,
+                        launchTimePoint, landscape, processFactoryFromHostAndServerDirectory);
+            final Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets =
+                    landscape.getApplicationReplicaSetsByTag(region, sailingAnalyticsServerTag, hostSupplier, optionalTimeout, 
+                            /* optional SSH key pair name */ Optional.empty(), privateKeyEncryptionPassphrase);
             // expecting to find at least "a" and "b"
             assertTrue(Util.containsAll(Util.map(replicaSets, ApplicationReplicaSet::getName), Arrays.asList(aServerName, bServerName)));
             Util.filter(replicaSets, rs->rs.getName().equals(aServerName) || rs.getName().equals(bServerName)).forEach(rs->assertTrue(Util.isEmpty(rs.getReplicas()) && rs.getMaster() != null));
@@ -185,7 +199,7 @@ public class TestProcedures {
     MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
     ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,
     SailingAnalyticsApplicationConfiguration<String>, AppConfigBuilderT>>
-    SailingAnalyticsProcess<String> launchMasterOnMultiServer(ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
+    SailingAnalyticsProcess<String> launchMasterOnMultiServer(SailingAnalyticsHost<String> host, String serverName) throws IOException, InterruptedException, JSchException, SftpException, Exception {
         final AppConfigBuilderT multiServerAppConfigBuilder = (AppConfigBuilderT) SailingAnalyticsApplicationConfiguration.<AppConfigBuilderT, SailingAnalyticsApplicationConfiguration<String>, String>builder();
         final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String,
                 ApplicationProcessHost<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>,

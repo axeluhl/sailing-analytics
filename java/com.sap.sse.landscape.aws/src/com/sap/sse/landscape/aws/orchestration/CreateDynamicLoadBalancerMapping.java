@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws.orchestration;
 
+import java.util.concurrent.ExecutionException;
+
 import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
@@ -30,7 +32,7 @@ implements Procedure<ShardingKey> {
     extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, CreateDynamicLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         @Override
-        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException {
+        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             final ApplicationLoadBalancer<ShardingKey> result;
             if (super.getLoadBalancerUsed() != null) {
                 result = super.getLoadBalancerUsed();
@@ -41,8 +43,8 @@ implements Procedure<ShardingKey> {
         }
 
         private ApplicationLoadBalancer<ShardingKey> getOrCreateNonDNSMappedLoadBalancer(
-                Region region, String hostname, AwsLandscape<ShardingKey> landscape) throws InterruptedException {
-            final String domainName = getHostedZoneName(hostname);
+                Region region, String hostname, AwsLandscape<ShardingKey> landscape) throws InterruptedException, ExecutionException {
+            final String domainName = AwsLandscape.getHostedZoneName(hostname);
             final ApplicationLoadBalancer<ShardingKey> existingLoadBalancer = landscape.getNonDNSMappedLoadBalancer(region, domainName);
             final ApplicationLoadBalancer<ShardingKey> result;
             if (existingLoadBalancer != null) {
@@ -59,7 +61,7 @@ implements Procedure<ShardingKey> {
                 AwsLandscape<ShardingKey> landscape,
                 ApplicationLoadBalancer<ShardingKey> loadBalancer, String domainName) {
             final String hostname = "*." + domainName;
-            landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer);
+            landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer, /* force */ false);
         }
 
         @Override

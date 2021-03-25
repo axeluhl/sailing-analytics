@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,7 +51,7 @@ implements Procedure<ShardingKey> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
         
         @Override
-        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException {
+        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             final ApplicationLoadBalancer<ShardingKey> result;
             if (super.getLoadBalancerUsed() != null) {
                 result = super.getLoadBalancerUsed();
@@ -63,10 +64,9 @@ implements Procedure<ShardingKey> {
         /**
          * Finds or creates a {@link ApplicationLoadBalander} load balancer in the {@code region} that is DNS-mapped and still has
          * at least the length of {@link #createRules()} additional rules available.
-         * @throws InterruptedException 
          */
         private ApplicationLoadBalancer<ShardingKey> getOrCreateDNSMappedLoadBalancer(
-                AwsLandscape<ShardingKey> landscape, Region region) throws InterruptedException {
+                AwsLandscape<ShardingKey> landscape, Region region) throws InterruptedException, ExecutionException {
             ApplicationLoadBalancer<ShardingKey> result = null;
             final Set<String> loadBalancerNames = new HashSet<>();
             for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : landscape.getLoadBalancers(region)) {
@@ -129,6 +129,6 @@ implements Procedure<ShardingKey> {
         final String hostname = this.getHostName();
         final ApplicationLoadBalancer<ShardingKey> alb = getLoadBalancerUsed();
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
-                getHostedZoneName(hostname)), hostname, alb);
+                AwsLandscape.getHostedZoneName(hostname)), hostname, alb, /* force */ false);
     }
 }

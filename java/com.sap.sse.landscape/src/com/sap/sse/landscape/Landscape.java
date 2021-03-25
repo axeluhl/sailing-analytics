@@ -30,6 +30,12 @@ public interface Landscape<ShardingKey> {
     SecurityGroup getDefaultSecurityGroupForApplicationHosts(Region region);
     
     /**
+     * @return the security group that shall be assigned by default to any application load balancer; assuming to
+     * let port 80 and 443 pass through
+     */
+    SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(Region region);
+
+    /**
      * @return the security group that shall be assigned by default to any host used as part of the central reverse
      *         proxy cluster in a region
      */

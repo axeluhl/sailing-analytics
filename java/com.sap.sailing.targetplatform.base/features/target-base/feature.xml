@@ -58,7 +58,7 @@
          id="com.sun.mail.javax.mail"
          download-size="0"
          install-size="0"
-         version="1.4.5"
+         version="1.6.2"
          unpack="false"/>
 
    <plugin
@@ -66,20 +66,6 @@
          download-size="0"
          install-size="0"
          version="1.6.4.1"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.shell"
-         download-size="0"
-         install-size="0"
-         version="1.4.3"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.shell.remote"
-         download-size="0"
-         install-size="0"
-         version="1.1.2"
          unpack="false"/>
 
    <plugin

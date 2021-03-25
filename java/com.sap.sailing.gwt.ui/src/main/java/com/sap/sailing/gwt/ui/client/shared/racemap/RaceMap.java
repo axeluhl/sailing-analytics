@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -97,6 +98,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeComparator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
+import com.sap.sailing.gwt.ui.client.NauticalSideFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
@@ -1970,7 +1972,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 startLineAdvantageText.replace(0, startLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                         numberFormatOneDecimal.format(courseDTO.startLineLengthInMeters),
                         numberFormatOneDecimal.format(Math.abs(courseDTO.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
-                        courseDTO.startLineAdvantageousSide.name().charAt(0)+courseDTO.startLineAdvantageousSide.name().substring(1).toLowerCase(),
+                        NauticalSideFormatter.format(courseDTO.startLineAdvantageousSide, stringMessages),
                         numberFormatOneDecimal.format(courseDTO.startLineAdvantageInMeters)));
             } else {
                 startLineAdvantageText.delete(0, startLineAdvantageText.length());
@@ -2004,7 +2006,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 finishLineAdvantageText.replace(0, finishLineAdvantageText.length(), " "+stringMessages.lineAngleToWindAndAdvantage(
                         numberFormatOneDecimal.format(courseDTO.finishLineLengthInMeters),
                         numberFormatOneDecimal.format(Math.abs(courseDTO.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind)),
-                        courseDTO.finishLineAdvantageousSide.name().charAt(0)+courseDTO.finishLineAdvantageousSide.name().substring(1).toLowerCase(),
+                        NauticalSideFormatter.format(courseDTO.finishLineAdvantageousSide, stringMessages),
                         numberFormatOneDecimal.format(courseDTO.finishLineAdvantageInMeters)));
             } else {
                 finishLineAdvantageText.delete(0, finishLineAdvantageText.length());
@@ -2023,8 +2025,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY) ||
                         (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)
                         // show the line for the current leg or for the first leg if we are still before the start
-                         && (courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
-                             courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0);
+                         && ((courseDTO.currentLegNumber-1 == zeroBasedIndexOfStartWaypoint) ||
+                              courseDTO.currentLegNumber == 0 && zeroBasedIndexOfStartWaypoint == 0));
                 keysAlreadyHandled.put(key, new Pair<>(showCourseMiddleLine, zeroBasedIndexOfStartWaypoint));
             }
             Set<Set<ControlPointDTO>> keysToConsider = new HashSet<>(keysAlreadyHandled.keySet());
@@ -2544,7 +2546,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         SpeedWithBearingDTO speedWithBearing = lastFix.speedWithBearing;
         if (speedWithBearing == null) {
-            // TODO should we show the boat at all?
             speedWithBearing = new SpeedWithBearingDTO(0, 0);
         }
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
@@ -2554,9 +2555,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
-
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsDegreesAndDecimalMinutesWithCardinalPoints()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), lastFix==null||lastFix.position==null ? "" : lastFix.position.getAsSignedDecimalDegrees()));
         vPanel.add(createInfoWindowLabelWithWidget(stringMessages.selectedDetailType(), createDetailTypeDropdown(competitorDTO)));
-
         if (raceIdentifier != null) {
             RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
@@ -2588,7 +2589,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.getAndShowManeuvers(race, timeRange);
             }
         }
-
         // If a metric is shown a click on any competitor / competitors tail will
         // add them to the selection effectively showing the metric on their tail.
         if (selectedDetailType != null) {

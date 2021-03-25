@@ -204,4 +204,11 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
     protected String getServerDirectory() {
         return serverDirectory;
     }
+    
+    /**
+     * Expose the superclass method to other classes in the same package
+     */
+    protected String getServerName() {
+        return super.getServerName();
+    }
 }

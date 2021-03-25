@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -162,7 +163,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
         sftpChannel.get(configFileName, configFileContents);
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
-        sftpChannel.disconnect();
+        sftpChannel.getSession().disconnect();
         proxy.removeRedirect(hostname, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
         final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
@@ -171,7 +172,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
 
     protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010);
         return process;
     }
     
@@ -400,7 +401,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String ipAddress = "1.2.3.4";
         final String dnsHostedZoneId = landscape.getDNSHostedZoneId(testHostedZoneDnsName);
         try {
-            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress);
+            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress, /* force */ false);
             int attempts = 10;
             while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
                 Thread.sleep(10000);
@@ -414,7 +415,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     }
     
     @Test
-    public void createEmptyLoadBalancerTest() throws InterruptedException {
+    public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
         final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
         try {
@@ -439,9 +440,13 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
     @Test
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
-        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80);
+        final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, "/gwt/status", 80,
+                /* loadBalancerArn */ null);
         try {
-            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName, targetGroup.getTargetGroupArn());
+            final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
+                    targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),
+                    targetGroup.getPort(), targetGroup.getHealthCheckProtocol(),
+                    targetGroup.getHealthCheckPort(), targetGroup.getHealthCheckPath());
             assertEquals(targetGroupName, fetchedTargetGroup.getName());
         } finally {
             landscape.deleteTargetGroup(targetGroup);
