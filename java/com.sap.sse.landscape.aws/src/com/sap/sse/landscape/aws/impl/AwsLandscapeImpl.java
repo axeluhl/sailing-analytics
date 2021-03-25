@@ -1293,6 +1293,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
                                                 mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
                                                 applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
+                                            if (mastersByServerName.containsKey(serverName)) {
+                                                logger.warning("Replacing master "+mastersByServerName.get(serverName)+" with newer master "+applicationProcess);
+                                            }
                                             mastersByServerName.put(serverName, applicationProcess);
                                         }
                                     }
