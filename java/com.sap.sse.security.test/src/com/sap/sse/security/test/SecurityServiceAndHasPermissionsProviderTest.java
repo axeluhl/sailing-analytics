@@ -62,12 +62,12 @@ public class SecurityServiceAndHasPermissionsProviderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testHasCurrentUserMetaPermissionExpectException() {
+    public void testHasCurrentUserAnyPermissionExpectException() {
         createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserAnyPermission(null);
     }
-
+    
     @Test(expected = IllegalArgumentException.class)
-    public void testHasCurrentUserAnyPermissionExpectException() {
+    public void testHasCurrentUserMetaPermissionExpectException() {
         createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermission(null, null);
     }
 
@@ -75,16 +75,17 @@ public class SecurityServiceAndHasPermissionsProviderTest {
     public void testHasCurrentUserMetaPermissionWithOwnershipLookupExpectException() {
         createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermissionWithOwnershipLookup(null);
     }
+    
+    @Test
+    public void testHasCurrentUserAnyPermissionExpectExcept() {
+        assert (excecutePermissionCheckUnderAdminSubject(() -> createSecurityServiceWithHasPermissionsProvider()
+                .hasCurrentUserAnyPermission(permission)));
+    }
 
     @Test
     public void testHasCurrentUserMetaPermission() {
         assert (excecutePermissionCheckUnderAdminSubject(
-                () -> createSecurityServiceWithHasPermissionsProvider().hasCurrentUserAnyPermission(permission)));
-    }
-
-    @Test
-    public void testHasCurrentUserAnyPermissionExpectExcept() {
-        assert (excecutePermissionCheckUnderAdminSubject(() -> createSecurityServiceWithHasPermissionsProvider()
+                () -> createSecurityServiceWithHasPermissionsProvider()
                 .hasCurrentUserMetaPermission(permission, null)));
     }
 
