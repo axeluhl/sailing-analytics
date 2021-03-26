@@ -42,15 +42,12 @@ public class RegattaCard extends Composite {
         this.regatta = regatta;
         this.presenter = presenter;
         local_res.style().ensureInjected();
-
-        int raceCount = regatta.races.size();
         String boatClass = regatta.boatClass.getName();
         ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(boatClass);
         logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
         String date = regatta.getStartDate() == null ? "" :
             DateAndTimeFormatterUtil.longDateFormatter.render(regatta.getStartDate());
-
-        racesUi.setInnerText(raceCount + " races");
+        racesUi.setInnerText(getNumberOfRaces() + " races");
         this.title.setInnerSafeHtml(SafeHtmlUtils.fromString(regatta.getName()));
         this.details.setInnerSafeHtml(SafeHtmlUtils.fromString(date));
     }
@@ -60,4 +57,11 @@ public class RegattaCard extends Composite {
         presenter.navigateToRegatta(this.regatta);
     }
 
+    private int getNumberOfRaces() {
+        if (regatta.series.isEmpty()) {
+            return 0;
+        } else {
+            return regatta.series.get(0).getRaceColumns().size();
+        }  
+    }
 }

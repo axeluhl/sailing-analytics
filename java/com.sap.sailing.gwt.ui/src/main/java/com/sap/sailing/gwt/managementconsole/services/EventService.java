@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.events.EventListResponseEvent;
 import com.sap.sailing.gwt.managementconsole.events.EventSeriesListResponseEvent;
 import com.sap.sailing.gwt.managementconsole.events.ListResponseEvent;
+import com.sap.sailing.gwt.managementconsole.services.factories.LeaderboardGroupFactory;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -99,22 +100,19 @@ public class EventService {
     }
     
     private void createDefaultLeaderboardGroup(final AsyncCallback<LeaderboardGroupDTO> leaderboardGroupCallback) {
-        final String leaderboardName = "Leaderboard" + System.currentTimeMillis();
-        final LeaderboardGroupDescriptor newGroup = new LeaderboardGroupDescriptor(leaderboardName, leaderboardName, leaderboardName,
-                false, false, new int[0] , null);
+        final LeaderboardGroupDescriptor newGroup = LeaderboardGroupFactory.createDefaultLeaderboardGroupDescriptor();
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<>(
                         new AsyncCallback<LeaderboardGroupDTO>() {
                             @Override
                             public void onFailure(final Throwable t) {
-                                throw new RuntimeException(t);
+                                leaderboardGroupCallback.onFailure(t);
                             }
                             @Override
                             public void onSuccess(final LeaderboardGroupDTO newGroup) {
                                 leaderboardGroupCallback.onSuccess(newGroup);
                             }
                         }));
-        
     }
 }
