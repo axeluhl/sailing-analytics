@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.managementconsole.places.regatta.create;
 
-import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddRegattaPlace> {
 
+    private static final Logger LOG = Logger.getLogger(AddRegattaActivity.class.getName());
+    
     private final UUID eventId;
     private AddRegattaView addRegattaView;
     
@@ -37,6 +39,16 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
         }
 
         @Override
+        public boolean validateRegattaName(String regattaName) {
+            for(RegattaDTO oldRegatta : getClientFactory().getRegattaService().getRegattas()) {
+                if (oldRegatta.getName().equals(regattaName)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        @Override
         public void cancelAddRegatta() {
             getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));
         }     
@@ -47,14 +59,14 @@ public class AddRegattaActivity extends AbstractManagementConsoleActivity<AddReg
             
                 @Override
                 public final void onFailure(Throwable t) {
-                    throw new RuntimeException(t);
+                    LOG.severe("addRegatta :: Cannot load add regatta");
+                    getClientFactory().getErrorReporter().reportError("Error", "Cannot add regatta");
                 }
                 
                 @Override
                 public void onSuccess(RegattaDTO regatta) { 
                     getClientFactory().getPlaceController().goTo(new RegattaOverviewPlace(eventId));                   
-                }
-            
+                }  
             });
         }
     }

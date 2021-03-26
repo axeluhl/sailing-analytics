@@ -11,12 +11,17 @@
                 <g:Anchor ui:field="back" addStyleNames="{app_res.icons.icon} {app_res.icons.iconBack} {app_res.style.backNavigation}" />
             </div>
         </div>
-        <div class="{res.mediaCss.grid}" style="padding-bottom:2rem;">
+        <div class="{res.mediaCss.grid}" style="padding-bottom:1rem;">
             <div class="{res.mediaCss.column} {res.mediaCss.small12}">
                 <div class="{app_res.fonts.title}"><ui:text from='{i18n.addRegattaClass}' /></div>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small12}">
                 <div class="{app_res.fonts.text}"><ui:text from='{i18n.addRegattaSubtitle}' /></div>
+            </div>
+        </div>
+        <div class="{res.mediaCss.grid}" style="padding-bottom:1rem;">
+            <div class="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="validationUi">
+                
             </div>
         </div>
         <div class="{res.mediaCss.grid}">
@@ -26,7 +31,7 @@
             </div>
              <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
                 <label for="name"><ui:text from='{i18n.regattaNameLabel}' /></label>
-                <input ui:field="regattaNameInput" placeholder="49 Regatta"/>
+                <input ui:field="regattaNameInput" placeholder="Regatta name"/>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small3} {res.mediaCss.medium3}">
                 <label for="races"><ui:text from='{i18n.racesLabel}' /></label>

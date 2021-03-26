@@ -10,6 +10,7 @@ public interface AddRegattaView extends View<AddRegattaView.Presenter>, Requires
     interface Presenter extends com.sap.sailing.gwt.managementconsole.mvp.Presenter {
         void cancelAddRegatta();
         void addRegatta(String regattaName, String boatClassName, RankingMetrics ranking, Integer racesCount, ScoringSchemeType scoringSystemListBox);
+        boolean validateRegattaName(String regattaName);
     }
 
 }

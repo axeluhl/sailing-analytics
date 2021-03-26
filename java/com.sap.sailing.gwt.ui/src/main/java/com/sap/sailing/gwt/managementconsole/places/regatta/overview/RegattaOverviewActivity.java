@@ -45,7 +45,6 @@ public class RegattaOverviewActivity extends AbstractManagementConsoleActivity<R
             public void onFailure(final Throwable caught) {
                 LOG.severe("requestEvent :: Cannot load event!");
                 getClientFactory().getErrorReporter().reportError("Error", "Cannot load event!");
-
             }
         });
     }

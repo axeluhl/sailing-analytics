@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
@@ -21,6 +23,7 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
+import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -46,6 +49,8 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
     IntegerBox racesInput;
     @UiField
     InputElement regattaNameInput;
+    @UiField
+    DivElement validationUi;
     
     private Presenter presenter;
     
@@ -58,10 +63,38 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         createRegattaDefaults();
       
         back.addClickHandler(e -> presenter.cancelAddRegatta());
-        addRegattaButton.addClickHandler(e -> presenter.addRegatta(regattaNameInput.getValue(), boatClassNameTextBox.getValue(), 
-                rankingListBox.getValue(), racesInput.getValue(), scoringSystemListBox.getValue()));
+        addRegattaButton.addClickHandler(e -> validate());
     }
 
+    private void validate() {
+        validationUi.setInnerHTML("");
+        if (regattaNameInput.getValue() == null || regattaNameInput.getValue().isEmpty()) {
+            showValidationFailure("Please fill in regatta name");
+        } 
+        if (!isRegattaNameValid()) {
+            showValidationFailure("Please change Regatta name. It is not unique");
+        }
+        if(boatClassNameTextBox.getValue() == null || boatClassNameTextBox.getValue().isEmpty()) {
+            showValidationFailure("Please fill in boat class");
+        }
+        
+        if(validationUi.getInnerHTML().isEmpty()) {
+            presenter.addRegatta(regattaNameInput.getValue(), boatClassNameTextBox.getValue(), 
+                    rankingListBox.getValue(), racesInput.getValue(), scoringSystemListBox.getValue());
+        }
+    }
+    
+    private boolean isRegattaNameValid() {
+        return presenter.validateRegattaName(regattaNameInput.getValue());
+    }
+    
+    private void showValidationFailure(String validationMessage) {
+        DivElement validationMsg = Document.get().createDivElement();
+        validationMsg.setClassName(ManagementConsoleResources.INSTANCE.fonts().text());
+        validationMsg.setInnerText(validationMessage);
+        validationUi.appendChild(validationMsg);
+    }
+    
     private void createScoringSystemListBox() {
         scoringSystemListBox = new ValueListBox<ScoringSchemeType>( new Renderer<ScoringSchemeType>() {
             @Override
@@ -111,6 +144,7 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         });
         racesInput.getElement().getStyle().setProperty("minWidth", "2rem");
         racesInput.setMaxLength(3);
+        racesInput.setValue(10);
     }
     
     private void createRegattaDefaults() {
