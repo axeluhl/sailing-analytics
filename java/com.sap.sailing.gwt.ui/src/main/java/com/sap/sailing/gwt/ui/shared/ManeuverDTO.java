@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.gwt.ui.client.NauticalSideFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ManeuverDTO implements IsSerializable {
@@ -96,8 +97,7 @@ public class ManeuverDTO implements IsSerializable {
         String markPassing = getMarkPassingTimePoint() == null ? ""
                 : "; " + stringMessages.markPassedToAt(
                         this.getMarkPassingSide() == null ? ""
-                                : this.getMarkPassingSide() == NauticalSide.PORT ? stringMessages.portSide()
-                                        : stringMessages.starboardSide(),
+                                : NauticalSideFormatter.format(this.getMarkPassingSide(), stringMessages),
                         DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(this.getMarkPassingTimePoint()));
         String maneuverTitle = timeAndManeuver + timePointBefore + "; " + directionChange + "; " + speedChange + "; "
                 + maxTurningRate + "; " + avgTurningRate + "; " + lowestSpeed + maneuverLoss + markPassing;

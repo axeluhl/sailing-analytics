@@ -287,8 +287,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             storeRegionSelection(userService, selectedRegion);
         });
         // TODO try to identify archive servers
-        // TODO support creating a new app server cluster
-        // TODO support archiving and dismantling of an application server cluster
+        // TODO support archiving of an application server cluster
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
         // TODO support archive server upgrade
         // TODO support upgrading all app server instances in a region

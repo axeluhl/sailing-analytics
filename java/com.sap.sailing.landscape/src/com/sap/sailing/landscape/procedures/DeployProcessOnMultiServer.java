@@ -256,6 +256,7 @@ implements Procedure<ShardingKey> {
             final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(
                     "su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
                     "mkdir -p "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
+                    "sudo /usr/local/bin/cp_root_mail_properties "+applicationConfiguration.getServerName()+"; "+
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
                     "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"")+
                     "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start; ./defineReverseProxyMappings.sh"+

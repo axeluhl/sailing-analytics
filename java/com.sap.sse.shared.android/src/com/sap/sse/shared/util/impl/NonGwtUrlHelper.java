@@ -1,4 +1,4 @@
-package com.sap.sse.util.impl;
+package com.sap.sse.shared.util.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

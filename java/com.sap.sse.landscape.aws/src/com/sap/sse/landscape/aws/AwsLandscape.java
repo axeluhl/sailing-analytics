@@ -319,9 +319,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Instance getInstance(String instanceId, Region region);
 
     /**
-     * @param hostname the fully-qualified host name
+     * @param hostname
+     *            the fully-qualified host name
+     * @param force
+     *            if {@code true} and a DNS record with the name as specified by {@code hostname} already exists in the
+     *            hosted zone with ID {@code hostedZoneId} then that resource record is updated; if {@code false}, an
+     *            {@link IllegalStateException} is thrown if the DNS record already exists and has a value different
+     *            from the {@code host}'s {@link Host#getPublicAddress() public IP address}.
      */
-    ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host);
+    ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host, boolean force);
 
     /**
      * Creates a {@code CNAME} record in the DNS's hosted zone identified by the {@code hostedZoneId} that lets
@@ -330,22 +336,42 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * 
      * @param hostname
      *            the fully-qualified host name
+     * @param force
+     *            if {@code true} and a DNS record with the name as specified by {@code hostname} already exists in the
+     *            hosted zone with ID {@code hostedZoneId} then that resource record is updated; if {@code false}, an
+     *            {@link IllegalStateException} is thrown if the DNS record already exists and has a value different
+     *            from the {@code alb}'s {@link ApplicationLoadBalancer#getDNSName() DNS name}.
      */
-    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey> alb);
+    ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname, ApplicationLoadBalancer<ShardingKey> alb, boolean force);
 
     String getDNSHostedZoneId(String hostedZoneName);
 
     /**
-     * @param hostname the fully-qualified host name
+     * In the DNS fully-qualified hostnames are regularly listed with a trailing "." (dot) character whereas
+     * for DNS requests more often than not this dot is missing. Comparing hostnames requires normalization.
+     * This method removes a trailing dot from a string if it is present.
      */
-    ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value);
+    static String removeTrailingDotFromHostname(String hostname) {
+        return hostname.replaceFirst("\\.$", "");
+    }
+
+    /**
+     * @param hostname
+     *            the fully-qualified host name
+     * @param force
+     *            if {@code true} and a DNS record with the name as specified by {@code hostname} already exists in the
+     *            hosted zone with ID {@code hostedZoneId} then that resource record is updated; if {@code false}, an
+     *            {@link IllegalStateException} is thrown if the DNS record already exists and has a value different
+     *            from {@code value}.
+     */
+    ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value, boolean force);
 
     /**
      * @param hostname
      *            the fully-qualified host name
      * @param value
      *            the address to which the record to remove did resolve the hostname, e.g., the value passed to the
-     *            {@link #setDNSRecordToValue(String, String, String)} earlier
+     *            {@link #setDNSRecordToValue(String, String, String, boolean)} earlier
      */
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, RRType type, String value);
 
@@ -356,7 +382,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      *            the fully-qualified host name
      * @param value
      *            the address to which the record to remove did resolve the hostname, e.g., the value passed to the
-     *            {@link #setDNSRecordToValue(String, String, String)} earlier
+     *            {@link #setDNSRecordToValue(String, String, String, boolean)} earlier
      */
     ChangeInfo removeDNSRecord(String hostedZoneId, String hostname, String value);
     

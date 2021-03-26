@@ -27,7 +27,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.landscape.ssh.SshCommandChannelImpl;
 import com.sap.sse.landscape.ssh.YesUserInfo;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;

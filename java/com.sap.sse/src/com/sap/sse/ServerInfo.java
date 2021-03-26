@@ -35,11 +35,14 @@ public class ServerInfo {
     }
     
     public static JSONObject getBuildVersionJson() throws FileNotFoundException, IOException, ParseException {
-        final JSONObject result;
+        JSONObject result;
         final File versionJsonFile = new File(ServerStartupConstants.JETTY_HOME + File.separator + "version.json");
         if (versionJsonFile.exists()) {
             try (final BufferedReader br = new BufferedReader(new FileReader(versionJsonFile))) {
                 result = (JSONObject) new JSONParser().parse(br);
+            } catch (Exception e) {
+                logger.warning("Unable to read version.json: "+e.getMessage());
+                result = new JSONObject();
             }
         } else {
             result = new JSONObject();
