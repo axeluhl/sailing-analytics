@@ -11,6 +11,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -33,6 +34,7 @@ import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
+@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class SimulatorOverlayTest extends AbstractSeleniumTest {
     private static final String JSON_URL = "http://event.tractrac.com/events/event_20150616_KielerWoch/jsonservice.php"; //$NON-NLS-1$
     private static final String EVENT = "Kieler Woche 2015"; //$NON-NLS-1$
