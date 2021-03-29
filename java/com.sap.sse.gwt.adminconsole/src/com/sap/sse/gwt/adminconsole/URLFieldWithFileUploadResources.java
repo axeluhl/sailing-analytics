@@ -29,6 +29,9 @@ public interface URLFieldWithFileUploadResources extends ClientBundle {
         
         @ClassName("loading")
         String loadingClass();
+        
+        @ClassName("url-textbox")
+        String urlTextboxClass();
     }
 
     @Source("URLFieldWithFileUpload.gss")

@@ -16,6 +16,9 @@ public interface NewMediaDialogResources extends ClientBundle {
         
         @ClassName("mobile-augmentation")
         String mobileAugmentations();
+        
+        @ClassName("button-size")
+        String buttonSizeClass();
     }
 
     @Source("NewMediaDialogResources.gss")

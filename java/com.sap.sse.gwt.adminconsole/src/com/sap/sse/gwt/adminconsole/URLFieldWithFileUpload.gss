@@ -2,6 +2,9 @@
 	display: inline-block;
 }
 
+.spacing {
+    display: flex;
+}
 .spacing > * {
 	margin: 3px 3px 3px 0;
 }
@@ -12,21 +15,32 @@
 
 .uploadButton {
     outline: none;
+    width: 2rem;
+    position: relative;
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.uploadButton::after {
+    outline: none;
     background-image: resourceUrl("folderWhite");
     content: "";
+    position: absolute;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 50%;
+    width: 100%;
+    height: 100%;
     top: 0;
     left: 0;
-    width: 2rem;
-    height: 1.5rem;
-    padding-bottom: 0;
-    padding-top: 0.6rem;
 }
 
 .uploadButton-loading {
     background-image: resourceUrl("busyIndicator");
+}
+.url-textbox {
+    margin-right: 0;
 }
 
 .loading {

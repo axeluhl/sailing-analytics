@@ -332,6 +332,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         FlowPanel startTimePanel = new FlowPanel();
         startTimePanel.add(startTimeBox);
         startTimePanel.add(defaultTimeButton);
+        defaultTimeButton.addStyleName(NewMediaDialogResources.INSTANCE.css().buttonSizeClass());
         formGrid.setWidget(3, 1, startTimePanel);
 
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));

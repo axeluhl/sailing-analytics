@@ -92,6 +92,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
         urlTextBox.getElement().addClassName("url-textbox");
+        urlTextBox.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().urlTextboxClass());
         urlTextBox.addValueChangeHandler(valueChangedEvent->{
            uri = valueChangedEvent.getValue(); 
         });
@@ -100,7 +101,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         final Button selectUploadButton = new Button();
         selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
         imageUrlPanel.add(selectUploadButton);
-        imageUrlPanel.add(removePanel);
+        mainPanel.add(removePanel);
         // the upload panel
         uploadFormPanel = new FormPanel();
         uploadPanel = new FlowPanel();
