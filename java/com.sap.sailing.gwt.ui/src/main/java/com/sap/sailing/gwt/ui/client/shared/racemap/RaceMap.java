@@ -1043,6 +1043,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Button createAddVideoToRaceButton(MapWidget map) {
         Button addVideoButton = new Button();
         addVideoButton.setStylePrimaryName(raceMapStyle.raceMapVideoUploadButton());
+        addVideoButton.setVisible(false);
         return addVideoButton;
     }
 
@@ -3429,6 +3430,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             GWT.log("clicked addVideoToRaceButton");
             mediaPlayerManagerComponent.addMediaTrack();
         });
+    }
+    
+    public void setAddVideoToRaceButtonVisible(boolean visible) {
+        this.addVideoToRaceButton.setVisible(visible);
     }
 }
 

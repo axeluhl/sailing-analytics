@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.media.rebuild.MediaGalleryComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.maneuver.ManeuverTablePanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
@@ -68,7 +69,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     }
 
     private Component<?> leftComponent;
-    private final Component<?> centerComponent;
+    /* the race map */
+    private final RaceMap centerComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -88,7 +90,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private final Panel newMediaPanel = new SimpleLayoutPanel();
     private MediaGalleryComponent newMediaGalleryComponent;
 
-    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> centerComponentP,
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final RaceMap centerComponentP,
             final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
             List<Component<?>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
@@ -140,8 +142,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 }
                 mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
-                mediaManagementButton.setVisible(
-                        isMediaManagementVisible(mediaPlayerManagerComponent));
+                mediaManagementButton.setVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
+                centerComponent.setAddVideoToRaceButtonVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
             }
         });
         this.leftScrollPanel = new ScrollPanel();
@@ -343,6 +345,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         refreshMarkUi();
+        
     }
 
     private void refreshMarkUi() {
@@ -377,6 +380,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 forceLayout();
             }
             mediaManagementButton.setVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
+            centerComponent.setAddVideoToRaceButtonVisible(isMediaManagementVisible(mediaPlayerManagerComponent));
         });
     }
     
