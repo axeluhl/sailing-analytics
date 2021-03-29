@@ -20,6 +20,7 @@ import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayServiceImpl;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class SwissTimingRaceConfigurationTest {
     
@@ -27,7 +28,7 @@ public class SwissTimingRaceConfigurationTest {
     
     @Test
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
-        InputStream inputStream = (InputStream) new URL(JSON_URL).getContent();
+        InputStream inputStream = (InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(JSON_URL)).getContent();
         List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).parseJSONObject(inputStream , JSON_URL);
         assertFalse(races.isEmpty());
     }

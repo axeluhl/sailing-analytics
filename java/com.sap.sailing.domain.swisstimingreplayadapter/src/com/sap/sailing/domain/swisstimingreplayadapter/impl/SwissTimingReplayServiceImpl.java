@@ -31,6 +31,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sse.util.ByteArrayOutputStreamWithVisibleBuffer;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
 
@@ -134,7 +135,7 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
             } else {
                 raceDataUrl = new URL("http://" + link);
             }
-            InputStream urlInputStream = (InputStream) raceDataUrl.getContent();
+            InputStream urlInputStream = (InputStream) HttpUrlConnectionHelper.redirectConnection(raceDataUrl).getContent();
             ByteArrayOutputStreamWithVisibleBuffer bos = new ByteArrayOutputStreamWithVisibleBuffer();
             byte[] buf = new byte[8192];
             int read;

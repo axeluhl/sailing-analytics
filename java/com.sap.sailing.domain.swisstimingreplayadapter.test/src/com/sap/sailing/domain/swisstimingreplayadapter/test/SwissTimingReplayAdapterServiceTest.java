@@ -33,6 +33,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHa
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class SwissTimingReplayAdapterServiceTest {
     
@@ -81,8 +82,8 @@ public class SwissTimingReplayAdapterServiceTest {
     @Test
     public void testRaceData_SAW005905_20120805_EqualsOnlineVersion() throws Exception {
         byte[] localCopy = read(getClass().getResourceAsStream("/SAW005905.20120805.replay"));
-        byte[] onlineCopy = read((InputStream) new URL(
-                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495").getContent());
+        byte[] onlineCopy = read((InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495")).getContent());
         assertArrayEquals(localCopy, onlineCopy);
     }
     
@@ -121,8 +122,8 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testRaceData_SAW005905_20120805_online() throws Exception {
         SwissTimingReplayTestListener replayCountListener = new SwissTimingReplayTestListener();
         // race ID is 450053, as extracted from http://live.ota.st-sportservice.com/service?cmd=unity_race_overview&id=91
-        byte[] onlineCopy = read((InputStream) new URL(
-                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495").getContent());
+        byte[] onlineCopy = read((InputStream) HttpUrlConnectionHelper.redirectConnection(new URL(
+                "https://static.sapsailing.com/OSG2012/446495.rsc?id=446495")).getContent());
         new SwissTimingReplayParserImpl().readData(new ByteArrayInputStream(onlineCopy), replayCountListener);
         assertEquals(0, replayCountListener.keyFrameIndexSum);          
         assertEquals(715, replayCountListener.keyFrameIndexPositionCount);  
