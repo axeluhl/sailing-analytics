@@ -31,6 +31,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -51,6 +52,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
+@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
 
