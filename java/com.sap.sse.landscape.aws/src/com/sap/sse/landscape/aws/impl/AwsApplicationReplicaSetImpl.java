@@ -144,16 +144,24 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
             && e.getKey().getLoadBalancerArn() != null && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
+                // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica set master's port
                 if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))
                  && hasMasterRuleForward(listenersAndTheirRules, e.getKey())) {
+                    // this replica set's master is registered with the target group, and there is a rule that forwards
+                    // requests with explicit master-markup to this target group:
                     myMasterTargetGroup = e.getKey();
                     masterTargetGroup.complete(myMasterTargetGroup);
                 } else if (!publicTargetGroup.isDone()
-                 && !Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
+                 && (!Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
+                  || !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId()))))
                  && hasPublicRuleForward(listenersAndTheirRules, e.getKey())) {
+                    // this replica set's master or at least one of the replicas of this replica set is registered with
+                    // the target group, and there is a rule that forwards
+                    // requests with explicit replica-markup to this target group:
                     publicTargetGroup.complete(e.getKey());
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups);
                 }
+                // TODO there is a third ("legacy") case where a single target group handles all requests; how do we want to model this?
             }
         }
         final TargetGroup<ShardingKey> finalMasterTargetGroup = myMasterTargetGroup;

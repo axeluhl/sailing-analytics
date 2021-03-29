@@ -60,6 +60,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
+import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -135,8 +136,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private static final Optional<Duration> WAIT_FOR_HOST_TIMEOUT = Optional.of(Duration.ONE_MINUTE.times(10));
     
     private static final String SAILING_TARGET_GROUP_NAME_PREFIX = "S-";
-    
-    private static final String DEFAULT_DOMAIN_NAME = "sapsailing.com";
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
@@ -459,6 +458,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         final AmazonMachineImage<String> ami = landscape.getImage(new AwsRegion(region), machineImageId);
+        // TODO bug5502: what about the auto-scaling groups still using this image? Should we figure this out before we allow removing it?
         ami.delete();
     }
 
@@ -476,6 +476,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setOptionalTimeout(IMAGE_UPGRADE_TIMEOUT);
         final UpgradeAmi<String> upgradeAmi = upgradeAmiBuilder.build();
         upgradeAmi.run();
+        // TODO bug5502: here or in the procedure we should offer the user to also upgrade the launch configurations using this AMI
         final AmazonMachineImage<String> resultingAmi = upgradeAmi.getUpgradedAmi();
         return new AmazonMachineImageDTO(resultingAmi.getId(), resultingAmi.getRegion().getId(), resultingAmi.getName(), /* TODO type */ null, resultingAmi.getState().name(), resultingAmi.getCreatedAt());
     }
@@ -533,7 +534,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
-        // TODO What about creating the group belonging to the server name? We could make the current user the owner of that group and establish replication permissions so that the user's bearer token could be used for replication
         masterConfigurationBuilder
             .setLandscape(landscape)
             .setServerName(name)
@@ -554,7 +554,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final SailingAnalyticsProcess<String> master = masterHostStartProcedure.getSailingAnalyticsProcess();
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder =
                 dynamicLoadBalancerMapping ? CreateDynamicLoadBalancerMapping.builder() : CreateDNSBasedLoadBalancerMapping.builder();
-        final String domainName = Optional.ofNullable(optionalDomainName).orElse(DEFAULT_DOMAIN_NAME);
+        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
         final String masterHostname = name+"."+domainName;
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
@@ -634,6 +634,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName, byte[] passphraseForPrivateKeyDescryption)
             throws Exception {
+        checkLandscapeManageAwsPermission();
         final AwsRegion region = new AwsRegion(regionId);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet = convertFromApplicationReplicaSetDTO(
                 region, applicationReplicaSetToRemove);
@@ -719,5 +720,37 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         throw new RuntimeException(e);
                     }
                 });
+    }
+
+    @Override
+    public void createDefaultLoadBalancerMappings(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
+            boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate) throws Exception {
+        checkLandscapeManageAwsPermission();
+        logger.info("Creating default load balancer mappings in region "+regionId+" for application replica set "+
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getName()+" on behalf of "+SecurityUtils.getSubject().getPrincipal());
+        final SailingAnalyticsProcess<String> master = new SailingAnalyticsProcessImpl<String>(
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getPort(),
+                getHostFromInstanceDTO(applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getHost()),
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getServerDirectory(), 
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getExpeditionUdpPort());
+        final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder;
+        if (useDynamicLoadBalancer) {
+            createLoadBalancerMappingBuilder = CreateDynamicLoadBalancerMapping.builder();
+        } else {
+            com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> withDNSBuilder =
+                    CreateDNSBasedLoadBalancerMapping.builder();
+            withDNSBuilder.forceDNSUpdate(forceDNSUpdate);
+            createLoadBalancerMappingBuilder = withDNSBuilder;
+        }
+        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
+        final String masterHostname = (applicationReplicaSetToCreateLoadBalancerMappingFor.getName()+"."+domainName).toLowerCase();
+        final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
+            .setProcess(master)
+            .setHostname(masterHostname)
+            .setTargetGroupNamePrefix(SAILING_TARGET_GROUP_NAME_PREFIX)
+            .setLandscape(getLandscape())
+            .build();
+        createLoadBalancerMapping.run();
     }
 }

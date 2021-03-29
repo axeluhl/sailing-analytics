@@ -94,4 +94,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String redirectEventSeries();
     String pleaseProvideAValidId();
     String defaultRedirectPath();
+    String successfullyCreatedLoadBalancerMappingFor(String name);
+    String createLoadBalancerMapping();
+    String forceDNSUpdate();
 }

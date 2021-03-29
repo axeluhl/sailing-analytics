@@ -178,7 +178,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
-    // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
@@ -552,7 +551,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         if (!force) {
             outer: for (final ListResourceRecordSetsResponse rrrs : existingResourceRecordSets) {
                 for (final ResourceRecordSet rrs : rrrs.resourceRecordSets()) {
-                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).equals(hostname)) {
+                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).toLowerCase().equals(hostname.toLowerCase())) {
                         for (final ResourceRecord rr : rrs.resourceRecords()) {
                             if (rr.value().equals(value)) {
                                 foundEqualValueForHostname = true;
@@ -573,7 +572,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .changeResourceRecordSets(
                         ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
-                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname.toLowerCase()).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
                                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build())
                                         .build()).build())
                                 .build());
