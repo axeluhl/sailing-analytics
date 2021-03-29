@@ -324,9 +324,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         if (defaultRedirectRule == null) {
             result = null;
         } else {
-            result = defaultRedirectRule.actions().stream().map(action->action.redirectConfig().path()
-                    +((action.redirectConfig().query() == null || !Util.hasLength(action.redirectConfig().query())) ? "" :
-                        ("?"+action.redirectConfig().query()))).findAny().orElse(null);
+            result = defaultRedirectRule.actions().stream().map(action->RedirectDTO.toString(action.redirectConfig().path(),
+                        Optional.ofNullable(action.redirectConfig().query()))).findAny().orElse(null);
         }
         return result;
     }
@@ -671,10 +670,14 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 logger.info("No more rules "+(!Util.isEmpty(currentLoadBalancerRuleSet) ? "except default rule " : "")+
                         "left in load balancer "+applicationReplicaSet.getLoadBalancer().getName()+" which was DNS-mapped; deleting.");
                 applicationReplicaSet.getLoadBalancer().delete();
+            } else {
+                logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped or still has rules.");
             }
             // remove the DNS record if this replica set was a DNS-mapped one
             logger.info("Removing DNS CNAME record "+applicationReplicaSet.getResourceRecordSet());
             getLandscape().removeDNSRecord(applicationReplicaSet.getHostedZoneId(), applicationReplicaSet.getHostname(), RRType.CNAME, loadBalancerDNSName);
+        } else {
+            logger.info("Keeping load balancer "+loadBalancerDNSName+" because it is not DNS-mapped.");
         }
     }
 
