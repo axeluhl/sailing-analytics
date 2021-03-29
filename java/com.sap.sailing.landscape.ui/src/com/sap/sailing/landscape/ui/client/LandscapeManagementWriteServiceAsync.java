@@ -102,5 +102,5 @@ public interface LandscapeManagementWriteServiceAsync {
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
             boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate,
-            AsyncCallback<Void> callback);
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

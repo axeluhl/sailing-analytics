@@ -76,7 +76,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String keyName,
             byte[] passphraseForPrivateKeyDescryption) throws Exception;
 
-    void createDefaultLoadBalancerMappings(String regionId,
+    SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
             boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate) throws Exception;
 }

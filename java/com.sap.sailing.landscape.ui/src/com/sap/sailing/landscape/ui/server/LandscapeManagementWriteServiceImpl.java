@@ -54,6 +54,7 @@ import com.sap.sailing.landscape.ui.shared.AwsSessionCredentialsWithExpiryImpl;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoProcessDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
+import com.sap.sailing.landscape.ui.shared.PlainRedirectDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
@@ -721,19 +722,16 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     }
                 });
     }
-
+    
     @Override
-    public void createDefaultLoadBalancerMappings(String regionId,
+    public SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
             boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate) throws Exception {
         checkLandscapeManageAwsPermission();
         logger.info("Creating default load balancer mappings in region "+regionId+" for application replica set "+
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getName()+" on behalf of "+SecurityUtils.getSubject().getPrincipal());
-        final SailingAnalyticsProcess<String> master = new SailingAnalyticsProcessImpl<String>(
-                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getPort(),
-                getHostFromInstanceDTO(applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getHost()),
-                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getServerDirectory(), 
-                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster().getExpeditionUdpPort());
+        final SailingAnalyticsProcess<String> master = getSailingAnalyticsProcessFromDTO(
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster());
         final CreateLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMappingBuilder;
         if (useDynamicLoadBalancer) {
             createLoadBalancerMappingBuilder = CreateDynamicLoadBalancerMapping.builder();
@@ -752,5 +750,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setLandscape(getLandscape())
             .build();
         createLoadBalancerMapping.run();
+        final PlainRedirectDTO defaultRedirect = new PlainRedirectDTO();
+        return new SailingApplicationReplicaSetDTO<String>(
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getName(),
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster(),
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getReplicas(),
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getVersion(),
+                masterHostname, RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
     }
 }

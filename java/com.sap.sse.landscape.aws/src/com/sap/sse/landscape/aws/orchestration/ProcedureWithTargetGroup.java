@@ -117,7 +117,7 @@ extends AbstractAwsProcedureImpl<ShardingKey> {
     }
     
     public String getPublicTargetGroupName() {
-        return targetGroupNamePrefix+serverName;
+        return targetGroupNamePrefix+serverName.replaceAll("_", "-");
     }
     
     public TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {

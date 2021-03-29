@@ -421,7 +421,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getA(),
                                 useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getB(),
                                 useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getC(),
-                                new AsyncCallback<Void>() {
+                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 applicationReplicaSetsBusy.setBusy(false);
@@ -429,8 +429,10 @@ public class LandscapeManagementPanel extends SimplePanel {
                             }
 
                             @Override
-                            public void onSuccess(Void result) {
+                            public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
                                 applicationReplicaSetsBusy.setBusy(false);
+                                applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToCreateLoadBalancerMappingFor);
+                                applicationReplicaSetsTable.getFilterPanel().add(result);
                                 Notification.notify(stringMessages.successfullyCreatedLoadBalancerMappingFor(
                                         applicationReplicaSetToCreateLoadBalancerMappingFor.getName()), NotificationType.SUCCESS);
                             }
