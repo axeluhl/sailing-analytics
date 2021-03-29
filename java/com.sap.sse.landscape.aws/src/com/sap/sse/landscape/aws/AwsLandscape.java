@@ -347,6 +347,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     String getDNSHostedZoneId(String hostedZoneName);
 
     /**
+     * In the DNS fully-qualified hostnames are regularly listed with a trailing "." (dot) character whereas
+     * for DNS requests more often than not this dot is missing. Comparing hostnames requires normalization.
+     * This method removes a trailing dot from a string if it is present.
+     */
+    static String removeTrailingDotFromHostname(String hostname) {
+        return hostname.replaceFirst("\\.$", "");
+    }
+
+    /**
      * @param hostname
      *            the fully-qualified host name
      * @param force

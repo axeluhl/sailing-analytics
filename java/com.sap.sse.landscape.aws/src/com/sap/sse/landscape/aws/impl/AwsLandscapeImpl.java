@@ -551,7 +551,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         if (!force) {
             outer: for (final ListResourceRecordSetsResponse rrrs : existingResourceRecordSets) {
                 for (final ResourceRecordSet rrs : rrrs.resourceRecordSets()) {
-                    if (rrs.name().equals(hostname)) {
+                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).equals(hostname)) {
                         for (final ResourceRecord rr : rrs.resourceRecords()) {
                             if (rr.value().equals(value)) {
                                 foundEqualValueForHostname = true;
@@ -1399,13 +1399,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         return result;
     }
-
+    
     @Override
     public CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname) {
         final Route53AsyncClient route53Client = getRoute53AsyncClient();
         final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
         return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
-            Util.filter(response.resourceRecordSets(), resourceRecordSet->resourceRecordSet.name().replaceFirst("\\.$", "").equals(hostname)));
+            Util.filter(response.resourceRecordSets(), resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname)));
     }
     
     @Override
