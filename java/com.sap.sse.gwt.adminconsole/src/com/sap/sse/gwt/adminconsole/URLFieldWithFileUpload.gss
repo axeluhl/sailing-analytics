@@ -41,6 +41,11 @@
 }
 .url-textbox {
     margin-right: 0;
+    width: 13rem !important;
+}
+
+.removeButton {
+    width: 15rem;
 }
 
 .loading {

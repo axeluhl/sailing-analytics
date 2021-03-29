@@ -80,6 +80,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
         removeButton.setTitle(stringMessages.remove());
+        removeButton.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().removeButtonClass());
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -113,9 +114,9 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         
-        final Label uploadLabel = new Label(stringMessages.upload()+ ":");
-        uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
-        uploadPanel.add(uploadLabel);
+        //final Label uploadLabel = new Label(stringMessages.upload()+ ":");
+        //uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
+        //uploadPanel.add(uploadLabel);
         
         fileUploadField = new FileUpload();
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());

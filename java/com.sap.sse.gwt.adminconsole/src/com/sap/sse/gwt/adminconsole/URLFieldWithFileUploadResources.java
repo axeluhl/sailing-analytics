@@ -32,6 +32,9 @@ public interface URLFieldWithFileUploadResources extends ClientBundle {
         
         @ClassName("url-textbox")
         String urlTextboxClass();
+        
+        @ClassName("removeButton")
+        String removeButtonClass();
     }
 
     @Source("URLFieldWithFileUpload.gss")
