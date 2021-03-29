@@ -211,7 +211,8 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
         applicationReplicaSetsTable.addColumn(rs->rs.getHostname(), stringMessages.hostname());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
-        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint());
+        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
+                (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
         applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(),
                 r->r.getHost().getPublicIpAddress()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
                 stringMessages.replicas());
@@ -301,7 +302,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         } else {
             new DefineRedirectDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
                 @Override
-                public void ok(RedirectDTO redirect) {
+                public void ok(final RedirectDTO redirect) {
                     applicationReplicaSetsBusy.setBusy(true);
                     landscapeManagementService.defineDefaultRedirect(selectedRegion, applicationReplicaSetToDefineLandingPageFor.getHostname(),
                             redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
@@ -316,6 +317,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                             @Override
                             public void onSuccess(Void result) {
                                 applicationReplicaSetsBusy.setBusy(false);
+                                final String newDefaultRedirect = RedirectDTO.toString(redirect.getPath(), redirect.getQuery());
+                                applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToDefineLandingPageFor);
+                                applicationReplicaSetsTable.getFilterPanel().add(new SailingApplicationReplicaSetDTO<String>(
+                                        applicationReplicaSetToDefineLandingPageFor.getReplicaSetName(),
+                                        applicationReplicaSetToDefineLandingPageFor.getMaster(),
+                                        applicationReplicaSetToDefineLandingPageFor.getReplicas(),
+                                        applicationReplicaSetToDefineLandingPageFor.getVersion(),
+                                        applicationReplicaSetToDefineLandingPageFor.getHostname(),
+                                        newDefaultRedirect));
                                 Notification.notify(stringMessages.successfullyUpdatedLandingPage(), NotificationType.SUCCESS);
                             }
                         });
@@ -391,6 +401,13 @@ public class LandscapeManagementPanel extends SimplePanel {
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
         Notification.notify("upgradeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
+        /*
+         * Distinguish the following cases:
+         *  - with auto-scaling group: we assume two target groups exist; ensure a replica is running, launch one
+         *    if none is running currently by increasing the minimum number of replicas in the auto-scaling group
+         *    to "1" and wait for it to become healthy in the public target group. When at least one replica is
+         *    healthy, stop replication on all of them (requires new API)
+         */
         // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
     }
 
