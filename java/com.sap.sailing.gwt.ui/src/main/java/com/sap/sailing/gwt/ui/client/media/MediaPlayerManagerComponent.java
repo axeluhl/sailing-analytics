@@ -553,7 +553,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                                 @Override
                                     public void onSuccess(MediaTrackWithSecurityDTO mediaTrack) {
                                     assignedMediaTracks.add(mediaTrack);
-                                    playFloatingVideo(mediaTrack);
+                                        if (!DeviceDetector.isMobile()) {
+                                            playFloatingVideo(mediaTrack);
+                                        }
                                     notifyStateChange();
                                 }
                         });
