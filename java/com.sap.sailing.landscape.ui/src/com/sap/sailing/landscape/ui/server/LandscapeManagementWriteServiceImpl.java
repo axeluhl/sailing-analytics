@@ -741,8 +741,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             withDNSBuilder.forceDNSUpdate(forceDNSUpdate);
             createLoadBalancerMappingBuilder = withDNSBuilder;
         }
-        final String domainName = Optional.ofNullable(optionalDomainName).orElse(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
-        final String masterHostname = (applicationReplicaSetToCreateLoadBalancerMappingFor.getName()+"."+domainName).toLowerCase();
+        final String masterHostname = (applicationReplicaSetToCreateLoadBalancerMappingFor.getHostname()).toLowerCase();
         final CreateLoadBalancerMapping<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLoadBalancerMapping = createLoadBalancerMappingBuilder
             .setProcess(master)
             .setHostname(masterHostname)

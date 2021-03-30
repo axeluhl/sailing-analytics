@@ -141,16 +141,22 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups, DNSCache dnsCache) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
+        TargetGroup<ShardingKey> singleTargetGroupCandidate = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
             && e.getKey().getLoadBalancerArn() != null && e.getKey().getHealthCheckPort() == getMaster().getPort()) {
                 // an HTTP(S) target group that is currently active in a load balancer and forwards to this replica set master's port
-                if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))
-                 && hasMasterRuleForward(listenersAndTheirRules, e.getKey())) {
-                    // this replica set's master is registered with the target group, and there is a rule that forwards
-                    // requests with explicit master-markup to this target group:
-                    myMasterTargetGroup = e.getKey();
-                    masterTargetGroup.complete(myMasterTargetGroup);
+                if (!masterTargetGroup.isDone() && !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId())))) {
+                    if (hasMasterRuleForward(listenersAndTheirRules, e.getKey())) {
+                        // this replica set's master is registered with the target group, and there is a rule that forwards
+                        // requests with explicit master-markup to this target group:
+                        myMasterTargetGroup = e.getKey();
+                        masterTargetGroup.complete(myMasterTargetGroup);
+                    } else {
+                        // no explicit master rule forward found, but the target group still forwards to our master;
+                        // keep in mind as a candidate if this is a set-up with only a single target group:
+                        singleTargetGroupCandidate = e.getKey();
+                    }
                 } else if (!publicTargetGroup.isDone()
                  && (!Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
                   || !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId()))))
@@ -161,8 +167,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     publicTargetGroup.complete(e.getKey());
                     tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups);
                 }
-                // TODO there is a third ("legacy") case where a single target group handles all requests; how do we want to model this?
             }
+        }
+        // "legacy" case where a single target group handles all requests
+        if (!masterTargetGroup.isDone() && !publicTargetGroup.isDone() && singleTargetGroupCandidate != null) {
+            myMasterTargetGroup = singleTargetGroupCandidate;
+            masterTargetGroup.complete(singleTargetGroupCandidate);
+            publicTargetGroup.complete(singleTargetGroupCandidate);
         }
         final TargetGroup<ShardingKey> finalMasterTargetGroup = myMasterTargetGroup;
         // At this point we hope to have found the masterTargetGroup at least, but the publicTargetGroup may not hold the master node, and there may not
