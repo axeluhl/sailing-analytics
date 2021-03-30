@@ -12,7 +12,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 /**
  * Deserializer for marks.

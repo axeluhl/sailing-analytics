@@ -19,6 +19,5 @@ public class ManeuverTypeFormatter {
             return stringMessages.unknownManeuver();
         }
         return null;
-
     }
 }

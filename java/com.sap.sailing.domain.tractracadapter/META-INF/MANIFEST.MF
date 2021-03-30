@@ -12,6 +12,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization;bundle-version="1.0.0",
  com.sap.sse,
  com.sap.sse.common,
+ com.sap.sse.shared.android,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sailing.domain.shared.android,
  com.sap.sse.security.common

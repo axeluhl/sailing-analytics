@@ -1,4 +1,4 @@
-package com.sap.sse.util;
+package com.sap.sse.shared.util;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
