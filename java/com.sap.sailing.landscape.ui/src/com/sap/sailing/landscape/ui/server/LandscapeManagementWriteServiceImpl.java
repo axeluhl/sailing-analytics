@@ -69,6 +69,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.server.ResultCachingProxiedRemoteServiceServlet;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
@@ -535,9 +536,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
+        final Release release = SailingReleaseRepository.INSTANCE.getLatestMasterRelease();
         masterConfigurationBuilder
             .setLandscape(landscape)
             .setServerName(name)
+            .setRelease(release)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
             .setRegion(region)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(securityReplicationBearerToken)).build());
@@ -571,7 +574,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setLandscape(landscape)
             .setRegion(region)
             .setServerName(name)
-            .setRelease(master.getRelease(SailingReleaseRepository.INSTANCE, WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase))
+            .setRelease(release)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setMasterHostname(masterHostname)
                     .setCredentials(new BearerTokenReplicationCredentials(userBearerToken))
