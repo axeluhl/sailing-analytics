@@ -13,7 +13,8 @@ public class WaypointDTO extends NamedDTO {
     
     public PassingInstruction passingInstructions;
     
-    WaypointDTO() {}
+    @Deprecated
+    WaypointDTO() {} // for GWT RPC serialization only
     
     public WaypointDTO(String name, ControlPointDTO controlPoint, PassingInstruction passingInstructions) {
         super(name);

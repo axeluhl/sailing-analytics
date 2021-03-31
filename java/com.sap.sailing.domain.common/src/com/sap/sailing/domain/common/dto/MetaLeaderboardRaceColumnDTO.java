@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
 
+    public MetaLeaderboardRaceColumnDTO(String name) {
+        super(name);
+    }
+
     private static final long serialVersionUID = 6152752963316150432L;
     
     private ArrayList<BasicRaceDTO> raceList = new ArrayList<BasicRaceDTO>();

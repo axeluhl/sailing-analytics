@@ -65,7 +65,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(Util.createList(races)), caught.getMessage()));
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(Util.asList(races)), caught.getMessage()));
                     }
         
                     @Override

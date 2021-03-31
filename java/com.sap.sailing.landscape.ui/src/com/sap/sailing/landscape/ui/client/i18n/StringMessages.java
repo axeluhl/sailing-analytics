@@ -97,4 +97,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String successfullyCreatedLoadBalancerMappingFor(String name);
     String createLoadBalancerMapping();
     String forceDNSUpdate();
+    String latestMasterRelease();
 }

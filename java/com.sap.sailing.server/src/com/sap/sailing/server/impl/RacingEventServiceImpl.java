@@ -4869,7 +4869,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
     public PairingList<RaceColumn, Fleet, Competitor, Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate,
             final String leaderboardName, final Iterable<RaceColumn> selectedRaceColumns) throws PairingListCreationException {
         final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        final List<Competitor> competitors = Util.createList(leaderboard.getAllCompetitors());
+        final List<Competitor> competitors = Util.asList(leaderboard.getAllCompetitors());
         Collections.shuffle(competitors);
         PairingList<RaceColumn, Fleet, Competitor, Boat> pairingList = pairingListTemplate
                 .createPairingList(new CompetitionFormat<RaceColumn, Fleet, Competitor, Boat>() {

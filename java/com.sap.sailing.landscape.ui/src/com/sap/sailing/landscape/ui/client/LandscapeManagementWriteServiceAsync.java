@@ -9,6 +9,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
+import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -103,4 +104,10 @@ public interface LandscapeManagementWriteServiceAsync {
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
             boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void upgradeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade,
+            String releaseOrNullForLatestMaster, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+
+    void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
 }

@@ -57,6 +57,7 @@ import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.PlainRedirectDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
+import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -759,5 +760,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getReplicas(),
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getVersion(),
                 masterHostname, RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
+    }
+
+    @Override
+    public SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster)
+            throws Exception {
+        // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
+        return null;
+    }
+
+    @Override
+    public ArrayList<ReleaseDTO> getReleases() {
+        return Util.mapToArrayList(SailingReleaseRepository.INSTANCE, r->new ReleaseDTO(r.getName(), r.getBaseName(), r.getCreationDate()));
     }
 }
