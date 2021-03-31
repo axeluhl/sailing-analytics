@@ -1,10 +1,12 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
@@ -68,9 +70,14 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
         securityReplicationBearerToken = createTextBox("", 40);
         final List<String> releaseNamesAndLatestMaster = new LinkedList<>();
         Util.addAll(releaseNames, releaseNamesAndLatestMaster);
-        Collections.sort(releaseNamesAndLatestMaster);
+        final Comparator<String> newestFirstComaprator = (r1, r2)->r2.compareTo(r1);
+        Collections.sort(releaseNamesAndLatestMaster, newestFirstComaprator);
         releaseNamesAndLatestMaster.add(0, stringMessages.latestMasterRelease());
         releaseNameBox = createSuggestBox(releaseNamesAndLatestMaster);
+        if (releaseNameBox.getSuggestOracle() instanceof MultiWordSuggestOracle) {
+            ((MultiWordSuggestOracle) releaseNameBox.getSuggestOracle()).setComparator(newestFirstComaprator);
+        }
+        releaseNameBox.setValue(stringMessages.latestMasterRelease());
     }
     
     protected StringMessages getStringMessages() {
