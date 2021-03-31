@@ -1,6 +1,7 @@
 package com.sap.sailing.landscape.ui.client;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.ListBox;
@@ -65,9 +66,10 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
         this.stringMessages = stringMessages;
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
         securityReplicationBearerToken = createTextBox("", 40);
-        final List<String> releaseNamesAndLatestMaster = new ArrayList<>();
-        releaseNamesAndLatestMaster.add(stringMessages.latestMasterRelease());
+        final List<String> releaseNamesAndLatestMaster = new LinkedList<>();
         Util.addAll(releaseNames, releaseNamesAndLatestMaster);
+        Collections.sort(releaseNamesAndLatestMaster);
+        releaseNamesAndLatestMaster.add(0, stringMessages.latestMasterRelease());
         releaseNameBox = createSuggestBox(releaseNamesAndLatestMaster);
     }
     
@@ -88,6 +90,7 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
     }
     
     protected String getReleaseNameBoxValue() {
-        return Util.equalsWithNull(releaseNameBox.getValue(), stringMessages.latestMasterRelease()) ? null : releaseNameBox.getValue();
+        return (!Util.hasLength(releaseNameBox.getValue()) || Util.equalsWithNull(releaseNameBox.getValue(), stringMessages.latestMasterRelease()))
+                ? null : releaseNameBox.getValue();
     }
 }
