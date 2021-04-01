@@ -164,7 +164,8 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         // keep in mind as a candidate if this is a set-up with only a single target group:
                         singleTargetGroupCandidate = e.getKey();
                     }
-                } else if (!publicTargetGroup.isDone()
+                }
+                if (!publicTargetGroup.isDone()
                  && (!Util.isEmpty(Util.filter(e.getValue(), target->Util.contains(Util.map(getReplicas(), replica->replica.getHost().getId()), target.target().id())))
                   || !Util.isEmpty(Util.filter(e.getValue(), target->target.target().id().equals(getMaster().getHost().getId()))))
                  && hasPublicRuleForward(listenersAndTheirRules, e.getKey())) {
