@@ -24,6 +24,7 @@ import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -65,11 +66,13 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private final CompletableFuture<TargetGroup<ShardingKey>> publicTargetGroup;
     private final CompletableFuture<ResourceRecordSet> resourceRecordSet;
 
-    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master, Optional<Iterable<ProcessT>> replicas,
+    public AwsApplicationReplicaSetImpl(String replicaSetAndServerName, String hostname, ProcessT master,
+            Optional<Iterable<ProcessT>> replicas,
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
-            CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups, DNSCache dnsCache) {
+            CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
         super(replicaSetAndServerName, hostname, master, replicas);
         autoScalingGroup = new CompletableFuture<>();
         defaultRedirectRule = new CompletableFuture<>();
@@ -82,8 +85,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         allLoadBalancersInRegion.thenCompose(loadBalancers->
             allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                 allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
-                    allAutoScalingGroups.handle((autoScalingGroups, e)->establishState(
-                        loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, dnsCache)))))
+                    allAutoScalingGroups.thenCompose(autoScalingGroups->
+                        allLaunchConfigurations.handle((launchConfigurations, e)->establishState(
+                                loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
             .handle((v, e)->{
                 if (e != null) {
                     logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
@@ -97,9 +101,11 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
-            AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups, DNSCache dnsCache) {
+            AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, DNSCache dnsCache) {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
-                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, dnsCache);
+                allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations,
+                dnsCache);
     }
     
     /**
@@ -139,7 +145,8 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
      */
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
-            Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups, DNSCache dnsCache) {
+            Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
+            Iterable<LaunchConfiguration> launchConfigurations, DNSCache dnsCache) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         TargetGroup<ShardingKey> singleTargetGroupCandidate = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
@@ -165,7 +172,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     // the target group, and there is a rule that forwards
                     // requests with explicit replica-markup to this target group:
                     publicTargetGroup.complete(e.getKey());
-                    tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups);
+                    tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchConfigurations);
                 }
             }
         }
@@ -288,10 +295,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, masterTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
     }
 
-    private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups) {
+    private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchConfiguration> launchConfigurations) {
         Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
             findFirst().ifPresent(asg->
-                autoScalingGroup.complete(new AwsAutoScalingGroupImpl(asg, targetGroup.getRegion())));
+                autoScalingGroup.complete(new AwsAutoScalingGroupImpl(asg,
+                        Util.filter(launchConfigurations, lc->Util.equalsWithNull(lc.launchConfigurationName(), asg.launchConfigurationName())).iterator().next(),
+                        targetGroup.getRegion())));
     }
 
     @Override

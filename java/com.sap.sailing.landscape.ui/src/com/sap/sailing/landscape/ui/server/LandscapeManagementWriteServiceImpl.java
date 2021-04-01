@@ -112,6 +112,7 @@ import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
@@ -528,7 +529,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+    public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName)
             throws Exception {
@@ -538,9 +539,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
-        final Release release = releaseNameOrNullForLatestMaster==null
-                ? SailingReleaseRepository.INSTANCE.getLatestMasterRelease()
-                : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
+        final Release release = getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
             .setLandscape(landscape)
             .setServerName(name)
@@ -587,10 +586,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
+        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchConfigurationsAsync(region);
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(name, masterHostname, master, /* no replicas yet */ Optional.empty(),
-                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
+                        allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
@@ -604,6 +604,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
         }
         createLaunchConfigurationAndAutoScalingGroupBuilder.build().run();
+        final PlainRedirectDTO defaultRedirect = new PlainRedirectDTO();
+        return new SailingApplicationReplicaSetDTO<String>(name,
+                convertToSailingAnalyticsProcessDTO(master, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
+                /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(), masterHostname,
+                RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
+    }
+
+    private Release getRelease(String releaseNameOrNullForLatestMaster) {
+        return releaseNameOrNullForLatestMaster==null
+                ? SailingReleaseRepository.INSTANCE.getLatestMasterRelease()
+                : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
     }
 
     private void establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(String serverName) {
@@ -762,15 +773,48 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getMaster(),
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getReplicas(),
                 applicationReplicaSetToCreateLoadBalancerMappingFor.getVersion(),
-                masterHostname, RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
+                applicationReplicaSetToCreateLoadBalancerMappingFor.getHostname(),
+                RedirectDTO.toString(defaultRedirect.getPath(), defaultRedirect.getQuery()));
     }
 
+    /**
+     * Performs an in-place upgrade for the master service if the replica set has distinct public and master
+     * target groups. If no replica exists, one is launched with the master's release, and the method waits
+     * until the replica has reached its healthy state. The replica is then registered in the public target group.<p>
+     * 
+     * Then, the {@code ./refreshInstance.sh install-release <release>} command is sent to the master which will
+     * download and unpack the new release but will not yet stop the master process. In parallel, an existing
+     * launch configuration will be copied and updated with user data reflecting the new release to be used.
+     * An existing auto-scaling group will then be updated to use the new launch configuration. The old launch
+     * configuration will then be removed.<p>
+     * 
+     * Replication is then stopped for all existing replicas, then the master is de-registered from the master
+     * target group and the public target group, effectively making the replica set "read-only." Then, the {@code ./stop}
+     * command is issued which is expected to wait until all process resources have been released so that it's
+     * appropriate to call {@code ./start} just after the {@code ./stop} call has returned, thus spinning up the
+     * master process with the new release configuration.<p>
+     * 
+     * When the master process has reached its healthy state, it is registered with both target groups while all other
+     * replicas are de-registered and then stopped. For replica processes being the last on their host, the host will
+     * be terminated. It is up to an auto-scaling group or to the user to decide whether to launch new replicas again.
+     * This won't happen automatically by this procedure.
+     */
     @Override
     public SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster)
-            throws Exception {
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
-        return null;
+        final Release release = getRelease(releaseOrNullForLatestMaster);
+        final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
+                convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
+        final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
+        return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
+                new SailingAnalyticsProcessDTO(oldMaster.getHost(), oldMaster.getPort(), oldMaster.getHostname(),
+                        release.getName(), oldMaster.getTelnetPortToOSGiConsole(), oldMaster.getServerName(),
+                        oldMaster.getServerDirectory(), oldMaster.getExpeditionUdpPort(),
+                        TimePoint.now()),
+                /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(), applicationReplicaSetToUpgrade.getHostname(),
+                applicationReplicaSetToUpgrade.getDefaultRedirectPath());
     }
 
     @Override

@@ -88,7 +88,7 @@ public interface LandscapeManagementWriteServiceAsync {
     void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName,
-            AsyncCallback<Void> callback);
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO,
@@ -107,8 +107,9 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void upgradeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade,
-            String releaseOrNullForLatestMaster, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);
 }

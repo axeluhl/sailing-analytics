@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
+import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -368,18 +369,22 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
                                         sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null, instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(), new AsyncCallback<Void>() {
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                                instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(),
+                                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override
                                  public void onFailure(Throwable caught) {
-                                        applicationReplicaSetsBusy.setBusy(false);
-                                        errorReporter.reportError(caught.getMessage());
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    errorReporter.reportError(caught.getMessage());
                                  }
                                  
                                  @Override
-                                 public void onSuccess(Void result) {
-                                        applicationReplicaSetsBusy.setBusy(false);
-                                        Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
-                                        refreshApplicationReplicaSetsTable();
+                                 public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                                    if (result != null) {
+                                        applicationReplicaSetsTable.getFilterPanel().add(result);
+                                    }
                                  }
                               });
                     }
@@ -388,7 +393,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                     public void cancel() {
                     }
                 }).show();
-                
             }
         });
     }
@@ -511,7 +515,53 @@ public class LandscapeManagementPanel extends SimplePanel {
      */
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
-        
+        landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<ReleaseDTO> result) {
+                new UpgradeApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                        stringMessages, errorReporter, new DialogCallback<UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions>() {
+                            @Override
+                            public void ok(UpgradeApplicationReplicaSetInstructions upgradeInstructions) {
+                                applicationReplicaSetsBusy.setBusy(true);
+                                landscapeManagementService.upgradeApplicationReplicaSet(regionId, applicationReplicaSetToUpgrade,
+                                        upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
+                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                        new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                applicationReplicaSetsBusy.setBusy(false);
+                                                errorReporter.reportError(caught.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                                applicationReplicaSetsBusy.setBusy(false);
+                                                if (result != null) {
+                                                    Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
+                                                                    result.getName(), result.getVersion()), NotificationType.SUCCESS);
+                                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToUpgrade);
+                                                    applicationReplicaSetsTable.getFilterPanel().add(result);
+                                                } else {
+                                                    Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(applicationReplicaSetToUpgrade.getName()),
+                                                            NotificationType.ERROR);
+                                                }
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                }).show();
+            }
+        });
         /*
          * Distinguish the following cases:
          *  1) with auto-scaling group: we assume two target groups exist; ensure a replica is running, launch one

@@ -67,7 +67,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     SerializationDummyDTO serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO,
             SailingApplicationReplicaSetDTO<String> sailingApplicationReplicationSetDTO);
 
-    void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
+    SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
             byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName) throws Exception;
 
@@ -82,7 +82,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
             boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate) throws Exception;
     
     SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster) throws Exception;
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     ArrayList<ReleaseDTO> getReleases();
 }
