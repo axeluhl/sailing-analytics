@@ -808,12 +808,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
         final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        // TODO if no replica, spin one up, wait until healthy, then register in public target group; remember
         for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
             replica.stopReplicatingFromMaster(userBearerToken);
         }
+        // TODO remove master from master and public target group
         if (replicaSet.getAutoScalingGroup() != null) {
-            // 
+            // TODO fix launch configuration user data, setting new release
         }
+        // TODO upgrade master in place using refreshInstance.sh; ./stop && ./start
+        // TODO wait for master to turn healthy
+        // TODO register master with master and public target group
+        // TODO if a replica was spun up, remove from public target group and terminate
         // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
         final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
