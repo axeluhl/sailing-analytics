@@ -20,18 +20,23 @@ public abstract class AbstractApplicationReplicaSetDialog<I extends AbstractAppl
     public static class AbstractApplicationReplicaSetInstructions {
         private final String instanceType;
         private final String replicationBearerToken;
+        private final String releaseNameOrNullForLatestMaster;
         
         public AbstractApplicationReplicaSetInstructions(String instanceType, String replicationBearerToken,
                 String releaseNameOrNullForLatestMaster) {
             super();
             this.instanceType = instanceType;
             this.replicationBearerToken = replicationBearerToken;
+            this.releaseNameOrNullForLatestMaster = releaseNameOrNullForLatestMaster;
         }
         public String getInstanceType() {
             return instanceType;
         }
         public String getReplicationBearerToken() {
             return replicationBearerToken;
+        }
+        public String getReleaseNameOrNullForLatestMaster() {
+            return releaseNameOrNullForLatestMaster;
         }
     }
     

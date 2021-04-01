@@ -529,15 +529,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     @Override
     public void createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
-            boolean dynamicLoadBalancerMapping, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
-            String securityReplicationBearerToken, String optionalDomainName) throws Exception {
+            boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName)
+            throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
         final com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration.Builder<?, String> masterConfigurationBuilder = SailingAnalyticsMasterConfiguration.masterBuilder();
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
-        final Release release = SailingReleaseRepository.INSTANCE.getLatestMasterRelease();
+        final Release release = releaseNameOrNullForLatestMaster==null
+                ? SailingReleaseRepository.INSTANCE.getLatestMasterRelease()
+                : SailingReleaseRepository.INSTANCE.getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
             .setLandscape(landscape)
             .setServerName(name)
