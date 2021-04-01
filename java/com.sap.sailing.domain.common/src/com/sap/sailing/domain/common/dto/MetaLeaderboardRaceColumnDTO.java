@@ -3,7 +3,9 @@ package com.sap.sailing.domain.common.dto;
 import java.util.ArrayList;
 
 public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
-
+    @Deprecated
+    MetaLeaderboardRaceColumnDTO() {} // for GWT RPC serialization only
+    
     public MetaLeaderboardRaceColumnDTO(String name) {
         super(name);
     }
