@@ -3,8 +3,11 @@ package com.sap.sse.landscape.application.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -35,6 +38,7 @@ import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -238,6 +242,21 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)
             throws ClientProtocolException, IOException, ParseException {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
+    }
+    
+    @Override
+    public void stopReplicatingFromMaster(String bearerToken) throws MalformedURLException, IOException {
+        final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
+                .redirectConnectionWithBearerToken(new URL(STOP_REPLICATION_POST_URL_PATH_AND_QUERY), /* HTTP method */ "POST", bearerToken);
+        StringBuilder uuid = new StringBuilder();
+        InputStream content = (InputStream) deregistrationRequestConnection.getContent();
+        byte[] buf = new byte[256];
+        int read = content.read(buf);
+        while (read != -1) {
+            uuid.append(new String(buf, 0, read));
+            read = content.read(buf);
+        }
+        content.close();
     }
 
     @Override

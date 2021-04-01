@@ -24,4 +24,5 @@ public interface SailingAnalyticsProcess<ShardingKey> extends ApplicationProcess
      * {@link AwsLandscape#terminate(com.sap.sse.landscape.aws.AwsInstance) terminated}.
      */
     void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase);
+
 }

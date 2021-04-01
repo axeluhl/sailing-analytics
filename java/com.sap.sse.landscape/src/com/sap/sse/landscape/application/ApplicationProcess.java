@@ -24,13 +24,17 @@ import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.shared.util.Wait;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
     static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
-    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = "/replication/replication?action=STATUS";
+    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH+"?"+ReplicationServletActions.ACTION_PARAMETER_NAME+"="+
+                            ReplicationServletActions.Action.STATUS.name();
+    static String STOP_REPLICATION_POST_URL_PATH_AND_QUERY = ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH+"?"+ReplicationServletActions.ACTION_PARAMETER_NAME+"="+
+                            ReplicationServletActions.Action.STOP_REPLICATING.name();
     
     @FunctionalInterface
     public static interface ApplicationProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
@@ -130,6 +134,13 @@ extends Process<RotatingFileBasedLog, MetricsT> {
     default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
         return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
     }
+    
+    /**
+     * Uses the {@code /replication} end point on the replica to request stopping the replication from master for
+     * all replicables running in this process. To authenticate the request, the {@code bearerToken} is used in
+     * the {@code Authorization:} header.
+     */
+    void stopReplicatingFromMaster(String bearerToken) throws MalformedURLException, IOException;
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();

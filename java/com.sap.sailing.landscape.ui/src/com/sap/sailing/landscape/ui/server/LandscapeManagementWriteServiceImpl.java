@@ -803,10 +803,18 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     public SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
+        checkLandscapeManageAwsPermission();
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
+        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
+            replica.stopReplicatingFromMaster(userBearerToken);
+        }
+        if (replicaSet.getAutoScalingGroup() != null) {
+            // 
+        }
+        // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
         final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
                 new SailingAnalyticsProcessDTO(oldMaster.getHost(), oldMaster.getPort(), oldMaster.getHostname(),
