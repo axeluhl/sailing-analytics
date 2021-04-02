@@ -809,7 +809,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
         final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
-            replica.stopReplicatingFromMaster(userBearerToken);
+            replica.stopReplicatingFromMaster(userBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
         }
         if (replicaSet.getAutoScalingGroup() != null) {
             // 

@@ -140,7 +140,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * all replicables running in this process. To authenticate the request, the {@code bearerToken} is used in
      * the {@code Authorization:} header.
      */
-    void stopReplicatingFromMaster(String bearerToken) throws MalformedURLException, IOException;
+    void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws MalformedURLException, IOException, TimeoutException, Exception;
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();

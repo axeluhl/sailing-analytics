@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
@@ -245,9 +244,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
     
     @Override
-    public void stopReplicatingFromMaster(String bearerToken) throws MalformedURLException, IOException {
+    public void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
-                .redirectConnectionWithBearerToken(new URL(STOP_REPLICATION_POST_URL_PATH_AND_QUERY), /* HTTP method */ "POST", bearerToken);
+                .redirectConnectionWithBearerToken(getUrl(STOP_REPLICATION_POST_URL_PATH_AND_QUERY, optionalTimeout),
+                        /* HTTP method */ "POST", bearerToken);
         StringBuilder uuid = new StringBuilder();
         InputStream content = (InputStream) deregistrationRequestConnection.getContent();
         byte[] buf = new byte[256];
