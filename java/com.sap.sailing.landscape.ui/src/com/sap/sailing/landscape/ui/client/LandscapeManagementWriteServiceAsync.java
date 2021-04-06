@@ -108,7 +108,7 @@ public interface LandscapeManagementWriteServiceAsync {
 
     void upgradeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void getReleases(AsyncCallback<ArrayList<ReleaseDTO>> asyncCallback);

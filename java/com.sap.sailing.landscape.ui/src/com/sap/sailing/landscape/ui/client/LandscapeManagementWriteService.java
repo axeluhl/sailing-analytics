@@ -83,7 +83,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception;
 
     ArrayList<ReleaseDTO> getReleases();
 }

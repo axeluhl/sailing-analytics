@@ -19,19 +19,17 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     public static class CreateApplicationReplicaSetInstructions extends AbstractApplicationReplicaSetDialog.AbstractApplicationReplicaSetInstructions {
         private final String name;
         private final String instanceType;
-        private final String replicationBearerToken;
         private final boolean dynamicLoadBalancerMapping;
         private final String optionalDomainName;
         
         public CreateApplicationReplicaSetInstructions(String name, String instanceType,
                 String releaseNameOrNullForLatestMaster, boolean dynamicLoadBalancerMapping,
                 String securityReplicationBearerToken, String optionalDomainName) {
-            super(releaseNameOrNullForLatestMaster);
+            super(releaseNameOrNullForLatestMaster, securityReplicationBearerToken);
             this.name = name;
             this.dynamicLoadBalancerMapping = dynamicLoadBalancerMapping;
             this.optionalDomainName = Util.hasLength(optionalDomainName) ? optionalDomainName : null;
             this.instanceType = instanceType;
-            this.replicationBearerToken = securityReplicationBearerToken;
         }
         public String getName() {
             return name;
@@ -44,9 +42,6 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         }
         public String getInstanceType() {
             return instanceType;
-        }
-        public String getReplicationBearerToken() {
-            return replicationBearerToken;
         }
     }
     
@@ -78,25 +73,19 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     private final CheckBox dynamicLoadBalancerCheckBox;
     private final TextBox domainNameBox;
     private final ListBox instanceTypeListBox;
-    private final TextBox securityReplicationBearerToken;
 
     public CreateApplicationReplicaSetDialog(LandscapeManagementWriteServiceAsync landscapeManagementService, Iterable<String> releaseNames,
             StringMessages stringMessages, ErrorReporter errorReporter, DialogCallback<CreateApplicationReplicaSetInstructions> callback) {
-        super(landscapeManagementService, releaseNames, stringMessages, errorReporter, new Validator(stringMessages), callback);
+        super(stringMessages.createApplicationReplicaSet(), landscapeManagementService, releaseNames, stringMessages, errorReporter, new Validator(stringMessages), callback);
         this.stringMessages = stringMessages;
         nameBox = createTextBox("", 40);
         dynamicLoadBalancerCheckBox = createCheckbox(stringMessages.useDynamicLoadBalancer());
         domainNameBox = createTextBox(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, 40);
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
-        securityReplicationBearerToken = createTextBox("", 40);
     }
     
     protected ListBox getInstanceTypeListBox() {
         return instanceTypeListBox;
-    }
-
-    protected TextBox getSecurityReplicationBearerToken() {
-        return securityReplicationBearerToken;
     }
 
     @Override
@@ -112,7 +101,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         result.setWidget(row, 0, new Label(stringMessages.useDynamicLoadBalancer()));
         result.setWidget(row++, 1, dynamicLoadBalancerCheckBox);
         result.setWidget(row, 0, new Label(stringMessages.bearerTokenForSecurityReplication()));
-        result.setWidget(row++, 1, getSecurityReplicationBearerToken());
+        result.setWidget(row++, 1, getReplicationBearerTokenBox());
         result.setWidget(row, 0, new Label(stringMessages.domainName()));
         result.setWidget(row++, 1, domainNameBox);
         return result;
@@ -126,6 +115,6 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     @Override
     protected CreateApplicationReplicaSetInstructions getResult() {
         return new CreateApplicationReplicaSetInstructions(nameBox.getValue(), getInstanceTypeListBox().getSelectedValue(),
-                getReleaseNameBoxValue(), dynamicLoadBalancerCheckBox.getValue(), getSecurityReplicationBearerToken().getValue(), domainNameBox.getValue());
+                getReleaseNameBoxValue(), dynamicLoadBalancerCheckBox.getValue(), getReplicationBearerTokenBox().getValue(), domainNameBox.getValue());
     }
 }

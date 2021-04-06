@@ -100,4 +100,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String latestMasterRelease();
     String successfullyUpgradedApplicationReplicaSet(String name, String version);
     String upgradingApplicationReplicaSetFailed(String name);
+    String upgradeApplicationReplicaSet();
 }

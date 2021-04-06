@@ -22,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -110,6 +111,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
@@ -803,7 +805,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public SailingApplicationReplicaSetDTO<String> upgradeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade, String releaseOrNullForLatestMaster,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
@@ -814,7 +816,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         if (Util.isEmpty(replicaSet.getReplicas())) {
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
-            replicas.add(launchReplicaAndWaitUntilHealthy(replicaSet));
+            replicas.add(launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
+                    privateKeyEncryptionPassphrase, securityReplicationBearerToken));
         }
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicas) {
@@ -859,11 +862,54 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * @return the replica launched
      */
     private SailingAnalyticsProcess<String> launchReplicaAndWaitUntilHealthy(
-            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) {
-        // TODO if no replica, spin one up, wait until healthy, then register in public target group; remember
-        // TODO Implement LandscapeManagementWriteServiceImpl.launchReplicaAndWaitUntilHealthy(...)
-        
-        return null; // TODO return the replica launched
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken)
+            throws Exception {
+        final SailingAnalyticsProcess<String> spunUpReplica;
+        if (replicaSet.getAutoScalingGroup() != null) {
+            spunUpReplica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup());
+        } else {
+            spunUpReplica = spinUpReplicaAndRegisterInPublicTargetGroup(replicaSet, optionalKeyName,
+                    privateKeyEncryptionPassphrase, securityReplicationBearerToken);
+        }
+        return spunUpReplica;
+    }
+
+    private SailingAnalyticsProcess<String> spinUpReplicaAndRegisterInPublicTargetGroup(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken) throws Exception {
+        final com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
+        final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
+        final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
+        final InstanceType masterInstanceType = getLandscape().getInstance(replicaSet.getMaster().getHost().getInstanceId(), region).instanceType();
+        final Release release = replicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
+        replicaConfigurationBuilder
+            .setLandscape(getLandscape())
+            .setServerName(replicaSet.getServerName())
+            .setRelease(release)
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
+            .setRegion(region)
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(securityReplicationBearerToken)).build());
+        replicaHostBuilder
+            .setInstanceType(masterInstanceType)
+            .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
+            .setLandscape(getLandscape())
+            .setRegion(region)
+            .setPrivateKeyEncryptionPassphrase(privateKeyEncryptionPassphrase);
+        optionalKeyName.ifPresent(keyName->replicaHostBuilder.setKeyName(keyName));
+        final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
+        replicaHostStartProcedure.run();
+        Wait.wait(() -> replicaHostStartProcedure.getSailingAnalyticsProcess().isReady(WAIT_FOR_HOST_TIMEOUT),
+                WAIT_FOR_HOST_TIMEOUT, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO,
+                "Waiting for replica " + replicaHostStartProcedure.getSailingAnalyticsProcess()
+                        + " to become available");
+        return replicaHostStartProcedure.getSailingAnalyticsProcess();
+    }
+
+    private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(
+            AwsAutoScalingGroup autoScalingGroup) {
+        // TODO Implement LandscapeManagementWriteServiceImpl.spinUpReplicaByIncreasingAutoScalingGroupMinSize(...)
+        return null;
     }
 
     @Override
