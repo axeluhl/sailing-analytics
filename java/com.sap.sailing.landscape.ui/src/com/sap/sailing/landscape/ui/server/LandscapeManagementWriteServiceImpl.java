@@ -43,6 +43,7 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration
 import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost;
+import com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
@@ -808,10 +809,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
         final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        // TODO if no replica, spin one up, wait until healthy, then register in public target group; remember
-        for (final SailingAnalyticsProcess<String> replica : replicaSet.getReplicas()) {
+        final Set<SailingAnalyticsProcess<String>> replicas = new HashSet<>();
+        Util.addAll(replicaSet.getReplicas(), replicas);
+        if (Util.isEmpty(replicaSet.getReplicas())) {
+            logger.info("No replica found for replica set " + replicaSet.getName()
+                    + "; spinning one up and waiting for it to become healthy");
+            replicas.add(launchReplicaAndWaitUntilHealthy(replicaSet));
+        }
+        logger.info("Stopping replication for replica set "+replicaSet.getName());
+        for (final SailingAnalyticsProcess<String> replica : replicas) {
+            logger.info("...asking replica "+replica+" to stop replication");
             replica.stopReplicatingFromMaster(userBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
         }
+        logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
+                replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
+        replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
         // TODO remove master from master and public target group
         if (replicaSet.getAutoScalingGroup() != null) {
             // TODO fix launch configuration user data, setting new release
@@ -829,6 +842,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         TimePoint.now()),
                 /* replicas won't be up and running yet */ Collections.emptySet(), release.getName(), applicationReplicaSetToUpgrade.getHostname(),
                 applicationReplicaSetToUpgrade.getDefaultRedirectPath());
+    }
+
+    /**
+     * For the {@code replicaSet}, find out how a replica can be spun up.
+     * <ul>
+     * <li>If there is an
+     * {@link AwsApplicationReplicaSet#getAutoScalingGroup() auto-scaling group} in place, ensure that
+     * its {@link AutoScalingGroup#minSize() minimum size} is at least one, then wait for a replica
+     * to show up and become healthy.</li>
+     * <li>Without an auto-scaling group, configure and run a {@link StartSailingAnalyticsReplicaHost} procedure
+     * and wait for its {@link StartSailingAnalyticsReplicaHost#getHost()} to become healthy, then
+     * {@link TargetGroup#addTarget(AwsInstance) add} the replica to the public target group.</li>
+     * </ul>
+     * 
+     * @return the replica launched
+     */
+    private SailingAnalyticsProcess<String> launchReplicaAndWaitUntilHealthy(
+            AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet) {
+        // TODO if no replica, spin one up, wait until healthy, then register in public target group; remember
+        // TODO Implement LandscapeManagementWriteServiceImpl.launchReplicaAndWaitUntilHealthy(...)
+        
+        return null; // TODO return the replica launched
     }
 
     @Override
