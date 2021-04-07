@@ -64,7 +64,7 @@ public class ThreadManager extends StreamingOutputUtil {
         Thread.enumerate(threads);
         for (Thread t : threads) {
             if (t != null && t.getName().equals(name)) {
-                t.stop();
+                t.suspend();
                 result.put("status", "OK");
                 found = true;
             }
