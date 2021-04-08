@@ -36,7 +36,7 @@ public final class RemoteServerUtil {
      */
     public static String resolveBearerTokenForRemoteServer(String hostname, int port, String username, String password) {
         try {
-            return resolveBearerTokenForRemoteServer(new URL("http", hostname, port, ""), username, password);
+            return resolveBearerTokenForRemoteServer(new URL(port==443?"https":"http", hostname, port, ""), username, password);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
