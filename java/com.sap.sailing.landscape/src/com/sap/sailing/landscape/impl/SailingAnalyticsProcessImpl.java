@@ -33,6 +33,7 @@ import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
 extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
@@ -64,7 +65,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private JSONObject getStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final HttpGet getStatusRequest = new HttpGet(getHealthCheckUrl(optionalTimeout).toString());
         final JSONObject status = Wait.wait(()->{
-                    final HttpClient client = HttpClientBuilder.create().build();
+                    final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
                     final HttpResponse result = client.execute(getStatusRequest);
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     result.getEntity().writeTo(bos);

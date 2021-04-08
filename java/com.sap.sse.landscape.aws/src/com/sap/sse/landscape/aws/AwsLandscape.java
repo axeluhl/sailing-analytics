@@ -680,4 +680,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
             ProcessT master, Iterable<ProcessT> replicas);
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
+
+    void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize);
 }

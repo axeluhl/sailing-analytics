@@ -1444,6 +1444,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
+    public void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize) {
+        getAutoScalingClient(getRegion(autoScalingGroup.getRegion())).updateAutoScalingGroup(b->b
+                .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
+                .minSize(minSize));
+    }
+    
+    @Override
     public CompletableFuture<Iterable<LaunchConfiguration>> getLaunchConfigurationsAsync(com.sap.sse.landscape.Region region) {
         final Set<LaunchConfiguration> result = new HashSet<>();
         return getAutoScalingAsyncClient(getRegion(region)).describeLaunchConfigurationsPaginator().subscribe(response->
