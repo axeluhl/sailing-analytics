@@ -25,7 +25,11 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * Furthermore, this procedure has logic to provision a new ALB in case no other DNS-mapped ALB has sufficient rule capacity
  * (see {@link #MAX_RULES_PER_ALB}) to accommodate the {@link #NUMBER_OF_RULES_PER_REPLICA_SET} additional rules required.
  * The naming scheme for those DNS-mapped ALBs is expected to follow the pattern {@link #DNS_MAPPED_ALB_NAME_PREFIX}{@code [0-9]*} which
- * means that names such as "DNSMapped-4" and "DNSMapped-7" are valid names.
+ * means that names such as "DNSMapped-4" and "DNSMapped-7" are valid names.<p>
+ * 
+ * By default, this procedure will not force a DNS update but fail with an {@link IllegalStateException} in case a competing
+ * DNS record is already set, pointing to a different load balancer or some other value. Only when using {@link Builder#forceDNSUpdate(boolean)},
+ * forcing the DNS record to be changed can be requested. Use with caution.
  * 
  * @author Axel Uhl (D043530)
  */
@@ -41,6 +45,12 @@ implements Procedure<ShardingKey> {
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
+        /**
+         * @param forceDNSUpdate
+         *            when {@code true}, the DNS record will be set to the new value even if an equal-named record for
+         *            that name already exists; use with caution!
+         */
+        BuilderT forceDNSUpdate(boolean forceDNSUpdate);
     }
     
     protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>,
@@ -49,7 +59,14 @@ implements Procedure<ShardingKey> {
     extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
     implements Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
+        private boolean forceDNSUpdate;
         
+        @Override
+        public BuilderT forceDNSUpdate(boolean forceDNSUpdate) {
+            this.forceDNSUpdate = forceDNSUpdate;
+            return self();
+        }
+
         @Override
         public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             final ApplicationLoadBalancer<ShardingKey> result;
@@ -106,6 +123,10 @@ implements Procedure<ShardingKey> {
         public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT> build() throws Exception {
             return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>(this);
         }
+
+        boolean isForceDNSUpdate() {
+            return forceDNSUpdate;
+        }
     }
     
     public static <ShardingKey, MetricsT extends ApplicationProcessMetrics, 
@@ -115,8 +136,11 @@ implements Procedure<ShardingKey> {
         return new BuilderImpl<>();
     }
 
+    private final boolean forceDNSUpdate;
+
     protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
+        this.forceDNSUpdate = builder.isForceDNSUpdate();
     }
 
     @Override
@@ -129,6 +153,6 @@ implements Procedure<ShardingKey> {
         final String hostname = this.getHostName();
         final ApplicationLoadBalancer<ShardingKey> alb = getLoadBalancerUsed();
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
-                AwsLandscape.getHostedZoneName(hostname)), hostname, alb);
+                AwsLandscape.getHostedZoneName(hostname)), hostname, alb, forceDNSUpdate);
     }
 }

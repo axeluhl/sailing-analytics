@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.api.regatta;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -143,7 +144,7 @@ public class RegattaApi {
     
     public RegattaDeviceStatus getTrackingDeviceStatus(ApiContext ctx, String regattaName) {
         final String url = REGATTAS + "/" + regattaName + TRACKING_DEVICES;
-        return new RegattaDeviceStatus(ctx.get(url));
+        return new RegattaDeviceStatus(ctx.post(url, new HashMap<>()));
     }
     
     public Course getCourse(ApiContext ctx, String regattaName, String raceColumn, String fleet) {

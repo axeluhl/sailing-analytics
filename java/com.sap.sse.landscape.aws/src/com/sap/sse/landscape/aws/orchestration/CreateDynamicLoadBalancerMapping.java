@@ -61,7 +61,7 @@ implements Procedure<ShardingKey> {
                 AwsLandscape<ShardingKey> landscape,
                 ApplicationLoadBalancer<ShardingKey> loadBalancer, String domainName) {
             final String hostname = "*." + domainName;
-            landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer);
+            landscape.setDNSRecordToApplicationLoadBalancer(landscape.getDNSHostedZoneId(domainName), hostname, loadBalancer, /* force */ false);
         }
 
         @Override

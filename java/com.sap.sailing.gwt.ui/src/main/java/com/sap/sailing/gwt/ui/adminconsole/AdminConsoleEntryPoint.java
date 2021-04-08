@@ -19,11 +19,11 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {    
+public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
     
     private SimplePanel appWidget = new SimpleLayoutPanel();
-    
+
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithMore();
@@ -42,7 +42,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         final AdminConsolePlaceHistoryMapper historyMapper = GWT.create(AdminConsolePlaceHistoryMapper.class);
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(placeController, eventBus, new DefaultPlace());
-        RootLayoutPanel.get().add(appWidget);    
+        RootLayoutPanel.get().add(appWidget);
         historyHandler.handleCurrentHistory();
     }
 }

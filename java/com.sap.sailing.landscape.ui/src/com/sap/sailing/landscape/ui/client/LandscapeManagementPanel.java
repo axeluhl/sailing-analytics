@@ -17,9 +17,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
@@ -30,8 +35,10 @@ import com.sap.sailing.landscape.ui.shared.RedirectDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
+import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -44,6 +51,7 @@ import com.sap.sse.gwt.client.celltable.TableWrapperWithMultiSelectionAndFilter;
 import com.sap.sse.gwt.client.celltable.TableWrapperWithSingleSelectionAndFilter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
@@ -211,7 +219,8 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsTable.addColumn(rs->Integer.toString(rs.getMaster().getPort()), stringMessages.masterPort());
         applicationReplicaSetsTable.addColumn(rs->rs.getHostname(), stringMessages.hostname());
         applicationReplicaSetsTable.addColumn(rs->rs.getMaster().getHost().getInstanceId(), stringMessages.masterInstanceId());
-        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint());
+        applicationReplicaSetsTable.addColumn(rs->""+rs.getMaster().getStartTimePoint(), stringMessages.startTimePoint(),
+                (rs1, rs2)->rs1.getMaster().getStartTimePoint().compareTo(rs2.getMaster().getStartTimePoint()));
         applicationReplicaSetsTable.addColumn(rs->Util.joinStrings(", ", Util.map(rs.getReplicas(),
                 r->r.getHost().getPublicIpAddress()+":"+r.getPort()+" ("+r.getServerName()+", "+r.getHost().getInstanceId()+")")),
                 stringMessages.replicas());
@@ -227,6 +236,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_DEFINE_LANDING_PAGE,
                 applicationReplicaSetForWhichToDefineLandingPage -> defineLandingPage(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLandingPage));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_CREATE_LOAD_BALANCER_MAPPING,
+                applicationReplicaSetForWhichToDefineLoadBalancerMapping -> createDefaultLoadBalancerMappings(stringMessages,
+                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLoadBalancerMapping));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_REMOVE,
                 applicationReplicaSetToRemove -> removeApplicationReplicaSet(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToRemove));
@@ -287,8 +299,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             storeRegionSelection(userService, selectedRegion);
         });
         // TODO try to identify archive servers
-        // TODO support creating a new app server cluster
-        // TODO support archiving and dismantling of an application server cluster
+        // TODO support archiving of an application server cluster
         // TODO support deploying a new app server process instance onto an existing app server host (multi-instance)
         // TODO support archive server upgrade
         // TODO support upgrading all app server instances in a region
@@ -302,7 +313,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         } else {
             new DefineRedirectDialog(applicationReplicaSetToDefineLandingPageFor, stringMessages, errorReporter, landscapeManagementService, new DialogCallback<RedirectDTO>() {
                 @Override
-                public void ok(RedirectDTO redirect) {
+                public void ok(final RedirectDTO redirect) {
                     applicationReplicaSetsBusy.setBusy(true);
                     landscapeManagementService.defineDefaultRedirect(selectedRegion, applicationReplicaSetToDefineLandingPageFor.getHostname(),
                             redirect, sshKeyManagementPanel.getSelectedKeyPair().getName(),
@@ -317,6 +328,15 @@ public class LandscapeManagementPanel extends SimplePanel {
                             @Override
                             public void onSuccess(Void result) {
                                 applicationReplicaSetsBusy.setBusy(false);
+                                final String newDefaultRedirect = RedirectDTO.toString(redirect.getPath(), redirect.getQuery());
+                                applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToDefineLandingPageFor);
+                                applicationReplicaSetsTable.getFilterPanel().add(new SailingApplicationReplicaSetDTO<String>(
+                                        applicationReplicaSetToDefineLandingPageFor.getReplicaSetName(),
+                                        applicationReplicaSetToDefineLandingPageFor.getMaster(),
+                                        applicationReplicaSetToDefineLandingPageFor.getReplicas(),
+                                        applicationReplicaSetToDefineLandingPageFor.getVersion(),
+                                        applicationReplicaSetToDefineLandingPageFor.getHostname(),
+                                        newDefaultRedirect));
                                 Notification.notify(stringMessages.successfullyUpdatedLandingPage(), NotificationType.SUCCESS);
                             }
                         });
@@ -388,10 +408,113 @@ public class LandscapeManagementPanel extends SimplePanel {
         Notification.notify("archiveApplicationReplicaSet not implemented yet", NotificationType.ERROR);
         // TODO Implement LandscapeManagementPanel.archiveApplicationReplicaSet(...)
     }
+    
+    private void createDefaultLoadBalancerMappings(final StringMessages stringMessages, String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor) {
+        new DataEntryDialog<Triple<Boolean, String, Boolean>>(stringMessages.createLoadBalancerMapping(), stringMessages.createLoadBalancerMapping(),
+                stringMessages.ok(), stringMessages.cancel(), /* validator */ null, new DialogCallback<Triple<Boolean, String, Boolean>>() {
+                    @Override
+                    public void ok(Triple<Boolean, String, Boolean> useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.createDefaultLoadBalancerMappings(regionId,
+                                applicationReplicaSetToCreateLoadBalancerMappingFor,
+                                useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getA(),
+                                useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getB(),
+                                useDynamicLoadBalancerAndOptionalDomainNameAndForceDNSUpdate.getC(),
+                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                errorReporter.reportError(caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                applicationReplicaSetsBusy.setBusy(false);
+                                applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToCreateLoadBalancerMappingFor);
+                                applicationReplicaSetsTable.getFilterPanel().add(result);
+                                Notification.notify(stringMessages.successfullyCreatedLoadBalancerMappingFor(
+                                        applicationReplicaSetToCreateLoadBalancerMappingFor.getName()), NotificationType.SUCCESS);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+            
+        }) {
+            private final CheckBox useDynamicLoadBalancerCheckbox = createCheckbox(stringMessages.useDynamicLoadBalancer());
+            private final TextBox optionalDomainNameBox = createTextBox(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME);
+            private final CheckBox forceDNSUpdateCheckbox = createCheckbox(stringMessages.forceDNSUpdate());
+            
+            @Override
+            protected Widget getAdditionalWidget() {
+                final VerticalPanel result = new VerticalPanel();
+                result.add(useDynamicLoadBalancerCheckbox);
+                final HorizontalPanel domainNamePanel = new HorizontalPanel();
+                result.add(domainNamePanel);
+                domainNamePanel.add(new Label(stringMessages.domainName()));
+                domainNamePanel.add(optionalDomainNameBox);
+                result.add(forceDNSUpdateCheckbox);
+                return result;
+            }
+
+            @Override
+            protected FocusWidget getInitialFocusWidget() {
+                return useDynamicLoadBalancerCheckbox;
+            }
+
+            @Override
+            protected Triple<Boolean, String, Boolean> getResult() {
+                return new Triple<>(useDynamicLoadBalancerCheckbox.getValue(),
+                        Util.hasLength(optionalDomainNameBox.getValue())?optionalDomainNameBox.getValue():null,
+                        forceDNSUpdateCheckbox.getValue());
+            }
+        }.show();
+    }
 
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
         Notification.notify("upgradeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
+        /*
+         * Distinguish the following cases:
+         *  1) with auto-scaling group: we assume two target groups exist; ensure a replica is running, launch one
+         *    if none is running currently by increasing the minimum number of replicas in the auto-scaling group
+         *    to "1" and wait for it to become healthy in the public target group. When at least one replica is
+         *    healthy, stop replication on all of them using /replication/replication?action=STOP_REPLICATING.
+         *    Then update master in place, issuing a "./refreshInstance.sh install-release {release}; ./stop; sleep 5; ./start"
+         *    sequence. Wait for the master to become healthy, then add to the master and public target group,
+         *    remove replicas from public target group, create a new launch configuration for the new release
+         *    and update the auto-scaling group with it; re-adjust the minimum number of instances to its old value,
+         *    then terminate all replicas running the old release.
+         *  2) without auto-scaling group and without replication, but distinct master/public target groups: remove
+         *    single process from master target group (making it "read-only"). Launch new master on different host,
+         *    either finding an appropriate multi-instance host, or by identifying a host explicitly in the request
+         *    which then needs to have no application using the port used by the application that is to be upgraded,
+         *    or by spinning up an entirely new host. After the new master has become healthy, register it to the
+         *    master and public target groups while de-registering the old master from the public target group, then
+         *    stopping the old process and subsequently terminating its instance in case it was the last application
+         *    process on that host.
+         *  3) without auto-scaling group, without replication, and with only a single target group: the master couldn't
+         *    be left reachable as we would not be able to distinguish between "read" and "write" calls without
+         *    separate target groups and their routing rules. Therefore, this scenario should be reduced to scenario 2)
+         *    by first establishing two separate target groups (if naming conventions match, use the existing target
+         *    group as the public target group and only create the separate master target group) and making sure the
+         *    old master is registered with the (potentially new) public target group. Then proceed as in 2).
+         * 
+         * Both, for 2) and 3), we'll need a way to identify a host/instance that qualifies for hosting the new master.
+         * This brings us to the topic of allowing the user / landscape manager to provide data allowing us to choose
+         * an appropriate scaling for the new master (mostly CPU, RAM). This could similarly apply to 1) where we could
+         * also allow the user to select CPU/RAM for a new master and where we could make adjustments to the launch configuration
+         * that we're touching anyhow for the release update.
+         * 
+         * For implementation order, let's consider "bang for the buck": finally getting the "club server" upgrades done
+         * in a way that leaves them available at least read-only would help our general availability, especially where
+         * "club servers" provide content featured through the archive server(s), such as tractrac.sapsailing.com,
+         * lyc.sapsailing.com, and vsaw.sapsailing.com. Upgrading auto-scaling groups manually is tedious and would also
+         * benefit a lot from more automation.
+         */
         // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
     }
 

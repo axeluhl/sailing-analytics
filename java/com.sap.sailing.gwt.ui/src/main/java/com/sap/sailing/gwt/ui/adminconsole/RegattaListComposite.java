@@ -314,7 +314,8 @@ public class RegattaListComposite extends Composite {
 
             @Override
             public void onSuccess(Void result) {
-                presenter.getRegattasRefresher().reloadAndCallFillAll();
+                presenter.getRegattasRefresher().remove(regatta);
+                presenter.getRegattasRefresher().callAllFill();
             }
         }));
     }

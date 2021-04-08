@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sse.util.WeakReferenceWithCleanerCallback;
+import com.sap.sse.shared.util.WeakReferenceWithCleanerCallback;
 
 /**
  * A listener that unregisters itself from the race log's listeners if its notification target is no longer strongly

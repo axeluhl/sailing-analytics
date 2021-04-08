@@ -401,7 +401,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
         final String ipAddress = "1.2.3.4";
         final String dnsHostedZoneId = landscape.getDNSHostedZoneId(testHostedZoneDnsName);
         try {
-            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress);
+            ChangeInfo changeInfo = landscape.setDNSRecordToValue(dnsHostedZoneId, hostname, ipAddress, /* force */ false);
             int attempts = 10;
             while ((changeInfo=landscape.getUpdatedChangeInfo(changeInfo)).status() != ChangeStatus.INSYNC && --attempts > 0) {
                 Thread.sleep(10000);

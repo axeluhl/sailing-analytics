@@ -185,7 +185,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonSerializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -2592,7 +2592,6 @@ public class RegattasResource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String regattaName = (String) requestObject.get("regattaName");
-
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
@@ -2638,23 +2637,24 @@ public class RegattasResource extends AbstractSailingServerResource {
         return Response.ok().header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
-    @Deprecated
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{regattaName}/tracking_devices")
-    public Response getTrackingStatusDeprecated(@PathParam("regattaName") String regattaName) {
-        return getTrackingStatus(regattaName);
-    }
-
+    /**
+     * Outputs device bindings in the scope of the regatta identified by {@code regattaName}, optionally limited to a single
+     * device whose ID can be provided by the {@code optionalDeviceUuid} parameter. Generally, callers need to have the
+     * {@link DefaultActions#UPDATE} permission for the regatta, but exceptionally, if a caller presents the correct
+     * {@code regattaSecret}, querying the tracking status for a single {@code optionalDeviceUuid} is permitted.
+     */
     @POST
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaName}/tracking_devices")
-    public Response getTrackingStatus(@PathParam("regattaName") String regattaName) {
+    public Response getTrackingStatus(@PathParam("regattaName") String regattaName, @QueryParam("deviceUuid") String optionalDeviceUuid,
+            @QueryParam("secret") String regattaSecret) {
         final Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             // Deeper insights to tracking data is only available to users who can administer a regatta
-            SecurityUtils.getSubject()
-                    .checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            boolean skip = getService().skipChecksDueToCorrectSecret(regattaName, regattaSecret);
+            if (!skip || !Util.hasLength(optionalDeviceUuid)) {
+                SecurityUtils.getSubject().checkPermission(regatta.getIdentifier().getStringPermission(DefaultActions.UPDATE));
+            }
             final TrackingDeviceStatusSerializer serializer = new TrackingDeviceStatusSerializer(
                     new DeviceIdentifierJsonSerializer(
                             getServiceFinderFactory().createServiceFinder(DeviceIdentifierJsonHandler.class)));
@@ -2681,14 +2681,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                     });
                 }
                 final JSONArray deviceStatusesOfTrackedItem = new JSONArray();
-                for (DeviceMappingWithRegattaLogEvent<WithID> deviceMapping: mappingByDeviceID.values()) {
-                    JSONObject serializedDeviceStatus = serializer.serialize(
-                            TrackingDeviceStatus.calculateDeviceStatus(deviceMapping.getDevice(), getService()));
-                    deviceStatusesOfTrackedItem.add(serializedDeviceStatus);
-                    TimeRange mappedTimeRange = deviceMapping.getTimeRange();
-                    serializedDeviceStatus.put("mappedFrom", mappedTimeRange.from().asMillis());
-                    serializedDeviceStatus.put("mappedTo",
-                            mappedTimeRange.hasOpenEnd() ? null : mappedTimeRange.to().asMillis());
+                for (DeviceMappingWithRegattaLogEvent<WithID> deviceMapping : mappingByDeviceID.values()) {
+                    // if a device ID has been specified, output only content relating to that device ID:
+                    if (!Util.hasLength(optionalDeviceUuid) || Util.equalsWithNull(deviceMapping.getDevice().getStringRepresentation(), optionalDeviceUuid)) {
+                        JSONObject serializedDeviceStatus = serializer.serialize(
+                                TrackingDeviceStatus.calculateDeviceStatus(deviceMapping.getDevice(), getService()));
+                        deviceStatusesOfTrackedItem.add(serializedDeviceStatus);
+                        TimeRange mappedTimeRange = deviceMapping.getTimeRange();
+                        serializedDeviceStatus.put("mappedFrom", mappedTimeRange.from().asMillis());
+                        serializedDeviceStatus.put("mappedTo",
+                                mappedTimeRange.hasOpenEnd() ? null : mappedTimeRange.to().asMillis());
+                    }
                 }
                 final JSONObject itemObject = new JSONObject();
                 itemObject.put("deviceStatuses", deviceStatusesOfTrackedItem);

@@ -24,7 +24,6 @@ public class SwissTimingEventManagementPanelSupplier
 
     @Override
     public SwissTimingEventManagementPanel init() {
-        logger.info("Create SwissTimingEventManagementPanel");
         SwissTimingEventManagementPanel swisstimingEventManagementPanel = new SwissTimingEventManagementPanel(presenter,
                 stringMessages, tableResources);
         swisstimingEventManagementPanel.ensureDebugId("swisstimingEventManagementPanel");

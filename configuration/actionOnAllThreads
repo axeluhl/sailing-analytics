@@ -1,0 +1,37 @@
+#!/bin/bash
+ACTION=$1
+TELNET_PORT=$2
+if [ -z "${TELNET_PORT}" ]; then
+  TELNET_PORT=14888
+fi
+
+rawurlencode() {
+  local string="${1}"
+  local strlen=${#string}
+  local encoded=""
+  local pos c o
+  for (( pos=0 ; pos<strlen ; pos++ )); do
+     c=${string:$pos:1}
+     case "$c" in
+        [-_.~a-zA-Z0-9] ) o="${c}" ;;
+        * )               printf -v o '%%%02x' "'$c"
+     esac
+     encoded+="${o}"
+  done
+  echo "${encoded}"    # You can either set a return variable (FASTER) 
+  REPLY="${encoded}"   #+or echo the result (EASIER)... or both... :p
+}
+
+# First find the threadmanager bundle ID and start it:
+tmbid=$( { echo "ss com.sap.sse.threadmanager"; sleep 1; } | telnet localhost ${TELNET_PORT} | grep "^[0-9][0-9]*	.* *com.sap.sse.threadmanager" | sed -e 's/^\([0-9]*\)	.* *com.sap.sse.threadmanager.*$/\1/' )
+echo "Starting Thread Manager bundle #$tmbid"
+{ echo "start $tmbid"; sleep 1; } | telnet localhost ${TELNET_PORT}
+# Now that the threadmanager bundle is started we can get all thread names and perform an action on them:
+curl "http://localhost:8888/threadmanager/api/threads" 2>/dev/null | jq -r '.[].name' | while read i; do
+  echo "
+$i"
+  thread_name_url_encoded=$(rawurlencode "$i")
+  echo "URL-encoded: ${thread_name_url_encoded}"
+  curl "http://localhost:8888/threadmanager/api/threads/${thread_name_url_encoded}/${ACTION}"
+done
+echo

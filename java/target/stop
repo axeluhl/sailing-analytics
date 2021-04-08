@@ -1,4 +1,9 @@
 #!/bin/bash
+# Tries a friendly OSGi shutdown first and waits for the process to disappear.
+# If this doesn't happen within a timeout perior, a SIGTERM is sent to the process.
+# If this doesn't make the process disappear within another timeout, SIGKILL is sent.
+# This script then waits another while for the process to disappear.
+# Returns 0 if stopping the process succeeded within the timeout periods, 1 otherwise.
 
 . `pwd`/env.sh
 
@@ -24,7 +29,7 @@ else
 fi
 
 # Wait for server to die; if it doesn't, kill it after a timeout
-KILL_TIMEOUT_IN_SECONDS=10
+KILL_TIMEOUT_IN_SECONDS=30
 SERVER_PID=`cat server.pid`
 seconds_counter=$KILL_TIMEOUT_IN_SECONDS
 while ((seconds_counter-- != 0)); do
@@ -35,7 +40,32 @@ while ((seconds_counter-- != 0)); do
   fi
   sleep 1
 done
-echo "Server didn't die within ${KILL_TIMEOUT_IN_SECONDS}s after sending it the shutdown command. Killing..."
+echo "Server process $SERVER_PID didn't die within ${KILL_TIMEOUT_IN_SECONDS}s after sending it the shutdown command. Killing..."
 kill $SERVER_PID
+TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR=120
+seconds_counter=$TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR
+echo "Waiting up to $TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR for server process $SERVER_PID to disappear..."
+while ((seconds_counter-- != 0)); do
+  if [ ! -d /proc/$SERVER_PID ]; then
+    echo "Server process $SERVER_PID disappeared after killing it. This took $(($TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR-$seconds_counter))s."
+    rm server.pid
+    exit 0
+  fi
+  sleep 1
+done
+echo "Server process $SERVER_PID did not die or disappear after SIGTERM. Trying SIGKILL..."
+kill -9 $SERVER_PID
+seconds_counter=$TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR
+echo "Waiting up to $TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR for server process $SERVER_PID to disappear after kill -SIGKILL..."
+while ((seconds_counter-- != 0)); do
+  if [ ! -d /proc/$SERVER_PID ]; then
+    echo "Server process $SERVER_PID disappeared after killing it with SIGKILL. This took $(($TIMEOUT_FOR_KILLED_PROCESS_TO_DISAPPEAR-$seconds_counter))s."
+    rm server.pid
+    exit 0
+  fi
+  sleep 1
+done
+echo "Server process $SERVER_PID did not die or disappear after SIGKILL either. Out of options."
+exit 1
 rm server.pid
 

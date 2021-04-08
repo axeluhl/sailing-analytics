@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,10 +165,12 @@ import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.GetChangeRequest;
+import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
 import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 import software.amazon.awssdk.services.route53.model.TestDnsAnswerResponse;
+import software.amazon.awssdk.services.route53.paginators.ListResourceRecordSetsIterable;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.Credentials;
 
@@ -176,7 +179,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
-    // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
@@ -364,10 +366,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpsListener(ApplicationLoadBalancer<ShardingKey> alb) throws InterruptedException, ExecutionException {
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
+        final int httpPort = 80;
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTPS.name(),
-                httpsPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpsPort, alb.getArn());
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn());
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -431,6 +434,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void deleteLoadBalancerListenerRules(com.sap.sse.landscape.Region region, Rule... rulesToDelete) {
+        logger.info("Removing load balancer rules "+rulesToDelete+" in region "+region);
         for (final Rule rule : rulesToDelete) {
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
@@ -484,9 +488,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String loadBalancerNameLowercase, com.sap.sse.landscape.Region region) {
         try {
             final DescribeLoadBalancersResponse response = getLoadBalancingClient(getRegion(region)).describeLoadBalancers();
-            return response.hasLoadBalancers() ? new ApplicationLoadBalancerImpl<>(region,
-                    Util.first(Util.filter(response.loadBalancers(),
-                            lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))), this)
+            return response.hasLoadBalancers() ?
+                    response.loadBalancers().stream()
+                        .filter(lb->Util.equalsWithNull(loadBalancerNameLowercase, lb.loadBalancerName(), /* ignore case */ true))
+                        .findFirst().map(lb->new ApplicationLoadBalancerImpl<>(region, lb, this)).orElse(null)
                     : null;
         } catch (LoadBalancerNotFoundException e) {
             return null;
@@ -517,21 +522,21 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     @Override
-    public ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host) {
+    public ChangeInfo setDNSRecordToHost(String hostedZoneId, String hostname, Host host, boolean force) {
         final String ipAddressAsString = host.getPublicAddress().getHostAddress();
-        return setDNSRecordToValue(hostedZoneId, hostname, ipAddressAsString);
+        return setDNSRecordToValue(hostedZoneId, hostname, ipAddressAsString, /* force */ false);
     }
     
     @Override
     public ChangeInfo setDNSRecordToApplicationLoadBalancer(String hostedZoneId, String hostname,
-            ApplicationLoadBalancer<ShardingKey> alb) {
+            ApplicationLoadBalancer<ShardingKey> alb, boolean force) {
         final String dnsName = alb.getDNSName();
-        return setDNSRecord(hostedZoneId, hostname, RRType.CNAME, dnsName);
+        return setDNSRecord(hostedZoneId, hostname, RRType.CNAME, dnsName, force);
     }
 
     @Override
-    public ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value) {
-        return setDNSRecord(hostedZoneId, hostname, RRType.A, value);
+    public ChangeInfo setDNSRecordToValue(String hostedZoneId, String hostname, String value, boolean force) {
+        return setDNSRecord(hostedZoneId, hostname, RRType.A, value, force);
     }
 
     @Override
@@ -539,12 +544,36 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getRoute53Client().listHostedZonesByName(b->b.dnsName(hostedZoneName)).hostedZones().iterator().next().id().replaceFirst("^\\/hostedzone\\/", "");
     }
 
-    private ChangeInfo setDNSRecord(String hostedZoneId, String hostname, RRType type, String value) {
-        final ChangeResourceRecordSetsResponse response = getRoute53Client()
+    private ChangeInfo setDNSRecord(String hostedZoneId, String hostname, RRType type, String value, boolean force) {
+        final Route53Client route53Client = getRoute53Client();
+        final ListResourceRecordSetsIterable existingResourceRecordSets = route53Client.listResourceRecordSetsPaginator(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname));
+        final Set<String> oldValues = new HashSet<>();
+        boolean foundEqualValueForHostname = false;
+        if (!force) {
+            outer: for (final ListResourceRecordSetsResponse rrrs : existingResourceRecordSets) {
+                for (final ResourceRecordSet rrs : rrrs.resourceRecordSets()) {
+                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).toLowerCase().equals(hostname.toLowerCase())) {
+                        for (final ResourceRecord rr : rrs.resourceRecords()) {
+                            if (rr.value().equals(value)) {
+                                foundEqualValueForHostname = true;
+                                break outer;
+                            } else {
+                                oldValues.add(rr.value());
+                            }
+                        }
+                    }
+                }
+            }
+            if (!foundEqualValueForHostname && !oldValues.isEmpty()) {
+                throw new IllegalStateException("A resource record set named "+hostname+" already exists in hosted zone "+hostedZoneId+
+                        ", its values "+oldValues+" do not contain the desired value "+value+" and the \"force\" option was not set");
+            }
+        }
+        final ChangeResourceRecordSetsResponse response = route53Client
                 .changeResourceRecordSets(
                         ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
-                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname.toLowerCase()).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
                                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build())
                                         .build()).build())
                                 .build());
@@ -950,6 +979,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup) {
+        logger.info("Deleting target group "+targetGroup);
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
@@ -1255,7 +1285,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                 final String masterServerName = applicationProcess.getMasterServerName(optionalTimeout);
                                 if (masterServerName != null && Util.equalsWithNull(masterServerName, serverName)) {
                                     // then applicationProcess is a replica in the serverName cluster:
-                                    synchronized(replicasByServerName) {
+                                    synchronized (replicasByServerName) {
                                         Util.addToValueSet(replicasByServerName, serverName, applicationProcess);
                                     }
                                 } else {
@@ -1265,6 +1295,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
                                                 mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
                                                 applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
+                                            if (mastersByServerName.containsKey(serverName)) {
+                                                logger.warning("Replacing master "+mastersByServerName.get(serverName)+" with newer master "+applicationProcess);
+                                            }
                                             mastersByServerName.put(serverName, applicationProcess);
                                         }
                                     }
@@ -1371,13 +1404,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         return result;
     }
-
+    
     @Override
     public CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname) {
         final Route53AsyncClient route53Client = getRoute53AsyncClient();
         final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
         return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
-            Util.filter(response.resourceRecordSets(), resourceRecordSet->resourceRecordSet.name().replaceFirst("\\.$", "").equals(hostname)));
+            Util.filter(response.resourceRecordSets(), resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname)));
     }
     
     @Override
@@ -1440,8 +1473,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
     }
 
+    /**
+     * This request will happen once per target group in a region; those may be many, and we'd like to avoid rate limit exceedings,
+     * so we'll throttle our requests a bit here; usually, 100 requests per seconds and region with a "bucket refill" of 20/s applies
+     * as a limit, so if we throttle down to 20/s we should be fine for most cases.
+     */
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
+        try {
+            Thread.sleep(1000/20);
+        } catch (InterruptedException e1) {
+            logger.log(Level.WARNING, "Interrupted", e1);
+        }
         final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
                 getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
         return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());

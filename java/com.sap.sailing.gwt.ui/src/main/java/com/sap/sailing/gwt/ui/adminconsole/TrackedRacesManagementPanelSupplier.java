@@ -19,7 +19,6 @@ public class TrackedRacesManagementPanelSupplier extends AdminConsolePanelSuppli
 
     @Override
     public TrackedRacesManagementPanel init() {
-        logger.info("Create TrackedRacesManagementPanel");
         final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(presenter,
                 stringMessages);
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
