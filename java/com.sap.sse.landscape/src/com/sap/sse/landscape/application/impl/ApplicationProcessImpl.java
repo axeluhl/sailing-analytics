@@ -38,6 +38,7 @@ import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -201,7 +202,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(final URL url)
             throws IOException, ClientProtocolException, ParseException {
         final HttpPost postRequest = new HttpPost(url.toString());
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         client.execute(postRequest).getEntity().writeTo(bos);
         return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
