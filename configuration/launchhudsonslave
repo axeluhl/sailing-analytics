@@ -1,5 +1,5 @@
 #!/bin/bash
-AWS=/root/.local/bin/aws
+AWS=/usr/bin/aws
 REGION=eu-west-1
 #HUDSON_SLAVE_AMI_ID=ami-0c153e4928f340fe5
 HUDSON_SLAVE_AMI_ID=ami-00183b2f76157870e
