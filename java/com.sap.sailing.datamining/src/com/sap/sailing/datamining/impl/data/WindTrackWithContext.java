@@ -9,7 +9,7 @@ public class WindTrackWithContext implements HasWindTrackContext {
 
     private final HasTrackedRaceContext trackedRaceContext;
     
-    private final String  windSourceType;
+    private final String windSourceType;
     
     private final String windSourceName;
     
