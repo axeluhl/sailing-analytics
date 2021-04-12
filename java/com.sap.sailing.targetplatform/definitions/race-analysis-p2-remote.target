@@ -35,8 +35,6 @@
 <unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
-<unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
-<unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 <unit id="org.apache.commons.collections" version="3.2.2.v201511171945"/>
@@ -147,7 +145,7 @@
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
-<plugin id="org.apache.commons.beanutils" version="1.9.0"/>
+<plugin id="org.apache.commons.beanutils" version="1.9.4"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
 <plugin id="org.apache.commons.collections"/>
