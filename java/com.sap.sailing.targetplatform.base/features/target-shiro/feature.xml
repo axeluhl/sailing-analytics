@@ -13,6 +13,20 @@
    </license>
 
    <plugin
+         id="org.owasp.encoder"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+
+   <plugin
+         id="org.owasp.encoder.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.3"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.shiro.core"
          download-size="0"
          install-size="0"

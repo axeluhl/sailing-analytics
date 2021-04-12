@@ -184,9 +184,11 @@
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.owasp.encoder"/>
 <plugin id="org.apache.shiro.core.source"/>
 <plugin id="org.apache.shiro.ehcache.source"/>
 <plugin id="org.apache.shiro.web.source"/>
+<plugin id="org.owasp.encoder.source"/>
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
