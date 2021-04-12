@@ -246,7 +246,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
                     int dotPos = lastPathSegment.lastIndexOf('.');
                     if (dotPos >= 0) {
-                        mediaTrack.title = lastPathSegment.substring(0, dotPos);
+                        mediaTrack.title = "";
                         String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
                         mediaTrack.mimeType = MimeType.byName(fileEnding);
                         if (MimeType.mp4.equals(mediaTrack.mimeType)) {
@@ -255,7 +255,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                             loadMediaDuration();
                         }
                     } else {
-                        mediaTrack.title = mediaTrack.url;
+                        mediaTrack.title = "";
                         mediaTrack.mimeType = null;
                     }
                 }
