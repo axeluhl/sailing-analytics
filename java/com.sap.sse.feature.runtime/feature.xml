@@ -46,10 +46,17 @@
          unpack="false"/>
 
    <plugin
+         id="org.hyperic.sigar"
+         download-size="0"
+         install-size="0"
+         version="1.6.4.1"
+         unpack="false"/>
+
+   <plugin
          id="slf4j.jdk14"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          fragment="true"
          unpack="false"/>
 
@@ -183,7 +190,7 @@
          id="slf4j.api"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          unpack="false"/>
 
    <plugin
@@ -204,7 +211,7 @@
          id="jcl.over.slf4j"
          download-size="0"
          install-size="0"
-         version="1.6.4"
+         version="1.7.30"
          unpack="false"/>
 
    <plugin

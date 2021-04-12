@@ -134,6 +134,8 @@
 <setEntry value="org.objectweb.asm.commons@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
+<setEntry value="org.owasp.encoder.source"/>
+<setEntry value="org.owasp.encoder@default:default"/>
 <setEntry value="routeconverter@default:default"/>
 <setEntry value="slf4j.api@default:default"/>
 <setEntry value="slf4j.jdk14@default:false"/>

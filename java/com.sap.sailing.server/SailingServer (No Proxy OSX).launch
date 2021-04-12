@@ -82,6 +82,8 @@
 <setEntry value="org.apache.commons.beanutils@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
+<setEntry value="org.owasp.encoder@default:default"/>
+<setEntry value="org.owasp.encoder.source@default:default"/>
 <setEntry value="org.apache.shiro.core@default:default"/>
 <setEntry value="org.apache.shiro.core.source@default:default"/>
 <setEntry value="org.apache.shiro.ehcache@default:default"/>
