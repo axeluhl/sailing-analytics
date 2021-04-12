@@ -17,7 +17,6 @@ public class FileStoragePanelSupplier extends AdminConsolePanelSupplier<FileStor
 
     @Override
     public FileStoragePanel init() {
-        logger.info("Create FileStoragePanel");
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(presenter.getSailingService(),
                 presenter.getErrorReporter());
         fileStoragePanel.ensureDebugId("fileStoragePanel");

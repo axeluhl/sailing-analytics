@@ -24,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -178,7 +179,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final String DEFAULT_TARGET_GROUP_PREFIX = "D";
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     private static final long DEFAULT_DNS_TTL_MILLIS = 60000l;
-    // TODO <config> the sapsailing.com certificate's ARN where the certificate is valid until 2021-05-07; we need a certifiate per region
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
     // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
@@ -434,6 +434,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public void deleteLoadBalancerListenerRules(com.sap.sse.landscape.Region region, Rule... rulesToDelete) {
+        logger.info("Removing load balancer rules "+rulesToDelete+" in region "+region);
         for (final Rule rule : rulesToDelete) {
             getLoadBalancingClient(getRegion(region)).deleteRule(b -> b.ruleArn(rule.ruleArn()));
         }
@@ -551,7 +552,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         if (!force) {
             outer: for (final ListResourceRecordSetsResponse rrrs : existingResourceRecordSets) {
                 for (final ResourceRecordSet rrs : rrrs.resourceRecordSets()) {
-                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).equals(hostname)) {
+                    if (AwsLandscape.removeTrailingDotFromHostname(rrs.name()).toLowerCase().equals(hostname.toLowerCase())) {
                         for (final ResourceRecord rr : rrs.resourceRecords()) {
                             if (rr.value().equals(value)) {
                                 foundEqualValueForHostname = true;
@@ -572,7 +573,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .changeResourceRecordSets(
                         ChangeResourceRecordSetsRequest.builder().hostedZoneId(hostedZoneId)
                                 .changeBatch(ChangeBatch.builder().changes(Change.builder().action(ChangeAction.UPSERT)
-                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
+                                        .resourceRecordSet(ResourceRecordSet.builder().name(hostname.toLowerCase()).type(type).ttl(DEFAULT_DNS_TTL_MILLIS)
                                                 .resourceRecords(ResourceRecord.builder().value(value).build()).build())
                                         .build()).build())
                                 .build());
@@ -978,6 +979,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     
     @Override
     public <SK> void deleteTargetGroup(TargetGroup<SK> targetGroup) {
+        logger.info("Deleting target group "+targetGroup);
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
@@ -1293,6 +1295,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         || Comparator.<TimePoint>nullsLast(Comparator.naturalOrder()).compare(
                                                 mastersByServerName.get(serverName).getStartTimePoint(optionalTimeout),
                                                 applicationProcess.getStartTimePoint(optionalTimeout)) < 0) {
+                                            if (mastersByServerName.containsKey(serverName)) {
+                                                logger.warning("Replacing master "+mastersByServerName.get(serverName)+" with newer master "+applicationProcess);
+                                            }
                                             mastersByServerName.put(serverName, applicationProcess);
                                         }
                                     }
@@ -1468,8 +1473,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
     }
 
+    /**
+     * This request will happen once per target group in a region; those may be many, and we'd like to avoid rate limit exceedings,
+     * so we'll throttle our requests a bit here; usually, 100 requests per seconds and region with a "bucket refill" of 20/s applies
+     * as a limit, so if we throttle down to 20/s we should be fine for most cases.
+     */
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
+        try {
+            Thread.sleep(1000/20);
+        } catch (InterruptedException e1) {
+            logger.log(Level.WARNING, "Interrupted", e1);
+        }
         final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
                 getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
         return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());

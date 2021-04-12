@@ -20,7 +20,6 @@ public class MarkPropertiesPanelSupplier extends AdminConsolePanelSupplier<MarkP
 
     @Override
     public MarkPropertiesPanel init() {
-        logger.info("Create MarkPropertiesPanel");
         final MarkPropertiesPanel markPropertiesPanel = new MarkPropertiesPanel(presenter.getSailingService(),
                 presenter.getErrorReporter(), stringMessages, presenter.getUserService());
         markPropertiesPanel.ensureDebugId("markPropertiesPanel");

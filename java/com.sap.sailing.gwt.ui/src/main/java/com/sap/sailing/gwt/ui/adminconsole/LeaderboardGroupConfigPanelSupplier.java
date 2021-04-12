@@ -19,7 +19,6 @@ public class LeaderboardGroupConfigPanelSupplier extends AdminConsolePanelSuppli
 
     @Override
     public LeaderboardGroupConfigPanel init() {
-        logger.info("Create LeaderboardGroupConfigPanel");
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(presenter,
                 stringMessages);
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
