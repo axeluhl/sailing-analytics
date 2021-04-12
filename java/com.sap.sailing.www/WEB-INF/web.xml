@@ -6,25 +6,57 @@
     <listener>
         <listener-class>com.sap.sse.debranding.ClientConfigurationListener</listener-class>
     </listener>
-	<servlet>
-		<servlet-name>default</servlet-name>
-		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
-		</servlet-class>
-		<init-param>
-			<param-name>useFileMappedBuffer</param-name>
-			<param-value>false</param-value>
-		</init-param>
-	</servlet>
-	<filter>
-		<filter-name>CORSFilter</filter-name>
-		<filter-class>com.sap.sailing.www.CORSFilter</filter-class>
-	</filter>
-    <servlet-mapping>
-        <servlet-name>jsp</servlet-name>
-        <url-pattern>*.html</url-pattern>
-    </servlet-mapping>
-	<filter-mapping>
-		<filter-name>CORSFilter</filter-name>
-		<url-pattern>/fonts/*</url-pattern>
-	</filter-mapping>
+    <servlet>
+    	<servlet-name>default</servlet-name>
+    	<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
+    	</servlet-class>
+    	<init-param>
+    		<param-name>useFileMappedBuffer</param-name>
+    		<param-value>false</param-value>
+    	</init-param>
+    </servlet>
+    <filter>
+    	<filter-name>CORSFilter</filter-name>
+    	<filter-class>com.sap.sailing.www.CORSFilter</filter-class>
+    </filter>
+          <servlet-mapping>
+              <servlet-name>jsp</servlet-name>
+              <url-pattern>*.html</url-pattern>
+          </servlet-mapping>
+    <filter-mapping>
+    	<filter-name>CORSFilter</filter-name>
+    	<url-pattern>/fonts/*</url-pattern>
+    </filter-mapping>
+
+  <!-- Apache Shiro -->
+  <context-param>
+    <param-name>shiroEnvironmentClass</param-name>
+    <param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+  </listener>
+  <filter>
+    <filter-name>ShiroFilter</filter-name>
+    <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+  </filter>
+  <!-- Make sure any request you want accessible to Shiro is filtered. "/*" catches all requests. Usually this filter mapping 
+    is defined first (before all others) to ensure that Shiro works in subsequent filters in the filter chain: -->
+  <filter-mapping>
+    <filter-name>ShiroFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
+    <dispatcher>ERROR</dispatcher>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>DefaultTenantFilter</filter-name>
+    <filter-class>com.sap.sse.security.impl.DefaultTenantRequestFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>DefaultTenantFilter</filter-name>
+    <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
 </web-app>
