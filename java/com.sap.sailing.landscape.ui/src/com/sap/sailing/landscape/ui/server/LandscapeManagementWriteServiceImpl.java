@@ -114,7 +114,6 @@ import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ThreadPoolUtil;
 
-import elemental2.dom.MediaTrackConstraintSet.GetAutoGainControlUnionType;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
@@ -916,11 +915,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 "Waiting for process " + sailingAnalyticsProcess + " to become available");
     }
 
-    private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup) {
+    private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup) throws TimeoutException, Exception {
         if (autoScalingGroup.getAutoScalingGroup().minSize() < 1) {
             getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, 1);
         }
-        Wait.wait(condition, WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
+        Wait.wait(/* TODO */ ()->true, WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
                 "Waiting for auto-scaling group to produce healthy replica");
         // TODO Implement LandscapeManagementWriteServiceImpl.spinUpReplicaByIncreasingAutoScalingGroupMinSize(...)
         return null;
