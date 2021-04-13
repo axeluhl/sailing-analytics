@@ -53,12 +53,11 @@ import org.apache.shiro.config.Ini.Section;
 import org.apache.shiro.crypto.RandomNumberGenerator;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha256Hash;
-import org.apache.shiro.mgt.CachingSecurityManager;
+import org.apache.shiro.env.BasicIniEnvironment;
+import org.apache.shiro.env.Environment;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.Factory;
-import org.apache.shiro.web.config.WebIniSecurityManagerFactory;
 import org.apache.shiro.web.env.IniWebEnvironment;
 import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
@@ -187,7 +186,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();
 
-    private CachingSecurityManager securityManager;
+    private SecurityManager securityManager;
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
     private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
@@ -211,7 +210,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
-    private static Ini shiroConfiguration;
+    private final static Ini shiroConfiguration;
+    private final static Environment shiroEnvironment;
 
     private final HasPermissionsProvider hasPermissionsProvider;
 
@@ -228,6 +228,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
+        shiroEnvironment = new BasicIniEnvironment("classpath:shiro.ini");
     }
     
     public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
@@ -278,7 +279,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.mailServiceTracker = mailServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         cacheManager = loadReplicationCacheManagerContents();
-        final Factory<SecurityManager> factory = new WebIniSecurityManagerFactory(shiroConfiguration);
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         final StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -292,7 +292,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         logger.info(logMessage.toString());
         System.setProperty("java.net.useSystemProxies", "true");
-        final CachingSecurityManager securityManager = (CachingSecurityManager) factory.getInstance();
+        final SecurityManager securityManager = shiroEnvironment.getSecurityManager();
         logger.info("Created: " + securityManager);
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
@@ -460,7 +460,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public CachingSecurityManager getSecurityManager() {
+    public SecurityManager getSecurityManager() {
         return this.securityManager;
     }
 
@@ -1605,10 +1605,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 System.out.println(s + ": " + Arrays.toString(filterChainManager.getChain(s).toArray(new Filter[0])));
             }
         }
-    }
-
-    public static Ini getShiroConfiguration() {
-        return shiroConfiguration;
     }
 
     @Override
