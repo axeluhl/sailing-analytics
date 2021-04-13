@@ -13,3 +13,5 @@ Partner of the world’s largest regatta, Kieler Woche (Kiel Week)
 Technical Partner of the Sailing Champions League
 Title sponsor of the SAP 5O5 World Championships
 Official Technology Partner of WORLD SAILING
+
+Start contributing: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding)
