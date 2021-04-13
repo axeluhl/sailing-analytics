@@ -1,0 +1,24 @@
+{
+  "title": "SAP Sailing Analytics",
+  "motivation": "What powers sapsailing.com; known from World Cups, the Extreme Sailing Series, or the Olympic Sailing Regattas",
+  "contributions": [
+    "UI/UX",
+    "Sailing Domain Analysis",
+    "Sailor Profiles",
+    "Audio/Video Integration",
+    "SAC Integration",
+    "AWS Automation/Orchestration",
+    "K8s"
+  ],
+  "skills": [
+    "Java",
+    "GWT",
+    "ReactNative",
+    "AWS",
+    "OSGi",
+    "Sailing"
+  ],
+  "logo": "path/to/your/project-logo.png (optional)",
+  "docs": "https://wiki.sapsailing.com/wiki/howto/onboarding",
+  "language": "Java, ReactNative"
+}
