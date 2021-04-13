@@ -46,6 +46,7 @@
 <setEntry value="org.mongodb.mongo-java-driver.source@default:default"/>
 <setEntry value="org.eclipse.jetty.osgi.boot@3:true"/>
 <setEntry value="org.eclipse.jetty.osgi.boot.warurl@default:default"/>
+<setEntry value="org.hyperic.sigar@default:default"/>
 <setEntry value="slf4j.jdk14@default:default"/>
 <setEntry value="lz4-java@default:default"/>
 <setEntry value="org.apache.felix.gogo.command@default:default"/>
@@ -77,6 +78,7 @@
 <setEntry value="com.sun.jersey@default:default"/>
 <setEntry value="javax.ws.rs@default:default"/>
 <setEntry value="org.apache.commons.beanutils@default:default"/>
+<setEntry value="org.apache.commons.beanutils.source@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.ehcache@default:default"/>
 <setEntry value="org.apache.servicemix.bundles.scribe@default:default"/>
 <setEntry value="org.owasp.encoder@default:default"/>
