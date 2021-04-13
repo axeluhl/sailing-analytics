@@ -18,7 +18,7 @@
     "OSGi",
     "Sailing"
   ],
-  "logo": "path/to/your/project-logo.png (optional)",
+  "logo": "sailing.png",
   "docs": "https://wiki.sapsailing.com/wiki/howto/onboarding",
   "language": "Java, ReactNative"
 }
