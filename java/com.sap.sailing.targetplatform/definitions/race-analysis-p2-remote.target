@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="176">
+<target name="Race Analysis Target" sequenceNumber="177">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -104,7 +104,6 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
 <unit id="org.apache.xmlbeans.source" version="3.1.0.v20200922-1359"/>
-<unit id="org.dom4j" version="2.1.1.v20190321-1528"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
