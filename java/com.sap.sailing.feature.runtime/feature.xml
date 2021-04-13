@@ -67,7 +67,7 @@
          id="org.apache.xmlbeans"
          download-size="0"
          install-size="0"
-         version="2.3.0.v201605172150"
+         version="3.1.0.v20200922-1359"
          unpack="false"/>
 
    <plugin
