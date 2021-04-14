@@ -43,6 +43,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AutoplayHelper {
     private static final Logger LOGGER = Logger.getLogger(AutoplayHelper.class.getName());
@@ -178,7 +179,7 @@ public class AutoplayHelper {
         }
     }
 
-    public static void create(SailingServiceAsync sailingService, ErrorReporter errorReporter, String leaderBoardName,
+    public static void create(SailingServiceAsync sailingService, UserService userService, ErrorReporter errorReporter, String leaderBoardName,
             UUID eventId, EventDTO event, EventBus eventBus, SailingDispatchSystem sailingDispatchSystem,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, AsyncCallback<RVWrapper> callback) {
         LOGGER.info("Creating map for " + regattaAndRaceIdentifier);
@@ -216,7 +217,7 @@ public class AutoplayHelper {
                                     @Override
                                     public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
                                         createRaceMapIfNotExist(regattaAndRaceIdentifier, selectedLeaderboard,
-                                                competitorsAndTheirBoats, competitors, sailingService,
+                                                competitorsAndTheirBoats, competitors, sailingService, userService,
                                                 AutoplayHelper.asyncActionsExecutor, errorReporter, creationTimer,
                                                 callback, clientTimeWhenResponseWasReceived,
                                                 serverTimeDuringRequest, clientTimeWhenRequestWasSent,
@@ -273,11 +274,10 @@ public class AutoplayHelper {
     private static void createRaceMapIfNotExist(RegattaAndRaceIdentifier currentLiveRace,
             StrippedLeaderboardDTO selectedLeaderboard, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Iterable<CompetitorDTO> competitors, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
+            UserService userService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer raceboardTimer,
             AsyncCallback<RVWrapper> callback, long clientTimeWhenResponseWasReceived, Date serverTimeDuringRequest,
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
             RaceTimesInfoProvider creationTimeProvider, AbstractQuickFlagDataProvider provider) {
-
         ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
@@ -298,7 +298,7 @@ public class AutoplayHelper {
         RaceMap raceboardPerspective = new RaceMap(null, null, raceMapLifecycle, settings, sailingService,
                 asyncActionsExecutor, errorReporter, raceboardTimer, competitorSelectionProvider,
                 new RaceCompetitorSet(competitorSelectionProvider), StringMessages.INSTANCE, currentLiveRace,
-                raceMapResources, false, provider);
+                raceMapResources, false, provider, userService);
         raceboardPerspective.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent,
                 serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         raceboardTimer.setPlayMode(PlayModes.Live);
