@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Wind;
@@ -35,7 +34,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiFixTrackTest.class.getName());
     

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="177">
+<target name="Race Analysis Target" sequenceNumber="179">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -67,6 +67,7 @@
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.36.v20210114"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.36.v20210114"/>
 <repository location="https://p2.sapsailing.com/p2/jetty/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -146,7 +147,7 @@
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
 <plugin id="lz4-java"/>
-<plugin id="org.apache.commons.beanutils" version="1.9.4"/>
+<plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
 <plugin id="org.apache.commons.collections"/>
@@ -281,30 +282,31 @@
 <plugin id="org.eclipse.jetty.plus.source"/>
 <plugin id="javax.annotation-api"/>
 <plugin id="org.apache.aries.spifly.dynamic.bundle"/>
-<plugin id="org.objectweb.asm" version="9.0.0.v20201001-1419"/>
-<plugin id="org.objectweb.asm.commons" version="9.0.0.v20201001-1419"/>
-<plugin id="org.objectweb.asm.tree" version="9.0.0.v20201001-1419"/>
+<plugin id="org.objectweb.asm"/>
+<plugin id="org.objectweb.asm.commons"/>
+<plugin id="org.objectweb.asm.tree"/>
 <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
-<plugin id="org.eclipse.jetty.apache-jsp" version="9.4.36.v20210114"/>
+<plugin id="org.eclipse.jetty.apache-jsp"/>
 <plugin id="org.eclipse.jdt.core.compiler.batch"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp" version="9.4.36.v20210114"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp"/>
 <plugin id="org.apache.taglibs.standard-impl"/>
 <plugin id="org.apache.taglibs.taglibs-standard-spec"/>
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
-<plugin id="org.eclipse.jetty.osgi.boot.jsp.source" version="9.4.36.v20201120"/>
+<plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
 <plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
 <plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objectweb.asm.tree.source"/>
 <plugin id="org.objectweb.asm.commons.source"/>
-<plugin id="javax.annotation" version="1.3.5.v20200909-1856"/>
+<plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.util.source"/>
+<plugin id="org.eclipse.jetty.io.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
