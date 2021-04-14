@@ -96,7 +96,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.deploy.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.http"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.http.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -110,7 +124,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.io.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.jmx"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.jmx.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -124,7 +152,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.security.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.server"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.server.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -138,7 +180,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.servlet.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.util"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.util.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -152,7 +208,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.util.ajax.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.webapp"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.webapp.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -166,7 +236,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.websocket.api.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.websocket.client"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.websocket.client.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
@@ -180,7 +264,21 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.websocket.common.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.xml"
+         download-size="0"
+         install-size="0"
+         version="9.4.36.v20210114"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.xml.source"
          download-size="0"
          install-size="0"
          version="9.4.36.v20210114"
