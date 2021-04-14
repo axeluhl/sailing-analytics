@@ -52,6 +52,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.shared.subscription.SSESubscriptionPlan;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -78,8 +79,10 @@ public class LoginTest {
         userStore.ensureServerGroupExists();
         accessControlStore = new AccessControlStoreImpl(userStore);
         Activator.setTestStores(userStore, accessControlStore);
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // to enable shiro to find classes from com.sap.sse.security
-        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
+        // enables shiro to find classes from com.sap.sse.security
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
+                SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         Activator.setSecurityService(securityService);
     }
 

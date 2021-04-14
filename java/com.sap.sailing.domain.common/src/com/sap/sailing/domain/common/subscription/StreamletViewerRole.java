@@ -1,4 +1,4 @@
-package com.sap.sailing.server.security;
+package com.sap.sailing.domain.common.subscription;
 
 import java.util.UUID;
 
