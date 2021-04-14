@@ -4918,7 +4918,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             throw new IllegalArgumentException("The regatta identified by "+regattaIdentifier+" was not found.");
         }
         final Leaderboard regattaLeaderboard = getLeaderboardByName(regatta.getName());
-        assert regattaLeaderboard instanceof RegattaLeaderboard;
         if (regattaLeaderboard != null) {
             final Event event = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(regattaLeaderboard);
             if (event != null) {
