@@ -811,17 +811,23 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
         final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final SailingAnalyticsProcess<String> replicaToShutDownWhenDone;
         final int oldAutoScalingGroupMinSize;
         if (replicaSet.getAutoScalingGroup() != null) {
             oldAutoScalingGroupMinSize = replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize();
+        } else {
+            oldAutoScalingGroupMinSize = -1;
         }
         final Set<SailingAnalyticsProcess<String>> replicas = new HashSet<>();
         Util.addAll(replicaSet.getReplicas(), replicas);
         if (Util.isEmpty(replicaSet.getReplicas())) {
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
-            replicas.add(launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
-                    privateKeyEncryptionPassphrase, replicationBearerToken));
+            replicaToShutDownWhenDone = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
+                    privateKeyEncryptionPassphrase, replicationBearerToken);
+            replicas.add(replicaToShutDownWhenDone);
+        } else {
+            replicaToShutDownWhenDone = null;
         }
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicas) {
@@ -839,7 +845,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         // TODO upgrade master in place using refreshInstance.sh; ./stop && ./start
         // TODO wait for master to turn healthy
         // TODO register master with master and public target group
-        // TODO if a replica was spun up, remove from public target group and terminate
+        // if a replica was spun up (replicaToShutDownWhenDone), remove from public target group and terminate:
+        if (replicaToShutDownWhenDone != null) {
+            if (replicaSet.getAutoScalingGroup() != null) {
+                getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), oldAutoScalingGroupMinSize);
+            } else {
+                replicaSet.getPublicTargetGroup().removeTarget(replicaToShutDownWhenDone.getHost());
+                replicaToShutDownWhenDone.stopAndTerminateIfLast(WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+            }
+        }
         // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
         final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
@@ -871,7 +885,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             throws Exception {
         final SailingAnalyticsProcess<String> spunUpReplica;
         if (replicaSet.getAutoScalingGroup() != null) {
-            spunUpReplica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup());
+            spunUpReplica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), replicaSet.getMaster());
         } else {
             spunUpReplica = spinUpReplicaAndRegisterInPublicTargetGroup(replicaSet, optionalKeyName,
                     privateKeyEncryptionPassphrase, replicationBearerToken);
@@ -915,13 +929,28 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 "Waiting for process " + sailingAnalyticsProcess + " to become available");
     }
 
-    private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup) throws TimeoutException, Exception {
+    private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(
+            AwsAutoScalingGroup autoScalingGroup,
+            SailingAnalyticsProcess<String> master)
+            throws TimeoutException, Exception {
         if (autoScalingGroup.getAutoScalingGroup().minSize() < 1) {
             getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, 1);
         }
-        Wait.wait(/* TODO */ ()->true, WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
+        return Wait.wait(()->hasHealthyReplica(master), healthyReplica->healthyReplica != null,
+                /* retryOnException */ true,
+                WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
                 "Waiting for auto-scaling group to produce healthy replica");
-        // TODO Implement LandscapeManagementWriteServiceImpl.spinUpReplicaByIncreasingAutoScalingGroupMinSize(...)
+    }
+
+    /**
+     * Returns one replica process that is healthy, or {@code null} if no such process was found
+     */
+    private SailingAnalyticsProcess<String> hasHealthyReplica(SailingAnalyticsProcess<String> master) throws IOException {
+        for (final SailingAnalyticsProcess<String> replica : master.getReplicas()) {
+            if (replica.isReady(WAIT_FOR_HOST_TIMEOUT)) {
+                return replica;
+            }
+        }
         return null;
     }
 

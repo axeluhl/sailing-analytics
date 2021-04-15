@@ -91,6 +91,12 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     String getHealthCheckPath();
 
+    /**
+     * For this application process finds out whether it is replicating from another application process which then is
+     * the master. Note that the master server name may differ from this application process's
+     * {@link #getServerName(Optional, Optional, byte[]) server name}, e.g., if this application process is a master
+     * with regards to the actual application content, but a replica with regards to, say, security.
+     */
     String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
 
     /**
@@ -141,6 +147,10 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * the {@code Authorization:} header.
      */
     void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws MalformedURLException, IOException, TimeoutException, Exception;
+    
+    ProcessT getMaster();
+    
+    Iterable<ProcessT> getReplicas();
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();

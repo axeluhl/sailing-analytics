@@ -259,6 +259,18 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         }
         content.close();
     }
+    
+    @Override
+    public ProcessT getMaster() {
+        // TODO Implement ApplicationProcessImpl.getMaster(...) using getReplicationStatus(...) to get IP+port of master, then query its /gwt/status to obtain all parameters for the ProcessT constructor call
+        return null;
+    }
+
+    @Override
+    public Iterable<ProcessT> getReplicas() {
+        // TODO Implement ApplicationProcessImpl.getReplicas(...) using getReplicationStatus(...) to get IP+port of replicas, then query their /gwt/status to obtain all parameters for the ProcessT constructor calls
+        return null;
+    }
 
     @Override
     public String toString() {
