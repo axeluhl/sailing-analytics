@@ -1,11 +1,7 @@
 package com.sap.sailing.gwt.ui.client.subscription;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * Base subscription remote service interface for all payment provider services
@@ -26,9 +22,4 @@ public interface SubscriptionService<C, P> extends RemoteService {
      * Fetch user current subscription data from database
      */
     public SubscriptionDTO getSubscription();
-    
-    public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans();
-    
-    public Map<Serializable, SubscriptionPlanDTO> getAllSubscriptionPlansMappedById();
-
 }

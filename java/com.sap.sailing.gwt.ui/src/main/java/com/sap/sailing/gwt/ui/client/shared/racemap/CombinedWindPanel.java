@@ -7,15 +7,10 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.ui.client.UserService;
 
 public class CombinedWindPanel extends FlowPanel {
     
@@ -34,7 +29,7 @@ public class CombinedWindPanel extends FlowPanel {
     private final CoordinateSystem coordinateSystem;
     
     public CombinedWindPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
-            StringMessages stringMessages, CoordinateSystem coordinateSystem, UserService userService) {
+            StringMessages stringMessages, CoordinateSystem coordinateSystem) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
@@ -48,15 +43,12 @@ public class CombinedWindPanel extends FlowPanel {
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final WildcardPermission viewStreamletsPermission = WildcardPermission.builder()
-                        .withActions(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS).build();
-                boolean hasPermission = userService.hasPermission(viewStreamletsPermission, null);
                 RaceMapSettings oldRaceMapSettings = map.getSettings();
                 // when off, turn on; when on and no color, turn on color; when on with color, turn off
-                final boolean newShowStreamletsOverlaySetting = (oldRaceMapSettings.isShowWindStreamletOverlay() ?
-                        oldRaceMapSettings.isShowWindStreamletColors() ? false : true : true) && hasPermission;
-                final boolean newShowWindStreamletColors = (oldRaceMapSettings.isShowWindStreamletOverlay() ? !oldRaceMapSettings.isShowWindStreamletColors() :
-                    false) && hasPermission;
+                boolean newShowStreamletsOverlaySetting = oldRaceMapSettings.isShowWindStreamletOverlay() ?
+                        oldRaceMapSettings.isShowWindStreamletColors() ? false : true : true;
+                boolean newShowWindStreamletColors = oldRaceMapSettings.isShowWindStreamletOverlay() ? !oldRaceMapSettings.isShowWindStreamletColors() :
+                    false;
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), oldRaceMapSettings.isWindUp(),
@@ -68,9 +60,6 @@ public class CombinedWindPanel extends FlowPanel {
                         oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization(),
                         oldRaceMapSettings.isShowSatelliteLayer());
                 map.updateSettings(newRaceMapSettings);
-                if(!hasPermission) {
-                    Notification.notify("Like & Subscribe!", NotificationType.WARNING);
-                }
             }
         });
         textLabel = new Label("");

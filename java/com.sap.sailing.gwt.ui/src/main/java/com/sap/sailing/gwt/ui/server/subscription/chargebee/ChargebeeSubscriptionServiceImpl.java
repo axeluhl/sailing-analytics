@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscription;
 import com.sap.sse.security.shared.subscription.chargebee.ChargebeeSubscriptionProvider;
 import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
@@ -27,8 +28,7 @@ import com.sap.sse.security.subscription.chargebee.ChargebeeConfiguration;
  * 
  * @author Tu Tran
  */
-public class ChargebeeSubscriptionServiceImpl extends
-        SubscriptionServiceImpl<ChargebeeConfigurationDTO, PrepareCheckoutDTO> implements ChargebeeSubscriptionService {
+public class ChargebeeSubscriptionServiceImpl extends SubscriptionServiceImpl implements ChargebeeSubscriptionService {
     private static final long serialVersionUID = -4276839013785711262L;
 
     private static final Logger logger = Logger.getLogger(ChargebeeSubscriptionServiceImpl.class.getName());
@@ -62,7 +62,7 @@ public class ChargebeeSubscriptionServiceImpl extends
                     response.setHostedPageJSONString(result.hostedPage().toJson());
                 } else {
                     response.setError(
-                            "User has already subscribed to " + getSecurityService().getSubscriptionPlanById(planId).getName() + " plan");
+                            "User has already subscribed to " + SubscriptionPlan.getPlan(planId).getName() + " plan");
                 }
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in generating Chargebee hosted page data ", e);
@@ -111,5 +111,4 @@ public class ChargebeeSubscriptionServiceImpl extends
         return subscription != null
                 && subscription.getSubscriptionStatus().equals(ChargebeeSubscription.SUBSCRIPTION_STATUS_CANCELLED);
     }
-
 }

@@ -30,7 +30,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -72,10 +71,9 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityUrlPathProvider;
 import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SubscriptionPlanProvider;
-import com.sap.sse.security.util.GenericJSONPreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -226,12 +224,9 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> sailingSecurityUrlPathProviderProperties = new Hashtable<>();
         sailingSecurityUrlPathProviderProperties.put(TypeBasedServiceFinder.TYPE,
                 SecurityUrlPathProviderSailingImpl.APPLICATION);
-        registrations.add(context.registerService(SecurityUrlPathProvider.class,
-                new SecurityUrlPathProviderSailingImpl(), sailingSecurityUrlPathProviderProperties));
-        registrations
-                .add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
-        registrations.add(context.registerService(SubscriptionPlanProvider.class,
-                SailingSubscriptionPlan::getAllInstances, null));
+        context.registerService(SecurityUrlPathProvider.class, new SecurityUrlPathProviderSailingImpl(),
+                sailingSecurityUrlPathProviderProperties);
+        registrations.add(context.registerService(HasPermissionsProvider.class, SecuredDomainType::getAllInstances, null));
         registrations.add(context.registerService(SecurityInitializationCustomizer.class,
                 (SecurityInitializationCustomizer) securityService -> {
                     final RoleDefinition sailingViewerRoleDefinition = securityService

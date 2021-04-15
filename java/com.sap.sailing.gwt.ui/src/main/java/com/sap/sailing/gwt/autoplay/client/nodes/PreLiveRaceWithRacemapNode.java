@@ -19,7 +19,7 @@ public class PreLiveRaceWithRacemapNode extends FiresPlaceNode {
     }
 
     public void onStart() {
-        AutoplayHelper.create(cf.getSailingService(),cf.getUserService(), cf.getErrorReporter(),
+        AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(),
                 cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(), cf.getAutoPlayCtxSignalError().getEvent(),
                 cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getPreLiveRace(),

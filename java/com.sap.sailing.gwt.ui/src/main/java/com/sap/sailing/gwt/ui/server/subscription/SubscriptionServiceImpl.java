@@ -1,12 +1,6 @@
 package com.sap.sailing.gwt.ui.server.subscription;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -22,8 +16,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionService;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -41,7 +33,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
  * regarding logic, or initialize any custom service logics, particular child implementation should override
  * {@code initService} method
  */
-public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet implements SubscriptionService<C, P> {
+public abstract class SubscriptionServiceImpl extends RemoteServiceServlet {
     private static final long serialVersionUID = -2953209842119970755L;
     private static final Logger logger = Logger.getLogger(SubscriptionServiceImpl.class.getName());
 
@@ -56,33 +48,9 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
         securityService = initSecurityService();
         subscriptionApiServiceTracker = ServiceTrackerFactory.createAndOpen(context, SubscriptionApiService.class);
     }
-    
-    @Override
-    public Iterable<SubscriptionPlanDTO> getAllSubscriptionPlans() {
-        Iterable<SubscriptionPlan> allSubscriptionPlans = getSecurityService().getAllSubscriptionPlans().values();
-        Set<SubscriptionPlanDTO> allSubscriptionPlanDTOs = new HashSet<>();
-        for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans) {
-            allSubscriptionPlanDTOs.add(new SubscriptionPlanDTO(subscriptionPlan.getId(), subscriptionPlan.getName(),
-                    null));
-        }
-        return allSubscriptionPlanDTOs;
-    }
-    
-    @Override
-    public Map<Serializable, SubscriptionPlanDTO> getAllSubscriptionPlansMappedById() {
-        Map<Serializable, SubscriptionPlanDTO> allSubscriptionPlans = new HashMap<>();
-        for (Entry<Serializable, SubscriptionPlan> subscriptionPlan : getSecurityService().getAllSubscriptionPlans()
-                .entrySet()) {
-            SubscriptionPlanDTO subscriptionPlanDTO = new SubscriptionPlanDTO(subscriptionPlan.getKey().toString(),
-                    subscriptionPlan.getValue().getName(), null);
-            allSubscriptionPlans.put(subscriptionPlan.getKey(), subscriptionPlanDTO);
-        }
-        return allSubscriptionPlans;
-    }
 
     private CompletableFuture<SecurityService> initSecurityService() {
-        final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker
-                .createAndOpen(context, SecurityService.class);
+        final FullyInitializedReplicableTracker<SecurityService> tracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
         return CompletableFuture.supplyAsync(() -> {
             SecurityService result = null;
             try {
@@ -110,9 +78,9 @@ public abstract class SubscriptionServiceImpl<C, P> extends RemoteServiceServlet
      * Check if planId is valid
      */
     protected boolean isValidPlan(String planId) {
-        return StringUtils.isNotEmpty(planId) && getSecurityService().getSubscriptionPlanById(planId) != null;
+        return StringUtils.isNotEmpty(planId) && SubscriptionPlan.getPlan(planId) != null;
     }
-    
+
     /**
      * Return true if user already subscribed to plan
      */

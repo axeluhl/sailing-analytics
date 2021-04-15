@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.ui.client.subscription.BaseUserSubscriptionView;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 
 /**
  * View for displaying user subscription information like plan, subscription status...In this view user is able to
@@ -49,7 +48,5 @@ public interface UserSubscriptionView extends BaseUserSubscriptionView, IsWidget
          *            subscription provider name
          */
         public void cancelSubscription(String planId, String providerName);
-
-        public SubscriptionPlanDTO getPlanById(String planId);
     }
 }

@@ -1,17 +1,11 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.subscription;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.client.subscription.SubscriptionServiceAsync;
 import com.sap.sailing.gwt.ui.client.subscription.WithSubscriptionService;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
@@ -28,7 +22,6 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
 
     private final C clientFactory;
     private UserSubscriptionView view;
-    private Map<Serializable, SubscriptionPlanDTO> subscriptionPlans = new HashMap<>();
 
     public UserSubscriptionPresenter(C clientFactory) {
         this.clientFactory = clientFactory;
@@ -38,7 +31,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
     public void init() {
         clientFactory.getSubscriptionService().initializeProviders();
     }
-    
+
     @Override
     public void loadSubscription() {
         view.onStartLoadSubscription();
@@ -93,7 +86,7 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
                             if (result != null && result.getError() != null && !result.getError().isEmpty()) {
                                 showError(StringMessages.INSTANCE.errorLoadingUserSubscription(result.getError()));
                             } else {
-                                updateView(result);
+                                view.updateView(result);
                             }
                         }
 
@@ -106,46 +99,12 @@ public class UserSubscriptionPresenter<C extends ClientFactoryWithDispatch & Err
             onInvalidSubscriptionProviderError(e);
         }
     }
-    
-    private void updateView(SubscriptionDTO subscription) {
-        try {
-            final SubscriptionServiceAsync<?, ?> defaultAsyncService = clientFactory.getSubscriptionService()
-                    .getDefaultAsyncService();
-            
-            defaultAsyncService.getAllSubscriptionPlansMappedById(new AsyncCallback<Map<Serializable, SubscriptionPlanDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    // This will simply not refresh the SubscriptionPlan list in the view.
-                    // Not critical, since the case of a changed set of SubscriptionPlans is highly unlikely.
-                    view.updateView(subscription, null);
-                }
 
-                @Override
-                public void onSuccess(Map<Serializable, SubscriptionPlanDTO> result) {
-                    updateSubscriptionPlanMap(result);
-                    view.updateView(subscription, result.values());
-                }
-            });
-        } catch (InvalidSubscriptionProviderException e) {
-            onInvalidSubscriptionProviderError(e);
-        }
-    }
-    
-    private void updateSubscriptionPlanMap(Map<Serializable, SubscriptionPlanDTO> updatedPlans) {
-        subscriptionPlans.clear();
-        subscriptionPlans.putAll(updatedPlans);
-    }
-    
     private void showError(String message) {
         Notification.notify(message, NotificationType.ERROR);
     }
 
     private void onInvalidSubscriptionProviderError(InvalidSubscriptionProviderException e) {
         showError(StringMessages.INSTANCE.errorInvalidSubscritionProvider(e.getMessage()));
-    }
-
-    @Override
-    public SubscriptionPlanDTO getPlanById(String planId) {
-        return subscriptionPlans.get(planId);
     }
 }

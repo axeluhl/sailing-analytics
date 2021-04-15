@@ -21,9 +21,9 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubs
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
-import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 
 /**
  * Implementation view for {@link UserSubscriptionView}
@@ -83,8 +83,8 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
     }
 
     @Override
-    public void updateView(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-        updatePlanList(subscription, planList);
+    public void updateView(SubscriptionDTO subscription) {
+        updatePlanList(subscription);
         subscribeButtonUi.setEnabled(true);
         if (subscription == null) {
             subscriptionListUi.setRowData(new ArrayList<SubscriptionItem>());
@@ -103,17 +103,16 @@ public class UserSubscription extends Composite implements UserSubscriptionView 
         subscriptionListUi.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
     }
 
-    private void updatePlanList(SubscriptionDTO subscription, Iterable<SubscriptionPlanDTO> planList) {
-        if (planList != null) {
-            planListUi.clear();
-            if (subscription == null) {
-                planListUi.addItem("", "");
-            }
-            for (SubscriptionPlanDTO plan : planList) {
-                planListUi.addItem(plan.getName(), plan.getId());
-            }
-            planListUi.setSelectedIndex(0);
+    private void updatePlanList(SubscriptionDTO subscription) {
+        planListUi.clear();
+        if (subscription == null) {
+            planListUi.addItem("", "");
         }
+        SubscriptionPlan[] planList = SubscriptionPlan.values();
+        for (SubscriptionPlan plan : planList) {
+            planListUi.addItem(plan.getName(), plan.getId());
+        }
+        planListUi.setSelectedIndex(0);
     }
 
     private void hide() {

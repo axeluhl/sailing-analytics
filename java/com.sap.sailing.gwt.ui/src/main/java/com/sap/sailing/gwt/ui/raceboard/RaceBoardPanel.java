@@ -299,7 +299,7 @@ public class RaceBoardPanel
                 errorReporter, timer,
                 competitorSelectionProvider, raceCompetitorSet, stringMessages, selectedRaceIdentifier, 
                 raceMapResources, /* showHeaderPanel */ true, quickFlagDataProvider, this::showInWindChart,
-                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction, userService) {
+                leaderboardName, leaderboardGroupName, leaderboardGroupId, shareLinkAction) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
