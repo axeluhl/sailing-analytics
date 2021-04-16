@@ -60,10 +60,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     private final FlowPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
-        this(stringMessages, true, false);
+        this(stringMessages, true, true);
     }
    
-    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean autosubmit) {
+    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean showUrlAfterUpload) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
         final VerticalPanel mainPanel = new VerticalPanel();
         final FlowPanel imageUrlPanel = new FlowPanel();
@@ -134,9 +134,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             public void onChange(ChangeEvent event) {
                 if (fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
                     submitButton.setEnabled(true);
-                    if (autosubmit) {
-                        submitButton.click();
-                    }
+                    submitButton.click();
                 }
             }
         });
@@ -151,16 +149,20 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 String localUri = uri;
                 if (localUri != null && !"".equals(localUri)) {
                     GWT.log("(1) remove uploaded file " + localUri);
-                    removePanel.setAction("/sailingserver/api/v1/file?uri=" + localUri);
-                    removePanel.submit();
+                    deleteFileOnServer(localUri);
                 }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
-                urlTextBox.setEnabled(false);
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI) != null) {
                         uri = resultJson.get(0).isObject().get(FileUploadConstants.FILE_URI).isString().stringValue();
+                        if (showUrlAfterUpload) {
+                            urlTextBox.setValue(uri);
+                            urlTextBox.setEnabled(true);
+                        } else {
+                            urlTextBox.setEnabled(false);
+                        }
                         fireResultUri(uri);
                         removeButton.setEnabled(true);
                         Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
@@ -187,7 +189,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
      * Returns <code>null</code> if the trimmed URL field contents are empty
      */
     public String getURL() {
-        final String trimmedUrl = urlTextBox.getValue().trim();
+        final String trimmedUrl = (uri != null ? uri : "").trim();
         return trimmedUrl.isEmpty() ? null : trimmedUrl;
     }
 
@@ -260,13 +262,17 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             uploadFormPanel.remove(uploadPanel);
         }
     }
-    
+
     public void fireClickToFileUploadField() {
         this.fileUploadField.click();
     }
-    
+
     public void deleteCurrentFile() {
         final String localUri = uri;
+        deleteFileOnServer(localUri);
+    }
+
+    private void deleteFileOnServer(String localUri) {
         // use request object as form elements of dialog are already destroyed
         RequestBuilder request = new RequestBuilder(RequestBuilder.POST, "/sailingserver/api/v1/file?uri=" + localUri);
         try {
@@ -285,6 +291,5 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         } catch (RequestException e) {
             GWT.log("request exception when deleting file" + localUri, e);
         }
-
     }
 }
