@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.osgi.framework.BundleContext;
@@ -51,10 +52,12 @@ import com.sap.sse.gwt.server.ProxiedRemoteServiceServlet;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
+    private static final Logger logger = Logger.getLogger(DataMiningServiceImpl.class.getName());
 
     private final BundleContext context;
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
@@ -364,7 +367,9 @@ public class DataMiningServiceImpl extends ProxiedRemoteServiceServlet implement
         StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer
                 .getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
+        logger.info("Handing query "+query+" to server for processing on behalf of user "+SessionUtils.getPrincipal());
         QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+        logger.info("Obtained result for query "+query+" from server on behalf of user "+SessionUtils.getPrincipal());
         return dtoFactory.createResultDTO(result);
     }
 

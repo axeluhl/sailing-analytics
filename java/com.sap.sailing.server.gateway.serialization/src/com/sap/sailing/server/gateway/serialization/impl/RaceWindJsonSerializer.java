@@ -49,7 +49,7 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
         Position firstPosition = null;
         double bestSamplingRate = Double.MAX_VALUE;
         for (WindSource windSource : highQualityWindSources) {
-            WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+            final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
             windTrack.lockForRead();
             try {
                 Iterator<Wind> iterator = windTrack.getFixes(finalFrom, true, finalTo, true).iterator();

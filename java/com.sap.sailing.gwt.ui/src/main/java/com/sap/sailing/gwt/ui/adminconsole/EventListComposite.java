@@ -461,7 +461,10 @@ public class EventListComposite extends Composite {
                 }
                 @Override
                 public void onSuccess(Void result) {
-                    presenter.getEventsRefresher().reloadAndCallFillAll();
+                    for (EventDTO event : events) {
+                        presenter.getEventsRefresher().remove(event);
+                    }
+                    presenter.getEventsRefresher().callAllFill();
                 }
             });
         }
@@ -476,7 +479,8 @@ public class EventListComposite extends Composite {
 
             @Override
             public void onSuccess(Void result) {
-                presenter.getEventsRefresher().reloadAndCallFillAll();
+                presenter.getEventsRefresher().remove(event);
+                presenter.getEventsRefresher().callAllFill();
             }
         });
     }
@@ -721,7 +725,8 @@ public class EventListComposite extends Composite {
 
             @Override
             public void onSuccess(final EventDTO newEvent) {
-                presenter.getEventsRefresher().reloadAndCallFillAll();
+                presenter.getEventsRefresher().add(newEvent);
+                presenter.getEventsRefresher().callAllFill();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
                     DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(

@@ -19,7 +19,6 @@ public class RegattaManagementPanelSupplier extends AdminConsolePanelSupplier<Re
 
     @Override
     public RegattaManagementPanel init() {
-        logger.info("Create RegattaManagementPanel");
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(stringMessages, presenter);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
         presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(regattaManagementPanel.getRegattasDisplayer());
