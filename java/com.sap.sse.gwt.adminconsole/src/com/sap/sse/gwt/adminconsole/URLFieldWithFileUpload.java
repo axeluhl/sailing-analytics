@@ -103,7 +103,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         urlTextBox.addValueChangeHandler(valueChangedEvent->{
            uri = valueChangedEvent.getValue(); 
         });
-//        urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         final Button selectUploadButton = new Button();
         selectUploadButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().uploadButtonClass(), true);
@@ -113,17 +112,9 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel = new FormPanel();
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
-        
-        //uploadPanel.getElement().setId("fileUploadPanel");
-        
         uploadFormPanel.setAction("/sailingserver/fileupload");
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
-        
-        //final Label uploadLabel = new Label(stringMessages.upload()+ ":");
-        //uploadLabel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().inlineClass());
-        //uploadPanel.add(uploadLabel);
-        
         fileUploadField = new FileUpload();
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
@@ -133,8 +124,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         selectUploadButton.addClickHandler(click -> {
             fileUploadField.click();
         });        
-//        uploadPanel.add(selectUploadButton);
-        
+        // the hidden submit button for uploading the file
         final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setVisible(false);
         submitButton.setEnabled(false);
@@ -236,7 +226,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
 
     @Override
     public String getValue() {
-        //return getURL();
         return this.uri;
     }
 
