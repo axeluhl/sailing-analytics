@@ -232,9 +232,9 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 } catch (Exception e) {
                     return false;
                 }
-            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name");
+            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name of "+this);
         } catch (Exception e) {
-            logger.info("Exception while waiting for master server name: "+e.getMessage());
+            logger.info("Exception while waiting for master server name of "+this+": "+e.getMessage());
         }
         return result[0];
     }
