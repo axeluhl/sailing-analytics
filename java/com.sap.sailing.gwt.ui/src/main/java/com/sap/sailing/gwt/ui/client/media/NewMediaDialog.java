@@ -134,6 +134,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 validateAndUpdate();
             }
         });
+        getCancelButton().addClickHandler(clickEvent-> urlBox.deleteCurrentFile());
+        
         titleBox = createTextBox(null);
         titleBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override

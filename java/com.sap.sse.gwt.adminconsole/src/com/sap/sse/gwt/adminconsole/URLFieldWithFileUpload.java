@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.adminconsole;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -8,6 +9,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -152,6 +158,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
+                String localUri = uri;
+                if (localUri != null && !"".equals(localUri)) {
+                    GWT.log("(1) remove uploaded file " + localUri);
+                    removePanel.setAction("/sailingserver/api/v1/file?uri=" + localUri);
+                    removePanel.submit();
+                }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
                 urlTextBox.setEnabled(false);
                 String result = event.getResults();
@@ -169,7 +181,6 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                 }
             }
         });
-        
         if (initiallyEnableUpload) {
             uploadFormPanel.add(uploadPanel);
         }
@@ -263,5 +274,28 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     public void fireClickToFileUploadField() {
         this.fileUploadField.click();
+    }
+    
+    public void deleteCurrentFile() {
+        final String localUri = uri;
+        // use request object as form elements of dialog are already destroyed
+        RequestBuilder request = new RequestBuilder(RequestBuilder.POST, "/sailingserver/api/v1/file?uri=" + localUri);
+        try {
+            request.sendRequest(null, new RequestCallback() {
+
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    GWT.log("successfully deleted " + localUri + " " + response.getText());
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    GWT.log("delete failed" + localUri, exception);
+                }
+            });
+        } catch (RequestException e) {
+            GWT.log("request exception when deleting file" + localUri, e);
+        }
+
     }
 }
