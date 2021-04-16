@@ -929,13 +929,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                 }
+                final VerticalPanel sharingAndVideoPanel = new VerticalPanel();
+                // add-video button
+                sharingAndVideoPanel.add(addVideoToRaceButton);
                 if (shareLinkAction != null) {
                     final Button shareLinkButton = createShareLinkButton(map);
-                    map.setControls(ControlPosition.RIGHT_BOTTOM, shareLinkButton);
+                    sharingAndVideoPanel.add(shareLinkButton);
                 }
-                
-                // add-video button
-                map.setControls(ControlPosition.RIGHT_CENTER, addVideoToRaceButton);
+                map.setControls(ControlPosition.RIGHT_BOTTOM, sharingAndVideoPanel);
                 
                 if (showMapControls) {
                     final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
