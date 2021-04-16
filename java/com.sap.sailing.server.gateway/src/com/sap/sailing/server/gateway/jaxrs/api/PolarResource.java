@@ -162,7 +162,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 JSONArray resultAsJson = new JSONArray();
                 WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
                 PolarDataService service = getService().getPolarDataService();
-                ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                final ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
                 maneuverBasedWindEstimationTrackImpl.initialize();
                 maneuverBasedWindEstimationTrackImpl.lockForRead();
