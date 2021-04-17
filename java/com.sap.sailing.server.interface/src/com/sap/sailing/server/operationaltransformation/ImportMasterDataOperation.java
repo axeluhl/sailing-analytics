@@ -338,7 +338,7 @@ public class ImportMasterDataOperation extends
     }
 
     private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
-            RaceLog log, RaceLogIdentifier identifier) {
+            final RaceLog log, RaceLogIdentifier identifier) {
         RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
         log.lockForRead();
@@ -378,7 +378,7 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void addAllImportedRegattaEvents(RegattaLogStore regattaLogStore, RegattaLog log,
+    private void addAllImportedRegattaEvents(RegattaLogStore regattaLogStore, final RegattaLog log,
             RegattaLikeIdentifier identifier, RegattaLogEventVisitor storeVisitor) {
         log.lockForRead();
         try {
