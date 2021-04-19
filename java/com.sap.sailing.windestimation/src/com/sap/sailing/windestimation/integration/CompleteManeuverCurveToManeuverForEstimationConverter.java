@@ -52,7 +52,7 @@ public class CompleteManeuverCurveToManeuverForEstimationConverter {
         }
         BoatClass boatClass = trackedRace.getBoatOfCompetitor(competitor).getBoatClass();
         ManeuverCurveBoundaries maneuverCurveBoundaries = maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries();
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         Position maneuverPosition = track.getEstimatedPosition(maneuver.getTimePoint(), false);
         Double courseChangeInDegreesWithinTurningSectionOfPreviousManeuver = previousManeuver == null ? null
                 : previousManeuver.getMainCurveBoundaries().getDirectionChangeInDegrees();

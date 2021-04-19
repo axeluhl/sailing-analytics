@@ -324,7 +324,7 @@ public class LeaderboardData extends ExportAction {
         
         long numberOfGPSFixes = 0, numberOfWindFixes = 0;
         for (Competitor competitor : race.getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = race.getTrack(competitor);
+            final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = race.getTrack(competitor);
             competitorTrack.lockForRead();
             try {
                 numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
