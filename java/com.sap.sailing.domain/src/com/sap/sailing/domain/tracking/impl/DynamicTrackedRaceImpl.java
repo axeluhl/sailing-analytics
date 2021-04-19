@@ -465,7 +465,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 // Holding the serialization lock 
                 for (WindSource windSource : getWindSources()) {
                     if (windSource.getType().canBeStored()) {
-                        WindTrack windTrack = getOrCreateWindTrack(windSource);
+                        final WindTrack windTrack = getOrCreateWindTrack(windSource);
                         // replicate all wind fixes that may have been loaded by the wind store
                         windTrack.lockForRead();
                         try {
@@ -1047,7 +1047,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     @Override
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+        final WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixes that may have been loaded by the wind store
             result.lockForRead();

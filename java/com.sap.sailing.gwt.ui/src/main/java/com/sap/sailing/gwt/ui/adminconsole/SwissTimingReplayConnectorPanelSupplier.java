@@ -24,7 +24,6 @@ public class SwissTimingReplayConnectorPanelSupplier
 
     @Override
     public SwissTimingReplayConnectorPanel init() {
-        logger.info("Create SwissTimingReplayConnectorPanel");
         SwissTimingReplayConnectorPanel swissTimingReplayConnectorPanel = new SwissTimingReplayConnectorPanel(presenter,
                 stringMessages, tableResources);
         swissTimingReplayConnectorPanel.ensureDebugId("swissTimingReplayConnectorPanel");

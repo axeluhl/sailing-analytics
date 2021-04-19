@@ -19,7 +19,6 @@ public class WindPanelSupplier extends AdminConsolePanelSupplier<WindPanel> {
 
     @Override
     public WindPanel init() {
-        logger.info("Create WindPanel");
         final WindPanel windPanel = new WindPanel(presenter, stringMessages);
         windPanel.ensureDebugId("WindPanel");
         presenter.getRegattasRefresher().addDisplayerAndCallFillOnInit(windPanel.getRegattasDisplayer());

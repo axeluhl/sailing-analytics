@@ -113,9 +113,16 @@ public class WindResource extends AbstractSailingServerResource {
         } else {
             for (final Regatta regatta : getService().getAllRegattas()) {
                 final DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-                for (final DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                    if (getSecurityService().hasCurrentUserUpdatePermission(trackedRace.getRaceIdentifier())) {
-                        result.add(new RaceIdentifierAndTrackedRace(trackedRace.getRaceIdentifier(), trackedRace));
+                if (trackedRegatta != null) {
+                    trackedRegatta.lockTrackedRacesForRead();
+                    try {
+                        for (final DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                            if (getSecurityService().hasCurrentUserUpdatePermission(trackedRace.getRaceIdentifier())) {
+                                result.add(new RaceIdentifierAndTrackedRace(trackedRace.getRaceIdentifier(), trackedRace));
+                            }
+                        }
+                    } finally {
+                        trackedRegatta.unlockTrackedRacesAfterRead();
                     }
                 }
             }

@@ -20,7 +20,6 @@ public class ExpeditionDeviceConfigurationsPanelSupplier
 
     @Override
     public ExpeditionDeviceConfigurationsPanel init() {
-        logger.info("Create ExpeditionDeviceConfigurationsPanel");
         ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(
                 presenter, stringMessages);
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");

@@ -2385,7 +2385,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         regattaLog.add(event);
     }
 
-    private void closeOpenEndedDeviceMapping(RegattaLog regattaLog, DeviceMappingDTO mappingDTO, Date closingTimePoint)
+    private void closeOpenEndedDeviceMapping(final RegattaLog regattaLog, DeviceMappingDTO mappingDTO, Date closingTimePoint)
             throws TransformationException, UnableToCloseDeviceMappingException {
         boolean successfullyClosed = false;
         List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = null;
@@ -2432,7 +2432,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         }
     }
 
-    private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> boolean revokeEvent(boolean eventRevoked, Serializable idToRevoke, AbstractLog<EventT, VisitorT> abstractLog)
+    private <EventT extends AbstractLogEvent<VisitorT>, VisitorT> boolean revokeEvent(boolean eventRevoked, Serializable idToRevoke, final AbstractLog<EventT, VisitorT> abstractLog)
             throws NotRevokableException {
         final EventT event; 
         abstractLog.lockForRead();

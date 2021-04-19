@@ -23,7 +23,7 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
     }
     
     @Override
-    public JSONObject serialize(RaceLog object) {
+    public JSONObject serialize(final RaceLog object) {
         JSONObject result = new JSONObject();
         object.lockForRead();
         try {
