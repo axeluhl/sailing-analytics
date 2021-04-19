@@ -273,6 +273,9 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     }
 
     private void deleteFileOnServer(String localUri) {
+        if (localUri == null || "".equals(localUri)) {
+            return;
+        }
         // use request object as form elements of dialog are already destroyed
         RequestBuilder request = new RequestBuilder(RequestBuilder.POST, "/sailingserver/api/v1/file?uri=" + localUri);
         try {
