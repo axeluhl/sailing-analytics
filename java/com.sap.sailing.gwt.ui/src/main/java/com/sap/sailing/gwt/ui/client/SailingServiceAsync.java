@@ -655,4 +655,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
+    
+    void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
+
 }

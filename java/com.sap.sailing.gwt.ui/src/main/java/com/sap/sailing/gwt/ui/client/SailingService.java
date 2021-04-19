@@ -577,4 +577,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws UnauthorizedException, NotFoundException;
+    
+    Integer getAdminConsoleChangeLogSize();
+
 }
