@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -392,10 +393,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private void refreshPopupPosition() {
         if (!DeviceDetector.isDesktop()) {
             final DialogBox popup = super.getDialogBox();
-
             popup.setPopupPositionAndShow((width, height) -> {
-                popup.setPopupPosition(popup.getParent().getOffsetWidth() - popup.getOffsetWidth(),
-                        popup.getParent().getOffsetHeight() - popup.getOffsetHeight());
+                popup.getElement().getStyle().clearTop();
+                popup.getElement().getStyle().setBottom(0, Unit.PX);
             });
         }
     }
