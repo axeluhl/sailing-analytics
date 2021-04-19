@@ -25,7 +25,6 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListener;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
-import com.sap.sailing.gwt.ui.client.media.rebuild.MediaGalleryComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardWithSecurityFetcher;
@@ -52,7 +51,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
     private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 80); // Account for Tags and Leaderboard toggle widths: 40px + 40px
-    private final int MIN_MEDIA_WIDTH = Math.min(440, Window.getClientWidth() - 80); // width for right sided media panel
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -87,14 +85,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private TouchSplitLayoutPanel splitLayoutPanel;
     private final UserService userService;
     private final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher;
-    private final Panel newMediaPanel = new SimpleLayoutPanel();
-    private MediaGalleryComponent newMediaGalleryComponent;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final RaceMap centerComponentP,
             final Component<?> rightComponentP, final MediaPlayerManagerComponent mediaPlayerManagerComponent,
             List<Component<?>> components, final StringMessages stringMessages, UserService userService,
             EditMarkPassingsPanel markPassingsPanel, EditMarkPositionPanel markPositionPanel,
-            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher,final MediaGalleryComponent newMediaGalleryComponent) {
+            ManeuverTablePanel maneuverTablePanel, final LeaderboardWithSecurityFetcher asyncLeaderboardFetcher) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -107,7 +103,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
-        this.newMediaGalleryComponent = newMediaGalleryComponent;
         markPositionPanel.setComponentViewer(this);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
@@ -171,14 +166,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         rightPanel.getElement().setId("rightPanel-TAGS");
         rightComponent.getEntryWidget().getElement().setId("rightComponent-TAGS");
         splitLayoutPanel.insert(rightPanel, rightComponent, Direction.EAST, MIN_TAGGING_WIDTH);
-
-        if (false) { //enable this block to show panel in side by side view
-            this.newMediaGalleryComponent.setVisible(false);
-            newMediaPanel.add(this.newMediaGalleryComponent.getEntryWidget());
-            newMediaPanel.setTitle(this.newMediaGalleryComponent.getEntryWidget().getTitle());
-
-            splitLayoutPanel.insert(newMediaPanel, this.newMediaGalleryComponent, Direction.EAST, MIN_MEDIA_WIDTH);
-        }
 
         // create a panel that will contain the horizontal toggle buttons
         ResizableAbsolutePanel panelForMapAndHorizontalToggleButtons = new ResizableAbsolutePanel();
@@ -300,23 +287,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             splitLayoutPanel.setWidgetVisibility(rightPanel, rightComponent, /* hidden */false, MIN_TAGGING_WIDTH);
         } else if (!rightComponent.isVisible() && !centerComponent.isVisible()) {
         }
-
-        // newMediaComponent
-        if (false) {
-            if (!newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
-                // the tagging is not visible, but the map is
-                if (isWidgetInSplitPanel(newMediaPanel)) {
-                    splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */true,
-                            MIN_TAGGING_WIDTH);
-                }
-            } else if (newMediaGalleryComponent.isVisible() && centerComponent.isVisible()) {
-                // the leaderboard and the map are visible
-                splitLayoutPanel.setWidgetVisibility(newMediaPanel, newMediaGalleryComponent, /* hidden */false,
-                        MIN_TAGGING_WIDTH);
-            } else if (!newMediaGalleryComponent.isVisible() && !centerComponent.isVisible()) {
-            }
-        }
-
         for (Component<?> component : components) {
             final boolean isComponentVisible = component.isVisible();
             splitLayoutPanel.setWidgetVisibility(component.getEntryWidget(), component, !isComponentVisible,

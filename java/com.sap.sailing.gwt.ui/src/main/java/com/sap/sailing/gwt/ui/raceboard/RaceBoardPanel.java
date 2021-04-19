@@ -73,7 +73,6 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListen
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
-import com.sap.sailing.gwt.ui.client.media.rebuild.MediaGalleryComponent;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -540,10 +539,9 @@ public class RaceBoardPanel
             }
         };
         
-        MediaGalleryComponent newMediaGalleryComponent = new MediaGalleryComponent(this, getComponentContext());
-        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent, mediaPlayerManagerComponent,
-                componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel,
-                maneuverTablePanel, asyncFetcher, newMediaGalleryComponent);
+        mapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, taggingComponent,
+                mediaPlayerManagerComponent, componentsForSideBySideViewer, stringMessages, userService,
+                editMarkPassingPanel, editMarkPositionPanel, maneuverTablePanel, asyncFetcher);
         mediaPlayerManagerComponent.addPlayerChangeListener(new PlayerChangeListener() {
             @Override
             public void notifyStateChange() {
