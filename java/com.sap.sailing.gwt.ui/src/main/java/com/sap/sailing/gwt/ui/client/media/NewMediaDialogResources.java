@@ -13,10 +13,7 @@ public interface NewMediaDialogResources extends ClientBundle {
 
         @ClassName("datepicker-styling")
         String datePickerClass();
-        
-        @ClassName("mobile-augmentation")
-        String mobileAugmentations();
-        
+
         @ClassName("button-size")
         String buttonSizeClass();
     }
