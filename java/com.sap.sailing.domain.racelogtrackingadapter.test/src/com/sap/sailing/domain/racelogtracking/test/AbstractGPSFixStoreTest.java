@@ -135,7 +135,10 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         track.lockForRead();
-        assertEquals(expected, size(track.getRawFixes()));
-        track.unlockAfterRead();
+        try {
+            assertEquals(expected, size(track.getRawFixes()));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 }

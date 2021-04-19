@@ -142,8 +142,11 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
 
     private void testSize(Track<?> track, int expected) {
         track.lockForRead();
-        assertEquals(expected, size(track.getRawFixes()));
-        track.unlockAfterRead();
+        try {
+            assertEquals(expected, size(track.getRawFixes()));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 
     private void addFixes0(DeviceIdentifier dev1) throws TransformationException,

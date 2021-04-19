@@ -33,14 +33,13 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
             //Forbidding null Queries ensures the functionality of registerNewQuery
             throw new NullPointerException();
         }
-        
         Iterable<T> keys = getKeysFor(session, query);
         validate(keys);
-        
         abortPreviousQueries(keys);
         registerNewQuery(keys, query);
         logger.info("Running query " + query + ", that has been registered for the keys " + keys);
         QueryResult<ResultType> result = query.run();
+        logger.info("Done running query "+query);
         unregisterQuery(keys, query);
         return result;
     }

@@ -51,7 +51,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
         TrackedRace trackedRace = element.getTrackedRace();
         Competitor competitor = element.getCompetitor();
         Leg leg = element.getLeg();
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
         TimePoint startTime = trackedLeg.getStartTime();
         TimePoint finishTime = trackedLeg.getFinishTime();

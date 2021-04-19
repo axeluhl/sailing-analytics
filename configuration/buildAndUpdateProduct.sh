@@ -316,11 +316,10 @@ if [[ "$@" == "release" ]]; then
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    create_version_info_files
-
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
+    create_version_info_files
 
     # removing compile reports as they do not belong into a release
     find $ACDIR -name soycReport | xargs rm -rf

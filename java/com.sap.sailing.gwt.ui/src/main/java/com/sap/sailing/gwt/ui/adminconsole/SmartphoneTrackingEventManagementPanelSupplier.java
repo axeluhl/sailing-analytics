@@ -21,7 +21,6 @@ public class SmartphoneTrackingEventManagementPanelSupplier
 
     @Override
     public SmartphoneTrackingEventManagementPanel init() {
-        logger.info("Create SmartphoneTrackingEventManagementPanel");
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 presenter, stringMessages);
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
