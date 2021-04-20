@@ -86,7 +86,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;

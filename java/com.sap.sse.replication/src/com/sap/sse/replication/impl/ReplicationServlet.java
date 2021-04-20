@@ -34,6 +34,7 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.replication.ReplicationServletActions.Action;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -159,7 +160,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             case STATUS:
                 // no permission check to read status; the same is available, e.g., through /gwt/status
                 try {
-                    reportStatus(resp);
+                    reportStatus(req, resp);
                 } catch (IllegalAccessException e) {
                     logger.info("Error obtaining replication status: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
@@ -195,7 +196,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
      * whether the replicable is still fetching its initial load, as well as the length of the queue of
      * inbound operations not yet processed. The JSON document is printed to the response object's writer.
      */
-    private void reportStatus(HttpServletResponse resp) throws IllegalAccessException, IOException {
+    private void reportStatus(HttpServletRequest req, HttpServletResponse resp) throws IllegalAccessException, IOException {
         final ReplicationStatus status = getReplicationService().getStatus();
         final JSONObject result = status.toJSONObject();
         resp.setContentType("application/json;charset=UTF-8");
@@ -322,6 +323,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         final UUID uuid = UUID.fromString(req.getParameter(ReplicationServletActions.SERVER_UUID_PARAMETER_NAME));
         final String additional = req.getParameter(ReplicationServletActions.ADDITIONAL_INFORMATION_PARAMETER_NAME);
         final String[] replicableIdsAsStrings = req.getParameter(ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME).split(",");
-        return new ReplicaDescriptorImpl(ipAddress, uuid, additional, replicableIdsAsStrings);
+        final Integer port = req.getParameter(ReplicationServletActions.PORT_NAME) == null ? null : Integer.valueOf(req.getParameter(ReplicationServletActions.PORT_NAME));
+        return new ReplicaDescriptorImpl(ipAddress, port, uuid, additional, replicableIdsAsStrings);
     }
 }

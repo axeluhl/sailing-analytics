@@ -332,7 +332,7 @@ import com.sap.sse.pairinglist.PairingListTemplateFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;

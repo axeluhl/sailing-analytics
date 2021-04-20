@@ -57,7 +57,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.OperationWithResult;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ClearStateTestSupport;

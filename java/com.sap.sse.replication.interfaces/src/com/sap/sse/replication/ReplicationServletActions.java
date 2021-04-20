@@ -4,6 +4,7 @@ public interface ReplicationServletActions {
     String REPLICATION_SERVLET_BASE_PATH = "/replication/replication";
     String ACTION_PARAMETER_NAME = "action";
     String SERVER_UUID_PARAMETER_NAME = "uuid";
+    String PORT_NAME = "port";
     String ADDITIONAL_INFORMATION_PARAMETER_NAME = "additional";
     String REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME = "replicaIdsAsStringsCommaSeparated";
     String REPLICABLE_ID_AS_STRING_PARAMETER_NAME = "replicaIdAsString";

@@ -3528,7 +3528,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
-            throws IOException, ClassNotFoundException, InterruptedException {
+            throws Exception {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier

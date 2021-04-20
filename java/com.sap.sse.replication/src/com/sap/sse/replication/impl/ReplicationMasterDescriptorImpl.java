@@ -1,7 +1,6 @@
 package com.sap.sse.replication.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -90,16 +89,14 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws MalformedURLException,
-            UnsupportedEncodingException {
+    public URL getReplicationRegistrationRequestURL(UUID uuid, String additional) throws Exception {
         final String[] replicableIdsAsString = StreamSupport.stream(replicables.spliterator(), /* parallel */ false).map(r->r.getId()).toArray(i->new String[i]);
-        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH + "?" + ReplicationServletActions.ACTION_PARAMETER_NAME + "="
-                + Action.REGISTER.name() + "&" + ReplicationServletActions.SERVER_UUID_PARAMETER_NAME + "="
-                + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
-                + ReplicationServletActions.ADDITIONAL_INFORMATION_PARAMETER_NAME + "="
-                + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8") + "&"
-                + ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME + "="
-                + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
+        return new URL(getHttpRequestProtocol(), getHostname(), servletPort, ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH + "?"
+                + ReplicationServletActions.ACTION_PARAMETER_NAME + "=" + Action.REGISTER.name() + "&"
+                + ReplicationServletActions.PORT_NAME + "=" + ServerInfo.getServerInfo().getPort() + "&" // FIXME how to figure out the port here? Consider automatic replication...
+                + ReplicationServletActions.SERVER_UUID_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
+                + ReplicationServletActions.ADDITIONAL_INFORMATION_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8") + "&"
+                + ReplicationServletActions.REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED_PARAMETER_NAME + "=" + java.net.URLEncoder.encode(String.join(",", replicableIdsAsString), "UTF-8"));
     }
 
     private String getHttpRequestProtocol() {
