@@ -52,7 +52,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     public SailingAnalyticsProcessImpl(int port,
             SailingAnalyticsHost<ShardingKey> host,
-            String serverDirectory, int telnetPort, String serverName, Integer expeditionUdpPort) {
+            String serverDirectory, Integer telnetPort, String serverName, Integer expeditionUdpPort) {
         super(port, host, serverDirectory, telnetPort, serverName);
         this.expeditionUdpPort = expeditionUdpPort;
     }
@@ -128,7 +128,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
         }
         return serverName;
     }
-
+    
     @Override
     public Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);

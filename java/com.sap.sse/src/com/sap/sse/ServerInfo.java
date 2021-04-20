@@ -38,9 +38,9 @@ public class ServerInfo {
     private final TimePoint buildDate;
     private final String release;
     private final TimePoint startTime;
-    private final int port;
+    private final Integer port;
     
-    private ServerInfo(String commitId, String activeBranch, TimePoint buildDate, String release, TimePoint startTime, int port) {
+    private ServerInfo(String commitId, String activeBranch, TimePoint buildDate, String release, TimePoint startTime, Integer port) {
         super();
         this.commitId = commitId;
         this.activeBranch = activeBranch;
@@ -138,7 +138,7 @@ public class ServerInfo {
         return startTime;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 

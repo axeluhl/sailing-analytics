@@ -148,9 +148,9 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws MalformedURLException, IOException, TimeoutException, Exception;
     
-    ProcessT getMaster();
+    ProcessT getMaster(Optional<Duration> optionalTimeout) throws Exception;
     
-    Iterable<ProcessT> getReplicas();
+    Iterable<ProcessT> getReplicas(Optional<Duration> optionalTimeout) throws Exception;
     
     default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final int port = getPort();
