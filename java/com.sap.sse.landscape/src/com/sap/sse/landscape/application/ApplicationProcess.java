@@ -26,6 +26,7 @@ import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.replication.ReplicationServletActions;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -120,8 +121,7 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      */
     default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
         try {
-            final HttpURLConnection connection = (HttpURLConnection) getHealthCheckUrl(optionalTimeout)
-                            .openConnection();
+            final HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(getHealthCheckUrl(optionalTimeout));
             return connection.getResponseCode() == 200;
         } catch (Exception e) {
             logger.info("Ready-check failed for "+this+": "+e.getMessage());
