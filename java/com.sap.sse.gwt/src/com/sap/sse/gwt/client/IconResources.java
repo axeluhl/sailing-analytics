@@ -37,4 +37,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/archive.png")
     ImageResource archiveIcon();
+
+    @Source("images/load-balancer.png")
+    ImageResource loadBalancerIcon();
 }

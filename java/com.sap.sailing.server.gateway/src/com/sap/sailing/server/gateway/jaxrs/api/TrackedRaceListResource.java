@@ -110,7 +110,7 @@ public class TrackedRaceListResource extends AbstractSailingServerResource {
             eventFilter = (uuid)->eventUUIDs.contains(uuid);
         } else if ("excl".equals(predicate)) {
             eventFilter = (uuid)->!eventUUIDs.contains(uuid);
-        }else {
+        } else {
             throw new IllegalArgumentException("unrecognized predicate " + predicate + " only \"excl\" and \"incl\" are possible");
         }
         final Map<RegattaAndRaceIdentifier, Set<SimpleRaceInfo>> distinctRaces = getDistinctRaces(includeRemotes,

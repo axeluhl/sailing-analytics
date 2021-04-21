@@ -56,5 +56,24 @@ public interface Refresher<T> {
      *            the {@link Displayer} on which the fill method should be called.
      */
     void callFillAndReloadInitially(Displayer<T> displayer);
+    
+    /**
+     * Call the fill method of all registered displayer, e.g. after removing some DTOs from list.
+     */
+    void callAllFill();
+    
+    /**
+     * Adds a DTO to DTO list to prevent loading all data after adding single object to context.
+     * 
+     * @param dto DTO
+     */
+    void add(T dto);
+    
+    /**
+     * Removes a DTO from DTO list to prevent loading all data after deleting single object to context.
+     * 
+     * @param dto DTO
+     */
+    void remove(T dto);
 
 }

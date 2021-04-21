@@ -17,7 +17,7 @@ import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
@@ -276,9 +276,5 @@ extends ProcedureWithTargetGroup<ShardingKey> {
 
     public ProcessT getProcess() {
         return process;
-    }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
     }
 }

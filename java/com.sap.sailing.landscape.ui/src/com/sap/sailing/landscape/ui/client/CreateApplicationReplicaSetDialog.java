@@ -1,18 +1,19 @@
 package com.sap.sailing.landscape.ui.client;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
+import com.sap.sailing.landscape.ui.shared.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions> {
-    private static final String DEFAULT_DOMAIN = "sapsailing.com";
     private static final String DEFAULT_INSTANCE_TYPE = "C4_2_XLARGE";
     
     public static class CreateApplicationReplicaSetInstructions {
@@ -87,7 +88,7 @@ public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApp
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
         dynamicLoadBalancerCheckBox = createCheckbox(stringMessages.useDynamicLoadBalancer());
         securityReplicationBearerToken = createTextBox("", 40);
-        domainNameBox = createTextBox(DEFAULT_DOMAIN, 40);
+        domainNameBox = createTextBox(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, 40);
     }
     
     @Override
@@ -107,6 +108,11 @@ public class CreateApplicationReplicaSetDialog extends DataEntryDialog<CreateApp
         return result;
     }
 
+    @Override
+    public FocusWidget getInitialFocusWidget() {
+        return nameBox;
+    }
+    
     @Override
     protected CreateApplicationReplicaSetInstructions getResult() {
         return new CreateApplicationReplicaSetInstructions(nameBox.getValue(), instanceTypeListBox.getSelectedValue(),

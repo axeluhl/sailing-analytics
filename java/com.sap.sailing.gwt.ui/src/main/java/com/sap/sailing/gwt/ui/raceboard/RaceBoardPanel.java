@@ -874,7 +874,7 @@ public class RaceBoardPanel
                 .getCompetitorsFilterSets();
         FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
                 .getActiveFilterSet();
-        String activeCompetitorsFilterSetName = activeFilterSet.getName() == null ? null : activeFilterSet.getName();
+        String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
         final Set<String> selectedCompetitorIds = new HashSet<>();
         final Duration newInitialDurationAfterRaceStartInReplay;
         if (timer != null && racetimePanel != null) {

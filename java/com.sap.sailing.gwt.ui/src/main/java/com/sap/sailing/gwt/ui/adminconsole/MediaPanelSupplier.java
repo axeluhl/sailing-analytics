@@ -19,7 +19,6 @@ public class MediaPanelSupplier extends AdminConsolePanelSupplier<MediaPanel> {
 
     @Override
     public MediaPanel init() {
-        logger.info("Create MediaPanel");
         final MediaPanel mediaPanel = new MediaPanel(presenter, stringMessages);
         mediaPanel.ensureDebugId("mediaPanel");
         mediaPanel.onShow();

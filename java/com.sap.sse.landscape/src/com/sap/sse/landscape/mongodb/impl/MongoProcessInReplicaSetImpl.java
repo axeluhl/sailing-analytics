@@ -15,7 +15,7 @@ public class MongoProcessInReplicaSetImpl extends MongoProcessImpl implements Mo
     }
 
     public MongoProcessInReplicaSetImpl(MongoReplicaSet replicaSet, int port, Host host) {
-        super(port, host);
+        super(host, port);
         this.replicaSet = replicaSet;
     }
 

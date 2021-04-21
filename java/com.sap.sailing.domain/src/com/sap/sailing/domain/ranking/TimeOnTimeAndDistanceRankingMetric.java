@@ -26,8 +26,8 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.shared.util.WeakReferenceWithCleanerCallback;
 import com.sap.sse.util.SerializableRunnable;
-import com.sap.sse.util.WeakReferenceWithCleanerCallback;
 
 /**
  * The basic concept of this ranking metric is to compare corrected reciproke VMG/VMC (measured in seconds per nautical

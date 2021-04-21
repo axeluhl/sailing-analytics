@@ -23,11 +23,23 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">April 2021</h2>
+                    <ul class="bulletList">
+                        <li>The <tt>/sailingserver/api/v1/wind/putWind</tt> method now has a missing null check in case
+                            there are untracked regattas in the scope analyzed for races that would accept wind fixed.</li>
+                        <li>Importing of results where sail numbers have leading or trailing space/blank characters works now.</li>
+                        <li>Image URLs used for events must not use the insecure HTTP protocol anymore; they have to use HTTPS now,
+                            meaning they should start with "http://".</li>
+                        <li>Fixed a problem with API access to seasonal/overall leaderboards regarding reporting "official" status.
+                            Clients received an error message when querying seasonal leaderboards. This is now solved.</li>
+                    </ul>
                     <h2 class="articleSubheadline">March 2021</h2>
                     <ul class="bulletList">
                         <li>When importing ORC certificates that provide 0.0s as allowance anywhere in the polar which cannot reasonably be represented
                             in the internal format which is speed-based, those certificates can now at least be read successfully. The speeds will
                             internally be set to "infinity" for those values for consistency.</li>
+                        <li>ORC Certificates provided in JSON format that lack allowances in certain categories, such as <tt>NonSpinnaker</tt>,
+                            or that lack a valid specification of their <tt>Family</tt> can now still be searched and imported.</li>
                     </ul>
                     <h2 class="articleSubheadline">February 2021</h2>
                     <ul class="bulletList">

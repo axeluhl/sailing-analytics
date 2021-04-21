@@ -9,7 +9,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasWindFixContext extends HasWind {
     @Connector(scanForStatistics=false)
-    public HasTrackedRaceContext getTrackedRaceContext();
+    public HasWindTrackContext getWindTrackContext();
     
     @Statistic(messageKey="WindFix", ordinal=0)
     public Wind getWind();

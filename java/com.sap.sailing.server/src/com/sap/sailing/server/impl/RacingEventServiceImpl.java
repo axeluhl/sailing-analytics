@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -1407,7 +1406,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
             RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
                     identifier, getMongoObjectFactory());
-            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
             raceLog.lockForRead();
             try {
                 for (RaceLogEvent e : raceLog.getRawFixes()) {
@@ -3264,18 +3263,9 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             ScoringScheme scoringScheme, int[] discardThresholds) {
         final Leaderboard overallLeaderboard = new LeaderboardGroupMetaLeaderboard(leaderboardGroup, scoringScheme,
                 new ThresholdBasedResultDiscardingRuleImpl(discardThresholds));
-        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, Leaderboard.getTypeRelativeObjectIdentifier(overallLeaderboard.getName()),
-                overallLeaderboard.getDisplayName(),
-                new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
-                        addLeaderboard(overallLeaderboard);
-                        updateStoredLeaderboard(overallLeaderboard);
-                        return null;
-                    }
-                });
+        leaderboardGroup.setOverallLeaderboard(overallLeaderboard);
+        addLeaderboard(overallLeaderboard);
+        updateStoredLeaderboard(overallLeaderboard);
     }
 
     @Override
@@ -4928,7 +4918,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             throw new IllegalArgumentException("The regatta identified by "+regattaIdentifier+" was not found.");
         }
         final Leaderboard regattaLeaderboard = getLeaderboardByName(regatta.getName());
-        assert regattaLeaderboard instanceof RegattaLeaderboard;
         if (regattaLeaderboard != null) {
             final Event event = findEventContainingLeaderboardAndMatchingAtLeastOneCourseArea(regattaLeaderboard);
             if (event != null) {

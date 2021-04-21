@@ -14,7 +14,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRevokeEv
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
-import com.sap.sse.util.impl.UUIDHelper;
+import com.sap.sse.shared.util.impl.UUIDHelper;
 
 public class RaceLogRevokeEventDeserializer extends BaseRaceLogEventDeserializer {	
     public RaceLogRevokeEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {

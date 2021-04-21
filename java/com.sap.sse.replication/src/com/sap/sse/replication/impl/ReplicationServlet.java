@@ -56,7 +56,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
     
     private static final long serialVersionUID = 4835516998934433846L;
     
-    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER, STATUS }
+    public enum Action { REGISTER, INITIAL_LOAD, DEREGISTER, STATUS, STOP_REPLICATING }
     
     /**
      * The parameter value found in the parameter with this name must have a value that matches any of the
@@ -178,6 +178,13 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace(resp.getWriter());
                 }
+                break;
+            case STOP_REPLICATING:
+                checkReplicatorPermission(ServerActions.REPLICATE);
+                logger.info("Stopping replication from master upon "
+                        +(SecurityUtils.getSubject()==null?null:SecurityUtils.getSubject().getPrincipal())
+                        +"'s request.");
+                getReplicationService().stopToReplicateFromMaster();
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "

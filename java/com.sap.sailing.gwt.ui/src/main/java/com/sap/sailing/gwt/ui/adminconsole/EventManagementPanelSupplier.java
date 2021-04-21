@@ -23,7 +23,6 @@ public class EventManagementPanelSupplier extends AdminConsolePanelSupplier<Even
 
     @Override
     public EventManagementPanel init() {
-        logger.info("Create EventManagementPanel");
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(presenter, stringMessages,
                 placeController);
         eventManagementPanel.ensureDebugId("EventManagement");

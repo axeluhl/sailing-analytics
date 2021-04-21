@@ -758,9 +758,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
                                 refreshableGroupsSelectionModel.clear();
                                 refreshableGroupsSelectionModel.setSelected(newGroup, true);
-                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(
-                                        availableLeaderboardGroups,
-                                        LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
+                                presenter.getLeaderboardGroupsRefresher().add(newGroup);
+                                presenter.getLeaderboardGroupsRefresher().callAllFill();
                             }
                         }));
     }
@@ -857,10 +856,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                         public void onSuccess(Void result) {
                             for (LeaderboardGroupDTO group : groups) {
                                 removeGroupFromTable(group);
-                                presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(
-                                        availableLeaderboardGroups,
-                                        LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
+                                presenter.getLeaderboardGroupsRefresher().remove(group);
                             }
+                            presenter.getLeaderboardGroupsRefresher().callAllFill();
                         }
                     }));
         }
@@ -879,8 +877,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                     @Override
                     public void onSuccess(Void v) {
                         removeGroupFromTable(group);
-                        presenter.getLeaderboardGroupsRefresher().updateAndCallFillForAll(availableLeaderboardGroups,
-                                LeaderboardGroupConfigPanel.this.getLeaderboardGroupsDisplayer());
+                        presenter.getLeaderboardGroupsRefresher().remove(group);
+                        presenter.getLeaderboardGroupsRefresher().callAllFill();
                     }
                 }));
     }

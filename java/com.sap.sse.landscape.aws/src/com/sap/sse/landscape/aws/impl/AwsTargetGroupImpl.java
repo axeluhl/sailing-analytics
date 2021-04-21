@@ -16,6 +16,7 @@ public class AwsTargetGroupImpl<ShardingKey>
 extends NamedImpl implements TargetGroup<ShardingKey> {
     private static final long serialVersionUID = -5442598262397393201L;
     private final String arn;
+    private final String loadBalancerArn;
     private final AwsLandscape<ShardingKey> landscape;
     private final Region region;
     private final ProtocolEnum protocol;
@@ -25,10 +26,11 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     private final String healthCheckPath;
 
     public AwsTargetGroupImpl(AwsLandscape<ShardingKey> landscape, Region region, String targetGroupName, String arn,
-            ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol, Integer healthCheckPort,
-            String healthCheckPath) {
+            String loadBalancerArn, ProtocolEnum protocol, Integer port, ProtocolEnum healthCheckProtocol,
+            Integer healthCheckPort, String healthCheckPath) {
         super(targetGroupName);
         this.arn = arn;
+        this.loadBalancerArn = loadBalancerArn;
         this.landscape = landscape;
         this.region = region;
         this.protocol = protocol;
@@ -97,6 +99,11 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     @Override
     public ProtocolEnum getHealthCheckProtocol() {
         return healthCheckProtocol;
+    }
+    
+    @Override
+    public String getLoadBalancerArn() {
+        return loadBalancerArn;
     }
 
     @Override

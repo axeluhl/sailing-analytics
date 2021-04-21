@@ -2,10 +2,12 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -20,8 +22,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig.Builder;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
@@ -171,7 +173,8 @@ implements ApplicationLoadBalancer<ShardingKey> {
     @Override
     public void delete() throws InterruptedException {
         // first obtain the target groups to which, based on the current ALB configuration, traffic is forwarded
-        final Iterable<TargetGroup<ShardingKey>> targetGroups = getTargetGroups();
+        final Set<TargetGroup<ShardingKey>> targetGroups = new HashSet<>();
+        Util.addAll(getTargetGroups(), targetGroups); // do this before deleting the ALB because then its ARN isn't known anymore
         // now delete the rules to free up all target groups to which the ALB could have forwarded, except the default rule
         deleteAllRules();
         deleteAllListeners();
@@ -196,23 +199,27 @@ implements ApplicationLoadBalancer<ShardingKey> {
     }
 
     @Override
-    public Rule updateDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+    public Rule setDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
         return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
-            .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule, pathWithLeadingSlash, query))
+            .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule.ruleArn(), hostname, pathWithLeadingSlash, query))
             .orElseGet(()->{
                 final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
-                addRules(defaultRedirectRule);
+                addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
                 return defaultRedirectRule;
             });
     }
     
     @Override
     public Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return getDefaultRedirectRuleBuilder(hostname, pathWithLeadingSlash, query).build();
+    }
+
+    private software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder getDefaultRedirectRuleBuilder(
+            String hostname, String pathWithLeadingSlash, Optional<String> query) {
         return Rule.builder()
                 .conditions(RuleCondition.builder().field("path-pattern").pathPatternConfig(ppc->ppc.values("/")).build(),
                             createHostHeaderRuleCondition(hostname))
-                .actions(createDefaultRedirectAction(pathWithLeadingSlash, query))
-                .build();
+                .actions(createDefaultRedirectAction(pathWithLeadingSlash, query));
     }
 
     private Action createDefaultRedirectAction(String pathWithLeadingSlash, Optional<String> query) {
@@ -231,8 +238,10 @@ implements ApplicationLoadBalancer<ShardingKey> {
         return RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(hostname)).build();
     }
 
-    private Rule updateDefaultRedirectRule(Rule defaultRedirectRule, String path, Optional<String> query) {
-        final Rule updatedRule = defaultRedirectRule.copy(b->b.actions(createDefaultRedirectAction(path, query)));
+    private Rule updateDefaultRedirectRule(String defaultRedirectRuleArn, String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        final Rule updatedRule = getDefaultRedirectRuleBuilder(hostname, pathWithLeadingSlash, query)
+                .ruleArn(defaultRedirectRuleArn)
+                .build();
         landscape.updateLoadBalancerListenerRule(getRegion(), updatedRule);
         return updatedRule;
     }

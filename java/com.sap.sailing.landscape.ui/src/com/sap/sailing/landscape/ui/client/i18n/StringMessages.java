@@ -86,4 +86,15 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String pleaseSelectSshKeyPair();
     String defineLandingPage();
     String successfullyUpdatedLandingPage();
+    String defineDefaultRedirect();
+    String defineDefaultRedirectMessage();
+    String redirectPlain();
+    String redirectHome();
+    String redirectEvent();
+    String redirectEventSeries();
+    String pleaseProvideAValidId();
+    String defaultRedirectPath();
+    String successfullyCreatedLoadBalancerMappingFor(String name);
+    String createLoadBalancerMapping();
+    String forceDNSUpdate();
 }

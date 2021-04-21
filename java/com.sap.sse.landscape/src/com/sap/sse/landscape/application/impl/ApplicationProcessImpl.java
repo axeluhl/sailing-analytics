@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
@@ -32,7 +34,7 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
-import com.sap.sse.util.Wait;
+import com.sap.sse.shared.util.Wait;
 
 public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -98,9 +100,11 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     }
 
     @Override
-    public boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout) {
-        // TODO Implement ApplicationProcessImpl.tryCleanShutdown(...)
-        return false;
+    public void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws IOException, InterruptedException, JSchException, Exception {
+        logger.info("Stopping application process "+this);
+        getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory()+"; ./stop", "Shutting down "+this, Level.INFO);
     }
     
     @Override
@@ -170,11 +174,13 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     protected String getFileContents(String path, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         final ChannelSftp sftpChannel = getHost().createRootSftpChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
-        sftpChannel.get(path, bos);
-        sftpChannel.disconnect();
-        return bos.toString();
+        try {final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis()); 
+            sftpChannel.get(path, bos);
+            return bos.toString();
+        } finally {
+            sftpChannel.getSession().disconnect();
+        }
     }
     
     /**
@@ -185,8 +191,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return "/";
     }
     
-    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout)
-            throws ClientProtocolException, IOException, ParseException {
+    protected JSONObject getReplicationStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(optionalTimeout));
     }
 
@@ -233,5 +238,10 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(Optional<Duration> optionalTimeout, String hostname, int port)
             throws ClientProtocolException, IOException, ParseException {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationProcessImpl [serverDirectory=" + serverDirectory + ", serverName=" + serverName + ", port=" + getPort() + ", host=" + getHost() + "]";
     }
 }

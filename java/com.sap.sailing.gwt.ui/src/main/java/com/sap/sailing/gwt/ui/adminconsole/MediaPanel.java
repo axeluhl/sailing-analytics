@@ -621,7 +621,8 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
                             @Override
                             public void onSuccess(MediaTrackWithSecurityDTO mediaTrackWithSecurity) {
                                 mediaTrack.dbId = mediaTrackWithSecurity.dbId;
-                                presenter.getMediaTracksRefresher().reloadAndCallFillAll();
+                                presenter.getMediaTracksRefresher().add(mediaTrackWithSecurity);
+                                presenter.getMediaTracksRefresher().callAllFill();
 
                             }
                         });
