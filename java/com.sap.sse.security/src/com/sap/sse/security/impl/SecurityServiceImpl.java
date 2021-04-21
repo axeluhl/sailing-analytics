@@ -232,23 +232,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     /**
-     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
-     */
-    public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
-        this(null, userStore, accessControlStore);
-    }
-
-    /**
-     * Use for TESTING ONLY. This will work without a {@link HasPermissionsProvider}!
-     * 
-     * @param mailProperties
-     *            must not be <code>null</code>
-     */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, /* hasPermissionsProvider*/ null);
-    }
-    
-    /**
      * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
      * domain through which its services are requested for {@code Document.domain} and hence for the browser local
      * storage, session storage and the Shiro {@code JSESSIONID} cookie's domain.
@@ -1222,13 +1205,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        final boolean transitive = role.isTransitive();
+        final Boolean transitive = role.isTransitive();
         apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
@@ -1246,13 +1229,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        final boolean transitive = role.isTransitive();
+        final Boolean transitive = role.isTransitive();
         apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
@@ -2010,20 +1993,17 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
         if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for any permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, an any permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
+            throw new IllegalArgumentException("No HasPermissionsProvider defined");
         } else {
-            return PermissionChecker.hasUserAnyPermission(permissionToCheck, hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), null);
+            User currentUser = getCurrentUser();
+            return PermissionChecker.hasUserAnyPermission(permissionToCheck,
+                    hasPermissionsProvider.getAllHasPermissions(), currentUser, getAllUser(), null);
         }
     }
     
     @Override
-    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition, final Ownership qualificationForGrantedPermissions) {
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition,
+            final Ownership qualificationForGrantedPermissions) {
         boolean result = true;
         for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
             if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {

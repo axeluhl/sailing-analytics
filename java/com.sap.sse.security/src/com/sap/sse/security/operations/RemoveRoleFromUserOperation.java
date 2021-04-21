@@ -14,7 +14,7 @@ public class RemoveRoleFromUserOperation implements SecurityOperation<Void> {
     protected final Boolean transitive;
 
     public RemoveRoleFromUserOperation(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole, boolean transitive) {
+            String nameOfUserQualifyingRole, Boolean transitive) {
         this.username = username;
         this.roleDefinitionId = roleDefinitionId;
         this.idOfTenantQualifyingRole = idOfTenantQualifyingRole;

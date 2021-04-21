@@ -1460,22 +1460,21 @@ public class UserStoreImpl implements UserStore {
         });
     }
 
-    @Override
-    public void removeAllQualifiedRolesForUser(User user) {
+    private void removeAllQualifiedRolesForUser(User user) {
         LockUtil.executeWithWriteLock(usersLock, () -> {
             for (User checkUser : users.values()) {
-                Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+                Set<Role> rolesToRemove = new HashSet<>();
                 for (Role role : checkUser.getRoles()) {
                     if (Util.equalsWithNull(role.getQualifiedForUser(), user)) {
-                        rolesToRemoveOrAdjust.add(role);
+                        rolesToRemove.add(role);
                     }
                 }
-                for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+                for (Role roleToRremove : rolesToRemove) {
                     try {
-                        removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                        removeRoleFromUser(checkUser.getName(), roleToRremove);
                     } catch (UserManagementException e) {
                         logger.log(Level.WARNING,
-                                "Could not properly update qualified roles on user delete " + removeOrAdjust);
+                                "Could not properly update qualified roles on user delete " + roleToRremove);
                     }
                 }
             }
@@ -1485,18 +1484,18 @@ public class UserStoreImpl implements UserStore {
     private void removeAllQualifiedRolesForUserGroup(UserGroup userGroup) {
         assert usersLock.isWriteLockedByCurrentThread();
         for (User checkUser : users.values()) {
-            Set<Role> rolesToRemoveOrAdjust = new HashSet<>();
+            Set<Role> rolesToRemove = new HashSet<>();
             for (Role role : checkUser.getRoles()) {
                 if (Util.equalsWithNull(role.getQualifiedForTenant(), userGroup)) {
-                    rolesToRemoveOrAdjust.add(role);
+                    rolesToRemove.add(role);
                 }
             }
-            for (Role removeOrAdjust : rolesToRemoveOrAdjust) {
+            for (Role roleToRemove : rolesToRemove) {
                 try {
-                    removeRoleFromUser(checkUser.getName(), removeOrAdjust);
+                    removeRoleFromUser(checkUser.getName(), roleToRemove);
                 } catch (UserManagementException e) {
                     logger.log(Level.WARNING,
-                            "Could not properly update qualified roles on userGroup delete " + removeOrAdjust);
+                            "Could not properly update qualified roles on userGroup delete " + roleToRemove);
                 }
             }
         }

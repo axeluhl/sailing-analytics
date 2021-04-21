@@ -14,7 +14,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 
 public class SecurityBundleTestWrapper {
     private static final Logger logger = Logger.getLogger(SecurityBundleTestWrapper.class.getName());
-    
+
     public SecurityService initializeSecurityServiceForTesting() throws Exception {
         final SecurityService securityService;
         if (Activator.getContext() == null) {
@@ -24,17 +24,20 @@ public class SecurityBundleTestWrapper {
             store.ensureServerGroupExists();
             final AccessControlStoreImpl accessControlStoreImpl = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStoreImpl);
-            securityService = new SecurityServiceImpl(store, accessControlStoreImpl);
+            securityService = new SecurityServiceImpl(null, store, accessControlStoreImpl,
+                    new MockedHasPermissionProvider());
             ((SecurityServiceImpl) securityService).clearState();
             securityService.initialize();
             SecurityUtils.setSecurityManager(securityService.getSecurityManager());
             Activator.setSecurityService(securityService);
         } else {
             logger.info("Creating dummy UserStoreImpl to trigger loading of userstore mongodb bundle");
-            new UserStoreImpl("defaultTenant"); // only to trigger bundle loading and activation so that security service can find the bundle and its original user store
+            new UserStoreImpl("defaultTenant"); // only to trigger bundle loading and activation so that security
+                                                // service can find the bundle and its original user store
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
             // Note: This timeout of 3 minutes is just for debugging purposes and should not be used in production!
-            final ServiceTracker<SecurityService, SecurityService> serviceTracker = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class);
+            final ServiceTracker<SecurityService, SecurityService> serviceTracker = ServiceTrackerFactory
+                    .createAndOpen(Activator.getContext(), SecurityService.class);
             if (serviceTracker == null) {
                 logger.severe("Couldn't obtain service tracker for SecurityService");
                 securityService = null;
@@ -43,7 +46,8 @@ public class SecurityBundleTestWrapper {
                 if (securityService == null) {
                     logger.severe("Waiting for the SecurityService timed out");
                 } else {
-                    // the security manager may have been set to other mock objects by other tests while the SecurityService survived
+                    // the security manager may have been set to other mock objects by other tests while the
+                    // SecurityService survived
                     SecurityUtils.setSecurityManager(securityService.getSecurityManager());
                 }
             }
