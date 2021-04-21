@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 public interface MediaViewResources extends SharedHomeResources {
     public static final MediaViewResources INSTANCE = GWT.create(MediaViewResources.class);
 
-
     @Source("MediaViewImpl.gss")
     LocalCss css();
     

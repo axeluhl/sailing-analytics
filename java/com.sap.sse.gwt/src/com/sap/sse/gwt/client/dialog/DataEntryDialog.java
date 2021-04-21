@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -20,7 +19,6 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -654,10 +652,7 @@ public abstract class DataEntryDialog<T> {
             panelForAdditionalWidget.add(additionalWidget);
         }
         validateAndUpdate();
-        GWT.log("dataEntryDialog:" + dataEntryDialog.getElement().getClientWidth() + " window width:"
-                + Window.getClientWidth());
         dataEntryDialog.center();
-        
         final FocusWidget focusWidget = getInitialFocusWidget();
         if (focusWidget != null) {
             Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});

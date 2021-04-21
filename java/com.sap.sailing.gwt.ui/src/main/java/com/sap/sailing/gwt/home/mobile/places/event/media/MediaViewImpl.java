@@ -53,8 +53,6 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         this.manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, presenter.getEventDTO(), stringMessages);
         MediaViewResources.INSTANCE.css().ensureInjected();
         setViewContent(uiBinder.createAndBindUi(this));
-        
-
         MediaPageResources.INSTANCE.css().ensureInjected();
         mobileMediaUploadPopup = new MobileMediaUploadPopup(
                 video -> {
@@ -63,7 +61,6 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
                 image -> {
                     manageMediaModel.addImage(image, eventDto -> updateMedia());
                 });
-
         addMediaButtonUi.addClickHandler(new ClickHandler() {
             
             @Override
@@ -72,13 +69,11 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
                 mobileMediaUploadPopup.openFileUpload();
             }
         });
-
         presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event->{
             logger.info("Sign out");
             // for some reason this event is only send after logout. Never the less it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
         });
-
     }
     
     @Override

@@ -171,7 +171,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initMedia(final MediaCallback callback) {
-        
         if (eventDTO.isHasMedia() || 
                 this.getUserService().hasPermission(eventDTO, HasPermissions.DefaultActions.UPDATE)) {
             clientFactory.getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), 

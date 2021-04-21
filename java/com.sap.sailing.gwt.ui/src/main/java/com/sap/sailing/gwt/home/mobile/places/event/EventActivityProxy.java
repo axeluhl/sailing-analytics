@@ -28,7 +28,6 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplicationClientFactory> {
-    
 
     public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory, EventBus eventBus) {
         super(clientFactory, place);
