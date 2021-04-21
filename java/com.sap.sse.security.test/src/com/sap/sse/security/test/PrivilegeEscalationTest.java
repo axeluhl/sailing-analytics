@@ -72,13 +72,13 @@ public class PrivilegeEscalationTest {
         accessControlStore = new AccessControlStoreImpl(userStore);
         securityService = new SecurityServiceImpl(null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
         securityService.initialize();
-        rd = new RoleDefinitionImpl(USER_GROUP_UUID, "some_role",
+        rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
     }
     
     @Test
     public void testMetaPermissionAfterUserDeletion() throws UserGroupManagementException, UserManagementException {
-        Role role = new Role(rd, null, user, true);
+        Role role = new Role(rd, /* group qualification */ null, user, /* transitive */ true);
         user2.addRole(role);
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
@@ -93,7 +93,7 @@ public class PrivilegeEscalationTest {
     
     @Test
     public void testMetaPermissionAfterGroupDeletion() throws UserGroupManagementException {
-        user.addRole(new Role(rd, userGroup, null, true));
+        user.addRole(new Role(rd, userGroup, /* user qualification */ null, /* transitive */ true));
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
         assertTrue(PermissionChecker.checkMetaPermission(permissionToCheck, Collections.singleton(type1), user, null,

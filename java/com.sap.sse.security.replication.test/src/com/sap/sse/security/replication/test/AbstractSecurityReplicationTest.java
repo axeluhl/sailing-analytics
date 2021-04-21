@@ -50,7 +50,7 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            return new SecurityServiceImpl(null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
+            return new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore, SecuredSecurityTypes::getAllInstances);
         }
     }
 }

@@ -258,6 +258,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+        if (hasPermissionsProvider == null) {
+            throw new IllegalArgumentException("No HasPermissionsProvider defined");
+        }
         logger.info("Initializing Security Service with user store " + userStore);
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
@@ -305,7 +308,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
-        return hasPermissionsProvider == null ? Collections.emptySet() : hasPermissionsProvider.getAllHasPermissions();
+        return hasPermissionsProvider.getAllHasPermissions();
     }
 
     @Override
@@ -1967,38 +1970,26 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
-        if (hasPermissionsProvider == null) {
-            throw new IllegalArgumentException("No HasPermissionsProvider defined");
-        } else {
-            return PermissionChecker.checkMetaPermission(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
-                    aclResolver);
-        }
+        return PermissionChecker.checkMetaPermission(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
+                aclResolver);
     }
     
     @Override
     public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
-        if (hasPermissionsProvider == null) {
-            throw new IllegalArgumentException("No HasPermissionsProvider defined");
-        } else {
-            return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
-                    qualifiedObjectId -> {
-                        OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
-                        return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
-                    }, aclResolver);
-        }
+        return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
+                qualifiedObjectId -> {
+                    OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
+                    return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
+                }, aclResolver);
     }
     
     @Override
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
-        if (hasPermissionsProvider == null) {
-            throw new IllegalArgumentException("No HasPermissionsProvider defined");
-        } else {
-            User currentUser = getCurrentUser();
-            return PermissionChecker.hasUserAnyPermission(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), currentUser, getAllUser(), null);
-        }
+        User currentUser = getCurrentUser();
+        return PermissionChecker.hasUserAnyPermission(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), currentUser, getAllUser(), /* ownership */ null);
     }
     
     @Override

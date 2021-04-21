@@ -24,7 +24,7 @@ public class SecurityBundleTestWrapper {
             store.ensureServerGroupExists();
             final AccessControlStoreImpl accessControlStoreImpl = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStoreImpl);
-            securityService = new SecurityServiceImpl(null, store, accessControlStoreImpl,
+            securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, store, accessControlStoreImpl,
                     new MockedHasPermissionProvider());
             ((SecurityServiceImpl) securityService).clearState();
             securityService.initialize();
