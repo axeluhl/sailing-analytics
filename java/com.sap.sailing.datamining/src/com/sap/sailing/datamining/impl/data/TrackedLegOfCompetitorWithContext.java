@@ -123,9 +123,10 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         final Distance result;
         final TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
         if (trackedRace != null) {
-            final TimePoint timePoint = trackedRace.getEndOfRace() != null ? trackedRace.getEndOfRace()
-                    : trackedRace.getEndOfTracking() != null ? trackedRace.getEndOfTracking() : TimePoint.now();
-            result = getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
+            final TimePoint now = TimePoint.now();
+            final TimePoint endTimePoint = trackedRace.getEndOfRace() != null ? trackedRace.getEndOfRace()
+                    : trackedRace.getEndOfTracking() != null ? trackedRace.getEndOfTracking() : now;
+            result = getTrackedLegOfCompetitor().getDistanceTraveled(endTimePoint.after(now) ? now : endTimePoint);
         } else {
             result = null;
         }
