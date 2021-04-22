@@ -78,7 +78,7 @@ public final class WhatsNewDialogFactory {
                 if (result != null) {
                     // deserialize whats-new-setting
                     WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
-                    if (pref.getNumberOfCharsOnLastLogin() > charactersInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
+                    if (pref.getNumberOfCharsOnLastLogin() + THRESHOLD_WHATS_NEW < charactersInWhatsChangedDocument) {
                         // check if length change is over threshold
                         WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
                     }

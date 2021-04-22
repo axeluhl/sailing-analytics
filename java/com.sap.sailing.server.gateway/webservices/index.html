@@ -8,20 +8,30 @@
 	<title>Gateway services</title>
 </head>
 <body>
-<h1>SAP Sailing Analytics - Web Services Overview</h1>
+<h1>SAP Sailing Analytics - REST API - Web Services Overview</h1>
 
 <p>
-A number of web services are available to query the state of a SAP Sailing Analytics server instance.
+A number of web services are available for the SAP Sailing Analytics. 
 Note that different server instances exist, and not all servers hold the same data. Usually, events get
-their own URL which is then made sure to point to a server instance holding the data for that event.
-We use an Apache reverse proxy to map URLs (and in particular the sub-domain) to a particular server instance.
+their own URL which is then made sure to point to an application server cluster holding the data for that event.
 So, <a href="http://www.sapsailing.com">www.sapsailing.com</a> may end up on a different server instance than
 <a href="http://tw2013.sapsailing.com">tw2013.sapsailing.com</a>
 or <a href="http://ess40-2013.sapsailing.com">ess40-2013.sapsailing.com</a>. Usually, we hand out a per-event
 or per-series URL, such as the ones above (except www.sapsailing.com which is the general landing page),
-and you would only fetch the content for the event you're interested in, even if the server instance has more.
+and you would only fetch the content for the event you're interested in, even if the cluster you're targeting
+with your request has more.
 In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host
 name to make sure you get to the event you're interested in.
+</p>
+<p>
+<b>ATTRIBUTION / BRANDING:</b> If you make use of this API, SAP requires you to include SAP branding in any
+end-user facing interface or document that is based on the data, information and insights you obtain through
+the use of this API. A good place to get started regarding SAP branding tips is
+<a href="https://www.sapbrandtools.com/">www.sapbrandtools.com</a>. Please also note that those APIs granting
+access to the original position and weather data requires the accessing user account to have special permissions.
+</p>
+<p>
+For further questions and support please get in touch through <a href="mailto:support@sapsailing.com">support@sapsailing.com</a>.
 </p>
 <div style="height: 1em;"></div>
 <br/>

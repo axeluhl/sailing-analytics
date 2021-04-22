@@ -789,4 +789,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     ScoreCorrectionMapping mapRegattaScoreCorrections(RegattaScoreCorrections regattaScoreCorrections,
             Map<String, RaceColumn> raceNumberOrNameToRaceColumnMap, Map<String, Competitor> sailIdToCompetitorMap,
             boolean allowRaceDefaultsByOrder, boolean allowPartialImport);
+
+    boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet);
 }

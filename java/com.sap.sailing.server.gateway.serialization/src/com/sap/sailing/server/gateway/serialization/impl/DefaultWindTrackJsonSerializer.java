@@ -35,10 +35,9 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
         this.windSource = windSource;
     }
     
-    public JSONObject serialize(WindTrack windTrack) {
+    public JSONObject serialize(final WindTrack windTrack) {
         JSONObject result = new JSONObject();
         JSONArray jsonWindFixes = new JSONArray();
-
         // quickly extract relevant fixes to hold locks as shortly as possible; process later
         ArrayList<Wind> fixes = new ArrayList<>();
         windTrack.lockForRead();
@@ -51,7 +50,6 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
         } finally {
             windTrack.unlockAfterRead();
         }
-
         for (Wind wind : fixes) {
             JSONObject jsonWind = new JSONObject();
             jsonWind.put("trueBearing-deg", RoundingUtil.bearingDecimalFormatter.format(wind.getBearing().getDegrees()));

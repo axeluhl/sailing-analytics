@@ -502,4 +502,9 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
         return getFullLeaderboard().getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns,
                 totalPointsProvider);
     }
+
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        return getFullLeaderboard().isResultsAreOfficial(raceColumn, fleet);
+    }
 }

@@ -1304,7 +1304,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 if(windSource.getType() == WindSourceType.WEB) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
-                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
+                    final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     windTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned = windTrack
                             .getResolutionOutsideOfWhichNoFixWillBeReturned();
                     windTrack.lockForRead();
@@ -1844,7 +1844,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
                     List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     result.put(competitorDTO, fixesForCompetitor);
-                    GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                    final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     TimePoint toTimePointExcluding = new MillisecondsTimePoint(toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
                     // copy the fixes into a list while holding the monitor; then release the monitor to avoid deadlocks
@@ -4404,7 +4404,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) lb).getRegatta());
         }
         RaceLogDTO result = null;
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         if(raceLog != null) {
             List<RaceLogEventDTO> entries = new ArrayList<RaceLogEventDTO>();
             result = new RaceLogDTO(leaderboardName, raceColumnDTO.getName(), fleet.getName(), raceLog.getCurrentPassId(), entries);
@@ -4430,8 +4430,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         RegattaLogDTO result = null;
         Leaderboard l = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserReadPermission(l);
-
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        final RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         if (regattaLog != null) {
             List<RegattaLogEventDTO> entries = new ArrayList<>();
             result = new RegattaLogDTO(leaderboardName, entries);
@@ -5304,7 +5303,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * Uses all fixed from {@code track} with the outliers removed, {@link #convertToGPSFixDTO(GPSFix) converts} each
      * of them to a {@link GPSFixDTO} and adds them to the resulting list.
      */
-    protected Iterable<GPSFixDTO> convertToGPSFixDTOTrack(Track<? extends GPSFix> track) {
+    protected Iterable<GPSFixDTO> convertToGPSFixDTOTrack(final Track<? extends GPSFix> track) {
         final List<GPSFixDTO> result = new ArrayList<>();
         track.lockForRead();
         try {

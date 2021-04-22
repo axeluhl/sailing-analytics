@@ -451,7 +451,7 @@ public class SensorFixStoreAndLoadTest {
     protected void testNumberOfRawFixes(Track<?> track, long expected) {
         if (expected == 0) {
             if (track != null) {
-        track.lockForRead();
+                track.lockForRead();
                 try {
                     assertTrue(size(track.getRawFixes()) == 0);
                 } finally {
@@ -461,10 +461,10 @@ public class SensorFixStoreAndLoadTest {
         } else {
             track.lockForRead();
             try {
-        assertEquals(expected, size(track.getRawFixes()));
+                assertEquals(expected, size(track.getRawFixes()));
             } finally {
-        track.unlockAfterRead();
-    }
+                track.unlockAfterRead();
+            }
         }
     }
 

@@ -177,7 +177,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
 
                     @Override
                     public CrossTrackErrorSumAndNumberOfFixesTrack provideNewCacheValue(Competitor key,
-                            CrossTrackErrorSumAndNumberOfFixesTrack oldValue, CrossTrackErrorSumAndNumberOfFixesTrack computedCacheUpdate,
+                            CrossTrackErrorSumAndNumberOfFixesTrack oldValue, final CrossTrackErrorSumAndNumberOfFixesTrack computedCacheUpdate,
                             FromTimePointToEndUpdateInterval updateInterval) {
                         CrossTrackErrorSumAndNumberOfFixesTrack result;
                         if (oldValue != null) {
@@ -324,7 +324,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             signedDistanceInMeters = 0;
             count = 0;
         }
-        GPSFixTrack<Competitor, GPSFixMoving> track = owner.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = owner.getTrack(competitor);
         GPSFixMoving fix = null;
         owner.getRace().getCourse().lockForRead();
         track.lockForRead();

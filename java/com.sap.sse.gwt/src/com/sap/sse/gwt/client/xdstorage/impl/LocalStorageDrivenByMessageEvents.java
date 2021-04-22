@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.messaging.MessagePort;
 
 /**
  * The request message processor and counterpart to {@link CrossDomainStorageImpl}. Receives {@link Request} objects
- * through a {@link MessagePort} and executed them against a {@link #localStorage}, sending back a {@link Response}
+ * through a {@link MessagePort} and executes them against a {@link #localStorage}, sending back a {@link Response}
  * {@link Response#getId() keyed} with the {@link Request#getId() ID} of the request.
  * <p>
  * 

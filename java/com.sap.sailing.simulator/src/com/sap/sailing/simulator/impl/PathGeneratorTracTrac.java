@@ -142,46 +142,37 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         // TODO: refactor, so that trackedRace is passed from server; no separate access to RacingEventService
         TrackedRace trackedRace = null; //this.service.getTrackedRace(regatta, raceDef)
         trackedRace.waitUntilNotLoading();
-
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;
-
         for (int index = 0; index <= this.competitorIndex; index++) {
             competitor = competitors.next();
         }
-
         Leg leg = raceDef.getCourse().getLegs().get(this.legIndex);
-
         TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
         TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
-
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         track.lockForRead();
-        Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
-
-        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
-
-        while (it.hasNext()) {
-            GPSFixMoving gpsFix = it.next();
-            if (gpsFix.getTimePoint().after(endTime)) {
-                break;
+        try {
+            Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
+            LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+            while (it.hasNext()) {
+                GPSFixMoving gpsFix = it.next();
+                if (gpsFix.getTimePoint().after(endTime)) {
+                    break;
+                }
+                Position position = gpsFix.getPosition();
+                TimePoint timePoint = gpsFix.getTimePoint();
+                Wind gpsWind = trackedRace.getWind(position, timePoint);
+                if (gpsWind.getKnots() == 1.0) {
+                    path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, scale(gpsWind, this.windScale)));
+                } else {
+                    path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
+                }
             }
-
-            Position position = gpsFix.getPosition();
-            TimePoint timePoint = gpsFix.getTimePoint();
-
-            Wind gpsWind = trackedRace.getWind(position, timePoint);
-
-            if (gpsWind.getKnots() == 1.0) {
-                path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, scale(gpsWind, this.windScale)));
-            } else {
-                path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
-            }
+            return new PathImpl(path, null, this.algorithmTimedOut);
+        } finally {
+            track.unlockAfterRead();
         }
-
-        track.unlockAfterRead();
-
-        return new PathImpl(path, null, this.algorithmTimedOut);
     }
 
     @SuppressWarnings("null")

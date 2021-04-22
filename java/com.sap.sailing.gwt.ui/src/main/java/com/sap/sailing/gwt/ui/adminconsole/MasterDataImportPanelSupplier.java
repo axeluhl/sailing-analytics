@@ -20,7 +20,6 @@ public class MasterDataImportPanelSupplier extends AdminConsolePanelSupplier<Mas
 
     @Override
     public MasterDataImportPanel init() {
-        logger.info("Create MasterDataImportPanel");
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(presenter, stringMessages);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         return masterDataImportPanel;
