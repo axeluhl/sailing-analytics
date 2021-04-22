@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -64,6 +65,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.DateTimeUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -185,6 +187,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
         boolean canRemoveFinishingTime = true;
+        boolean canRemoveFinishedTime = true;
         boolean first = true;
         for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
             final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
@@ -194,6 +197,10 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
             if (canRemoveFinishingTime && loopRaceInfo.finishingTime != null
                     && timePassedInSeconds(loopRaceInfo.finishingTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveFinishingTime = false;
+                canRemoveFinishedTime = false;
+            }
+            if (canRemoveFinishedTime && loopRaceInfo.finishedTime != null) {
+                canRemoveFinishedTime = false;
             }
             if (canRemoveProtestTime && loopRaceInfo.protestFinishTime != null
                     && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
@@ -743,7 +750,15 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append(stringMessages.finishTime((timeFormatter.format(entryDTO.raceInfo.finishedTime))));
+                    final Duration finishDuration;
+                    if (entryDTO.raceInfo.finishingTime != null) {
+                        finishDuration = new MillisecondsDurationImpl(
+                                entryDTO.raceInfo.finishedTime.getTime()
+                                        - entryDTO.raceInfo.finishingTime.getTime());
+                    } else {
+                        finishDuration = new MillisecondsDurationImpl(0);
+                    }
+                    additionalInformation.append(stringMessages.finishDuration(formatDuration(finishDuration)));
                     isInfoBefore = true;
                 }
                 return additionalInformation.toString();
@@ -929,6 +944,36 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         if (dateTime == null)
             return 0;
         return (new Date().getTime() - dateTime.getTime()) / 1000;
+    }
+
+    private String formatDuration(Duration duration) {
+        long seconds = (long) Math.round(duration.asSeconds());
+        final long days = seconds / (long) Duration.ONE_DAY.asSeconds();
+        seconds %= 24 * 3600;
+        final long hours = seconds / (long) Duration.ONE_HOUR.asSeconds();
+        seconds %= 3600;
+        final long minutes = seconds / (long) Duration.ONE_MINUTE.asSeconds();
+        seconds %= 60;
+        final StringJoiner sj = new StringJoiner(":");
+        if (days > 0) {
+            sj.add(String.valueOf(days));
+        }
+        if (days > 0 && hours < 10) {
+            sj.add("0" + String.valueOf(hours));
+        } else {
+            sj.add(String.valueOf(hours));
+        }
+        if (minutes < 10) {
+            sj.add("0" + String.valueOf(minutes));
+        } else {
+            sj.add(String.valueOf(minutes));
+        }
+        if (seconds < 10) {
+            sj.add("0" + String.valueOf(seconds));
+        } else {
+            sj.add(String.valueOf(seconds));
+        }
+        return sj.toString();
     }
 
     @Override
