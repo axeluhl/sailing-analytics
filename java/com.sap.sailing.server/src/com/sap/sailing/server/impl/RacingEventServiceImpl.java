@@ -1406,7 +1406,7 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
             RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
                     identifier, getMongoObjectFactory());
-            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
             raceLog.lockForRead();
             try {
                 for (RaceLogEvent e : raceLog.getRawFixes()) {
