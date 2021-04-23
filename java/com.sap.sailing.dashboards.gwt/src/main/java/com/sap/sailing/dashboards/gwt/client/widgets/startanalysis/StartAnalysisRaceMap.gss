@@ -64,3 +64,22 @@
     height: 28px !important;
     cursor: pointer;
 }
+
+.raceMapVideoUploadButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204) !important;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("uploadVideoIcon");
+    background-size: 74%;
+}
