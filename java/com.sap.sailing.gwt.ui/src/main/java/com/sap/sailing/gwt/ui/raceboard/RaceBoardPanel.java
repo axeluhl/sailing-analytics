@@ -766,7 +766,7 @@ public class RaceBoardPanel
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");
-                if(leaderboardGroupNameParam != null) {
+                if (leaderboardGroupNameParam != null) {
                     Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
                     leaderboardGroupLinkParameters.put("showRaceDetails", "true");
                     leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupNameParam);
