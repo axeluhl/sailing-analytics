@@ -514,6 +514,30 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .iterator().next().instances().iterator().next();
     }
 
+    @Override
+    public Instance getInstanceByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress) {
+        return getEc2Client(getRegion(region))
+                .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(publicIpAddress).build())).reservations()
+                .iterator().next().instances().iterator().next();
+    }
+    
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPublicIpAddress(region, publicIpAddress), hostSupplier);
+    }
+
+    @Override
+    public Instance getInstanceByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress) {
+        return getEc2Client(getRegion(region))
+                .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(privateIpAddress).build())).reservations()
+                .iterator().next().instances().iterator().next();
+    }
+
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPrivateIpAddress(region, publicIpAddress), hostSupplier);
+    }
+
     private Route53Client getRoute53Client() {
         return getClient(Route53Client.builder(), getRegion(globalRegion));
     }
@@ -664,10 +688,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
-            String tagName, String tagValue) {
+    public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
         Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
-        return getHostsWithFilters(region, filter);
+        return getHostsWithFilters(region, hostSupplier, filter);
     }
 
     private Filter.Builder getHostWithTagValueFilter(String tagName, String tagValue) {
@@ -675,29 +699,31 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
-            String tagName, String tagValue) {
-        return getHostsWithFilters(region, getRunningHostFilter());
+    public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getRunningHostFilter());
     }
     
     private Filter getRunningHostFilter() {
         return Filter.builder().name("instance-state-name").values("running").build();
     }
 
-    private Iterable<AwsInstance<ShardingKey>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
-        final List<AwsInstance<ShardingKey>> result = new ArrayList<>();
+    private <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getHostsWithFilters(com.sap.sse.landscape.Region region, HostSupplier<ShardingKey, HostT> hostSupplier, Filter... filters) {
+        final List<HostT> result = new ArrayList<>();
         final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filters));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
-                result.add(getHost(region, i));
+                result.add(getHost(region, i, hostSupplier));
             }
         }
         return result;
     }
 
-    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
+    private <HostT extends AwsInstance<ShardingKey>>
+    HostT getHost(com.sap.sse.landscape.Region region, final Instance instance, HostSupplier<ShardingKey, HostT> hostSupplier) {
         try {
-            return new AwsInstanceImpl<ShardingKey>(instance.instanceId(),
+            return hostSupplier.supply(instance.instanceId(),
                     getAvailabilityZoneByName(region, instance.placement().availabilityZone()),
                     InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()), this);
         } catch (UnknownHostException e) {
@@ -706,18 +732,21 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
     }
 
-    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
-        return getHost(region, getInstance(instanceId, region));
+    private <HostT extends AwsInstance<ShardingKey>>
+    HostT getHost(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstance(instanceId, region), hostSupplier);
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
+    public <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName));
+    public <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName));
     }
     
     private Filter getFilterForHostWithTag(Filter.Builder builder, String tagName) {
@@ -984,7 +1013,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
-
+    
     @Override
     public Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup) {
         final Map<AwsInstance<ShardingKey>, TargetHealth> result = new HashMap<>();
@@ -993,7 +1022,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
                 .targetHealthDescriptions().forEach(
                     targetHealthDescription->result.put(
-                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id()), targetHealthDescription.targetHealth()));
+                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id(), AwsInstanceImpl::new), targetHealthDescription.targetHealth()));
         return result;
     }
 
@@ -1001,7 +1030,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -1166,7 +1195,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     private Iterable<AwsInstance<ShardingKey>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
-        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
+        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME, AwsInstanceImpl::new);
     }
 
     /**
@@ -1208,7 +1237,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
+        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME, AwsInstanceImpl::new);
         if (rabbitMQHostsInRegion.iterator().hasNext()) {
             final AwsInstance<ShardingKey> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
             result = new RabbitMQEndpoint() {
@@ -1252,7 +1281,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     Iterable<HostT> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             HostSupplier<ShardingKey, HostT> hostSupplier) {
         final List<HostT> result = new ArrayList<>();
-        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
+        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName, hostSupplier)) {
             final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(),
                     host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(), this);
             result.add(applicationProcessHost);

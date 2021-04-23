@@ -239,28 +239,33 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * 
      * @see #getRunningHostsWithTagValue(Region, String)
      */
-    Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(Region region, String tagName, String tagValue);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTagValue(Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * result includes instances regardless their state; they are not required to be RUNNING.
      * 
-     * @see #getRunningHostsWithTag(Region, String)
+     * @see #getRunningHostsWithTag(Region, String, HostSupplier<ShardingKey, HostT>)
      */
-    Iterable<AwsInstance<ShardingKey>> getHostsWithTag(Region region, String tagName);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
     
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(Region region, String tagName);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
+
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(Region region, String publicIpAddress,
+            HostSupplier<ShardingKey, HostT> hostSupplier);
+
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByPublicIpAddress(Region region, String publicIpAddress,
+            HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(Region region, String tagName,
-            String tagValue);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
 
@@ -318,6 +323,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     SSHKeyPair createKeyPair(Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
+
+    Instance getInstanceByPublicIpAddress(Region region, String publicIpAddress);
+
+    Instance getInstanceByPrivateIpAddress(Region region, String publicIpAddress);
 
     /**
      * @param hostname

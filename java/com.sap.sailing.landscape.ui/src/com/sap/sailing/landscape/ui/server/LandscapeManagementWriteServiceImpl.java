@@ -81,6 +81,7 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
@@ -146,21 +147,22 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
-    private final static ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory =
-            (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
-                try {
-                    final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
-                    return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
-                            expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            };
+    private final ProcessFactory<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, SailingAnalyticsHost<String>> processFactoryFromHostAndServerDirectory;
     
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
         BundleContext context = Activator.getContext();
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+        processFactoryFromHostAndServerDirectory =
+                (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+                    try {
+                        final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                        return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
+                                expeditionUdpPort == null ? null : expeditionUdpPort.intValue(), getLandscape());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                };
     }
     
     protected SecurityService getSecurityService() {
@@ -728,7 +730,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private SailingAnalyticsProcess<String> getSailingAnalyticsProcessFromDTO(SailingAnalyticsProcessDTO processDTO) throws UnknownHostException {
         return new SailingAnalyticsProcessImpl<String>(processDTO.getPort(),
                 getHostFromInstanceDTO(processDTO.getHost()), processDTO.getServerDirectory(),
-                processDTO.getExpeditionUdpPort());
+                processDTO.getExpeditionUdpPort(), getLandscape());
     }
 
     private Host getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {
@@ -738,7 +740,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
                         return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
-                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), getLandscape());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -947,7 +949,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * Returns one replica process that is healthy, or {@code null} if no such process was found
      */
     private SailingAnalyticsProcess<String> hasHealthyReplica(SailingAnalyticsProcess<String> master) throws Exception {
-        for (final SailingAnalyticsProcess<String> replica : master.getReplicas(WAIT_FOR_HOST_TIMEOUT)) {
+        final HostSupplier<String, SailingAnalyticsHost<String>> hostSupplier =
+                (String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<String> landscape)->
+                    new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape,
+                            processFactoryFromHostAndServerDirectory);
+        for (final SailingAnalyticsProcess<String> replica : master.getReplicas(WAIT_FOR_HOST_TIMEOUT, hostSupplier, processFactoryFromHostAndServerDirectory)) {
             if (replica.isReady(WAIT_FOR_HOST_TIMEOUT)) {
                 return replica;
             }

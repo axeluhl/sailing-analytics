@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -34,11 +33,9 @@ import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
-import com.sap.sse.replication.ReplicationStatus;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
@@ -263,36 +260,6 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         content.close();
     }
     
-    @Override
-    public ProcessT getMaster(Optional<Duration> optionalTimeout) throws Exception {
-        final ProcessFactory<ShardingKey, MetricsT, ProcessT, /* HostT */ ?> processFactory = null;
-        final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
-        final JSONArray replicables = (JSONArray) replicationStatus.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLES);
-        for (final Object replicableObject : replicables) {
-            final JSONObject replicable = (JSONObject) replicableObject;
-            final JSONObject replicatedFrom = (JSONObject) replicable.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLE_REPLICATEDFROM);
-            if (replicatedFrom != null) {
-                final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
-                final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
-                return processFactory.createProcess(/* TODO: where to get the host from? HostSupplier is only available in com.sap.sse.landscape.aws but not here,
-                and here we only have address and port, and that may even only be a DNS name mapping to a load balancer... */ null, port, masterAddress, /* telnetPort can be obtained from environment on demand */ null, masterAddress, Collections.emptyMap());
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Iterable<ProcessT> getReplicas(Optional<Duration> optionalTimeout) {
-        // TODO Implement ApplicationProcessImpl.getReplicas(...) using getReplicationStatus(...) to get IP+port of replicas, then query their /gwt/status to obtain all parameters for the ProcessT constructor calls
-        /* TODO Similar to the problem in getMaster(...) we don't have all the parameters at hand to create a host object for each replica, but this would be required
-         * for a full-fledged ProcessT object (see HostSupplier and ProcessFactory). We could go at length and try to discover these from the
-         * IP address. Or we change these methods' return types to just the address/port combination which is enough to contact the process and
-         * obtain its health status. Should we introduce a slimmed-down version of the Host interface for this purpose? Or a slimmed-down ApplicationProcess
-         * variant? The ironic part is that these methods were introduced only in order to find a healthy replica, so a health check is all that's needed,
-         * and that would only require the address and the port so /gwt/status can be called. */
-        return null;
-    }
-
     @Override
     public String toString() {
         return "ApplicationProcessImpl [serverDirectory=" + serverDirectory + ", serverName=" + serverName + ", port=" + getPort() + ", host=" + getHost() + "]";
