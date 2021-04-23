@@ -1,7 +1,10 @@
 package com.sap.sse.landscape.aws.impl;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,18 +47,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             if (replicatedFrom != null) {
                 final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
                 final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
-                HostT host;
-                try {
-                    host = landscape.getHostByPublicIpAddress(getHost().getRegion(), masterAddress, hostSupplier);
-                } catch (Exception e) {
-                    logger.info("Unable to find master by public IP "+masterAddress+" ("+e.getMessage()+"); trying to look up master assuming "+masterAddress+" is the private IP");
-                    try {
-                        host = landscape.getHostByPrivateIpAddress(getHost().getRegion(), masterAddress, hostSupplier);
-                    } catch (Exception f) {
-                        logger.info("Unable to find master by private IP "+masterAddress+" ("+f.getMessage()+") either. Returning null.");
-                        host = null;
-                    }
-                }
+                HostT host = getHostFromIpAddress(hostSupplier, masterAddress);
                 if (host != null) {
                     return processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
                             /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap());
@@ -65,16 +57,49 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         return null;
     }
 
+    /**
+     * Assuming to find the {@code ipAddress} in this host's {@link Host#getRegion() region}, this method looks for instances that
+     * have {@code ipAddress} as their public or private IP address. If found, the respective host is returned, otherwise
+     * {@code null} is returned.
+     */
+    private <HostT extends AwsInstance<ShardingKey>> HostT getHostFromIpAddress(HostSupplier<ShardingKey, HostT> hostSupplier, final String ipAddress) {
+        HostT host;
+        try {
+            host = landscape.getHostByPublicIpAddress(getHost().getRegion(), ipAddress, hostSupplier);
+        } catch (Exception e) {
+            logger.info("Unable to find master by public IP "+ipAddress+" ("+e.getMessage()+"); trying to look up master assuming "+ipAddress+" is the private IP");
+            try {
+                host = landscape.getHostByPrivateIpAddress(getHost().getRegion(), ipAddress, hostSupplier);
+            } catch (Exception f) {
+                logger.info("Unable to find master by private IP "+ipAddress+" ("+f.getMessage()+") either. Returning null.");
+                host = null;
+            }
+        }
+        return host;
+    }
+
     @Override
     public <HostT extends AwsInstance<ShardingKey>> Iterable<ProcessT> getReplicas(Optional<Duration> optionalTimeout, HostSupplier<ShardingKey, HostT> hostSupplier,
-            ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactory) {
-        // TODO Implement ApplicationProcessImpl.getReplicas(...) using getReplicationStatus(...) to get IP+port of replicas, then query their /gwt/status to obtain all parameters for the ProcessT constructor calls
-        /* TODO Similar to the problem in getMaster(...) we don't have all the parameters at hand to create a host object for each replica, but this would be required
-         * for a full-fledged ProcessT object (see HostSupplier and ProcessFactory). We could go at length and try to discover these from the
-         * IP address. Or we change these methods' return types to just the address/port combination which is enough to contact the process and
-         * obtain its health status. Should we introduce a slimmed-down version of the Host interface for this purpose? Or a slimmed-down ApplicationProcess
-         * variant? The ironic part is that these methods were introduced only in order to find a healthy replica, so a health check is all that's needed,
-         * and that would only require the address and the port so /gwt/status can be called. */
-        return null;
+            ProcessFactory<ShardingKey, MetricsT, ProcessT, HostT> processFactory) throws TimeoutException, Exception {
+        final Set<ProcessT> result = new HashSet<>();
+        final JSONObject replicationStatus = getReplicationStatus(optionalTimeout);
+        final JSONArray replicables = (JSONArray) replicationStatus.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLES);
+        for (final Object replicableObject : replicables) {
+            final JSONObject replicable = (JSONObject) replicableObject;
+            final JSONArray replicatedBy = (JSONArray) replicable.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLE_REPLICATEDBY);
+            if (replicatedBy != null) {
+                for (final Object replicaObject : replicatedBy) {
+                    final JSONObject replica = (JSONObject) replicaObject;
+                    final String replicaAddress = (String) replica.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
+                    final Integer port = replica.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replica.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
+                    HostT host = getHostFromIpAddress(hostSupplier, replicaAddress);
+                    if (host != null) {
+                        result.add(processFactory.createProcess(host, port, /* serverDirectory to be discovered otherwise */ null,
+                                /* telnetPort can be obtained from environment on demand */ null, /* serverName to be discovered otherwise */ null, Collections.emptyMap()));
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
