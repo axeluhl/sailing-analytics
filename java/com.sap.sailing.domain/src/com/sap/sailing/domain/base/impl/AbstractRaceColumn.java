@@ -482,7 +482,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
-        RaceLog raceLog = getRaceLog(fleet);
+        final RaceLog raceLog = getRaceLog(fleet);
         List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
         for (RaceLogEvent event : events) {
             raceLog.lockForRead();

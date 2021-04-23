@@ -896,7 +896,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                             if (competitor.getFlagImage() != null) {
                                 jsonCompetitor.put("flagImage", competitor.getFlagImage().toString());
                             }
-                            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+                            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                             JSONArray jsonFixes = new JSONArray();
                             track.lockForRead();
                             try {
@@ -1044,7 +1044,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             JSONObject jsonMark = new JSONObject();
             jsonMark.put("name", mark.getName());
             jsonMark.put("id", mark.getId() != null ? mark.getId().toString() : null);
-            GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            final GPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
             JSONArray jsonFixes = new JSONArray();
             track.lockForRead();
             try {
