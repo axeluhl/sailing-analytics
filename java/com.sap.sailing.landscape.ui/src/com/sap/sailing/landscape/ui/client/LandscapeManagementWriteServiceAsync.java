@@ -93,9 +93,14 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<SerializationDummyDTO> callback);
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName,
-            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> asyncCallback);
+            String passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void removeApplicationReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> asyncCallback);
+            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<Void> callback);
+
+    void createDefaultLoadBalancerMappings(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
+            boolean useDynamicLoadBalancer, String optionalDomainName, boolean forceDNSUpdate,
+            AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 }

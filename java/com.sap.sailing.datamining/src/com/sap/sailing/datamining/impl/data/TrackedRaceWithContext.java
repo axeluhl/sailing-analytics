@@ -205,7 +205,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         if (getTrackedRace() != null) {
             int number = 0;
             for (T trackedObject : tracksFor) {
-                Track<?> track = trackProvider.apply(trackedObject, getTrackedRace());
+                final Track<?> track = trackProvider.apply(trackedObject, getTrackedRace());
                 track.lockForRead();
                 try {
                     number += Util.size(track.getRawFixes());

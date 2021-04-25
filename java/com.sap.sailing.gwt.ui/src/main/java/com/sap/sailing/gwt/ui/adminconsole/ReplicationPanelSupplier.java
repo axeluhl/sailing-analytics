@@ -19,7 +19,6 @@ public class ReplicationPanelSupplier extends AdminConsolePanelSupplier<Replicat
     }
 
     public ReplicationPanel init() {
-        logger.info("Create ReplicationPanel");
         final ReplicationPanel replicationPanel = new ReplicationPanel(presenter.getSailingService(),
                 presenter.getUserService(), presenter.getErrorReporter(), stringMessages);
         replicationPanel.ensureDebugId("replicationPanel");

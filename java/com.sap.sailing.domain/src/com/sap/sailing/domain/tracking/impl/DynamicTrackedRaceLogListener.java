@@ -343,7 +343,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     public void visit(RaceLogRevokeEvent event) {
         if (markPassingUpdateListener != null) {
             RaceLogEvent revokedEvent = null;
-            for (RaceLog log : raceLogs.keySet()) {
+            for (final RaceLog log : raceLogs.keySet()) {
                 try {
                     log.lockForRead();
                     revokedEvent = log.getEventById(event.getRevokedEventId());

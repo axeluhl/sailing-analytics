@@ -250,7 +250,7 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     @Override
     public void insertExistingFixes(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
             track.lockForRead();
             try {
                 for (GPSFixMoving fix : track.getFixes()) {

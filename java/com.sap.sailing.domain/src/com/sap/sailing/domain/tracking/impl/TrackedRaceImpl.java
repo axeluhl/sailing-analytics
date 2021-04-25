@@ -647,9 +647,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * and {@link #timePointOfOldestEvent}.
      */
     private void updateEventTimePoints(Iterable<? extends Track<? extends Timed>> tracks) {
-        for (Track<? extends Timed> track : tracks) {
+        for (final Track<? extends Timed> track : tracks) {
             track.lockForRead();
-
             try {
                 for (Timed fix : track.getRawFixes()) {
                     updated(fix.getTimePoint());
@@ -3608,15 +3607,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         long result = 0;
         Boolean isGateStart = isGateStart();
         if (isGateStart != null && isGateStart.booleanValue() == true) {
-            for (RaceLog raceLog : attachedRaceLogs.values()) {
+            for (final RaceLog raceLog : attachedRaceLogs.values()) {
                 raceLog.lockForRead();
-                for(RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
-                    if(raceLogEvent.getClass().equals(RaceLogGateLineOpeningTimeEventImpl.class)){
-                        RaceLogGateLineOpeningTimeEvent raceLogGateLineOpeningTimeEvent = (RaceLogGateLineOpeningTimeEvent) raceLogEvent;
-                        result = raceLogGateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime();
+                try {
+                    for (RaceLogEvent raceLogEvent: raceLog.getRawFixes()) {
+                        if (raceLogEvent.getClass().equals(RaceLogGateLineOpeningTimeEventImpl.class)){
+                            RaceLogGateLineOpeningTimeEvent raceLogGateLineOpeningTimeEvent = (RaceLogGateLineOpeningTimeEvent) raceLogEvent;
+                            result = raceLogGateLineOpeningTimeEvent.getGateLineOpeningTimes().getGolfDownTime();
+                        }
                     }
+                } finally {
+                    raceLog.unlockAfterRead();
                 }
-                raceLog.unlockAfterRead();
             }
         }
         return result;

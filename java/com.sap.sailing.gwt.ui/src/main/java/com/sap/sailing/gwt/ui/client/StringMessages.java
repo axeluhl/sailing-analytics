@@ -2384,4 +2384,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String rankingLabel();
     String scoringSystemLabel();
     String scoringSystemPlaceholder(); 
+    String pleaseUseHttpsForImageUrls();
 }

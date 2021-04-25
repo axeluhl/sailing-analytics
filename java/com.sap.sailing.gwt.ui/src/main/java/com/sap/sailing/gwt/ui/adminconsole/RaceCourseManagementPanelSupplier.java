@@ -19,7 +19,6 @@ public class RaceCourseManagementPanelSupplier extends AdminConsolePanelSupplier
 
     @Override
     public RaceCourseManagementPanel init() {
-        logger.info("Create RaceCourseManagementPanel");
         RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(
                 presenter, stringMessages);
         raceCourseManagementPanel.ensureDebugId("raceCourseManagementPanel");
