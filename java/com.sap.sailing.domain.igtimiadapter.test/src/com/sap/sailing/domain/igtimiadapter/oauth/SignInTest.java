@@ -13,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -29,6 +30,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
+@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class SignInTest {
     private static final Logger logger = Logger.getLogger(SignInTest.class.getName());
     

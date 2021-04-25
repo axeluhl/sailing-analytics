@@ -783,12 +783,12 @@ public class RaceBoardPanel
                 }
             }
             regattaNameAnchor.setStyleName("RegattaName-Anchor");
-            Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
+            final Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
             regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
-            DataByLogo dataByLogo = new DataByLogo();
+            final DataByLogo dataByLogo = new DataByLogo();
             dataByLogo.setUp(trackingConnectorInfo == null ? Collections.emptySet()
                     : Collections.singleton(trackingConnectorInfo), /** colorIfPossible **/ false, /** enforceTextColor **/ true);
             if (dataByLogo.isVisible()) {
