@@ -169,6 +169,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
@@ -567,33 +568,37 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
-            RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider) {
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter,
+            Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
+            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, UserService userService) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "", /* leaderboardGroupId */ null);
+                showHeaderPanel, quickRanksDTOProvider, /* leaderboardName */ "", /* leaderboardGroupName */ "",
+                /* leaderboardGroupId */ null, userService);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
-            RaceMapSettings raceMapSettings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection,
-            RaceCompetitorSet raceCompetitorSet, StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, 
-            RaceMapResources raceMapResources, boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider,
-            String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId) {
+            RaceMapSettings raceMapSettings, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
+            RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
+            boolean showHeaderPanel, QuickFlagDataProvider quickRanksDTOProvider, String leaderboardName,
+            String leaderboardGroupName, UUID leaderboardGroupId, UserService userService) {
         this(parent, context, raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
                 timer, competitorSelection, raceCompetitorSet, stringMessages, raceIdentifier, raceMapResources,
-                showHeaderPanel, quickRanksDTOProvider, visible -> {}, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null);
+                showHeaderPanel, quickRanksDTOProvider, visible -> {
+                }, leaderboardName, leaderboardGroupName, leaderboardGroupId, /* shareLinkAction */ null, userService);
     }
     
     public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
-            RaceMapSettings raceMapSettings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
-            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel,
-            QuickFlagDataProvider quickFlagDataProvider, Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName, UUID leaderboardGroupId, Runnable shareLinkAction) {
+            RaceMapSettings raceMapSettings, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
+            RaceCompetitorSelectionProvider competitorSelection, RaceCompetitorSet raceCompetitorSet,
+            StringMessages stringMessages, RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources,
+            boolean showHeaderPanel, QuickFlagDataProvider quickFlagDataProvider,
+            Consumer<WindSource> showWindChartForProvider, String leaderboardName, String leaderboardGroupName,
+            UUID leaderboardGroupId, Runnable shareLinkAction, UserService userService) {
         super(parent, context);
         this.shareLinkAction = shareLinkAction;
         this.maneuverMarkersAndLossIndicators = new ManeuverMarkersAndLossIndicators(this, sailingService, errorReporter, stringMessages);
@@ -645,7 +650,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         panelForRightHeaderLabels = new AbsolutePanel();
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
-        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, userService);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);

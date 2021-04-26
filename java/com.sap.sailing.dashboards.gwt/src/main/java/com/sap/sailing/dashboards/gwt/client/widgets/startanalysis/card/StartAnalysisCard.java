@@ -150,7 +150,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     private void addMap(final int cardID, final StartAnalysisDTO startAnalysisDTO, RaceMapResources raceMapResources) {
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live, 1000l);
         timer.pause();
-        ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
+        final ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
         if (startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)) {
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds + startAnalysisDTO.tailLenghtInMilliseconds);
             zoomTypes.add(ZoomTypes.BUOYS);
@@ -158,10 +158,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.BUOYS);
         }
-        RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
-        
-        AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
+        final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
+        final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
                 /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
                 /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
@@ -175,16 +174,15 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration(),
                 defaultRaceMapSettings.getStartCountDownFontSizeScaling(), defaultRaceMapSettings.isShowManeuverLossVisualization(),
                 defaultRaceMapSettings.isShowSatelliteLayer());
-
-        
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
+        final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
+        // FIXME: UserService must not be null at this point. Else the streamlet feature permission check will not succeed.
         raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
-                sailingServiceAsync,
-                asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
+                sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
-                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickFlagDataProvider());
+                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
+                new DefaultQuickFlagDataProvider(), null);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);

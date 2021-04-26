@@ -15,8 +15,8 @@ import com.google.gwt.uibinder.client.UiRenderer;
 import com.sap.sailing.gwt.home.shared.places.user.profile.subscription.UserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionItem;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 
 public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
     interface Style extends CssResource {
@@ -57,7 +57,7 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
 
     @Override
     public void render(Context context, SubscriptionItem subscription, SafeHtmlBuilder sb) {
-        SubscriptionPlan plan = getSubscriptionPlan(subscription);
+        SubscriptionPlanDTO plan = getSubscriptionPlan(subscription);
         if (plan != null) {
             String planName = plan.getName();
             String subscriptionStatus = getSubscriptionStatusLabel(subscription);
@@ -97,8 +97,8 @@ public class SubscriptionCell extends AbstractCell<SubscriptionItem> {
         presenter.cancelSubscription(subscription.getPlanId(), subscription.getProvider());
     }
 
-    private SubscriptionPlan getSubscriptionPlan(SubscriptionItem subscription) {
-        return subscription != null ? SubscriptionPlan.getPlan(subscription.getPlanId()) : null;
+    private SubscriptionPlanDTO getSubscriptionPlan(SubscriptionItem subscription) {
+        return subscription != null ? presenter.getPlanById(subscription.getPlanId()) : null;
     }
 
     private String buildTrialText(SubscriptionItem subscription) {

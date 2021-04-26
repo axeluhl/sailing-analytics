@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.subscription.BaseUserSubscriptionView;
 import com.sap.sailing.gwt.ui.client.subscription.SubscriptionViewPresenter;
 import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionDTO;
+import com.sap.sailing.gwt.ui.shared.subscription.SubscriptionPlanDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.FinishCheckoutDTO;
 import com.sap.sailing.gwt.ui.shared.subscription.chargebee.PrepareCheckoutDTO;
 import com.sap.sse.gwt.client.Notification;
@@ -64,7 +65,7 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
         writeService.finishCheckout(/* planId */ null, data, new AsyncCallback<SubscriptionDTO>() {
             @Override
             public void onSuccess(SubscriptionDTO result) {
-                view.updateView(result);
+                updateView(result, view);
                 Chargebee.getInstance().closeAll();
             }
 
@@ -72,6 +73,21 @@ public class ChargebeeSubscriptionViewPresenter implements SubscriptionViewPrese
             public void onFailure(Throwable caught) {
                 Chargebee.getInstance().closeAll();
                 showError(StringMessages.INSTANCE.errorSaveSubscription(caught.getMessage()));
+            }
+        });
+    }
+    
+    private void updateView(SubscriptionDTO subscription, BaseUserSubscriptionView view) {
+        service.getAllSubscriptionPlans(new AsyncCallback<Iterable<SubscriptionPlanDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // This will simply not refresh the SubscriptionPlan list in the view.
+                // Not critical, since the case of a changed set of SubscriptionPlans is highly unlikely.
+                view.updateView(subscription, null);
+            }
+            @Override
+            public void onSuccess(Iterable<SubscriptionPlanDTO> result) {
+                view.updateView(subscription, result);
             }
         });
     }

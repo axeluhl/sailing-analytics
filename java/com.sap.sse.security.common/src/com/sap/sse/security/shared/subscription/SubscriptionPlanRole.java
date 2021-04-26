@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.subscription;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
@@ -10,7 +11,9 @@ import java.util.UUID;
  * 
  * @author Tu Tran
  */
-public class SubscriptionPlanRole {
+public class SubscriptionPlanRole implements Serializable{
+    private static final long serialVersionUID = -4052966548617597414L;
+
     /**
      * Specify how role is qualified by user: none(unqualified) or by subscription user
      */
@@ -115,5 +118,50 @@ public class SubscriptionPlanRole {
     public String getExplicitUserQualification() {
         return explicitUserQualification;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((explicitUserQualification == null) ? 0 : explicitUserQualification.hashCode());
+        result = prime * result + ((groupQualificationMode == null) ? 0 : groupQualificationMode.hashCode());
+        result = prime * result
+                + ((idOfExplicitGroupQualification == null) ? 0 : idOfExplicitGroupQualification.hashCode());
+        result = prime * result + ((roleId == null) ? 0 : roleId.hashCode());
+        result = prime * result + ((userQualificationMode == null) ? 0 : userQualificationMode.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SubscriptionPlanRole other = (SubscriptionPlanRole) obj;
+        if (explicitUserQualification == null) {
+            if (other.explicitUserQualification != null)
+                return false;
+        } else if (!explicitUserQualification.equals(other.explicitUserQualification))
+            return false;
+        if (groupQualificationMode != other.groupQualificationMode)
+            return false;
+        if (idOfExplicitGroupQualification == null) {
+            if (other.idOfExplicitGroupQualification != null)
+                return false;
+        } else if (!idOfExplicitGroupQualification.equals(other.idOfExplicitGroupQualification))
+            return false;
+        if (roleId == null) {
+            if (other.roleId != null)
+                return false;
+        } else if (!roleId.equals(other.roleId))
+            return false;
+        if (userQualificationMode != other.userQualificationMode)
+            return false;
+        return true;
+    }
+    
 
 }

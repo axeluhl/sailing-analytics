@@ -155,6 +155,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.security.shared.SecurityAccessControlList;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -214,6 +215,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final static Environment shiroEnvironment;
 
     private final HasPermissionsProvider hasPermissionsProvider;
+    private final SubscriptionPlanProvider subscriptionPlanProvider;
 
     private String sharedAcrossSubdomainsOf;
     
@@ -244,8 +246,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            replication.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
+        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, subscriptionPlanProvider,
                 /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
@@ -256,7 +258,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
@@ -264,6 +266,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         logger.info("Initializing Security Service with user store " + userStore);
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
+        this.subscriptionPlanProvider = subscriptionPlanProvider;
         this.baseUrlForCrossDomainStorage = baseUrlForCrossDomainStorage;
         this.store = userStore;
         this.accessControlStore = accessControlStore;
@@ -310,7 +313,17 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
         return hasPermissionsProvider.getAllHasPermissions();
     }
-
+    
+    @Override
+    public Map<Serializable, SubscriptionPlan> getAllSubscriptionPlans() {
+        return subscriptionPlanProvider.getAllSubscriptionPlans();
+    }
+    
+    @Override
+    public SubscriptionPlan getSubscriptionPlanById(String planId) {
+        return subscriptionPlanProvider.getAllSubscriptionPlans().get(planId);
+    }
+    
     @Override
     public void initialize() {
         initEmptyStore();
@@ -2516,7 +2529,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // New subscription doesn't have plan id, that means it's an empty subscription model which is used for
             // clearing all user subscriptions
             shouldProcess = true;
-        } else if (SubscriptionPlan.getPlan(newSubscription.getPlanId()) != null) {
+        } else if (subscriptionPlanProvider.getAllSubscriptionPlans().get(newSubscription.getPlanId()) != null) {
             if (currentSubscription == null) {
                 // New subscription plan is valid, but current subscription of the plan is empty
                 shouldProcess = true;
@@ -2589,8 +2602,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         // in case new subscription has no planId, it means the subscription is an empty one with just meta data for
         // update times, and user doesn't subscribe to any plans, so all plan's roles assigned to the user must be
         // removed, but only if no other plan that the user still is subscribed to implies an equal role:
+        Map<Serializable, SubscriptionPlan> allSubscriptionPlans = subscriptionPlanProvider.getAllSubscriptionPlans();
         if (newSubscription != null && !newSubscription.hasPlan()) {
-            SubscriptionPlan[] plans = SubscriptionPlan.values();
+            Iterable<SubscriptionPlan> plans = allSubscriptionPlans.values();
             for (SubscriptionPlan plan : plans) {
                 removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
             }
@@ -2600,11 +2614,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (currentSubscription != null && currentSubscription.hasPlan()
                     && currentSubscription.isActiveSubscription() && newSubscription != null
                     && !newSubscription.isActiveSubscription()) {
-                SubscriptionPlan currentPlan = SubscriptionPlan.getPlan(currentSubscription.getPlanId());
+                SubscriptionPlan currentPlan = allSubscriptionPlans.get(currentSubscription.getPlanId());
                 removeUserPlanRoles(user, currentPlan, /* checkOverlappingRoles */ true);
             }
             if (newSubscription != null && newSubscription.hasPlan() && newSubscription.isActiveSubscription()) {
-                SubscriptionPlan newPlan = SubscriptionPlan.getPlan(newSubscription.getPlanId());
+                SubscriptionPlan newPlan = allSubscriptionPlans.get(newSubscription.getPlanId());
                 addUserPlanRoles(user, newPlan);
             }
         }
@@ -2659,7 +2673,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         Iterable<Subscription> subscriptions = user.getSubscriptions();
         for (Subscription subscription : subscriptions) {
             if (subscription.isActiveSubscription() && !subscription.getPlanId().equals(plan.getId())) {
-                SubscriptionPlan otherPlan = SubscriptionPlan.getPlan(subscription.getPlanId());
+                SubscriptionPlan otherPlan = subscriptionPlanProvider.getAllSubscriptionPlans().get(subscription.getPlanId());
                 for (SubscriptionPlanRole planRole : otherPlan.getRoles()) {
                     otherPlanRoles.add(getSubscriptionPlanUserRole(user, planRole));
                 }
@@ -2677,7 +2691,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     /**
      * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}.
-     * These roles are non transitive, hence they can not be 
+     * These roles are non transitive, hence they can not be granted to other users.
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);

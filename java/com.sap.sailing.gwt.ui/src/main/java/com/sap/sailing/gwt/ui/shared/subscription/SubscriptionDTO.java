@@ -19,6 +19,10 @@ public class SubscriptionDTO implements IsSerializable {
      */
     private String error;
 
+    /**
+     * Only for GWT serialization
+     */
+    @Deprecated
     public SubscriptionDTO() {
     }
 

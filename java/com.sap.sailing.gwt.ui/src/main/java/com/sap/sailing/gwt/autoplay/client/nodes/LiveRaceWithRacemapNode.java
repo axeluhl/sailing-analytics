@@ -36,7 +36,7 @@ public class LiveRaceWithRacemapNode extends FiresPlaceNode {
 
     public void onStart() {
         place = new LiveRaceWithRacemapAndLeaderBoardPlace();
-        AutoplayHelper.create(cf.getSailingService(), cf.getErrorReporter(),
+        AutoplayHelper.create(cf.getSailingService(), cf.getUserService(), cf.getErrorReporter(),
                 cf.getAutoPlayCtxSignalError().getContextDefinition().getLeaderboardName(), cf.getAutoPlayCtxSignalError().getContextDefinition().getEventId(),
                 cf.getAutoPlayCtxSignalError().getEvent(), cf.getEventBus(), cf.getDispatch(), cf.getAutoPlayCtxSignalError().getLiveRace(),
                 new AsyncCallback<RVWrapper>() {
