@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoPlayer;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -53,8 +54,7 @@ public class VideoGalleryVideo extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
-                // TODO translate
-                if (Window.confirm("Do you really want to delete this video?")) {
+                if (Window.confirm(StringMessages.INSTANCE.confirmDeleteVideo())) {
                     updateVideo.accept(video);
                 }
             }

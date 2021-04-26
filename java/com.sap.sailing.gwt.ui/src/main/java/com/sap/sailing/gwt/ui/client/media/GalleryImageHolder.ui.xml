@@ -48,9 +48,6 @@
         <div class="{style.overlayWrapper}">
             <div class="{res_home.sharedHomeCss.overlay} {style.overlay}"
                 ui:field="overlay" style="display:none;">
-                <g:Anchor ui:field="editAnchor"
-                    href="javascript:;"
-                    styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_edit_button}" />
                 <g:Anchor ui:field="deleteAnchor"
                     href="javascript:;"
                     styleName="{res.mainCss.button} {local_res.css.button} {local_res.css.thumbnail_delete_button}" />

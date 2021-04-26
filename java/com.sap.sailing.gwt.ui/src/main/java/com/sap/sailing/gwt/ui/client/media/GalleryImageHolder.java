@@ -30,11 +30,8 @@ public class GalleryImageHolder extends Composite implements HasClickHandlers {
 
     @UiField
     DivElement imageHolderUi;
-    
     @UiField
     Anchor deleteAnchor;
-    @UiField
-    Anchor editAnchor;
     @UiField
     DivElement overlay;
 
@@ -46,9 +43,6 @@ public class GalleryImageHolder extends Composite implements HasClickHandlers {
         this.imageSourceRef = image.getSourceRef();
         this.imageCreateAt = image.getCreatedAtDate();
         deleteAnchor.addClickHandler(deleteHandler);
-        // TODO: activate after implementing edit logic
-        editAnchor.setVisible(false);
-        //editAnchor.addClickHandler(editHandler);
         imageHolderUi.getStyle().setBackgroundImage("url(\"" + image.getSourceRef() + "\")");
         
     }

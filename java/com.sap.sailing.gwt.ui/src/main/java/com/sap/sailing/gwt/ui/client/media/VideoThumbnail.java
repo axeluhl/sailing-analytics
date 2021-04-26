@@ -39,14 +39,10 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
 
     @UiField
     DivElement captionUi;
-
     @UiField
     ImageElement thumbnailUi;
-    
     @UiField
     Anchor deleteAnchor;
-    @UiField
-    Anchor editAnchor;
     @UiField
     DivElement overlay;
     
@@ -56,12 +52,8 @@ public class VideoThumbnail extends Composite implements HasClickHandlers {
         MediaPageResources.INSTANCE.css().ensureInjected();
         SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        //setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");
         captionUi.setInnerText(video.getTitle());
-        // TODO: activate after implementing edit logic
-        //editAnchor.addClickHandler(editHandler);
-        editAnchor.setVisible(false);
         deleteAnchor.addClickHandler(deleteHandler);
         if (video.getThumbnailRef() == null) {
             if (video.getMimeType().mediaSubType == MediaSubType.youtube) {
