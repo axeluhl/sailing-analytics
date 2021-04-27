@@ -79,7 +79,7 @@ public class SecurityServiceAndHasPermissionsProviderTest {
     }
     
     @Test
-    public void testHasCurrentUserAnyPermissionExpectExcept() {
+    public void testHasCurrentUserAnyPermission() {
         assertTrue(excecutePermissionCheckUnderAdminSubject(createSecurityServiceWithHasPermissionsProvider(),
                 securityService->securityService.hasCurrentUserAnyPermission(permission)));
     }
