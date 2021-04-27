@@ -97,10 +97,9 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 # The number of worker threads to use for building GWT permutations.
 # Can be overridden using the -x option
 GWT_WORKERS=2
-
-# The number of worker threads to use for building GWT permutations.
-# Can be overridden using the -x option
-GWT_WORKERS=2
+# The default resolution for headless Firefox for Selenium tests:
+MOZ_HEADLESS_WIDTH=1600
+MOZ_HEADLESS_HEIGHT=900
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
