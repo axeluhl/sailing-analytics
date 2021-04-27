@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
@@ -92,16 +93,19 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
         final TextBox userInput = textBoxConstructor.get();
         userInput.ensureDebugId("userInput");
         this.initPlaceholder(userInput, stringMessages.username());
+        final CheckBox transitiveCheckBox = new CheckBox(stringMessages.transitive());
+        transitiveCheckBox.setValue(true);
         roleInputPanel.add(suggestRole);
         roleInputPanel.add(tenantInput);
         roleInputPanel.add(userInput);
+        roleInputPanel.add(transitiveCheckBox);
         final Button addRoleButton = new Button(stringMessages.add(), (ClickHandler) event -> {
             StrippedRoleDefinitionDTO role = oracle.fromString(suggestRole.getText());
             if (role != null) {
                 UserDTO selectedUser = this.userSelectionModel.getSelectedObject();
                 if (selectedUser != null) {
                     userService.getUserManagementWriteService().addRoleToUser(selectedUser.getName(), userInput.getText(),
-                            role.getId(), tenantInput.getText(), new AsyncCallback<SuccessInfo>() {
+                            role.getId(), tenantInput.getText(), transitiveCheckBox.getValue(), new AsyncCallback<SuccessInfo>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Window.alert(caught.getMessage());
@@ -121,6 +125,7 @@ public class UserRoleDefinitionPanel extends HorizontalPanel
             suggestRole.setText("");
             tenantInput.setText("");
             userInput.setText("");
+            transitiveCheckBox.setValue(true);
         });
         addRoleButton.ensureDebugId("addRoleButton");
         final Command addRoleButtonUpdater = () -> addRoleButton.setEnabled(!suggestRole.getValue().isEmpty());

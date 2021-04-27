@@ -113,7 +113,7 @@ public interface UserManagementWriteService extends UserManagementService {
             throws OAuthException, org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId,
-            String tenantQualifierName)
+            String tenantQualifierName, boolean transitive)
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,

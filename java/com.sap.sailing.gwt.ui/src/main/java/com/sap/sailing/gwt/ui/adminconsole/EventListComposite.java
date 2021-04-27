@@ -592,6 +592,8 @@ public class EventListComposite extends Composite {
                                         } else {
                                             errorReporter.reportError("Could not find the event with name "+newEvent.getName()+" to which the leaderboardgroup should be added");
                                         }
+                                        presenter.getLeaderboardGroupsRefresher().add(newGroup);
+                                        presenter.getLeaderboardGroupsRefresher().callAllFill();
                                         openCreateDefaultRegattaDialog(newEvent);
                                     }
                                 }));
