@@ -9,7 +9,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
     private final UUID roleDefinitionId;
-    
+
     public RoleDefinitionEditDialog(RoleDefinition roleDefinition, StringMessages stringMessages,
             Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinitionDTO> allOtherRoles,
             DialogCallback<RoleDefinitionDTO> callback) {

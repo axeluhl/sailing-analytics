@@ -231,18 +231,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         shiroEnvironment = new BasicIniEnvironment("classpath:shiro.ini");
     }
     
-    public SecurityServiceImpl(UserStore userStore, AccessControlStore accessControlStore) {
-        this(null, userStore, accessControlStore);
-    }
-
-    /**
-     * @param mailProperties
-     *            must not be <code>null</code>
-     */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, null);
-    }
-    
     /**
      * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
      * domain through which its services are requested for {@code Document.domain} and hence for the browser local
@@ -270,6 +258,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
             AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+        if (hasPermissionsProvider == null) {
+            throw new IllegalArgumentException("No HasPermissionsProvider defined");
+        }
         logger.info("Initializing Security Service with user store " + userStore);
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
@@ -344,7 +335,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         null);
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
-                Role adminRole = new Role(adminRoleDefinition);
+                Role adminRole = new Role(adminRoleDefinition, /* transitive */ true);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
                 // add new admin user to server group and make server group the default creation group for the admin user:
                 final UserGroup defaultTenant = getServerGroup();
@@ -945,12 +936,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private void addUserRoleToUser(final User user) {
         addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
-                /* tenant qualifier */ null, /* user qualifier */ user));
+                /* tenant qualifier */ null, /* user qualifier */ user, /* transitive */ true));
     }
     
     private void addUserRoleForGroupToUser(final UserGroup group, final User user) {
         addRoleForUserAndSetUserAsOwner(user, new Role(store.getRoleDefinitionByPrototype(UserRole.getInstance()),
-                /* tenant qualifier */ group, /* user qualifier */ null));
+                /* tenant qualifier */ group, /* user qualifier */ null, /* transitive */ true));
     }
     
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
@@ -1217,14 +1208,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        final Boolean transitive = role.isTransitive();
+        apply(new AddRoleForUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
         store.addRoleForUser(username, role);
         return null;
@@ -1240,14 +1232,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
-        apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole));
+        final Boolean transitive = role.isTransitive();
+        apply(new RemoveRoleFromUserOperation(username, roleDefinitionId, idOfTenantQualifyingRole, nameOfUserQualifyingRole, transitive));
     }
 
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
-            String nameOfUserQualifyingRole) throws UserManagementException {
+            String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException {
         final Role role = new Role(getRoleDefinition(roleDefinitionId),
-                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole));
+                getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole), transitive);
         permissionChangeListeners.roleAddedToOrRemovedFromUser(getUserByName(username), role);
         store.removeRoleFromUser(username, role);
         return null;
@@ -1977,58 +1970,31 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
-        if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
-        } else {
-            return PermissionChecker.checkMetaPermission(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
-                    aclResolver);
-        }
+        return PermissionChecker.checkMetaPermission(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership,
+                aclResolver);
     }
     
     @Override
     public boolean hasCurrentUserMetaPermissionWithOwnershipLookup(WildcardPermission permissionToCheck) {
-        if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
-        } else {
-            return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
-                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
-                    qualifiedObjectId -> {
-                        OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
-                        return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
-                    }, aclResolver);
-        }
+        return PermissionChecker.checkMetaPermissionWithOwnershipResolution(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(),
+                qualifiedObjectId -> {
+                    OwnershipAnnotation ownershipAnnotation = accessControlStore.getOwnership(qualifiedObjectId);
+                    return ownershipAnnotation == null ? null : ownershipAnnotation.getAnnotation();
+                }, aclResolver);
     }
     
     @Override
     public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck) {
-        if (hasPermissionsProvider == null) {
-            logger.warning(
-                    "Missing HasPermissionsProvider for any permission check. Using basic permission check that will produce false negatives in some cases.");
-            // In case we can not resolve all available HasPermissions instances, an any permission check will not be
-            // able to produce the expected results.
-            // A basic permission check is done instead. This will potentially produce false negatives but never false
-            // positives.
-            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), null, null);
-        } else {
-            return PermissionChecker.hasUserAnyPermission(permissionToCheck, hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), null);
-        }
+        User currentUser = getCurrentUser();
+        return PermissionChecker.hasUserAnyPermission(permissionToCheck,
+                hasPermissionsProvider.getAllHasPermissions(), currentUser, getAllUser(), /* ownership */ null);
     }
     
     @Override
-    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition, final Ownership qualificationForGrantedPermissions) {
+    public boolean hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(final RoleDefinition roleDefinition,
+            final Ownership qualificationForGrantedPermissions) {
         boolean result = true;
         for (WildcardPermission permissionToCheck : roleDefinition.getPermissions()) {
             if (!hasCurrentUserMetaPermission(permissionToCheck, qualificationForGrantedPermissions)) {
@@ -2431,7 +2397,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
-                    existingRole.getQualifiedForUser());
+                    existingRole.getQualifiedForUser(), existingRole.isTransitive());
             addRoleForUser(userAndRole.getA(),
                     copyRole);
             callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
@@ -2710,12 +2676,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     /**
-     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}
+     * Get a role {@code Role} for a subscription plan role definition {@code SubscriptionPlanRole}.
+     * These roles are non transitive, hence they can not be 
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
         final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
-        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser);
+        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser,
+                /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
     }
 
     /**

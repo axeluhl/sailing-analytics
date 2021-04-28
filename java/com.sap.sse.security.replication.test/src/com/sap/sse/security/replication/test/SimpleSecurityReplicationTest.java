@@ -7,117 +7,162 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.Subject;
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
+    private static final String ERNIE2_SESAME_STREET_COM = "ernie2@sesame-street.com";
+    private static final String HTTP_ME_TO_BACK_COM = "http://me.to.back.com";
+    private static final String ERNIE_S_COMPANY = "Ernie's Company";
+    private static final String ERNIE_S_FULL_NAME = "Ernie's Full Name";
+    private static final String BERT_MY_FRIEND = "BertMyFriend";
+    private static final String ERNIE_SESAME_STREET_COM = "ernie@sesame-street.com";
+    private static final String ERNIE = "Ernie";
+
     @Test
     public void testSimpleReplicationOfUserCreation() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
-        final String username = "Ernie";
-        final String email = "ernie@sesame-street.com";
-        final String password = "BertMyFriend";
-        final String fullName = "Ernie's Full Name";
-        final String company = "Ernie's Company";
-        final String validationBaseURL = "http://me.to.back.com";
-        assertNull(master.getUserByName(username));
-        User user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
-                validationBaseURL, null);
+        assertNull(master.getUserByName(ERNIE));
+        User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND, ERNIE_S_FULL_NAME, ERNIE_S_COMPANY, Locale.ENGLISH,
+                HTTP_ME_TO_BACK_COM, null);
         assertNotNull(user);
-        assertSame(user, master.getUserByName(username));
-        assertTrue(master.checkPassword(username, password));
+        assertSame(user, master.getUserByName(ERNIE));
+        assertTrue(master.checkPassword(ERNIE, BERT_MY_FRIEND));
         final String emailValidationSecret = user.getValidationSecret();
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        User replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(ERNIE);
         assertNotNull(replicatedErnie);
-        assertEquals(username, replicatedErnie.getName());
-        assertEquals(email, replicatedErnie.getEmail());
-        assertTrue(replica.checkPassword(username, password));
+        assertEquals(ERNIE, replicatedErnie.getName());
+        assertEquals(ERNIE_SESAME_STREET_COM, replicatedErnie.getEmail());
+        assertTrue(replica.checkPassword(ERNIE, BERT_MY_FRIEND));
         assertEquals(emailValidationSecret, replicatedErnie.getValidationSecret());
-        assertEquals(fullName, replicatedErnie.getFullName());
-        assertEquals(company, replicatedErnie.getCompany());
+        assertEquals(ERNIE_S_FULL_NAME, replicatedErnie.getFullName());
+        assertEquals(ERNIE_S_COMPANY, replicatedErnie.getCompany());
         // check that incremental replication of access token handling works
-        final String accessToken = master.createAccessToken(username);
+        final String accessToken = master.createAccessToken(ERNIE);
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        assertEquals(username, replica.getUserByAccessToken(accessToken).getName());
+        assertEquals(ERNIE, replica.getUserByAccessToken(accessToken).getName());
     }
 
     @Test
     public void testSimpleReplicationOfUserEmailChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
-        final String username = "Ernie";
-        final String email = "ernie@sesame-street.com";
-        final String newEmail = "ernie2@sesame-street.com";
-        final String password = "BertMyFriend";
-        final String validationBaseURL = "http://me.to.back.com";
-        final String fullName = "Ernie's Full Name";
-        final String company = "Ernie's Company";
-        User user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
-                validationBaseURL, master.getDefaultTenantForCurrentUser());
-        user.setFullName(fullName);
-        user.setCompany(company);
+        User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND, ERNIE_S_FULL_NAME, ERNIE_S_COMPANY, Locale.ENGLISH,
+                HTTP_ME_TO_BACK_COM, master.getDefaultTenantForCurrentUser());
+        user.setFullName(ERNIE_S_FULL_NAME);
+        user.setCompany(ERNIE_S_COMPANY);
         final String emailValidationSecretAfterCreation = user.getValidationSecret();
-        master.updateSimpleUserEmail(username, newEmail, validationBaseURL);
+        master.updateSimpleUserEmail(ERNIE, ERNIE2_SESAME_STREET_COM, HTTP_ME_TO_BACK_COM);
         final String emailValidationSecretAfterChangingEmail = user.getValidationSecret();
         assertFalse(emailValidationSecretAfterChangingEmail.equals(emailValidationSecretAfterCreation));
-        assertEquals(newEmail, user.getEmail());
+        assertEquals(ERNIE2_SESAME_STREET_COM, user.getEmail());
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        User replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(ERNIE);
         assertNotNull(replicatedErnie);
-        assertEquals(username, replicatedErnie.getName());
-        assertEquals(newEmail, replicatedErnie.getEmail());
+        assertEquals(ERNIE, replicatedErnie.getName());
+        assertEquals(ERNIE2_SESAME_STREET_COM, replicatedErnie.getEmail());
         assertEquals(emailValidationSecretAfterChangingEmail, replicatedErnie.getValidationSecret());
-        assertEquals(fullName, replicatedErnie.getFullName());
-        assertEquals(company, replicatedErnie.getCompany());
+        assertEquals(ERNIE_S_FULL_NAME, replicatedErnie.getFullName());
+        assertEquals(ERNIE_S_COMPANY, replicatedErnie.getCompany());
     }
 
     @Test
     public void testSimpleReplicationOfUserPasswordChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
-        final String username = "Ernie";
-        final String email = "ernie@sesame-street.com";
-        final String password = "BertMyFriend";
         final String newPassword = "ErnieAndBert";
-        final String validationBaseURL = "http://me.to.back.com";
-        master.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL,
+        master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, HTTP_ME_TO_BACK_COM,
                 null);
-        master.updateSimpleUserPassword(username, newPassword);
-        assertTrue(master.checkPassword(username, newPassword));
+        master.updateSimpleUserPassword(ERNIE, newPassword);
+        assertTrue(master.checkPassword(ERNIE, newPassword));
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        User replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(ERNIE);
         assertNotNull(replicatedErnie);
-        assertEquals(username, replicatedErnie.getName());
-        assertFalse(replica.checkPassword(username, password));
-        assertTrue(replica.checkPassword(username, newPassword));
+        assertEquals(ERNIE, replicatedErnie.getName());
+        assertFalse(replica.checkPassword(ERNIE, BERT_MY_FRIEND));
+        assertTrue(replica.checkPassword(ERNIE, newPassword));
     }
 
     @Test
     public void testReplicationOfPasswordReset() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
-        final String username = "Ernie";
-        final String email = "ernie@sesame-street.com";
-        final String password = "BertMyFriend";
         final String validationBaseURL = "http://me.to.back.com/validateemail";
         final String passwordResetBaseURL = "http://me.to.back.com/passwordreset";
-        User user = master.createSimpleUser(username, email, password,
+        User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL,
                 null);
-        master.validateEmail(username, user.getValidationSecret());
+        master.validateEmail(ERNIE, user.getValidationSecret());
         assertTrue(user.isEmailValidated());
-        master.resetPassword(username, passwordResetBaseURL);
+        master.resetPassword(ERNIE, passwordResetBaseURL);
         String passwordResetSecret = user.getPasswordResetSecret();
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-        User replicatedErnie = replica.getUserByName(username);
+        User replicatedErnie = replica.getUserByName(ERNIE);
         assertNotNull(replicatedErnie);
         assertTrue(replicatedErnie.isEmailValidated());
         assertEquals(passwordResetSecret, replicatedErnie.getPasswordResetSecret());
     }
+    
+    @Test
+    public void testReplicationOfLegacyRole() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
+        final UUID roleDefinitionUUID = UUID.randomUUID();
+        final String roleDefinitionName = "roleDefinition";
+        final WildcardPermission permission = new WildcardPermission("EVENT:READ:*");
+        final Set<WildcardPermission> permissions = Collections.singleton(permission);
+        master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, null,
+                null);
+        final RoleDefinition roleDefinition = master.createRoleDefinition(roleDefinitionUUID, roleDefinitionName);
+        roleDefinition.setPermissions(permissions);
+        master.updateRoleDefinition(roleDefinition);
+        final Role role = new Role(roleDefinition, null);
+        master.addRoleForUser(ERNIE, role);
+        replicaReplicator.waitUntilQueueIsEmpty();
+        Thread.sleep(3000);
+        // If no transitivity indication was given, the roles transitivity should default to true
+        assert(excecutePermissionCheckUnderUserSubject(() -> replica.hasCurrentUserMetaPermission(permission, null)));
+    }
+    
+    @Test
+    public void testReplicationONonTransitiveRole() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
+        final UUID roleDefinitionUUID = UUID.randomUUID();
+        final String roleDefinitionName = "roleDefinition";
+        final WildcardPermission permission = new WildcardPermission("EVENT:READ:*");
+        final Set<WildcardPermission> permissions = Collections.singleton(permission);
+        master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, null,
+                null);
+        final RoleDefinition roleDefinition = master.createRoleDefinition(roleDefinitionUUID, roleDefinitionName);
+        roleDefinition.setPermissions(permissions);
+        master.updateRoleDefinition(roleDefinition);
+        final Role role = new Role(roleDefinition, false);
+        master.addRoleForUser(ERNIE, role);
+        replicaReplicator.waitUntilQueueIsEmpty();
+        Thread.sleep(3000);
+        // If no transitivity indication was given, the roles transitivity should default to true
+        assertFalse(excecutePermissionCheckUnderUserSubject(() -> replica.hasCurrentUserMetaPermission(permission, null)));
+    }
+    
+    private boolean excecutePermissionCheckUnderUserSubject(Callable<Boolean> callable) {
+        PrincipalCollection principals = new SimplePrincipalCollection(Collections.singleton(ERNIE), "MyRealm");
+        Subject subject = new Subject.Builder().principals(principals).authenticated(true).buildSubject();
+        return subject.execute(callable);
+    }
+
 }

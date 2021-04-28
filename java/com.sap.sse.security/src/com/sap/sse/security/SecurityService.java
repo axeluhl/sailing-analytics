@@ -199,7 +199,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Creates a new role with initially empty {@link RoleDefinition#getPermissions() permissions}.
      */
     RoleDefinition createRoleDefinition(UUID id, String name);
-    
+
     /**
      * Deletes the {@code roleDefinition} from this service persistently.
      */
