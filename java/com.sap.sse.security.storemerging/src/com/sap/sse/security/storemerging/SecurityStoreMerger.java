@@ -252,8 +252,8 @@ public class SecurityStoreMerger {
                             (qualifiedForUser != userQualifierInTarget || qualifiedForGroup != groupQualifierInTarget)) {
                         logger.info("Qualifying user/group for role "+role+" on user "+sourceUser.getName()+
                                 " merged to target. Updating role");
-                        rolesToReplaceDueToChangingQualifierObject.put(role,
-                                new Role(targetRoleDefinition, groupQualifierInTarget, userQualifierInTarget));
+                        rolesToReplaceDueToChangingQualifierObject.put(role, new Role(targetRoleDefinition,
+                                groupQualifierInTarget, userQualifierInTarget, role.isTransitive()));
                     }
                 }
             }
