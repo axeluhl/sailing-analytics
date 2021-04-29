@@ -174,6 +174,8 @@ public class ReplicationServlet extends AbstractHttpServlet {
                         +(SecurityUtils.getSubject()==null?null:SecurityUtils.getSubject().getPrincipal())
                         +"'s request.");
                 getReplicationService().stopToReplicateFromMaster();
+                resp.setContentType("text/plain");
+                resp.setStatus(HttpServletResponse.SC_OK);
                 break;
             default:
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "

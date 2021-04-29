@@ -816,7 +816,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final Release release = getRelease(releaseOrNullForLatestMaster);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
-        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
+        final String bearerToken = replicationBearerToken != null ? replicationBearerToken :
+            getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final SailingAnalyticsProcess<String> replicaToShutDownWhenDone;
         final int oldAutoScalingGroupMinSize;
         if (replicaSet.getAutoScalingGroup() != null) {
@@ -830,7 +831,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
             replicaToShutDownWhenDone = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
-                    privateKeyEncryptionPassphrase, replicationBearerToken);
+                    privateKeyEncryptionPassphrase, bearerToken);
             replicas.add(replicaToShutDownWhenDone);
         } else {
             replicaToShutDownWhenDone = null;
@@ -838,7 +839,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicas) {
             logger.info("...asking replica "+replica+" to stop replication");
-            replica.stopReplicatingFromMaster(userBearerToken, WAIT_FOR_PROCESS_TIMEOUT);
+            replica.stopReplicatingFromMaster(bearerToken, WAIT_FOR_PROCESS_TIMEOUT);
         }
         logger.info("Done stopping replication. Removing master "+replicaSet.getMaster()+" from target groups "+
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
@@ -924,15 +925,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final StartSailingAnalyticsReplicaHost<String> replicaHostStartProcedure = replicaHostBuilder.build();
         replicaHostStartProcedure.run();
         final SailingAnalyticsProcess<String> sailingAnalyticsProcess = replicaHostStartProcedure.getSailingAnalyticsProcess();
-        waitForProcessToBeReady(sailingAnalyticsProcess);
+        sailingAnalyticsProcess.waitUntilReady(WAIT_FOR_HOST_TIMEOUT);
         return sailingAnalyticsProcess;
-    }
-
-    private void waitForProcessToBeReady(final SailingAnalyticsProcess<String> sailingAnalyticsProcess)
-            throws Exception, TimeoutException {
-        Wait.wait(() -> sailingAnalyticsProcess.isReady(WAIT_FOR_HOST_TIMEOUT),
-                WAIT_FOR_HOST_TIMEOUT, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO,
-                "Waiting for process " + sailingAnalyticsProcess + " to become available");
     }
 
     private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(
