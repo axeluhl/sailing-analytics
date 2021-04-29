@@ -597,6 +597,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(name, masterHostname, master, /* no replicas yet */ Optional.empty(),
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
+        // Now wait for master to become healthy before creating auto-scaling; otherwise it may happen that the replica tried to start
+        // replication before the master is ready (see also bug 5527).
+        master.waitUntilReady(WAIT_FOR_HOST_TIMEOUT);
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
                 CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
