@@ -169,7 +169,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     }
 
     @Override
-    public HeaderPanel createUI(final ServerInfoDTO serverInfo) {
+    public HeaderPanel createUI2(final ServerInfoDTO serverInfo) {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(stringMessages.administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);

@@ -196,7 +196,7 @@ public class AdminConsoleActivity extends AbstractActivity implements AdminConso
             adminConsoleView = new AdminConsoleViewImpl();
             adminConsoleView.setPresenter(this);
             adminConsoleView.setRedirectToPlace(defaultPlace);
-            clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI);
+            clientFactory.getUserService().executeWithServerInfo(adminConsoleView::createUI2);
             clientFactory.getUserService().addUserStatusEventHandler((u, p) -> checkPublicServerNonPublicUserWarning());
         }
     }
