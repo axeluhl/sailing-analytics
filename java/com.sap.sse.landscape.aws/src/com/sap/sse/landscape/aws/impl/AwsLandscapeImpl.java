@@ -1587,8 +1587,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
         final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
         final String newUserData = oldUserData.replaceFirst(
-                "^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
-                DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"="+release.getName());
+                "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
+                DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=\""+release.getName()+"\"");
         final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
         logger.info("Creating new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.createLaunchConfiguration(b->b
@@ -1604,10 +1604,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .keyName(oldLaunchConfiguration.keyName())
                 .launchConfigurationName(newLaunchConfigurationName)
                 .placementTenancy(oldLaunchConfiguration.placementTenancy())
-                .ramdiskId(oldLaunchConfiguration.ramdiskId())
                 .securityGroups(oldLaunchConfiguration.securityGroups())
                 .spotPrice(oldLaunchConfiguration.spotPrice())
-                .userData(newUserData));
+                .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
         logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
         autoScalingClient.updateAutoScalingGroup(b->b
                 .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())

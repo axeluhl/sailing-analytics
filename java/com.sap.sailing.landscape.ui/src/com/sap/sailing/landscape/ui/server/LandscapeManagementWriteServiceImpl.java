@@ -850,8 +850,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
         }
         // TODO upgrade master in place using refreshInstance.sh; ./stop && ./start
-        // TODO wait for master to turn healthy
-        // TODO register master with master and public target group
+        // wait for master to turn healthy:
+        replicaSet.getMaster().waitUntilReady(WAIT_FOR_HOST_TIMEOUT); // wait a little longer since master may need to re-load many races
+        // register master again with master and public target group
+        replicaSet.getPublicTargetGroup().addTarget(replicaSet.getMaster().getHost());
+        replicaSet.getMasterTargetGroup().addTarget(replicaSet.getMaster().getHost());
         // if a replica was spun up (replicaToShutDownWhenDone), remove from public target group and terminate:
         if (replicaToShutDownWhenDone != null) {
             if (replicaSet.getAutoScalingGroup() != null) {
@@ -861,7 +864,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 replicaToShutDownWhenDone.stopAndTerminateIfLast(WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
             }
         }
-        // TODO Implement LandscapeManagementWriteServiceImpl.upgradeApplicationReplicaSet(...)
         final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),
                 new SailingAnalyticsProcessDTO(oldMaster.getHost(), oldMaster.getPort(), oldMaster.getHostname(),
