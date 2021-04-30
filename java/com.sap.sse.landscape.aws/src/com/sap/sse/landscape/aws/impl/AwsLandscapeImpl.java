@@ -37,8 +37,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -1576,6 +1578,43 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
         return Util.map(Region.regions(), AwsRegion::new);
     }
+    
+    @Override
+    public void updateReleaseInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release) {
+        logger.info("Adjusting release for auto-scaling group "+autoScalingGroup.getName()+" to "+release);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final String releaseName = release.getName();
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
+        final String newUserData = oldUserData.replaceFirst(
+                "^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
+                DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"="+release.getName());
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(b->b
+                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
+                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
+                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
+                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
+                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
+                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
+                .imageId(oldLaunchConfiguration.imageId())
+                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
+                .instanceType(oldLaunchConfiguration.instanceType())
+                .keyName(oldLaunchConfiguration.keyName())
+                .launchConfigurationName(newLaunchConfigurationName)
+                .placementTenancy(oldLaunchConfiguration.placementTenancy())
+                .ramdiskId(oldLaunchConfiguration.ramdiskId())
+                .securityGroups(oldLaunchConfiguration.securityGroups())
+                .spotPrice(oldLaunchConfiguration.spotPrice())
+                .userData(newUserData));
+        logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.updateAutoScalingGroup(b->b
+                .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
+                .launchConfigurationName(newLaunchConfigurationName));
+        logger.info("Removing old launch configuration "+oldLaunchConfiguration.launchConfigurationName());
+        autoScalingClient.deleteLaunchConfiguration(b->b.launchConfigurationName(oldLaunchConfiguration.launchConfigurationName()));
+    }
 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfiguration(
@@ -1584,8 +1623,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final String launchConfigurationName = replicaSetName + "-" + replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
-        final String autoScalingGroupName = replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
+        final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
+        final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
+        final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
         final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
@@ -1624,6 +1664,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGroup.getId())
                                 .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
                         .targetValue((double) maxRequestsPerTarget)));
+    }
+
+    private String getLaunchConfigurationName(String replicaSetName, final String releaseName) {
+        return replicaSetName + "-" + releaseName;
+    }
+
+    private String getAutoScalingGroupName(String replicaSetName) {
+        return replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
     }
 
     @Override

@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 
 public class AwsAutoScalingGroupImpl implements AwsAutoScalingGroup {
+    private static final long serialVersionUID = -6244055510377604441L;
     private final AutoScalingGroup autoScalingGroup;
     private final LaunchConfiguration launchConfiguration;
     private final Region region;

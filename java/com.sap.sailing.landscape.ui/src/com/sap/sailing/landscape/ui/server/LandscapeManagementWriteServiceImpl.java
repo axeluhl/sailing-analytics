@@ -814,8 +814,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getRelease(releaseOrNullForLatestMaster);
+        final AwsRegion region = new AwsRegion(regionId);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
-                convertFromApplicationReplicaSetDTO(new AwsRegion(regionId), applicationReplicaSetToUpgrade);
+                convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
         final String bearerToken = replicationBearerToken != null ? replicationBearerToken :
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final SailingAnalyticsProcess<String> replicaToShutDownWhenDone;
@@ -845,9 +846,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
-        // TODO remove master from master and public target group
         if (replicaSet.getAutoScalingGroup() != null) {
-            // TODO fix launch configuration user data, setting new release
+            getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
         }
         // TODO upgrade master in place using refreshInstance.sh; ./stop && ./start
         // TODO wait for master to turn healthy

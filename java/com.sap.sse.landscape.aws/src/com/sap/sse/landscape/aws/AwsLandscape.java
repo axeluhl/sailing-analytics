@@ -14,6 +14,7 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -691,4 +692,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
 
     void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize);
+
+    void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
 }
