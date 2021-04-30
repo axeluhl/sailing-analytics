@@ -11,10 +11,10 @@ import java.util.Set;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Series;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -111,7 +111,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
         polarChart.removeAllSeries(false);
         speedChart.removeAllSeries(false);
         angleChart.removeAllSeries(false);
-        
         final Set<Series> seriesToHideAfterRendering = new HashSet<>();
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
@@ -144,7 +143,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 }
                 speedChart.addSeries(downwindSpeedSeries, false, false);
             }
-            speedChart.redraw();
             if (aggregation.hasUpwindAngleData()) {
                 Series upwindAngleSeries = speedChart.createSeries();
                 upwindAngleSeries.setName(key.asString() + "-" + stringMessages.upWind());
@@ -165,7 +163,6 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 }
                 angleChart.addSeries(downwindAngleSeries, false, false);
             }
-            angleChart.redraw();
             boolean[] hasDataForAngle = aggregation.getDataForAngleBooleanArray();
             for (int i = 5; i < 30; i = i + 3) {
                 Series polarSeries = polarChart.createSeries();
@@ -181,14 +178,9 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 }
                 polarChart.addSeries(polarSeries, false, false);
             }
-            polarChart.redraw();
-
         }
         // Initially resize the chart. Otherwise it's too big. FIXME with a better solution
-        Timer timer = new Timer() {
-
-            @Override
-            public void run() {
+        Scheduler.get().scheduleDeferred(()->{
                 polarChart.setSizeToMatchContainer();
                 speedChart.setSizeToMatchContainer();
                 angleChart.setSizeToMatchContainer();
@@ -196,9 +188,9 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                     seriesToHide.setVisible(false, false);
                 }
                 polarChart.redraw();
-            }
-        };
-        timer.schedule(200);
+                angleChart.redraw();
+                speedChart.redraw();
+            });
     }
 
     @Override
