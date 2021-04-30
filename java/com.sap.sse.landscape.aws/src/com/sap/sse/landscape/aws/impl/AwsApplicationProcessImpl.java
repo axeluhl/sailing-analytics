@@ -46,7 +46,7 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             final JSONObject replicatedFrom = (JSONObject) replicable.get(ReplicationStatus.JSON_FIELD_NAME_REPLICABLE_REPLICATEDFROM);
             if (replicatedFrom != null) {
                 final String masterAddress = (String) replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_ADDRESS);
-                // FIXME if masterAddress is a hostname then it could either resolve to the IP address of the master's host, or it could be a CNAME for a load balancer which means we would have to scan the load balancer rules for the hostname, find a master target group and try to resolve the process this way
+                // FIXME bug5530 if masterAddress is a hostname then it could either resolve to the IP address of the master's host, or it could be a CNAME for a load balancer which means we would have to scan the load balancer rules for the hostname, find a master target group and try to resolve the process this way
                 final Integer port = replicatedFrom.get(ReplicationStatus.JSON_FIELD_NAME_PORT) == null ? null : ((Number) replicatedFrom.getOrDefault(ReplicationStatus.JSON_FIELD_NAME_PORT, 8888)).intValue();
                 HostT host = getHostFromIpAddress(hostSupplier, masterAddress);
                 if (host != null) {
