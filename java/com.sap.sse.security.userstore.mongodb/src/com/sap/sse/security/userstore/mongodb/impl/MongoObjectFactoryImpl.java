@@ -162,6 +162,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.Role.QUALIFYING_TENANT_ID.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getId());
         result.put(FieldNames.Role.QUALIFYING_TENANT_NAME.name(), role.getQualifiedForTenant()==null?null:role.getQualifiedForTenant().getName());
         result.put(FieldNames.Role.QUALIFYING_USERNAME.name(), role.getQualifiedForUser()==null?null:role.getQualifiedForUser().getName());
+        result.put(FieldNames.Role.TRANSITIVE.name(), role.isTransitive());
         return result;
     }
     
