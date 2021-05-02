@@ -228,9 +228,11 @@ public abstract class DataEntryDialog<T> {
                     if (!invalidState) {
                         statusLabel.setHTML(SafeHtmlUtils.fromSafeConstant("&nbsp;"));
                         onChange(result);
+                        getOkButton().setEnabled(true);
                     } else {
                         statusLabel.setHTML(SafeHtmlUtils.fromString(errorMessage));
                         statusLabel.setStyleName("errorLabel");
+                        getOkButton().setEnabled(false);
                     }
                 }
             }, validationExecutor);

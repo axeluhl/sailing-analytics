@@ -45,6 +45,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -556,6 +558,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                                         if (!DeviceDetector.isMobile()) {
                                             playFloatingVideo(mediaTrack);
                                         }
+                                    Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                                     notifyStateChange();
                                 }
                         });

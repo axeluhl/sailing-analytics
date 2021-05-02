@@ -8,8 +8,6 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -95,6 +93,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private SimplePanel infoLabel; // showing either mime type or youtube id
 
     private TextBox durationBox;
+    
+    private ListBox mimeTypeListBox;
 
     private TimePoint defaultStartTime;
 
@@ -183,6 +183,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         });
         storageServiceConnection.registerObserver(this);
     }
+    
+    @Override
+    protected void validateAndUpdate() {
+        super.validateAndUpdate();
+        if (urlBox.getURL() == null || urlBox.getURL().isEmpty()) {
+            getOkButton().setEnabled(false);
+        }
+    }
 
     @Override
     protected MediaTrack getResult() {
@@ -193,6 +201,18 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     
     protected void connectMediaWithRace() {
         mediaTrack.assignedRaces = assignedRaces;
+    }
+    
+    private void updateBoxByMimeType() {
+        if (mimeTypeListBox != null) {
+            for (int i = 0; i < mimeTypeListBox.getItemCount(); i++) {
+                String value = mimeTypeListBox.getValue(i);
+                if (value != null && !value.isEmpty() && mediaTrack.mimeType == MimeType.valueOf(value)) {
+                    mimeTypeListBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     protected void updateFromUrl() {
@@ -243,7 +263,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     String lastPathSegment = anchor.getPropertyString("pathname").substring(1);
                     int dotPos = lastPathSegment.lastIndexOf('.');
                     if (dotPos >= 0) {
-                        mediaTrack.title = "";
                         String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
                         mediaTrack.mimeType = MimeType.byName(fileEnding);
                         if (MimeType.mp4.equals(mediaTrack.mimeType)) {
@@ -252,7 +271,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                             loadMediaDuration();
                         }
                     } else {
-                        mediaTrack.title = "";
                         mediaTrack.mimeType = null;
                     }
                 }
@@ -512,19 +530,15 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         if (message != null) {
             fp.add(new Label(message));
         }
-        ListBox mimeTypeListBox = createListBox(false);
+        mimeTypeListBox = createListBox(false);
+        // add empty default value to enable validation
+        mimeTypeListBox.addItem(stringMessages.pleaseSelect(), "");
         for (int i = 0; i < proposedMimeTypes.length; i++) {
             mimeTypeListBox.addItem(proposedMimeTypes[i].name());
         }
-        mimeTypeListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                mediaTrack.mimeType = MimeType.valueOf(mimeTypeListBox.getSelectedValue());
-            }
-        });
-        mimeTypeListBox.setSelectedIndex(MimeType.mp4 == mediaTrack.mimeType ? 0 : 1);
         fp.add(mimeTypeListBox);
         infoLabel.setWidget(fp);
+        updateBoxByMimeType();
     }
 
     @Override
