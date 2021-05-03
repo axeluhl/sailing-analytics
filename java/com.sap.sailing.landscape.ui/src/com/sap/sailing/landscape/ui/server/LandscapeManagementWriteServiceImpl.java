@@ -537,7 +537,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public SailingApplicationReplicaSetDTO<String> createApplicationReplicaSet(String regionId, String name, String masterInstanceType,
             boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster, String optionalKeyName,
-            byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken, String optionalDomainName)
+            byte[] privateKeyEncryptionPassphrase, String replicationBearerToken, String optionalDomainName)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final AwsLandscape<String> landscape = getLandscape();
@@ -545,6 +545,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
+        final String bearerTokenUsedByMaster = replicationBearerToken == null ? getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString()) : replicationBearerToken;
+        final String bearerTokenUsedByReplicas = bearerTokenUsedByMaster; // TODO how about using an explicit replicationBearerToken only for master and prefer the current user's token for replicas? Doesn't work, though, for testing with disconnected caller security
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
             .setLandscape(landscape)
@@ -552,7 +554,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setRelease(release)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
             .setRegion(region)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(securityReplicationBearerToken)).build());
+            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByMaster)).build());
         masterHostBuilder
             .setInstanceType(InstanceType.valueOf(masterInstanceType))
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
@@ -577,7 +579,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .build();
         createLoadBalancerMapping.run();
         // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
-        final String userBearerToken = getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
         replicaConfigurationBuilder
             .setLandscape(landscape)
@@ -586,7 +587,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             .setRelease(release)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
                     .setMasterHostname(masterHostname)
-                    .setCredentials(new BearerTokenReplicationCredentials(userBearerToken))
+                    .setCredentials(new BearerTokenReplicationCredentials(bearerTokenUsedByReplicas))
                     .build());
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
@@ -601,7 +602,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         // replication before the master is ready (see also bug 5527).
         master.waitUntilReady(WAIT_FOR_HOST_TIMEOUT);
         final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
-                CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, userBearerToken, createLoadBalancerMapping.getPublicTargetGroup());
+                CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, applicationReplicaSet, createLoadBalancerMapping.getPublicTargetGroup());
         createLaunchConfigurationAndAutoScalingGroupBuilder
             .setInstanceType(InstanceType.valueOf(masterInstanceType))
             .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+name+" (Auto-Replica)")
@@ -819,7 +820,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
         final String bearerToken = replicationBearerToken != null ? replicationBearerToken :
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
-        final SailingAnalyticsProcess<String> replicaToShutDownWhenDone;
+        final SailingAnalyticsProcess<String> additionalReplicaStarted;
         final int oldAutoScalingGroupMinSize;
         if (replicaSet.getAutoScalingGroup() != null) {
             oldAutoScalingGroupMinSize = replicaSet.getAutoScalingGroup().getAutoScalingGroup().minSize();
@@ -831,11 +832,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         if (Util.isEmpty(replicaSet.getReplicas())) {
             logger.info("No replica found for replica set " + replicaSet.getName()
                     + "; spinning one up and waiting for it to become healthy");
-            replicaToShutDownWhenDone = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
+            additionalReplicaStarted = launchReplicaAndWaitUntilHealthy(replicaSet, Optional.ofNullable(optionalKeyName),
                     privateKeyEncryptionPassphrase, bearerToken);
-            replicas.add(replicaToShutDownWhenDone);
+            replicas.add(additionalReplicaStarted);
         } else {
-            replicaToShutDownWhenDone = null;
+            additionalReplicaStarted = null;
         }
         logger.info("Stopping replication for replica set "+replicaSet.getName());
         for (final SailingAnalyticsProcess<String> replica : replicas) {
@@ -849,20 +850,31 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         if (replicaSet.getAutoScalingGroup() != null) {
             getLandscape().updateReleaseInAutoScalingGroup(region, replicaSet.getAutoScalingGroup(), replicaSet.getName(), release);
         }
-        // TODO upgrade master in place using refreshInstance.sh; ./stop && ./start
+        logger.info("Upgrading master "+replicaSet.getMaster()+" to release "+release.getName());
+        replicaSet.getMaster().getHost().createRootSshChannel(WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)
+            .runCommandAndReturnStdoutAndLogStderr("su -l "+StartSailingAnalyticsHost.SAILING_USER_NAME+" -c \""+
+                    "cd "+replicaSet.getMaster().getServerDirectory().replaceAll("\"", "\\\\\"")+"; "+
+                    "./refreshInstance.sh install-release "+release.getName()+" && ./stop && ./start"+
+                    "\"", "Refreshing master to release "+release.getName(), Level.INFO);
         // wait for master to turn healthy:
-        replicaSet.getMaster().waitUntilReady(WAIT_FOR_HOST_TIMEOUT); // wait a little longer since master may need to re-load many races
+        logger.info("Waiting for master "+replicaSet.getMaster()+" to get ready with new release "+release.getName());
+        replicaSet.getMaster().waitUntilReady(Optional.of(Duration.ONE_DAY)); // wait a little longer since master may need to re-load many races
         // register master again with master and public target group
+        logger.info("Adding master "+replicaSet.getMaster()+" again to target groups "+
+                replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().addTarget(replicaSet.getMaster().getHost());
         // if a replica was spun up (replicaToShutDownWhenDone), remove from public target group and terminate:
-        if (replicaToShutDownWhenDone != null) {
+        if (additionalReplicaStarted != null) {
             if (replicaSet.getAutoScalingGroup() != null) {
                 getLandscape().updateAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), oldAutoScalingGroupMinSize);
-            } else {
-                replicaSet.getPublicTargetGroup().removeTarget(replicaToShutDownWhenDone.getHost());
-                replicaToShutDownWhenDone.stopAndTerminateIfLast(WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-            }
+            } // else, the replica was started explicitly, without an auto-scaling group; in any case, all replicas still
+            // on the old release will now be stopped:
+        }
+        logger.info("Stopping (and terminating if last application process on host) replicas on old release: "+replicas);
+        for (final SailingAnalyticsProcess<String> replica : replicas) {
+            replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
+            replica.stopAndTerminateIfLast(WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         }
         final SailingAnalyticsProcessDTO oldMaster = applicationReplicaSetToUpgrade.getMaster();
         return new SailingApplicationReplicaSetDTO<String>(applicationReplicaSetToUpgrade.getName(),

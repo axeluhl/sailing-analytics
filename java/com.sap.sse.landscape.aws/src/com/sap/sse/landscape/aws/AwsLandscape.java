@@ -656,7 +656,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    void createLaunchConfiguration(Region region, String replicaSetName, Optional<Tags> tags,
+    void createLaunchConfigurationAndAutoScalingGroup(Region region, String replicaSetName, Optional<Tags> tags,
                     TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
                     AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
                     int maxReplicas, int maxRequestsPerTarget);

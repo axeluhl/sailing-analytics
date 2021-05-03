@@ -1616,11 +1616,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfiguration(
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfigurationAndAutoScalingGroup(
             com.sap.sse.landscape.Region region, String replicaSetName, Optional<Tags> tags,
             TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
+        logger.info("Creating launch configuration for replica set "+replicaSetName);
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
         final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
         final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
@@ -1635,6 +1636,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.toString()));
+        logger.info("Creating auto-scaling group for replica set "+replicaSetName);
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(minReplicas)
