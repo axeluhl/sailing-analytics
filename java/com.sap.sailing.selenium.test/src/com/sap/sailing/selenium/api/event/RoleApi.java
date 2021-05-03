@@ -22,14 +22,15 @@ public class RoleApi {
     private static final String KEY_PERMISSIONS = "permissions";
     private static final String KEY_ID = "roleId";
 
-    public Role getRole(ApiContext ctx, UUID roleId) {
-        return new Role(ctx.get(ROLE_URL + roleId.toString()));
+    public RoleDefinition getRole(ApiContext ctx, UUID roleId) {
+        return new RoleDefinition(ctx.get(ROLE_URL + roleId.toString()));
     }
 
-    public Role createRole(ApiContext ctx, String roleName) {
+    public RoleDefinition createRole(ApiContext ctx, String roleName) {
         final Map<String, String> formParams = new HashMap<>();
         formParams.put(KEY_ROLE_NAME, roleName);
-        return new Role(ctx.post(ROLE_URL, new HashMap<>(), formParams));
+        final Map<String, String> queryParams = new HashMap<>();
+        return new RoleDefinition(ctx.post(ROLE_URL, queryParams, formParams));
     }
 
     public void deleteRole(ApiContext ctx, UUID roleId) {
@@ -47,9 +48,9 @@ public class RoleApi {
         return ctx.put(ROLE_URL + roleId.toString(), new HashMap<>(), json);
     }
 
-    public static class Role extends JsonWrapper {
+    public static class RoleDefinition extends JsonWrapper {
 
-        public Role(JSONObject json) {
+        public RoleDefinition(JSONObject json) {
             super(json);
         }
 
@@ -94,7 +95,7 @@ public class RoleApi {
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            Role other = (Role) obj;
+            RoleDefinition other = (RoleDefinition) obj;
             final String name = getName();
             final String otherName = other.getName();
             if (name == null) {

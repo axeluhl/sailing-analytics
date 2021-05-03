@@ -79,7 +79,7 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
      * Grants the role associated with the given {@code roleDefinitionId}, {@code userQualifierName} and
      * {@code tenantQualifierName} to the given {@code username} if the current user has the required permissions
      */
-    void addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId, String tenantQualifierName,
+    void addRoleToUser(String username, String userQualifierName, UUID roleDefinitionId, String tenantQualifierName, boolean transitive,
             AsyncCallback<SuccessInfo> callback);
 
     /**
