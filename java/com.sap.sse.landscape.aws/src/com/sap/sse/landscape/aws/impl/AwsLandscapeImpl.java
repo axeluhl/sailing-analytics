@@ -1346,7 +1346,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             }));
         }
         // wait for all application processes on all hosts to be discovered
-        for (final Future<?> taskToWaitFor : tasksToWaitFor) {
+        Future<?> taskToWaitFor;
+        while ((taskToWaitFor=tasksToWaitFor.poll()) != null) {
             waitForFuture(taskToWaitFor, optionalTimeout);
         }
         backgroundExecutor.shutdown();
