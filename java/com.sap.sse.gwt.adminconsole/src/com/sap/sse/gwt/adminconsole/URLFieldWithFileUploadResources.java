@@ -23,6 +23,9 @@ public interface URLFieldWithFileUploadResources extends ClientBundle {
         
         @ClassName("uploadButton")
         String uploadButtonClass();
+        
+        @ClassName("deleteButton")
+        String deleteButtonClass();
 
         @ClassName("uploadButton-loading")
         String uploadButtonLoadingClass();
@@ -39,6 +42,10 @@ public interface URLFieldWithFileUploadResources extends ClientBundle {
 
     @Source("URLFieldWithFileUpload.gss")
     URLFieldWithFileUploadStyle urlFieldWithFileUploadStyle();
+
+    @Source("close.svg")
+    @MimeType("image/svg+xml")
+    DataResource delete();
 
     @Source("folder_white.svg")
     @MimeType("image/svg+xml")

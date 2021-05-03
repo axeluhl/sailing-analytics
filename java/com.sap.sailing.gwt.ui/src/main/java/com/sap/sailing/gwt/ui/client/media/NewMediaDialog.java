@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.media;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
@@ -54,6 +55,7 @@ import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileStorageServiceConnectionTestObserver {
 
     private static final boolean DONT_FIRE_EVENTS = false;
+    private static final NewMediaDialogResources RESOURCES = NewMediaDialogResources.INSTANCE;
 
     protected static class MediaTrackValidator implements Validator<MediaTrack> {
         private final StringMessages stringMessages;
@@ -121,6 +123,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(),
                 new MediaTrackValidator(stringMessages), dialogCallback);
+        RESOURCES.css().ensureInjected();
         this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
@@ -146,6 +149,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             }
         });
         startTimeBox = new DateAndTimeInput(Accuracy.MILLISECONDS);
+        startTimeBox.addStyleName(RESOURCES.css().startTimeTextboxClass());
         startTimeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange(ValueChangeEvent<Date> event) {
@@ -154,7 +158,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 validateAndUpdate();
             }
         });
-        defaultTimeButton = new Button(StringMessages.INSTANCE.resetStartTimeToDefault());
+        defaultTimeButton = new Button();
+        defaultTimeButton.setTitle(StringMessages.INSTANCE.resetStartTimeToDefault());
+        defaultTimeButton.setStyleName(RESOURCES.css().resetButtonClass(), true);
         defaultTimeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -264,8 +270,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     int dotPos = lastPathSegment.lastIndexOf('.');
                     if (dotPos >= 0) {
                         String fileEnding = lastPathSegment.substring(dotPos + 1).toLowerCase();
-                        mediaTrack.mimeType = MimeType.byName(fileEnding);
-                        if (MimeType.mp4.equals(mediaTrack.mimeType)) {
+                        if ("quicktime".equals(fileEnding)) {
+                            mediaTrack.mimeType = MimeType.mov;
+                        } else {
+                            mediaTrack.mimeType = MimeType.byName(fileEnding);
+                        }
+                        Logger.getLogger("test").info("mimeType: " + mediaTrack.mimeType + ", ending: " + fileEnding);
+                        if (MimeType.mp4.equals(mediaTrack.mimeType) || MimeType.mov.equals(mediaTrack.mimeType)) {
                             processMp4(mediaTrack);
                         } else {
                             loadMediaDuration();
@@ -345,9 +356,9 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         formGrid.setWidget(3, 0, new Label(stringMessages.startTime() + ":"));
 
         FlowPanel startTimePanel = new FlowPanel();
+        startTimePanel.addStyleName(NewMediaDialogResources.INSTANCE.css().fieldGroup());
         startTimePanel.add(startTimeBox);
         startTimePanel.add(defaultTimeButton);
-        defaultTimeButton.addStyleName(NewMediaDialogResources.INSTANCE.css().buttonSizeClass());
         formGrid.setWidget(3, 1, startTimePanel);
 
         formGrid.setWidget(4, 0, new Label(stringMessages.duration() + ":"));
@@ -377,7 +388,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             infoLabel.setWidget(new Label(mediaTrack.url));
         } else {
             infoLabelLabel.setText(stringMessages.mimeType() + ":");
-            if (mediaTrack.mimeType == MimeType.mp4 || mediaTrack.mimeType == MimeType.mp4panorama || mediaTrack.mimeType == MimeType.mp4panoramaflip) {
+            if (mediaTrack.mimeType == MimeType.mp4 
+                    || mediaTrack.mimeType == MimeType.mp4panorama 
+                    || mediaTrack.mimeType == MimeType.mp4panoramaflip
+                    || mediaTrack.mimeType == MimeType.mov) {
                 if (!remoteMp4WasStarted) {
                     processMp4(mediaTrack);
                 } else if (remoteMp4WasFinished) {
@@ -389,7 +403,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
               infoLabel.setWidget(new Label(mediaTrack.typeToString()));
             } else {
                 manualMimeTypeSelection(null, mediaTrack, new MimeType[] { MimeType.mp4, MimeType.mp4panorama,
-                        MimeType.mp4panoramaflip, MimeType.youtube, MimeType.vimeo });
+                        MimeType.mp4panoramaflip, MimeType.youtube, MimeType.vimeo, MimeType.mov });
             }
         }
         startTimeBox.setValue(mediaTrack.startTime == null ? null : mediaTrack.startTime.asDate(), DONT_FIRE_EVENTS);

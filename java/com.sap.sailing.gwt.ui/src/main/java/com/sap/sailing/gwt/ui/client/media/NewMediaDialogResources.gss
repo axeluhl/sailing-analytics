@@ -1,3 +1,6 @@
+.field-group {
+ display: flex;
+}
 
 .textfield-size input[type=text], .textfield-size select, .button-size {
     width: 15rem;
@@ -15,4 +18,33 @@
     width: 7.4rem;
     margin: 3px 3px 3px 0;
     height: 1.469rem;
+}
+
+.resetButton {
+    outline: none;
+    width: 1.5rem;
+    height: 1.469rem;
+    position: relative;
+    margin: 3px 3px 3px -4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #efaa00;
+}
+
+.resetButton::after {
+    outline: none;
+    background-image: resourceUrl("reset");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 67%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.startTime-textbox {
+    width: 13.5rem !important;
 }

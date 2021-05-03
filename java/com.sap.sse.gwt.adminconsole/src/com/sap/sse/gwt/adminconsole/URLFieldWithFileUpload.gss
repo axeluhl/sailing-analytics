@@ -20,6 +20,8 @@
     margin-left: -1px;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     background-color: #efaa00;
 }
 
@@ -37,12 +39,37 @@
     left: 0;
 }
 
+.deleteButton {
+    outline: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    margin-left: -3px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #efaa00;
+}
+
+.deleteButton::after {
+    outline: none;
+    background-image: resourceUrl("delete");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 50%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
 .uploadButton-loading {
     background-image: resourceUrl("busyIndicator");
 }
 .url-textbox {
     margin-right: 0;
-    width: 13rem !important;
+    width: 11.5rem !important;
 }
 
 .removeButton {

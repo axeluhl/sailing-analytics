@@ -15,7 +15,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.Button;
@@ -75,18 +74,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
-                Notification.notify(stringMessages.removeResult(resultJson.get(FileUploadConstants.STATUS).isString().stringValue(),
-                        resultJson.get(FileUploadConstants.MESSAGE) == null ? "" : resultJson.get(FileUploadConstants.MESSAGE).isString().stringValue()), NotificationType.INFO);
                 setUriAndFireEvent(null);
             }
         });
         removePanel.setMethod(FormPanel.METHOD_POST);
-        removeButton = new Button(stringMessages.resetToDefault());
+        removeButton = new Button();
+        removeButton.setStyleName(RESOURCES.urlFieldWithFileUploadStyle().deleteButtonClass(), true);
         removeButton.setEnabled(false); // the button shall only be enabled as long as we know the URI for removal
         removeButton.ensureDebugId("RemoveButton");
         removeButton.setTitle(stringMessages.resetToDefault());
-        removeButton.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().removeButtonClass());
         removeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -116,6 +112,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
+        fileUploadField.getElement().setAttribute("accept", "capture=camera");
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
