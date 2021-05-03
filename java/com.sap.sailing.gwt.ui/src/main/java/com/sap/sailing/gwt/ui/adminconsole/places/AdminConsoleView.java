@@ -19,7 +19,7 @@ public interface AdminConsoleView extends IsWidget {
 
     void setPresenter(Presenter presenter);
     
-    HeaderPanel createUI2(final ServerInfoDTO serverInfo);
+    HeaderPanel createUI(final ServerInfoDTO serverInfo);
     
     void selectTabByPlace(AbstractAdminConsolePlace place);
     
