@@ -872,9 +872,9 @@ public class RaceBoardPanel
         final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
         final CompetitorsFilterSets leaderboardFiterPanelFilterSets = competitorSearchTextBox
                 .getCompetitorsFilterSets();
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
+        final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
                 .getActiveFilterSet();
-        String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
+        final String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
         final Set<String> selectedCompetitorIds = new HashSet<>();
         final Duration newInitialDurationAfterRaceStartInReplay;
         if (timer != null && racetimePanel != null) {
@@ -899,7 +899,7 @@ public class RaceBoardPanel
         final boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
         final boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
         final boolean autoExpandPreSelectedRace = leaderboardPanel.isAutoExpandPreSelectedRace();
-        RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+        final RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
