@@ -918,17 +918,17 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String replicationBearerToken) throws Exception {
         final com.sap.sailing.landscape.procedures.SailingAnalyticsReplicaConfiguration.Builder<?, String> replicaConfigurationBuilder = SailingAnalyticsReplicaConfiguration.replicaBuilder();
-        final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
         final AwsRegion region = replicaSet.getMaster().getHost().getRegion();
         final InstanceType masterInstanceType = getLandscape().getInstance(replicaSet.getMaster().getHost().getInstanceId(), region).instanceType();
         final Release release = replicaSet.getVersion(WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
         replicaConfigurationBuilder
             .setLandscape(getLandscape())
+            .setRegion(region)
+            .setPort(replicaSet.getMaster().getPort())
             .setServerName(replicaSet.getServerName())
             .setRelease(release)
-            .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().build())
-            .setRegion(region)
             .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder().setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken)).build());
+        final com.sap.sailing.landscape.procedures.StartSailingAnalyticsReplicaHost.Builder<?, String> replicaHostBuilder = StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder);
         replicaHostBuilder
             .setInstanceType(masterInstanceType)
             .setOptionalTimeout(WAIT_FOR_HOST_TIMEOUT)
@@ -940,6 +940,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         replicaHostStartProcedure.run();
         final SailingAnalyticsProcess<String> sailingAnalyticsProcess = replicaHostStartProcedure.getSailingAnalyticsProcess();
         sailingAnalyticsProcess.waitUntilReady(WAIT_FOR_HOST_TIMEOUT);
+        if (replicaSet.getPublicTargetGroup() != null) {
+            replicaSet.getPublicTargetGroup().addTarget(replicaHostStartProcedure.getHost());
+        }
         return sailingAnalyticsProcess;
     }
 
