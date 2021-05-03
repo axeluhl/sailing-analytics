@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
+import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -87,10 +88,14 @@ public class UserManagementPanelPO extends PageArea {
     }
     
     public void selectUser(String name) {
-        final CellTablePO<DataEntryPO> table = getUserTable();
-        final DataEntryPO findUser = findUser(name);
-        if(findUser != null) {
-            table.selectEntry(findUser);
+        final DataEntryPO userTableEntry = findUser(name);
+        
+        if (userTableEntry != null) {
+            try {
+                userTableEntry.select();
+            } catch (StaleElementReferenceException e) {
+                throw new ElementNotSelectableException("Cannot select user any more. Entry has already been removed from DOM.", e);
+            }
         }
     }
     
