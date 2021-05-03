@@ -1,5 +1,7 @@
 package com.sap.sse.security.subscription.chargebee;
 
+import java.sql.Timestamp;
+
 import com.chargebee.models.Invoice;
 import com.chargebee.models.Subscription;
 import com.chargebee.models.Transaction;
@@ -11,7 +13,7 @@ public class ChargebeeApiSubscriptionData {
     private final Invoice invoice;
     private final Transaction transaction;
 
-    public ChargebeeApiSubscriptionData(com.chargebee.models.Subscription subscription, Invoice invoice,
+    public ChargebeeApiSubscriptionData(Subscription subscription, Invoice invoice,
             Transaction transaction) {
         this.subscription = subscription;
         this.invoice = invoice;
@@ -37,8 +39,11 @@ public class ChargebeeApiSubscriptionData {
         }
         String paymentStatus = ChargebeeSubscription.determinePaymentStatus(transactionType, transactionStatus,
                 invoiceStatus);
+        final Timestamp trialStart = subscription.trialStart();
+        final Timestamp trialEnd = subscription.trialEnd();
         return new ChargebeeSubscription(subscription.id(), subscription.planId(), subscription.customerId(),
-                TimePoint.of(subscription.trialStart()), TimePoint.of(subscription.trialEnd()), subscriptionStatus,
+                trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialStart),
+                trialStart == null ? com.sap.sse.security.shared.subscription.Subscription.emptyTime() : TimePoint.of(trialEnd), subscriptionStatus,
                 paymentStatus, transactionType, transactionStatus, invoiceId, invoiceStatus,
                 TimePoint.of(subscription.createdAt()), TimePoint.of(subscription.updatedAt()), TimePoint.now(),
                 TimePoint.now());

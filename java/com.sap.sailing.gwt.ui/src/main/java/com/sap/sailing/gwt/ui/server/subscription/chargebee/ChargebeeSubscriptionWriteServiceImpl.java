@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server.subscription.chargebee;
 
+import java.sql.Timestamp;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -55,9 +56,12 @@ public class ChargebeeSubscriptionWriteServiceImpl extends ChargebeeSubscription
                 invoiceId = null;
                 invoiceStatus = null;
             }
+            final Timestamp trialStart = content.subscription().trialStart();
+            final Timestamp trialEnd = content.subscription().trialEnd();
             final Subscription subscription = new ChargebeeSubscription(content.subscription().id(),
                     content.subscription().planId(), content.customer().id(),
-                    TimePoint.of(content.subscription().trialStart()), TimePoint.of(content.subscription().trialEnd()),
+                    trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialStart),
+                    trialStart == null ? Subscription.emptyTime() : TimePoint.of(trialEnd),
                     content.subscription().status().name().toLowerCase(), null, transactionType, transactionStatus,
                     invoiceId, invoiceStatus, TimePoint.of(content.subscription().createdAt()),
                     TimePoint.of(content.subscription().updatedAt()), Subscription.emptyTime(), TimePoint.now());
