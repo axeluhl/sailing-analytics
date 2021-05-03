@@ -12,6 +12,7 @@ import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
+import com.sap.sailing.selenium.pages.adminconsole.common.WhatsNewDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ResultImportUrlsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ExpeditionDeviceConfigurationsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
@@ -106,6 +107,8 @@ public class AdminConsolePage extends HostPageWithAuthentication {
 
     private static final String LEADERBOARDS_PLACE = "LeaderboardsPlace";
     private static final String EXPEDITION_DEVICE_CONFIGURATIONS_PLACE = "ExpeditionDeviceConfigurationsPlace";
+    
+    private static final String ID_ADMIN_WHATS_NEW_DIALOG = "AdminWhatsNewDialog";
 
     private static final String ADMIN_CONSOLE_PATH = "gwt/AdminConsole.html";
 
@@ -146,6 +149,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+        waitForPO(WhatsNewDialogPO::new, ID_ADMIN_WHATS_NEW_DIALOG, 1).pressCancel();
     }
     
     public EventConfigurationPanelPO goToEvents() {

@@ -73,6 +73,7 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
             }
         };
         userNotified = true;
+        dialog.ensureDebugId("AdminWhatsNewDialog");
         dialog.show();
     }
 
