@@ -296,12 +296,16 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return hasListenerRuleWithHostHeaderForward(listenersAndTheirRules, masterTargetGroupCandidate, HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
     }
 
+    /**
+     * Completes the {@link #autoScalingGroup} with {@code null} if not found
+     */
     private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchConfiguration> launchConfigurations) {
-        Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
-            findFirst().ifPresent(asg->
-                autoScalingGroup.complete(new AwsAutoScalingGroupImpl(asg,
-                        Util.filter(launchConfigurations, lc->Util.equalsWithNull(lc.launchConfigurationName(), asg.launchConfigurationName())).iterator().next(),
-                        targetGroup.getRegion())));
+        autoScalingGroup.complete(
+            Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
+                findFirst().map(asg->
+                    new AwsAutoScalingGroupImpl(asg,
+                            Util.filter(launchConfigurations, lc->Util.equalsWithNull(lc.launchConfigurationName(), asg.launchConfigurationName())).iterator().next(),
+                            targetGroup.getRegion())).orElse(null));
     }
 
     @Override
