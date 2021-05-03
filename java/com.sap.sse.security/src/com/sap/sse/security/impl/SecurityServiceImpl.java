@@ -944,25 +944,29 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 /* tenant qualifier */ group, /* user qualifier */ null, /* transitive */ true));
     }
     
+    /**
+     * A simple {@code synchronized} block synchronizing on the {@link #userGroupLock} monitor is used
+     * in the {@link #getOrCreateTenantForUser(User)} method to avoid race conditions between multiple
+     * threads, such as the migration code run in a background thread by the {@link Activator}'s {@code migrate}
+     * method, and the regular creation of a user which also probes for the user's default group.
+     */
+    private final static Object userGroupLock = new Object();
     private UserGroup getOrCreateTenantForUser(User user) throws UserGroupManagementException {
         final String username = user.getName();
         final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        UserGroup tenant = store.getUserGroupByName(defaultTenantNameForUsername);
-        if (tenant != null) {
-            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-        } else {
-            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
-            tenant = createTenantForUser(defaultTenantNameForUsername, user);
+        synchronized (userGroupLock) {
+            UserGroup tenant = store.getUserGroupByName(defaultTenantNameForUsername);
+            if (tenant != null) {
+                logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
+            } else {
+                logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
+                tenant = createUserGroupWithInitialUser(UUID.randomUUID(), defaultTenantNameForUsername, user);
+                setOwnership(tenant.getIdentifier(), user, tenant);
+            }
+            return tenant;
         }
-        return tenant;
     }
     
-    private UserGroup createTenantForUser(String defaultTenantNameForUsername, User user) throws UserGroupManagementException {
-        final UserGroup tenant = createUserGroupWithInitialUser(UUID.randomUUID(), defaultTenantNameForUsername, user);
-        setOwnership(tenant.getIdentifier(), user, tenant);
-        return tenant;
-    }
-
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
         final User result = store.createUser(username, email, accounts); // TODO: get the principal as owner
@@ -2149,7 +2153,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (user.getDefaultTenant(ServerInfo.getName()) == null
                     && getUserGroupByName(tenantNameForUsername) == null) {
                 try {
-                    final UserGroup tenantForUser = createTenantForUser(tenantNameForUsername, user);
+                    final UserGroup tenantForUser = getOrCreateTenantForUser(user);
                     setDefaultTenantForCurrentServerForUser(user.getName(), tenantForUser.getId());
                 } catch (UserGroupManagementException e) {
                     logger.log(Level.SEVERE, "Error during migration while creating tenant for user: " + user, e);
