@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.pages.adminconsole;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -149,7 +150,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
-        waitForPO(WhatsNewDialogPO::new, ID_ADMIN_WHATS_NEW_DIALOG, 1).pressCancel();
+        cancelWhatsNewDialogIfAppearing();
     }
     
     public EventConfigurationPanelPO goToEvents() {
@@ -282,6 +283,14 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
         return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
+    }
+    
+    private void cancelWhatsNewDialogIfAppearing() {
+        try {
+            waitForPO(WhatsNewDialogPO::new, ID_ADMIN_WHATS_NEW_DIALOG, 1).pressCancel();
+        } catch (TimeoutException exc) {
+            logger.log(Level.FINEST, "What's new dialog not found => ignoring", exc);
+        }
     }
 
 }
