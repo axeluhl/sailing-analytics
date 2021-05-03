@@ -21,8 +21,8 @@ import com.sap.sse.gwt.resources.Highcharts;
 
 public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
-    
-    private SimplePanel appWidget = new SimpleLayoutPanel();
+
+    private final SimplePanel appWidget = new SimpleLayoutPanel();
 
     @Override
     protected void doOnModuleLoad() {
@@ -31,7 +31,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
         initActivitiesAndPlaces();
     }
-     
+
     private void initActivitiesAndPlaces() {
         final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
         final EventBus eventBus = clientFactory.getEventBus();
