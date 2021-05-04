@@ -908,6 +908,10 @@ public class RaceBoardPanel
         return raceBoardPerspectiveOwnSettings;
     }
     
+    public RaceBoardPerspectiveOwnSettings getOriginalPerspectiveSettings() {
+        return super.getPerspectiveSettings();
+    }
+    
     @Override
     public boolean hasPerspectiveOwnSettings() {
         return true;
