@@ -9,8 +9,8 @@ public class WindPatternDTO extends NamedDTO {
 
     private WindPattern pattern;
     
-    public WindPatternDTO() {
-    }
+    @Deprecated
+    WindPatternDTO() {} // for GWT RPC serialization only
     
     public WindPatternDTO(WindPattern pattern) {
         super(pattern.name());

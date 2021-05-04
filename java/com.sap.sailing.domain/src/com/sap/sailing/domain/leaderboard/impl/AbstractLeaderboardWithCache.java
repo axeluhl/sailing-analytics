@@ -389,15 +389,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final BoatClass boatClass = getBoatClass();
-        final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
-                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
-                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
-                this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                        .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(), addOverallDetails,
-                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
+        final LeaderboardDTO result = new LeaderboardDTO(this.getName(), timePoint.asDate(), 
+                this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+                        : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
+                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
+                                .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(),
+                        addOverallDetails, boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
-        result.setName(this.getName());
         result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<>();
         boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;

@@ -178,15 +178,15 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
 
     @Override
     protected EventDTO getResult() {
-        EventDTO result = new EventDTO();
+        final List<LeaderboardGroupDTO> leaderboardGroups = new ArrayList<>();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
         for (final String lgName : leaderboardGroupNames) {
             final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
             if (lgDTO != null) {
-                result.addLeaderboardGroup(lgDTO);
+                leaderboardGroups.add(lgDTO);
             }
         }
-        result.setName(nameEntryField.getText());
+        EventDTO result = new EventDTO(nameEntryField.getText(), leaderboardGroups);
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());

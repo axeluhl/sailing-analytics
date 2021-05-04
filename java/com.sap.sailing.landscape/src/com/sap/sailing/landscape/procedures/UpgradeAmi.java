@@ -265,7 +265,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
                             try {
                                 final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
-                                        expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
+                                        expeditionUdpPort == null ? null : expeditionUdpPort.intValue(), landscape);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }

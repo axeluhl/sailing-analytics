@@ -14,6 +14,7 @@ import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -36,6 +37,7 @@ import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
@@ -238,28 +240,33 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * 
      * @see #getRunningHostsWithTagValue(Region, String)
      */
-    Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(Region region, String tagName, String tagValue);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTagValue(Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * result includes instances regardless their state; they are not required to be RUNNING.
      * 
-     * @see #getRunningHostsWithTag(Region, String)
+     * @see #getRunningHostsWithTag(Region, String, HostSupplier<ShardingKey, HostT>)
      */
-    Iterable<AwsInstance<ShardingKey>> getHostsWithTag(Region region, String tagName);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
     
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName}. The tag may have any value. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(Region region, String tagName);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTag(Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier);
+
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(Region region, String publicIpAddress,
+            HostSupplier<ShardingKey, HostT> hostSupplier);
+
+    <HostT extends AwsInstance<ShardingKey>> HostT getHostByPublicIpAddress(Region region, String publicIpAddress,
+            HostSupplier<ShardingKey, HostT> hostSupplier);
 
     /**
      * Finds EC2 instances in the {@code region} that have a tag named {@code tagName} with value {@code tagValue}. The
      * instances returned have been in state RUNNING at the time of the request.
      */
-    Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(Region region, String tagName,
-            String tagValue);
+    <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(Region region, String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier);
 
     KeyPairInfo getKeyPairInfo(Region region, String keyName);
 
@@ -317,6 +324,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     SSHKeyPair createKeyPair(Region region, String keyName, byte[] privateKeyEncryptionPassphrase) throws JSchException;
 
     Instance getInstance(String instanceId, Region region);
+
+    Instance getInstanceByPublicIpAddress(Region region, String publicIpAddress);
+
+    Instance getInstanceByPrivateIpAddress(Region region, String publicIpAddress);
 
     /**
      * @param hostname
@@ -645,7 +656,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    void createLaunchConfiguration(Region region, String replicaSetName, Optional<Tags> tags,
+    void createLaunchConfigurationAndAutoScalingGroup(Region region, String replicaSetName, Optional<Tags> tags,
                     TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
                     AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
                     int maxReplicas, int maxRequestsPerTarget);
@@ -672,9 +683,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
 
+    CompletableFuture<Iterable<LaunchConfiguration>> getLaunchConfigurationsAsync(Region region);
+
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
             ProcessT master, Iterable<ProcessT> replicas);
 
     CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
+
+    void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize);
+
+    void updateReleaseInAutoScalingGroup(Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release);
 }

@@ -26,12 +26,14 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
+import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.RedirectDTO;
+import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -350,34 +352,49 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
 
     private void createApplicationReplicaSet(StringMessages stringMessages, String regionId) {
-        new CreateApplicationReplicaSetDialog(landscapeManagementService, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
+        landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
             @Override
-            public void ok(CreateApplicationReplicaSetInstructions instructions) {
-                applicationReplicaSetsBusy.setBusy(true);
-                landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getMasterInstanceType(),
-                        instructions.isDynamicLoadBalancerMapping(), sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                        sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                        ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        instructions.getSecurityReplicationBearerToken(), instructions.getOptionalDomainName(),new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                applicationReplicaSetsBusy.setBusy(false);
-                                errorReporter.reportError(caught.getMessage());
-                            }
-                            
-                            @Override
-                            public void onSuccess(Void result) {
-                                applicationReplicaSetsBusy.setBusy(false);
-                                Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
-                                refreshApplicationReplicaSetsTable();
-                            }
-                        });
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
             }
 
             @Override
-            public void cancel() {
+            public void onSuccess(ArrayList<ReleaseDTO> result) {
+                new CreateApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                        stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
+                    @Override
+                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.createApplicationReplicaSet(regionId, instructions.getName(), instructions.getInstanceType(),
+                                instructions.isDynamicLoadBalancerMapping(), instructions.getReleaseNameOrNullForLatestMaster(),
+                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                                instructions.getReplicationBearerToken(),instructions.getOptionalDomainName(),
+                                                new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                 @Override
+                                 public void onFailure(Throwable caught) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    errorReporter.reportError(caught.getMessage());
+                                 }
+                                 
+                                 @Override
+                                 public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                    applicationReplicaSetsBusy.setBusy(false);
+                                    Notification.notify(stringMessages.successfullyCreatedReplicaSet(instructions.getName()), NotificationType.SUCCESS);
+                                    if (result != null) {
+                                        applicationReplicaSetsTable.getFilterPanel().add(result);
+                                    }
+                                 }
+                              });
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
             }
-        }).show();
+        });
     }
 
     private void removeApplicationReplicaSet(StringMessages stringMessages, String regionId,
@@ -474,9 +491,78 @@ public class LandscapeManagementPanel extends SimplePanel {
         }.show();
     }
 
+    /**
+     * Performs an in-place upgrade for the master service if the replica set has distinct public and master
+     * target groups. If no replica exists, one is launched with the master's release, and the method waits
+     * until the replica has reached its healthy state. The replica is then registered in the public target group.<p>
+     * 
+     * Then, the {@code ./refreshInstance.sh install-release <release>} command is sent to the master which will
+     * download and unpack the new release but will not yet stop the master process. In parallel, an existing
+     * launch configuration will be copied and updated with user data reflecting the new release to be used.
+     * An existing auto-scaling group will then be updated to use the new launch configuration. The old launch
+     * configuration will then be removed.<p>
+     * 
+     * Replication is then stopped for all existing replicas, then the master is de-registered from the master
+     * target group and the public target group, effectively making the replica set "read-only." Then, the {@code ./stop}
+     * command is issued which is expected to wait until all process resources have been released so that it's
+     * appropriate to call {@code ./start} just after the {@code ./stop} call has returned, thus spinning up the
+     * master process with the new release configuration.<p>
+     * 
+     * When the master process has reached its healthy state, it is registered with both target groups while all other
+     * replicas are de-registered and then stopped. For replica processes being the last on their host, the host will
+     * be terminated. It is up to an auto-scaling group or to the user to decide whether to launch new replicas again.
+     * This won't happen automatically by this procedure.
+     */
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
-        Notification.notify("upgradeApplicationReplicaSet not implemented yet", NotificationType.ERROR);
+        landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(ArrayList<ReleaseDTO> result) {
+                new UpgradeApplicationReplicaSetDialog(landscapeManagementService, result.stream().map(r->r.getName())::iterator,
+                        stringMessages, errorReporter, new DialogCallback<UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions>() {
+                            @Override
+                            public void ok(UpgradeApplicationReplicaSetInstructions upgradeInstructions) {
+                                applicationReplicaSetsBusy.setBusy(true);
+                                landscapeManagementService.upgradeApplicationReplicaSet(regionId, applicationReplicaSetToUpgrade,
+                                        upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
+                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                        upgradeInstructions.getReplicationBearerToken(),
+                                        new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                applicationReplicaSetsBusy.setBusy(false);
+                                                errorReporter.reportError(caught.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                                applicationReplicaSetsBusy.setBusy(false);
+                                                if (result != null) {
+                                                    Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
+                                                                    result.getName(), result.getVersion()), NotificationType.SUCCESS);
+                                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToUpgrade);
+                                                    applicationReplicaSetsTable.getFilterPanel().add(result);
+                                                } else {
+                                                    Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(applicationReplicaSetToUpgrade.getName()),
+                                                            NotificationType.ERROR);
+                                                }
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                }).show();
+            }
+        });
         /*
          * Distinguish the following cases:
          *  1) with auto-scaling group: we assume two target groups exist; ensure a replica is running, launch one
@@ -488,12 +574,13 @@ public class LandscapeManagementPanel extends SimplePanel {
          *    remove replicas from public target group, create a new launch configuration for the new release
          *    and update the auto-scaling group with it; re-adjust the minimum number of instances to its old value,
          *    then terminate all replicas running the old release.
-         *  2) without auto-scaling group and without replication, but distinct master/public target groups: remove
-         *    single process from master target group (making it "read-only"). Launch new master on different host,
-         *    either finding an appropriate multi-instance host, or by identifying a host explicitly in the request
-         *    which then needs to have no application using the port used by the application that is to be upgraded,
-         *    or by spinning up an entirely new host. After the new master has become healthy, register it to the
-         *    master and public target groups while de-registering the old master from the public target group, then
+         *  2) without auto-scaling group and without replication, but distinct master/public target groups: ensure
+         *    that at least one healthy replica is registered in public target group; if not, spin one up and wait until
+         *    it's healthy. Then stop replication using the new replication API.
+         *    Then remove the master process from the master target group (making the replica set "read-only").
+         *    Upgrade master in place using refreshInstance.sh install-release {release}. After the new master has become
+         *    healthy, register it again with the
+         *    master and public target groups while de-registering all replicas from the public target group, then
          *    stopping the old process and subsequently terminating its instance in case it was the last application
          *    process on that host.
          *  3) without auto-scaling group, without replication, and with only a single target group: the master couldn't
@@ -515,6 +602,7 @@ public class LandscapeManagementPanel extends SimplePanel {
          * lyc.sapsailing.com, and vsaw.sapsailing.com. Upgrading auto-scaling groups manually is tedious and would also
          * benefit a lot from more automation.
          */
+        
         // TODO Implement LandscapeManagementPanel.upgradeApplicationReplicaSet(...)
     }
 

@@ -52,7 +52,7 @@ public class DefaultRegattaCreateDialog extends AbstractRegattaWithSeriesAndFlee
 
     @Override
     protected EventAndRegattaDTO getResult() {
-        final RegattaDTO regattaDTO = getRegattaDTO();
+        final RegattaDTO regattaDTO = getRegattaDTO(/* no name */ "");
         EventAndRegattaDTO eventAndRegatta = new EventAndRegattaDTO(getSelectedEvent(), regattaDTO);
         setRankingMetrics(regattaDTO);
         return eventAndRegatta;

@@ -31,6 +31,6 @@ public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<ManeuverType> getSelectedManeuverTypes() {
-        return Util.createSet(selectedManeuverTypes.getValues());
+        return Util.asSet(selectedManeuverTypes.getValues());
     }
 }

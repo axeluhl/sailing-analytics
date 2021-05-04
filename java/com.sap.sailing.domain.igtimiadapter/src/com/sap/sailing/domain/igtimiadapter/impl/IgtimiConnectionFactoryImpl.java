@@ -113,7 +113,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     private Account getAccount(String creatorName, String accessToken) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
-        HttpClient client = HttpClientBuilder.create().build();
+        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         HttpGet getAccount = new HttpGet(getApiV1BaseUrl()+"account?access_token="+accessToken);
         HttpResponse accountResponse = client.execute(getAccount);
         JSONObject accountJson = ConnectivityUtils.getJsonFromResponse(accountResponse);
@@ -373,7 +373,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @throws RuntimeException in case there was an error while retrieving the token
      */
     public Account obtainAccessTokenFromAuthorizationCode(String creatorName, String code) throws ClientProtocolException, IOException, IllegalStateException, ParseException {
-        HttpClient client = HttpClientBuilder.create().build();
+        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         HttpPost post = new HttpPost(getOauthTokenUrl());
         List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
@@ -518,7 +518,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     public HttpClient getHttpClient() {
-        HttpClient client = HttpClientBuilder.create().build();
+        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         return client;
     }
     
