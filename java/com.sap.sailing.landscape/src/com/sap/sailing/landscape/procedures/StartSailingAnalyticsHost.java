@@ -90,7 +90,7 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
                         launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                             try {
                                 return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
-                                        ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue());
+                                        ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), landscape);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -129,6 +129,6 @@ implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
 
     public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
         return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
-                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort());
+                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort(), getLandscape());
     }
 }

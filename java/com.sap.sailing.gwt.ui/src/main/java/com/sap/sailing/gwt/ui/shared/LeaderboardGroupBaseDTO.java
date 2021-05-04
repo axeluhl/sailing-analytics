@@ -18,7 +18,8 @@ public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements Wi
     private String displayName;
     private boolean hasOverallLeaderboard;
 
-    protected LeaderboardGroupBaseDTO() {} // for deserialization
+    @Deprecated
+    LeaderboardGroupBaseDTO() {} // for deserialization
     
     public LeaderboardGroupBaseDTO(UUID id, String name, String displayName) {
         super(name);

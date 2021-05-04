@@ -49,6 +49,7 @@ import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWith
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonSerializer;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 /**
  * 
@@ -102,6 +103,7 @@ public class ManeuverAndWindImporter {
 
     public HttpClient createNewHttpClient() {
         CloseableHttpClient client = HttpClientBuilder.create()
+                .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECTION_TIMEOUT_MILLIS)
                         .setConnectionRequestTimeout(CONNECTION_TIMEOUT_MILLIS)

@@ -4,10 +4,10 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Duration;
-import com.sap.sse.landscape.application.ApplicationProcess;
+import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
-public interface SailingAnalyticsProcess<ShardingKey> extends ApplicationProcess<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
+public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProcess<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>> {
     static Logger logger = Logger.getLogger(SailingAnalyticsProcess.class.getName());
     static String HEALTH_CHECK_PATH = "/gwt/status";
 
@@ -24,4 +24,5 @@ public interface SailingAnalyticsProcess<ShardingKey> extends ApplicationProcess
      * {@link AwsLandscape#terminate(com.sap.sse.landscape.aws.AwsInstance) terminated}.
      */
     void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase);
+
 }

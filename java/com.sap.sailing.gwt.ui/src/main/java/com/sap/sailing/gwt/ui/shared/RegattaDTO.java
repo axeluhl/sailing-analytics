@@ -48,7 +48,8 @@ public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     public Double buoyZoneRadiusInHullLengths;
     public String registrationLinkSecret;
     
-    public RegattaDTO() {}
+    @Deprecated
+    RegattaDTO() {} // for GWT RPC serialization only
     
     public RegattaDTO(String name, ScoringSchemeType scoringScheme) {
         super(name);

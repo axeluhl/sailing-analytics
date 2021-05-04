@@ -8,7 +8,8 @@ public class FleetDTO extends NamedDTO {
     private Color color;
     private int orderNo;
     
-    public FleetDTO() {}
+    @Deprecated
+    FleetDTO() {} // for GWT RPC serialization only
 
     public FleetDTO(String fleetName, int orderNo, Color color) {
         super(fleetName);

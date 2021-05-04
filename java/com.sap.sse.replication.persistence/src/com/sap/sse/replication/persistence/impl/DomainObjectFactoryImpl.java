@@ -16,7 +16,7 @@ import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.replication.ReplicaDescriptor;
-import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.persistence.DomainObjectFactory;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
@@ -60,6 +60,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final TimePoint registrationTime = new MillisecondsTimePoint(o.getLong(FieldNames.REPLICA_REGISTRATION_TIME_MILLIS.name()));
         final String additionalInformation = o.getString(FieldNames.REPLICA_ADDITIONAL_INFORMATION.name());
         final String[] replicableIdsAsStrings = o.get(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(), new ArrayList<String>()).toArray(new String[0]);
-        return new ReplicaDescriptorImpl(ipAddress, uuid, registrationTime, additionalInformation, replicableIdsAsStrings);
+        final Integer port = o.getInteger(FieldNames.REPLICA_PORT.name()); // default for backward compatibility, assuming 
+        return new ReplicaDescriptorImpl(ipAddress, port, uuid, registrationTime, additionalInformation, replicableIdsAsStrings);
     }
 }

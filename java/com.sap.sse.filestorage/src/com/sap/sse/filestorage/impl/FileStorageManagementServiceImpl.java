@@ -22,7 +22,7 @@ import com.sap.sse.filestorage.FileStorageServiceResolver;
 import com.sap.sse.filestorage.operations.FileStorageServiceOperation;
 import com.sap.sse.filestorage.operations.SetActiveFileStorageServiceOperation;
 import com.sap.sse.filestorage.operations.SetFileStorageServicePropertyOperation;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 
 /**
  * Implements {@link ServiceTrackerCustomizer} so that all {@link FileStorageServices} announced in the registry can

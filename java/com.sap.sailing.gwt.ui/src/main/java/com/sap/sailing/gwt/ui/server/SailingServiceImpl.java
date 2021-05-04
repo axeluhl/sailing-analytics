@@ -990,7 +990,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     // READ
     protected void fillRaceColumnDTO(RaceColumn raceColumn, RaceColumnDTO raceColumnDTO) {
-        raceColumnDTO.setName(raceColumn.getName());
         raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
         raceColumnDTO.setExplicitFactor(raceColumn.getExplicitFactor());
     }
@@ -2012,12 +2011,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 int numberOfWaypoints = Util.size(markPassingsTimes);
                 int wayPointNumber = 1;
                 for (com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>> markPassingTimes : markPassingsTimes) {
-                    MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
                     String name = "M" + (wayPointNumber - 1);
                     if (wayPointNumber == numberOfWaypoints) {
                         name = "F";
                     }
-                    markPassingTimesDTO.setName(name);
+                    MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO(name);
                     com.sap.sse.common.Util.Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
                     TimePoint firstPassingTime = timesPair.getA();
                     TimePoint lastPassingTime = timesPair.getB();
@@ -2419,7 +2417,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
-        StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(convertToBoatClassDTO(leaderboard.getBoatClass()));
+        StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(leaderboard.getName(), convertToBoatClassDTO(leaderboard.getBoatClass()));
         fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
         return leaderboardDTO;
     }
@@ -2436,7 +2434,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     protected StrippedLeaderboardDTOWithSecurity createStrippedLeaderboardDTOWithSecurity(Leaderboard leaderboard,
             boolean withGeoLocationData, boolean withStatisticalData) {
         StrippedLeaderboardDTOWithSecurity leaderboardDTO = new StrippedLeaderboardDTOWithSecurity(
-                convertToBoatClassDTO(leaderboard.getBoatClass()));
+                leaderboard.getName(), convertToBoatClassDTO(leaderboard.getBoatClass()));
         fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO);
         return leaderboardDTO;
@@ -2446,7 +2444,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             StrippedLeaderboardDTO leaderboardDTO) {
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
-        leaderboardDTO.setName(leaderboard.getName());
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());
@@ -3531,7 +3528,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public void startReplicatingFromMaster(String messagingHost, String masterHostName, String exchangeName,
             int servletPort, int messagingPort, String usernameOrNull, String passwordOrNull)
-            throws IOException, ClassNotFoundException, InterruptedException {
+            throws Exception {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.START_REPLICATION);
         // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
@@ -3648,8 +3645,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
     
     private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
-        eventDTO.venue = new VenueDTO();
-        eventDTO.venue.setName(event.getVenue() != null ? event.getVenue().getName() : null);
+        eventDTO.venue = new VenueDTO(event.getVenue() != null ? event.getVenue().getName() : null);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();

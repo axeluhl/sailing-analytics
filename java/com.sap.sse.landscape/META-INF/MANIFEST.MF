@@ -26,5 +26,6 @@ Require-Bundle: com.sap.sse.common,
  com.sap.sse.security.common,
  com.sap.sse.landscape.common,
  com.sap.sse.shared.android,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.replication.interfaces
 Bundle-ActivationPolicy: lazy
