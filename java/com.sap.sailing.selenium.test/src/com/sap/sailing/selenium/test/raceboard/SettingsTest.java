@@ -83,12 +83,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      */
     @Test
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        EventConfigurationPanelPO events = adminConsole.goToEvents();
-        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
-                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
-                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
-        initTrackingForBmwCupRace(adminConsole);
+        createEventWithTrackedRace();
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
         DetailCheckboxInfo[] detailsToSelect = new DetailCheckboxInfo[] {
@@ -199,13 +194,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      */
     @Test
     public void testThatUserDefaultsForOneModeDoNotHaveAnEffectOnAnotherMode() throws InterruptedException, UnsupportedEncodingException {
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        EventConfigurationPanelPO events = adminConsole.goToEvents();
-        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
-                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
-                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
-        
-        initTrackingForBmwCupRace(adminConsole);
+        createEventWithTrackedRace();
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
@@ -246,13 +235,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      */
     @Test
     public void testThatSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        EventConfigurationPanelPO events = adminConsole.goToEvents();
-        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
-                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
-                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
-        
-        initTrackingForBmwCupRace(adminConsole);
+        createEventWithTrackedRace();
         
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
@@ -279,17 +262,9 @@ public class SettingsTest extends AbstractSeleniumTest {
      */
     @Test
     public void testThatModeDependentSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        EventConfigurationPanelPO events = adminConsole.goToEvents();
-        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
-                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
-                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
-        
-        initTrackingForBmwCupRace(adminConsole);
-        
+        createEventWithTrackedRace();
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES", false);
-        
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         // The following options are false in the system default but activated by the WINNING_LANES mode
         mapSettings.waitForWindUpUntil(true);
@@ -297,15 +272,23 @@ public class SettingsTest extends AbstractSeleniumTest {
         mapSettings.setWindUp(false);
         mapSettings.setShowOnlySelectedCompetitors(false);
         mapSettings.pressMakeDefault();
-        
         raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA, BMW_CUP_REGATTA,
                 String.format(BMW_RACE, 1), "WINNING_LANES", false);
-        
         mapSettings = raceboard.openMapSettings();
-        // verify mode settigns have been overwritten
+        // verify mode settings have been overwritten
         mapSettings.waitForWindUpUntil(false);
         Assert.assertFalse(mapSettings.isShowOnlySelectedCompetitors());
     }
+
+    private void createEventWithTrackedRace() {
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, false);
+        initTrackingForBmwCupRace(adminConsole);
+    }
+    
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
         TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1),
