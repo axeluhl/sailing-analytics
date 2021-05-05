@@ -64,6 +64,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -6302,4 +6307,17 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return result;
     }
+    
+    public Integer getAdminConsoleChangeLogSize() {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final URIBuilder url = new URIBuilder(getRequestBaseURL().toURI()).setPath("release_notes_admin.html");
+            final HttpGet request = new HttpGet(url.build());
+            return client.execute(request, response -> EntityUtils.toString(response.getEntity())).length();
+        } catch (IOException | URISyntaxException e) {
+            logger.log(Level.WARNING, "Unable to determine admin change log size", e);
+            return 0;
+        }
+
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants.mediaServiceRemotePath;
 import static com.sap.sse.common.HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER;
+import static com.sap.sse.gwt.client.EntryPointHelper.registerASyncService;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
@@ -10,12 +12,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleTopLevelView;
+import com.sap.sailing.gwt.ui.adminconsole.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.ui.client.MediaServiceWrite;
 import com.sap.sailing.gwt.ui.client.MediaServiceWriteAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.TopLevelView;
@@ -30,20 +31,17 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     private final WithSecurity securityProvider = new DefaultWithSecurityImpl();
     private final EventBus eventBus = new SimpleEventBus();
     private final PlaceController placeController = new PlaceController(eventBus);
-    private final ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
+    private final ErrorReporter errorReporter = new DefaultErrorReporter<>(StringMessages.INSTANCE);
     private final MediaServiceWriteAsync mediaServiceWrite = GWT.create(MediaServiceWrite.class);
-    private SailingServiceWriteAsync sailingService;
-    private TopLevelView topLevelView;
-    
-    public AdminConsoleClientFactoryImpl() {
-    }
-    
+    private final TopLevelView topLevelView = new AdminConsoleTopLevelView(eventBus);
+    private final SailingServiceWriteAsync sailingService;
+
     public AdminConsoleClientFactoryImpl(final SailingServiceWriteAsync sailingService) {
         this.sailingService = sailingService;
-        EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, RemoteServiceMappingConstants.mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
-        topLevelView = new AdminConsoleTopLevelView(eventBus);
+        registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath, HEADER_FORWARD_TO_MASTER);
+        WhatsNewDialogFactory.register(getUserService(), sailingService);
     }
-    
+
     @Override
     public EventBus getEventBus() {
         return eventBus;
@@ -58,7 +56,7 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     public ErrorReporter getErrorReporter() {
         return errorReporter;
     }
-    
+
     @Override
     public UserManagementServiceAsync getUserManagementService() {
         return securityProvider.getUserManagementService();
@@ -83,7 +81,7 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     public MediaServiceWriteAsync getMediaServiceWrite() {
         return mediaServiceWrite;
     }
-    
+
     @Override
     public TopLevelView getTopLevelView() {
         return topLevelView;
@@ -93,7 +91,7 @@ public class AdminConsoleClientFactoryImpl implements AdminConsoleClientFactory 
     public Widget getRoot() {
         return topLevelView.asWidget();
     }
-    
+
     @Override
     public AcceptsOneWidget getContent() {
         return topLevelView.getContent();

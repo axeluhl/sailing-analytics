@@ -119,7 +119,6 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
-import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.client.UserService;
@@ -173,12 +172,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(stringMessages.administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(userService, header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
-        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
-            @Override
-            public Widget get() {
-                return createAdminConsolePanel(serverInfo);
-            }
-        });
+        authorizedContentDecorator.setContentWidgetFactory(() -> createAdminConsolePanel(serverInfo));
         headerPanel.setHeaderWidget(header);
         headerPanel.setContentWidget(authorizedContentDecorator);
         return headerPanel;

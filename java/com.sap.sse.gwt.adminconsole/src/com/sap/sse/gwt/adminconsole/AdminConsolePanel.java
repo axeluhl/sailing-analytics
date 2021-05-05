@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.adminconsole;
 
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.htmlEscape;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +15,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -255,8 +256,7 @@ public class AdminConsolePanel<T extends Place & AdminConsolePlace> extends Head
         sysinfoPanel.addStyleName("systemInformationPanel");
         sysinfoPanel.ensureDebugId("SystemInformation");
         if (ClientConfiguration.getInstance().isBrandingActive()) {
-            final Anchor releaseNotesLink = new Anchor(
-                    new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
+            final Anchor releaseNotesLink = new Anchor(htmlEscape(releaseNotesAnchorLabel), releaseNotesURL);
             releaseNotesLink.addStyleName("releaseNotesAnchor");
             sysinfoPanel.add(releaseNotesLink);
             informationPanel.add(releaseNotesLink, DockPanel.EAST);
