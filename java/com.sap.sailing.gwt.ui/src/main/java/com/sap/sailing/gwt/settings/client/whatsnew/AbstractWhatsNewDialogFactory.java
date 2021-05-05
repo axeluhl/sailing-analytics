@@ -68,7 +68,7 @@ public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSe
     }
 
     private void updateOrCreatePreference(final long charCount, final SettingsToJsonSerializerGWT serializer) {
-        final String serializedSetting = serializer .serializeToString(getInstanceForSerialization(charCount));
+        final String serializedSetting = serializer.serializeToString(getInstanceForSerialization(charCount));
         userService.setPreference(getPrefName(), serializedSetting, new ServiceCallback<Void>());
     }
 
