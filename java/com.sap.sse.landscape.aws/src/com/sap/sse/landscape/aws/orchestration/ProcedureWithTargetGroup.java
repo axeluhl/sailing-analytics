@@ -1,19 +1,16 @@
 package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
-import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 
@@ -24,42 +21,39 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
  * 
  * @author Axel Uhl (D043530)
  */
-public abstract class ProcedureWithTargetGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+public abstract class ProcedureWithTargetGroup<ShardingKey>
+extends AbstractAwsProcedureImpl<ShardingKey> {
     private static final String MASTER_TARGET_GROUP_SUFFIX = "-m";
-    private final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
+    private final ApplicationLoadBalancer<ShardingKey> loadBalancerUsed;
     private final String targetGroupNamePrefix;
     private final String serverName;
     private Iterable<Rule> rulesAdded;
     
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends com.sap.sse.common.Builder<BuilderT, T> {
-        BuilderT setLoadBalancerUsed(ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed);
+    /**
+     * If no {@link #setTargetGroupNamePrefix(String) target group name prefix} is specified, the target group names are
+     * constructed from the {@link #setServerName(String) server name} property.
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends ProcedureWithTargetGroup<ShardingKey>, ShardingKey>
+    extends AbstractAwsProcedureImpl.Builder<BuilderT, T, ShardingKey> {
+        BuilderT setLoadBalancerUsed(ApplicationLoadBalancer<ShardingKey> loadBalancerUsed);
         BuilderT setTargetGroupNamePrefix(String targetGroupNamePrefix);
         BuilderT setServerName(String serverName);
-        BuilderT setLandscape(AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape);
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends ProcedureWithTargetGroup<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
-        private ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed;
+    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends ProcedureWithTargetGroup<ShardingKey>, ShardingKey>
+    extends AbstractAwsProcedureImpl.BuilderImpl<BuilderT, T, ShardingKey>
+    implements Builder<BuilderT, T, ShardingKey> {
+        private ApplicationLoadBalancer<ShardingKey> loadBalancerUsed;
         private String targetGroupNamePrefix;
         private String serverName;
-        private AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape;
         
         @Override
         public BuilderT setLoadBalancerUsed(
-                ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancerUsed) {
+                ApplicationLoadBalancer<ShardingKey> loadBalancerUsed) {
             this.loadBalancerUsed = loadBalancerUsed;
             return self();
         }
@@ -77,74 +71,65 @@ extends AbstractProcedureImpl<ShardingKey, MetricsT, MasterProcessT, ReplicaProc
             return self();
         }
 
-        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
+        protected ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
             return loadBalancerUsed;
         }
 
-        public String getTargetGroupNamePrefix() {
+        protected String getTargetGroupNamePrefix() {
             return targetGroupNamePrefix;
         }
 
-        public String getServerName() throws JSchException, IOException, InterruptedException, SftpException {
+        protected String getServerName() throws Exception {
             return serverName;
         }
 
-        @Override
-        public BuilderT setLandscape(
-                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape) {
-            this.landscape = landscape;
-            return self();
-        }
-
-        public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
-            return landscape;
+        protected AwsLandscape<ShardingKey> getLandscape() {
+            return (AwsLandscape<ShardingKey>) super.getLandscape();
         }
     }
 
-    protected ProcedureWithTargetGroup(BuilderImpl<?, ?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
-        super(builder.getLandscape());
+    protected ProcedureWithTargetGroup(BuilderImpl<?, ?, ShardingKey> builder) throws Exception {
+        super(builder);
         this.loadBalancerUsed = builder.getLoadBalancerUsed();
         this.targetGroupNamePrefix = builder.getTargetGroupNamePrefix();
         this.serverName = builder.getServerName();
     }
     
-    protected TargetGroup<ShardingKey, MetricsT> createTargetGroup(Region region, String targetGroupName,
-            ApplicationProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> process) {
-        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName,
-                process.getPort(), process.getHealthCheckPath(),
-                /* use traffic port as health check port, too */ process.getPort());
+    protected <ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics>
+    TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, ProcessT process) {
+        return getLandscape().createTargetGroup(getLoadBalancerUsed().getRegion(), targetGroupName, process.getPort(),
+                process.getHealthCheckPath(), /* use traffic port as health check port, too */ process.getPort(),
+                getLoadBalancerUsed().getArn());
     }
     
     @Override
-    public AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getLandscape() {
-        return (AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>) super.getLandscape();
+    public AwsLandscape<ShardingKey> getLandscape() {
+        return (AwsLandscape<ShardingKey>) super.getLandscape();
     }
 
-    protected String getMasterTargetGroupName() {
+    public String getMasterTargetGroupName() {
         return getPublicTargetGroupName()+MASTER_TARGET_GROUP_SUFFIX;
     }
     
-    protected TargetGroup<ShardingKey, MetricsT> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName());
+    public TargetGroup<ShardingKey> getMasterTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getMasterTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
-    protected String getPublicTargetGroupName() {
-        return targetGroupNamePrefix+serverName;
+    public String getPublicTargetGroupName() {
+        return targetGroupNamePrefix+serverName.replaceAll("_", "-");
     }
     
-    protected TargetGroup<ShardingKey, MetricsT> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
-        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName());
+    public TargetGroup<ShardingKey> getPublicTargetGroup() throws JSchException, IOException, InterruptedException, SftpException {
+        return getLandscape().getTargetGroup(loadBalancerUsed.getRegion(), getPublicTargetGroupName(),
+                getLoadBalancerUsed().getArn());
     }
     
-    public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() {
+    public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() {
         return loadBalancerUsed;
     }
 
     public Iterable<Rule> getRulesAdded() {
         return rulesAdded;
-    }
-
-    protected static String getHostedZoneName(String hostname) {
-        return hostname.substring(hostname.indexOf('.')+1);
     }
 }

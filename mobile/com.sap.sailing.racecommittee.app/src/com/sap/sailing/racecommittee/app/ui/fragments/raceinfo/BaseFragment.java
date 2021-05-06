@@ -12,6 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class BaseFragment extends RaceFragment {
+    private final static String TAG = BaseFragment.class.getSimpleName();
 
     @IntDef({START_MODE_PRESETUP, START_MODE_PLANNED})
     @Retention(RetentionPolicy.SOURCE)
@@ -59,7 +60,6 @@ public class BaseFragment extends RaceFragment {
         if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
-            sendIntent(AppConstants.ACTION_CLEAR_TOGGLE);
             sendIntent(AppConstants.ACTION_SHOW_MAIN_CONTENT);
         }
     }

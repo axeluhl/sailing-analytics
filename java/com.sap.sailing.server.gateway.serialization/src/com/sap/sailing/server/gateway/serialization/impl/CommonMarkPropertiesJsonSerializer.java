@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class CommonMarkPropertiesJsonSerializer implements JsonSerializer<CommonMarkProperties> {
 

@@ -41,12 +41,14 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -58,7 +60,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class CourseTemplatePanel extends FlowPanel {
+public class CourseTemplatePanel extends FlowPanel implements FilterablePanelProvider<CourseTemplateDTO>{
     private static AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private final SailingServiceWriteAsync sailingService;
@@ -359,9 +361,14 @@ public class CourseTemplatePanel extends FlowPanel {
 
                                     @Override
                                     public void onSuccess(CourseTemplateDTO updatedCourseTemplate) {
-                                        int editedCourseTemplateIndex = filterableCourseTemplatePanel
-                                                .indexOf(originalCourseTemplate);
-                                        filterableCourseTemplatePanel.remove(originalCourseTemplate);
+                                        final int editedCourseTemplateIndex;
+                                        if (originalCourseTemplate != null) {
+                                            editedCourseTemplateIndex = filterableCourseTemplatePanel
+                                                    .indexOf(originalCourseTemplate);
+                                            filterableCourseTemplatePanel.remove(originalCourseTemplate);
+                                        } else {
+                                            editedCourseTemplateIndex = -1;
+                                        }
                                         if (editedCourseTemplateIndex >= 0) {
                                             filterableCourseTemplatePanel.add(editedCourseTemplateIndex,
                                                     updatedCourseTemplate);
@@ -379,6 +386,11 @@ public class CourseTemplatePanel extends FlowPanel {
                 }, isNew);
         dialog.ensureDebugId("CourseTemplateEditDialog");
         dialog.show();
+    }
+
+    @Override
+    public AbstractFilterablePanel<CourseTemplateDTO> getFilterablePanel() {
+        return filterableCourseTemplatePanel;
     }
 
 }

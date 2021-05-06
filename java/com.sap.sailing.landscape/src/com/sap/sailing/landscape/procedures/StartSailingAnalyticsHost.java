@@ -1,46 +1,44 @@
 package com.sap.sailing.landscape.procedures;
 
-import java.util.Collections;
+import java.net.InetAddress;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
-import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
-import com.sap.sse.landscape.ProcessConfigurationVariable;
-import com.sap.sse.landscape.Release;
+import com.sap.sailing.landscape.impl.SailingAnalyticsProcessImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
+import com.sap.sse.landscape.aws.ApplicationProcessHost;
+import com.sap.sse.landscape.aws.AwsAvailabilityZone;
+import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.orchestration.StartAwsApplicationHost;
-import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.orchestration.Procedure;
 
 /**
- * This launches an EC2 instance with a {@link SailingAnalyticsProcess} automatically started on it. The port configurations,
- * especially for the {@link Builder#getPort() HTTP port}, the {@link Builder#getTelnetPort() telnet port for OSGi console access}
- * and the {@link Builder#getExpeditionPort() "Expedition" UDP port} for this default process can be specified. They default to
- * 8888, 14888, and 2010, respectively.
- * 
+ * This launches an EC2 instance with a {@link SailingAnalyticsProcess} automatically started on it. The port
+ * configurations, especially for the {@link Builder#getPort() HTTP port}, the {@link Builder#getTelnetPort() telnet
+ * port for OSGi console access} and the {@link Builder#getExpeditionPort() "Expedition" UDP port} for this default
+ * process can be specified. They default to 8888, 14888, and 2010, respectively.
+ * <p>
+ *
  * @author Axel Uhl (D043530)
  *
  * @param <ShardingKey>
  */
-public abstract class StartSailingAnalyticsHost<ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
-implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>>,
-    StartFromSailingAnalyticsImage {
-    private final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
-    private final static String EXPEDITION_PORT_USER_DATA_NAME = "EXPEDITION_PORT";
-    private final int DEFAULT_PORT = 8888;
-    private final Integer port;
-    private final String defaultServerDirectory;
+public class StartSailingAnalyticsHost<ShardingKey>
+extends StartAwsApplicationHost<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+implements Procedure<ShardingKey>, StartFromSailingAnalyticsImage {
+    public static final Logger logger = Logger.getLogger(StartSailingAnalyticsHost.class.getName());
+    public final static String INSTANCE_NAME_DEFAULT_PREFIX = "SL ";
     
     /**
-     * The following defaults, in addition to the defaults implemented by the more general {@link StartAwsHost.Builder},
-     * are:
+     * The following defaults, in addition to the defaults implemented by the more general
+     * {@link StartAwsApplicationHost.Builder}, are:
      * <ul>
      * <li>If no {@link #setInstanceName(String) instance name} is provided, the instance name is constructed from the
      * {@link #getServerName() server name} by pre-pending the prefix "SL ".</li>
@@ -48,121 +46,89 @@ implements Procedure<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaste
      * {@link StartSailingAnalyticsHost#IMAGE_TYPE_TAG_VALUE_SAILING} if no explicit
      * {@link #setMachineImage(AmazonMachineImage) machine image is set} and no {@link #setImageType(String) image type
      * is set} of which the latest version would be used otherwise.</li>
-     * <li>If no {@link Release} is explicitly {@link #setRelease set}, or that {@link Optional} is empty,
-     * {@link SailingReleaseRepository#INSTANCE}{@link SailingReleaseRepository#getLatestMasterRelease()
-     * getLatestMasterRelease()} will be used instead.</li>
-     * <li>The {@link #getDefaultServerDirectory() server directory} defaults to {code /home/sailing/servers/server}
-     * (see {@link SailingAnalyticsHost#DEFAULT_SERVER_PATH})</li>
+     * <li>The {@link #getServerDirectory() server directory} defaults to {@code /home/sailing/servers/<server-name>}
+     * (see {@link ApplicationProcessHost#DEFAULT_SERVER_PATH})</li>
+     * <li>The tag {@link SailingAnalyticsHost#SAILING_ANALYTICS_APPLICATION_HOST_TAG} is set, with the value equaling the
+     * {@link SailingAnalyticsApplicationConfiguration.Builder#setServerName(String) server name} set in the application
+     * configuration.</li>
      * </ul>
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
-    T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
-        BuilderT setPort(int port);
-
-        BuilderT setTelnetPort(int telnetPort);
-
-        BuilderT setExpeditionPort(int expeditionPort);
-        
-        BuilderT setDefaultServerDirectory(String serverDirectory);
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
+    extends StartAwsApplicationHost.Builder<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>> {
     }
     
-    protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, ProcessT>,
-    T extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT extends SailingAnalyticsProcess<ShardingKey>>
-    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
-    implements Builder<BuilderT, T, ShardingKey, ProcessT> {
-        private Integer port;
-        private Integer telnetPort;
-        private Integer expeditionPort;
-        private String defaultServerDirectory;
-        
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey>,
+    T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
+    extends StartAwsApplicationHost.BuilderImpl<BuilderT, T, ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, SailingAnalyticsHost<ShardingKey>>
+    implements Builder<BuilderT, T, ShardingKey> {
+        protected BuilderImpl(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+            super(applicationConfigurationBuilder);
+        }
+
+        @Override
+        protected SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey> getApplicationConfigurationBuilder() {
+            return (com.sap.sailing.landscape.procedures.SailingAnalyticsApplicationConfiguration.BuilderImpl<?, ?, ShardingKey>) super.getApplicationConfigurationBuilder();
+        }
+
         @Override
         protected String getImageType() {
             return super.getImageType() == null ? IMAGE_TYPE_TAG_VALUE_SAILING : super.getImageType();
         }
-
-        @Override
-        protected Optional<Release> getRelease() {
-            return Optional.of(super.getRelease().orElse(SailingReleaseRepository.INSTANCE.getLatestMasterRelease()));
-        }
-
+        
         @Override
         protected String getInstanceName() {
-            return isInstanceNameSet() ? super.getInstanceName() : INSTANCE_NAME_DEFAULT_PREFIX+getServerName();
+            return isInstanceNameSet() ? super.getInstanceName() : INSTANCE_NAME_DEFAULT_PREFIX+getApplicationConfigurationBuilder().getServerName();
         }
 
         @Override
-        protected HostSupplier<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
-            return SailingAnalyticsHostImpl::new;
-        }
-        
-        protected Integer getPort() {
-            return this.port;
-        }
-        
-        @Override
-        public BuilderT setPort(int port) {
-            this.port = port;
-            return self();
-        }
-        
-        public Integer getTelnetPort() {
-            return this.telnetPort;
+        protected HostSupplier<ShardingKey, SailingAnalyticsHost<ShardingKey>> getHostSupplier() {
+            return (String instanceId, AwsAvailabilityZone az, InetAddress privateIpAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape)->
+                new SailingAnalyticsHostImpl<>(instanceId, az, privateIpAddress,
+                        launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
+                            try {
+                                return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
+                                        ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), landscape);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
         }
         
         @Override
-        public BuilderT setTelnetPort(int telnetPort) {
-            this.telnetPort = telnetPort;
-            return self();
-        }
-
-        public Integer getExpeditionPort() {
-            return expeditionPort;
-        }
-        
-        @Override
-        public BuilderT setExpeditionPort(int expeditionPort) {
-            this.expeditionPort = expeditionPort;
-            return self();
-        }
-
-        // TODO the host start-up should ideally be separated from the process installation/startup
-        public String getDefaultServerDirectory() {
-            return defaultServerDirectory == null ? SailingAnalyticsHost.DEFAULT_SERVER_PATH : defaultServerDirectory;
+        protected Optional<Tags> getTags() {
+            return Optional.of(super.getTags().orElse(Tags.empty()).and(SailingAnalyticsHost.SAILING_ANALYTICS_APPLICATION_HOST_TAG, getApplicationConfigurationBuilder().getServerName()));
         }
 
         @Override
-        public BuilderT setDefaultServerDirectory(String defaultServerDirectory) {
-            this.defaultServerDirectory = defaultServerDirectory;
-            return self();
+        public T build() throws Exception {
+            @SuppressWarnings("unchecked")
+            final T result = (T) new StartSailingAnalyticsHost<ShardingKey>(this);
+            return result;
         }
     }
     
-    protected StartSailingAnalyticsHost(BuilderImpl<?, ? extends StartSailingAnalyticsHost<ShardingKey, ProcessT>, ShardingKey, ProcessT> builder) {
+    public static <BuilderT extends Builder<BuilderT, T, ShardingKey>, T extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey>
+    BuilderT builder(SailingAnalyticsApplicationConfiguration.Builder<?, ?, ShardingKey> applicationConfigurationBuilder) {
+        @SuppressWarnings("unchecked")
+        final BuilderT result = (BuilderT) new BuilderImpl<BuilderT, T, ShardingKey>(applicationConfigurationBuilder);
+        return result;
+    }
+
+    protected StartSailingAnalyticsHost(BuilderImpl<?, ? extends StartSailingAnalyticsHost<ShardingKey>, ShardingKey> builder) throws Exception {
         super(builder);
-        // remember the port we need in order to hand out the process
-        this.port = builder.getPort();
-        this.defaultServerDirectory = builder.getDefaultServerDirectory();
-        if (builder.getPort() != null) {
-            addUserData(ProcessConfigurationVariable.SERVER_PORT, builder.getPort().toString());
-        }
-        if (builder.getTelnetPort() != null) {
-            addUserData(ProcessConfigurationVariable.TELNET_PORT, builder.getTelnetPort().toString());
-        }
-        if (builder.getExpeditionPort() != null) {
-            addUserData(Collections.singleton(EXPEDITION_PORT_USER_DATA_NAME+"="+builder.getExpeditionPort()));
-        }
     }
     
-    protected int getPort() {
-        return port == null ? DEFAULT_PORT : port;
+    @Override
+    protected SailingAnalyticsApplicationConfiguration<ShardingKey>
+    getApplicationConfiguration() {
+        return (SailingAnalyticsApplicationConfiguration<ShardingKey>) super.getApplicationConfiguration();
     }
-    
-    protected String getDefaultServerDirectory() {
-        return defaultServerDirectory;
+
+    public SailingAnalyticsProcess<ShardingKey> getSailingAnalyticsProcess() {
+        return new SailingAnalyticsProcessImpl<>(getApplicationConfiguration().getPort(), getHost(), getApplicationConfiguration().getServerDirectory(),
+                getApplicationConfiguration().getTelnetPort(), getApplicationConfiguration().getServerName(), getApplicationConfiguration().getExpeditionPort(), getLandscape());
     }
-    
-    public abstract ProcessT getSailingAnalyticsProcess();
 }

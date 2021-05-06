@@ -8,17 +8,20 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
     private static final long serialVersionUID = -6510535362114348707L;
 
     private transient StringSetting competitorId;
+    private transient StringSetting competitorName;
     private transient BooleanSetting notifyAboutResults;
 
     public CompetitorNotificationPreference() {
         competitorId = new StringSetting("competitor", this);
+        competitorName = new StringSetting("competitorName", this);
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
-    public CompetitorNotificationPreference(String competitorIdAsString, boolean notifyAboutResults) {
+    public CompetitorNotificationPreference(String competitorIdAsString, String competitorName, boolean notifyAboutResults) {
         this();
         this.competitorId.setValue(competitorIdAsString);
         this.notifyAboutResults.setValue(notifyAboutResults);
+        this.competitorName.setValue(competitorName);
     }
 
     @Override
@@ -36,5 +39,13 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
 
     public boolean isNotifyAboutResults() {
         return Boolean.TRUE.equals(notifyAboutResults.getValue());
+    }
+    
+    public String getCompetitorName() {
+        return competitorName.getValue();
+    }
+    
+    public void setCompetitorName(String name) {
+        this.competitorName.setValue(name);
     }
 }

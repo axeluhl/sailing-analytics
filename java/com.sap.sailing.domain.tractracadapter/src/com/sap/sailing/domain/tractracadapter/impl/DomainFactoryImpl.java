@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -102,8 +103,8 @@ import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.WeakIdentityHashMap;
-import com.sap.sse.util.WeakValueCache;
+import com.sap.sse.shared.util.WeakIdentityHashMap;
+import com.sap.sse.shared.util.WeakValueCache;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
@@ -578,12 +579,17 @@ public class DomainFactoryImpl implements DomainFactory {
             IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds,
             RaceTrackingHandler raceTrackingHandler,
             RaceAndCompetitorStatusWithRaceLogReconciler raceAndCompetitorStatusWithRaceLogReconciler) {
+        final List<ReceiverType> receiverTypes = new ArrayList<>();
+        receiverTypes.addAll(Arrays.asList(ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
+                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA));
+        if (raceAndCompetitorStatusWithRaceLogReconciler != null) {
+            receiverTypes.add(ReceiverType.COMPETITOR);
+        }
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
                 useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, raceAndCompetitorStatusWithRaceLogReconciler,
-                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS, ReceiverType.SENSORDATA);
+                receiverTypes.toArray(new ReceiverType[receiverTypes.size()]));
     }
     
     @Override

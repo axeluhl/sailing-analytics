@@ -7,21 +7,21 @@ import java.util.TimeZone;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.AwsLandscape;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Image;
 import software.amazon.awssdk.services.ec2.model.ImageState;
+import software.amazon.awssdk.services.ec2.model.Tag;
 
-public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics> implements AmazonMachineImage<ShardingKey, MetricsT> {
+public class AmazonMachineImageImpl<ShardingKey> implements AmazonMachineImage<ShardingKey> {
     private static final long serialVersionUID = 1615200981492476022L;
     private final Image image;
     private final Region region;
-    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey> landscape;
     
-    public AmazonMachineImageImpl(Image image, Region region, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
+    public AmazonMachineImageImpl(Image image, Region region, AwsLandscape<ShardingKey> landscape) {
         this.image = image;
         this.region = region;
         this.landscape = landscape;
@@ -41,6 +41,11 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
     public Region getRegion() {
         return region;
     }
+    
+    @Override
+    public Iterable<Tag> getTags() {
+        return image.tags();
+    }
 
     @Override
     public TimePoint getCreatedAt() {
@@ -56,7 +61,7 @@ public class AmazonMachineImageImpl<ShardingKey, MetricsT extends ApplicationPro
     }
 
     @Override
-    public AmazonMachineImage<ShardingKey, MetricsT> updateAllPackages() {
+    public AmazonMachineImage<ShardingKey> updateAllPackages() {
         // launch with "image-upgrade" as the only user data, then produce the new image
         // TODO Implement MachineImage<AwsInstance>.updateAllPackages(...)
         return null;

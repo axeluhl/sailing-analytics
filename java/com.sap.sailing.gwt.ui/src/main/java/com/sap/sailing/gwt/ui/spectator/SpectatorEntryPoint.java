@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
 import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.shared.ClientConfiguration;
@@ -23,7 +22,7 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
  * @author Lennart Hensler (D054527)
  *
  */
-public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implements RegattaRefresher {
+public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint {
 
     @Override
     protected void doOnModuleLoad() {
@@ -58,14 +57,13 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
                     Anchor feedbackLink = new Anchor(new SafeHtmlBuilder()
                             .appendHtmlConstant("<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());
                     // TODO set image
-                    feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
+                    feedbackLink.setHref("mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback");
                     feedbackPanel.add(feedbackLink);
                     groupAndFeedbackPanel.add(feedbackPanel);
                 }
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
-        fillRegattas();
     }
 
     private void setHeader(final String groupNameParam, final boolean embedded) {
@@ -87,11 +85,6 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint implement
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
-    }
-
-    @Override
-    public void fillRegattas() {
-        
     }
     
 }

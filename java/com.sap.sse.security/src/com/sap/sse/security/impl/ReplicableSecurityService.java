@@ -15,6 +15,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.subscription.Subscription;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda
@@ -84,9 +85,9 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalAddSetting(String key, Class<?> clazz);
 
-    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException;
 
-    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole) throws UserManagementException;
+    Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole, String nameOfUserQualifyingRole, Boolean transitive) throws UserManagementException;
 
     Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException;
 
@@ -109,5 +110,7 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalSetDefaultTenantForServerForUser(String username, UUID defaultTenantId, String serverName);
 
     Void internalResetPassword(String username, String passwordResetSecret);
+
+    Void internalUpdateSubscription(String username, Subscription newSubscription) throws UserManagementException;
 
 }

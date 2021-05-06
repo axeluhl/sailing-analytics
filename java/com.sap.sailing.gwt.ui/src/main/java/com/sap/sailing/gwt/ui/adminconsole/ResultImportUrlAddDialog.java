@@ -13,7 +13,6 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final TextBox textBox;
-    
     private final String urlProvider;
     
     protected class UrlDTOValidator implements Validator<UrlDTO> {
@@ -52,19 +51,20 @@ public class ResultImportUrlAddDialog extends DataEntryDialog<UrlDTO> {
             StringMessages stringMessages, DialogCallback<UrlDTO> callback) {
         super(stringMessages.addResultImportUrl(), urlProvider, stringMessages.add(),
                 stringMessages.cancel(), null, callback);
+        this.ensureDebugId("ResultImportUrlAddDialog");
         this.urlProvider = urlProvider;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.setValidator(new UrlDTOValidator());
-
         textBox = super.createTextBox(null, 120);
         textBox.getElement().setPropertyString("placeholder", stringMessages.eventIdOrUrl());
+        textBox.ensureDebugId("ResultImportUrlAddDialogTextBox");
         textBox.setFocus(true);
     }
 
     @Override
     protected UrlDTO getResult() {
-        return new UrlDTO(textBox.getValue().trim());
+        return new UrlDTO(urlProvider, textBox.getValue().trim());
     }
 
     @Override

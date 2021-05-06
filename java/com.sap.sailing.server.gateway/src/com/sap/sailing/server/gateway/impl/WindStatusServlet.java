@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +40,7 @@ import com.sap.sse.common.Util;
  * @author Simon Marcel Pamies
  *
  */
-public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedConrentReplacing implements IgtimiWindListener, BulkFixReceiver {
+public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedContentReplacing implements IgtimiWindListener, BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(WindStatusServlet.class.getName());
     private static final long serialVersionUID = -6791613843435003810L;
     
@@ -218,10 +219,12 @@ public abstract class WindStatusServlet extends SailingServerHttpServletWithPost
     }
     
     protected class IgtimiMessageInfo {
-        private Wind wind;
+        private final Wind wind;
+        private final Set<Fix> fixesUsed;
         
-        public IgtimiMessageInfo(Wind wind) {
+        public IgtimiMessageInfo(Wind wind, Set<Fix> fixesUsed) {
             this.wind = wind;
+            this.fixesUsed = fixesUsed;
         }
         
         public Wind getWind() {
@@ -229,30 +232,33 @@ public abstract class WindStatusServlet extends SailingServerHttpServletWithPost
         }
         
         public String toString() {
-            String formatedInfo = "";
-            if(wind.getTimePoint() != null) {
-                formatedInfo += "Time: " + dateTimeFormatter.format(wind.getTimePoint().asDate());
+            final StringBuilder formattedInfo = new StringBuilder();
+            if (wind.getTimePoint() != null) {
+                formattedInfo.append("Time: " + dateTimeFormatter.format(wind.getTimePoint().asDate()));
             }
-            if(wind.getPosition() != null) {
-                formatedInfo += ", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + " " + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()); 
+            if (wind.getPosition() != null) {
+                formattedInfo.append(", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + " "
+                        + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()));
             }
-            formatedInfo += ", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) +"kn";
-            if(wind.getFrom() != null) {
-                formatedInfo += " from "+ decimalFormatter1Digit.format(wind.getFrom().getDegrees()) + "&deg;";
+            formattedInfo.append(", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) + "kn");
+            if (wind.getFrom() != null) {
+                formattedInfo.append(" from " + decimalFormatter1Digit.format(wind.getFrom().getDegrees()) + "&deg;");
             }
-            return formatedInfo;
+            final Iterable<Fix> sortedFixes = fixesUsed.stream().sorted((f1, f2)->f1.toString().compareTo(f2.toString()))::iterator;
+            formattedInfo.append(Util.joinStrings(", ", sortedFixes));
+            return formattedInfo.toString();
         }
     }
 
     @Override
-    public void windDataReceived(Wind wind, String deviceSerialNumber) {
+    public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
         Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
         if (messagesPerDevice == null) {
-            messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
+            messagesPerDevice = new ArrayDeque<>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
             lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
         }
         synchronized (messagesPerDevice) {
-            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind, fixesUsed));
             if (messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
                 messagesPerDevice.pollLast();
             }

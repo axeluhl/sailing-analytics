@@ -39,9 +39,14 @@ public abstract class AbstractLeaderboardDTO extends NamedDTO implements Seriali
     @Deprecated
     protected AbstractLeaderboardDTO() {} // for GWT serialization only
 
-    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+    public AbstractLeaderboardDTO(String name, BoatClassDTO boatClass) {
+        super(name);
         this.boatClass = boatClass;
         races = new ArrayList<RaceColumnDTO>();
+    }
+    
+    public AbstractLeaderboardDTO(BoatClassDTO boatClass) {
+        this(/* name */ "", boatClass);
     }
     
     public BoatClassDTO getBoatClass() {

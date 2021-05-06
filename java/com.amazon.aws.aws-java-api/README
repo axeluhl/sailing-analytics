@@ -58,4 +58,4 @@ update site project's plugins/aws-sdk folder, the feature.xml file for the updat
 to reflect the correct version number, and then the update site is built using Maven.
 
 If you like what you've got, update the p2.sapsailing.com version of the aws-sdk update site by invoking
-	/java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh
+	${workspace}/java/com.sap.sailing.targetplatform/scripts/uploadAwsApiRepositoryToServer.sh

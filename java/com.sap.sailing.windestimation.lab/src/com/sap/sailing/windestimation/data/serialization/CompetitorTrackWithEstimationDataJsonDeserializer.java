@@ -10,13 +10,13 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class CompetitorTrackWithEstimationDataJsonDeserializer<T> {
 

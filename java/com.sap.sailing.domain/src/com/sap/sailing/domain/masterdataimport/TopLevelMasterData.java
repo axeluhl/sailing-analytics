@@ -28,7 +28,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -37,6 +36,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 
 /**
@@ -82,7 +82,7 @@ public class TopLevelMasterData implements Serializable {
         Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
         // Add fixes for regatta log mappings
         for (Regatta regatta : getAllRegattas()) {
-            RegattaLog regattaLog = regatta.getRegattaLog();
+            final RegattaLog regattaLog = regatta.getRegattaLog();
             try {
                 regattaLog.lockForRead();
                 for (RegattaLogEvent logEvent : regattaLog.getRawFixes()) {
@@ -97,7 +97,7 @@ public class TopLevelMasterData implements Serializable {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                         try {
                             raceLog.lockForRead();
                             for (RaceLogEvent logEvent : raceLog.getRawFixes()) {

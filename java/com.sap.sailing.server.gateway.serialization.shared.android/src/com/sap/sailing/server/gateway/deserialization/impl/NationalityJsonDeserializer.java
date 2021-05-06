@@ -5,9 +5,9 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class NationalityJsonDeserializer implements JsonDeserializer<Nationality> {
     private final SharedDomainFactory<?> domainFactory;

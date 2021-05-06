@@ -4,24 +4,27 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.logging.Level;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
+import com.sap.sse.landscape.common.shared.MongoDBConstants;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.orchestration.StartHost;
+import com.sap.sse.shared.util.Wait;
 
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
@@ -44,26 +47,28 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * In this case no other node tagged for the desired replica set will be found, and the new instance will become the
  * first primary of the new replica set.<p>
  * 
- * TODO Why is the MetricsT parameter necessary when there is MongoMetrics?
- * 
  * @author Axel Uhl (D043530)
  */
-public class StartMongoDBServer<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
-    private static enum MongoDBReplicaSetUserData {
+public class StartMongoDBServer<ShardingKey, ProcessT extends MongoProcess>
+extends StartAwsHost<ShardingKey, AwsInstance<ShardingKey>> {
+    private static enum MongoDBReplicaSetUserData implements ProcessConfigurationVariable {
         REPLICA_SET_NAME, REPLICA_SET_PRIMARY, REPLICA_SET_PRIORITY, REPLICA_SET_VOTES;
     }
     
-    private MongoProcess mongoProcess;
+    private ProcessT mongoProcess;
     
     private final String replicaSetName;
+
+    private final  Optional<Duration> optionalTimeout;
     
     /**
      * In order to launch a standalone instance, call {@link #setReplicaSetName(String)} with {@code null} as a
      * parameter. To launch a new first instance (primary) for a replica set call {@link #setReplicaSetPrimary(String)}
-     * with {@code null} as a parameter.
+     * with {@code null} as a parameter. If you use an {@link Builder#setImageType(String) image type} that supports NVMe
+     * storage (on-board fast SSDs) then your MongoDB may have plenty and fast but only ephemeral storage. This is suitable
+     * only for replicas where your data is protected by spreading it across availability zones and/or having at least one
+     * replica in the replica set that has a non-ephemeral volume as the basis for storage which can also undergo EBS
+     * snapshot backups.<p>
      * 
      * Defaults:
      * <ul>
@@ -85,11 +90,9 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
      * 
      * @author Axel Uhl (D043530)
      */
-    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartAwsHost.Builder<BuilderT, StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> {
+    public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, ProcessT>,
+    ShardingKey, ProcessT extends MongoProcess>
+    extends StartAwsHost.Builder<BuilderT, StartMongoDBServer<ShardingKey, ProcessT>, ShardingKey, AwsInstance<ShardingKey>> {
         /**
          * The default {@link #setImageType(String) image type} used for launching a MongoDB server.
          */
@@ -104,12 +107,10 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         BuilderT setReplicaSetVotes(int replicaSetVotes);
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    extends StartAwsHost.BuilderImpl<BuilderT, StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>>
-    implements Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, ProcessT>,
+    ShardingKey, ProcessT extends MongoProcess>
+    extends StartAwsHost.BuilderImpl<BuilderT, StartMongoDBServer<ShardingKey, ProcessT>, ShardingKey, AwsInstance<ShardingKey>>
+    implements Builder<BuilderT, ShardingKey, ProcessT> {
         private String replicaSetName = AwsLandscape.MONGO_DEFAULT_REPLICA_SET_NAME;
         private String replicaSetPrimary;
         private boolean replicaSetPrimaryWasSetExplicitly = false;
@@ -121,7 +122,7 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         }
         
         @Override
-        public HostSupplier<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, AwsInstance<ShardingKey, MetricsT>> getHostSupplier() {
+        public HostSupplier<ShardingKey, AwsInstance<ShardingKey>> getHostSupplier() {
             return AwsInstanceImpl::new;
         }
 
@@ -166,7 +167,7 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
                         // for connecting to the entire replica set through which then the primary is automatically found for adding the replica to the set
                         result = String.join(",", Util.map(Util.filter(getLandscape().getDatabaseConfigurationForReplicaSet(getRegion(), getReplicaSetName()).getInstances(),
                                 instance->instance.getHost().getPrivateAddress(getOptionalTimeout()) != null), 
-                                instance->instance.getHost().getPrivateAddress(getOptionalTimeout()).getCanonicalHostName()+":"+instance.getPort()));
+                                instance->instance.getHost().getPrivateAddress(getOptionalTimeout()).getHostAddress()+":"+instance.getPort()));
                     } else {
                         result = null; // empty replica set name provided, overriding default replica set name; launch as stand-alone 
                     }
@@ -213,39 +214,46 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
         }
         
         @Override
-        public StartMongoDBServer<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException {
-            setTags(Optional.of(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoProcess.DEFAULT_PORT)));
+        public StartMongoDBServer<ShardingKey, ProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException {
+            setTags(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoDBConstants.DEFAULT_PORT));
             if (!isSecurityGroupsSet()) {
                 setSecurityGroups(Collections.singleton(getLandscape().getDefaultSecurityGroupForMongoDBHosts(getRegion())));
             }
             return new StartMongoDBServer<>(this);
         }
+        
+        /**
+         * Re-expose the method declared protected in a different package to the local procedure
+         */
+        @Override
+        protected Optional<Duration> getOptionalTimeout() {
+            return super.getOptionalTimeout();
+        }
     }
     
-    public static <BuilderT extends Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
-    Builder<BuilderT, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder() {
+    public static <BuilderT extends Builder<BuilderT, ShardingKey, ProcessT>, ShardingKey, ProcessT extends MongoProcess>
+    Builder<BuilderT, ShardingKey, ProcessT> builder() {
         return new BuilderImpl<>();
     }
     
-    protected StartMongoDBServer(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> builder) throws URISyntaxException, JSchException, IOException, InterruptedException {
+    protected StartMongoDBServer(BuilderImpl<?, ShardingKey, ProcessT> builder) throws URISyntaxException, JSchException, IOException, InterruptedException {
         super(builder);
         this.replicaSetName = builder.getReplicaSetName();
         if (builder.getReplicaSetName() != null) {
-            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_NAME.name(), builder.getReplicaSetName());
+            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_NAME, builder.getReplicaSetName());
         }
         if (builder.getReplicaSetPrimary() != null) {
-            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIMARY.name(), builder.getReplicaSetPrimary());
+            addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIMARY, builder.getReplicaSetPrimary());
         }
-        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIORITY.name(), Integer.toString(builder.getReplicaSetPriority()));
-        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_VOTES.name(), Integer.toString(builder.getReplicaSetVotes()));
+        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_PRIORITY, Integer.toString(builder.getReplicaSetPriority()));
+        addUserData(MongoDBReplicaSetUserData.REPLICA_SET_VOTES, Integer.toString(builder.getReplicaSetVotes()));
+        this.optionalTimeout = builder.getOptionalTimeout();
     }
 
     /**
      * The process launched by this procedure. {@link MongoProcess#getHost()} is expected to match {@link #getHost()}.
      */
-    public MongoProcess getMongoProcess() {
+    public ProcessT getMongoProcess() {
         return mongoProcess;
     }
 
@@ -253,13 +261,21 @@ extends StartAwsHost<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, Aws
     public void run() throws Exception {
         super.run();
         if (replicaSetName == null) {
-            mongoProcess = new MongoProcessImpl(getHost());
+            @SuppressWarnings("unchecked")
+            final ProcessT mongoProcessCast = (ProcessT) new MongoProcessImpl(getHost());
+            mongoProcess = mongoProcessCast;
         } else {
+            // the host may not yet be in state RUNNING; we'd like to wait for this:
+            boolean running = Wait.wait(()->getLandscape().getInstance(getHost().getInstanceId(), getHost().getRegion()).state().name() == InstanceStateName.RUNNING,
+                    optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for host "+getHost().getInstanceId()+" to be in state RUNNING");
+            if (!running) {
+                throw new IllegalStateException("The host launched did not reach state RUNNING"+optionalTimeout.map(d->" within timeout "+d).orElse(""));
+            }
             final MongoReplicaSet replicaSet = getLandscape().getDatabaseConfigurationForReplicaSet(getHost().getRegion(), replicaSetName);
             final Host instance = Util.stream(replicaSet.getInstances()).filter(replica->replica.getHost().equals(getHost())).map(replica->replica.getHost()).findAny().get();
-            mongoProcess = new MongoProcessInReplicaSetImpl(replicaSet, MongoProcess.DEFAULT_PORT, instance);
+            @SuppressWarnings("unchecked")
+            final ProcessT mongoProcessCast = (ProcessT) new MongoProcessInReplicaSetImpl(replicaSet, MongoDBConstants.DEFAULT_PORT, instance);
+            mongoProcess = mongoProcessCast;
         }
     }
-
-    
 }

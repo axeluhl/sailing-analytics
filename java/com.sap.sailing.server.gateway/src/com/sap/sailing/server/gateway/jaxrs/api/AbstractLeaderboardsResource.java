@@ -178,6 +178,7 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
                 final JSONObject fleetJson = new JSONObject();
                 fleetsJson.add(fleetJson);
                 fleetJson.put("name", fleet.getName());
+                fleetJson.put("resultsAreOfficial", leaderboard.isResultsAreOfficial(raceColumn, fleet));
                 final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 final JSONObject trackedRaceInfo;
                 if (trackedRace == null) {

@@ -4,7 +4,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -75,11 +74,10 @@ public class MobileApplicationClientFactory extends
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.sailingService = sailingService;
-        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
-        WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
+        WhatsNewDialogFactory.register(getUserService(), placeController);
         
         authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
             final LoginHintContent content = new LoginHintContent(() -> {

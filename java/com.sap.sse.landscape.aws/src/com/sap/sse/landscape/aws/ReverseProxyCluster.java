@@ -1,9 +1,8 @@
 package com.sap.sse.landscape.aws;
 
 import com.sap.sse.landscape.Log;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
+import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
@@ -16,32 +15,28 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  * @author Axel Uhl (D043530)
  *
  */
-public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-LogT extends Log>
-        extends ReverseProxy<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, LogT> {
+public interface ReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
+extends ReverseProxy<ShardingKey, MetricsT, ProcessT, LogT> {
     /**
      * A reverse proxy may scale out by adding more hosts.
      * 
      * @return at least one host
      */
-    Iterable<AwsInstance<ShardingKey, MetricsT>> getHosts();
+    Iterable<AwsInstance<ShardingKey>> getHosts();
     
     /**
      * Add one host of the instance type specified to the availability zone {@code az}.
      * 
-     * @return the hosts that were added by this request; they will also be part of the response of {@link #getHosts()}
-     *         now
+     * @return the host that was added by this request; it will also be part of the response of {@link #getHosts()} now
      */
-    AwsInstance<ShardingKey, MetricsT> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
+    AwsInstance<ShardingKey> createHost(InstanceType instanceType, AwsAvailabilityZone az, String keyName);
     
-    void addHost(AwsInstance<ShardingKey, MetricsT> host);
+    void addHost(AwsInstance<ShardingKey> host);
 
     /**
      * Removes a single host from this reverse proxy, terminating the host. When trying to remove the last remaining
      * host, an {@link IllegalStateException} will be thrown and the method will not complete the request. Consider
      * using {@link #terminate()} to terminate all hosts forming this reverse proxy.
      */
-    void removeHost(AwsInstance<ShardingKey, MetricsT> host);
+    void removeHost(AwsInstance<ShardingKey> host);
 }

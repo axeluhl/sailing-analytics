@@ -8,6 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.activities.SendingServiceAwareActivity;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
@@ -37,14 +39,15 @@ public class SystemInformationActivityHelper {
     public void updateSendingServiceInformation() {
         TextView statusView = (TextView) activity.findViewById(R.id.system_information_persistence_status);
         TextView waitingView = (TextView) activity.findViewById(R.id.system_information_persistence_waiting);
-        if (activity.boundSendingService) {
-            Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
+        final MessageSendingService service = activity.getService();
+        if (service != null && activity.isBound()) {
+            Date lastSuccessfulSend = service.getLastSuccessfulSend();
             String never = activity.getString(R.string.never);
             statusView.setText(activity.getString(R.string.events_waiting_to_be_sent,
-                    activity.sendingService.getDelayedIntentsCount(),
+                    service.getDelayedIntentsCount(),
                     lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            Iterable<String> delayedIntentsContent = service.getDelayedIntentsContent();
             StringBuilder waitingEvents = new StringBuilder();
             synchronized (delayedIntentsContent) {
                 boolean first = true;
@@ -69,8 +72,9 @@ public class SystemInformationActivityHelper {
         clearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (activity.boundSendingService) {
-                    activity.sendingService.clearDelayedIntents();
+                final MessageSendingService service = activity.getService();
+                if (service != null && activity.isBound()) {
+                    service.clearDelayedIntents();
                 } else {
                     Toast.makeText(activity.getApplicationContext(), "", Toast.LENGTH_SHORT).show();
                 }

@@ -1,32 +1,32 @@
 package com.sap.sailing.landscape.impl;
 
+import java.net.InetAddress;
+import java.util.Map;
+
 import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.SailingAnalyticsMaster;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingAnalyticsReplica;
-import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.MapBuilder;
+import com.sap.sse.landscape.application.ProcessFactory;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsLandscape;
-import com.sap.sse.landscape.aws.ReverseProxy;
-import com.sap.sse.landscape.aws.impl.AwsInstanceImpl;
+import com.sap.sse.landscape.aws.impl.ApplicationProcessHostImpl;
 
-public class SailingAnalyticsHostImpl<ShardingKey> extends AwsInstanceImpl<ShardingKey, SailingAnalyticsMetrics> implements SailingAnalyticsHost<ShardingKey> {
+public class SailingAnalyticsHostImpl<ShardingKey, HostT extends SailingAnalyticsHost<ShardingKey>>
+extends ApplicationProcessHostImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT>
+implements SailingAnalyticsHost<ShardingKey> {
     public SailingAnalyticsHostImpl(String instanceId, AwsAvailabilityZone availabilityZone,
-            AwsLandscape<ShardingKey, SailingAnalyticsMetrics, ?, ?> landscape) {
-        super(instanceId, availabilityZone, landscape);
-        // TODO Auto-generated constructor stub
+            InetAddress privateIpAddress, TimePoint launchTimePoint,
+            AwsLandscape<ShardingKey> landscape, ProcessFactory<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>, HostT> processFactoryFromHostAndServerDirectory) {
+        super(instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape, processFactoryFromHostAndServerDirectory);
     }
 
     @Override
-    public ReverseProxy<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsMaster<ShardingKey>, SailingAnalyticsReplica<ShardingKey>, RotatingFileBasedLog> getReverseProxy() {
-        // TODO Implement SailingAnalyticsHost<ShardingKey>.getReverseProxy(...)
-        return null;
-    }
-
-    @Override
-    public Iterable<SailingAnalyticsProcess<ShardingKey>> getSailingAnalyticsProcesses() {
-        // TODO Implement SailingAnalyticsHost<ShardingKey>.getSailingAnalyticsProcesses(...)
-        return null;
+    protected Map<String, Boolean> getAdditionalEnvironmentPropertiesAndWhetherStringTyped() {
+        return MapBuilder.of(super.getAdditionalEnvironmentPropertiesAndWhetherStringTyped())
+                .put(SailingProcessConfigurationVariables.EXPEDITION_PORT.name(), /* String-typed */ false)
+                .build();
     }
 }

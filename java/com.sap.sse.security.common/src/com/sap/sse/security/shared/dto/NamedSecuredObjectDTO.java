@@ -9,8 +9,8 @@ public abstract class NamedSecuredObjectDTO extends NamedDTO implements SecuredD
 
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
-    protected NamedSecuredObjectDTO() {
-    }
+    @Deprecated
+    protected NamedSecuredObjectDTO() {} // for GWT RPC serialization only
 
     protected NamedSecuredObjectDTO(String name) {
         super(name);

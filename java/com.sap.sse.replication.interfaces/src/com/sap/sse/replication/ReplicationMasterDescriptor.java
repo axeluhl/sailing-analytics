@@ -1,7 +1,6 @@
 package com.sap.sse.replication;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -12,17 +11,13 @@ import com.rabbitmq.client.QueueingConsumer;
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
  * 
- * TODO bug 2465: add the set of {@link Replicable}s that are replicated from the master represented by this descriptor,
- * considering that this may be a subset only of the replicables running on this instance or the master server. Example:
- * replicating only the SecurityService from some other server but being a master regarding all other Replicables.
- * 
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws MalformedURLException, UnsupportedEncodingException;
-    
+    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws Exception;
+
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     /**

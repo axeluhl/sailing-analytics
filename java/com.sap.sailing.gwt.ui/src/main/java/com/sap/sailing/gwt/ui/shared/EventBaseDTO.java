@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,14 +61,8 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
      */
     private boolean isOnRemoteServer;
 
-    EventBaseDTO() {
-    } // for serialization only
-
-    public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
-        this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<String, ImageSize>();
-        sailorsInfoWebsiteURLs = new HashMap<>();
-    }
+    @Deprecated
+    EventBaseDTO() {} // for serialization only
 
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
@@ -86,6 +79,11 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     @Override
     public int hashCode() {
         return this.getId().hashCode();
+    }
+    
+    @Override
+    public UUID getId() {
+        return id;
     }
     
     public ImageDTO getLogoImage() {
@@ -218,10 +216,4 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
     }
-
-    @Override
-    public Serializable getId() {
-        return id;
-    }
-
 }

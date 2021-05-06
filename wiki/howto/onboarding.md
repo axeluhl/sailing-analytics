@@ -4,7 +4,7 @@ This document describes the onboarding process for a new team member (developer)
 
 First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612](http://www.amazon.de/Patterns-Elements-Reusable-Object-Oriented-Software/dp/0201633612). That's a great book, and knowing at least some of it will help you a great deal finding your way around our solution.
 
-### Race Analysis Development Setup
+### SAP Sailing Analytics Development Setup
 
 #### Installations
 
@@ -132,6 +132,8 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
 The project has some configuration of line endings for specific file types in ".gitattributes". To make this work as intended, you need to ensure that the git attribute "core.autocrlf" is set to "false". This can be done by navigating to your local repository in a Bach/Git Bach/Cygwin instance and executing the command `git config core.autocrlf false`.
 
 If you are first time git user, don't forget to specify your user metadata. Use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` to tell git your name and email address.
+
+Depending on the location of your local repository, it's filepaths might be too long for the default settings to handle. Excecute the command `git config --system core.longpaths true` to enable your system wide git installation to handle long file paths.
 
 #### Maven Setup
 Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.

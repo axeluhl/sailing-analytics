@@ -212,6 +212,6 @@ REPLICATE_MASTER_BEARER_TOKEN="Gecx+W/dwFKRAxFbIvC/IMafEnJ8kTQF+MlYNVhEwD4="
 DEPLOY_TO=galvestaure
 SERVER_NAME=galvestaure
 SERVER_PORT=8923
-MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/galvestaure?replicaSet=live&retryWrites=true"
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/galvestaure?replicaSet=live&retryWrites=true&readPreference=nearest"
 EXPEDITION_PORT=2045
 TELNET_PORT=14923

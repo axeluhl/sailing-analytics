@@ -71,9 +71,11 @@ and added the lines
 ```
 PermitRootLogin without-password
 PermitRootLogin Yes
+MaxStartups 100
 ```
 
-to allow root shell login.
+to allow root shell login, and allow for several concurrent SSH connections (up to 100) starting up around the
+same time.
 
 I copied the JDK7/JDK8 installations, particularly the current sapjvm_8 VM, from an existing SL instance to /opt.
 

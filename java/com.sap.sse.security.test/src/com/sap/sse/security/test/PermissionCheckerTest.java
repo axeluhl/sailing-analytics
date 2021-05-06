@@ -95,6 +95,7 @@ public class PermissionCheckerTest {
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
         user = userStore.createUser("jonas", "jonas@dann.io");
         userTenant.add(user);
+        userStore.updateUserGroup(userTenant);
         ownership = new Ownership(user, userTenant);
         adminTenant.add(adminUser);
         adminOwnership = new Ownership(adminUser, adminTenant);
@@ -120,7 +121,7 @@ public class PermissionCheckerTest {
                 ownership, acl));
         userStore.addRoleForUser(user.getName(),
                 new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
-                        /* qualified for userTenant */ null, /* qualified for user */ user));
+                        /* qualified for userTenant */ null, /* qualified for user */ user, true));
         // having the admin role qualified for objects owned by user should help
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
@@ -157,7 +158,7 @@ public class PermissionCheckerTest {
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
         userStore.addRoleForUser(user.getName(),
                 new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()), /* qualifiedForTenant */ null,
-                        /* qualifiedForUser */ user));
+                        /* qualifiedForUser */ user, true));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaIdentifier), /* userOwner */ null,
@@ -168,7 +169,7 @@ public class PermissionCheckerTest {
         // but now we assign the admin role to the user, qualified for objects owned by the group owner:
         userStore.addRoleForUser(user.getName(),
                 new Role(userStore.getRoleDefinitionByPrototype(AdminRole.getInstance()),
-                        /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
+                        /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null, true));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // now the user should be granted permission because admin gets *, and the user gets admin on all objects owned by userTenant
         assertTrue(realm.isPermitted(principalCollection, regattaPermission.toString()));
@@ -220,12 +221,12 @@ public class PermissionCheckerTest {
     public void testRole() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
-        final Role globalRole = new Role(globalRoleDefinition);
+        final Role globalRole = new Role(globalRoleDefinition, true);
         user.addRole(globalRole);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         user.removeRole(globalRole);
-        user.addRole(new Role(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
+        user.addRole(new Role(globalRoleDefinition, this.userTenant, /* user qualifier */ null, true));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         Ownership testOwnership = new Ownership(adminUser, userTenant);
@@ -313,7 +314,7 @@ public class PermissionCheckerTest {
     public void testMetaPermissionWithOwnership() {
         RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "some_role",
                 Collections.singleton(type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         WildcardPermission permissionToCheck = type1.getPermissionForTypeRelativeIdentifier(DefaultActions.READ,
                 new TypeRelativeObjectIdentifier("someid"));
         // The assigned role is qualified by the tenant. This makes a check without ownership fail
@@ -335,7 +336,7 @@ public class PermissionCheckerTest {
     public void testMetaPermissionWithOwnershipandWildcardAction() {
         RoleDefinition rd = new RoleDefinitionImpl(UUID.randomUUID(), "admin",
                 Collections.singleton(WildcardPermission.builder().build()));
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         final String objectId = "someid";
         // wildcard for the action part
         assertTrue(PermissionChecker.checkMetaPermissionWithOwnershipResolution(
@@ -361,10 +362,10 @@ public class PermissionCheckerTest {
                 user, null, ownershipResolver, noopAclResolver);
         assertFalse(permissionCheck.getAsBoolean());
         // Not the right qualification -> check still fails
-        user.addRole(new Role(rd, adminTenant, null));
+        user.addRole(new Role(rd, adminTenant, null, true));
         assertFalse(permissionCheck.getAsBoolean());
         // The right qualification
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         assertTrue(permissionCheck.getAsBoolean());
     }
     
@@ -393,9 +394,9 @@ public class PermissionCheckerTest {
                 user, null, ownershipResolver, noopAclResolver);
         
         assertFalse(permissionCheck.getAsBoolean());
-        user.addRole(new Role(rd, userTenant, null));
+        user.addRole(new Role(rd, userTenant, null, true));
         assertFalse(permissionCheck.getAsBoolean());
-        user.addRole(new Role(rd, adminTenant, null));
+        user.addRole(new Role(rd, adminTenant, null, true));
         assertTrue(permissionCheck.getAsBoolean());
     }
 
@@ -464,6 +465,30 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ)));
         assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
                 type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.DELETE)));
+    }
+
+    @Test
+    public void testPermissionCheckWithTransientRole() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        final Role transientRole = new Role(transientRoleDefinition, null, null, false);
+        user.addRole(transientRole);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
+    }
+    
+    @Test
+    public void testPermissionCheckWithTransientRoleThroughGroup() {
+        final WildcardPermission permissionToCheck = new WildcardPermission("a:b:c");
+        // No non-transitivity flag defined on role definition level
+        final RoleDefinition transientRoleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "transientRole", Collections.singleton(permissionToCheck));
+        userTenant.put(transientRoleDefinition, false);
+        boolean metaPermitted = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null, noopAclResolver);
+        assertFalse(metaPermitted);
+        boolean permitted = PermissionChecker.isPermitted(permissionToCheck, user, null, ownership, acl);
+        assertTrue(permitted);
     }
 
     private boolean checkAnyPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,

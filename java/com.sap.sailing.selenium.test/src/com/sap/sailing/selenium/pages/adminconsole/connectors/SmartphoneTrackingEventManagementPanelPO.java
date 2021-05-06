@@ -21,6 +21,9 @@ public class SmartphoneTrackingEventManagementPanelPO extends PageArea {
  
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
+ 
+    @FindBy(how = BySeleniumId.class, using = "LeaderboardRefreshButton")
+    private WebElement leaderboardRefreshButton;
     
     public SmartphoneTrackingEventManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -36,5 +39,10 @@ public class SmartphoneTrackingEventManagementPanelPO extends PageArea {
     
     public TrackedRacesListPO getTrackedRaceListComposite() {
         return new TrackedRacesListPO(this.driver, this.trackedRacesListComposite);
+    }
+    
+    public void refreshLeaderboardTable() {
+        leaderboardRefreshButton.click();
+        waitForAjaxRequests();
     }
 }

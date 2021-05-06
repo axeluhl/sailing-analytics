@@ -84,6 +84,37 @@ public class LoginTest {
     }
 
     @Test
+    public void testGetUsersWithPermission() throws UserManagementException, UserGroupManagementException, MailException {
+        final String username = "TheNewUser";
+        final String specialUserGroupName1 = "TheSpecialUserGroup1";
+        final String specialUserGroupName2 = "TheSpecialUserGroup2";
+        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final TypeRelativeObjectIdentifier myServerTypeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier("myserver");
+        final WildcardPermission createObjectPermissionOnMyserver = SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
+                myServerTypeRelativeObjectIdentifier);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.addPermissionForUser(username, createObjectPermissionOnMyserver);
+        assertTrue(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.removePermissionFromUser(username, createObjectPermissionOnMyserver);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
+        final RoleDefinition roleGrantingPermission = securityService.createRoleDefinition(UUID.randomUUID(), "roleGrantingPermission");
+        roleGrantingPermission.setPermissions(Collections.singleton(createObjectPermissionOnMyserver));
+        securityService.updateRoleDefinition(roleGrantingPermission);
+        specialUserGroup1.put(roleGrantingPermission, /* forAll */ false);
+        final QualifiedObjectIdentifier myServerObjectIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(myServerTypeRelativeObjectIdentifier);
+        securityService.setOwnership(myServerObjectIdentifier, /* user */ null, specialUserGroup1);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        securityService.addUserToUserGroup(specialUserGroup1, user);
+        // now since the user belongs to the group and the group implies the permission and the myserver objetc is owned by the group, this shall imply the permission for user
+        assertTrue(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+        final UserGroup specialUserGroup2 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName2);
+        // change group ownership to a group that doesn't imply the permission:
+        securityService.setOwnership(myServerObjectIdentifier, /* user */ null, specialUserGroup2);
+        assertFalse(Util.contains(securityService.getUsersWithPermissions(createObjectPermissionOnMyserver), user));
+    }
+    
+    @Test
     public void testDeleteUser() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         final String specialUserGroupName1 = "TheSpecialUserGroup1";
@@ -149,7 +180,7 @@ public class LoginTest {
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         final QualifiedObjectIdentifier myId = my.getIdentifier();
         // grant admin role to user unqualified, implying READ on all objects including the "my" SERVER
-        securityService.addRoleForUser(username, new Role(securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance())));
+        securityService.addRoleForUser(username, new Role(securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance()), true));
         securityService.login(username, password);
         securityService.setOwnership(myId, admin, adminTenant);
         // check explicit permission:
@@ -208,8 +239,9 @@ public class LoginTest {
     @Test
     public void rolesTest() throws UserStoreManagementException {
         userStore.createUser("me", "me@sap.com");
-        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
-        final Role testRole = new Role(testRoleDefinition);
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
+                Collections.emptySet());
+        final Role testRole = new Role(testRoleDefinition, true);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
@@ -219,8 +251,9 @@ public class LoginTest {
     public void roleWithQualifiersTest() throws UserStoreManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com");
-        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
-        final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
+        RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
+                Collections.emptySet());
+        final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser, true);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = createAndLoadUserStore();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));

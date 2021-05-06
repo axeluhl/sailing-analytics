@@ -537,7 +537,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Set<GPSFixMoving> getAllFixes(Competitor c) {
         Set<GPSFixMoving> fixes = new TreeSet<>(comp);
         if (timeRangeForValidCandidates.getTimeRangeOrNull() != null) {
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+            final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
             track.lockForRead();
             try {
                 for (GPSFixMoving fix : track.getFixes(
@@ -562,7 +562,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFixMoving> affectedFixes = new TreeSet<GPSFixMoving>(comp);
-        GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;
@@ -773,7 +773,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;

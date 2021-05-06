@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.Channel;
@@ -29,6 +30,21 @@ public class SshCommandChannelImpl implements SshCommandChannel {
     @Override
     public int getExitStatus() {
         return channel.getExitStatus();
+    }
+
+    @Override
+    public String runCommandAndReturnStdoutAndLogStderr(String commandLine, String stderrLogPrefix, Level stderrLogLevel) throws IOException, InterruptedException, JSchException {
+        final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+        try {
+            sendCommandLineSynchronously(commandLine, stderr);
+            if (stderrLogLevel != null && stderr.size() > 0) {
+                logger.log(stderrLogLevel, (stderrLogPrefix==null?"":(stderrLogPrefix+": "))+stderr.toString());
+            }
+            final String result = getStreamContentsAsString();
+            return result;
+        } finally {
+            disconnect();
+        }
     }
 
     @Override
@@ -76,7 +92,7 @@ public class SshCommandChannelImpl implements SshCommandChannel {
     }
 
     @Override
-    public void disconnect() {
-        channel.disconnect();
+    public void disconnect() throws JSchException {
+        channel.getSession().disconnect();
     }
 }

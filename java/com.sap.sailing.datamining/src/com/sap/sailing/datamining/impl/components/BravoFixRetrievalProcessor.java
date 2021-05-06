@@ -29,7 +29,7 @@ public class BravoFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
         Collection<HasBravoFixContext> bravoFixesWithContext = new ArrayList<>();
         TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
         if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
-            BravoFixTrack<Competitor> bravoFixTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
+            final BravoFixTrack<Competitor> bravoFixTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
             if (bravoFixTrack != null) {
                 bravoFixTrack.lockForRead();
                 try {

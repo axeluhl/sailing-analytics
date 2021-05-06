@@ -34,6 +34,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         replicaDescriptorDoc.put(FieldNames.REPLICA_ADDITIONAL_INFORMATION.name(), replicaDescriptor.getAdditionalInformation());
         replicaDescriptorDoc.put(FieldNames.REPLICA_REPLICABLE_IDS_AS_STRINGS.name(),
                 Arrays.asList(replicaDescriptor.getReplicableIdsAsStrings()));
+        replicaDescriptorDoc.put(FieldNames.REPLICA_PORT.name(), replicaDescriptor.getPort());
         getReplicaDescriptorCollection().withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(replicaDescriptorDoc,
                 replicaDescriptorDoc, new UpdateOptions().upsert(true));
     }

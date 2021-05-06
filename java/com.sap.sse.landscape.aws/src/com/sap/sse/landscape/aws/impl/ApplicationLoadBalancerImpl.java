@@ -2,26 +2,34 @@ package com.sap.sse.landscape.aws.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.TargetGroup;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionConfig.Builder;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RuleCondition;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RulePriorityPair;
 
-public class ApplicationLoadBalancerImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics>
-implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
+public class ApplicationLoadBalancerImpl<ShardingKey>
+implements ApplicationLoadBalancer<ShardingKey> {
     private static final long serialVersionUID = -5297220031399131769L;
     
     /**
@@ -33,9 +41,9 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
 
     private final Region region;
 
-    private final AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape;
+    private final AwsLandscape<ShardingKey> landscape;
     
-    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<ShardingKey, MetricsT, ?, ?> landscape) {
+    public ApplicationLoadBalancerImpl(Region region, LoadBalancer loadBalancer, AwsLandscape<ShardingKey> landscape) {
         this.region = region;
         this.loadBalancer = loadBalancer;
         this.landscape = landscape;
@@ -72,7 +80,8 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
         landscape.deleteLoadBalancerListener(getRegion(), listener);
     }
 
-    private Listener getListener(ProtocolEnum protocol) {
+    @Override
+    public Listener getListener(ProtocolEnum protocol) {
         return Util.filter(landscape.getListeners(this), l->l.protocol() == protocol).iterator().next();
     }
 
@@ -149,7 +158,7 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
     }
 
     @Override
-    public Iterable<TargetGroup<ShardingKey, MetricsT>> getTargetGroups() {
+    public Iterable<TargetGroup<ShardingKey>> getTargetGroups() {
         return landscape.getTargetGroupsByLoadBalancerArn(getRegion(), getArn());
     }
     
@@ -164,15 +173,16 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
     @Override
     public void delete() throws InterruptedException {
         // first obtain the target groups to which, based on the current ALB configuration, traffic is forwarded
-        final Iterable<TargetGroup<ShardingKey, MetricsT>> targetGroups = getTargetGroups();
+        final Set<TargetGroup<ShardingKey>> targetGroups = new HashSet<>();
+        Util.addAll(getTargetGroups(), targetGroups); // do this before deleting the ALB because then its ARN isn't known anymore
         // now delete the rules to free up all target groups to which the ALB could have forwarded, except the default rule
         deleteAllRules();
         deleteAllListeners();
         landscape.deleteLoadBalancer(this);
         Thread.sleep(Duration.ONE_SECOND.times(5).asMillis()); // wait a bit until the target groups are no longer considered "in use"
         // now that all target groups the ALB used are freed up, delete them:
-        for (final TargetGroup<?, ?> targetGroup : targetGroups) {
-            landscape.deleteTargetGroup(landscape.getTargetGroup(getRegion(), targetGroup.getName(), targetGroup.getTargetGroupArn()));
+        for (final TargetGroup<?> targetGroup : targetGroups) {
+            landscape.deleteTargetGroup(targetGroup);
         }
     }
     
@@ -186,5 +196,67 @@ implements ApplicationLoadBalancer<ShardingKey, MetricsT> {
     private void deleteAllListeners() {
         deleteListener(ProtocolEnum.HTTP);
         deleteListener(ProtocolEnum.HTTPS);
+    }
+
+    @Override
+    public Rule setDefaultRedirect(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return Util.stream(getRules()).filter(r->isDefaultRedirectRule(r, hostname)).findAny()
+            .map(defaultRedirectRule->updateDefaultRedirectRule(defaultRedirectRule.ruleArn(), hostname, pathWithLeadingSlash, query))
+            .orElseGet(()->{
+                final Rule defaultRedirectRule = createDefaultRedirectRule(hostname, pathWithLeadingSlash, query);
+                addRulesAssigningUnusedPriorities(/* forceContiguous */ false, defaultRedirectRule);
+                return defaultRedirectRule;
+            });
+    }
+    
+    @Override
+    public Rule createDefaultRedirectRule(String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return getDefaultRedirectRuleBuilder(hostname, pathWithLeadingSlash, query).build();
+    }
+
+    private software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule.Builder getDefaultRedirectRuleBuilder(
+            String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        return Rule.builder()
+                .conditions(RuleCondition.builder().field("path-pattern").pathPatternConfig(ppc->ppc.values("/")).build(),
+                            createHostHeaderRuleCondition(hostname))
+                .actions(createDefaultRedirectAction(pathWithLeadingSlash, query));
+    }
+
+    private Action createDefaultRedirectAction(String pathWithLeadingSlash, Optional<String> query) {
+        Builder redirectConfigBuilder = RedirectActionConfig.builder()
+                .protocol("#{protocol}")
+                .port("#{port}")
+                .host("#{host}")
+                .path(pathWithLeadingSlash)
+                .statusCode(RedirectActionStatusCodeEnum.HTTP_302);
+        query.ifPresent(q->redirectConfigBuilder.query(q));
+        return Action.builder().type(ActionTypeEnum.REDIRECT).redirectConfig(redirectConfigBuilder.build()).build();
+    }
+    
+    @Override
+    public RuleCondition createHostHeaderRuleCondition(String hostname) {
+        return RuleCondition.builder().field("host-header").hostHeaderConfig(hhcb->hhcb.values(hostname)).build();
+    }
+
+    private Rule updateDefaultRedirectRule(String defaultRedirectRuleArn, String hostname, String pathWithLeadingSlash, Optional<String> query) {
+        final Rule updatedRule = getDefaultRedirectRuleBuilder(hostname, pathWithLeadingSlash, query)
+                .ruleArn(defaultRedirectRuleArn)
+                .build();
+        landscape.updateLoadBalancerListenerRule(getRegion(), updatedRule);
+        return updatedRule;
+    }
+
+    /**
+     * A {@code rule} is considered to be the default redirect rule for {@code hostname} if it has a {@code host-header}
+     * condition for that {@code hostname} and a {@code path-pattern} condition for exactly one path, {@code "/"}.
+     */
+    private boolean isDefaultRedirectRule(Rule rule, String hostname) {
+        return
+                rule.conditions().stream().filter(condition->condition.field().equals("host-header")
+                                               && condition.hostHeaderConfig().values().contains(hostname)).findAny().isPresent()
+                &&
+                rule.conditions().stream().filter(condition->condition.field().equals("path-pattern")
+                                               && condition.pathPatternConfig().values().size() == 1
+                                               && condition.pathPatternConfig().values().contains("/")).findAny().isPresent();
     }
 }

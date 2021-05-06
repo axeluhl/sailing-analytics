@@ -87,7 +87,7 @@ public class RaceLogRevocationTest {
         sendClientEvent(clientCRaceLog, event, clientCUUID);
     }
     
-    private static void assertNumUnrevoked(RaceLog raceLog, int expectedNum) {
+    private static void assertNumUnrevoked(final RaceLog raceLog, int expectedNum) {
         raceLog.lockForRead();
         try {
             assertEquals(expectedNum, Util.size(raceLog.getUnrevokedEvents()));
@@ -96,7 +96,7 @@ public class RaceLogRevocationTest {
         }
     }
     
-    private static void assertNumAll(RaceLog raceLog, int expectedNum) {
+    private static void assertNumAll(final RaceLog raceLog, int expectedNum) {
         raceLog.lockForRead();
         try {
             assertEquals(expectedNum, Util.size(raceLog.getRawFixes()));

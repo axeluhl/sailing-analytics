@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -107,7 +108,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
             StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
+        super(new RegattaDTO("", ScoringSchemeType.LOW_POINT), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
                 stringMessages.addRegatta(), stringMessages.ok(), sailingService, stringMessages,
                 new RegattaParameterValidator(stringMessages, existingRegattas), callback);
         buoyZoneRadiusInHullLengthsDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
@@ -151,8 +152,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             if (series.getName().equals(Series.DEFAULT_NAME)) {
                 List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                 for (int i = 1; i <= 3; i++) {
-                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), dto.getName());
-                    raceColumnDTO.setName("R"+i);
+                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO("R"+i, series.getName(), dto.getName());
                     races.add(raceColumnDTO);
                 }
                 series.setRaceColumns(races);

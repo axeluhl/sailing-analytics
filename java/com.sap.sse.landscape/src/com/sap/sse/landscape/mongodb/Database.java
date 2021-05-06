@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.mongodb.client.MongoDatabase;
 import com.sap.sse.common.Named;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.UserDataProvider;
 
@@ -22,6 +23,13 @@ public interface Database extends UserDataProvider, Named {
     
     MongoEndpoint getEndpoint();
     
+    /**
+     * See {@link MongoEndpoint#getMD5Hash(String)}
+     */
+    default String getMD5Hash() throws URISyntaxException {
+        return getEndpoint().getMD5Hash(getMongoDatabase());
+    }
+    
     default MongoDatabase getMongoDatabase() throws URISyntaxException {
         return getEndpoint().getMongoDatabase(getName());
     }
@@ -30,10 +38,15 @@ public interface Database extends UserDataProvider, Named {
     default Map<ProcessConfigurationVariable, String> getUserData() {
         final Map<ProcessConfigurationVariable, String> result = new HashMap<>();
         try {
-            result.put(ProcessConfigurationVariable.MONGODB_URI, getConnectionURI().toString());
+            result.put(DefaultProcessConfigurationVariables.MONGODB_URI, getConnectionURI().toString());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         return result;
     }
+
+    /**
+     * Drops the database.
+     */
+    void drop() throws URISyntaxException;
 }

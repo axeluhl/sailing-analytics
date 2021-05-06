@@ -72,12 +72,8 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
-import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -90,7 +86,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
-import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -112,8 +107,8 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
-        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>, RegattasDisplayer,
-        TrackedRaceChangedListener, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
+        implements SelectedLeaderboardProvider<StrippedLeaderboardDTOWithSecurity>,
+        TrackedRaceChangedListener {
     private static final Logger logger = Logger.getLogger(LeaderboardConfigPanel.class.getName());
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
@@ -123,7 +118,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private Button addRaceColumnsButton;
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
-
+    
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -136,12 +131,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         SafeHtml cell(SafeUri url, String displayName);
     }
 
-    public LeaderboardConfigPanel(final SailingServiceWriteAsync sailingService, final UserService userService,
-            RegattaRefresher regattaRefresher, final ErrorReporter errorReporter, StringMessages theStringConstants,
-            final boolean showRaceDetails,
-            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher) {
-        super(sailingService, userService, regattaRefresher, leaderboardsRefresher, errorReporter, theStringConstants,
-                /* multi-selection */ false);
+    public LeaderboardConfigPanel(final Presenter presenter, StringMessages theStringConstants, final boolean showRaceDetails) {
+        super(presenter, theStringConstants, /* multi-selection */ false);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }
@@ -1010,8 +1001,10 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     private void addLeaderboard(StrippedLeaderboardDTOWithSecurity result) {
         filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
+        presenter.getLeaderboardsRefresher().add(result);
         leaderboardSelectionModel.clear();
         leaderboardSelectionModel.setSelected(result, true);
+        loadAndRefreshLeaderboard(result);
     }
 
     private void updateLeaderboard(final String leaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
@@ -1077,9 +1070,9 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 public void onSuccess(Void result) {
                     for (StrippedLeaderboardDTOWithSecurity leaderboard : leaderboards) {
                         removeLeaderboardFromTable(leaderboard);
+                        getLeaderboardsRefresher().remove(leaderboard);
                     }
-                    getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList,
-                            LeaderboardConfigPanel.this);
+                    getLeaderboardsRefresher().callAllFill();
                 }
             });
         }
@@ -1097,8 +1090,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                     @Override
                     public void onSuccess(Void result) {
                         removeLeaderboardFromTable(leaderBoard);
-                        getLeaderboardsRefresher().updateLeaderboards(availableLeaderboardList,
-                                LeaderboardConfigPanel.this);
+                        getLeaderboardsRefresher().remove(leaderBoard);
+                        getLeaderboardsRefresher().callAllFill();
                     }
                 }));
     }
@@ -1157,4 +1150,5 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         String link = EntryPointLinkFactory.createPairingListLink(result);
         Window.open(link, "", "");
     }
+    
 }

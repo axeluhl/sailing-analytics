@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,16 +44,15 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     
     private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
-    public DeviceConfigurationPanel(SailingServiceWriteAsync sailingServiceWrite, UserService userService,
-            StringMessages stringMessages, ErrorReporter reporter) {
-        this.sailingServiceWrite = sailingServiceWrite;
-        this.userService = userService;
+    public DeviceConfigurationPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = reporter;
+        this.errorReporter = presenter.getErrorReporter();
         listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages,
                 userService);
         refreshableMultiSelectionModel = listComposite.getSelectionModel();
-        setupUi();
+        detailComposite = setupUi(presenter);
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -72,12 +72,12 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         return userService;
     }
 
-    private void setupUi() {
+    private DeviceConfigurationDetailComposite setupUi(Presenter presenter) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         setupControlPanel(mainPanel);
-        setupConfigurationPanels(mainPanel);
+        return setupConfigurationPanels(mainPanel, presenter);
     }
 
     private void setupControlPanel(VerticalPanel mainPanel) {
@@ -108,15 +108,16 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         mainPanel.add(deviceManagementControlPanel);
     }
 
-    private void setupConfigurationPanels(VerticalPanel mainPanel) {
+    private DeviceConfigurationDetailComposite setupConfigurationPanels(VerticalPanel mainPanel, Presenter presenter) {
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
-        detailComposite = new DeviceConfigurationDetailComposite(sailingServiceWrite, getUserService(), errorReporter, stringMessages, this);
-        detailComposite.setVisible(false);
-        grid.setWidget(0, 1, detailComposite);
+        DeviceConfigurationDetailComposite myDetailComposite = new DeviceConfigurationDetailComposite(presenter, stringMessages, this);
+        myDetailComposite.setVisible(false);
+        grid.setWidget(0, 1, myDetailComposite);
+        return myDetailComposite;
     }
     
     private void createConfiguration() {
@@ -177,7 +178,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     }
     
     private void removeConfiguration() {
-        detailComposite.setConfiguration(null);
+        detailComposite.setConfiguration(/* configuration to display */ null);
         for (DeviceConfigurationDTO config : refreshableMultiSelectionModel.getSelectedSet()) {
             sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                 @Override

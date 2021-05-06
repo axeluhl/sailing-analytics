@@ -12,7 +12,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.autoplay.client.places.autoplaystart.AutoPlayStartPlace;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -50,7 +49,6 @@ public abstract class AutoPlayClientFactoryBase
                 HEADER_FORWARD_TO_REPLICA);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaServiceWrite, mediaServiceRemotePath,
                 HEADER_FORWARD_TO_MASTER);
-        getUserService().addKnownHasPermissions(SecuredDomainType.getAllInstances());
     }
 
     @Override

@@ -32,8 +32,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RaceWindJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -49,6 +47,9 @@ import com.sap.sailing.windestimation.data.transformer.CompetitorTrackTransforme
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToLabelledManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForDataAnalysisTransformer;
 import com.sap.sailing.windestimation.util.LoggingUtil;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 /**
  * 
@@ -102,6 +103,7 @@ public class ManeuverAndWindImporter {
 
     public HttpClient createNewHttpClient() {
         CloseableHttpClient client = HttpClientBuilder.create()
+                .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(CONNECTION_TIMEOUT_MILLIS)
                         .setConnectionRequestTimeout(CONNECTION_TIMEOUT_MILLIS)

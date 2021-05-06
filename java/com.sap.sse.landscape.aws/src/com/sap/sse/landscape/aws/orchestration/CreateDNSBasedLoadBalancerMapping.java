@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.orchestration;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,12 +13,9 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
-import com.sap.sse.landscape.application.ApplicationMasterProcess;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-import com.sap.sse.landscape.application.ApplicationReplicaProcess;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
-import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.orchestration.Procedure;
 
@@ -27,39 +25,51 @@ import com.sap.sse.landscape.orchestration.Procedure;
  * Furthermore, this procedure has logic to provision a new ALB in case no other DNS-mapped ALB has sufficient rule capacity
  * (see {@link #MAX_RULES_PER_ALB}) to accommodate the {@link #NUMBER_OF_RULES_PER_REPLICA_SET} additional rules required.
  * The naming scheme for those DNS-mapped ALBs is expected to follow the pattern {@link #DNS_MAPPED_ALB_NAME_PREFIX}{@code [0-9]*} which
- * means that names such as "DNSMapped-4" and "DNSMapped-7" are valid names.
+ * means that names such as "DNSMapped-4" and "DNSMapped-7" are valid names.<p>
+ * 
+ * By default, this procedure will not force a DNS update but fail with an {@link IllegalStateException} in case a competing
+ * DNS record is already set, pointing to a different load balancer or some other value. Only when using {@link Builder#forceDNSUpdate(boolean)},
+ * forcing the DNS record to be changed can be requested. Use with caution.
  * 
  * @author Axel Uhl (D043530)
  */
 public class CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-HostT extends AwsInstance<ShardingKey, MetricsT>>
-extends CreateLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+extends CreateLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>
+implements Procedure<ShardingKey> {
     private static final String DNS_MAPPED_ALB_NAME_PREFIX = "DNSMapped-";
     private static final Pattern ALB_NAME_PATTERN = Pattern.compile(DNS_MAPPED_ALB_NAME_PREFIX+"(.*)$");
     
-    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
-    T extends CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    public static interface Builder<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>,
+    T extends CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends CreateLoadBalancerMapping.Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT> {
+        /**
+         * @param forceDNSUpdate
+         *            when {@code true}, the DNS record will be set to the new value even if an equal-named record for
+         *            that name already exists; use with caution!
+         */
+        BuilderT forceDNSUpdate(boolean forceDNSUpdate);
     }
     
-    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>,
+    protected static class BuilderImpl<BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>,
     ShardingKey, MetricsT extends ApplicationProcessMetrics,
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    HostT extends AwsInstance<ShardingKey, MetricsT>>
-    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>
-    implements Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    extends CreateLoadBalancerMapping.BuilderImpl<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>
+    implements Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> {
         private static final Logger logger = Logger.getLogger(BuilderImpl.class.getName());
+        private boolean forceDNSUpdate;
         
         @Override
-        public ApplicationLoadBalancer<ShardingKey, MetricsT> getLoadBalancerUsed() throws InterruptedException {
-            final ApplicationLoadBalancer<ShardingKey, MetricsT> result;
+        public BuilderT forceDNSUpdate(boolean forceDNSUpdate) {
+            this.forceDNSUpdate = forceDNSUpdate;
+            return self();
+        }
+
+        @Override
+        public ApplicationLoadBalancer<ShardingKey> getLoadBalancerUsed() throws InterruptedException, ExecutionException {
+            final ApplicationLoadBalancer<ShardingKey> result;
             if (super.getLoadBalancerUsed() != null) {
                 result = super.getLoadBalancerUsed();
             } else {
@@ -71,13 +81,12 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         /**
          * Finds or creates a {@link ApplicationLoadBalander} load balancer in the {@code region} that is DNS-mapped and still has
          * at least the length of {@link #createRules()} additional rules available.
-         * @throws InterruptedException 
          */
-        private ApplicationLoadBalancer<ShardingKey, MetricsT> getOrCreateDNSMappedLoadBalancer(
-                AwsLandscape<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> landscape, Region region) throws InterruptedException {
-            ApplicationLoadBalancer<ShardingKey, MetricsT> result = null;
+        private ApplicationLoadBalancer<ShardingKey> getOrCreateDNSMappedLoadBalancer(
+                AwsLandscape<ShardingKey> landscape, Region region) throws InterruptedException, ExecutionException {
+            ApplicationLoadBalancer<ShardingKey> result = null;
             final Set<String> loadBalancerNames = new HashSet<>();
-            for (final ApplicationLoadBalancer<ShardingKey, MetricsT> loadBalancer : landscape.getLoadBalancers(region)) {
+            for (final ApplicationLoadBalancer<ShardingKey> loadBalancer : landscape.getLoadBalancers(region)) {
                 if (ALB_NAME_PATTERN.matcher(loadBalancer.getName()).matches()) {
                     loadBalancerNames.add(loadBalancer.getName());
                     if (Util.size(loadBalancer.getRules()) <= MAX_RULES_PER_ALB - NUMBER_OF_RULES_PER_REPLICA_SET) {
@@ -111,21 +120,27 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
         }
 
         @Override
-        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> build() throws JSchException, IOException, InterruptedException, SftpException {
-            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>(this);
+        public CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT> build() throws Exception {
+            return new CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>(this);
+        }
+
+        boolean isForceDNSUpdate() {
+            return forceDNSUpdate;
         }
     }
     
     public static <ShardingKey, MetricsT extends ApplicationProcessMetrics, 
-    MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-    ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>, HostT extends AwsInstance<ShardingKey, MetricsT>,
-    BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>>
-    Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT>, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder() {
+    ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>,
+    BuilderT extends Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>>
+    Builder<BuilderT, CreateDNSBasedLoadBalancerMapping<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {
         return new BuilderImpl<>();
     }
 
-    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT, HostT> builder) throws JSchException, IOException, InterruptedException, SftpException {
+    private final boolean forceDNSUpdate;
+
+    protected CreateDNSBasedLoadBalancerMapping(BuilderImpl<?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
+        this.forceDNSUpdate = builder.isForceDNSUpdate();
     }
 
     @Override
@@ -136,8 +151,8 @@ implements Procedure<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> {
 
     private void createRoute53Mapping() {
         final String hostname = this.getHostName();
-        final ApplicationLoadBalancer<ShardingKey, MetricsT> alb = getLoadBalancerUsed();
+        final ApplicationLoadBalancer<ShardingKey> alb = getLoadBalancerUsed();
         getLandscape().setDNSRecordToApplicationLoadBalancer(getLandscape().getDNSHostedZoneId(
-                getHostedZoneName(hostname)), hostname, alb);
+                AwsLandscape.getHostedZoneName(hostname)), hostname, alb, forceDNSUpdate);
     }
 }

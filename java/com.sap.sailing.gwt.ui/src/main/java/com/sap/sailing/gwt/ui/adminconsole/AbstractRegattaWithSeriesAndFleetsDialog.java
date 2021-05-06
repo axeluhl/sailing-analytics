@@ -346,11 +346,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         return courseAreaSelection.getSelectedCourseAreas();
     }
     
-    public RegattaDTO getRegattaDTO() {
-        RegattaDTO result = new RegattaDTO();
+    public RegattaDTO getRegattaDTO(String name) {
+        RegattaDTO result = new RegattaDTO(name, getSelectedScoringSchemeType());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
-        result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
         result.autoRestartTrackingUponCompetitorSetChange = autoRestartTrackingUponCompetitorSetChangeCheckBox.getValue();

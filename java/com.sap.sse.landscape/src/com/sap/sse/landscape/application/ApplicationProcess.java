@@ -1,30 +1,47 @@
 package com.sap.sse.landscape.application;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.json.simple.parser.ParseException;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.Host;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Process;
+import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.mongodb.Database;
+import com.sap.sse.replication.ReplicationServletActions;
+import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public interface ApplicationProcess<ShardingKey, MetricsT extends ApplicationProcessMetrics,
-MasterProcessT extends ApplicationMasterProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>,
-ReplicaProcessT extends ApplicationReplicaProcess<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT>>
+ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 extends Process<RotatingFileBasedLog, MetricsT> {
-    /**
-     * @return the replica set to which this process belongs<p>
-     * 
-     *         TODO define this more precisely; an instance can be replica with regards to the SecurityService and
-     *         SharedSailingData replicables and at the same time be master for RacingEventService and all the other
-     *         replicables. What then is "the" replica set of the process?
-     */
-    ApplicationReplicaSet<ShardingKey, MetricsT, MasterProcessT, ReplicaProcessT> getReplicaSet();
+    static Logger logger = Logger.getLogger(ApplicationProcess.class.getName());
+    static String REPLICATION_STATUS_POST_URL_PATH_AND_QUERY = ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH+"?"+ReplicationServletActions.ACTION_PARAMETER_NAME+"="+
+                            ReplicationServletActions.Action.STATUS.name();
+    static String STOP_REPLICATION_POST_URL_PATH_AND_QUERY = ReplicationServletActions.REPLICATION_SERVLET_BASE_PATH+"?"+ReplicationServletActions.ACTION_PARAMETER_NAME+"="+
+                            ReplicationServletActions.Action.STOP_REPLICATING.name();
+    
+    @FunctionalInterface
+    public static interface ApplicationProcessFactory<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> {
+        ProcessT createApplicationProcess(String instanceId, AvailabilityZone availabilityZone,
+                Landscape<ShardingKey> landscape, ProcessFactory<ShardingKey, MetricsT, ProcessT, Host> processFactoryFromHostAndServerDirectory);
+    }
     
     /**
      * @param releaseRepository
@@ -32,24 +49,23 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      *            artifacts, including its release notes
      * @return the release that this process is currently running
      */
-    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    
     
     /**
      * Tries to shut down an OSGi application server process cleanly by sending the "shutdown" OSGi command to this
      * process's OSGi console using the {@link #getTelnetPortToOSGiConsole() telnet port}. If the instance hasn't
-     * terminated after {@code timeout} after having received this shutdown request, if {@code forceAfterTimeout} is
-     * {@code true}, a hard kill command will be used terminate the virtual machine and {@code false} is returned;
-     * otherwise ({@code forceAfterTimeout==false}), {@code false} will be returned after the timeout period.
+     * terminated after some time, a hard kill command will be used terminate the virtual machine. All this is
+     * implemented in the {@code stop} script in the {@link #getServerDirectory() server's directory}.<p>
      * 
-     * @return {@code true} if the clean shutdown has succeeded, {@code false} otherwise. Note that therefore the result
-     *         does not indicate whether the process was finally gone; with {@code forceAfterTimeout==true} callers can
-     *         assume that no matter what the result of this call, the VM will finally be gone, but with this logic it's
-     *         possible even with a hard shutdown to figure out that a hard shutdown was actually required and the clean
-     *         shutdown didn't work.
+     * The server directory and the {@link #getHost()} are left untouched by this. In particular, a subsequent execution
+     * of the {@code start} script in the {@link #getServerDirectory() server directory} can be expected to start the
+     * application process again.
      */
-    boolean tryCleanShutdown(Duration timeout, boolean forceAfterTimeout);
+    void tryShutdown(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
+            byte[] privateKeyEncryptionPassphrase) throws IOException, InterruptedException, JSchException, Exception;
     
-    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout) throws NumberFormatException, JSchException, IOException, SftpException, InterruptedException;
+    int getTelnetPortToOSGiConsole(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * @return the directory as an absolute path that can be used, e.g., in a {@link ChannelSftp} to change directory to
@@ -64,9 +80,9 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * the {@link Database}, at least when this is a master node, and the name of the RabbitMQ fan-out exchange used
      * for replication.
      */
-    String getServerName(Optional<Duration> optionalTimeout) throws JSchException, IOException, InterruptedException, SftpException;
+    String getServerName(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    String getEnvSh(Optional<Duration> optionalTimeout) throws JSchException, IOException, SftpException;
+    String getEnvSh(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
      * The URL path (everything following the hostname and starting with "/" but without any fragment) that can be
@@ -75,4 +91,73 @@ extends Process<RotatingFileBasedLog, MetricsT> {
      * else in case it's not.
      */
     String getHealthCheckPath();
+
+    /**
+     * For this application process finds out whether it is replicating from another application process which then is
+     * the master. Note that the master server name may differ from this application process's
+     * {@link #getServerName(Optional, Optional, byte[]) server name}, e.g., if this application process is a master
+     * with regards to the actual application content, but a replica with regards to, say, security.
+     */
+    String getMasterServerName(Optional<Duration> optionalTimeout) throws Exception;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable cannot be found
+     * in the evaluated {@code env.sh} file.
+     * @throws Exception 
+     */
+    String getEnvShValueFor(ProcessConfigurationVariable variable, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
+
+    /**
+     * Obtains the last definition of the process configuration variable specified, or {@code null} if that variable isn't set
+     * by evaluating the {@code env.sh} file on the {@link #getHost() host}.
+     */
+    String getEnvShValueFor(String variableName, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+            throws Exception;
+
+    /**
+     * Tells whether this process is ready to accept requests. Use this for a health check in a target group
+     * that decides whether traffic will be sent to this process. {@link #isReady(Optional<Duration>)} implies {@link #isAlive(Optional)}.
+     */
+    default boolean isReady(Optional<Duration> optionalTimeout) throws IOException {
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) HttpUrlConnectionHelper.redirectConnection(getHealthCheckUrl(optionalTimeout));
+            return connection.getResponseCode() == 200;
+        } catch (Exception e) {
+            logger.info("Ready-check failed for "+this+": "+e.getMessage());
+            return false;
+        }
+    }
+
+    default URL getHealthCheckUrl(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return getUrl(getHealthCheckPath(), optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return getUrl(REPLICATION_STATUS_POST_URL_PATH_AND_QUERY, optionalTimeout);
+    }
+    
+    default URL getReplicationStatusPostUrlAndQuery(String hostname, int port) throws MalformedURLException {
+        return new URL(port==443 ? "https" : "http", hostname, port, REPLICATION_STATUS_POST_URL_PATH_AND_QUERY);
+    }
+    
+    /**
+     * Uses the {@code /replication} end point on the replica to request stopping the replication from master for
+     * all replicables running in this process. To authenticate the request, the {@code bearerToken} is used in
+     * the {@code Authorization:} header.
+     */
+    void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws MalformedURLException, IOException, TimeoutException, Exception;
+    
+    default URL getUrl(String pathAndQuery, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        final int port = getPort();
+        return new URL(port==443 ? "https" : "http", getHost().getPublicAddress(optionalTimeout).getCanonicalHostName(), port, pathAndQuery);
+    }
+    
+    default boolean waitUntilReady(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        return Wait.wait(()->isReady(optionalTimeout), optionalTimeout, Duration.ONE_SECOND.times(5), Level.INFO, ""+this+" not yet ready");
+    }
+
+    Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    TimePoint getStartTimePoint(Optional<Duration> optionalTimeout) throws IOException, ParseException, java.text.ParseException, TimeoutException, Exception;
 }

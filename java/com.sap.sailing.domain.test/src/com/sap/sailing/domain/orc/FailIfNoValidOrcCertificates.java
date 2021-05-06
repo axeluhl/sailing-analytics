@@ -7,10 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /***
- * A IgnoreInvalidOrcCerticates is a annotation which is used to identify whether we need to execute the
- * {@link FailIfNoValidOrcCertificateRule} for that particular test case. i.e. you can find
- * the usage of {@link FailIfNoValidOrcCertificates} in
- * {@link TestORCPublicCertificateDatabase} class.
+ * A {@link FailIfNoValidOrcCertificates} is an annotation which is used to identify whether we need to execute the
+ * {@link FailIfNoValidOrcCertificateRule} for that particular test case. i.e. you can find the usage of
+ * {@link FailIfNoValidOrcCertificates} in {@link TestORCPublicCertificateDatabase} class.
  * 
  * @author Usman Ali
  *

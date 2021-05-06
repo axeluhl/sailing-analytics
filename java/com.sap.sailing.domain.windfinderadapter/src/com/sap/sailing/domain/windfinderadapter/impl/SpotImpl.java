@@ -27,6 +27,7 @@ import com.sap.sailing.domain.windfinder.WindFinderSpotListener;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class SpotImpl extends SpotDTO implements Spot {
@@ -116,7 +117,8 @@ public class SpotImpl extends SpotDTO implements Spot {
     @Override
     public Iterable<Wind> getAllMeasurements()
             throws IOException, MalformedURLException, ParseException, org.json.simple.parser.ParseException {
-        final InputStream response = (InputStream) getMeasurementsUrl().getContent();
+        final InputStream response = (InputStream) HttpUrlConnectionHelper.redirectConnection(
+                getMeasurementsUrl()).getContent();
         final Iterable<Wind> measurements = parser.parse(getPosition(), (JSONArray) new JSONParser().parse(new InputStreamReader(response)));
         return measurements;
     }

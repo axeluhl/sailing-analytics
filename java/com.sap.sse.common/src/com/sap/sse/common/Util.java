@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +27,6 @@ import com.sap.sse.common.util.NaturalComparator;
 
 
 public class Util {
-
     public static class Pair<A, B> implements Serializable {
         private static final long serialVersionUID = -7631774746419135931L;
     
@@ -312,6 +312,10 @@ public class Util {
         }
     }
     
+    /**
+     * @return the first element of the {@code iterable}, or {@code null} if the {@code iterable}
+     *         {@link #isEmpty(Iterable) is empty}.
+     */
     public static <T> T first(Iterable<T> iterable) {
         final Iterator<T> iter = iterable.iterator();
         final T result;
@@ -335,24 +339,6 @@ public class Util {
         return result;
     }
     
-    public static <T> List<T> createList(Iterable<T> iterable) {
-        List<T> list = new ArrayList<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            list.add(iterator.next());
-        }
-        return list;
-    }
-    
-    public static <T> Set<T> createSet(Iterable<T> iterable) {
-        Set<T> set = new HashSet<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            set.add(iterator.next());
-        }
-        return set;
-    }
-    
     public static interface Mapper<S, T> { T map(S s); }
     public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
         return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
@@ -370,7 +356,7 @@ public class Util {
     }
 
     public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
-        return StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate)::iterator;
+        return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
     }
     
     /**
@@ -771,8 +757,13 @@ public class Util {
     }
 
     public static <T> List<T> asList(Iterable<T> iterable) {
-        final List<T> list = new ArrayList<>();
-        addAll(iterable, list);
+        final List<T> list;
+        if (iterable instanceof List<?>) {
+            list = (List<T>) iterable;
+        } else {
+            list = new ArrayList<>();
+            addAll(iterable, list);
+        }
         return list;
     }
     
@@ -810,7 +801,7 @@ public class Util {
     
     /**
      * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
-     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * Collections of the resulting Map are created using the given {@link Supplier} instance.
      * <br>
      * Can be replaced with Java 8 Stream API in the future.
      * 
@@ -845,20 +836,26 @@ public class Util {
     }
 
     /**
-     * Checks if the given map is null, and if, returns an empty map.
+     * Checks if the given map is null, and if so, returns an empty map.
      */
     public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        final Map<K, V> result;
         if (map == null) {
-            return Collections.emptyMap();
+            result = Collections.emptyMap();
+        } else {
+            result = map;
         }
-        return map;
+        return result;
     }
 
     public static String toStringOrNull(Object toStringOrNull) {
+        final String result;
         if (toStringOrNull == null) {
-            return null;
+            result = null;
+        } else {
+            result = toStringOrNull.toString();
         }
-        return toStringOrNull.toString();
+        return result;
     }
     
     public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {
@@ -993,5 +990,38 @@ public class Util {
      */
     public static <T> boolean setEquals(Iterable<T> a, Iterable<T> b) {
         return asSet(a).equals(asSet(b));
+    }
+    
+    public static interface MapBuilder<K, V> {
+        static <K, V> MapBuilder<K, V> of(Map<K, V> other) { return new MapBuilderImpl<>(other); }
+        MapBuilder<K, V> put(K key, V value);
+        Map<K, V> build();
+    }
+    
+    private static class MapBuilderImpl<K, V> implements MapBuilder<K, V> {
+        private final Map<K, V> result;
+        
+        public MapBuilderImpl() {
+            result = new HashMap<>();
+        }
+        
+        public MapBuilderImpl(Map<K, V> other) {
+            result = new HashMap<>(other);
+        }
+        
+        @Override
+        public Map<K, V> build() {
+            return result;
+        }
+
+        @Override
+        public MapBuilder<K, V> put(K key, V value) {
+            result.put(key, value);
+            return this;
+        }
+    }
+    
+    public static <K, V> MapBuilder<K, V> mapBuilder() {
+        return new MapBuilderImpl<>();
     }
 }

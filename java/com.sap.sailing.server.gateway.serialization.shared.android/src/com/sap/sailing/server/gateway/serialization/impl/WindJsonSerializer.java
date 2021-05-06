@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class WindJsonSerializer implements JsonSerializer<Wind> {
     public static final String FIELD_POSITION = "position";
