@@ -657,5 +657,4 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<RaceCourseDTO> callback);
     
     void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
-
 }

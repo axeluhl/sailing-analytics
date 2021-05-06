@@ -33,7 +33,6 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
     @Override
     protected void currentCharacterCount(final IntConsumer callback) {
         sailingService.getAdminConsoleChangeLogSize(new ServiceCallback<Integer>() {
-
             @Override
             public void onSuccess(final Integer result) {
                 callback.accept(result.intValue());
@@ -66,7 +65,6 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
         final DataEntryDialog<Void> dialog = new DataEntryDialog<Void>(StringMessages.INSTANCE.whatsNewDialogTitle(),
                 StringMessages.INSTANCE.whatsNewDialogMessage(), StringMessages.INSTANCE.showChangelog(),
                 StringMessages.INSTANCE.cancel(), null, dialogCallback) {
-
             @Override
             protected Void getResult() {
                 return null;
@@ -81,5 +79,4 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
     protected void openReleaseNotes() {
         Window.Location.assign(RELEASE_NOTES_PATH);
     }
-
 }

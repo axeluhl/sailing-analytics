@@ -579,5 +579,4 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
             throws UnauthorizedException, NotFoundException;
     
     Integer getAdminConsoleChangeLogSize();
-
 }

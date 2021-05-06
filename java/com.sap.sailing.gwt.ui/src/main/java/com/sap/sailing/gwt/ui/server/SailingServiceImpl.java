@@ -6308,6 +6308,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return result;
     }
     
+    @Override
     public Integer getAdminConsoleChangeLogSize() {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final URIBuilder url = new URIBuilder(getRequestBaseURL().toURI()).setPath("release_notes_admin.html");
@@ -6319,5 +6320,4 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
 
     }
-
 }
