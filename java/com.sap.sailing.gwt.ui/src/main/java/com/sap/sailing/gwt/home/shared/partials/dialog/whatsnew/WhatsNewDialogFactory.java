@@ -20,7 +20,7 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
 
     /** Automatically shows the whats-new dialog after login, if necessary. */
     public static void register(final UserService userService, final PlaceController placeController) {
-        register(new WhatsNewDialogFactory(userService, placeController));
+        new WhatsNewDialogFactory(userService, placeController).register();
     }
 
     private static boolean isUserNotified = false;
