@@ -42,6 +42,8 @@ public class TimeSlider extends SliderBar {
      */
     private List<Element> overLayElements = new ArrayList<Element>();
 
+    private NormalizedInterval normalizedTimeTickInterval;
+
     public TimeSlider() {
         calculatedTimeTicks = new ArrayList<TickPosition>();
         overlays = new ArrayList<>();
@@ -53,7 +55,7 @@ public class TimeSlider extends SliderBar {
             calculatedTimeTicks.clear();
             long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
             long tickInterval = minMaxDiffInMs / TICKCOUNT; 
-            NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+            normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
             calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
         }
     }
@@ -197,18 +199,17 @@ public class TimeSlider extends SliderBar {
     protected void drawKnob() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
-        
-        Element knobElement = knobImage.getElement();
+        final Element knobElement = knobImage.getElement();
         if (curValue != null && minValue != null && maxValue != null && curValue >= minValue && curValue <= maxValue) {
             // Move the knob to the correct position
-            int lineWidth = lineElement.getOffsetWidth();
-            int knobWidth = knobElement.getOffsetWidth();
+            final int lineWidth = lineElement.getOffsetWidth();
+            final int knobWidth = knobElement.getOffsetWidth();
             int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
             knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
-            
             knobElement.getStyle().setLeft(knobLeftOffset, Unit.PX);
             knobElement.getStyle().setVisibility(Visibility.VISIBLE);
             knobElement.getStyle().setProperty("display", "");
+            knobElement.setTitle(formatTickLabel(curValue, null));
         } else {
             knobElement.getStyle().setDisplay(Display.NONE);
             knobElement.getStyle().setVisibility(Visibility.HIDDEN);
