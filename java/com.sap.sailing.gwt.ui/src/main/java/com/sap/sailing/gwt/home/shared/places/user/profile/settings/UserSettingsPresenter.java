@@ -102,7 +102,7 @@ public class UserSettingsPresenter<C extends ClientFactoryWithDispatch & ErrorAn
         clientFactory.getUserService().unsetPreference(storageKey);
         clientFactory.getUserService().getStorage().removeItem(storageKey, /* callback */ null);
         currentlyShownEntries.remove(entry);
-        view.setEntries(currentlyShownEntries);
+        updateData();
     }
 
     @Override
