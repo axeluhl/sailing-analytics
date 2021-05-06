@@ -57,6 +57,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
 /**
  * A panel for managing an SAP Sailing Analytics landscape in the AWS cloud. The main widgets offered will address the
@@ -234,7 +235,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToArchive));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_UPGRADE,
                 applicationReplicaSetToUpgrade -> upgradeApplicationReplicaSet(stringMessages,
-                        regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetToUpgrade));
+                        regionsTable.getSelectionModel().getSelectedObject(), Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_DEFINE_LANDING_PAGE,
                 applicationReplicaSetForWhichToDefineLandingPage -> defineLandingPage(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetForWhichToDefineLandingPage));
@@ -255,6 +256,11 @@ public class LandscapeManagementPanel extends SimplePanel {
         final Button addApplicationReplicaSetButton = new Button(stringMessages.add());
         applicationReplicaSetsButtonPanel.add(addApplicationReplicaSetButton);
         addApplicationReplicaSetButton.addClickHandler(e->createApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
+        final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
+                stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
+                e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
+                        applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
         applicationReplicaSetsBusy = new SimpleBusyIndicator();
@@ -514,7 +520,7 @@ public class LandscapeManagementPanel extends SimplePanel {
      * This won't happen automatically by this procedure.
      */
     private void upgradeApplicationReplicaSet(StringMessages stringMessages, String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToUpgrade) {
+            Iterable<SailingApplicationReplicaSetDTO<String>> replicaSets) {
         landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -528,33 +534,35 @@ public class LandscapeManagementPanel extends SimplePanel {
                             @Override
                             public void ok(UpgradeApplicationReplicaSetInstructions upgradeInstructions) {
                                 applicationReplicaSetsBusy.setBusy(true);
-                                landscapeManagementService.upgradeApplicationReplicaSet(regionId, applicationReplicaSetToUpgrade,
-                                        upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
-                                        sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
-                                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
-                                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                        upgradeInstructions.getReplicationBearerToken(),
-                                        new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                applicationReplicaSetsBusy.setBusy(false);
-                                                errorReporter.reportError(caught.getMessage());
-                                            }
-
-                                            @Override
-                                            public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
-                                                applicationReplicaSetsBusy.setBusy(false);
-                                                if (result != null) {
-                                                    Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
-                                                                    result.getName(), result.getVersion()), NotificationType.SUCCESS);
-                                                    applicationReplicaSetsTable.getFilterPanel().remove(applicationReplicaSetToUpgrade);
-                                                    applicationReplicaSetsTable.getFilterPanel().add(result);
-                                                } else {
-                                                    Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(applicationReplicaSetToUpgrade.getName()),
-                                                            NotificationType.ERROR);
+                                for (final SailingApplicationReplicaSetDTO<String> replicaSet : replicaSets) {
+                                    landscapeManagementService.upgradeApplicationReplicaSet(regionId, replicaSet,
+                                            upgradeInstructions.getReleaseNameOrNullForLatestMaster(),
+                                            sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                                    ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                            upgradeInstructions.getReplicationBearerToken(),
+                                            new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    applicationReplicaSetsBusy.setBusy(false);
+                                                    errorReporter.reportError(caught.getMessage());
                                                 }
-                                            }
-                                        });
+    
+                                                @Override
+                                                public void onSuccess(SailingApplicationReplicaSetDTO<String> result) {
+                                                    applicationReplicaSetsBusy.setBusy(false);
+                                                    if (result != null) {
+                                                        Notification.notify(stringMessages.successfullyUpgradedApplicationReplicaSet(
+                                                                        result.getName(), result.getVersion()), NotificationType.SUCCESS);
+                                                        applicationReplicaSetsTable.getFilterPanel().remove(replicaSet);
+                                                        applicationReplicaSetsTable.getFilterPanel().add(result);
+                                                    } else {
+                                                        Notification.notify(stringMessages.upgradingApplicationReplicaSetFailed(replicaSet.getName()),
+                                                                NotificationType.ERROR);
+                                                    }
+                                                }
+                                            });
+                                }
                             }
 
                             @Override

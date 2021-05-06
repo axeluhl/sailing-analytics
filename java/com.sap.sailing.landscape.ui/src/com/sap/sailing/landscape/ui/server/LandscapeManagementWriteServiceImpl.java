@@ -545,7 +545,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final com.sap.sailing.landscape.procedures.StartSailingAnalyticsMasterHost.Builder<?, String> masterHostBuilder = StartSailingAnalyticsMasterHost.masterHostBuilder(masterConfigurationBuilder);
         final AwsRegion region = new AwsRegion(regionId);
         establishServerGroupAndTryToMakeCurrentUserItsOwnerAndMember(name);
-        final String bearerTokenUsedByMaster = replicationBearerToken == null ? getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString()) : replicationBearerToken;
+        final String bearerTokenUsedByMaster = Util.hasLength(replicationBearerToken) ? replicationBearerToken : getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final String bearerTokenUsedByReplicas = bearerTokenUsedByMaster; // TODO how about using an explicit replicationBearerToken only for master and prefer the current user's token for replicas? Doesn't work, though, for testing with disconnected caller security
         final Release release = getRelease(releaseNameOrNullForLatestMaster);
         masterConfigurationBuilder
@@ -821,7 +821,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final AwsRegion region = new AwsRegion(regionId);
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet =
                 convertFromApplicationReplicaSetDTO(region, applicationReplicaSetToUpgrade);
-        final String bearerToken = replicationBearerToken != null ? replicationBearerToken :
+        final String bearerToken = Util.hasLength(replicationBearerToken) ? replicationBearerToken :
             getSecurityService().getOrCreateAccessToken(SessionUtils.getPrincipal().toString());
         final SailingAnalyticsProcess<String> additionalReplicaStarted;
         final int oldAutoScalingGroupMinSize;
