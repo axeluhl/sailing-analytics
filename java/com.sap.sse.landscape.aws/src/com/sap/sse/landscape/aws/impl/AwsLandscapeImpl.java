@@ -1529,16 +1529,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * so we'll throttle our requests a bit here; usually, 100 requests per seconds and region with a "bucket refill" of 20/s applies
      * as a limit, so if we throttle down to 20/s we should be fine for most cases.
      */
+    private final static Object sequencer = new Object();
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
-        try {
-            Thread.sleep(1000/20);
-        } catch (InterruptedException e1) {
-            logger.log(Level.WARNING, "Interrupted", e1);
+        synchronized (sequencer) { // ensure across instances to throttle access accordingly
+            try {
+                Thread.sleep(1000/20);
+            } catch (InterruptedException e1) {
+                logger.log(Level.WARNING, "Interrupted", e1);
+            }
+            final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
+                    getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
+            return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->{
+                final Iterable<TargetHealthDescription> result;
+                if (e != null) {
+                    logger.log(Level.WARNING, "Exception trying to obtain health status of target group "+targetGroup, e);
+                    result = Collections.emptySet();
+                } else {
+                    result = targetHealthResponse.targetHealthDescriptions();
+                }
+                return result;
+            });
         }
-        final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
-                getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
-        return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());
     }
     
     @Override
