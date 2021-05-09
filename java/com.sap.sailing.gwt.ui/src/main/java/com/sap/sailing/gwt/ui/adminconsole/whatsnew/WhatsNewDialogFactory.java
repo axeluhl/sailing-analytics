@@ -17,7 +17,7 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
 
     /** Automatically shows the whats-new dialog after login, if necessary. */
     public static void register(final UserService userService, final SailingServiceAsync sailingService) {
-        register(new WhatsNewDialogFactory(userService, sailingService));
+        new WhatsNewDialogFactory(userService, sailingService).register();
     }
 
     private static final String RELEASE_NOTES_PATH = "/release_notes_admin.html";
@@ -77,6 +77,6 @@ public final class WhatsNewDialogFactory extends AbstractWhatsNewDialogFactory<W
 
     @Override
     protected void openReleaseNotes() {
-        Window.Location.assign(RELEASE_NOTES_PATH);
+        Window.open(RELEASE_NOTES_PATH, "_blank", /* features */ null);
     }
 }
