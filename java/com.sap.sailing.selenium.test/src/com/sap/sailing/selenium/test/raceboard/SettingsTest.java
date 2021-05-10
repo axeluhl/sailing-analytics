@@ -36,6 +36,7 @@ import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewPage;
 import com.sap.sailing.selenium.pages.regattaoverview.RegattaOverviewSettingsDialogPO;
+import com.sap.sailing.selenium.pages.timeslider.TimeSliderPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class SettingsTest extends AbstractSeleniumTest {
@@ -255,6 +256,21 @@ public class SettingsTest extends AbstractSeleniumTest {
         // verify default settings work
         mapSettings.waitForWindUpUntil(true);
         Assert.assertTrue(mapSettings.isShowOnlySelectedCompetitors());
+    }
+    
+    /**
+     * Verifies that Modes correctly set the time slider.
+     */
+    @Test
+    public void testThatModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
+        createEventWithTrackedRace();
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "FULL_ANALYSIS", false);
+        LeaderboardSettingsDialogPO mapSettings = raceboard.openLeaderboardSettingsDialog();
+        // Verify initial mode settings
+        mapSettings.waitForRaceDetailsAverageSpeedUntil(true);
+        TimeSliderPO timeSlider = raceboard.getTimeSlider();
+        Assert.assertTrue(timeSlider.getSliderKnobTime().equals(timeSlider.getEndMarkerTime()));
     }
     
     /**
