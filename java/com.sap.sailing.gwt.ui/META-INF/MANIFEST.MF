@@ -7,6 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
+ com.sap.sailing.www,
  com.sap.sailing.server,
  com.sap.sailing.server.interface,
  com.sap.sailing.domain.tractracadapter,
