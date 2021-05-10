@@ -1,4 +1,4 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication.interfaces.impl;
 
 import java.io.InputStream;
 import java.io.Serializable;

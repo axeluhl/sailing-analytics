@@ -1621,8 +1621,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     protected RaceColumnInSeriesDTO convertToRaceColumnInSeriesDTO(RaceColumnInSeries raceColumnInSeries) {
-        RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getSeries().getName(),
-                raceColumnInSeries.getRegatta().getName());
+        RaceColumnInSeriesDTO raceColumnInSeriesDTO = new RaceColumnInSeriesDTO(raceColumnInSeries.getName(),
+                raceColumnInSeries.getSeries().getName(), raceColumnInSeries.getRegatta().getName());
         fillRaceColumnDTO(raceColumnInSeries, raceColumnInSeriesDTO);
         return raceColumnInSeriesDTO;
     }

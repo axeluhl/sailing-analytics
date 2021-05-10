@@ -45,6 +45,7 @@ import com.sap.sse.replication.ReplicaDescriptor;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
+import com.sap.sse.replication.interfaces.impl.ReplicationStatusImpl;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
@@ -367,6 +368,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
         Channel result = createMasterChannel();
+        if (!Util.hasLength(exchangeName)) {
+            logger.severe("Replica seems registering at this master, but this master's exchange name is \""+exchangeName+
+                    "\". Failing with an exception.");
+            throw new IllegalStateException("Master's outbound replication exchange name is "+exchangeName+" but must be non-empty; "+
+                    "consider setting the REPLICATION_CHANNEL environment variable.");
+        }
         result.exchangeDeclare(exchangeName, "fanout");
         logger.info("Created fanout exchange " + exchangeName + " successfully.");
         return result;
@@ -643,8 +650,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
      * replicas described in the {@code master} descriptor has completed.
      */
     @Override
-    public void startToReplicateFrom(final ReplicationMasterDescriptor master)
-            throws IOException, ClassNotFoundException, InterruptedException {
+    public void startToReplicateFrom(final ReplicationMasterDescriptor master) throws Exception {
         if (initialLoadChannels.containsKey(master)) {
             logger.warning("An initial load from "+master+" is already running, replicating the following replicables: "+
                             initialLoadChannels.get(master).getReplicables()+". Not starting a second time.");
@@ -740,10 +746,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     /**
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
-    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
-            ClassNotFoundException {
-        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
-                ServerInfo.getBuildVersion());
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws Exception {
+        URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(), ServerInfo.getBuildVersion());
         logger.info("Replication registration request URL: "+replicationRegistrationRequestURL);
         final URLConnection registrationRequestConnection = HttpUrlConnectionHelper
                 .redirectConnectionWithBearerToken(replicationRegistrationRequestURL, /* HTTP method */ "POST", master.getBearerToken());

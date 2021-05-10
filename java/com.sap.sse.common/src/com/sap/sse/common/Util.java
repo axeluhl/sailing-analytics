@@ -339,24 +339,6 @@ public class Util {
         return result;
     }
     
-    public static <T> List<T> createList(Iterable<T> iterable) {
-        List<T> list = new ArrayList<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            list.add(iterator.next());
-        }
-        return list;
-    }
-    
-    public static <T> Set<T> createSet(Iterable<T> iterable) {
-        Set<T> set = new HashSet<>();
-        Iterator<T> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            set.add(iterator.next());
-        }
-        return set;
-    }
-    
     public static interface Mapper<S, T> { T map(S s); }
     public static <S, T> Iterable<T> map(final Iterable<S> iterable, final Mapper<S, T> mapper) {
         return new MappingIterable<>(iterable, new MappingIterator.MapFunction<S, T>() {
@@ -775,8 +757,13 @@ public class Util {
     }
 
     public static <T> List<T> asList(Iterable<T> iterable) {
-        final List<T> list = new ArrayList<>();
-        addAll(iterable, list);
+        final List<T> list;
+        if (iterable instanceof List<?>) {
+            list = (List<T>) iterable;
+        } else {
+            list = new ArrayList<>();
+            addAll(iterable, list);
+        }
         return list;
     }
     

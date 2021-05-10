@@ -170,7 +170,7 @@ public class TestProcedures {
                         try {
                             final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
                             return new SailingAnalyticsProcessImpl<String>(thePort, theHost, dir, telnetPort, serverName,
-                                    expeditionUdpPort == null ? null : expeditionUdpPort.intValue());
+                                    expeditionUdpPort == null ? null : expeditionUdpPort.intValue(), landscape);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }

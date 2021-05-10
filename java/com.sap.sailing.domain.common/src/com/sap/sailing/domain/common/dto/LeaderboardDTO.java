@@ -70,10 +70,10 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
      */
-    public LeaderboardDTO(Date timepoint, Date timePointOfLastCorrectionsValidity, String comment,
-            ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator,
-            boolean hasOverallDetails, BoatClassDTO boatClass) {
-        super(boatClass);
+    public LeaderboardDTO(String name, Date timepoint, Date timePointOfLastCorrectionsValidity,
+            String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter,
+            UUIDGenerator uuidGenerator, boolean hasOverallDetails, BoatClassDTO boatClass) {
+        super(name, boatClass);
         initCollections();
         id = uuidGenerator.generateRandomUUID();
         this.timePoint = timepoint;

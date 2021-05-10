@@ -42,8 +42,7 @@ public interface ReplicationService {
      * bundle that starts after this bundle because then that {@link Replicable} will not yet be registered and won't
      * become part of replication.
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
-            ClassNotFoundException, InterruptedException;
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws Exception;
 
     /**
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of

@@ -1,4 +1,4 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication.interfaces.impl;
 
 import java.net.InetAddress;
 import java.util.UUID;
@@ -20,6 +20,7 @@ public class ReplicaDescriptorImpl implements ReplicaDescriptor {
 
     private final UUID uuid;
     private final InetAddress ipAddress;
+    private final Integer port;
     private final TimePoint registrationTime;
     private final String additionalInformation;
     private final String[] replicableIdsAsStrings;
@@ -27,35 +28,45 @@ public class ReplicaDescriptorImpl implements ReplicaDescriptor {
     /**
      * Sets the registration time to now.
      */
-    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID id, String additionalInformation, String[] replicableIdsAsStrings) {
-        this(ipAddress, id, MillisecondsTimePoint.now(), additionalInformation, replicableIdsAsStrings);
+    public ReplicaDescriptorImpl(InetAddress ipAddress, Integer port, UUID id, String additionalInformation, String[] replicableIdsAsStrings) {
+        this(ipAddress, port, id, MillisecondsTimePoint.now(), additionalInformation, replicableIdsAsStrings);
     }
 
     /**
      * Sets the registration time to now.
      */
-    public ReplicaDescriptorImpl(InetAddress ipAddress, UUID id, TimePoint registrationTime,
-            String additionalInformation, String[] replicableIdsAsStrings) {
+    public ReplicaDescriptorImpl(InetAddress ipAddress, Integer port, UUID id,
+            TimePoint registrationTime, String additionalInformation, String[] replicableIdsAsStrings) {
         assert replicableIdsAsStrings != null && replicableIdsAsStrings.length > 0;
         this.uuid = id;
         this.registrationTime = registrationTime;
         this.ipAddress = ipAddress;
+        this.port = port;
         this.additionalInformation = additionalInformation;
         this.replicableIdsAsStrings = replicableIdsAsStrings;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }
 
+    @Override
     public InetAddress getIpAddress() {
         return ipAddress;
     }
 
+    @Override
+    public Integer getPort() {
+        return port;
+    }
+
+    @Override
     public TimePoint getRegistrationTime() {
         return registrationTime;
     }
     
+    @Override
     public String getAdditionalInformation() {
         return additionalInformation;
     }
@@ -67,6 +78,7 @@ public class ReplicaDescriptorImpl implements ReplicaDescriptor {
      * replica must filter the operations received for those replicable IDs it has been requesting replication
      * for.
      */
+    @Override
     public String[] getReplicableIdsAsStrings() {
         return replicableIdsAsStrings;
     }
