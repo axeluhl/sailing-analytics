@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.adminconsole;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -42,6 +45,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  *
  */
 public class URLFieldWithFileUpload extends Composite implements HasValue<String> {
+    
+    private final Logger logger = Logger.getLogger(getClass().getName());
     private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
 
     private final TextBox urlTextBox;
@@ -50,12 +55,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     private String uri;
 
-    private final Button removeButton;
-
     private boolean valueChangeHandlerInitialized = false;
+    private StartUploadEvent startUploadEvent;
+    private EndUploadEvent endUploadEvent;
     
+    private final Button removeButton;
     private final FormPanel uploadFormPanel;
-    
     private final FlowPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
@@ -64,6 +69,18 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
    
     public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload, boolean showUrlAfterUpload) {
         RESOURCES.urlFieldWithFileUploadStyle().ensureInjected();
+        startUploadEvent = new StartUploadEvent() {
+            @Override
+            public void startUpload() {
+                logger.log(Level.FINE, "start upload of file.");
+            }
+        };
+        endUploadEvent = new EndUploadEvent() {
+            @Override
+            public void endUpload() {
+                logger.log(Level.FINE, "end upload of file,");
+            }
+        };
         final VerticalPanel mainPanel = new VerticalPanel();
         final FlowPanel imageUrlPanel = new FlowPanel();
         imageUrlPanel.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
@@ -136,6 +153,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         });
         uploadPanel.add(submitButton);
         uploadFormPanel.addSubmitHandler(submitEvent-> {
+            startUploadEvent.startUpload();
+            urlTextBox.setValue(stringMessages.upload());
             selectUploadButton.addStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
         });
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -147,6 +166,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                     deleteFileOnServer(localUri);
                 }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
+                endUploadEvent.endUpload();
                 String result = event.getResults();
                 JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
@@ -172,9 +192,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                         fireResultUri(uri);
                         removeButton.setEnabled(true);
                     } else {
+                        urlTextBox.setValue(stringMessages.error());
                         Notification.notify(stringMessages.fileUploadResult(resultJson.get(0).isObject().get(FileUploadConstants.STATUS).isString().stringValue(),
                                 resultJson.get(0).isObject().get(FileUploadConstants.MESSAGE).isString().stringValue()), NotificationType.ERROR);
                     }
+                } else {
+                    urlTextBox.setValue(stringMessages.error());
                 }
             }
         });
@@ -258,6 +281,14 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         if (fireEvents) {
             ValueChangeEvent.fire(this, value);
         }
+    }
+    
+    public void setStartUploadEvent(StartUploadEvent startUploadEvent) {
+        this.startUploadEvent = startUploadEvent;
+    }
+    
+    public void setEndUploadEvent(EndUploadEvent endUploadEvent) {
+        this.endUploadEvent = endUploadEvent;
     }
 
     /**

@@ -43,6 +43,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.adminconsole.EndUploadEvent;
+import com.sap.sse.gwt.adminconsole.StartUploadEvent;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -366,6 +368,25 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         busyIndicator = new SimpleBusyIndicator();
         formGrid.setWidget(5, 0, busyIndicator);
         mainPanel.add(formGrid);
+        FlowPanel progressOverlay = new FlowPanel();
+        progressOverlay.addStyleName(NewMediaDialogResources.INSTANCE.css().progressOverlay());
+        FlowPanel progressSpinner = new FlowPanel();
+        progressSpinner.addStyleName(NewMediaDialogResources.INSTANCE.css().progressSpinner());
+        progressOverlay.add(progressSpinner);
+        progressOverlay.setVisible(false);
+        urlBox.setStartUploadEvent(new StartUploadEvent() {
+            @Override
+            public void startUpload() {
+                progressOverlay.setVisible(true);
+            }
+        });
+        urlBox.setEndUploadEvent(new EndUploadEvent() {
+            @Override
+            public void endUpload() {
+                progressOverlay.setVisible(false);
+            }
+        });
+        mainPanel.add(progressOverlay);
         return mainPanel;
     }
 

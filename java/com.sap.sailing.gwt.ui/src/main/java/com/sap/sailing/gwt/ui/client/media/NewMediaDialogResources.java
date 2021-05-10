@@ -27,6 +27,12 @@ public interface NewMediaDialogResources extends ClientBundle {
         
         @ClassName("startTime-textbox")
         String startTimeTextboxClass();
+        
+        @ClassName("progress-overlay")
+        String progressOverlay();
+        
+        @ClassName("progress-spinner")
+        String progressSpinner();
     }
 
     @Source("NewMediaDialogResources.gss")

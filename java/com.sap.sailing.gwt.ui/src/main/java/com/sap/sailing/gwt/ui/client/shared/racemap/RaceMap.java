@@ -1044,6 +1044,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Button createAddVideoToRaceButton(MapWidget map) {
         Button addVideoButton = new Button();
         addVideoButton.setStylePrimaryName(raceMapStyle.raceMapVideoUploadButton());
+        addVideoButton.setTitle(stringMessages.addMediaTrack());
+        addVideoButton.ensureDebugId("addVideoAudioButton");
         addVideoButton.setVisible(false);
         return addVideoButton;
     }
