@@ -1,0 +1,57 @@
+# Setup for the Olympic Summer Games 2020/2021 Tokyo
+
+## Local Installation
+
+For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with equal hardward configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices.
+
+### Installation Packages
+
+The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
+
+Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongo .conf``. RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
+
+Both machines have been configured to use 2GB of swap space at ``/swapfile``.
+
+### User Accounts
+
+The essential user account on both laptops is ``sailing``. The account is intended to be used for running the Java VM that executes the SAP Sailing Analytics server software. The account is currently still protected by a password that our on-site team should know. There are also still two personal accounts ``uhl`` and ``tim`` and an Eclipse development environment under /usr/local/eclipse.
+
+### Hostnames
+
+We assume not to have DNS available on site. Therefore, for now, we have decided for host names ``sap-p1-1`` and ``sap-p1-2`` for which we have created entries in both laptops' ``/etc/hosts`` file. Currently, when testing in the SAP facilities with the SAP Guest WiFi, possibly changing IP addresses have to be updated there.
+
+The domain name has been set to ``sapsailing.com`` so that the fully-qualified host names are ``sap-p1-1.sapsailing.com`` and ``sap-p1-2.sapsailing.com`` respectively. Using this domain name is helpful later when it comes to the shared security realm established with the central ``security-service.sapsailing.com`` replica set.
+
+## AWS Setup
+
+Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels.
+
+Our "favorite" Availability Zone (AZ) in ap-northeast-1 is "1d" / "ap-northeast-1d".
+
+The same host ``tokyo-ssh.sapsailing.com`` also runs a MongoDB 3.6 instance on port 10203.
+
+For RabbitMQ we plan use a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings. The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672, RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``.
+
+*TODO* We should define a hostname in Route53 at least for the internal IP address of the RabbitMQ host so that when port forwards can easily be configured by hostname when using the ap-northeast-1 jump host.
+
+## Landscape Architecture
+
+We have applied for a single SSH tunnel to IP address ``52.194.91.94`` which is our elastic IP for our SSH jump host in ap-northeast-1(d). 
+
+The default production set-up is defined as follows:
+
+### MongoDB
+
+Three MongoDB nodes are intended to run during regular operations: sap-p1-1:10201, sap-p1-2:10202, and tokyo-ssh.sapsailing.com:10203. Since we have to work with SSH tunnels to keep things connected, we map everything using ``localhost`` ports such that both, sap-p1-2 and tokyo-ssh see sap-p1-1:10201 as their localhost:10201, and that both, sap-p1-1 and tokyo-ssh see sap-p1-2:10202 as their respective localhost:10202. Both, sap-p1-1 and sap-p1-2 see tokyo-ssh:10203 as their localhost:10203. This way, the MongoDB URI can be specified as
+
+```
+	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
+```
+
+### Application Servers
+
+sap-p1-1 normally is the master for the ``tokyo2020`` replica set. It shall replicate the shared services, in particular ``SecurityServiceImpl``, from ``security-service.sapsailing.com``, like any normal server in our landscape, only that here we have to make sure we can target the default RabbitMQ in eu-west-1 and can see the ``security-service.sapsailing.com`` master directly or even better the load balancer.
+
+*TODO* find out whether an SSH port forward using a DNS hostname will resolve this host name again each time a connection is made. Probably, forwarding to ``security-service.sapsailing.com:443`` could just work...
+
+sap-p1-2 normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on sap-p1-1. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward. A reverse port forward from ap-northeast-1 to the application port 8888 on sap-p1-2 has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
