@@ -15,15 +15,6 @@ import com.sap.sse.security.ui.client.UserService;
  * {@value #THRESHOLD_WHATS_NEW} characters since the last login of the current user.
  */
 public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSettings> {
-
-    protected static void register(final AbstractWhatsNewDialogFactory<?> factory) {
-        factory.userService.addUserStatusEventHandler((user, preAuth) -> {
-            if (user != null) {
-                factory.showWhatsNewDialogIfNecessaryAndUpdatePreference();
-            }
-        }, false);
-    }
-
     private static final long THRESHOLD_WHATS_NEW = 10;
     private static final Logger LOG = Logger.getLogger(AbstractWhatsNewDialogFactory.class.getName());
 
@@ -33,6 +24,14 @@ public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSe
         this.userService = userService;
     }
 
+    protected void register() {
+        userService.addUserStatusEventHandler((user, preAuth) -> {
+            if (user != null) {
+                showWhatsNewDialogIfNecessaryAndUpdatePreference();
+            }
+        }, false);
+    }
+    
     protected final void showWhatsNewDialogIfNecessaryAndUpdatePreference() {
         if (!isUserAlreadyNotified() && ClientConfiguration.getInstance().isBrandingActive()) {
             currentCharacterCount(charCount -> userService.getPreference(getPrefName(), new ServiceCallback<String>() {
@@ -42,13 +41,19 @@ public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSe
                     final DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
                         @Override
                         public void ok(final Void editedObject) {
-                            updateOrCreatePreference(charCount, serializer);
-                            openReleaseNotes();
+                            updateOrCreatePreference(charCount, serializer, new ServiceCallback<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    // open release notes only after the preference has been updated; otherwise, moving back to AdminConsole
+                                    // quickly may still find the preference not updated
+                                    openReleaseNotes();
+                                }
+                            });
                         }
 
                         @Override
                         public void cancel() {
-                            updateOrCreatePreference(charCount, serializer);
+                            updateOrCreatePreference(charCount, serializer, new ServiceCallback<Void>());
                         }
                     };
                     if (result != null) {
@@ -67,9 +72,9 @@ public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSe
         }
     }
 
-    private void updateOrCreatePreference(final long charCount, final SettingsToJsonSerializerGWT serializer) {
+    private void updateOrCreatePreference(final long charCount, final SettingsToJsonSerializerGWT serializer, ServiceCallback<Void> callback) {
         final String serializedSetting = serializer.serializeToString(getInstanceForSerialization(charCount));
-        userService.setPreference(getPrefName(), serializedSetting, new ServiceCallback<Void>());
+        userService.setPreference(getPrefName(), serializedSetting, callback);
     }
 
     protected abstract void currentCharacterCount(IntConsumer callback);
@@ -87,7 +92,6 @@ public abstract class AbstractWhatsNewDialogFactory<S extends AbstractWhatsNewSe
     protected abstract void openReleaseNotes();
 
     protected static class ServiceCallback<R> implements AsyncCallback<R> {
-
         @Override
         public void onSuccess(final R result) {
         }

@@ -368,6 +368,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
         Channel result = createMasterChannel();
+        if (!Util.hasLength(exchangeName)) {
+            logger.severe("Replica seems registering at this master, but this master's exchange name is \""+exchangeName+
+                    "\". Failing with an exception.");
+            throw new IllegalStateException("Master's outbound replication exchange name is "+exchangeName+" but must be non-empty; "+
+                    "consider setting the REPLICATION_CHANNEL environment variable.");
+        }
         result.exchangeDeclare(exchangeName, "fanout");
         logger.info("Created fanout exchange " + exchangeName + " successfully.");
         return result;
