@@ -17,9 +17,10 @@ else
   echo Instance $instanceid seems running now
   private_ip=`$AWS ec2 describe-instances --region $REGION --instance-ids $instanceid | jq .Reservations[0].Instances[0].PrivateIpAddress | sed -e 's/"//g'`
   echo Probing for SSH on private IP $private_ip
-  while su - hudson -c "ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no hudson@$private_ip ls >/dev/null"; do
+  while ! su - hudson -c "ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no hudson@$private_ip mkdir -p /home/hudson/workspace/___test___\; rmdir /home/hudson/workspace/___test___"; do
     echo SSH daemon not reachable yet. Trying again...
   done
+  # Try to ensure that "java.io.IOException: Failed to mkdirs: /home/hudson/workspace/bug4811" won't occur by trying to run a mkdir -p /home/hudson/workspace/something and removing the directory again when successful and retrying if not...
   echo SSH daemon reached. State should be ready to connect to now.
   su - hudson -c "ssh -o StrictHostKeyChecking=no hudson@$private_ip \"/opt/sapjvm_8/bin/java -jar slave.jar; sudo /sbin/shutdown -h now\""
   $AWS ec2 terminate-instances --instance-ids $instanceid
