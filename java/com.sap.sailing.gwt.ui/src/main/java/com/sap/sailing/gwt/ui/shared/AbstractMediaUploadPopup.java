@@ -81,6 +81,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     protected final ListBox mimeTypeListBox;
     private final FlowPanel fileExistingPanel;
     private final Button saveButton;
+    private FlowPanel progressOverlay;
     private String uri;
     
     public AbstractMediaUploadPopup(Consumer<VideoDTO> updateVideo, Consumer<ImageDTO> updateImage) {
@@ -244,7 +245,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             }
         });
         content.add(metaDataForm);
-        
 
         upload.addChangeHandler(new ChangeHandler() {
             @Override
@@ -253,6 +253,15 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 uploadForm.submit();
             }
         });
+        
+        progressOverlay = new FlowPanel();
+        progressOverlay.ensureDebugId("ProgressOverlay");
+        progressOverlay.addStyleName(sharedHomeResources.sharedHomeCss().progressOverlay());
+        FlowPanel progressSpinner = new FlowPanel();
+        progressSpinner.addStyleName(sharedHomeResources.sharedHomeCss().progressSpinner());
+        progressOverlay.add(progressSpinner);
+        progressOverlay.setVisible(false);
+        content.add(progressOverlay);
         
         add(content);
         
@@ -332,10 +341,12 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         public void onSubmit(SubmitEvent event) {
             // This event is fired just before the form is submitted. We can take
             // this opportunity to perform validation.
-            uploadButton.addStyleName(sharedHomeResources.sharedHomeCss().loading());
+            progressOverlay.setVisible(true);
             fileNameInput.setValue(i18n.loading());
             if (getMimeType(upload.getFilename()) == MimeType.unknown) {
                 logger.log(Level.SEVERE, "File type is not supported.");
+                progressOverlay.setVisible(false);
+                fileNameInput.setValue(i18n.fileTypeNotSupported());
                 Notification.notify(i18n.fileTypeNotSupported(), NotificationType.WARNING);
                 event.cancel();
             }
@@ -350,7 +361,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // fired. Assuming the service returned a response of type text/html,
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
-            uploadButton.removeStyleName(sharedHomeResources.sharedHomeCss().loading());
+            progressOverlay.setVisible(false);
             fileNameInput.setValue("");
             String result = event.getResults().trim();
             JSONValue resultJsonValue = parseAfterReplacingSurroundingPreElement(result);
@@ -397,7 +408,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         subtitleTextBox.setValue("");
         copyrightTextBox.setValue("");
         mimeTypeListBox.setSelectedIndex(0);
-        uploadButton.removeStyleName(sharedHomeResources.sharedHomeCss().loading());
+        //progressOverlay.setVisible(false);
     }
 
     /**
@@ -502,8 +513,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                     }
                     if (STATUS_OK.equals(status)) {
                         logger.log(Level.INFO, "Cleanup file successful. URL: " + uri);
-                        updateUri(null, "");
-                        cleanFormElements();
                     } else if (EMPTY_MESSAGE.equals(message)) {
                         // No further message from service. Probably the file is not existing any more.
                         Notification.notify(i18n.error(), NotificationType.ERROR);
@@ -521,6 +530,8 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 }
             });
             try {
+                updateUri(null, "");
+                cleanFormElements();
                 requestBuilder.send();
             } catch (RequestException e) {
                 Notification.notify(i18n.error(), NotificationType.ERROR);

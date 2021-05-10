@@ -29,6 +29,10 @@ public interface SharedHomeResources extends CommonIcons {
         String loading();
         String popup();
         String select();
+        @ClassName("progress-overlay")
+        String progressOverlay();
+        @ClassName("progress-spinner")
+        String progressSpinner();
     }
     
     @Source("default_event_logo.jpg")
