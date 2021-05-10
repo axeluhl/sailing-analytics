@@ -389,15 +389,14 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
         final BoatClass boatClass = getBoatClass();
-        final LeaderboardDTO result = new LeaderboardDTO(timePoint.asDate(), this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
-                : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
-                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
-                this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                        .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(), addOverallDetails,
-                        boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
+        final LeaderboardDTO result = new LeaderboardDTO(this.getName(), timePoint.asDate(), 
+                this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+                        : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
+                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
+                                .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(),
+                        addOverallDetails, boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
-        result.setName(this.getName());
         result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<>();
         boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
@@ -961,13 +960,8 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 averageAbsoluteCrossTrackError = null;
             }
             Distance averageSignedCrossTrackError;
-            try {
-                averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
-                    competitor, timePoint, waitForLatestAnalyses, cache);
-            } catch (NoWindException nwe) {
-                // without wind information, use null meaning "unknown"
-                averageSignedCrossTrackError = null;
-            }
+            averageSignedCrossTrackError = trackedRace == null ? null : trackedRace.getAverageSignedCrossTrackError(
+                competitor, timePoint, waitForLatestAnalyses, cache);
             final CompetitorRankingInfo competitorRankingInfo = rankingInfo.getCompetitorRankingInfo().apply(competitor);
             return new RaceDetails(legDetails, windwardDistanceToCompetitorFarthestAhead, averageAbsoluteCrossTrackError, averageSignedCrossTrackError,
                     trackedRace.getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache),
@@ -997,27 +991,17 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
             final boolean hasFinishedLeg = trackedLeg.hasFinishedLeg(timePoint);
             Distance currentOrAverageAbsoluteCrossTrackError;
-            try {
-                if (hasFinishedLeg) {
-                    currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
-                } else {
-                    currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAbsoluteCrossTrackError(timePoint);
-                }
-            } catch (NoWindException nwe) {
-                // leave averageAbsoluteCrossTrackError as null, meaning "unknown"
-                currentOrAverageAbsoluteCrossTrackError = null;
+            if (hasFinishedLeg) {
+                currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAverageAbsoluteCrossTrackError(timePoint, waitForLatestAnalyses);
+            } else {
+                currentOrAverageAbsoluteCrossTrackError = trackedLeg.getAbsoluteCrossTrackError(timePoint);
             }
             result.currentOrAverageAbsoluteCrossTrackErrorInMeters = currentOrAverageAbsoluteCrossTrackError == null ? null : currentOrAverageAbsoluteCrossTrackError.getMeters();
             Distance currentOrAverageSignedCrossTrackError;
-            try {
-                if (hasFinishedLeg) {
-                    currentOrAverageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
-                } else {
-                    currentOrAverageSignedCrossTrackError = trackedLeg.getSignedCrossTrackError(timePoint);
-                }
-            } catch (NoWindException nwe) {
-                // leave averageSignedCrossTrackError as null, meaning "unknown"
-                currentOrAverageSignedCrossTrackError = null;
+            if (hasFinishedLeg) {
+                currentOrAverageSignedCrossTrackError = trackedLeg.getAverageSignedCrossTrackError(timePoint, waitForLatestAnalyses);
+            } else {
+                currentOrAverageSignedCrossTrackError = trackedLeg.getSignedCrossTrackError(timePoint);
             }
             result.currentOrAverageSignedCrossTrackErrorInMeters = currentOrAverageSignedCrossTrackError == null ? null : currentOrAverageSignedCrossTrackError.getMeters();
             Double speedOverGroundInKnots;

@@ -1,7 +1,6 @@
 package com.sap.sse.replication;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -17,8 +16,8 @@ import com.rabbitmq.client.QueueingConsumer;
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws MalformedURLException, UnsupportedEncodingException;
-    
+    URL getReplicationRegistrationRequestURL(UUID uuid, String additionalInformation) throws Exception;
+
     URL getReplicationDeRegistrationRequestURL(UUID uuid) throws MalformedURLException;
 
     /**

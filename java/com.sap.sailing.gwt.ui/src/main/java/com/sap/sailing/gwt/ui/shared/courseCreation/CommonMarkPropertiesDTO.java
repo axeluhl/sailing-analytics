@@ -15,8 +15,8 @@ public class CommonMarkPropertiesDTO extends NamedDTO implements Serializable {
     private String pattern;
     private MarkType type;
 
-    protected CommonMarkPropertiesDTO() {
-        // GWT serialization
+    public CommonMarkPropertiesDTO() {
+        super("");
     }
 
     public CommonMarkPropertiesDTO(String name, String shortName, Color color, String shape, String pattern,

@@ -50,13 +50,13 @@ import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.Activator;
 import com.sap.sse.replication.impl.RabbitOutputStream;
-import com.sap.sse.replication.impl.ReplicaDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
 import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationReceiverImpl;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.ReplicationServlet;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
+import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
@@ -176,7 +176,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
-        replicaDescriptor = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
+        replicaDescriptor = new ReplicaDescriptorImpl(InetAddress.getLocalHost(), 8888, serverUuid, "", new String[] { this.master.getId().toString() });
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,

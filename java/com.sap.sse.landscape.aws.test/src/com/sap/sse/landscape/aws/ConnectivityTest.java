@@ -172,7 +172,7 @@ public class ConnectivityTest<ProcessT extends ApplicationProcess<String, Sailin
 
     protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, host, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010, landscape);
         return process;
     }
     

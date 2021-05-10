@@ -17,6 +17,7 @@ public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<B
     private Distance hullLength;
     private Distance hullBeam;
     
+    @Deprecated
     BoatClassDTO() {}
 
     public BoatClassDTO(String name, Distance hullLength, Distance hullBeam) {

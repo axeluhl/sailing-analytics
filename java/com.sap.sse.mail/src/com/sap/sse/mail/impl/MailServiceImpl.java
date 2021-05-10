@@ -26,7 +26,7 @@ import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.operations.MailServiceOperation;
 import com.sap.sse.mail.operations.SendMailOperation;
 import com.sap.sse.mail.operations.SendMailWithMultipartSupplierOperation;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<ReplicableMailService, MailServiceOperation<?>> implements ReplicableMailService {
