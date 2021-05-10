@@ -1,32 +1,21 @@
 package com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew;
 
-import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
-import com.sap.sse.common.settings.generic.LongSetting;
+import com.sap.sailing.gwt.settings.client.whatsnew.AbstractWhatsNewSettings;
 
 /**
- * Stores the number of characters in the changelog when the last login occured. This is needed to determine whether to
- * show a 'What's New' dialog to the user after login.
+ * AbstractWhatsNewSettings implementation to store the number of characters in the Home.html change log
  */
-public class WhatsNewSettings extends AbstractGenericSerializableSettings {
-    private static final long serialVersionUID = 1545042411098078525L;
+public class WhatsNewSettings extends AbstractWhatsNewSettings {
 
-    public static final String PREF_NAME = "sailing.whatsnew";;
+    private static final long serialVersionUID = 2132947244127105543L;
 
-    private transient LongSetting numberOfCharsOnLastLogin;
+    public static final String PREF_NAME = "sailing.whatsnew";
 
     public WhatsNewSettings() {
     }
 
-    public WhatsNewSettings(Long numberOfCharsOnLastLogin) {
-        this.numberOfCharsOnLastLogin.setValue(numberOfCharsOnLastLogin);
+    public WhatsNewSettings(final Long numberOfCharsOnLastLogin) {
+        super(numberOfCharsOnLastLogin);
     }
 
-    @Override
-    protected void addChildSettings() {
-        numberOfCharsOnLastLogin = new LongSetting("numberOfCharsOnLastLogin", this, 0l);
-    }
-
-    public Long getNumberOfCharsOnLastLogin() {
-        return numberOfCharsOnLastLogin.getValue();
-    }
 }

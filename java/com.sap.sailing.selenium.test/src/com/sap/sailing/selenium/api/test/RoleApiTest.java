@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.RoleApi;
-import com.sap.sailing.selenium.api.event.RoleApi.Role;
+import com.sap.sailing.selenium.api.event.RoleApi.RoleDefinition;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
@@ -34,13 +34,13 @@ public class RoleApiTest extends AbstractSeleniumTest {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
         final String testRoleName = "test role 123";
-        final Role roleCreated = roleApi.createRole(adminCtx, testRoleName);
+        final RoleDefinition roleCreated = roleApi.createRole(adminCtx, testRoleName);
 
         assertEquals("Responded role name of createRole is different!", testRoleName, roleCreated.getName());
         assertNotNull("UUID cannot be null!", roleCreated.getId());
         assertTrue("Permissions should be empty!", Util.isEmpty(roleCreated.getPermissions()));
 
-        final Role roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
+        final RoleDefinition roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
 
         assertEquals("Responded role name of getRole is different!", roleCreated.getName(), roleGet.getName());
         assertEquals("UUID must be the same!", roleCreated.getId(), roleGet.getId());
@@ -54,11 +54,11 @@ public class RoleApiTest extends AbstractSeleniumTest {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
         final String testRoleName = "test role 123";
-        final Role roleCreated = roleApi.createRole(adminCtx, testRoleName);
+        final RoleDefinition roleCreated = roleApi.createRole(adminCtx, testRoleName);
 
         assertNotNull("UUID cannot be null!", roleCreated.getId());
 
-        final Role roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
+        final RoleDefinition roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
 
         assertEquals("UUID must be the same!", roleCreated.getId(), roleGet.getId());
 
@@ -77,11 +77,11 @@ public class RoleApiTest extends AbstractSeleniumTest {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
         final String testRoleName = "test role 123";
-        final Role roleCreated = roleApi.createRole(adminCtx, testRoleName);
+        final RoleDefinition roleCreated = roleApi.createRole(adminCtx, testRoleName);
 
         assertNotNull("UUID cannot be null!", roleCreated.getId());
 
-        final Role roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
+        final RoleDefinition roleGet = roleApi.getRole(adminCtx, roleCreated.getId());
 
         assertEquals("UUID must be the same!", roleCreated.getId(), roleGet.getId());
 
@@ -94,7 +94,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
 
         assertNull("Empty string expected.", roleUpdate);
 
-        final Role roleGetAfterUpdate = roleApi.getRole(adminCtx, roleCreated.getId());
+        final RoleDefinition roleGetAfterUpdate = roleApi.getRole(adminCtx, roleCreated.getId());
 
         assertEquals("Responded role name of getRole is different!", updatedRoleName, roleGetAfterUpdate.getName());
         assertEquals("UUID must be the same!", roleCreated.getId(), roleGetAfterUpdate.getId());

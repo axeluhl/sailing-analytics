@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.pages.adminconsole;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -12,6 +13,7 @@ import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.LocalServerPO;
 import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
+import com.sap.sailing.selenium.pages.adminconsole.common.WhatsNewDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ResultImportUrlsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ExpeditionDeviceConfigurationsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
@@ -106,6 +108,8 @@ public class AdminConsolePage extends HostPageWithAuthentication {
 
     private static final String LEADERBOARDS_PLACE = "LeaderboardsPlace";
     private static final String EXPEDITION_DEVICE_CONFIGURATIONS_PLACE = "ExpeditionDeviceConfigurationsPlace";
+    
+    private static final String ID_ADMIN_WHATS_NEW_DIALOG = "AdminWhatsNewDialog";
 
     private static final String ADMIN_CONSOLE_PATH = "gwt/AdminConsole.html";
 
@@ -146,6 +150,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+        cancelWhatsNewDialogIfAppearing();
     }
     
     public EventConfigurationPanelPO goToEvents() {
@@ -278,6 +283,14 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
         return goToTab(administrationTabPanel, label, id, isVertical ? TabPanelType.VERTICAL_TAB_LAYOUT_PANEL : TabPanelType.TAB_LAYOUT_PANEL);
+    }
+    
+    private void cancelWhatsNewDialogIfAppearing() {
+        try {
+            waitForPO(WhatsNewDialogPO::new, ID_ADMIN_WHATS_NEW_DIALOG, 1).pressCancel();
+        } catch (TimeoutException exc) {
+            logger.log(Level.FINEST, "What's new dialog not found => ignoring", exc);
+        }
     }
 
 }

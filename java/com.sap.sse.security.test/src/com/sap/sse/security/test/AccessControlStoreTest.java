@@ -215,10 +215,11 @@ public class AccessControlStoreTest {
         newStores();
         assertNotNull(userStore.getRoleDefinition(testRoleId));
     }
-    
+
     @Test
     public void testDeleteRole() throws UserGroupManagementException {
-        final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
+        final RoleDefinition role = userStore.createRoleDefinition(testRoleId, testDisplayName,
+                new HashSet<WildcardPermission>());
         userStore.removeRoleDefinition(role);
         assertNull(userStore.getRoleDefinition(testRoleId));
         newStores();

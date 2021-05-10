@@ -61,7 +61,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
         final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
-        WhatsNewDialogFactory.registerWithUserService(getUserService(), getPlaceController());
+        WhatsNewDialogFactory.register(getUserService(), placeController);
         final Runnable signInSuccesfulNavigation = new Runnable() {
             @Override
             public void run() {

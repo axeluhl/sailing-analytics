@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
+    <string name="running_on_course">"(på banen %s)"</string>
+    <string name="course_design_number_waypoints">"Banen har %d waypoints"</string>
+    
+    <string name="service_text_no_races">"Venter på kapsejladser at overvåge..."</string>
+    <string name="service_text_num_races">"I øjeblikket overvåges %d kapsejladser."</string>
+    
+    <string name="set_time">"Start"</string>
+    <string name="reset_time">"Genstart"</string>
+    <string name="choose">"Vælg"</string>
+    <string name="current_time">"Aktuel tid"</string>
+    <string name="race_finished_template">"%s har fuldført"</string>
+    <string name="race_first_boat_finished">"Første båd fuldførte kl.:"</string>
+    <string name="race_first_finisher">"Første fuldførte kl. %1$s"</string>
+    <string name="race_first_finisher_and_time_limit">"Første fuldførte kl. %1$s, tidsgrænsen for at fuldføre kapsejladsen er kl. %2$s"</string>
+    <string name="race_time_limit">"Tidsgrænsen for at fuldføre kapsejladsen er kl. %s"</string>
+    <string name="choose_startmode">"Vælg starttilstanden for denne kapsejlads"</string>
+    <string name="choose_abort_mode">"Vælg det flag, du vil vise"</string>
+    <string name="choose_abort_flag_mode">"Vælg tilstanden til opgivelsesflag"</string>
+    <string name="flags_up">"OP"</string>
+    <string name="flags_down">"NED"</string>
+    <string name="ap_or_november">"Vælg opgivelsesflaget"</string>
+    <string name="choose_start_mode_flag">"Vælg starttilstandsflaget"</string>
+    <string name="abort_starting_phase">"Opgiv startfasen"</string>
+    <string name="abort_running_race">"Opgiv kapsejladsen"</string>
+    <string name="choose_xray_flag_up">"Vis individuel tilbagekaldelse"</string>
+    <string name="choose_xray_flag_down">"Fjern individuel tilbagekaldelse"</string>
+    <string name="choose_first_substitute_flag">"Generel tilbagekaldelse"</string>
+    <string name="confirm_general_recall">"Foretag generel tilbagekaldelse?"</string>
+    <string name="confirm">"Bekræft"</string>
+    <string name="abort">"Annuller"</string>
+    <string name="choose_blue_flag">"Start slutfase"</string>
+    <string name="flag_ap">"AP"</string>
+    <string name="flag_november">"November"</string>
+    <string name="flag_jury">"Jury"</string>
+    <string name="label_login_events">"Regatta"</string>
+    <string name="label_login_course_area">"Område"</string>
+    <string name="label_login_position">"Position"</string>
+    <string name="login_type_superuser">"Log på som superbruger"</string>
+    <string name="login_type_officer_on_vessel">"Log på som kapsejladsofficer om bord."</string>
+    <string name="login_type_shore_control">"Log på som shore control."</string>
+    <string name="login_type_viewer">"Log på med visningsbruger (demotilstand)"</string>
+    <string name="racelist_unscheduled">"Endnu ikke planlagt"</string>
+    <string name="racelist_prescheduled">"Forhåndsplanlagt for %s"</string>
+    <string name="racelist_scheduled">"Planlagt for %s"</string>
+    <string name="racelist_startphase">"Start ved %s i gang"</string>
+    <string name="racelist_running">"I gang siden %s"</string>
+    <string name="racelist_finishing">"Afslutter"</string>
+    <string name="racelist_finished">"Afsluttet"</string>
+    <string name="racelist_unknown">"Ukendt"</string>
+    <string name="currentlyLoading">"Indlæser i øjeblikket..."</string>
+    <string name="racingview_header">"Kapsejladser i baneområde \'%s\'"</string>
+    <string name="running_on_unknown">"(klik for indstille bane)"</string>
+    <string name="updateIndicator">"Opdateringsindikator"</string>
+    <string name="reset_race">"Nulstil kapsejlads"</string>
+    <string name="postpone">"Udsæt"</string>
+    <string name="race_running_since_template">"%1$s i gang siden %2$s"</string>
+    <string name="race_reset_confirmation_header">"Du er ved at nulstille kapsejladsen"</string>
+    <string name="race_reset_confirmation_warning">"Når kapsejladsen nulstilles, fjernes alle dens gemt data permanent. Alle oplysninger om kapsejladsstatussen skal indtastes igen. Kun de indtastede oplysninger om banen beholdes. Vi anbefaler kraftigt, at du ikke nulstiller kapsejladsen."</string>
+    <string name="race_reset_confirmation_title">"Nulstil denne kapsejlads?"</string>
+    <string name="race_reset_reset_button">"Nulstil alligevel"</string>
+    <string name="race_finished_start_time">"Kapsejlads startet kl.:"</string>
+    <string name="race_finished_end_time">"Kapsejlads afsluttet kl.:"</string>
+    <string name="race_startphase_countdown_mode_remove">"%1$s til %2$s fjernes"</string>
+    <string name="race_startphase_countdown_mode_display">"%1$s til %2$s vises"</string>
+    <string name="race_startphase_countdown_start">"%1$s til %2$s starter"</string>
+    <string name="set_pathfinder">"Førerbåd"</string>
+    <string name="set_pathfinder_title">"Vælg førerbåden"</string>
+    <string name="protest_dialog_title">"Starttidspunkt for protest"</string>
+    <string name="finished_dialog_title">"Indstil tidspunktet, hvor kapsejladsen blev afsluttet"</string>
+    <string name="protest_start_time">"Starttidspunkt for protest: %s"</string>
+    <string name="protest_duration">"Varighed af protest: %d min."</string>
+    <string name="protest_end_time">"Sluttidspunkt for protest: %s"</string>
+    <string name="protest_duration_dialog_title">"Varighed i minutter"</string>
+    <string name="no_pathfinder_selected">"Ingen førerbåd valgt"</string>
+    <string name="set_line_opening_time">"Gate-start"</string>
+    <string name="no_line_opening_time_selected">"Ingen tid valgt"</string>
+    <string name="set_gate_line_opening_time_title">"Indstil tiden for gate-start"</string>
+    <string name="choose_line_open_min">"min."</string>
+    <string name="previous_course">"Foregående bane"</string>
+    <string name="make_new_course">"Opret en bane"</string>
+    <string name="course_design_assets">"Aktiver til banedesign"</string>
+    <string name="course_design_dialog_title">"Sæt et banedesign op"</string>
+    <string name="pick_a_rounding_direction">"Vælg en retning til runding"</string>
+    <string name="select_penalty_reason">"Vælg årsag til straf"</string>
+
+    <string name="passing_instruction_none">"Ingen"</string>
+    <string name="passing_instruction_port">"Bagbord"</string>
+    <string name="passing_instruction_starboard">"Styrbord"</string>
+    <string name="passing_instruction_single_unknown">"Enkelt, ukendt"</string>
+    <string name="passing_instruction_gate">"Gate"</string>
+    <string name="passing_instruction_line">"Linje"</string>
+    <string name="passing_instruction_offset">"Forskydning"</string>
+    <string name="passing_instruction_fixed_bearing">"Fast pejling"</string>
+
+    <string name="publish">"Publicer"</string>
+    <string name="unpublish">"Annuller publicering"</string>
+    <string name="take_previous">"Brug foregående bane"</string>
+    <string name="take_previous_short">"Brug denne"</string>
+    <string name="markImage">"Billede af mærke"</string>
+    <string name="cancel">"Annuller"</string>
+    <string name="retry">"Forsøg igen"</string>
+    <string name="yes">"Ja"</string>
+    <string name="no">"Nej"</string>
+    <string name="tracking_list_01">"Deltagerliste"</string>
+    <string name="tracking_list_02">"Resultatliste"</string>
+    <string name="availableFinishingCompetitors">"Deltagere"</string>
+    <string name="choose_blue_flag_finishing">"Afslut kapsejlads"</string>
+    <string name="drag_handle_description">"Træk i håndtag"</string>
+    <string name="options_menu_settings">"Indstillinger"</string>
+    <string name="results_capturing_title">"Sejladsresultater"</string>
+    <string name="results_capturing_view_subject">"E-mail-emne"</string>
+    <string name="results_capturing_view_body">"E-mail-tekst"</string>
+    <string name="results_capturing_view_send">"Send resultater"</string>
+    <string name="results_capturing_view_add_photo">"Tilføj foto"</string>
+    <string name="results_capturing_view_list_header">"Vedhæftede fotos"</string>
+    <string name="results_capturing_view_list_empty">"Ingen fotos endnu"</string>
+    <string name="results_mail_subject">"[Kapsejladskomité - %1$s] %2$s"</string>
+    <string name="results_mail_body">"Resultater for kapsejlads \'%s\' er vedhæftet.\n\n"</string>
+    <string name="results_mail_body_boat_class">"Bådklasse: %s\n"</string>
+    <string name="results_mail_body_race_group">"Kapsejladsgruppe: %s\n"</string>
+    <string name="results_mail_body_start">"Starttid: %s\n"</string>
+    <string name="results_mail_body_finish">"Sluttid: %s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"Vindretning fra (grader)"</string>
+    <string name="enter_wind_direction">"Retning (fra)"</string>
+    <string name="enter_wind_speed">"Hastighed (kts)"</string>
+    <string name="enter_wind_gps">"Vindmåling position"</string>
+    <string name="check_all_data">"3. Kontroller alle data"</string>
+    <string name="in_degrees">"i grader"</string>
+    <string name="in_knots">"i knob"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"Vindhastigheden eller retningen er ikke et gyldigt tal. Korriger værdien."</string>
+    <string name="wind_location_or_fields_not_valid">"Den indtastede placering, vindhastighed eller retning er tom. Korriger værdierne."</string>
+    <string name="waiting_for_gps">"Venter på GPS-signal..."</string>
+    <string name="manual_entry">"Manuel registrering af position"</string>
+    <string name="found_gps_position">"GPS-baseret position"</string>
+    <string name="set_position_manually">"Tilføj position manuelt"</string>
+    <string name="searchPosition">"Placeringssøgning..."</string>
+    <string name="no_location_found">"Kunne ikke finde en placering baseret på din forespørgsel."</string>
+    <string name="store_position">"Brug denne position"</string>
+    <string name="store_wind">"Gem vind"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"Indstillinger"</string>
+    <string name="settings_category_general">"Andet"</string>
+    <string name="settings_general_manageareas_header">"Administrerede baneområder"</string>
+    <string name="settings_general_language_header">"Vælg sprog"</string>
+    <string name="settings_general_language_description">"Vælg sproget. Du skal muligvis genstarte appen for at anvende ændringerne."</string>
+    <string name="override_default_start_procedure_type_select_header">"Standardtype for startprocedure, når den tilsidesættes"</string>
+    <string name="override_default_start_procedure_type_select_description">"Kapsejladser bruger den valgte startproceduretype som standard. For at denne valgmulighed skal være aktiv, skal afkrydsningsfeltet til tilsidesættelse aktiveres."</string>
+    <string name="settings_please_reload">"Udfør aktionen \'Genindlæs\' for at anvende ændringer."</string>
+    <string name="settings_advanced_service_header">"Webservice-URL"</string>
+    <string name="settings_advanced_mail_header">"Modtager til e-mail med resultat"</string>
+    <string name="settings_category_polling">"Polling"</string>
+    <string name="settings_polling_active_header">"Aktiver polling"</string>
+    <string name="settings_polling_active_description">"Når det er aktivt, foretages der polling på serveren for ændringer."</string>
+    <string name="settings_polling_interval_header">"Polling-interval (sekunder)"</string>
+    <string name="settings_category_developer">"Udviklermuligheder"</string>
+    <string name="compass_view_compass">"Kompas"</string>
+    <string name="compass_view_needle">"Nål"</string>
+    <string name="racing_course_area_missing">"Baneområdet kunne ikke indlæses. Gå tilbage til logonsiden."</string>
+    <string name="racing_load_success">"%d kapsejladser blev indlæst."</string>
+    <string name="generic_load_failure">"Der opstod en fejl under indlæsning af de ønskede data:\n\n\"%s\"\n\nVil du prøve igen?"</string>
+    <string name="set_course_layout">"Indstil banelayout"</string>
+    <string name="loading_failure">"Fejl ved indlæsning"</string>
+    <string name="wind_unknown">"(klik for indstille vind)"</string>
+    <string name="wind_info">"%2$s/%1$f kn"</string>
+    <string name="login">"Log på"</string>
+    <string name="please_select_a_login_type">"Vælg en logontype."</string>
+    <string name="race_list_filter_show_all">"Vis alle"</string>
+    <string name="race_list_filter_show_active">"Vis aktiv"</string>
+    <string name="race_reset_time_schedule_race">"Planlæg kapsejlads"</string>
+    <string name="race_reset_time_startmode_starttime">"Vælg starttilstand og starttid"</string>
+    <string name="start">"Indstil starttidspunkt"</string>
+    <string name="nationality">"Nationalitet"</string>
+    <string name="number">"Nummer"</string>
+    <string name="set_tracking_list">"Indstil sporingsliste"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"Fastgør"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"Vil du logge af og logge på som en ny bruger?"</string>
+    <string name="change_dialog_title">"Ændr regatta"</string>
+    <string name="change_dialog_message">"Vil du ændre en regatta og/eller området? Forbindelsen til de aktuelt overvågede kapsejladser afbrydes."</string>
+    <string name="logout">"Log af"</string>
+    <string name="loading_configuration">"Indlæser konfiguration..."</string>
+    <string name="loading_configuration_failed">"Der opstod en fejl ved indlæsning af konfigurationen."</string>
+    <string name="loading_configuration_not_found">"Ingen ekstern konfiguration blev fundet for denne enhed."</string>
+    <string name="loading_configuration_succeded">"Ekstern konfiguration anvendt."</string>
+    <string name="gate_launch_stops_after">"Gate-start stopper efter %d min."</string>
+    <string name="settings_category_regatta_defaults">"Regattakonfiguration (standard)"</string>
+    <string name="settings_category_regattas">"Regattakonfiguration (specifik)"</string>
+    <string name="settings_category_course_designer">"Konfiguration af banedesigner"</string>
+    <string name="override_default_course_designer_type_select_header">"Type af banedesigner"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"Banenavne"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"Flag til starttilstand"</string>
+    <string name="preference_racing_procedure_classflag_header">"Klasseflag"</string>
+    <string name="preference_racing_procedure_hasxray_header">"Individuel tilbagekaldelse"</string>
+    <string name="preference_racing_procedure_hasxray_description">"Aktiver denne indstilling for at aktivere individuel tilbagekaldelse"</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"Resultatregistrering"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"Aktiver denne indstilling for at aktivere indtastning af resultater under og efter afslutning af kapsejladsen"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"Aktiver denne indstilling for at vælge førerbåden"</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"Førerbåd"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"Aktiver denne indstilling for at aktivere valg af yderligere golfnedetid"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"Yderligere golfnedetid"</string>
+    <string name="device_identifier">"Enhedsnavn"</string>
+    <string name="synchronize_connection_settings_header">"Synkroniser med server"</string>
+    <string name="synchronize_connection_settings_description">"Ved oprettelse af en konfiguration på serveren skal du klikke her for at synkronisere dine app- og forbindelsesindstillinger via QR-kode."</string>
+    <string name="update_app_header">"Fremtving opdatering"</string>
+    <string name="update_app_description">"Fremtving en opdatering fra serveren. Det er en bedre ide at bruge synkroniseringsindstillingen."</string>
+    <string name="preference_wakelock_header">"Hold skærmen tændt"</string>
+    <string name="preference_wakelock_summary">"Tving skærmen til at være tændt. Advarsel: Bruger mere batteri."</string>
+    <string name="preference_offline_header">"Offline-tilstand"</string>
+    <string name="preference_offline_summary">"Afbryder forbindelsen til en server og bruger statiske data"</string>
+    <string name="preference_allow_demo_header">"Tillad logon i skrivebeskyttet tilstand"</string>
+    <string name="preference_allow_demo_summary">"Hvis det er indstillet, kan du logge på i skrivebeskyttet tilstand. Ingen kapsejladsændringer sendes tilbage til serveren."</string>
+    <string name="options_menu_info">"Ekspertoplysninger"</string>
+    <string name="options_menu_refresh">"Opdater data"</string>
+    <string name="auto_update_install">"Installer"</string>
+    <string name="auto_update_install_anyway">"Installer alligevel"</string>
+    <string name="gate_launch">"Gate-start"</string>
+    <string name="golf_down">"Golf nede"</string>
+    <string name="preference_regatta_specific_title">"Regattakonfiguration - %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"Gem konfiguration af %1$s"</string>
+    <string name="preference_regatta_specific_save_description">"Dette vil gemme den viste konfiguration for alle kapsejladser for %1$s."</string>
+    <string name="auto_update">"Automatisk opdatering"</string>
+    <string name="auto_update_checking_version">"Kontroller versionsoplysninger på serveren..."</string>
+    <string name="auto_update_downloading_version">"Forsøger at downloade oplysninger for automatisk opdatering fra %1$s"</string>
+    <string name="auto_update_version_file_url_invalid">"Versionens fillink var ikke gyldig."</string>
+    <string name="auto_update_click_install">"Klik på \'Installer\' for at opdatere til version %1$d."</string>
+    <string name="auto_update_force_install">"Du har allerede installeret den version, der tilbydes af serveren (version %1$d)."</string>
+    <string name="auto_update_with_store">"Din aktuelle version er installeret fra %1$s. Den downloadede version fra serveren kan ikke installleres uden at afinstallere den aktuelle app."</string>
+    <string name="auto_update_already_up_to_date">"Du er allerede opdateret!"</string>
+    <string name="auto_update_downloading_apk">"Downloader APK fra server..."</string>
+    <string name="auto_update_apk_link_invalid">"Downloadlinket var ikke gyldigt."</string>
+    <string name="auto_update_apk_file_error">"Downloadfilen kune ikke oprettes."</string>
+    <string name="auto_update_error">"Fejl ved forsøg på at opdatere automatisk."</string>
+    <string name="auto_update_completed">"Automatisk opdatering fuldført"</string>
+    <string name="auto_update_completed_text">"Den automatisk opdatering blev fuldført. Du skal nu synkronisere dine forbindelsesindstillinger med serveren igen."</string>
+    <string name="auto_update_completed_take_me_there">"Før mig dertil"</string>
+    <string name="wind_gps_is_disabled">"Din GPS-enhed ser ud til at være deaktiveret. Vil du aktivere den?"</string>
+    <string name="rrs26_start_mode_changed_to">"Starttilstandsflag ændret til %1$s"</string>
+    <string name="preference_there_are_no_regattas">"Der er ingen regattaer indlæst."</string>
+    <string name="configure_regatta">"Konfigurer regatta %1$s"</string>
+    <string name="race_start_in_5_minutes">"5 minutter"</string>
+    <string name="race_start_in_4_minutes">"4 minutter"</string>
+    <string name="race_start_in_2_minutes">"2 minutter"</string>
+    <string name="race_start_in_1_minute">"1 minut"</string>
+    <string name="race_set_time">"Indstil tid"</string>
+    <string name="race_reset_course">"Nulstil bane"</string>
+    <string name="no_course_active">"Ingen bane aktiv"</string>
+    <string name="toggle_group_race_mode">"Gruppekapsejlads?"</string>
+    <string name="toggle_group_race_mode_off">"Ingen gruppekapsejlads"</string>
+    <string name="toggle_group_race_mode_on">"Gruppekapsejlads"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"Det valgte tidspunkt er før start på kapsejladsen."</string>
+
+    <string name="confirm_start_time">"Bekræft starttid"</string>
+    <string name="confirm_start_mode">"Bekræft starttilstand"</string>
+
+    <string name="start_procedure_change">"Ændr startprocedure"</string>
+    <string name="start_procedure_confirm">"Bekræft startprocedure"</string>
+    <string name="start_procedure_line_start">"Linjestart"</string>
+    <string name="start_procedure_gate_start">"Gate-start"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"Forenklet"</string>
+    <string name="nav_drawer_open">"Åbn navigationspanel"</string>
+    <string name="nav_drawer_close">"Luk navigationspanel"</string>
+
+    <string name="available_races">"Tilgængelige kapsejladser"</string>
+
+    <string name="race_started">"Startet %s"</string>
+    <string name="race_finished">"Afsluttet %s"</string>
+    <string name="race_start">"Start %s"</string>
+    <string name="race_unscheduled">"Ikke planlagt"</string>
+
+    <string name="race_show_all">"vis alle"</string>
+    <string name="race_show_less">"vis mindre"</string>
+
+    <string name="races_current">"AKTUELLE KAPSEJLADSER"</string>
+    <string name="races_all">"ALLE KAPSEJLADSER"</string>
+
+    <string name="welcome">"VELKOMMEN"</string>
+    <string name="change">"Ændr"</string>
+
+    <string name="start_procedure">"Procedure"</string>
+    <string name="start_procedure_more">"Mere"</string>
+    <string name="start_mode">"Tilstand"</string>
+    <string name="course">"Bane"</string>
+    <string name="wind">"Vind"</string>
+    <string name="loading_events_succeded">"Begivenheder indlæst."</string>
+
+    <string name="login_text">"Velkommen til\nSAP Sailing Race Manager"</string>
+    <string name="login_sub_text">"Vælg en regatta"</string>
+    <string name="login_onboarding_text">"Onboarding"</string>
+    <string name="sign_up">"Tilmeld mig"</string>
+    <string name="flags_abandon">"Opgiv"</string>
+    <string name="flags_recall">"Tilbagekald"</string>
+    <string name="flags_course">"Bane"</string>
+    <string name="flags_more">"Afslut"</string>
+    <string name="flags_postpone">"Udsæt"</string>
+    <string name="race_select">"Vælg en kapsejlads"</string>
+
+    <string name="gate_start_pathfinder">"Førerbåd"</string>
+    <string name="gate_start_nationality">"Nation"</string>
+    <string name="gate_start_number">"Nr."</string>
+    <string name="gate_start_set_pathfinder">"Indstil førerbåd"</string>
+    <string name="gate_start_timing">"Timing"</string>
+    <string name="gate_start_set">"Indstil gate-tid"</string>
+
+    <string name="time_launch">"Gate-start\n(minutter)"</string>
+    <string name="time_golf">"Golf\n(minutter)"</string>
+    <string name="time_total">"Total\n(minutter)"</string>
+
+    <string name="wind_from">"Kommer fra"</string>
+    <string name="wind_speed">"Hastighed"</string>
+    <string name="wind_position">"Position"</string>
+    <string name="wind_set_data">"Indstil vinddata"</string>
+    <string name="wind_set_data_multi">"Indstil vinddata (flere)"</string>
+    <string name="wind_off">"Ingen vindsensorer"</string>
+    <string name="wind_on">"Vindsensorer aktive"</string>
+    <string name="wind_set_position">"Indstil placering"</string>
+    <string name="wind_enter_position">"Indstil din position"</string>
+    <string name="wind_kn">"kn"</string>
+    <string name="wind_address_hint">"Indtast adresse"</string>
+    <string name="wind_sensor">"ved %1$s / fra %2$.0f° / %3$.1f kn"</string>
+    <string name="wind_panel">"Fra %1$.0f°\nmed %2$.1f kn"</string>
+    <string name="wind_no_data">"Ingen data"</string>
+
+    <string name="time_up">"Oppe i #TIME#"</string>
+    <string name="time_down">"Nede i #TIME#"</string>
+    <string name="time_start">"Start %s"</string>
+    <string name="time_finish">"Slut - ikke relevant"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"Indstil signal"</string>
+    <string name="flag_ap_desc">"Udsæt kommende kapsejladser"</string>
+    <string name="flag_ap_alpha_desc">"Udsæt, ikke flere kapsejladser i dag"</string>
+    <string name="flag_ap_hotel_desc">"Udsæt, yderligere signaler gives på land"</string>
+    <string name="flag_ap_alpha">"AP &amp; Alpha"</string>
+    <string name="flag_ap_hotel">"AP &amp; Hotel"</string>
+    <string name="flag_xray">"Xray"</string>
+    <string name="flag_xray_desc">"Individuel tilbagekaldelse"</string>
+    <string name="flag_first_subst">"1. subst."</string>
+    <string name="flag_first_subst_desc">"Generel tilbagekaldelse"</string>
+    <string name="flag_blue">"Blå"</string>
+    <string name="flag_blue_desc">"Start slutfase"</string>
+    <string name="flag_november_desc">"Opgiv alle kapsejladser, som er startet"</string>
+    <string name="flag_november_alpha">"November &amp; Alpha"</string>
+    <string name="flag_november_hotel">"November &amp; Hotel"</string>
+    <string name="flag_november_alpha_desc">"Opgiv, ikke flere kapsejladser i dag"</string>
+    <string name="flag_november_hotel_desc">"Opgiv, yderligere signaler gives på land"</string>
+    <string name="race_reset_confirm">"Nulstil kapsejlads"</string>
+    <string name="race_reset_cancel">"Nej tak"</string>
+    <string name="race_reset_message">"Er du sikker på, at du vil nulstillle denne kapsejlads, inklussive alle indstillinger og aktioner, der blev foretaget? Dette kan ikke fortrydes."</string>
+    <string name="race_begin_finish_header">"Start slut"</string>
+    <string name="race_end_finish_header">"Afslut slut\n(Start slut: %s)"</string>
+    <string name="race_begin_finish_current">"Aktuel tid"</string>
+    <string name="race_begin_finish_custom">"Brugerdefineret tid"</string>
+    <string name="race_setup_confirm">"Bekræft opsætning"</string>
+
+    <string name="race_summary_title">"Sammendrag af kapsejlads"</string>
+    <string name="race_summary_start">"Start på kapsejlads"</string>
+    <string name="race_summary_finish_begin">"Start slut"</string>
+    <string name="race_summary_finish_end">"Afslut slut"</string>
+    <string name="race_summary_finish_duration">"Slut varighed"</string>
+    <string name="race_summary_wind_direction">"Gennemsnitlig vindretning"</string>
+    <string name="race_summary_wind_direction_value">"fra %.0f°"</string>
+    <string name="race_summary_wind_speed">"Gennemsnitlig vindhastighed"</string>
+    
+    <string name="race_summary_individual_recalls">"Individuelle tilbagekaldelser"</string>
+    
+    <string name="record_voice">"Optag stemme"</string>
+    <string name="finishing_started">"Første afslutter kl. %1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"Nede nu"</string>
+    <string name="finished_recording">"Optagelse"</string>
+    <string name="finished_replay">"Afspil stemme"</string>
+    <string name="finished_list">"Rangliste"</string>
+    <string name="finished_photos">"Tag fotos"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"Rediger liste"</string>
+    <string name="finished_publishing">"Publicering"</string>
+    <string name="finished_submit">"Send"</string>
+    <string name="finished_duration">"#TIME# min."</string>
+
+    <string name="finished_text_01">"Evaluer og send dette sammendrag af kapsejlads."</string>
+    <string name="finished_text_02">"Din vurdering blev publiceret. Ændringer skal sendes igen for at træde i kraft."</string>
+
+    <string name="protest_time">"Protesttid"</string>
+    <string name="protest_time_start">"Start protesttid"</string>
+    <string name="protest_time_end">"Slut protesttid"</string>
+    <string name="degrees">"Grader"</string>
+
+    <string name="no_camera">"Ingen kameraapp fundet"</string>
+    <string name="delete_file_title">"Slet fil"</string>
+    <string name="delete_file">"Dette vil slette billedet"</string>
+    <string name="start_time">"Starttid"</string>
+    <string name="start_time_value">"Kl. %1$s i %2$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"Det valgte baneområde blev mistet."</string>
+    <string name="no_fitting_race_group_found">"Ingen overensstemmende kapsejladsgruppe blev fundet."</string>
+    <string name="loading_of_course_area_succeeded">"Banedata blev indlæst."</string>
+    <string name="scores">"Point"</string>
+    <string name="no_text">"Ingen tekst."</string>
+    <string name="error_picture_callback">"Fejl ved skrivning af billedfil."</string>
+    <string name="competitor_load_error">"Deltagere: %s"</string>
+    <string name="error_announced_finish_time">"Den angivne sluttid er tidligere end tiden for den første fuldførte. Kontroller tiden igen."</string>
+    <string name="error_time_before_finish">"Det valgte tidspunkt er før start på kapsejladsen."</string>
+    <string name="error_set_wind">"Indstil oplysninger om vind"</string>
+    <string name="use_previous_course_dialog_title">"Brug foregående banedesign"</string>
+    <string name="use_previous_course_dialog_message">"Brug foregående publicerede banedesign?"</string>
+    <string name="please_enter_valid_number">"Indtast et gyldigt tal"</string>
+    <string name="please_enter_valid_pathfinder">"Indtast en gyldig førerbåd"</string>
+    <string name="error_scanning_qr">"Fejl ved scanning af QR-kode (%d)"</string>
+    <string name="error_scanning_qr_malformed">"URL formateret med fejl"</string>
+    <string name="marks_w_placeholder">"Mærker: %s"</string>
+    <string name="error_no_course_to_copy">"Ingen bane tilgængelig til kopiering"</string>
+    <string name="error_missing_second_mark">"De valgte instruktioner om at passere kræver to bøjer. Vælg den anden bøje."</string>
+    <string name="error_missing_passing_instructions">"En waypoint har ingen instruktioner om at passere. Vælg instruktionen om at passere med et langt tryk på waypoint."</string>
+    <string name="error_no_way_point">"Banens design skal have mindst en waypoint."</string>
+    <string name="start_w_placeholder">"Start %s"</string>
+    <string name="events_waiting_to_be_sent">"I øjeblikket venter %1$d begivenheder på at blive sendt.\nDer blev senest sendt kl.: %2$s."</string>
+    <string name="no_event_to_be_sent">"I øjeblikket venter ingen begivenheder på at blive sendt."</string>
+    <string name="never">"aldrig"</string>
+    <string name="theme_changed_title">"Temaændring"</string>
+    <string name="theme_changed_message">"Ændringer af temaet vil træde i kraft efter genstart af appen."</string>
+    <string name="url_refresh_title">"Server-URL ændret"</string>
+    <string name="app_refresh_message">"Log af den aktuelle begivenhed for at indlæse data fra den nye server."</string>
+    <string name="until_xray_removed">"XRAY fjernes om %s"</string>
+    <string name="send_photos">"Send fotos"</string>
+    <string name="error_wrong_degree_value_title">"Fejl"</string>
+    <string name="error_wrong_degree_value_message">"Angiv en værdi mellem 0 og 360"</string>
+
+    <string name="author_type_officer_vessel">"Kapsejladsofficer om bord"</string>
+    <string name="author_type_shore_control">"Shore control"</string>
+    <string name="author_viewer">"Demotilstand"</string>
+    <string name="author_type_superuser">"Superbruger"</string>
+    <string name="change_proceed">"Fortsæt"</string>
+    <string name="change_cancel">"Annuller"</string>
+    <string name="change_message">"I henhold til kapsejladsreglerne kan disse data ikke ændres i den aktuelle\nkapsejladsstatus. Du kan dog stadig fortsætte for at korrigere forkerte input."</string>
+    <string name="change_title">"Advarsel"</string>
+    <string name="send_mail">"Send e-mail..."</string>
+    <string name="data_reload_title">"Data blev ændret eksternt"</string>
+    <string name="data_reload_message">"Data skal genindlæses. Der er mulighed for datatab."</string>
+    <string name="preference_allow_dependent_races_header">"Relativ starttid (minutter)"</string>
+    <string name="preference_allow_dependent_races_description">"Aktiver relativ starttid mellem kapsejladser"</string>
+    <string name="preference_dependent_races_offset_header">"Standardforskydning for relativ starttid (minutter)"</string>
+    <string name="preference_allow_edit_race_factor_header">"Ændring af kapsejladsfaktor"</string>
+    <string name="preference_protest_time_header">"Varighed af protesttid (minutter)"</string>
+    <string name="preference_allow_edit_race_factor_description">"Kapsejladsledere kan ændre kapsejladsfaktoren for hver kapsejlads"</string>
+    <string name="error_finished_time">"Den angivne sluttid er tidligere end tiden for den første fuldførte. Kontroller tiden igen."</string>
+    <string name="error_finishing_time">"Det valgte tidspunkt er før start på kapsejladsen."</string>
+    <string name="error_time_in_future">"Det angivne tidspunkt er i fremtiden. Kontroller tidspunktet."</string>
+    <string name="error_wrong_race_state">"Kapsejladsstatussen er ikke den korrekte status (krævesneeded: %1$s - aktuel: %2$s)"</string>
+    <string name="wind_map_button_show">"Vindkort"</string>
+    <string name="wind_map_button_hide">"Skjul"</string>
+    <string name="wind_latitude">"Breddegrad:"</string>
+    <string name="wind_longitude">"Længdegrad:"</string>
+    <string name="wind_accuracy">"Nøjagtighed:"</string>
+    <string name="dependent_races_absolute">"Absolut starttid"</string>
+    <string name="dependent_races_relative">"Relativ starttid"</string>
+    <string name="dependent_races_prompt">"Vælg kapsejladsen"</string>
+    <string name="minutes_after">"Minutter efter"</string>
+    <string name="minutes_after_long">"%1$.0f min. after %2$s"</string>
+    <string name="wind_accuracy_ago">"siden"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d minutter"</string>
+    <string name="gate_time_schedule_short">"%d minutter"</string>
+    <string name="not_available">"ikke relevant"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"(siden %s)"</string>
+    <string name="prev_course">"Foregående bane"</string>
+    <string name="layout_course">"Banelayout"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"Tryk plus for at tilføje waypoint"</string>
+    <string name="unpublished_course">"Banedesign der ikke er publiceret"</string>
+    <string name="reset_state_1">"Ny"</string>
+    <string name="reset_state_2">"Nulstil"</string>
+    <string name="reset_message_1">"Vil du rydde listen?"</string>
+    <string name="reset_message_2">"Vil du nulstille den seneste status?"</string>
+    
+    <string name="onboarding_scan">"Scan QR-kode"</string>
+    <string name="onboarding_input">"Manuelt input"</string>
+    <string name="race_group">"Gruppekapsejlads"</string>
+    <string name="wind_select_race">"Vælg kapsejlads"</string>
+    <string name="added_to_result_list">"Tilføjede \'%1$s\' til resultatlisten på placering %2$d"</string>
+    <string name="get_started">"Kom godt i gang"</string>
+    <string name="position">"Position"</string>
+    <string name="server_deeplink_message">"Server blev ændret til %1$s."</string>
+    <string name="penalty">"Straf"</string>
+    <string name="score">"Point"</string>
+    <string name="finishing_time">"Afslutningstid"</string>
+    <string name="comment">"Kommentar"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"Anmodning mislykkedes. Brugeren er ikke godkendt."</string>
+    <string name="server_url">"Server"</string>
+    <string name="username">"Brugernavn"</string>
+    <string name="password">"Adgangskode"</string>
+    <string name="wrong_credentials">"Ugyldigt brugernavn eller adgangskode"</string>
+    <string name="unexpected_error">"Der opstod en uventet fejl"</string>
+    <string name="sending_exception_title">"Advarsel"</string>
+    <string name="sending_exception_message">"Du har sandsynligvis ikke tilladelse til at sende data til serveren. Vil du ændre dine legitimationsoplysninger til logon?"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Til"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Fra"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Magnetisk"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Nordbaseret"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Pejling"</string>
+    <string name="finishing_date">"Afslutningsdato"</string>
+    <string-array name="sort_by_values">
+        <item>"efter sejl-id"</item>
+        <item>"efter navn"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"Vis ikkeoffentlige begivenheder"</string>
+    <string name="preference_non_public_events_summary">"Indlæs alle begivenheder, inklussive de ikkeoffentlige."</string>
+    <string name="race_factor">"Faktor"</string>
+    <string name="options_menu_role">"Ændr regatta"</string>
+    <string name="reload_config">"Genindlæs konfiguration fra server"</string>
+    <string name="abort_title">"Opgiv kapsejladser"</string>
+    <string name="abort_hint">"Hvilke igangværende kapsejladser vil du opgive?"</string>
+    <string name="abort_dismiss">"Forkast"</string>
+    
+    <string name="set_column_factor">"Indstil faktor"</string>
+    <string name="set_factor_error">"Der opstod en fejl under indstilling af faktoren: %s"</string>
+    <string name="sync_to_minute">"Synkroniser til minut"</string>
+    <string name="non_public_changed_title">"Ikkeoffentlige begivenheder"</string>
+
+    <string name="competitor_list">"Resultater"</string>
+    <string name="sort_by_boat">"efter sejlnummer"</string>
+    <string name="sort_by_short_name">"efter kort navn"</string>
+    <string name="sort_by_name">"efter deltagernavn"</string>
+    <string name="sort_by_start">"efter position til startlinje"</string>
+    <string name="sort_by_goal">"efter sporet position"</string>
+
+    <string name="apply_button">"Anvend"</string>
+    <string name="publish_button_empty">"Publicer"</string>
+    <string name="publish_button_other">"Publicer (%d)"</string>
+    <string name="publish_clicked">"Resultater publiceret"</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"Data ændret"</string>
+    <string name="refresh_message">"Data for følgende deltagere blev ændret. Kontroller:\n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"Kan ikke oprette forbindelse til SAP"</string>
+    <string name="hello_call_error_message">"Appen kunne ikke etablere en forbindelse til SAP Sailing.\nKontroller, om du har en stabil mobil forbindelse.\nVil du prøve igen?"</string>
+    <string name="hello_call_error_positive">"Forsøg igen"</string>
+    <string name="hello_call_error_negative">"Afslut"</string>
+    <string name="hello_call_error_neutral">"Ændr server"</string>
+
+    <string name="competitor_merge_error_message">"Denne deltager blev ændret fra en anden enhed, og du har ændret de samme data. Sørg for, at disse data er korrekte nu."</string>
+
+    <string name="finishing_revoke">"Tilbagekald"</string>
+    <string name="error_revoke_finished">"Kan ikke tilbagekalde sluttid"</string>
+    <string name="error_revoke_finishing">"Kan ikke tilbagekalde afslutningstid"</string>
+</resources>

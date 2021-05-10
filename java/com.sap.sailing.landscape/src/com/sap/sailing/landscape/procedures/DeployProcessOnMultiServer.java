@@ -15,8 +15,8 @@ import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.orchestration.AbstractAwsProcedureImpl;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
-import com.sap.sse.landscape.orchestration.AbstractProcedureImpl;
 import com.sap.sse.landscape.orchestration.Procedure;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -36,7 +36,7 @@ import com.sap.sse.landscape.ssh.SshCommandChannel;
 public class DeployProcessOnMultiServer<ShardingKey, HostT extends AwsInstance<ShardingKey>,
 ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
 ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
-extends AbstractProcedureImpl<ShardingKey>
+extends AbstractAwsProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final Logger logger = Logger.getLogger(DeployProcessOnMultiServer.class.getName());
     private final SailingAnalyticsHost<ShardingKey> hostToDeployTo;
@@ -90,7 +90,7 @@ implements Procedure<ShardingKey> {
     public static interface Builder<BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey>,
     ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
-    extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey> {
+    extends AbstractAwsProcedureImpl.Builder<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey> {
         BuilderT setHostToDeployTo(SailingAnalyticsHost<ShardingKey> hostToDeployTo);
         BuilderT setKeyName(String keyName);
         BuilderT setPrivateKeyEncryptionPassphrase(byte[] privateKeyEncryptionPassphrase);
@@ -99,7 +99,7 @@ implements Procedure<ShardingKey> {
     public static class BuilderImpl<BuilderT extends Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey, HostT extends AwsInstance<ShardingKey>,
     ApplicationConfigurationT extends SailingAnalyticsApplicationConfiguration<ShardingKey>,
     ApplicationConfigurationBuilderT extends SailingAnalyticsApplicationConfiguration.Builder<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey>>
-    extends com.sap.sse.landscape.orchestration.AbstractProcedureImpl.BuilderImpl<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey>
+    extends AbstractAwsProcedureImpl.BuilderImpl<BuilderT, DeployProcessOnMultiServer<ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT>, ShardingKey>
     implements Builder<BuilderT, ShardingKey, HostT, ApplicationConfigurationT, ApplicationConfigurationBuilderT> {
         private final SailingAnalyticsApplicationConfiguration.BuilderImpl<ApplicationConfigurationBuilderT, ApplicationConfigurationT, ShardingKey> applicationConfigurationBuilder;
         private SailingAnalyticsHost<ShardingKey> hostToDeployTo;
@@ -272,7 +272,7 @@ implements Procedure<ShardingKey> {
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),
                 serverDirectory, applicationConfiguration.getTelnetPort(),
-                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort());
+                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort(), getLandscape());
     }
     
     public SailingAnalyticsProcess<ShardingKey> getProcess() {

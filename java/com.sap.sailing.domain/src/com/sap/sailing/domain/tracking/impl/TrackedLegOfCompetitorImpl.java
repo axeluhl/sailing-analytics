@@ -530,7 +530,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) {
         final Distance result;
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart != null) {
@@ -548,7 +548,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+    public Distance getAverageSignedCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) {
         final Distance result;
         final MarkPassing legStartMarkPassing = getMarkPassingForLegStart();
         if (legStartMarkPassing != null) {
@@ -562,7 +562,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) throws NoWindException {
+    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) {
         final Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
         if (track != null) {
@@ -579,7 +579,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getSignedCrossTrackError(TimePoint timePoint) throws NoWindException {
+    public Distance getSignedCrossTrackError(TimePoint timePoint) {
         final Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
         if (track != null) {

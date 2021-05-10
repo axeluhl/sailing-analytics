@@ -1,4 +1,4 @@
-package com.sap.sse.replication.impl;
+package com.sap.sse.replication.interfaces.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +45,7 @@ public class ReplicationStatusImpl implements ReplicationStatus {
         this.outboundExchangeName = outboundExchangeName;
         this.outboundMessagingPort = outboundMessagingPort;
     }
-
+    
     @Override
     public boolean isReplica() {
         return isReplica;
@@ -115,30 +115,30 @@ public class ReplicationStatusImpl implements ReplicationStatus {
     public JSONObject toJSONObject() {
         final JSONObject result = new JSONObject();
         final JSONArray replicablesJSON = new JSONArray();
-        result.put("replica", this.isReplica());
-        result.put("servername", serverName);
-        result.put("replicationstarting", this.isReplicationStarting());
-        result.put("suspended", this.isSuspended());
-        result.put("stopped", this.isStopped());
-        result.put("messagequeuelength", this.getMessageQueueLength());
-        result.put("totaloperationqueuelength", this.getTotalOperationQueueLength());
-        result.put("outboundmessagingname", this.outboundExchangeName);
-        result.put("outboundmessagingport", this.outboundMessagingPort);
+        result.put(JSON_FIELD_NAME_REPLICA, this.isReplica());
+        result.put(JSON_FIELD_NAME_SERVERNAME, serverName);
+        result.put(JSON_FIELD_NAME_REPLICATIONSTARTING, this.isReplicationStarting());
+        result.put(JSON_FIELD_NAME_SUSPENDED, this.isSuspended());
+        result.put(JSON_FIELD_NAME_STOPPED, this.isStopped());
+        result.put(JSON_FIELD_NAME_MESSAGEQUEUELENGTH, this.getMessageQueueLength());
+        result.put(JSON_FIELD_NAME_TOTALOPERATIONQUEUELENGTH, this.getTotalOperationQueueLength());
+        result.put(JSON_FIELD_NAME_OUTBOUNDMESSAGINGNAME, this.outboundExchangeName);
+        result.put(JSON_FIELD_NAME_OUTBOUNDMESSAGINGPORT, this.outboundMessagingPort);
         for (final String replicableIdAsString : this.getReplicableIdsAsStrings()) {
             Boolean initialLoadRunning = this.isInitialLoadRunning(replicableIdAsString);
             if (initialLoadRunning != null) {
                 final JSONObject replicableJSON = new JSONObject();
-                replicableJSON.put("id", replicableIdAsString);
-                replicableJSON.put("initialloadrunning", initialLoadRunning);
+                replicableJSON.put(JSON_FIELD_NAME_REPLICABLE_ID, replicableIdAsString);
+                replicableJSON.put(JSON_FIELD_NAME_REPLICABLE_INITIALLOADRUNNING, initialLoadRunning);
                 final Integer operationQueueLength = this.getOperationQueueLength(replicableIdAsString);
-                replicableJSON.put("operationqueuelength", operationQueueLength==null?0:operationQueueLength);
-                replicableJSON.put("replicatedfrom", getReplicatedFromAsJSON(replicableIdAsString));
-                replicableJSON.put("replicatedby", getReplicatedByAsJSON(replicableIdAsString));
+                replicableJSON.put(JSON_FIELD_NAME_REPLICABLE_OPERATIONQUEUELENGTH, operationQueueLength==null?0:operationQueueLength);
+                replicableJSON.put(JSON_FIELD_NAME_REPLICABLE_REPLICATEDFROM, getReplicatedFromAsJSON(replicableIdAsString));
+                replicableJSON.put(JSON_FIELD_NAME_REPLICABLE_REPLICATEDBY, getReplicatedByAsJSON(replicableIdAsString));
                 replicablesJSON.add(replicableJSON);
             }
         }
-        result.put("replicables", replicablesJSON);
-        result.put("available", this.isAvailable());
+        result.put(JSON_FIELD_NAME_REPLICABLES, replicablesJSON);
+        result.put(JSON_FIELD_NAME_AVAILABLE, this.isAvailable());
         return result;
     }
 
@@ -154,11 +154,11 @@ public class ReplicationStatusImpl implements ReplicationStatus {
     
     private JSONObject serializeMasterDescriptorAsJSON() {
         final JSONObject result = new JSONObject();
-        result.put("exchange", masterDescriptor.getExchangeName());
-        result.put("hostname", masterDescriptor.getHostname());
-        result.put("port", masterDescriptor.getServletPort());
-        result.put("messaginghostname", masterDescriptor.getMessagingHostname());
-        result.put("messagingport", masterDescriptor.getMessagingPort());
+        result.put(JSON_FIELD_NAME_EXCHANGE, masterDescriptor.getExchangeName());
+        result.put(JSON_FIELD_NAME_HOSTNAME, masterDescriptor.getHostname());
+        result.put(JSON_FIELD_NAME_PORT, masterDescriptor.getServletPort());
+        result.put(JSON_FIELD_NAME_MESSAGINGHOSTNAME, masterDescriptor.getMessagingHostname());
+        result.put(JSON_FIELD_NAME_MESSAGINGPORT, masterDescriptor.getMessagingPort());
         return result;
     }
 
@@ -172,12 +172,13 @@ public class ReplicationStatusImpl implements ReplicationStatus {
         return result;
     }
 
-    private Object serializeReplicaDescriptorAsJSON(ReplicaDescriptor replicaDescriptor) {
+    private JSONObject serializeReplicaDescriptorAsJSON(ReplicaDescriptor replicaDescriptor) {
         final JSONObject result = new JSONObject();
-        result.put("id", replicaDescriptor.getUuid().toString());
-        result.put("registrationtimemillis", replicaDescriptor.getRegistrationTime().asMillis());
-        result.put("address", replicaDescriptor.getIpAddress().getCanonicalHostName());
-        result.put("additionalinformation", replicaDescriptor.getAdditionalInformation());
+        result.put(JSON_FIELD_NAME_REPLICABLE_ID, replicaDescriptor.getUuid().toString());
+        result.put(JSON_FIELD_NAME_REGISTRATIONTIMEMILLIS, replicaDescriptor.getRegistrationTime().asMillis());
+        result.put(JSON_FIELD_NAME_PORT, replicaDescriptor.getPort());
+        result.put(JSON_FIELD_NAME_ADDRESS, replicaDescriptor.getIpAddress().getCanonicalHostName());
+        result.put(JSON_FIELD_NAME_ADDITIONALINFORMATION, replicaDescriptor.getAdditionalInformation());
         return result;
     }
 }

@@ -3,7 +3,6 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -59,7 +58,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceLogEmptyOnInitialLoad() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceLogEmptyOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -72,7 +71,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceLogStateOnInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRaceLogStateOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -86,7 +85,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -99,7 +98,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
@@ -111,7 +110,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
 
     @Test
-    public void testRaceEventReplicationOnRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -125,7 +124,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationCourseDesignOnRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationCourseDesignOnRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -142,7 +141,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationOnFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
@@ -155,7 +154,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationCourseDesignOnFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationCourseDesignOnFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";

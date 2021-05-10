@@ -262,7 +262,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user null. */
     private void testWithTenantAndUserNull(User user, RoleDefinitionImpl roleDefinition)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, null, null);
+        Role role = new Role(roleDefinition, null, null, true);
         store.addRoleForUser(user.getName(), role);
 
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
@@ -278,7 +278,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user not null. */
     private void testWithTenantAndUserNotNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, userGroup, user);
+        Role role = new Role(roleDefinition, userGroup, user, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -287,7 +287,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with user null. */
     private void testWithUserNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, userGroup, null);
+        Role role = new Role(roleDefinition, userGroup, null, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -296,7 +296,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with tenant null. */
     private void testWithTenantNull(User user, RoleDefinitionImpl roleDefinition, UserGroupImpl userGroup)
             throws UserManagementException {
-        Role role = new Role(roleDefinition, null, user);
+        Role role = new Role(roleDefinition, null, user, true);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
