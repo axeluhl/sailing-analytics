@@ -1,12 +1,6 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +11,6 @@ import org.apache.shiro.session.SessionException;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.SessionContext;
 import org.apache.shiro.session.mgt.SessionKey;
-import org.apache.shiro.util.StringUtils;
 import org.apache.shiro.web.servlet.Cookie;
 import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 import org.apache.shiro.web.servlet.SimpleCookie;
@@ -85,13 +78,13 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
 
     @Override
     public void touch(SessionKey key) throws InvalidSessionException {
-        Session s = lookupRequiredSession(key);
+        final Session s = lookupRequiredSession(key);
         s.touch();
         triggerOnChangeLatestInHalfTimeoutPeriod(s);
     }
 
     private void triggerOnChangeLatestInHalfTimeoutPeriod(Session s) {
-        Duration sendDurationLatestIn = new MillisecondsDurationImpl(s.getTimeout()).minus(MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY);
+        final Duration sendDurationLatestIn = new MillisecondsDurationImpl(s.getTimeout()).minus(MAX_DURATION_ASSUMED_FOR_MESSAGE_DELIVERY);
         if (!sessionsAlreadyScheduledForOnChange.containsKey(s)) {
             sessionsAlreadyScheduledForOnChange.put(s, DUMMY);
             timer.schedule(()->{ onChange(s); sessionsAlreadyScheduledForOnChange.remove(s); },
@@ -109,14 +102,14 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
     }
 
     private Session lookupRequiredSession(SessionKey key) throws SessionException {
-        Session session = lookupSession(key);
+        final Session session = lookupSession(key);
         if (session == null) {
             String msg = "Unable to locate required Session instance based on SessionKey [" + key + "].";
             throw new UnknownSessionException(msg);
         }
         return session;
     }
-    
+
     /**
      * Stores the Session's ID, usually as a Cookie, to associate with future requests.
      *
@@ -124,155 +117,40 @@ public class SecurityWebSessionManager extends DefaultWebSessionManager {
      */
     @Override
     protected void onStart(Session session, SessionContext context) {
-        //super.onStart(session, context);
-
         if (!WebUtils.isHttp(context)) {
             log.debug("SessionContext argument is not HTTP compatible or does not have an HTTP request/response " +
                     "pair. No session ID cookie will be set.");
             return;
-
         }
-        HttpServletRequest request = WebUtils.getHttpRequest(context);
-        HttpServletResponse response = WebUtils.getHttpResponse(context);
-
+        final HttpServletRequest request = WebUtils.getHttpRequest(context);
+        final HttpServletResponse response = WebUtils.getHttpResponse(context);
         if (isSessionIdCookieEnabled()) {
-            Serializable sessionId = session.getId();
+            final Serializable sessionId = session.getId();
             storeSessionId(sessionId, request, response);
         } else {
             log.debug("Session ID cookie is disabled.  No cookie has been set for new session with id {}", session.getId());
         }
-
         request.removeAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE);
         request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_IS_NEW, Boolean.TRUE);
     }
 
     private void storeSessionId(Serializable currentId, HttpServletRequest request, HttpServletResponse response) {
         if (currentId == null) {
-            String msg = "sessionId cannot be null when persisting for subsequent requests.";
+            final String msg = "sessionId cannot be null when persisting for subsequent requests.";
             throw new IllegalArgumentException(msg);
         }
-        Cookie template = getSessionIdCookie();
-        Cookie cookie = new SamesiteCookie(template);
-        String idString = currentId.toString();
+        final Cookie template = getSessionIdCookie();
+        // Always create the Cookie with a SameSite Attribute "none".
+        final Cookie cookie = new SimpleCookie(template) {
+            @Override
+            public SameSiteOptions getSameSite() {
+                return SameSiteOptions.NONE;
+            }
+        };
+        final String idString = currentId.toString();
         cookie.setValue(idString);
         cookie.setSecure(true);
         cookie.saveTo(request, response);
         log.trace("Set session ID cookie for session with id {}", idString);
-    }
-    
-    
-    private static class SamesiteCookie extends SimpleCookie {
-        
-        public SamesiteCookie(Cookie template) {
-            super(template);
-        }
-        
-        protected String buildHeaderValue(String name, String value, String comment, String domain, String path,
-                int maxAge, int version, boolean secure, boolean httpOnly) {
-
-            if (!StringUtils.hasText(name)) {
-                throw new IllegalStateException("Cookie name cannot be null/empty.");
-            }
-
-            StringBuilder sb = new StringBuilder(name).append(NAME_VALUE_DELIMITER);
-
-            if (StringUtils.hasText(value)) {
-                sb.append(value);
-            }
-
-            appendComment(sb, comment);
-            appendDomain(sb, domain);
-            appendPath(sb, path);
-            appendExpires(sb, maxAge);
-            appendVersion(sb, version);
-            appendSamesite(sb,"None");
-            appendSecure(sb, secure);
-            appendHttpOnly(sb, httpOnly);
-
-            return sb.toString();
-
-        }
-
-        private void appendSamesite(StringBuilder sb, String value) {
-            if (StringUtils.hasText(value)) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append("SameSite").append(NAME_VALUE_DELIMITER).append(value);
-            }
-        }
-        
-        private void appendComment(StringBuilder sb, String comment) {
-            if (StringUtils.hasText(comment)) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(COMMENT_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(comment);
-            }
-        }
-
-        private void appendDomain(StringBuilder sb, String domain) {
-            if (StringUtils.hasText(domain)) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(DOMAIN_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(domain);
-            }
-        }
-
-        private void appendPath(StringBuilder sb, String path) {
-            if (StringUtils.hasText(path)) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(PATH_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(path);
-            }
-        }
-
-        private void appendExpires(StringBuilder sb, int maxAge) {
-            // if maxAge is negative, cookie should should expire when browser closes
-            // Don't write the maxAge cookie value if it's negative - at least on Firefox it'll cause the 
-            // cookie to be deleted immediately
-            // Write the expires header used by older browsers, but may be unnecessary
-            // and it is not by the spec, see http://www.faqs.org/rfcs/rfc2965.html
-            // TODO consider completely removing the following 
-            if (maxAge >= 0) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(MAXAGE_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(maxAge);
-                sb.append(ATTRIBUTE_DELIMITER);
-                Date expires;
-                if (maxAge == 0) {
-                    //delete the cookie by specifying a time in the past (1 day ago):
-                    expires = new Date(System.currentTimeMillis() - DAY_MILLIS);
-                } else {
-                    //Value is in seconds.  So take 'now' and add that many seconds, and that's our expiration date:
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.SECOND, maxAge);
-                    expires = cal.getTime();
-                }
-                String formatted = toCookieDate(expires);
-                sb.append(EXPIRES_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(formatted);
-            }
-        }
-
-        private void appendVersion(StringBuilder sb, int version) {
-            if (version > DEFAULT_VERSION) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(VERSION_ATTRIBUTE_NAME).append(NAME_VALUE_DELIMITER).append(version);
-            }
-        }
-
-        private void appendSecure(StringBuilder sb, boolean secure) {
-            if (secure) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(SECURE_ATTRIBUTE_NAME); //No value for this attribute
-            }
-        }
-
-        private void appendHttpOnly(StringBuilder sb, boolean httpOnly) {
-            if (httpOnly) {
-                sb.append(ATTRIBUTE_DELIMITER);
-                sb.append(HTTP_ONLY_ATTRIBUTE_NAME); //No value for this attribute
-            }
-        }
-        
-        private static String toCookieDate(Date date) {
-            TimeZone tz = TimeZone.getTimeZone(GMT_TIME_ZONE_ID);
-            DateFormat fmt = new SimpleDateFormat(COOKIE_DATE_FORMAT_STRING, Locale.US);
-            fmt.setTimeZone(tz);
-            return fmt.format(date);
-        }
     }
 }
