@@ -16,8 +16,10 @@ else
   echo Instance $instanceid seems running now
   private_ip=`$AWS ec2 describe-instances --region $REGION --instance-ids $instanceid | jq .Reservations[0].Instances[0].PrivateIpAddress | sed -e 's/"//g'`
   echo Probing for SSH on private IP $private_ip
-  while ! su - hudson -c "ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no hudson@$private_ip mkdir -p /home/hudson/workspace/___test___\; rmdir /home/hudson/workspace/___test___"; do
-    echo SSH daemon not reachable yet. Trying again...
+  # Note: it's important to redirect stdin/stdout from/to /dev/null to ensure the Hudon master can properly connect stdin/stdout to the slave later
+  while ! su - hudson -c "ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no hudson@$private_ip mkdir -p /home/hudson/workspace/___test___\; rmdir /home/hudson/workspace/___test___ </dev/null >/dev/null 2>/dev/null"; do
+    echo SSH daemon not reachable yet. Trying again in a few seconds...
+    sleep 10
   done
   echo SSH daemon reached. State should be ready to connect to now.
   su - hudson -c "ssh -o StrictHostKeyChecking=no hudson@$private_ip \"/opt/sapjvm_8/bin/java -jar slave.jar; sudo /sbin/shutdown -h now\""
