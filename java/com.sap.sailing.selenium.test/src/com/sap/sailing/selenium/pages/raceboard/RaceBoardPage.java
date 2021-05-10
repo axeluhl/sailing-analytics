@@ -14,6 +14,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sailing.selenium.pages.leaderboard.LeaderboardSettingsDialogPO;
+import com.sap.sailing.selenium.pages.timeslider.TimeSliderPO;
 
 /**
  * {@link PageObject} representing the SAP Sailing home page.
@@ -25,6 +26,9 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     
     @FindBy(how=BySeleniumId.class, using = "dataByContainer")
     private WebElement dataByContainer;
+    
+    @FindBy(how=BySeleniumId.class, using = "timeSlider")
+    private WebElement timeSlider;
     
     private boolean doneInit;
     
@@ -171,4 +175,7 @@ public class RaceBoardPage extends HostPageWithAuthentication {
         return goToRaceboardUrl(webDriver, url);
     }
     
+    public TimeSliderPO getTimeSlider() {
+        return new TimeSliderPO(this.driver, this.timeSlider);
+    }
 }
