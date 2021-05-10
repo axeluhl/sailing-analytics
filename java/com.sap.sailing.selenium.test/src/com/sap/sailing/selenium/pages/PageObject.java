@@ -517,6 +517,11 @@ public class PageObject {
         waitUntil((driver) -> supplier.getAsBoolean());
     }
     
+    protected void waitUntilAlertIsPresent() {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.alertIsPresent());
+    }
+    
     /**
      * Returns a {@link PageArea} instance representing the element with the specified selenium id using the
      * {@link WebDriver} as search context.

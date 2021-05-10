@@ -37,8 +37,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.landscape.AvailabilityZone;
+import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.MachineImage;
+import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
 import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -88,6 +90,7 @@ import software.amazon.awssdk.services.acm.model.CertificateStatus;
 import software.amazon.awssdk.services.autoscaling.AutoScalingAsyncClient;
 import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.autoscaling.model.MetricType;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateKeyPairRequest;
@@ -513,6 +516,30 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .iterator().next().instances().iterator().next();
     }
 
+    @Override
+    public Instance getInstanceByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress) {
+        return getEc2Client(getRegion(region))
+                .describeInstances(b->b.filters(Filter.builder().name("ip-address").values(publicIpAddress).build())).reservations()
+                .iterator().next().instances().iterator().next();
+    }
+    
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPublicIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPublicIpAddress(region, publicIpAddress), hostSupplier);
+    }
+
+    @Override
+    public Instance getInstanceByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress) {
+        return getEc2Client(getRegion(region))
+                .describeInstances(b->b.filters(Filter.builder().name("private-ip-address").values(privateIpAddress).build())).reservations()
+                .iterator().next().instances().iterator().next();
+    }
+
+    @Override
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPrivateIpAddress(region, publicIpAddress), hostSupplier);
+    }
+
     private Route53Client getRoute53Client() {
         return getClient(Route53Client.builder(), getRegion(globalRegion));
     }
@@ -663,10 +690,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getHostsWithTagValue(com.sap.sse.landscape.Region region,
-            String tagName, String tagValue) {
+    public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
         Filter filter = getHostWithTagValueFilter(tagName, tagValue).build();
-        return getHostsWithFilters(region, filter);
+        return getHostsWithFilters(region, hostSupplier, filter);
     }
 
     private Filter.Builder getHostWithTagValueFilter(String tagName, String tagValue) {
@@ -674,29 +701,31 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
-            String tagName, String tagValue) {
-        return getHostsWithFilters(region, getRunningHostFilter());
+    public <HostT extends AwsInstance<ShardingKey>> Iterable<HostT> getRunningHostsWithTagValue(com.sap.sse.landscape.Region region,
+            String tagName, String tagValue, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getRunningHostFilter());
     }
     
     private Filter getRunningHostFilter() {
         return Filter.builder().name("instance-state-name").values("running").build();
     }
 
-    private Iterable<AwsInstance<ShardingKey>> getHostsWithFilters(com.sap.sse.landscape.Region region, Filter... filters) {
-        final List<AwsInstance<ShardingKey>> result = new ArrayList<>();
+    private <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getHostsWithFilters(com.sap.sse.landscape.Region region, HostSupplier<ShardingKey, HostT> hostSupplier, Filter... filters) {
+        final List<HostT> result = new ArrayList<>();
         final DescribeInstancesResponse instanceResponse = getEc2Client(getRegion(region)).describeInstances(b->b.filters(filters));
         for (final Reservation r : instanceResponse.reservations()) {
             for (final Instance i : r.instances()) {
-                result.add(getHost(region, i));
+                result.add(getHost(region, i, hostSupplier));
             }
         }
         return result;
     }
 
-    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final Instance instance) {
+    private <HostT extends AwsInstance<ShardingKey>>
+    HostT getHost(com.sap.sse.landscape.Region region, final Instance instance, HostSupplier<ShardingKey, HostT> hostSupplier) {
         try {
-            return new AwsInstanceImpl<ShardingKey>(instance.instanceId(),
+            return hostSupplier.supply(instance.instanceId(),
                     getAvailabilityZoneByName(region, instance.placement().availabilityZone()),
                     InetAddress.getByName(instance.privateIpAddress()), TimePoint.of(instance.launchTime().toEpochMilli()), this);
         } catch (UnknownHostException e) {
@@ -705,18 +734,21 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
     }
 
-    private AwsInstance<ShardingKey> getHost(com.sap.sse.landscape.Region region, final String instanceId) {
-        return getHost(region, getInstance(instanceId, region));
+    private <HostT extends AwsInstance<ShardingKey>>
+    HostT getHost(com.sap.sse.landscape.Region region, final String instanceId, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstance(instanceId, region), hostSupplier);
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
+    public <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getRunningHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostFilter());
     }
     
     @Override
-    public Iterable<AwsInstance<ShardingKey>> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName) {
-        return getHostsWithFilters(region, getFilterForHostWithTag(Filter.builder(), tagName));
+    public <HostT extends AwsInstance<ShardingKey>>
+    Iterable<HostT> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName));
     }
     
     private Filter getFilterForHostWithTag(Filter.Builder builder, String tagName) {
@@ -983,7 +1015,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).deleteTargetGroup(DeleteTargetGroupRequest.builder().targetGroupArn(
                 targetGroup.getTargetGroupArn()).build());
     }
-
+    
     @Override
     public Map<AwsInstance<ShardingKey>, TargetHealth> getTargetHealthDescriptions(TargetGroup<ShardingKey> targetGroup) {
         final Map<AwsInstance<ShardingKey>, TargetHealth> result = new HashMap<>();
@@ -992,7 +1024,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
                 .targetHealthDescriptions().forEach(
                     targetHealthDescription->result.put(
-                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id()), targetHealthDescription.targetHealth()));
+                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id(), AwsInstanceImpl::new), targetHealthDescription.targetHealth()));
         return result;
     }
 
@@ -1000,7 +1032,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;
@@ -1165,7 +1197,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     private Iterable<AwsInstance<ShardingKey>> getMongoDBHosts(com.sap.sse.landscape.Region region) {
-        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME);
+        return getRunningHostsWithTag(region, MONGO_REPLICA_SETS_TAG_NAME, AwsInstanceImpl::new);
     }
 
     /**
@@ -1207,7 +1239,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME);
+        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME, AwsInstanceImpl::new);
         if (rabbitMQHostsInRegion.iterator().hasNext()) {
             final AwsInstance<ShardingKey> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
             result = new RabbitMQEndpoint() {
@@ -1251,7 +1283,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     Iterable<HostT> getApplicationProcessHostsByTag(com.sap.sse.landscape.Region region, String tagName,
             HostSupplier<ShardingKey, HostT> hostSupplier) {
         final List<HostT> result = new ArrayList<>();
-        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName)) {
+        for (final AwsInstance<ShardingKey> host : getRunningHostsWithTag(region, tagName, hostSupplier)) {
             final HostT applicationProcessHost = hostSupplier.supply(host.getInstanceId(),
                     host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(), this);
             result.add(applicationProcessHost);
@@ -1268,7 +1300,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion = getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
-        final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
+        final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups = getAutoScalingGroupsAsync(region);
+        final CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations = getLaunchConfigurationsAsync(region);
         final Iterable<HostT> hosts = getApplicationProcessHostsByTag(region, tagName, hostSupplier);
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1313,7 +1346,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             }));
         }
         // wait for all application processes on all hosts to be discovered
-        for (final Future<?> taskToWaitFor : tasksToWaitFor) {
+        Future<?> taskToWaitFor;
+        while ((taskToWaitFor=tasksToWaitFor.poll()) != null) {
             waitForFuture(taskToWaitFor, optionalTimeout);
         }
         backgroundExecutor.shutdown();
@@ -1325,7 +1359,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             final Set<ProcessT> replicas = replicasByServerName.get(serverName);
             final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
                     serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
-                    allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
+                    allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
             result.add(replicaSet);
         }
         return result;
@@ -1339,8 +1373,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
+        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = getLaunchConfigurationsAsync(region);
         final DNSCache dnsCache = getNewDNSCache();
-        return getApplicationReplicaSet(serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, autoScalingGroups, dnsCache);
+        return getApplicationReplicaSet(serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
+                allLoadBalancerRulesInRegion, autoScalingGroups, launchConfigurations, dnsCache);
     }
 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -1349,10 +1385,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             final CompletableFuture<Iterable<ApplicationLoadBalancer<ShardingKey>>> allLoadBalancersInRegion,
             final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
-            final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups, final DNSCache dnsCache) {
+            final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
+            CompletableFuture<Iterable<LaunchConfiguration>> allLaunchConfigurations, final DNSCache dnsCache) {
         final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(
-                serverName, master, Optional.ofNullable(replicas),
-                allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion, this, autoScalingGroups, dnsCache);
+                serverName, master, Optional.ofNullable(replicas), allLoadBalancersInRegion, allTargetGroupsInRegion,
+                allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
         return replicaSet;
     }
     
@@ -1438,6 +1475,20 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             result.addAll(response.autoScalingGroups())).handle((v, e)->Collections.unmodifiableCollection(result));
     }
     
+    @Override
+    public void updateAutoScalingGroupMinSize(AwsAutoScalingGroup autoScalingGroup, int minSize) {
+        getAutoScalingClient(getRegion(autoScalingGroup.getRegion())).updateAutoScalingGroup(b->b
+                .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
+                .minSize(minSize));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<LaunchConfiguration>> getLaunchConfigurationsAsync(com.sap.sse.landscape.Region region) {
+        final Set<LaunchConfiguration> result = new HashSet<>();
+        return getAutoScalingAsyncClient(getRegion(region)).describeLaunchConfigurationsPaginator().subscribe(response->
+            result.addAll(response.launchConfigurations())).handle((v, e)->Collections.unmodifiableCollection(result));
+    }
+    
     private CompletableFuture<Map<Listener, Iterable<Rule>>> getListenerToRulesMap(com.sap.sse.landscape.Region region, Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers) {
         final ElasticLoadBalancingV2AsyncClient loadBalancingClient = getLoadBalancingAsyncClient(getRegion(region));
         final Set<CompletableFuture<Pair<Listener, Iterable<Rule>>>> mapEntryFutures = new HashSet<>();
@@ -1478,16 +1529,28 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      * so we'll throttle our requests a bit here; usually, 100 requests per seconds and region with a "bucket refill" of 20/s applies
      * as a limit, so if we throttle down to 20/s we should be fine for most cases.
      */
+    private final static Object sequencer = new Object();
     @Override
     public CompletableFuture<Iterable<TargetHealthDescription>> getTargetHealthDescriptionsAsync(com.sap.sse.landscape.Region region, TargetGroup<ShardingKey> targetGroup) {
-        try {
-            Thread.sleep(1000/20);
-        } catch (InterruptedException e1) {
-            logger.log(Level.WARNING, "Interrupted", e1);
+        synchronized (sequencer) { // ensure across instances to throttle access accordingly
+            try {
+                Thread.sleep(1000/20);
+            } catch (InterruptedException e1) {
+                logger.log(Level.WARNING, "Interrupted", e1);
+            }
+            final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
+                    getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
+            return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->{
+                final Iterable<TargetHealthDescription> result;
+                if (e != null) {
+                    logger.log(Level.WARNING, "Exception trying to obtain health status of target group "+targetGroup, e);
+                    result = Collections.emptySet();
+                } else {
+                    result = targetHealthResponse.targetHealthDescriptions();
+                }
+                return result;
+            });
         }
-        final CompletableFuture<DescribeTargetHealthResponse> describeTargetHealthResponse = getLoadBalancingAsyncClient(
-                getRegion(region)).describeTargetHealth(b->b.targetGroupArn(targetGroup.getTargetGroupArn()));
-        return describeTargetHealthResponse.handleAsync((targetHealthResponse, e)->targetHealthResponse.targetHealthDescriptions());
     }
     
     @Override
@@ -1528,16 +1591,54 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public Iterable<com.sap.sse.landscape.Region> getRegions() {
         return Util.map(Region.regions(), AwsRegion::new);
     }
+    
+    @Override
+    public void updateReleaseInAutoScalingGroup(com.sap.sse.landscape.Region region, AwsAutoScalingGroup autoScalingGroup, String replicaSetName, Release release) {
+        logger.info("Adjusting release for auto-scaling group "+autoScalingGroup.getName()+" to "+release);
+        final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
+        final String releaseName = release.getName();
+        final LaunchConfiguration oldLaunchConfiguration = autoScalingGroup.getLaunchConfiguration();
+        final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchConfiguration.userData().getBytes()));
+        final String newUserData = oldUserData.replaceFirst(
+                "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
+                DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=\""+release.getName()+"\"");
+        final String newLaunchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
+        logger.info("Creating new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.createLaunchConfiguration(b->b
+                .associatePublicIpAddress(oldLaunchConfiguration.associatePublicIpAddress())
+                .blockDeviceMappings(oldLaunchConfiguration.blockDeviceMappings())
+                .classicLinkVPCId(oldLaunchConfiguration.classicLinkVPCId())
+                .classicLinkVPCSecurityGroups(oldLaunchConfiguration.classicLinkVPCSecurityGroups())
+                .ebsOptimized(oldLaunchConfiguration.ebsOptimized())
+                .iamInstanceProfile(oldLaunchConfiguration.iamInstanceProfile())
+                .imageId(oldLaunchConfiguration.imageId())
+                .instanceMonitoring(oldLaunchConfiguration.instanceMonitoring())
+                .instanceType(oldLaunchConfiguration.instanceType())
+                .keyName(oldLaunchConfiguration.keyName())
+                .launchConfigurationName(newLaunchConfigurationName)
+                .placementTenancy(oldLaunchConfiguration.placementTenancy())
+                .securityGroups(oldLaunchConfiguration.securityGroups())
+                .spotPrice(oldLaunchConfiguration.spotPrice())
+                .userData(Base64.getEncoder().encodeToString(newUserData.getBytes())));
+        logger.info("Telling auto-scaling group "+autoScalingGroup.getName()+" to use new launch configuration "+newLaunchConfigurationName);
+        autoScalingClient.updateAutoScalingGroup(b->b
+                .autoScalingGroupName(autoScalingGroup.getAutoScalingGroup().autoScalingGroupName())
+                .launchConfigurationName(newLaunchConfigurationName));
+        logger.info("Removing old launch configuration "+oldLaunchConfiguration.launchConfigurationName());
+        autoScalingClient.deleteLaunchConfiguration(b->b.launchConfigurationName(oldLaunchConfiguration.launchConfigurationName()));
+    }
 
     @Override
-    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfiguration(
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> void createLaunchConfigurationAndAutoScalingGroup(
             com.sap.sse.landscape.Region region, String replicaSetName, Optional<Tags> tags,
             TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
+        logger.info("Creating launch configuration for replica set "+replicaSetName);
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(region));
-        final String launchConfigurationName = replicaSetName + "-" + replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
-        final String autoScalingGroupName = replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
+        final String releaseName = replicaConfiguration.getRelease().map(r->r.getName()).orElse("UnknownRelease");
+        final String launchConfigurationName = getLaunchConfigurationName(replicaSetName, releaseName);
+        final String autoScalingGroupName = getAutoScalingGroupName(replicaSetName);
         final Iterable<AvailabilityZone> availabilityZones = getAvailabilityZones(region);
         final int instanceWarmupTimeInSeconds = (int) Duration.ONE_MINUTE.times(3).asSeconds();
         autoScalingClient.createLaunchConfiguration(b->b
@@ -1548,6 +1649,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .securityGroups(getDefaultSecurityGroupForApplicationHosts(region).getId())
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.toString()));
+        logger.info("Creating auto-scaling group for replica set "+replicaSetName);
         autoScalingClient.createAutoScalingGroup(b->{
             b
                 .minSize(minReplicas)
@@ -1576,6 +1678,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                                         "/targetgroup/"+publicTargetGroup.getName()+"/"+publicTargetGroup.getId())
                                 .predefinedMetricType(MetricType.ALB_REQUEST_COUNT_PER_TARGET))
                         .targetValue((double) maxRequestsPerTarget)));
+    }
+
+    private String getLaunchConfigurationName(String replicaSetName, final String releaseName) {
+        return replicaSetName + "-" + releaseName;
+    }
+
+    private String getAutoScalingGroupName(String replicaSetName) {
+        return replicaSetName+AUTO_SCALING_GROUP_NAME_SUFFIX;
     }
 
     @Override

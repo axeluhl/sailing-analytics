@@ -25,7 +25,8 @@ public class BasicRaceDTO extends NamedDTO {
     public Date raceFinishedTime;
     public TrackedRaceDTO trackedRace;
 
-    public BasicRaceDTO() {} // for GWT serialization only
+    @Deprecated
+    BasicRaceDTO() {} // for GWT serialization only
 
     public BasicRaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace) {
         super(raceIdentifier.getRaceName());

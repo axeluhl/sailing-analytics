@@ -12,7 +12,8 @@ public class PlacemarkDTO extends NamedDTO {
     /**
      * Constructor for serialization.
      */
-    PlacemarkDTO() {}
+    @Deprecated
+    PlacemarkDTO() {} // for GWT RPC serialization only
 
     public PlacemarkDTO(String name, String countryCode, Position position, long population) {
         super(name);

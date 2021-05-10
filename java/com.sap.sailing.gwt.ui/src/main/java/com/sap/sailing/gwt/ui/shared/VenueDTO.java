@@ -10,8 +10,8 @@ public class VenueDTO extends NamedDTO {
     private static final long serialVersionUID = 2182920890078828150L;
     private List<CourseAreaDTO> courseAreas;
 
-    public VenueDTO() {
-    }
+    @Deprecated
+    VenueDTO() {} // for GWT RPC serialization only
 
     public VenueDTO(String name) {
         super(name);

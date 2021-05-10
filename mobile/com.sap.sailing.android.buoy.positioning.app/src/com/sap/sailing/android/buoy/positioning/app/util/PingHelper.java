@@ -37,7 +37,7 @@ public class PingHelper {
             Uri.Builder builder = new Uri.Builder()
                     .scheme(uri.getScheme())
                     .authority(uri.getAuthority())
-                    .appendEncodedPath(prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString()));
+                    .encodedPath(prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString()));
             if (secret != null) {
                 builder.appendQueryParameter(URL_SECRET, secret);
             }

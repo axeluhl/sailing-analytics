@@ -221,7 +221,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      *            cache entry will be used
      */
     public Distance getAverageAbsoluteCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatest) throws NoWindException {
+            boolean waitForLatest) {
         CrossTrackErrorMeterRetriever absoluteMetersRetriever = cacheEntry->cacheEntry.getAbsoluteDistanceInMetersSumFromStart();
         return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, absoluteMetersRetriever);
     }
@@ -235,8 +235,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      *            whether to wait for any currently ongoing cache update calculation; if <code>false</code>, the current
      *            cache entry will be used
      */
-    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
-            boolean waitForLatest) throws NoWindException {
+    public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatest) {
         CrossTrackErrorMeterRetriever signedMetersRetriever = cacheEntry->cacheEntry.getSignedDistanceInMetersSumFromStart();
         return getAbsoluteOrSignedAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatest, signedMetersRetriever);
     }
@@ -245,8 +244,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      * @param absoluteOrSignedMetersRetriever determines whether the absolute or signed cross track error will be aggregated
      */
     private Distance getAbsoluteOrSignedAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
-            boolean upwindOnly, boolean waitForLatest, CrossTrackErrorMeterRetriever absoluteOrSignedMetersRetriever)
-            throws NoWindException {
+            boolean upwindOnly, boolean waitForLatest, CrossTrackErrorMeterRetriever absoluteOrSignedMetersRetriever) {
         Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = cachePerCompetitor.get(competitor, waitForLatest);
         double distanceInMeters = 0;
         int count = 0;
@@ -259,7 +257,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                     final TrackedLeg trackedLeg = owner.getTrackedLeg(leg);
                     final MarkPassing legStartMarkPassing = owner.getMarkPassing(competitor, leg.getFrom());
                     if (legStartMarkPassing != null) {
-                        if (!upwindOnly || trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
+                        LegType legType;
+                        try {
+                            legType = trackedLeg.getLegType(legStartMarkPassing.getTimePoint());
+                        } catch (NoWindException e) {
+                            legType = null;
+                        }
+                        if (!upwindOnly || legType == LegType.UPWIND) {
                             final TimePoint start;
                             final TimePoint legStart = legStartMarkPassing.getTimePoint();
                             if (legStart.compareTo(from) < 0) {

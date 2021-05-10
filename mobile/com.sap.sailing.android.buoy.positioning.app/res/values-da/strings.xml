@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Banetype"</string>
+    <string name="marks">"Mærker"</string>
+    <string name="set_position">"Indstil placering"</string>
+    <string name="set_position_disabled_gps">"Aktiver GPS\nfor at indstille placering"</string>
+    <string name="set_position_no_gps_yet">"Venter på GPS-forbindelse"</string>
+    <string name="reset_position">"Nulstil placering"</string>
+    <string name="getting_marks">"Henter kapsejladsmærker..."</string>
+    <string name="set">"indstillet"</string>
+    <string name="unknown">"ikke relevant"</string>
+    <string name="not_set">"ikke indstillet"</string>
+    <string name="mark_list_accuracy">"(Nøjagtighed ca. %1$sm)"</string>
+    <string name="accuracy_detail">"for GPS-placering"</string>
+    <string name="distance_detail">"til gammel bøje"</string>
+    
+    
+    <string name="accuracy">"Nøjagtighed af GPS"</string>
+    <string name="distance">"Distance til gammel bøje"</string>
+    <string name="position_set">"Placeringen er sat"</string>
+    <string name="no_information">"Ingen oplysninger"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Placer enheden tæt på mærket, og tryk på \'Indstil placering\' for at indstille mærkets placering. Brug indikatoren for nøjagtighed for at besluttes, om den viste placering er god nok. Aktiver GPS, eller vent på, at GPS er tilgængelig."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Indstillinger"</string>
+
+    <string name="server">"Polling"</string>
+    <string name="server_sync_settings">"Polling-interval (sekunder)"</string>
+
+    <string name="options_menu_checkout">"Checkout"</string>
+    <string name="checkout_warning_message">"Er du sikker på, at du vil logge af? Du skal logge på igen med den angivne QR-kode for at få adgang til dine mærker!"</string>
+
+    <string name="no_marks_message">"Ingen mærker"</string>
+
+</resources>

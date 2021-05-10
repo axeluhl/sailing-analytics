@@ -61,14 +61,8 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
      */
     private boolean isOnRemoteServer;
 
-    EventBaseDTO() {
-    } // for serialization only
-
-    public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
-        this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<String, ImageSize>();
-        sailorsInfoWebsiteURLs = new HashMap<>();
-    }
+    @Deprecated
+    EventBaseDTO() {} // for serialization only
 
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);

@@ -771,7 +771,7 @@ public class RaceBoardPanel
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");
-                if(leaderboardGroupNameParam != null) {
+                if (leaderboardGroupNameParam != null) {
                     Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
                     leaderboardGroupLinkParameters.put("showRaceDetails", "true");
                     leaderboardGroupLinkParameters.put("leaderboardGroupName", leaderboardGroupNameParam);
@@ -877,9 +877,9 @@ public class RaceBoardPanel
         final RaceBoardPerspectiveOwnSettings initialSettings = super.getPerspectiveSettings();
         final CompetitorsFilterSets leaderboardFiterPanelFilterSets = competitorSearchTextBox
                 .getCompetitorsFilterSets();
-        FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
+        final FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> activeFilterSet = leaderboardFiterPanelFilterSets
                 .getActiveFilterSet();
-        String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
+        final String activeCompetitorsFilterSetName = activeFilterSet == null ? null : activeFilterSet.getName();
         final Set<String> selectedCompetitorIds = new HashSet<>();
         final Duration newInitialDurationAfterRaceStartInReplay;
         if (timer != null && racetimePanel != null) {
@@ -904,13 +904,17 @@ public class RaceBoardPanel
         final boolean isWindChartVisible = windChart == null ? false : windChart.isVisible();
         final boolean isManeuverTableVisible = maneuverTablePanel == null ? false : maneuverTablePanel.isVisible();
         final boolean autoExpandPreSelectedRace = leaderboardPanel.isAutoExpandPreSelectedRace();
-        RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+        final RaceBoardPerspectiveOwnSettings raceBoardPerspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 activeCompetitorsFilterSetName, leaderboardPanel.isVisible(), isWindChartVisible,
                 isCompetitorChartVisible, initialSettings.isCanReplayDuringLiveRaces(),
                 newInitialDurationAfterRaceStartInReplay, /* legacy single selectedCompetitor */ null,
                 selectedCompetitorIds, taggingComponent.isVisible(), isManeuverTableVisible,
                 initialSettings.getJumpToTag(), zoomStartInMillis, zoomEndInMillis, autoExpandPreSelectedRace);
         return raceBoardPerspectiveOwnSettings;
+    }
+    
+    public RaceBoardPerspectiveOwnSettings getOriginalPerspectiveSettings() {
+        return super.getPerspectiveSettings();
     }
     
     @Override

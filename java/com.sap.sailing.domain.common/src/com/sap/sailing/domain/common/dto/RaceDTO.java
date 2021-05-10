@@ -41,6 +41,7 @@ public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     
     private RegattaAndRaceIdentifier raceIdentifier;
     
+    @Deprecated
     public RaceDTO() {}
 
     public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked, RankingMetrics rankingMetricType) {
