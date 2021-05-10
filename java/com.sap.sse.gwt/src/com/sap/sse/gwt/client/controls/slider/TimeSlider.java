@@ -15,6 +15,7 @@ import com.google.gwt.user.client.DOM;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * A slider bar whose values are assumed to be Unix time stamps (milliseconds since the epoch, Jan 1st 1970 00:00:00 UTC).
@@ -209,6 +210,7 @@ public class TimeSlider extends SliderBar {
             knobElement.getStyle().setLeft(knobLeftOffset, Unit.PX);
             knobElement.getStyle().setVisibility(Visibility.VISIBLE);
             knobElement.getStyle().setProperty("display", "");
+            knobElement.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderKnob");
             knobElement.setTitle(formatTickLabel(curValue, null));
         } else {
             knobElement.getStyle().setDisplay(Display.NONE);
