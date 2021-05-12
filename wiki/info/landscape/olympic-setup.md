@@ -33,19 +33,25 @@ On sap-p1-1 two SSH connections are maintained, with the following port forwards
 
 On sap-p1-2, the following SSH connections are maintained:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 10202<--10202
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 10202<--10202; 8888<--8888
 
 ## AWS Setup
 
-Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels.
+Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission.
+
+I added the EPEL repository like this:
+
+```
+   yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+```
 
 Our "favorite" Availability Zone (AZ) in ap-northeast-1 is "1d" / "ap-northeast-1d".
 
 The same host ``tokyo-ssh.sapsailing.com`` also runs a MongoDB 3.6 instance on port 10203.
 
-For RabbitMQ we plan use a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings. The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672, RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``.
+For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings. The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
 
-*TODO* We should define a hostname in Route53 at least for the internal IP address of the RabbitMQ host so that when port forwards can easily be configured by hostname when using the ap-northeast-1 jump host.
+An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
 
 ## Landscape Architecture
 
@@ -67,4 +73,4 @@ sap-p1-1 normally is the master for the ``tokyo2020`` replica set. It shall repl
 
 SSH local port forwards (configured with the ``-L`` option) that use hostnames instead of IP addresses for the remote host specification are resolved each time a new connection is established through this forward. If the DNS entry resolves to multiple IPs or if the DNS entry changes over time, later connection requests through the port forward will honor the new host name's DNS resolution.
 
-sap-p1-2 normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on sap-p1-1. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward. A reverse port forward from ap-northeast-1 to the application port 8888 on sap-p1-2 has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
+sap-p1-2 normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on sap-p1-1. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward with local port 5673 for the ap-northeast-1 RabbitMQ (15673 for the web administration UI). A reverse port forward from ap-northeast-1 to the application port 8888 on sap-p1-2 has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
