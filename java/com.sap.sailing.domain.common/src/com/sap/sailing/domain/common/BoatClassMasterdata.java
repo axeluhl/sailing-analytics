@@ -101,6 +101,7 @@ public enum BoatClassMasterdata {
     RC44 ("RC44", true, 13.35, 2.75, BoatHullType.MONOHULL, true),
     RS100 ("RS 100", true, 4.30, 1.83, BoatHullType.MONOHULL, true, "RS100", "RS_100"),
     RS200 ("RS 200", true, 4.00, 1.83, BoatHullType.MONOHULL, true, "RS200", "RS_200"),
+    RS21 ("RS 21", true, 6.67, 2.20, BoatHullType.MONOHULL, true, "RS21", "RS_21"),
     RS400 ("RS 400", true, 4.52, 1.83, BoatHullType.MONOHULL, true, "RS400", "RS_400"),
     RS500 ("RS 500", true, 4.34, 1.58, BoatHullType.MONOHULL, true, "RS500", "RS_500"),
     RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800", "RS_800"),
