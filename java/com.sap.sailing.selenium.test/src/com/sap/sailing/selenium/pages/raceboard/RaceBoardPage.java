@@ -27,9 +27,6 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     @FindBy(how=BySeleniumId.class, using = "dataByContainer")
     private WebElement dataByContainer;
     
-    @FindBy(how=BySeleniumId.class, using = "timeSlider")
-    private WebElement timeSlider;
-    
     private boolean doneInit;
     
     /**
@@ -176,6 +173,7 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     }
     
     public TimeSliderPO getTimeSlider() {
-        return new TimeSliderPO(this.driver, this.timeSlider);
+        WebElement timeSliderElement = findElementBySeleniumId(this.driver, "timeSlider");
+        return new TimeSliderPO(this.driver, timeSliderElement);
     }
 }
