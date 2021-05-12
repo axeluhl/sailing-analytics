@@ -21,6 +21,12 @@ public class TimeSliderPO extends PageObject {
     @FindBy(how=BySeleniumId.class, using = "sliderBarMarker-E")
     private WebElement raceEndMarker;
     
+    @FindBy(how=BySeleniumId.class, using = "sliderBarMarker-S")
+    private WebElement startMarker;
+    
+    @FindBy(how=BySeleniumId.class, using = "sliderBarMarker-F")
+    private WebElement finishMarker;
+    
     private TimeSliderPO(WebDriver driver) {
         super(driver);
     }
@@ -37,7 +43,7 @@ public class TimeSliderPO extends PageObject {
             @Override
             public Boolean apply(WebDriver t) {
                 try {
-                    return sliderKnob.isDisplayed() && raceEndMarker.isDisplayed();
+                    return sliderKnob.isDisplayed() && startMarker.isDisplayed();
                 } catch (Exception e) {
                     return false;
                 }
@@ -51,5 +57,13 @@ public class TimeSliderPO extends PageObject {
     
     public String getEndMarkerTime() {
         return raceEndMarker.getAttribute("title");
+    }
+    
+    public String getStartMarkerTime() {
+        return startMarker.getAttribute("title");
+    }
+    
+    public String getFinishMarkerTime() {
+        return finishMarker.getAttribute("title");
     }
 }
