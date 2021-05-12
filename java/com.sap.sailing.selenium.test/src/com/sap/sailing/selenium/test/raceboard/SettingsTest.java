@@ -1,6 +1,8 @@
 package com.sap.sailing.selenium.test.raceboard;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +62,9 @@ public class SettingsTest extends AbstractSeleniumTest {
             .getTime();
     private static final Date AUDI_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2017-04-05T10:50:00-05:00")
             .getTime();
-
+    
+    private static final long DURATION_BEFORE_START_TO_SET_TIMER_TO_FOR_REPLAY_RACES_IN_SECONDS = 10;
+    private static final long DURATION_AFTER_START_TO_SET_TIMER_TO_FOR_START_ANALYSIS = 10;
     private static final String BMW_CUP_RACE_NAME = "R1";
 
     private static final String CUSTOM_COURSE_AREA = "Custom X";
@@ -262,16 +266,69 @@ public class SettingsTest extends AbstractSeleniumTest {
      * Verifies that Modes correctly set the time slider.
      */
     @Test
-    public void testThatModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
+    public void testThatAnalysisModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
-        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+        final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
                 BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "FULL_ANALYSIS", false);
-        LeaderboardSettingsDialogPO mapSettings = raceboard.openLeaderboardSettingsDialog();
+        final LeaderboardSettingsDialogPO leaderboardSettings = raceboard.openLeaderboardSettingsDialog();
         // Verify initial mode settings
-        mapSettings.waitForRaceDetailsAverageSpeedUntil(true);
-        TimeSliderPO timeSlider = raceboard.getTimeSlider();
-        Assert.assertTrue(timeSlider.getSliderKnobTime().equals(timeSlider.getEndMarkerTime()));
+        leaderboardSettings.waitForRaceDetailsAverageSpeedUntil(true);
+        final TimeSliderPO timeSlider = raceboard.getTimeSlider();
+        final String sliderKnobTime = timeSlider.getSliderKnobTime();
+        final String endMarkerTime = timeSlider.getEndMarkerTime();
+        Assert.assertTrue(sliderKnobTime.equals(endMarkerTime));
     }
+    
+    @Test
+    public void testThatFinishingLanesModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
+        createEventWithTrackedRace();
+        final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "WINNING_LANES", false);
+        final MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial mode settings
+        mapSettings.waitForWindUpUntil(true);
+        final TimeSliderPO timeSlider = raceboard.getTimeSlider();
+        final String sliderKnobTime = timeSlider.getSliderKnobTime();
+        final String finishMarkerTime = timeSlider.getFinishMarkerTime();
+        Assert.assertTrue(sliderKnobTime.equals(finishMarkerTime));
+    }
+    
+    @Test
+    public void testThatPlayerModeAffectsTimeSliderCorrectly()
+            throws InterruptedException, UnsupportedEncodingException {
+        createEventWithTrackedRace();
+        final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "PLAYER", false);
+        final MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial mode settings
+        mapSettings.waitForWindUpUntil(false);
+        final TimeSliderPO timeSlider = raceboard.getTimeSlider();
+        final LocalTime playerStartTime = LocalTime.parse(timeSlider.getStartMarkerTime())
+                .minusSeconds(DURATION_BEFORE_START_TO_SET_TIMER_TO_FOR_REPLAY_RACES_IN_SECONDS);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm");
+        final String formatedPlayerStartTime = formatter.format(playerStartTime);
+        final String sliderKnobTime = timeSlider.getSliderKnobTime();
+        Assert.assertTrue(sliderKnobTime.equals(formatedPlayerStartTime));
+    }
+    
+    @Test
+    public void testThatStartAnalysisModeAffectsTimeSliderCorrectly()
+            throws InterruptedException, UnsupportedEncodingException {
+        createEventWithTrackedRace();
+        final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(BMW_RACE, 1), "START_ANALYSIS", false);
+        final MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // Verify initial mode settings
+        mapSettings.waitForWindUpUntil(true);
+        final TimeSliderPO timeSlider = raceboard.getTimeSlider();
+        final LocalTime playerStartTime = LocalTime.parse(timeSlider.getStartMarkerTime())
+                .plusSeconds(DURATION_AFTER_START_TO_SET_TIMER_TO_FOR_START_ANALYSIS);
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm");
+        final String formatedPlayerStartTime = formatter.format(playerStartTime);
+        final String sliderKnobTime = timeSlider.getSliderKnobTime();
+        Assert.assertTrue(sliderKnobTime.equals(formatedPlayerStartTime));
+    }
+     
     
     /**
      * Verifies that settings are stored for raceboard.
