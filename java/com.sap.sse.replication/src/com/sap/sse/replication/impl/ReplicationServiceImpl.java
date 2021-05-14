@@ -368,6 +368,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
 
     private Channel createMasterChannelAndDeclareFanoutExchange() throws IOException {
         Channel result = createMasterChannel();
+        if (!Util.hasLength(exchangeName)) {
+            logger.severe("Replica seems registering at this master, but this master's exchange name is \""+exchangeName+
+                    "\". Failing with an exception.");
+            throw new IllegalStateException("Master's outbound replication exchange name is "+exchangeName+" but must be non-empty; "+
+                    "consider setting the REPLICATION_CHANNEL environment variable.");
+        }
         result.exchangeDeclare(exchangeName, "fanout");
         logger.info("Created fanout exchange " + exchangeName + " successfully.");
         return result;
@@ -403,10 +409,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
+        // due to different replicables to be replicated for replica, ensure that all
+        // replicables to be replicated to replica are actually observed:
+        addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
         synchronized (replicationInstancesManager) {
-            // due to different replicables to be replicated for replica, ensure that all
-            // replicables to be replicated to replica are actually observed:
-            addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
             // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
                 synchronized (this) {
