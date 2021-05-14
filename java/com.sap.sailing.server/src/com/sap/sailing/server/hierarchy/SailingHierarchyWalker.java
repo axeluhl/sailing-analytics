@@ -32,8 +32,18 @@ public final class SailingHierarchyWalker {
             // If !includeLeaderboardGroupsWithOverallLeaderboard we consider a LeaderboardGroup to belong
             // to the Event only if all Leaderboards are part of that Event.
             boolean hasOverallLeaderboard = lg.hasOverallLeaderboard();
+            boolean allLeaderboardsArePartOfEvent = true;
             boolean includeLeaderboardGroup = includeLeaderboardGroupsWithOverallLeaderboard || !hasOverallLeaderboard;
-            if (includeLeaderboardGroup) {
+            for (Leaderboard lb : lg.getLeaderboards()) {
+                final boolean partOfEvent = lb.isPartOfEvent(event);
+                if (includeLeaderboardGroup || partOfEvent) {
+                    Util.add(leaderboardsToLeaderboardGroups, lb, lg);
+                } else {
+                    allLeaderboardsArePartOfEvent = false;
+                }
+            }
+            // FIXME bug 5541: if there is only one leaderboard in the leaderboard group of an event series, the leaderboard group representing the series is still visited, leading to an endless recursion
+            if (includeLeaderboardGroup || allLeaderboardsArePartOfEvent) {
                 visitor.visit(lg);
                 if (hasOverallLeaderboard) {
                     Util.add(leaderboardsToLeaderboardGroups, lg.getOverallLeaderboard(), lg);

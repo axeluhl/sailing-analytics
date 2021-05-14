@@ -92,20 +92,23 @@ public class SailingHierarchyOwnershipUpdater {
 
             @Override
             public void visit(LeaderboardGroup leaderboardGroup) {
-                // No LeaderboardGroups with overall leaderboard are visited -> no infinite recursion occurs
-                updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup);
+                // leaderboard groups with overall leaderboard may be visited if all their leaderboards belong
+                // to the "event", but the process won't recurse back into "event" as we pass it explicitly as
+                // an event not to visit
+                updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup, /* exclude */ event);
             }
         });
     }
 
     public void updateGroupOwnershipForLeaderboardGroupHierarchy(LeaderboardGroup leaderboardGroup) {
-        updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup);
+        updateGroupOwnershipForLeaderboardGroupHierarchyInternal(leaderboardGroup, /* eventToExclude */ null);
         commitChanges();
     }
 
-    private void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup) {
+    private void updateGroupOwnershipForLeaderboardGroupHierarchyInternal(LeaderboardGroup leaderboardGroup, Event eventToExclude) {
         updateGroupOwner(leaderboardGroup.getIdentifier());
-        SailingHierarchyWalker.walkFromLeaderboardGroup(service, leaderboardGroup, true,
+        SailingHierarchyWalker.walkFromLeaderboardGroup(service, leaderboardGroup,
+                /* includeEventsIfLeaderboardGroupHasOverallLeaderboard */ true,
                 new LeaderboardGroupHierarchyVisitor() {
                     @Override
                     public void visit(Leaderboard leaderboard) {
@@ -114,9 +117,11 @@ public class SailingHierarchyOwnershipUpdater {
 
                     @Override
                     public void visit(Event event) {
-                        // Only events of LeaderboardGroups with overall leaderboard are visited -> no infinite
-                        // recursion occurs
-                        updateGroupOwnershipForEventHierarchyInternal(event);
+                        if (event != eventToExclude) {
+                            // Only events of LeaderboardGroups with overall leaderboard are visited -> no infinite
+                            // recursion occurs
+                            updateGroupOwnershipForEventHierarchyInternal(event);
+                        }
                     }
                 });
     }
