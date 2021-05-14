@@ -1916,13 +1916,27 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         deleteAccessControlList(identifier);
     }
 
+    private static class ShiroWildcardPermissionFromParts extends org.apache.shiro.authz.permission.WildcardPermission {
+        private static final long serialVersionUID = -6361446629960026098L;
+
+        private ShiroWildcardPermissionFromParts(Set<String> types, Set<String> actions, Set<String> objectIds) {
+            super();
+            setParts(Arrays.asList(types, actions, objectIds));
+        }
+        
+        private ShiroWildcardPermissionFromParts(WildcardPermission permission) {
+            super();
+            setParts(permission.getParts());
+        }
+    }
+
     @Override
     public <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
             HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            if (SecurityUtils.getSubject().isPermitted(
-                    objectToCheck.getIdentifier().getStringPermission(action))) {
+            if (SecurityUtils.getSubject().isPermitted(new ShiroWildcardPermissionFromParts(
+                    objectToCheck.getIdentifier().getPermission(action)))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1937,7 +1951,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(objectToCheck.getIdentifier().getStringPermission(actions[i]))) {
+                        .isPermitted(new ShiroWildcardPermissionFromParts(objectToCheck.getIdentifier().getPermission(actions[i])))) {
                     isPermitted = true;
                     break;
                 }
