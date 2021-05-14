@@ -97,6 +97,7 @@ import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.OAuthToken;
@@ -1914,20 +1915,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         deleteOwnership(identifier);
         logger.info("Deleting acls for " + identifier);
         deleteAccessControlList(identifier);
-    }
-
-    private static class ShiroWildcardPermissionFromParts extends org.apache.shiro.authz.permission.WildcardPermission {
-        private static final long serialVersionUID = -6361446629960026098L;
-
-        private ShiroWildcardPermissionFromParts(Set<String> types, Set<String> actions, Set<String> objectIds) {
-            super();
-            setParts(Arrays.asList(types, actions, objectIds));
-        }
-        
-        private ShiroWildcardPermissionFromParts(WildcardPermission permission) {
-            super();
-            setParts(permission.getParts());
-        }
     }
 
     @Override

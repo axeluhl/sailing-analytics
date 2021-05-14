@@ -59,7 +59,6 @@ public final class SailingHierarchyWalker {
             final LeaderboardGroupHierarchyVisitor visitor) {
         boolean visitEvents = includeEventsIfLeaderboardGroupHasOverallLeaderboard
                 && leaderboardGroup.hasOverallLeaderboard();
-
         if (visitEvents) {
             for (Event event : service.getAllEvents()) {
                 if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
@@ -67,7 +66,6 @@ public final class SailingHierarchyWalker {
                 }
             }
         }
-
         for (Leaderboard lb : leaderboardGroup.getLeaderboards()) {
             visitor.visit(lb);
         }

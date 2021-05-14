@@ -16,6 +16,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SecurityService.RoleCopyListener;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -155,10 +156,8 @@ public class SailingHierarchyOwnershipUpdater {
     private void updateGroupOwner(QualifiedObjectIdentifier id) {
         final OwnershipAnnotation ownership = securityService.getOwnership(id);
         if (updateStrategy.needsUpdate(id, ownership)) {
-            String permissionToCheck = id.getTypeIdentifier() + WildcardPermission.PART_DIVIDER_TOKEN
-                    + DefaultActions.CHANGE_OWNERSHIP.name() + WildcardPermission.PART_DIVIDER_TOKEN
-                    + id.getTypeRelativeObjectIdentifier();
-            SecurityUtils.getSubject().checkPermission(permissionToCheck);
+            final WildcardPermission permission = id.getPermission(DefaultActions.CHANGE_OWNERSHIP);
+            SecurityUtils.getSubject().checkPermission(new ShiroWildcardPermissionFromParts(permission));
             objectsToUpdateOwnershipsFor.add(id);
         }
     }
