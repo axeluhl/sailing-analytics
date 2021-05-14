@@ -32,17 +32,8 @@ public final class SailingHierarchyWalker {
             // If !includeLeaderboardGroupsWithOverallLeaderboard we consider a LeaderboardGroup to belong
             // to the Event only if all Leaderboards are part of that Event.
             boolean hasOverallLeaderboard = lg.hasOverallLeaderboard();
-            boolean allLeaderboardsArePartOfEvent = true;
             boolean includeLeaderboardGroup = includeLeaderboardGroupsWithOverallLeaderboard || !hasOverallLeaderboard;
-            for (Leaderboard lb : lg.getLeaderboards()) {
-                final boolean partOfEvent = lb.isPartOfEvent(event);
-                if (includeLeaderboardGroup || partOfEvent) {
-                    Util.add(leaderboardsToLeaderboardGroups, lb, lg);
-                } else {
-                    allLeaderboardsArePartOfEvent = false;
-                }
-            }
-            if (includeLeaderboardGroup || allLeaderboardsArePartOfEvent) {
+            if (includeLeaderboardGroup) {
                 visitor.visit(lg);
                 if (hasOverallLeaderboard) {
                     Util.add(leaderboardsToLeaderboardGroups, lg.getOverallLeaderboard(), lg);

@@ -83,7 +83,8 @@ public class SailingHierarchyOwnershipUpdater {
 
     private void updateGroupOwnershipForEventHierarchyInternal(Event event) {
         updateGroupOwner(event.getIdentifier());
-        SailingHierarchyWalker.walkFromEvent(event, false, new EventHierarchyVisitor() {
+        SailingHierarchyWalker.walkFromEvent(event, /* includeLeaderboardGroupsWithOverallLeaderboard */ false,
+                new EventHierarchyVisitor() {
             @Override
             public void visit(Leaderboard leaderboard, Set<LeaderboardGroup> leaderboardGroups) {
                 updateGroupOwnershipForLeaderboardHierarchyInternal(leaderboard);
