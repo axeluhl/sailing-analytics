@@ -53,6 +53,16 @@ For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rab
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
 
+### Cross-Region VPC Peering
+
+The primary AWS region for the tokyo2020 replica set is ap-northeast-1 (Tokyo). In order to provide low latencies for the RHBs we'd like to add replicas also in other regions. Since we want to not expose the RabbitMQ running ap-northeast-1 to the outside world, we plan to peer the VPCs of other regions with the one in ap-northeast-1.
+
+The pre-requisite for VPCs to get peered is that their CIDRs (such as 172.31.0.0/16) don't overlap. The default VPC in each region always uses the same CIDR (172.31.0.0/16), and hence in order to peer VPCs all but one must be non-default VPC. To avoid confusion when lanuching instances or setting up security groups it can be adequate for those peering regions other than our default region eu-west-1 to set up non-default VPCs with peering-capable CIDRs and remove the default VPC. This way users cannot accidentally launch instances or define security groups for any VPC other than the peered one.
+
+After having peered the VPCs, the VPCs default routing table must be extended by a route to the peered VPC's CIDR using the peering connection.
+
+With peering in place it is possible to reach instances in peered VPCs by their internal IPs. In particular, it is possible to connect to a RabbitMQ instance with the internal IP and port 5672 even if that RabbitMQ runs in a different region whose VPC is peered.
+
 ## Landscape Architecture
 
 We have applied for a single SSH tunnel to IP address ``52.194.91.94`` which is our elastic IP for our SSH jump host in ap-northeast-1(d). 
