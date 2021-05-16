@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -53,7 +54,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
 
     @Before
     public void setUp() throws Exception {
-        MongoDBConfiguration.getDefaultTestConfiguration().getService().getDB().drop();
+        MongoDBConfiguration.getDefaultTestConfiguration().getService().getDB().withWriteConcern(WriteConcern.JOURNALED).drop();
         service = Mockito.spy(new RacingEventServiceImpl());
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         Mockito.doReturn(securityService).when(service).getSecurityService();
