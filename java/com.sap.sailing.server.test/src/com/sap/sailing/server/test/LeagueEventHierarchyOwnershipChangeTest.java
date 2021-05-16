@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.shiro.SecurityUtils;
@@ -38,6 +39,9 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.UserManagementException;
 
 public class LeagueEventHierarchyOwnershipChangeTest {
+    private static final String USERNAME = "user-123";
+    private static final String PASSWORD = "pass-234";
+
     private Event event;
     private LeaderboardGroup leaderboardGroup;
     private Leaderboard overallLeaderboard;
@@ -53,6 +57,8 @@ public class LeagueEventHierarchyOwnershipChangeTest {
         service = Mockito.spy(new RacingEventServiceImpl());
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         Mockito.doReturn(securityService).when(service).getSecurityService();
+        securityService.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
+                /* validation URL */ Locale.ENGLISH, null, null);
         event = service.addEvent("Test", "Test Event", TimePoint.now(), TimePoint.now().plus(Duration.ONE_WEEK), "Here",
                 /* isPublic */ true, UUID.randomUUID());
         defaultCourseArea = new CourseAreaImpl("Default", UUID.randomUUID());
@@ -67,7 +73,6 @@ public class LeagueEventHierarchyOwnershipChangeTest {
         subject = SecurityUtils.getSubject(); // this also binds the Subject to the ThreadContext
         subject.login(new UsernamePasswordToken("admin", "admin"));
         threadState = new SubjectThreadState(subject);
-        
     }
 
     @Test
