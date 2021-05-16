@@ -6,6 +6,8 @@ import static org.junit.Assert.assertSame;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -14,6 +16,7 @@ import org.apache.shiro.subject.support.SubjectThreadState;
 import org.apache.shiro.util.ThreadContext;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -37,29 +40,34 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.UserManagementException;
 
 public class LeagueEventHierarchyOwnershipChangeTest {
+    private static final Logger logger = Logger.getLogger(LeagueEventHierarchyOwnershipChangeTest.class.getName());
+    private static final String THE_NEW_OWNING_GROUP_NAME = /* newGroupName */ "The new owning group";
     private static final String USERNAME = "user-123";
     private static final String PASSWORD = "pass-234";
 
     private Event event;
     private LeaderboardGroup leaderboardGroup;
     private Leaderboard overallLeaderboard;
-    private RacingEventService service;
+    private static RacingEventService service;
     private Subject subject;
     private SubjectThreadState threadState;
-    private SecurityService securityService;
+    private static SecurityService securityService;
     private CourseArea defaultCourseArea;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpClass() throws Exception {
         MongoDBConfiguration.getDefaultTestConfiguration().getService().getDB().withWriteConcern(WriteConcern.JOURNALED).drop();
         service = Mockito.spy(new RacingEventServiceImpl());
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         Mockito.doReturn(securityService).when(service).getSecurityService();
         securityService.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
                 /* validation URL */ Locale.ENGLISH, null, null);
+    }
+    
+    @Before
+    public void setUp() throws Exception {
         event = service.addEvent("Test", "Test Event", TimePoint.now(), TimePoint.now().plus(Duration.ONE_WEEK), "Here",
                 /* isPublic */ true, UUID.randomUUID());
         defaultCourseArea = new CourseAreaImpl("Default", UUID.randomUUID());
@@ -79,7 +87,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
     @Test
     public void testLeagueEventHierarchyOwnershipChange() {
         SailingHierarchyOwnershipUpdater.createOwnershipUpdater(/* createNewGroup */ true , /* existingGroupIdOrNull */ null,
-                /* newGroupName */ "The new owning group",
+                THE_NEW_OWNING_GROUP_NAME,
                 /* migrateCompetitors */ true, /* migrateBoats */ true, /* copyMembersAndRoles */ true,
                 service)
             .updateGroupOwnershipForEventHierarchy(event);
@@ -89,7 +97,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
     @Test
     public void testLeagueHierarchyOwnershipChange() {
         SailingHierarchyOwnershipUpdater.createOwnershipUpdater(/* createNewGroup */ true , /* existingGroupIdOrNull */ null,
-                /* newGroupName */ "The new owning group",
+                THE_NEW_OWNING_GROUP_NAME,
                 /* migrateCompetitors */ true, /* migrateBoats */ true, /* copyMembersAndRoles */ true,
                 service)
             .updateGroupOwnershipForLeaderboardGroupHierarchy(leaderboardGroup);
@@ -107,7 +115,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("CA", UUID.randomUUID())));
         event.addLeaderboardGroup(leaderboardGroup2);
         SailingHierarchyOwnershipUpdater.createOwnershipUpdater(/* createNewGroup */ true , /* existingGroupIdOrNull */ null,
-                /* newGroupName */ "The new owning group",
+                THE_NEW_OWNING_GROUP_NAME,
                 /* migrateCompetitors */ true, /* migrateBoats */ true, /* copyMembersAndRoles */ true,
                 service)
             .updateGroupOwnershipForEventHierarchy(event);
@@ -126,7 +134,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
                 new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), defaultCourseArea));
         event.addLeaderboardGroup(leaderboardGroup2);
         SailingHierarchyOwnershipUpdater.createOwnershipUpdater(/* createNewGroup */ true , /* existingGroupIdOrNull */ null,
-                /* newGroupName */ "The new owning group",
+                THE_NEW_OWNING_GROUP_NAME,
                 /* migrateCompetitors */ true, /* migrateBoats */ true, /* copyMembersAndRoles */ true,
                 service)
             .updateGroupOwnershipForEventHierarchy(event);
@@ -136,9 +144,18 @@ public class LeagueEventHierarchyOwnershipChangeTest {
     }
     
     @After
-    public void tearDown() throws UserManagementException {
+    public void tearDown() {
+        if (service != null && event != null) {
+            service.removeEvent(event.getId());
+        }
+        if (securityService != null) {
+            try {
+                securityService.deleteUserGroup(securityService.getUserGroupByName(THE_NEW_OWNING_GROUP_NAME));
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Problem deleting user group "+THE_NEW_OWNING_GROUP_NAME, e);
+            }
+        }
         threadState.restore();
         subject.logout();
-        securityService.deleteUser("admin");
     }
 }
