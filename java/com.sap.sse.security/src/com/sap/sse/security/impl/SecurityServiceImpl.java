@@ -97,6 +97,7 @@ import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.OAuthToken;
@@ -1921,8 +1922,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            if (SecurityUtils.getSubject().isPermitted(
-                    objectToCheck.getIdentifier().getStringPermission(action))) {
+            if (SecurityUtils.getSubject().isPermitted(new ShiroWildcardPermissionFromParts(
+                    objectToCheck.getIdentifier().getPermission(action)))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1937,7 +1938,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(objectToCheck.getIdentifier().getStringPermission(actions[i]))) {
+                        .isPermitted(new ShiroWildcardPermissionFromParts(objectToCheck.getIdentifier().getPermission(actions[i])))) {
                     isPermitted = true;
                     break;
                 }

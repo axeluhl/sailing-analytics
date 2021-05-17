@@ -23,6 +23,18 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+                    <h2 class="articleSubheadline">May 2021</h2>
+                    <ul class="bulletList">
+                        <li>Added the RS21 boat class including logo, hull length and visualization type as a pre-defined boat class.</li>
+                        <li>Fixed an error regarding removing of non-transitive roles.</li>
+                        <li>Fixed problem with changing the ownership hierarchy of event series that have a leaderboard group
+                            with an overall leaderboard.</li>
+                        <li>Bugfix: When selecting "ORC Performance Curve (&gt;>=2015, leader as baseline)" the certificate management button
+                            was missing in the Regatta panel in the AdminConsole. This has now been fixed.</li>
+                        <li>Bugfix: When an incomplete ORC certificate that is missing allowances for certain pre-configured
+			    course types, such as "non-Spinnaker," then loading those certificates after a server re-start
+			    failed. This problem has now been fixed, and such missing allowances will be represented as 0.0s values.</li>
+                    </ul>
                     <h2 class="articleSubheadline">April 2021</h2>
                     <ul class="bulletList">
                         <li>The <tt>/sailingserver/api/v1/wind/putWind</tt> method now has a missing null check in case
