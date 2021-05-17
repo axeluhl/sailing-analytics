@@ -11,8 +11,8 @@ public class CompetitorProviderDTO extends NamedDTO {
 
     private Map<String, Set<String>> hasCompetitorsForRegattasInEvent;
 
-    public CompetitorProviderDTO() {
-    }
+    @Deprecated
+    CompetitorProviderDTO() {} // for GWT RPC serialization only
 
     public CompetitorProviderDTO(String name, Map<String, Set<String>> hasCompetitorsForRegattasInEvent) {
         super(name);

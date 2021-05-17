@@ -3,8 +3,10 @@ package com.sap.sse.landscape.application.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -35,6 +37,8 @@ import com.sap.sse.landscape.impl.ProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public abstract class ApplicationProcessImpl<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -59,7 +63,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.serverDirectory = serverDirectory;
     }
 
-    public ApplicationProcessImpl(int port, Host host, String serverDirectory, int telnetPort, String serverName) {
+    public ApplicationProcessImpl(int port, Host host, String serverDirectory, Integer telnetPort, String serverName) {
         this(port, host, serverDirectory);
         this.telnetPortToOSGiConsole = telnetPort;
         this.serverName = serverName;
@@ -198,7 +202,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
     private JSONObject getReplicationStatus(final URL url)
             throws IOException, ClientProtocolException, ParseException {
         final HttpPost postRequest = new HttpPost(url.toString());
-        final HttpClient client = HttpClientBuilder.create().build();
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         client.execute(postRequest).getEntity().writeTo(bos);
         return (JSONObject) new JSONParser().parse(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
@@ -228,9 +232,9 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
                 } catch (Exception e) {
                     return false;
                 }
-            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name");
+            }, optionalTimeout, /* sleep between attempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for master server name of "+this);
         } catch (Exception e) {
-            logger.info("Exception while waiting for master server name: "+e.getMessage());
+            logger.info("Exception while waiting for master server name of "+this+": "+e.getMessage());
         }
         return result[0];
     }
@@ -239,7 +243,23 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             throws ClientProtocolException, IOException, ParseException {
         return getReplicationStatus(getReplicationStatusPostUrlAndQuery(hostname, port));
     }
-
+    
+    @Override
+    public void stopReplicatingFromMaster(String bearerToken, Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
+        final URLConnection deregistrationRequestConnection = HttpUrlConnectionHelper
+                .redirectConnectionWithBearerToken(getUrl(STOP_REPLICATION_POST_URL_PATH_AND_QUERY, optionalTimeout),
+                        /* HTTP method */ "POST", bearerToken);
+        StringBuilder uuid = new StringBuilder();
+        InputStream content = (InputStream) deregistrationRequestConnection.getContent();
+        byte[] buf = new byte[256];
+        int read = content.read(buf);
+        while (read != -1) {
+            uuid.append(new String(buf, 0, read));
+            read = content.read(buf);
+        }
+        content.close();
+    }
+    
     @Override
     public String toString() {
         return "ApplicationProcessImpl [serverDirectory=" + serverDirectory + ", serverName=" + serverName + ", port=" + getPort() + ", host=" + getHost() + "]";

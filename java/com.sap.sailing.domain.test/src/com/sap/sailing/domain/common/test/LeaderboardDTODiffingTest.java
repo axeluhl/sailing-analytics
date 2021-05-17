@@ -410,7 +410,7 @@ public class LeaderboardDTODiffingTest {
     public void testPartialRaceColumnDTOCompaction() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // create a modified R9 RaceDTO clone in newVersion to make sure that even changing a property in the RaceDTO will keep the RaceColumnDTO from being omitted
         RaceColumnDTO r9 = newVersion.getRaceColumnByName("R9");
-        RaceColumnDTO clonedR9 = new RaceColumnDTO();
+        RaceColumnDTO clonedR9 = new RaceColumnDTO("R9");
         cloner.clone(r9, clonedR9);
         // also clone the racesPerFleet map, or else we'd be modifying the previous version's one too
         final Field racesPerFleetField = clonedR9.getClass().getDeclaredField("racesPerFleet");
@@ -420,6 +420,7 @@ public class LeaderboardDTODiffingTest {
         racesPerFleetField.set(clonedR9, new HashMap<FleetDTO, RaceDTO>(m));
         final FleetDTO defaultFleet = r9.getFleets().iterator().next();
         RaceDTO r9Race = r9.getRace(defaultFleet);
+        @SuppressWarnings("deprecation") // special test based on cloning another instance
         RaceDTO clonedR9Race = new RaceDTO();
         cloner.clone(r9Race, clonedR9Race);
         clonedR9.setRace(defaultFleet, clonedR9Race);

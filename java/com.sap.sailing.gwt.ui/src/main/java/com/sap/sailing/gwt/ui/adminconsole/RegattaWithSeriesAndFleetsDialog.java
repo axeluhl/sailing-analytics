@@ -51,8 +51,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
 
     @Override
     protected RegattaDTO getResult() {
-        RegattaDTO result = getRegattaDTO();
-        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
+        RegattaDTO result = getRegattaDTO(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
         result.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceCheckBox.getValue();
         return result;

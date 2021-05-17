@@ -35,7 +35,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     private Integer defaultNumberOfLaps;
     
     public CourseTemplateDTO() {
-        // for GWT serialization
+        super("");
     }
 
     public CourseTemplateDTO(UUID uuid, String name, String shortName,

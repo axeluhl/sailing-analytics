@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>
+
+    
+    
+    <string name="options_menu_live">"Forbindelsesinformation"</string>
+    <string name="remove">"Fjern"</string>
+    <string name="enter_new_item">"Indtast nyt element"</string>
+    <string name="add">"Tilføj"</string>
+    <string name="there_are_no_items_yet_">"Der er endnu ingen elementer."</string>
+
+    <!-- SystemInformationActivity -->
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- Generic -->
+    <string name="generic_error">"Fejl"</string>
+    <string name="about">"Info"</string>
+
+    <!-- Signal quality -->
+    <string name="signal_accuracy_indicator_view_description">"Nøjagtighed af GPS"</string>
+    <string name="poor">"dårlig"</string>
+    <string name="good">"god"</string>
+    <string name="great">"fremragende"</string>
+    <string name="no_signal">"intet signal"</string>
+    <string name="ok">"OK"</string>
+
+    <!-- Regatta -->
+    <string name="your_regattas">"Dine regattaer:"</string>
+    <string name="options_refresh">"Opdater"</string>
+
+    <!-- QR Code -->
+    <string name="notify_user_db_operation_failed">"Fejl: Databaseoperation mislykkedes."</string>
+    <string name="no_qr_code_popup_title">"Ingen QR-kode?"</string>
+    <string name="no_qr_code_popup_message">"Kontakt kapsejladsledelsen, hvis du ikke har modtaget en QR-kode."</string>
+    <string name="error_play_store_and_scanning_not_available">"Play Store og scanning ikke tilgængelig."</string>
+    <string name="scanning_cancelled">"Scanning annulleret"</string>
+    <string name="error_scanning_qrcode">"Fejl ved scanning af QR-kode {result-code}"</string>
+    <string name="notify_user_api_call_failed">"Der opstod en fejl under forsøg på at kontakte serveren. Prøv igen."</string>
+    <string name="please_wait">"Vent"</string>
+    <string name="error_invalid_qr_code">"Ugyldig QR-kode"</string>
+    
+    
+    
+
+    <!-- Eula -->
+    <string name="eula_title">"Slutbrugerlicensaftale"</string>
+    <string name="eula_message">"Hvis du bruger denne app bekræfter og accepterer du slutbrugerlicensaftale fra SAP SE. Læs slutbrugerlicensaftalen her."</string>
+    <string name="eula_confirm">"Bekræft"</string>
+    <string name="linked_eula_message_part">"her"</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">"Om denne app"</string>
+    <string name="eula">"Slutbrugerlicensaftale"</string>
+    <string name="license_information">"Licensoplysninger"</string>
+
+    <!-- HTTP Requests -->
+    
+    
+    
+    
+
+    <!-- Dialog -->
+    <string name="yes">"Ja"</string>
+    <string name="no">"Nej"</string>
+    <string name="warning">"Advarsel"</string>
+    <string name="enable_gps">"GPS er slået fra. Denne app kræver GPS-placeringer. Vil du slå GPS til i placeringsindstillingerne?"</string>
+
+    <!-- Message Sending -->
+    <string name="connected_to_wp">"Forbundet til: %1$s\n%2$s\nBoundService:%3$s"</string>
+    <string name="sending_waiting">"I øjeblikket venter %1$d begivenheder på at blive sendt.\nDer blev senest sendt kl. %2$s"</string>
+    <string name="sending_no_waiting">"I øjeblikket venter ingen begivenheder på at blive sendt."</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">"Yderligere oplysninger om"</string>
+    <string name="footer_text_link">"https://www.sapsailing.com"</string>
+
+    <string name="yesterday">"I går"</string>
+    <string name="today">"I dag"</string>
+    <string name="tomorrow">"I morgen"</string>
+    
+    
+
+    
+</resources>

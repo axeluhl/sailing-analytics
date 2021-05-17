@@ -22,7 +22,7 @@ import com.sap.sailing.windestimation.model.store.ModelDomainType;
 import com.sap.sailing.windestimation.model.store.ModelStore;
 import com.sap.sailing.windestimation.model.store.MongoDbModelStoreImpl;
 import com.sap.sse.mongodb.MongoDBService;
-import com.sap.sse.replication.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class WindEstimationFactoryServiceImpl extends

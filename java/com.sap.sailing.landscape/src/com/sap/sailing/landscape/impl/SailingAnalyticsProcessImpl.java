@@ -30,12 +30,14 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
-import com.sap.sse.landscape.application.impl.ApplicationProcessImpl;
+import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.impl.AwsApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 public class SailingAnalyticsProcessImpl<ShardingKey>
-extends ApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
+extends AwsApplicationProcessImpl<ShardingKey, SailingAnalyticsMetrics, SailingAnalyticsProcess<ShardingKey>>
 implements SailingAnalyticsProcess<ShardingKey> {
     private static final Logger logger = Logger.getLogger(SailingAnalyticsProcessImpl.class.getName());;
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
@@ -44,15 +46,15 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private Release release;
     private TimePoint startTimePoint;
     
-    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort) {
-        super(port, host, serverDirectory);
+    public SailingAnalyticsProcessImpl(int port, Host host, String serverDirectory, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
+        super(port, host, serverDirectory, landscape);
         this.expeditionUdpPort = expeditionUdpPort;
     }
 
     public SailingAnalyticsProcessImpl(int port,
             SailingAnalyticsHost<ShardingKey> host,
-            String serverDirectory, int telnetPort, String serverName, Integer expeditionUdpPort) {
-        super(port, host, serverDirectory, telnetPort, serverName);
+            String serverDirectory, Integer telnetPort, String serverName, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
+        super(port, host, serverDirectory, telnetPort, serverName, landscape);
         this.expeditionUdpPort = expeditionUdpPort;
     }
 
@@ -64,7 +66,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private JSONObject getStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final HttpGet getStatusRequest = new HttpGet(getHealthCheckUrl(optionalTimeout).toString());
         final JSONObject status = Wait.wait(()->{
-                    final HttpClient client = HttpClientBuilder.create().build();
+                    final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
                     final HttpResponse result = client.execute(getStatusRequest);
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     result.getEntity().writeTo(bos);
@@ -127,7 +129,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
         }
         return serverName;
     }
-
+    
     @Override
     public Release getVersion(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         return getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);

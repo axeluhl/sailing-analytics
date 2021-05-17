@@ -83,7 +83,7 @@ public class RoleWithSecurityDTOTableWrapper extends
                         qualifiedForUser != null ? qualifiedForUser.getName() : null,
                         selectedRole.getRoleDefinition().getId(),
                         qualifiedForTenant == null ? null : qualifiedForTenant.getName(),
-                        new AsyncCallback<SuccessInfo>() {
+                        selectedRole.isTransitive(), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.couldNotRemoveRoleFromUser(selectedObject.getName(),
