@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
-import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -57,6 +57,7 @@ import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileStorageServiceConnectionTestObserver {
 
     private static final boolean DONT_FIRE_EVENTS = false;
+    private static final Duration DEFAULT_DURATION = Duration.ONE_MILLISECOND;
     private static final NewMediaDialogResources RESOURCES = NewMediaDialogResources.INSTANCE;
 
     protected static class MediaTrackValidator implements Validator<MediaTrack> {
@@ -72,7 +73,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             if (media.url == null || media.url.trim().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (media.title == null || media.title.trim().isEmpty()) {
-                errorMessage = stringMessages.pleaseEnterA(stringMessages.title());
+                errorMessage = stringMessages.pleaseEnterA(stringMessages.name());
             } else if (media.mimeType == null) {
                 errorMessage = stringMessages.pleaseEnterA(stringMessages.mimeType());
             } else if (media.startTime == null) {
@@ -90,7 +91,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     private URLFieldWithFileUpload urlBox;
 
-    private TextBox titleBox;
+    private TextBox nameBox;
 
     protected DateAndTimeInput startTimeBox;
 
@@ -99,8 +100,6 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private TextBox durationBox;
     
     private ListBox mimeTypeListBox;
-
-    private TimePoint defaultStartTime;
 
     private Label infoLabelLabel;
 
@@ -113,6 +112,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     private boolean remoteMp4WasFinished;
 
     private Button defaultTimeButton;
+    private Button resetNameButton;
 
     private SimpleBusyIndicator busyIndicator;
 
@@ -120,13 +120,12 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     private boolean manuallyEditedStartTime = false;
 
-    public NewMediaDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime, StringMessages stringMessages,
+    public NewMediaDialog(MediaServiceAsync mediaService, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, FileStorageServiceConnectionTestObservable storageServiceConnection,
             DialogCallback<MediaTrack> dialogCallback) {
         super(stringMessages.addMediaTrack(), "", stringMessages.ok(), stringMessages.cancel(),
                 new MediaTrackValidator(stringMessages), dialogCallback);
         RESOURCES.css().ensureInjected();
-        this.defaultStartTime = defaultStartTime != null ? defaultStartTime : MillisecondsTimePoint.now();
         this.stringMessages = stringMessages;
         this.raceIdentifier = raceIdentifier;
         this.assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
@@ -137,16 +136,30 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         urlBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
+                nameBox.setValue(urlBox.getName());
+                mediaTrack.title = nameBox.getValue();
                 validateAndUpdate();
             }
         });
         getCancelButton().addClickHandler(clickEvent-> urlBox.deleteCurrentFile());
         
-        titleBox = createTextBox(null);
-        titleBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+        nameBox = createTextBox(null);
+        nameBox.addStyleName(RESOURCES.css().nameBoxClass());
+        nameBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                mediaTrack.title = titleBox.getValue();
+                mediaTrack.title = nameBox.getValue();
+                validateAndUpdate();
+            }
+        });
+        resetNameButton = new Button();
+        resetNameButton.addStyleName(RESOURCES.css().resetNameButtonClass());
+        resetNameButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                mediaTrack.title = "";
+                nameBox.setValue("");
+                //refreshUI(); // Force UI update
                 validateAndUpdate();
             }
         });
@@ -160,19 +173,21 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 validateAndUpdate();
             }
         });
+        
         defaultTimeButton = new Button();
         defaultTimeButton.setTitle(StringMessages.INSTANCE.resetStartTimeToDefault());
-        defaultTimeButton.setStyleName(RESOURCES.css().resetButtonClass(), true);
+        defaultTimeButton.addStyleName(RESOURCES.css().resetButtonClass());
         defaultTimeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 manuallyEditedStartTime = true;
-                mediaTrack.startTime = defaultStartTime;
+                mediaTrack.startTime = MillisecondsTimePoint.now();
                 refreshUI(); // Force UI update
                 validateAndUpdate();
             }
         });
         durationBox = createTextBox(null);
+        durationBox.setValue(DEFAULT_DURATION.toString());
         durationBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -181,10 +196,10 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                     try {
                         mediaTrack.duration = TimeFormatUtil.hrsMinSecToMilliSeconds(duration);
                     } catch (NumberFormatException e) {
-                        mediaTrack.duration = null;
+                        mediaTrack.duration = DEFAULT_DURATION;
                     }
                 } else {
-                    mediaTrack.duration = null;
+                    mediaTrack.duration = DEFAULT_DURATION;
                 }
                 validateAndUpdate();
             }
@@ -234,7 +249,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                 manuallyEditedStartTime = false;
 
                 if (mediaTrack.startTime == null) {
-                    mediaTrack.startTime = defaultStartTime;
+                    mediaTrack.startTime = MillisecondsTimePoint.now();
                 }
 
                 
@@ -251,7 +266,11 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
                         @Override
                         public void onSuccess(VideoMetadataDTO result) {
                             if (result.isDownloadable()) {
-                                mediaTrack.duration = result.getDuration();
+                                if (result.getDuration() != null) {
+                                    mediaTrack.duration = result.getDuration();
+                                } else {
+                                    mediaTrack.duration = DEFAULT_DURATION;
+                                }
                                 mediaTrack.title = result.getMessage();
                                 refreshUI();
                                 validateAndUpdate();
@@ -324,13 +343,13 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
 
     public void loadedmetadata(MediaElement mediaElement) {
         if (!manuallyEditedStartTime) {
-            mediaTrack.startTime = this.defaultStartTime;
+            mediaTrack.startTime = MillisecondsTimePoint.now();
         }
         double duration = mediaElement.getDuration();
         if (duration > 0) {
             mediaTrack.duration = new MillisecondsDurationImpl((long) Math.round(duration * 1000));
         } else {
-            mediaTrack.duration = null;
+            mediaTrack.duration = DEFAULT_DURATION;
         }
         refreshUI();
         validateAndUpdate();
@@ -345,10 +364,14 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         
         Grid formGrid = new Grid(6, 2);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0, 0, new Label(stringMessages.url() + ":"));
+        formGrid.setWidget(0, 0, new Label(stringMessages.fileUpload() + ":"));
         formGrid.setWidget(0, 1, urlBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.name() + ":"));
-        formGrid.setWidget(1, 1, titleBox);
+        FlowPanel namePanel = new FlowPanel();
+        namePanel.addStyleName(NewMediaDialogResources.INSTANCE.css().fieldGroup());
+        namePanel.add(nameBox);
+        namePanel.add(resetNameButton);
+        formGrid.setWidget(1, 1, namePanel);
 
         infoLabelLabel = new Label();
         formGrid.setWidget(2, 0, infoLabelLabel);
@@ -403,7 +426,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
     }
 
     protected void refreshUI() {
-        titleBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
+        nameBox.setValue(mediaTrack.title, DONT_FIRE_EVENTS);
         if (mediaTrack.isYoutube()) {
             infoLabelLabel.setText(stringMessages.youtubeId() + ":");
             infoLabel.setWidget(new Label(mediaTrack.url));
@@ -431,7 +454,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         if (mediaTrack.duration != null) {
             durationBox.setValue(TimeFormatUtil.durationToHrsMinSec(mediaTrack.duration), DONT_FIRE_EVENTS);
         } else {
-            durationBox.setValue("", DONT_FIRE_EVENTS);
+            durationBox.setValue(DEFAULT_DURATION.toString(), DONT_FIRE_EVENTS);
         }
         refreshPopupPosition();
     }
@@ -550,6 +573,8 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
             mediaTrack.duration = result.getDuration();
             if (mediaTrack.duration == null) {
                 loadMediaDuration(); // Attempt duration detection with audio channel
+            } else {
+                mediaTrack.duration = DEFAULT_DURATION;
             }
             mediaTrack.mimeType = result.isSpherical() ? MimeType.mp4panorama : MimeType.mp4;
             if (result.getRecordStartedTime() != null && !manuallyEditedStartTime) {

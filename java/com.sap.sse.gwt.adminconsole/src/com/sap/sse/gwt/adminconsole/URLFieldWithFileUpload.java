@@ -54,6 +54,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     private final FileUpload fileUploadField;
     
     private String uri;
+    private String name;
 
     private boolean valueChangeHandlerInitialized = false;
     private StartUploadEvent startUploadEvent;
@@ -129,7 +130,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
-        fileUploadField.getElement().setAttribute("accept", "capture=camera");
+        fileUploadField.getElement().setAttribute("accept", "video/*");
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
@@ -185,10 +186,12 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
                                 String fileEnding = fileName.substring(dotPos + 1);
                                 textShown = fileEnding + " - ";
                             } 
+                            name = fileName.substring(dotPos + 1);
                             textShown += stringMessages.uploadSuccessful();
                             urlTextBox.setValue(textShown);
                         }
                         urlTextBox.setTitle(fileName);
+                        name = getFileNameWithoutEnding(fileName);
                         fireResultUri(uri);
                         removeButton.setEnabled(true);
                     } else {
@@ -208,9 +211,24 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         initWidget(mainPanel);
     }
     
+    private String getFileNameWithoutEnding(String fileName) {
+        String result = fileName;
+        int dotPos = fileName.lastIndexOf('.');
+        if (dotPos >= 0) {
+            String fileEnding = fileName.substring(dotPos);
+            result = fileName.replace(fileEnding, "");
+        } 
+        result = result.replaceAll("(?=[-_][^\\\\S])(\\-)", " ");
+        return result;
+    }
+    
     private void fireResultUri(String uri) {
         this.uri = uri;
         ValueChangeEvent.fire(this, uri);
+    }
+    
+    public String getName() {
+        return name;
     }
     
     /**

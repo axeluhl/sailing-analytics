@@ -529,11 +529,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void addMediaTrack() {
-        TimePoint defaultStartTime = getRaceStartTime();
-        if (defaultStartTime == null) {
-            defaultStartTime = getTrackingStartTime();
-        }
-        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
+        NewMediaDialog dialog = new NewMediaDialog(mediaService,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
                 storageServiceAvailable, new DialogCallback<MediaTrack>() {
 

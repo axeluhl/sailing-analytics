@@ -25,6 +25,12 @@ public interface NewMediaDialogResources extends ClientBundle {
         @ClassName("resetButton")
         String resetButtonClass();
         
+        @ClassName("nameBox")
+        String nameBoxClass();
+        
+        @ClassName("resetNameButton")
+        String resetNameButtonClass();
+        
         @ClassName("startTime-textbox")
         String startTimeTextboxClass();
         
@@ -41,4 +47,8 @@ public interface NewMediaDialogResources extends ClientBundle {
     @Source("refresh.svg")
     @MimeType("image/svg+xml")
     DataResource reset();
+
+    @Source("close.svg")
+    @MimeType("image/svg+xml")
+    DataResource close();
 }

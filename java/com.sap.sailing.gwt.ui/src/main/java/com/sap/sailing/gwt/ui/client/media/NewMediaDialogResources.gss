@@ -2,7 +2,7 @@
  display: flex;
 }
 
-.textfield-size input[type=text], .textfield-size select, .button-size {
+.textfield-size input[type=text], .textfield-size input[type=search], .textfield-size select, .button-size {
     width: 15rem;
 }
 
@@ -45,8 +45,39 @@
     left: 0;
 }
 
+.resetNameButton {
+    outline: none;
+    width: 1.5rem;
+    height: 1.469rem;
+    position: relative;
+    margin: 3px 3px 3px -4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: #efaa00;
+}
+
+.resetNameButton::after {
+    outline: none;
+    background-image: resourceUrl("close");
+    content: "";
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 67%;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
 .startTime-textbox {
     width: 13.5rem !important;
+}
+
+.nameBox {
+    width: 13.5rem !important;
+    margin: 3px 3px 3px 0;
+    height: 1.469rem;
 }
 
 .progress-overlay {
