@@ -64,6 +64,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.commons.compress"
+         download-size="0"
+         install-size="0"
+         version="1.19.0.v20200106-2343"
+         unpack="false"/>
+
+   <plugin
          id="org.dom4j"
          download-size="0"
          install-size="0"
