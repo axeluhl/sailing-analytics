@@ -437,8 +437,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private boolean orientationChangeInProgress;
     
-    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
     private final NumberFormat numberFormatNoDecimal = NumberFormatterFactory.getDecimalFormat(0);
+    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
+    private final NumberFormat numberFormatTwoDecimals = NumberFormatterFactory.getDecimalFormat(2);
     
     /**
      * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
@@ -2084,11 +2085,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 sb.append('\n');
                 sb.append(numberFormatNoDecimal.format(
                         Math.abs(position1DTO.getDistance(position2DTO).getMeters()))+stringMessages.metersUnit());
+                sb.append(" (");
+                sb.append(numberFormatTwoDecimals.format(
+                        Math.abs(position1DTO.getDistance(position2DTO).getNauticalMiles()))+"NM");
+                sb.append(")\n");
+                final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
+                sb.append(NumberFormatterFactory.getThreeDigitDecimalFormat(0).format(legBearingDeg)+stringMessages.degreesUnit());
                 if (lastCombinedWindTrackInfoDTO != null) {
                     final WindTrackInfoDTO windTrackAtLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(zeroBasedIndexOfStartWaypoint);
                     if (windTrackAtLegMiddle != null && windTrackAtLegMiddle.windFixes != null && !windTrackAtLegMiddle.windFixes.isEmpty()) {
                         WindDTO windAtLegMiddle = windTrackAtLegMiddle.windFixes.get(0);
-                        final double legBearingDeg = position1DTO.getBearingGreatCircle(position2DTO).getDegrees();
                         final String diff = numberFormatOneDecimal.format(
                                 Math.min(Math.abs(windAtLegMiddle.dampenedTrueWindBearingDeg-legBearingDeg),
                                                      Math.abs(windAtLegMiddle.dampenedTrueWindFromDeg-legBearingDeg)));
