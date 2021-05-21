@@ -44,5 +44,4 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
     public UserService getUserService() {
         return securityProvider.getUserService();
     }
-
 }
