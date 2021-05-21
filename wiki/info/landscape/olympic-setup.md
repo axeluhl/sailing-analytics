@@ -14,7 +14,9 @@ Both machines have been configured to use 2GB of swap space at ``/swapfile``.
 
 ### User Accounts
 
-The essential user account on both laptops is ``sailing``. The account is intended to be used for running the Java VM that executes the SAP Sailing Analytics server software. The account is currently still protected by a password that our on-site team should know. There are also still two personal accounts ``uhl`` and ``tim`` and an Eclipse development environment under /usr/local/eclipse.
+The essential user account on both laptops is ``sailing``. The account is intended to be used for running the Java VM that executes the SAP Sailing Analytics server software. The account is currently still protected by a password that our on-site team should know. On both laptops the ``sailing`` account has a password-less SSH key installed under ``/home/sailing/.ssh`` that is contained in the ``known_hosts`` file of ``tokyo-ssh.sapsailing.com`` as well as the mutually other P1 laptop. This way, all tunnels can easily be created once logged on to this ``sailing`` account.
+
+There are also still two personal accounts ``uhl`` and ``tim`` and an Eclipse development environment under ``/usr/local/eclipse``.
 
 ### Hostnames
 
@@ -26,14 +28,16 @@ The domain name has been set to ``sapsailing.com`` so that the fully-qualified h
 
 On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes SSH tunnels using the ``autossh`` tool. The ``autossh`` processes are forked into the background using the ``-f`` option. It seems important to then pass the port to use for sending heartbeats using the ``-M`` option. If this is omitted, according to my experience only one of several ``autossh`` processes survives.
 
-On sap-p1-1 two SSH connections are maintained, with the following port forwards:
+On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
 
-* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 10201<--10201
-* sap-p1-2: 10202-->10202; 10201<--10201
+* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 8888<--8888
+* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
 
-On sap-p1-2, the following SSH connections are maintained:
+On sap-p1-2, the following SSH connections are maintained, assuming sap-p1-2 is the local replica:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 10202<--10202; 8888<--8888
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202
+
+This means that tokyo-ssh.sapsailing.com sees 
 
 ## AWS Setup
 
