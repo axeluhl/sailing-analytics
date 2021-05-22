@@ -71,6 +71,41 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.poi.source"
+         download-size="0"
+         install-size="0"
+         version="4.1.1.v20200604-1524"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.poi.ooxml.source"
+         download-size="0"
+         install-size="0"
+         version="4.1.1.v20200820-1148"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.poi.ooxml.schemas.source"
+         download-size="0"
+         install-size="0"
+         version="4.1.1.v20200922-2105"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.collections4.source"
+         download-size="0"
+         install-size="0"
+         version="4.4.0.v20200420-1700"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.compress.source"
+         download-size="0"
+         install-size="0"
+         version="1.19.0.v20200106-2343"
+         unpack="false"/>
+
+   <plugin
          id="org.dom4j"
          download-size="0"
          install-size="0"

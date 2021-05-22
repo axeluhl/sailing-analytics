@@ -27,6 +27,11 @@
 <setEntry value="org.apache.poi.ooxml.schemas@default:default"/>
 <setEntry value="org.apache.commons.collections4@default:default"/>
 <setEntry value="org.apache.commons.compress@default:default"/>
+<setEntry value="org.apache.poi.source@default:default"/>
+<setEntry value="org.apache.poi.ooxml.source@default:default"/>
+<setEntry value="org.apache.poi.ooxml.schemas.source@default:default"/>
+<setEntry value="org.apache.commons.collections4.source@default:default"/>
+<setEntry value="org.apache.commons.compress.source@default:default"/>
 <setEntry value="org.dom4j@default:default"/>
 <setEntry value="org.apache.xmlbeans@default:default"/>
 <setEntry value="org.apache.commons.math@default:default"/>
