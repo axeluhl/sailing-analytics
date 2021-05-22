@@ -2,13 +2,13 @@
 
 ## Local Installation
 
-For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with equal hardward configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices.
+For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with equal hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices.
 
 ### Installation Packages
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongo .conf``. RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
+Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
 
 Both machines have been configured to use 2GB of swap space at ``/swapfile``.
 
@@ -161,3 +161,13 @@ sap-p1-1 normally is the master for the ``tokyo2020`` replica set. It shall repl
 SSH local port forwards (configured with the ``-L`` option) that use hostnames instead of IP addresses for the remote host specification are resolved each time a new connection is established through this forward. If the DNS entry resolves to multiple IPs or if the DNS entry changes over time, later connection requests through the port forward will honor the new host name's DNS resolution.
 
 sap-p1-2 normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on sap-p1-1. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward with local port 5673 for the ap-northeast-1 RabbitMQ (15673 for the web administration UI). A reverse port forward from ap-northeast-1 to the application port 8888 on sap-p1-2 has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
+
+## User Groups and Permissions
+
+The general public shall not be allowed during the live event to browse the event through ``tokyo2020.sapsailing.com``. Instead, they are required to go through any of the so-called "Rights-Holding Broadcaster" (RHB) web sites. There, a "widget" will be embedded into their web sites which works with our REST API to display links to the regattas and races, in particular the RaceBoard.html pages displaying the live and replay races.
+
+Moderators who need to comment on the races shall be given more elaborate permissions and shall be allowed to use the full-fledged functionality of ``tokyo2020.sapsailing.com``, in particular, browse through all aspects of the event, see flag statuses, postponements and so on.
+
+To achieve this effect, the ``tokyo2020-server`` group has the ``sailing_viewer`` role assigned for all users, and all objects, except for the top-level ``Event`` object are owned by that group. This way, everything but the event are publicly visible.
+
+The ``Event`` object is owned by ``tokyo2020-moderators``, and that group grants the ``sailing_viewer`` role only to its members, meaning only the members of that group are allowed to see the ``Event`` object.
