@@ -272,7 +272,6 @@
 <plugin id="com.jcraft.jsch"/>
 <plugin id="com.jcraft.jsch.source"/>
 <plugin id="org.apache.commons.codec.source"/>
-<plugin id="org.apache.poi.ooxml.schemas.source"/>
 <plugin id="org.apache.poi.ooxml.source"/>
 <plugin id="org.apache.poi.source"/>
 <plugin id="org.apache.xmlbeans.source"/>
