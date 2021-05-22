@@ -55,7 +55,6 @@ public class SAPHeader extends Composite {
         logoAnchor.setHref(LOGO_URL);
         String sapSailingUrl = applicationBaseUrl + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
         applicationNameAnchor.setHref(sapSailingUrl);
-
         if (!ClientConfiguration.getInstance().isBrandingActive()) {
             logoAnchor.getStyle().setDisplay(Display.NONE);
             applicationNameAnchor.setHref("");
