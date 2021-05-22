@@ -63,7 +63,15 @@ Our "favorite" Availability Zone (AZ) in ap-northeast-1 is "1d" / "ap-northeast-
 
 The same host ``tokyo-ssh.sapsailing.com`` also runs a MongoDB 3.6 instance on port 10203.
 
-For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings. The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
+For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rabbitmq-server`` package with it (version 3.8.2 on Erlang 22.2.7), and we'll install it with default settings, except for the following change: In the new file ``/etc/rabbitmq/rabbitmq.conf`` we enter the line
+
+```
+    loopback_users = none
+```
+
+which allows clients from other hosts to connect. The security groups for the RabbitMQ server are configured such that only ``172.0.0.0/8`` addresses from our VPCs can connect.
+
+The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
 
@@ -77,6 +85,20 @@ After having peered the VPCs, the VPCs default routing table must be extended by
 
 With peering in place it is possible to reach instances in peered VPCs by their internal IPs. In particular, it is possible to connect to a RabbitMQ instance with the internal IP and port 5672 even if that RabbitMQ runs in a different region whose VPC is peered.
 
+### Global Accelerator
+
+We have created a Global Accelerator [Tokyo2020](https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#AcceleratorDetails:AcceleratorArn=arn:aws:globalaccelerator::017363970217:accelerator/8ddd5afb-dd8d-4e8b-a22f-443a47240a94) which manages cross-region load balancing for us. There are two listeners: one for port 80 (HTTP) and one for port 443 (HTTPS). For each region an endpoint group must be created for both of the listeners, and the application load balancer (ALB) in that region has to be added as an endpoint.
+
+The Route53 entry ``tokyo2020.sapsailing.com`` now is an alias A record pointing to this global accelerator (``aca060e6eabf4ba3e.awsglobalaccelerator.com.``).
+
+### Application Load Balancers (ALBs) and Target Groups
+
+In each region supported, two target groups with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public) and ``S-ded-tokyo2020-m`` (master). An application load balancer then must be created or identified that will then have the five rules distributing traffic for ``tokyo2020.sapsailing.com`` to either the public or the master target group, furthermore a general rule in the HTTP listener for port 80 that will redirect all HTTP traffic to HTTPS permanently.
+
+The master target group in all regions must contain an instance that forwards traffic on port 8888 to the master running on site, usually transitively through ``tokyo-ssh.sapsailing.com:8888``. Only in ap-northeast-1 the ``tokyo-ssh.sapsailing.com`` instance itself can be used as target in the ``S-ded-tokyo2020-m`` master target group. In ``eu-west-1`` the Webserver instance plays that role; it has a tmux running with the ``root`` user where an ``autossh`` connection is established to ``tokyo-ssh.sapsailing.com``, forwarding port 8888 accordingly.
+
+Similar set-ups with a region-local "jump host" can be established; the jump host doesn't need much bandwidth as it is mainly used for admin requests that are to be routed straight to the master instance running on site.
+
 ## Landscape Architecture
 
 We have applied for a single SSH tunnel to IP address ``52.194.91.94`` which is our elastic IP for our SSH jump host in ap-northeast-1(d). 
@@ -89,6 +111,45 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 
 ```
 	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
+```
+
+All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
+
+### Replicas
+
+Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
+
+```
+INSTALL_FROM_RELEASE=build-202105211058
+SERVER_NAME=tokyo2020
+MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/tokyo2020-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
+USE_ENVIRONMENT=live-replica-server
+REPLICATION_CHANNEL=tokyo2020-replica
+REPLICATION_HOST=rabbit-ap-northeast-1.sapsailing.com
+REPLICATE_MASTER_SERVLET_HOST=tokyo-ssh.internal.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=8888
+REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
+REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
+REPLICATE_MASTER_BEARER_TOKEN="4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="
+```
+
+(Adjust the release accordingly, of course).
+
+In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
+
+
+```
+INSTALL_FROM_RELEASE=build-202105211058
+SERVER_NAME=tokyo2020
+MONGODB_URI="mongodb://localhost/tokyo2020-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
+USE_ENVIRONMENT=live-replica-server
+REPLICATION_CHANNEL=tokyo2020-replica
+REPLICATION_HOST=rabbit-ap-northeast-1.sapsailing.com
+REPLICATE_MASTER_SERVLET_HOST=tokyo-ssh.internal.sapsailing.com
+REPLICATE_MASTER_SERVLET_PORT=8888
+REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
+REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
+REPLICATE_MASTER_BEARER_TOKEN="4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="
 ```
 
 ### Application Servers
