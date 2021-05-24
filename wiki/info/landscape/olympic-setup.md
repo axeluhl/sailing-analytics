@@ -49,6 +49,27 @@ In order to allow us to access ``tokyo2020.sapsailing.com`` with any HTTPS port 
 
 as ``root`` on ``sapsailing.com``. The challenge displayed can be solved by creating an ALB rule for hostname header ``tokyo2020.sapsailing.com`` and the path as issued in the output of the ``certbot`` command, and as action specify a fixed response, response code 200, and pasting as text/plain the challenge data printed by the ``certbot`` command. Wait a few seconds, then confirm the Certbot prompt. The certificate will be issued and stored under ``/etc/letsencrypt/live/tokyo2020.sapsailing.com`` from where I copied it to ``/home/sailing/Downloads/letsencrypt`` on both laptops for later use with a local Apache httpd server. The certificate will expire on 2021-08-19, so after the Olympic Games, so we don't have to worry about renewing it.
 
+### Local NGINX Webserver Setup
+
+In order to be able to access the applications running on the local on-site laptops using HTTPS there is a web server on each of the two laptops, listening on port 9443 (HTTPS). The configuration for this is under ``/etc/nginx/sites-enables/tokyo2020`` and looks like this:
+
+```
+server {
+    listen              9443 ssl;
+    server_name         tokyo2020.sapsailing.com;
+    ssl_certificate     /etc/ssl/certs/tokyo2020.sapsailing.com.crt;
+    ssl_certificate_key /etc/ssl/private/tokyo2020.sapsailing.com.key;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+    }
+}
+```
+
+The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo2020.sapsailing.com aliased in ``/etc/hosts`` to the address of the current master server, this allows accessing ``https://tokyo2020.sapsailing.com:9443`` with all benefits of cookie / session authentication.
+
 ## AWS Setup
 
 Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission. In the root user's crontab we have the same set of scripts hooked up that in our eu-west-1 production landscape is responsible for obtaining and installing the landscape manager's SSH public keys to the login user's account, aligning the set of ``authorized_keys`` with those of the registered landscape managers (users with permission ``LANDSCAPE:MANAGE:AWS``). The ``authorized_keys.org`` file also contains the two public SSH keys of the ``sailing`` accounts on the two laptops, so each time the script produces a new ``authorized_keys`` file for the ``ec2-user``, the ``sailing`` keys for the laptop tunnels don't get lost.
