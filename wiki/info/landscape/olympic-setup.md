@@ -24,6 +24,24 @@ We assume not to have DNS available on site. Therefore, for now, we have decided
 
 The domain name has been set to ``sapsailing.com`` so that the fully-qualified host names are ``sap-p1-1.sapsailing.com`` and ``sap-p1-2.sapsailing.com`` respectively. Using this domain name is helpful later when it comes to the shared security realm established with the central ``security-service.sapsailing.com`` replica set.
 
+### IP Addresses and VPN
+
+Here are the IP addresses as indicated by SwissTiming:
+
+```
+Host					Internal IP	VPN IP
+-----------------------------------------------------------------------------------------
+TracTrac A (Linux)			10.1.1.104	10.8.0.128	STSP-SAL_client28
+TracTrac B (Linux)			10.1.1.105	10.8.0.129	STSP-SAL_client29
+SAP Analytics 1 Server A (Linux)	10.1.3.195	10.8.0.130	STSP-SAL_client30
+SAP Analytics 2 Server B (Linux)	10.1.3.197	10.8.0.131	
+SAP Client Jan (Windows)		10.1.3.220	10.8.0.132	
+SAP Client Alexandro (Windows)		10.1.3.221	10.8.0.133	
+SAP Client Axel (Windows)		10.1.3.227	10.8.0.134	
+TracTrac Dev Jorge (Linux)		10.1.3.228	10.8.0.135	
+TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136	
+```
+
 ### Tunnels
 
 On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes SSH tunnels using the ``autossh`` tool. The ``autossh`` processes are forked into the background using the ``-f`` option. It seems important to then pass the port to use for sending heartbeats using the ``-M`` option. If this is omitted, according to my experience only one of several ``autossh`` processes survives.
