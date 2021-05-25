@@ -46,16 +46,52 @@ TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136
 
 On both laptops there is a script ``/usr/local/bin/tunnels`` which establishes SSH tunnels using the ``autossh`` tool. The ``autossh`` processes are forked into the background using the ``-f`` option. It seems important to then pass the port to use for sending heartbeats using the ``-M`` option. If this is omitted, according to my experience only one of several ``autossh`` processes survives.
 
+During regular operations we assume that we have an Internet connection that allows us to reach our jump host ``tokyo-ssh.sapsailing.com`` through SSH, establishing various port forwards. We also expect TracTrac to have their primary server available. Furthermore, we assume both our laptops to be in service. ``sap-p1-1`` then runs the master server instance, ``sap-p1-2`` runs a local replica. The master on ``sap-p1-1`` replicates the central security service at ``security-service.sapsailing.com`` using the RabbitMQ installation on ``rabbit.internal.sapsailing.com`` in the AWS region eu-west-1. The port forwarding through tokyo-ssh.sapsailing.com (in ap-northeast-1) to the internal RabbitMQ address (in eu-west-1) works through VPC peering. The RabbitMQ instance used for outbound replication, both, into the cloud and for the on-site replica, is rabbit-ap-northeast-1.sapsailing.com. The replica on ``sap-p1-2`` obtains its replication stream from there, and for the HTTP connection for "reverse replication" it uses a direct connection to ``sap-p1-1``. The outside world, in particular all "S-ded-tokyo2020-m" master security groups in all regions supported, access the on-site master through a reverse port forward on our jump host ``tokyo-ssh.sapsailing.com:8888`` which under regular operations points to ``sap-p1-1:8888`` where the master process runs.
+
+On both laptops, we maintain SSH connections to ``localhost`` with port forwards to the current TracTrac production server for HTTP, live data, and stored data. In the test we did on 2021-05-25, those port numbers were 9081, 14001, and 14011, respectively, for the primary server, and 9082, 14002, and 14012, respectively, for the secondary server. In addition to these port forwards, an entry in ``/etc/hosts`` is required for the hostname that TracTrac will use on site for their server(s), pointing to ``127.0.0.1`` to let the Sailing Analytics process connect to localhost with the port forwards. Tests have shown that if the port forwards are changed during live operations, e.g., to point to the secondary instead of the primary TracTrac server, the TracAPI continues smoothly which is a great way of handling such a fail-over process without having to re-start our master server necessarily or reconnect to all live races.
+
+Furthermore, for administrative SSH access from outside, we establish reverse port forwards from our jump host ``tokyo-ssh.sapsailing.com`` to the SSH ports on ``sap-p1-1`` (on port 18122) and ``sap-p1-2`` (on port 18222).
+
+The port forwards vary for exceptional situations, such as when the Internet connection is not available, or when ``sap-p1-1`` that regularly runs the master process fails and we need to make ``sap-p1-2`` the new master. See below for the details of the configurations for those scenarios.
+
+The tunnel configurations are established and configured using a set of scripts, each to be found under ``/usr/local/bin`` on each of the two laptops.
+
+#### Regular Operations: master on sap-p1-1, replica on sap-p1-2, with Internet / Cloud connection 
+
 On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
 
-* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 8888<--8888
+* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443; 8888<--8888
 * sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
 
 On sap-p1-2, the following SSH connections are maintained, assuming sap-p1-2 is the local replica:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 15674<--15672
 
-This means that tokyo-ssh.sapsailing.com sees the process to use for reverse replication at its port 8888. Both laptops see the RabbitMQ running in eu-west-1 and reachable with its internal IP address under rabbit.internal.sapsailing.com at localhost:5675 / localhost:15675. The port forwarding through tokyo-ssh.sapsailing.com to the internal RabbitMQ address works through VPC peering.
+#### Operations with sap-p1-1 failing: master on sap-p1-2, with Internet / Cloud connection 
+
+On sap-p1-1, if the operating system still runs and the failure affects only the Java process running the SAP Sailing Analytics, two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is not running an SAP Sailing Analytics process currently:
+
+* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443
+* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+
+On sap-p1-2 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-2 is the local master:
+
+* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 18222<--22; 443:security-service.sapsailing.com:443; 8888<--8888
+* sap-p1-1 (if the operating system on sap-p1-1 still runs): 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
+
+So the essential change is that the reverse forward from ``tokyo-ssh.sapsailing.com:8888`` now targets ``sap-p1-2:8888`` where we now assume the failover master to be running.
+
+#### Operations with Internet failing
+
+When the Internet connection fails, replicating the security service from ``security-service.sapsailing.com`` / ``rabbit.internal.sapsailing.com`` will no longer be possible. Neither will outbound replication to ``rabbit-ap-northeast-1.sapsailing.com`` be possible, and cloud replicas won't be able to reach the on-site master anymore through the ``tokyo-ssh.sapsailing.com:8888`` reverse port forward. This also has an effect on the local on-site replica which no longer will be able to reach ``rabbit-ap-northeast-1.sapsailing.com`` which provides the on-site replica with the operation stream under regular circumstances.
+
+There is little we can do against the lack of Internet connection regarding providing data to the cloud replicas and maintaining replication with ``security-service.sapsailing.com`` (we could theoretically try to work with local WiFi hotspots; but the key problem will be that TracTrac then neither has Internet connectivity for their on-site server, and we would have to radically change to a cloud-only set-up which is probably beyond what we'd be doing in this case). But we can ensure continued local operations with the replica on ``sap-p1-2`` now using a local on-site RabbitMQ installation between the two instances. For this, we replace the port forwards that during regular operations point to ``rabbit-ap-northeast-1.sapsailing.com`` by port forwards pointing to the RabbitMQ process on ``sap-p1-2``.
+
+On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the following port forwards:
+
+* sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672; 5763-->localhost:5672
+
+So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
 ### Letsencrypt Certificate for tokyo2020.sapsailing.com
 
@@ -154,7 +190,61 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
 
+### Master
+
+The master configuration is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
+
+```
+      rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
+```
+
+This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``master.conf`` file looks approximately like this:
+
+```
+SERVER_NAME=tokyo2020
+MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
+# RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
+# Replication of shared services from central security-service.sapsailing.com through SSH tunnel 443:security-service.sapsailing.com:443
+# with a local /etc/hosts entry mapping security-service.sapsailing.com to 127.0.0.1
+REPLICATE_MASTER_QUEUE_HOST=localhost
+REPLICATE_MASTER_QUEUE_PORT=5675
+REPLICATE_MASTER_BEARER_TOKEN="***"
+# Outbound replication to RabbitMQ through SSH tunnel with port forward on port 5673, regularly to rabbit-ap-northeast-1.sapsailing.com
+# Can be re-mapped to the RabbitMQ running on sap-p1-2
+REPLICATION_HOST=localhost
+REPLICATION_PORT=5673
+USE_ENVIRONMENT=live-master-server
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+```
+
 ### Replicas
+
+The on-site replica on ``sap-p1-2`` can be configured with a ``replica.conf`` file in ``/home/sailing/servers/replica``, using
+
+```
+	rm env.sh; cat replica.conf | ./refreshInstance auto-install-from-stdin
+```
+
+The file looks like this:
+
+```
+# Regular operations; sap-p1-2 replicates sap-p1-1 using the rabbit-ap-northeast-1.sapsailing.com RabbitMQ in the cloud through SSH tunnel.
+# Outbound replication, though not expected to become active, goes to a local RabbitMQ
+SERVER_NAME=tokyo2020
+MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}-replica?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
+# RabbitMQ in ap-northeast-1 is expected to be found locally on port 5673
+REPLICATE_MASTER_SERVLET_HOST=sap-p1-1
+REPLICATE_MASTER_SERVLET_PORT=8888
+REPLICATE_MASTER_QUEUE_HOST=localhost
+REPLICATE_MASTER_QUEUE_PORT=5673
+REPLICATE_MASTER_BEARER_TOKEN="***"
+# Outbound replication to RabbitMQ running locally on sap-p1-2
+REPLICATION_HOST=localhost
+REPLICATION_PORT=5672
+REPLICATION_CHANNEL=${SERVER_NAME}-replica
+USE_ENVIRONMENT=live-replica-server
+ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+```
 
 Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
 
@@ -169,14 +259,13 @@ REPLICATE_MASTER_SERVLET_HOST=tokyo-ssh.internal.sapsailing.com
 REPLICATE_MASTER_SERVLET_PORT=8888
 REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
 REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
-REPLICATE_MASTER_BEARER_TOKEN="4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="
+REPLICATE_MASTER_BEARER_TOKEN="***"
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
 (Adjust the release accordingly, of course).
 
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
-
 
 ```
 INSTALL_FROM_RELEASE=build-202105211058
@@ -189,17 +278,17 @@ REPLICATE_MASTER_SERVLET_HOST=tokyo-ssh.internal.sapsailing.com
 REPLICATE_MASTER_SERVLET_PORT=8888
 REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
 REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
-REPLICATE_MASTER_BEARER_TOKEN="4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="
+REPLICATE_MASTER_BEARER_TOKEN="***"
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 ```
 
 ### Application Servers
 
-sap-p1-1 normally is the master for the ``tokyo2020`` replica set. It shall replicate the shared services, in particular ``SecurityServiceImpl``, from ``security-service.sapsailing.com``, like any normal server in our landscape, only that here we have to make sure we can target the default RabbitMQ in eu-west-1 and can see the ``security-service.sapsailing.com`` master directly or even better the load balancer.
+``sap-p1-1`` normally is the master for the ``tokyo2020`` replica set. It shall replicate the shared services, in particular ``SecurityServiceImpl``, from ``security-service.sapsailing.com``, like any normal server in our landscape, only that here we have to make sure we can target the default RabbitMQ in eu-west-1 and can see the ``security-service.sapsailing.com`` master directly or even better the load balancer.
 
 SSH local port forwards (configured with the ``-L`` option) that use hostnames instead of IP addresses for the remote host specification are resolved each time a new connection is established through this forward. If the DNS entry resolves to multiple IPs or if the DNS entry changes over time, later connection requests through the port forward will honor the new host name's DNS resolution.
 
-sap-p1-2 normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on sap-p1-1. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward with local port 5673 for the ap-northeast-1 RabbitMQ (15673 for the web administration UI). A reverse port forward from ap-northeast-1 to the application port 8888 on sap-p1-2 has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
+``sap-p1-2`` normally is a replica for the ``tokyo2020`` replica set, using the local RabbitMQ running on ``sap-p1-1``. Its outbound ``REPLICATION_CHANNEL`` will be ``tokyo2020-replica`` and uses the RabbitMQ running in ap-northeast-1, using an SSH port forward with local port 5673 for the ap-northeast-1 RabbitMQ (15673 for the web administration UI). A reverse port forward from ap-northeast-1 to the application port 8888 on ``sap-p1-2`` has to be established which replicas running in ap-northeast-1 will use to reach their master through HTTP. This way, adding more replicas on the AWS side in the cloud will not require any additional bandwidth between cloud and on-site network, except that the reverse HTTP channel, which uses only little traffic, will see additional traffic per replica whereas all outbound replication goes to the single exchange in the RabbitMQ node running in ap-northeast-1.
 
 ## User Groups and Permissions
 
