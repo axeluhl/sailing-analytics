@@ -19,7 +19,9 @@ Require-Bundle: com.sap.sailing.server,
  org.apache.xmlbeans;bundle-version="3.1.0",
  org.apache.poi;bundle-version="3.9.0",
  org.apache.poi.ooxml;bundle-version="3.9.0",
- org.apache.poi.ooxml.schemas;bundle-version="3.9.0"
+ org.apache.poi.ooxml.schemas;bundle-version="3.9.0",
+ org.apache.commons.collections4;bundle-version="4.4.0",
+ org.apache.commons.compress;bundle-version="1.19.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.barbados.resultimport.impl;x-friends:="com.sap.sailing.barbados.resultimport.test"
 Automatic-Module-Name: com.sap.sailing.barbados.resultimport

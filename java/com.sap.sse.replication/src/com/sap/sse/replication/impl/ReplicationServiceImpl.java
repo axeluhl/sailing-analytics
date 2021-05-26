@@ -409,10 +409,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
     
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
+        // due to different replicables to be replicated for replica, ensure that all
+        // replicables to be replicated to replica are actually observed:
+        addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
         synchronized (replicationInstancesManager) {
-            // due to different replicables to be replicated for replica, ensure that all
-            // replicables to be replicated to replica are actually observed:
-            addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
             // need to establish the outbound messaging channel only when this is the first replica to be added:
             if (!replicationInstancesManager.hasReplicas()) {
                 synchronized (this) {

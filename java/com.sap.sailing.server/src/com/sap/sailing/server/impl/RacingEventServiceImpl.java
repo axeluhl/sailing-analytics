@@ -619,7 +619,8 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
         this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
+                /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 

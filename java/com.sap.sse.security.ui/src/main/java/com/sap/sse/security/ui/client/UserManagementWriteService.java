@@ -117,7 +117,7 @@ public interface UserManagementWriteService extends UserManagementService {
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
-            String tenantQualifierName)
+            String tenantQualifierName, Boolean isTransitive)
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     SuccessInfo addPermissionForUser(String username, WildcardPermission permissions)

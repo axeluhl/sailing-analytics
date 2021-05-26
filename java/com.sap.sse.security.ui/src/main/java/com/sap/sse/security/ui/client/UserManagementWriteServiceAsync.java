@@ -88,7 +88,7 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
      */
     void removeRoleFromUser(String username, String userQualifierName, UUID roleDefinitionId,
             String tenantQualifierName,
-            AsyncCallback<SuccessInfo> callback);
+            Boolean isTransitive, AsyncCallback<SuccessInfo> callback);
 
     /**
      * Grants the given {@code permission} to the given {@code username} if the current user has the required
