@@ -594,7 +594,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
                     break;
                 }
                 final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(), timePoint, cache);
-                if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
+                if (windwardDistanceTraveled != null && windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
                     maxWindwardDistanceTraveled = windwardDistanceTraveled;
                     competitorFarthestAlong = mp.getCompetitor();
                 }
