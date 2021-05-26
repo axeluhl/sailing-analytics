@@ -1252,7 +1252,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
                 @Override
                 public String getNodeName() {
-                    return anyRabbitMQHost.getPublicAddress().getCanonicalHostName();
+                    return anyRabbitMQHost.getPrivateAddress().getCanonicalHostName();
                 }
             };
         } else {
