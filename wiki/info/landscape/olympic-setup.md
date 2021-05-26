@@ -193,6 +193,12 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
 
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``ec2-user`` on ``tokyo-ssh.sapsailing.com`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/ec2-user/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``tokyo-ssh.sapsailing.com`` and then restores it on the local ``tokyo2020`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+
+```
+    db.copyDatabase("security_service_bak", "security_service")
+```
+
 ### Master
 
 The master configuration is described in ``/home/sailing/servers/master/master.conf`` and can be used to produce a clean set-up like this:
