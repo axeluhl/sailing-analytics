@@ -93,19 +93,20 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for tokyo2020.sapsailing.com
+### Letsencrypt Certificate for tokyo2020.sapsailing.com and security-service.sapsailing.com
 
-In order to allow us to access ``tokyo2020.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
+In order to allow us to access ``tokyo2020.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
 ```
 /usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d tokyo2020.sapsailing.com
+/usr/bin/sudo -u certbot docker run --rm -it --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" certbot/certbot certonly --manual -d security-service.sapsailing.com
 ```
 
 as ``root`` on ``sapsailing.com``. The challenge displayed can be solved by creating an ALB rule for hostname header ``tokyo2020.sapsailing.com`` and the path as issued in the output of the ``certbot`` command, and as action specify a fixed response, response code 200, and pasting as text/plain the challenge data printed by the ``certbot`` command. Wait a few seconds, then confirm the Certbot prompt. The certificate will be issued and stored under ``/etc/letsencrypt/live/tokyo2020.sapsailing.com`` from where I copied it to ``/home/sailing/Downloads/letsencrypt`` on both laptops for later use with a local Apache httpd server. The certificate will expire on 2021-08-19, so after the Olympic Games, so we don't have to worry about renewing it.
 
 ### Local NGINX Webserver Setup
 
-In order to be able to access the applications running on the local on-site laptops using HTTPS there is a web server on each of the two laptops, listening on port 9443 (HTTPS). The configuration for this is under ``/etc/nginx/sites-enables/tokyo2020`` and looks like this:
+In order to be able to access the applications running on the local on-site laptops using HTTPS there is a web server on each of the two laptops, listening on port 9443 (HTTPS). The configuration for this is under ``/etc/nginx/sites-enabled/tokyo2020`` and looks like this:
 
 ```
 server {
@@ -123,6 +124,8 @@ server {
 ```
 
 The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo2020.sapsailing.com aliased in ``/etc/hosts`` to the address of the current master server, this allows accessing ``https://tokyo2020.sapsailing.com:9443`` with all benefits of cookie / session authentication.
+
+Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
 
 ## AWS Setup
 
