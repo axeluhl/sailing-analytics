@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.subscription.SailingSubscriptionPlan;
+import com.sap.sailing.domain.common.subscription.StreamletViewerRole;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -247,6 +248,9 @@ public class Activator implements BundleActivator {
                                 securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
                                         null, DefaultActions.READ.name());
                     }
+                    // TODO: Registering SubscriptionPlan specific RoleDefinitions here requires additional maintenance. Consider
+                    // implementing another Construct like OSGIHasPermissionsProvider
+                    securityService.getOrCreateRoleDefinitionFromPrototype(StreamletViewerRole.getInstance());
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(),
