@@ -60,12 +60,60 @@ The tunnel configurations are established and configured using a set of scripts,
 
 On sap-p1-1 two SSH connections are maintained, with the following default port forwards, assuming sap-p1-1 is the local master:
 
-* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443; 8888<--8888
+* tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com:15672; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10201<--10201; 18122<--22; 443:security-service.sapsailing.com:443; 8888<--8888; 9443<--9443
 * sap-p1-2: 10202-->10202; 5674-->5672; 15674-->15672; 10201<--10201; 5674<--5672; 15674<--15672
 
 On sap-p1-2, the following SSH connections are maintained, assuming sap-p1-2 is the local replica:
 
-- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 15674<--15672
+- tokyo-ssh.sapsailing.com: 10203-->10203; 5763-->rabbit-ap-northeast-1.sapsailing.com:5762; 15763-->rabbit-ap-northeast-1.sapsailing.com; 5675:rabbit.internal.sapsailing.com:5672; 15675:rabbit.internal.sapsailing.com:15672; 10202<--10202; 15674<--15672; 9444<--9443
+
+A useful set of entries in your personal ``~/.ssh/config`` file for "off-site" use may look like this:
+
+```
+Host tokyo
+    Hostname tokyo-ssh.sapsailing.com
+    User ec2-user
+    ForwardAgent yes
+    ForwardX11Trusted yes
+    LocalForward 18122 localhost:18122
+    LocalForward 18222 localhost:18222
+    LocalForward 9443 localhost:9443
+    LocalForward 9444 localhost:9444
+
+Host sap-p1-1
+    Hostname localhost
+    Port 18122
+    User sailing
+    ForwardAgent yes
+    ForwardX11Trusted yes
+
+Host sap-p1-2
+    Hostname localhost
+    Port 18222
+    User sailing
+    ForwardAgent yes
+    ForwardX11Trusted yes
+```
+
+It will allow you to log on to the "jump host" ``tokyo-ssh.sapsailing.com`` with the simple command ``ssh tokyo`` and will establish the port forwards that will then allow you to connect to the two laptops using ``ssh sap-p1-1`` and ``ssh sap-p1-2``, respectively. Of course, when on site and with the two laptops in direct reach you may adjust the host entries for ``sap-p1-1`` and ``sap-p1-2`` accordingly, and you may then wish to establish only an SSH connection to ``sap-p1-1`` which then does the port forwards for HTTPS ports 9443/9444. This could look like this:
+
+```
+Host sap-p1-1
+    Hostname 10.1.3.195
+    Port 22
+    User sailing
+    ForwardAgent yes
+    ForwardX11Trusted yes
+    LocalForward 9443 localhost:9443
+    LocalForward 9444 10.1.3.197:9443
+
+Host sap-p1-2
+    Hostname 10.1.3.197
+    Port 22
+    User sailing
+    ForwardAgent yes
+    ForwardX11Trusted yes
+```
 
 #### Operations with sap-p1-1 failing: master on sap-p1-2, with Internet / Cloud connection 
 
