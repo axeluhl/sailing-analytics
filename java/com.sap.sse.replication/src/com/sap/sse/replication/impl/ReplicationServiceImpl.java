@@ -698,7 +698,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                                 delivered = true;
                                 final long newTotalSendJobsSize = totalSendJobsSize.addAndGet(-messageAndTypesOfOperations.getA().length);
                                 logger.fine(()->"New send queue size "+sendJobQueue.size()+" ("+newTotalSendJobsSize+"B)");
-                            } catch (IOException ioe) {
+                            } catch (Exception ioe) {
                                 logger.log(Level.WARNING, "Exception trying to send out replication operations to RabbitMQ exchange "+
                                         exchangeHost+":"+exchangePort+"/"+exchangeName+
                                         "; trying to re-establish a channel to the fanout exchange in "+DURATION_BETWTEEN_SEND_RETRIES,
@@ -711,7 +711,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                                 } catch (IOException e) {
                                     logger.log(Level.SEVERE, "Re-establishing a connection to the fan-out exchange at "+
                                             exchangeHost+":"+exchangePort+"/"+exchangeName+
-                                            " didn't work. Will try to send again through old channel which will probably fail, then sleep and try again.");
+                                            " didn't work. Will try to send again through old channel which will probably fail, then sleep and try again.",
+                                            e);
                                 }
                             }
                         } while (!delivered);
