@@ -69,4 +69,14 @@ public interface ReplicationMasterDescriptor {
     Iterable<Replicable<?, ?>> getReplicables();
 
     String getBearerToken();
+    
+    /**
+     * A heuristic deciding whether to use HTTPS or HTTP depending on the port on which the master is listening.
+     * 
+     * @return "https" or "https"
+     */
+    static String getHttpRequestProtocol(int port) {
+        return port%1000==443?"https":"http";
+    }
+
 }
