@@ -39,6 +39,9 @@ public interface NewMediaDialogResources extends ClientBundle {
         
         @ClassName("progress-spinner")
         String progressSpinner();
+        
+        @ClassName("progress-counter")
+        String progressCounter();
     }
 
     @Source("NewMediaDialogResources.gss")

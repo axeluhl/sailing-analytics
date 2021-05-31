@@ -221,6 +221,14 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <servlet-name>ProgressServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.ProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProgressServlet</servlet-name>
+        <url-pattern>/fileupload/progress</url-pattern>
+    </servlet-mapping>
 	<servlet>
 		<servlet-name>ORCCertificateImportServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>

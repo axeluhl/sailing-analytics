@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.AnchorElement;
@@ -14,11 +15,20 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.typedarrays.shared.Int8Array;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -42,6 +52,7 @@ import com.sap.sailing.gwt.ui.client.media.JSDownloadUtils.JSDownloadCallback;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaSubType;
@@ -58,10 +69,13 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 
 public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileStorageServiceConnectionTestObserver {
+    
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     private static final boolean DONT_FIRE_EVENTS = false;
     private static final Duration DEFAULT_DURATION = new MillisecondsDurationImpl(0L);
     private static final NewMediaDialogResources RESOURCES = NewMediaDialogResources.INSTANCE;
+    private static final String PROGRESS_STATUS_URL = "/sailingserver/fileupload/progress";
 
     protected static class MediaTrackValidator implements Validator<MediaTrack> {
         private final StringMessages stringMessages;
@@ -402,22 +416,80 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> implements FileS
         progressOverlay.addStyleName(NewMediaDialogResources.INSTANCE.css().progressOverlay());
         FlowPanel progressSpinner = new FlowPanel();
         progressSpinner.addStyleName(NewMediaDialogResources.INSTANCE.css().progressSpinner());
+        final Label counter = new Label("0%");
+        counter.addStyleName(NewMediaDialogResources.INSTANCE.css().progressCounter());
         progressOverlay.add(progressSpinner);
+        progressOverlay.add(counter);
         progressOverlay.setVisible(false);
+        final Timer t = new Timer(){
+            public void run() {
+                requestProgressPercentage(this, counter);
+            }
+        };
         urlBox.setStartUploadEvent(new StartUploadEvent() {
             @Override
             public void startUpload() {
                 progressOverlay.setVisible(true);
+                t.scheduleRepeating(1000);
             }
         });
         urlBox.setEndUploadEvent(new EndUploadEvent() {
             @Override
             public void endUpload() {
                 progressOverlay.setVisible(false);
+                t.cancel();
             }
         });
         mainPanel.add(progressOverlay);
         return mainPanel;
+    }
+    
+    private void requestProgressPercentage(final Timer t, final Label counter) {
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, PROGRESS_STATUS_URL);
+        try {
+            builder.sendRequest(null, new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    try {
+                        String result = response.getText().trim();
+                        JSONValue resultJsonValue = JSONParser.parseStrict(result);
+                        if (resultJsonValue.isObject().get(FileUploadConstants.PROGRESS_PERCENTAGE) != null) {
+                            int percentage = (int) resultJsonValue.isObject()
+                                    .get(FileUploadConstants.PROGRESS_PERCENTAGE).isNumber().doubleValue();
+                            long theBytesRead = (long) resultJsonValue.isObject()
+                                    .get(FileUploadConstants.PROGRESS_BYTE_DONE).isNumber().doubleValue();
+                            long theContentLength = (long) resultJsonValue.isObject()
+                                    .get(FileUploadConstants.PROGRESS_BYTE_TOTAL).isNumber().doubleValue();
+                            if (percentage > 99) {
+                                logger.info("Upload complete.");
+                                t.cancel();
+                            }
+                            counter.setText(percentage + "%");
+                            if (theContentLength == -1) {
+                                counter.setTitle(theBytesRead + " bytes");
+                            } else {
+                                counter.setTitle(theBytesRead + " / " + theContentLength + " bytes.");
+                            }
+                        } else {
+                            logger.severe("Cannot read result from progress request");
+                            t.cancel();
+                        }
+                    } catch (JSONException e) {
+                        logger.log(Level.SEVERE, "Cannot read result from progress request", e);
+                        t.cancel();
+                    }
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    logger.log(Level.SEVERE, "Error occured while requesting upload status. (1)", exception);
+                    t.cancel();
+                }
+            });
+        } catch (RequestException e) {
+            logger.log(Level.SEVERE, "Error occured while requesting upload status. (2)", e);
+            t.cancel();
+        }
     }
 
     private String sliceBefore(String lastPathSegment, String slicer) {

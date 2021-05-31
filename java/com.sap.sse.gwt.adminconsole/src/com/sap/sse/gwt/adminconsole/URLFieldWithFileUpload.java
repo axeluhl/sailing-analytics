@@ -48,6 +48,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     private final Logger logger = Logger.getLogger(getClass().getName());
     private static final URLFieldWithFileUploadResources RESOURCES = URLFieldWithFileUploadResources.INSTANCE;
+    private static final String UPLOAD_URL = "/sailingserver/fileupload";
 
     private final TextBox urlTextBox;
     
@@ -126,7 +127,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel = new FormPanel();
         uploadPanel = new FlowPanel();
         uploadPanel.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().spaceDirectChildrenClass());
-        uploadFormPanel.setAction("/sailingserver/fileupload");
+        uploadFormPanel.setAction(UPLOAD_URL);
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();

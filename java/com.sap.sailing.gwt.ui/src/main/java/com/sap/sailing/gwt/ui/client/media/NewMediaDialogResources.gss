@@ -104,6 +104,10 @@
     -webkit-animation: pulse 4s infinite, spin 2s linear infinite;
 }
 
+.progress-counter {
+    position: absolute;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
