@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +45,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
+import com.sap.sse.shared.media.MediaUtils;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
     
@@ -293,12 +293,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else if (isVimeoUrl(url)) {
             mimeType = MimeType.vimeo;
         } else {
-            final List<MimeType> possibleMimeTypes = MimeType.fromUrl(url);
-            if (possibleMimeTypes.size() > 0) {
-                mimeType = possibleMimeTypes.get(0);
-            } else {
-                mimeType = MimeType.unknown;
-            }
+            mimeType = MediaUtils.detectMimeTypeFromUrl(url);
         }
         return mimeType;
     }

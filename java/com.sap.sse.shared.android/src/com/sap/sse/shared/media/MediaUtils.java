@@ -33,8 +33,6 @@ public class MediaUtils {
 
     private static final Pattern VIMEO_REGEX = Pattern.compile("^.*(vimeo\\.com\\/).*");
 
-    private static final Pattern MP4_REGEX = Pattern.compile(".*\\.mp4$");
-
     /**
      * Detect mimetype for given url.
      * 
@@ -43,16 +41,25 @@ public class MediaUtils {
      * @return mimetype detected or MimeType.unknown
      */
     public static MimeType detectMimeTypeFromUrl(String url) {
-
+        MimeType result = MimeType.unknown;
         if (YOUTUBE_ID_REGEX.matcher(url).matches()) {
-            return MimeType.youtube;
+            result = MimeType.youtube;
         } else if (VIMEO_REGEX.matcher(url).matches()) {
-            return MimeType.vimeo;
-        } else if (MP4_REGEX.matcher(url).matches()) {
-            return MimeType.mp4;
+            result = MimeType.vimeo;
         } else {
-            return MimeType.unknown;
+            if (url != null) {
+                for (MimeType mimeType: MimeType.values()) {
+                    if (mimeType.endingPattern.length() > 0) {
+                        String regex = "[a-z\\-_0-9\\/\\:\\.]*\\.(" + mimeType.getEndingPattern() + ")";
+                        if (Pattern.compile(regex).matcher(url).matches()) {
+                            result = mimeType;
+                            break;
+                        }
+                    }
+                }
+            }
         }
+        return result;
     }
     
     public static Pair<Integer, Integer> getImageDimensions(URL imageURL) {

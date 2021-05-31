@@ -3,8 +3,6 @@ package com.sap.sse.common.media;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.regexp.shared.RegExp;
-
 public enum MimeType {
 
     mp4(MediaType.video, MediaSubType.mp4, "mp4"), 
@@ -40,7 +38,7 @@ public enum MimeType {
         return this == mp4panoramaflip;
     }
     
-    private String getEndingPattern() {
+    public String getEndingPattern() {
         return endingPattern;
     }
     
@@ -75,21 +73,6 @@ public enum MimeType {
             for (MimeType mimeType: MimeType.values()) {
                 if (mimeType.getEndingPattern().contains(extension.toLowerCase())) {
                     result.add(mimeType);
-                }
-            }
-        }
-        return result;
-    }
-    
-    public static List<MimeType> fromUrl(String url) {
-        List<MimeType> result = new ArrayList<>();
-        if (url != null) {
-            for (MimeType mimeType: MimeType.values()) {
-                if (mimeType.endingPattern.length() > 0) {
-                    String regex = "[a-z\\-_0-9\\/\\:\\.]*\\.(" + mimeType.getEndingPattern() + ")";
-                    if (RegExp.compile(regex, "i").test(url)) {
-                        result.add(mimeType);
-                    }
                 }
             }
         }
