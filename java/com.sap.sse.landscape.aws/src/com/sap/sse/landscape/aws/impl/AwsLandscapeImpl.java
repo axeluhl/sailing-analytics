@@ -1252,7 +1252,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
                 @Override
                 public String getNodeName() {
-                    return anyRabbitMQHost.getPublicAddress().getCanonicalHostName();
+                    return anyRabbitMQHost.getPrivateAddress().getCanonicalHostName();
                 }
             };
         } else {
@@ -1503,7 +1503,24 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                         } else {
                             result = loadBalancingClient.describeRules(
                                 b->b.listenerArn(listener.listenerArn())).handle(
-                                    (describeRulesResponse, e)->new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules()));
+                                    (describeRulesResponse, e)->{
+                                        final Pair<Listener, Iterable<Rule>> rulesResult;
+                                        if (e != null) {
+                                            logger.log(Level.WARNING, "Problem trying to get load balancer listener rules for "
+                                                    + loadBalancer.getName() + ". Trying synchronously...", e);
+                                            try {
+                                                Thread.sleep(3000);
+                                            } catch (InterruptedException e1) {
+                                                logger.log(Level.WARNING, "Strange; sleeping was interrupted", e1);
+                                            } // wait a bit; could have been a rate limit exceeding issue 
+                                            rulesResult = new Pair<Listener, Iterable<Rule>>(listener,
+                                                    getLoadBalancingClient(getRegion(region)).describeRules(b->b
+                                                            .listenerArn(listener.listenerArn())).rules());
+                                        } else {
+                                            rulesResult = new Pair<Listener, Iterable<Rule>>(listener, describeRulesResponse.rules());
+                                        }
+                                        return rulesResult;
+                                    });
                         }
                         return result;
                     });

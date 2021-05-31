@@ -6318,6 +6318,5 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             logger.log(Level.WARNING, "Unable to determine admin change log size", e);
             return 0;
         }
-
     }
 }

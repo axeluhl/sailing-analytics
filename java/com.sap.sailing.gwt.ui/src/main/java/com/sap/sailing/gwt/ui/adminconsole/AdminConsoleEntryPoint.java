@@ -24,7 +24,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingWriteEntryPoint {
     }
 
     private void initActivitiesAndPlaces() {
-        final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService());
+        final AdminConsoleClientFactory clientFactory = new AdminConsoleClientFactoryImpl(getSailingService(), this);
         final EventBus eventBus = clientFactory.getEventBus();
         final PlaceController placeController = clientFactory.getPlaceController();
         final AdminConsoleActivityMapper activityMapper = new AdminConsoleActivityMapper(clientFactory);

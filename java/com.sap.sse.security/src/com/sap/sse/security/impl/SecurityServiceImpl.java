@@ -97,6 +97,7 @@ import com.sap.sse.security.SecurityInitializationCustomizer;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ShiroWildcardPermissionFromParts;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.interfaces.OAuthToken;
@@ -648,8 +649,32 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         final UUID tenantId = tenantOwner == null ? null : tenantOwner.getId();
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
-                displayNameOfOwnedObject));
+        final OwnershipAnnotation existingOwnership = getOwnership(objectId);
+        final User existingUserOwner;
+        final UserGroup existingTenantOwner;
+        final String existingDisplayNameOfOwnedObject;
+        final Ownership result;
+        if (existingOwnership == null || existingOwnership.getAnnotation() == null) {
+            existingUserOwner = null;
+            existingTenantOwner = null;
+        } else {
+            existingUserOwner = existingOwnership.getAnnotation().getUserOwner();
+            existingTenantOwner = existingOwnership.getAnnotation().getTenantOwner();
+        }
+        if (existingOwnership == null) {
+            existingDisplayNameOfOwnedObject = null;
+        } else {
+            existingDisplayNameOfOwnedObject = existingOwnership.getDisplayNameOfAnnotatedObject();
+        }
+        if (Util.equalsWithNull(existingDisplayNameOfOwnedObject, displayNameOfOwnedObject)
+            && existingUserOwner == userOwner
+            && existingTenantOwner == tenantOwner) {
+            result = existingOwnership.getAnnotation();
+        } else {
+            result = apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
+                    displayNameOfOwnedObject));
+        }
+        return result;
     }
     
     @Override
@@ -1199,7 +1224,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
         QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
                 .getQualifiedObjectIdentifier(associationTypeIdentifier);
-        setOwnership(qualifiedTypeIdentifier, user, null);
+        setOwnership(qualifiedTypeIdentifier, user, /* owning group */ null);
     }
 
     @Override
@@ -1921,8 +1946,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            if (SecurityUtils.getSubject().isPermitted(
-                    objectToCheck.getIdentifier().getStringPermission(action))) {
+            if (SecurityUtils.getSubject().isPermitted(new ShiroWildcardPermissionFromParts(
+                    objectToCheck.getIdentifier().getPermission(action)))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1937,7 +1962,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean isPermitted = false;
             for (int i = 0; i < actions.length; i++) {
                 if (SecurityUtils.getSubject()
-                        .isPermitted(objectToCheck.getIdentifier().getStringPermission(actions[i]))) {
+                        .isPermitted(new ShiroWildcardPermissionFromParts(objectToCheck.getIdentifier().getPermission(actions[i])))) {
                     isPermitted = true;
                     break;
                 }

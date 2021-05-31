@@ -100,7 +100,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     private String getHttpRequestProtocol() {
-        return servletPort==443?"https":"http";
+        return servletPort%1000==443?"https":"http";
     }
 
     @Override

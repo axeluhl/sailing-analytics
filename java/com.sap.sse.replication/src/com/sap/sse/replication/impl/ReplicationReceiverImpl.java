@@ -61,8 +61,8 @@ import com.sap.sse.util.ThreadPoolUtil;
 public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
     private final static Logger logger = Logger.getLogger(ReplicationReceiverImpl.class.getName());
     
-    private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
-    private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
+    private static final long CHECK_INTERVAL_MILLIS = 5000; // how long (milliseconds) to pause before checking connection again
+    private static final int CHECK_COUNT = Integer.MAX_VALUE; // how long to check, value is CHECK_INTERVAL second steps
     
     /**
      * descriptor of the master server from which this replicator receives messages
@@ -223,7 +223,6 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                 if (checksPerformed <= CHECK_COUNT) {
                     try {
                         Thread.sleep(CHECK_INTERVAL_MILLIS);
-                        
                         /* isOpen() will return false if the channel has been closed. This
                          * does not hold when the connection is dropped.
                          */
