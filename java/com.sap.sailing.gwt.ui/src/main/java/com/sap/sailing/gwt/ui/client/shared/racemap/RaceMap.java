@@ -780,12 +780,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
-                if (showHeaderPanel) {
-                    final Image sapLogo = createSAPLogo();
-                    if (ClientConfiguration.getInstance().isBrandingActive()) {
-                        rootPanel.add(sapLogo);
-                    }
-                }
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -926,6 +920,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 metricOverlay.addToMap();
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
+                    if (ClientConfiguration.getInstance().isBrandingActive()) {
+                        getLeftHeaderPanel().insert(createSAPLogo(), 0);
+                    }
                 }
                 if (shareLinkAction != null) {
                     final Button shareLinkButton = createShareLinkButton(map);
@@ -3262,12 +3259,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private Image createSAPLogo() {
         ImageResource sapLogoResource = resources.sapLogoOverlay();
         Image sapLogo = new Image(sapLogoResource);
-        sapLogo.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.open(stringMessages.sapAnalyticsURL(), "_blank", null);
-            }
-        });
+        sapLogo.addClickHandler(event -> Window.open(stringMessages.sapAnalyticsURL(), "_blank", null));
         sapLogo.setStyleName("raceBoard-Logo");
         sapLogo.getElement().setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "raceBoardSapLogo");
         return sapLogo;
