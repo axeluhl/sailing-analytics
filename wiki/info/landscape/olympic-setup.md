@@ -175,6 +175,12 @@ The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo
 
 Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
 
+### Backup
+
+borgbackup is used to backup the ``/`` folder of both laptops towards the other machine. Folder where the borg repository is located is: ``/backup``.
+
+The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from sap-p1-2 to sap-p1-1 runs at 02:00 each day. Details about the configuration can be found in ``/root/borg-backup.sh`` on either machine. Log files for the backup run are in ``/var/log/backup.log``. Crontab file is in ``/root``.
+
 ## AWS Setup
 
 Our primary AWS region for the event will be Tokyo (ap-northeast-1). There, we have reserved the elastic IP ``52.194.91.94`` to which we've mapped the Route53 hostname ``tokyo-ssh.sapsailing.com`` with a simple A-record. The host assigned to the IP/hostname is to be used as a "jump host" for SSH tunnels. It runs Amazon Linux with a login-user named ``ec2-user``. The ``ec2-user`` has ``sudo`` permission. In the root user's crontab we have the same set of scripts hooked up that in our eu-west-1 production landscape is responsible for obtaining and installing the landscape manager's SSH public keys to the login user's account, aligning the set of ``authorized_keys`` with those of the registered landscape managers (users with permission ``LANDSCAPE:MANAGE:AWS``). The ``authorized_keys.org`` file also contains the two public SSH keys of the ``sailing`` accounts on the two laptops, so each time the script produces a new ``authorized_keys`` file for the ``ec2-user``, the ``sailing`` keys for the laptop tunnels don't get lost.
