@@ -471,6 +471,24 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             return null;
         }
     }
+    
+    private TimePoint getTrackingEndTime() {
+        Date endOfTracking = raceTimesInfoProvider.getRaceTimesInfo(getCurrentRace()).endOfTracking;
+        if (endOfTracking != null) {
+            return new MillisecondsTimePoint(endOfTracking);
+        } else {
+            return null;
+        }
+    }
+    
+    private TimePoint getCurrentCursorTime() {
+        Date raceTimerTime = raceTimer.getTime();
+        if (raceTimerTime != null) {
+            return new MillisecondsTimePoint(raceTimerTime);
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public void closeFloatingPlayer(MediaTrackWithSecurityDTO videoTrack) {
@@ -529,7 +547,16 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void addMediaTrack() {
-        NewMediaDialog dialog = new NewMediaDialog(mediaService,
+        final TimePoint currentCursorTime = getCurrentCursorTime();
+        final TimePoint defaultStartTime;
+        if (getTrackingEndTime() == null) {
+            defaultStartTime = TimePoint.now();
+        } else if (currentCursorTime != null) {
+            defaultStartTime = currentCursorTime;
+        } else {
+            defaultStartTime = getTrackingStartTime();
+        }
+        NewMediaDialog dialog = new NewMediaDialog(mediaService, defaultStartTime,
                 MediaPlayerManagerComponent.this.stringMessages, this.getCurrentRace(),
                 storageServiceAvailable, new DialogCallback<MediaTrack>() {
 

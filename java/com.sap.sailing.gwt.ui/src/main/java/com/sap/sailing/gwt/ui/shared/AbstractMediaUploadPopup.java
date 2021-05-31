@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,14 +57,6 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
     private final static String STATUS_NOT_OK = "NOK";
     private final static String EMPTY_MESSAGE = "-";
     private final static String YOUTUBE_REGEX = "http(?:s?):\\/\\/(?:www\\.)?youtu(?:be\\.com\\/watch\\?v=|\\.be\\/)([\\w\\-\\_]*)(&(amp;)?‌​[\\w\\?‌​=]*)?";
-    private final static String IMAGE_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(jpg|jpeg|png|gif)";
-    private final static String ACC_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(acc)";
-    private final static String MP3_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mp3)";
-    private final static String MP4_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mp4)";
-    private final static String OGG_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogg)";
-    private final static String OGV_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(ogv)";
-    private final static String QT_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(mov|qt)";
-    private final static String WEBM_REGEX = "[a-z\\-_0-9\\/\\:\\.]*\\.(webm)";
     protected final StringMessages i18n = StringMessages.INSTANCE;
     protected final SharedHomeResources sharedHomeResources = SharedHomeResources.INSTANCE;
     
@@ -295,28 +288,17 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         }
         logger.info("Check url: " + url);
         final MimeType mimeType;
-        if (matches(url, ACC_REGEX)) {
-            mimeType = MimeType.aac;
-        } else if (matches(url, IMAGE_REGEX)) {
-            mimeType = MimeType.image;
-        } else if (matches(url, MP3_REGEX)) {
-            mimeType = MimeType.mp3;
-        } else if (matches(url, MP4_REGEX)) {
-            mimeType = MimeType.mp4;
-        } else if (matches(url, OGG_REGEX)) {
-            mimeType = MimeType.ogg;
-        } else if (matches(url, OGV_REGEX)) {
-            mimeType = MimeType.ogv;
-        } else if (matches(url, QT_REGEX)) {
-            mimeType = MimeType.mp4;
-        } else if (matches(url, WEBM_REGEX)) {
-            mimeType = MimeType.webm;
-        } else if (matches(url, YOUTUBE_REGEX)) {
+        if (matches(url, YOUTUBE_REGEX)) {
             mimeType = MimeType.youtube;
         } else if (isVimeoUrl(url)) {
             mimeType = MimeType.vimeo;
         } else {
-            mimeType = MimeType.unknown;
+            final List<MimeType> possibleMimeTypes = MimeType.fromUrl(url);
+            if (possibleMimeTypes.size() > 0) {
+                mimeType = possibleMimeTypes.get(0);
+            } else {
+                mimeType = MimeType.unknown;
+            }
         }
         return mimeType;
     }

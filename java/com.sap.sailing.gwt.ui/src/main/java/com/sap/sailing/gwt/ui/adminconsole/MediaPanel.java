@@ -10,6 +10,7 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -56,8 +57,10 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -65,6 +68,7 @@ import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -101,6 +105,7 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
     private final UserService userService;
     private CellTable<MediaTrackWithSecurityDTO> mediaTracksTable;
     private ListDataProvider<MediaTrackWithSecurityDTO> mediaTrackListDataProvider = new ListDataProvider<>();
+    private Date latestDate;
     private RefreshableMultiSelectionModel<MediaTrackWithSecurityDTO> refreshableSelectionModel;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
@@ -598,7 +603,8 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
 
     private void addUrlMediaTrack() {
         NewMediaWithRaceSelectionDialog dialog = new NewMediaWithRaceSelectionDialog(mediaServiceWrite,
-                stringMessages, presenter, storageServiceAvailable, new DialogCallback<MediaTrack>() {
+                getDefaultStartTime(), stringMessages, presenter,
+                storageServiceAvailable, new DialogCallback<MediaTrack>() {
                     @Override
                     public void cancel() {
                         // no op
@@ -624,6 +630,44 @@ public class MediaPanel extends FlowPanel implements FilterablePanelProvider<Med
                 });
         dialog.show();
     }
+    
+    private TimePoint getDefaultStartTime() {
+        if (getLatestDate() != null) {
+            return new MillisecondsTimePoint(latestDate); 
+        } else {
+            return MillisecondsTimePoint.now();
+        }
+    }
+
+    private Date getLatestDate() {
+        sailingServiceWrite.getRegattas(new MarkedAsyncCallback<List<RegattaDTO>>(new AsyncCallback<List<RegattaDTO>>() {
+            @Override
+            public void onSuccess(List<RegattaDTO> result) {
+               latestDate = getDateFromLatestRegatta(result); 
+            }
+
+            private Date getDateFromLatestRegatta(List<RegattaDTO> result) {
+                RegattaDTO latestRegatta = null;
+                for (RegattaDTO regatta : result) {
+                    if(regatta.getStartDate()!=null){
+                        if(latestRegatta == null){
+                            latestRegatta = regatta;
+                        }else if(regatta.getStartDate().after(latestRegatta.getStartDate())) {
+                            latestRegatta = regatta;
+                        }
+                    }
+                }
+                return latestRegatta == null ? null : latestRegatta.getStartDate();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        }));
+        return latestDate;
+    }
+
+
 
     private String listAssignedRaces(MediaTrackWithSecurityDTO mediaTrack) {
         final String result;

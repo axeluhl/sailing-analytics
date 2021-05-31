@@ -130,7 +130,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
         fileUploadField = new FileUpload();
-        fileUploadField.getElement().setAttribute("accept", "video/*");
+        fileUploadField.getElement().setAttribute("accept", "audio/*,video/*");
         fileUploadField.setStylePrimaryName(RESOURCES.urlFieldWithFileUploadStyle().fileInputClass());
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");

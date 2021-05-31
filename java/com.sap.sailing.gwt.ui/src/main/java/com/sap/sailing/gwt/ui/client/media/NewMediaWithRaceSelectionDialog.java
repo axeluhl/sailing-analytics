@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.adminconsole.FileStorageServiceConnectionTestObser
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.TimePoint;
 
 public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
@@ -21,11 +22,11 @@ public class NewMediaWithRaceSelectionDialog extends NewMediaDialog {
 
     private final Presenter presenter;
 
-    public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService,
+    public NewMediaWithRaceSelectionDialog(MediaServiceAsync mediaService, TimePoint defaultStartTime,
             StringMessages stringMessages, Presenter presenter,
             FileStorageServiceConnectionTestObservable storageServiceConnection,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<MediaTrack> dialogCallback) {
-        super(mediaService, stringMessages, null, storageServiceConnection, dialogCallback);
+        super(mediaService, defaultStartTime, stringMessages, null, storageServiceConnection, dialogCallback);
         this.presenter = presenter;
     }
 
