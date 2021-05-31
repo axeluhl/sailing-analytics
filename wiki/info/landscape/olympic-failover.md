@@ -72,4 +72,12 @@ How will local/on-site users be connected to the local P1s, assuming that the LA
 
 Would we try to provide connectivity through mobile hotspots, as auto SSH should reliably start working again once it reaches the target IPs? Shall we leave this issue to Swisstiming/Organizers and stick to the local connections to the Sailing Analytics?
 
+## TracTrac in the Cloud?
 
+### Scenario
+
+On-site Internet goes down; does TracTrac have a full-fledged server running in the cloud that we could connect to from the cloud to at least keep serving the RHBs?
+
+### Open questions
+
+How can the MongoDB in the cloud be re-configured dynamically to become primary even though it may have been started with priority 0?

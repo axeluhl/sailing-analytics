@@ -269,7 +269,11 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
-            ss = new ServerSocket(0); // bind to any free port
+            ServerSocket mySs;
+            do {
+                mySs = new ServerSocket(0); // bind to any free port
+            } while (!ReplicationMasterDescriptor.getHttpRequestProtocol(mySs.getLocalPort()).equals("http")); // unless it is considered an https port by internal heuristics; then try again...
+            ss = mySs;
             this.masterReplicationService = masterReplicationService;
             final List<Replicable<?, ?>> replicablesToReplicate = new ArrayList<>();
             for (final String replicableIdAsString : replicaDescriptor.getReplicableIdsAsStrings()) {
