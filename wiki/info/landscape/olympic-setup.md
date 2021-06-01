@@ -210,7 +210,7 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for tokyo2020.sapsailing.com and security-service.sapsailing.com
+### Letsencrypt Certificate for tokyo2020.sapsailing.com, security-service.sapsailing.com and tokyo2020-master.sapsailing.com
 
 In order to allow us to access ``tokyo2020.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
@@ -244,6 +244,25 @@ The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo
 
 Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
 
+On sap-p1-1 is currently a nginx listening to tokyo2020-master.sapsailing.com with the following configuration:
+
+```
+server {
+    listen              9443 ssl;
+    server_name         tokyo2020-master.sapsailing.com;
+    ssl_certificate     /etc/ssl/private/tokyo2020-master.sapsailing.com.fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/tokyo2020-master.sapsailing.com.privkey.pem;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+    }
+}
+```
+
+
+
 ### Backup
 
 borgbackup is used to backup the ``/`` folder of both laptops towards the other machine. Folder where the borg repository is located is: ``/backup``.
@@ -257,6 +276,8 @@ Both laptops, ``sap-p1-1`` and ``sap-p1-2`` have monitoring scripts from the git
 The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes and looks for their corresponding ``ssh`` child processes. If any of them is missing, an alert is sent using ``notify-operators``.
 
 The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.printSecondaryReplicationInfo()`` and logs it to ``/tmp/mongo-replica-set-delay``. The average of the last ten values is compared to a threshold (currently 3s), and an alert is sent using ``notify-operators`` if the threshold is exceeded.
+
+The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
 
 ## AWS Setup
 
@@ -324,6 +345,15 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 
 ```
 	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
+```
+
+The cloud replica is not supposed to become primary, except for maybe in the unlikely event where operations would move entirely to the cloud. To achieve this, the cloud replica has priority 0 which can be configured like this:
+
+```
+    tokyo2020:PRIMARY> cfg = rs.conf()
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[1]:
+    cfg.members[1].priority=0
+    rs.reconfig(cfg)
 ```
 
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
