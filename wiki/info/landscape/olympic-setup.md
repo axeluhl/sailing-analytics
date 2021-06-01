@@ -213,6 +213,10 @@ The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbit
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
 
+#### Local setup of rabbitmq
+
+The above configuration needs also to be set on the rabbitmq installations of the P1s. The rabbitmq-server package has version 3.6.10. In that version the config file is located in ``/etc/rabbitmq/rabbitmq.config``, the entry is ``[{rabbit, [{loopback_users, []}]}].`` Further documentation for this version can be found here: [http://previous.rabbitmq.com/v3_6_x/configure.html](http://previous.rabbitmq.com/v3_6_x/configure.html)
+
 ### Cross-Region VPC Peering
 
 The primary AWS region for the tokyo2020 replica set is ap-northeast-1 (Tokyo). In order to provide low latencies for the RHBs we'd like to add replicas also in other regions. Since we want to not expose the RabbitMQ running ap-northeast-1 to the outside world, we plan to peer the VPCs of other regions with the one in ap-northeast-1.
