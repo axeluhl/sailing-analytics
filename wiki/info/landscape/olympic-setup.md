@@ -328,6 +328,15 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
 ```
 
+The cloud replica is not supposed to become primary, except for maybe in the unlikely event where operations would move entirely to the cloud. To achieve this, the cloud replica has priority 0 which can be configured like this:
+
+```
+    tokyo2020:PRIMARY> cfg = rs.conf()
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[1]:
+    cfg.members[1].priority=0
+    rs.reconfig(cfg)
+```
+
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
 
 One way to monitor the health and replication status of the replica set is running the following command:
