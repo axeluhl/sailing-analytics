@@ -8,7 +8,27 @@ For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up 
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
+Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this:
+
+```
+storage:
+  dbPath: /var/lib/mongodb
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 2
+```
+
+On ``sap-p1-1`` we have a second MongoDB configuration ``/etc/mongod-security-service.conf`` which is used by the ``/lib/systemd/system/mongod-security-service.service`` unit which we created as a copy of ``/lib/systemd/system/mongod.service`` and adjusted the line
+
+```
+ExecStart=/usr/bin/mongod --config /etc/mongod-security-service.conf
+```
+
+This second database runs on the default port 27017 and is used as the target for a backup script for the ``security_service`` database. See below.
+
+RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
 
 Both machines have been configured to use 2GB of swap space at ``/swapfile``.
 
@@ -40,6 +60,55 @@ SAP Client Alexandro (Windows)		10.1.3.221	10.8.0.133
 SAP Client Axel (Windows)		10.1.3.227	10.8.0.134	
 TracTrac Dev Jorge (Linux)		10.1.3.228	10.8.0.135	
 TracTrac Dev Chris (Linux)		10.1.3.233	10.8.0.136	
+```
+
+The OpenVPN connection is set up with the GUI of the Linux Desktop. Therefore the management is done through Network Manager. Network Manager has a CLI, ``nmcli``. With that more properties of connections can be modified. The ``connection.secondaries`` property defines the UUID of a connection that will be established as soon as the initial connection is working. With ``nmcli connection show`` you will get the list of connections with the corresponding UUIDs. For the Medemblik Event the OpenVPN connection to the A server is bound to the wired interface that is used with 
+
+```
+sudo nmcli connection modify <Wired Connection 2> +connection.secondaries <UUID-of-OpenVPN-A>
+```
+
+For the OpenVPN connections we have received two alternative configuration files together with keys and certificates for our server and work laptops, as well as the certificates for the OpenVPN server (``ca.crt``, ``dh.pem``, ``pfs.key``). The "A" configuration, e.g., provided in a file named ``st-soft-aws_A.ovpn``, looks like this:
+
+```
+client
+dev tun
+proto udp
+remote 3.122.96.235 1195
+ca ca.crt
+cert {name-of-the-certificate}.crt
+key {name-of-the-key}.key
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256
+cipher AES-256-CBC
+auth SHA512
+resolv-retry infinite
+auth-retry none
+nobind
+persist-key
+persist-tun
+ns-cert-type server
+comp-lzo
+verb 3
+tls-client
+tls-auth pfs.key
+```
+
+Here, ``{name-of-the-certificate}.crt`` and ``{name-of-the-key}.key`` need to be replaced by the names of the files corresponding with the host to connect to the OpenVPN. The "B" configuration only differs in the ``remote`` specification, using a different IP address for the OpenVPN server, namely ``52.59.130.167``. It is useful to copy the ``.ovpn`` file and the other ``.key`` and ``.crt`` files into one directory.
+
+Under Windows download the latest OpenVPN client from [https://openvpn.net/client-connect-vpn-for-windows/](https://openvpn.net/client-connect-vpn-for-windows/). After installation, use the ``.ovpn`` file, adjusted with your personalized key/certificate, to establish the connection.
+
+On Linux, go to the global settings through Gnome, node "Network" and press the "+" button next to VPN. Import the ``.ovpn`` file, then enable the OpenVPN connection by flicking the switch. The connection will show in the output of
+
+```
+	nmcli connection show
+```
+
+The connection IDs will be shown, e.g., ``st-soft-aws_A``. Such a connection can be stopped and restarted from the command line using the following commands:
+
+```
+	nmcli connection down st-soft-aws_A
+	nmcli connection up st-soft-aws_A
 ```
 
 ### Tunnels
@@ -141,7 +210,7 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for tokyo2020.sapsailing.com and security-service.sapsailing.com
+### Letsencrypt Certificate for tokyo2020.sapsailing.com, security-service.sapsailing.com and tokyo2020-master.sapsailing.com
 
 In order to allow us to access ``tokyo2020.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
@@ -175,11 +244,40 @@ The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo
 
 Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
 
+On sap-p1-1 is currently a nginx listening to tokyo2020-master.sapsailing.com with the following configuration:
+
+```
+server {
+    listen              9443 ssl;
+    server_name         tokyo2020-master.sapsailing.com;
+    ssl_certificate     /etc/ssl/private/tokyo2020-master.sapsailing.com.fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/tokyo2020-master.sapsailing.com.privkey.pem;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+    }
+}
+```
+
+
+
 ### Backup
 
 borgbackup is used to backup the ``/`` folder of both laptops towards the other machine. Folder where the borg repository is located is: ``/backup``.
 
 The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from sap-p1-2 to sap-p1-1 runs at 02:00 each day. Details about the configuration can be found in ``/root/borg-backup.sh`` on either machine. Log files for the backup run are in ``/var/log/backup.log``. Crontab file is in ``/root``.
+
+### Monitoring and e-Mail Alerting
+
+Both laptops, ``sap-p1-1`` and ``sap-p1-2`` have monitoring scripts from the git folder ``configuration/on-site-scripts`` linked to ``/usr/local/bin``. These in particular include ``monitor-autossh-tunnels`` and ``monitor-mongo-replica-set-delay`` as well as a ``notify-operators`` script which contains the list of e-mail addresses to notify in case an alert occurs.
+
+The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes and looks for their corresponding ``ssh`` child processes. If any of them is missing, an alert is sent using ``notify-operators``.
+
+The ``monitor-mongo-replica-set-delay`` looks as the result of calling ``rs.printSecondaryReplicationInfo()`` and logs it to ``/tmp/mongo-replica-set-delay``. The average of the last ten values is compared to a threshold (currently 3s), and an alert is sent using ``notify-operators`` if the threshold is exceeded.
+
+The ``monitor-disk-usage`` script checks the partition holding ``/var/lib/mongodb/``. Should it fill up to more than 90%, an alert will be sent using ``notify-operators``.
 
 ## AWS Setup
 
@@ -206,6 +304,10 @@ which allows clients from other hosts to connect. The security groups for the Ra
 The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
+
+#### Local setup of rabbitmq
+
+The above configuration needs also to be set on the rabbitmq installations of the P1s. The rabbitmq-server package has version 3.6.10. In that version the config file is located in ``/etc/rabbitmq/rabbitmq.config``, the entry is ``[{rabbit, [{loopback_users, []}]}].`` Further documentation for this version can be found here: [http://previous.rabbitmq.com/v3_6_x/configure.html](http://previous.rabbitmq.com/v3_6_x/configure.html)
 
 ### Cross-Region VPC Peering
 
@@ -245,9 +347,28 @@ Three MongoDB nodes are intended to run during regular operations: sap-p1-1:1020
 	mongodb://localhost:10201,localhost:10202,localhost:10203/tokyo2020?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest
 ```
 
+The cloud replica is not supposed to become primary, except for maybe in the unlikely event where operations would move entirely to the cloud. To achieve this, the cloud replica has priority 0 which can be configured like this:
+
+```
+    tokyo2020:PRIMARY> cfg = rs.conf()
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[1]:
+    cfg.members[1].priority=0
+    rs.reconfig(cfg)
+```
+
 All cloud replicas shall use a MongoDB database name ``tokyo2020-replica``. In those regions where we don't have dedicated MongoDB support established (basically all but eu-west-1 currently), an image should be used that has a MongoDB server configured to use ``/home/sailing/mongo`` as its data directory and ``replica`` as its replica set name. See AMI SAP Sailing Analytics App HVM with MongoDB 1.137 (ami-05b6c7b1244f49d54) in ap-northeast-1 (already copied to the other peered regions except eu-west-1).
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``ec2-user`` on ``tokyo-ssh.sapsailing.com`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/ec2-user/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``tokyo-ssh.sapsailing.com`` and then restores it on the local ``tokyo2020`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+One way to monitor the health and replication status of the replica set is running the following command:
+
+```
+  watch 'echo "rs.printSecondaryReplicationInfo()" | \
+  mongo "mongodb://localhost:10201/?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest" | \
+  grep "\(^source:\)\|\(syncedTo:\)\|\(behind the primary\)"'
+```
+
+It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s).
+
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
