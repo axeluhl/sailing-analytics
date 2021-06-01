@@ -210,7 +210,7 @@ On ``sap-p1-1`` an SSH connection to ``sap-p1-2`` is maintained, with the follow
 
 So the essential changes are that there are no more SSH connections into the cloud, and the port forward on each laptop's port 5673, which would point to ``rabbit-ap-northeast-1.sapsailing.com`` during regular operations, now points to ``sap-p1-2:5672`` where the RabbitMQ installation takes over from the cloud instance.
 
-### Letsencrypt Certificate for tokyo2020.sapsailing.com and security-service.sapsailing.com
+### Letsencrypt Certificate for tokyo2020.sapsailing.com, security-service.sapsailing.com and tokyo2020-master.sapsailing.com
 
 In order to allow us to access ``tokyo2020.sapsailing.com`` and ``security-service.sapsailing.com`` with any HTTPS port forwarding locally so that all ``JSESSION_GLOBAL`` etc. cookies with their ``Secure`` attribute are delivered properly, we need an SSL certificate. I've created one by doing
 
@@ -243,6 +243,25 @@ server {
 The "Let's Encrypt"-provided certificate is used for SSL termination. With tokyo2020.sapsailing.com aliased in ``/etc/hosts`` to the address of the current master server, this allows accessing ``https://tokyo2020.sapsailing.com:9443`` with all benefits of cookie / session authentication.
 
 Likewise, ``/etc/nginx/sites-enabled/security-service`` forwards to 127.0.0.1:8889 where a local copy of the security service may be deployed in case the Internet fails. In this case, the local port 443 must be forwarded to the NGINX port 9443 instead of security-service.sapsailing.com:443 through tokyo-ssh.sapsailing.com.
+
+On sap-p1-1 is currently a nginx listening to tokyo2020-master.sapsailing.com with the following configuration:
+
+```
+server {
+    listen              9443 ssl;
+    server_name         tokyo2020-master.sapsailing.com;
+    ssl_certificate     /etc/ssl/private/tokyo2020-master.sapsailing.com.fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/tokyo2020-master.sapsailing.com.privkey.pem;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8888;
+    }
+}
+```
+
+
 
 ### Backup
 
