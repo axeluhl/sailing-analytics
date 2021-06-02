@@ -654,7 +654,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (hasFinishedLeg(timePoint)) {
                             // Yes, so the gap is the time period between the time points at which the leader and
                             // our competitor finished this leg.
-                            return whenLeaderFinishedLeg.until(getMarkPassingForLegEnd().getTimePoint()); 
+                            return whenLeaderFinishedLeg.until(getMarkPassingForLegEnd().getTimePoint());
                         } else {
                             if (windwardSpeed == null) {
                                 return null;

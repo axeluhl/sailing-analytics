@@ -893,11 +893,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             // check for start/finished times in race log and add a few minutes on the ends
             if (!startOfTrackingFound || !endOfTrackingFound) {
-                if (!startOfTrackingFound && getStartOfRace() != null) {
+                if (!startOfTrackingFound && getStartOfRace() != null && getTrackedRegatta().getRegatta().isControlTrackingFromStartAndFinishTimes()) {
                     startOfTracking = getStartOfRace().minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
                     startOfTrackingFound = true;
                 }
-                if (!endOfTrackingFound && getFinishedTime() != null) {
+                if (!endOfTrackingFound && getFinishedTime() != null && getTrackedRegatta().getRegatta().isControlTrackingFromStartAndFinishTimes()) {
                     endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
                     endOfTrackingFound = true;
                 }
