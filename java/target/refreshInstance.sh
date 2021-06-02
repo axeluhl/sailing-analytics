@@ -123,8 +123,18 @@ install_environment ()
         # clean up directory to really make sure that there are no files left
         rm -rf ${SERVER_HOME}/environment
         mkdir ${SERVER_HOME}/environment
-        echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
-        wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+        if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+            if [ -n "${SCP_PORT}" ]; then
+                SCP_PORT_OPTION="-P ${SCP_PORT}"
+            fi
+            SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+	    echo "Using environment ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT}"
+            scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT} .
+        else
+	    echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
+	    wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
+	fi
         echo "# Environment ($USE_ENVIRONMENT): START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
         cat ${SERVER_HOME}/environment/$USE_ENVIRONMENT >> $SERVER_HOME/env.sh
         echo "# Environment: END" >> ${SERVER_HOME}/env.sh
@@ -148,7 +158,12 @@ load_from_release_file ()
         rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf *.tar.gz
 	if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
-	    scp ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
+		SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+	    if [ -n "${SCP_PORT}" ]; then
+                SCP_PORT_OPTION="-P ${SCP_PORT}"
+	    fi
+	    SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+	    scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
 	else
 	    echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
 	    wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
