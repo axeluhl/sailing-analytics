@@ -130,7 +130,8 @@ install_environment ()
             fi
             SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
 	    echo "Using environment ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT}"
-            scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT} .
+	    mkdir -p ./environment
+            scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/environments/${USE_ENVIRONMENT} ./environment
         else
 	    echo "Using environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT"
 	    wget -P environment https://releases.sapsailing.com/environments/$USE_ENVIRONMENT
