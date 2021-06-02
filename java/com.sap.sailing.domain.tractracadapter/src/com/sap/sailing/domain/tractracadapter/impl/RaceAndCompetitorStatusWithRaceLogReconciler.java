@@ -246,8 +246,13 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
-        if (raceStatus == RaceStatusType.OFFICIAL && !ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial()) {
-            final Runnable setResultsAreOfficial = ()->RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+        final boolean resultsAreOfficial = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial();
+        if (raceStatus == RaceStatusType.OFFICIAL && !resultsAreOfficial) {
+            logger.info("Race status for race "+trackedRace.getName()+" is OFFICIAL with TracTrac and we have it as not official so far. Scheduling update.");
+            final Runnable setResultsAreOfficial = ()->{
+                logger.info("Setting race status for race "+trackedRace.getName()+" to OFFICIAL");
+                RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+            };
             if (officialCompetitorUpdateProvider != null) {
                 officialCompetitorUpdateProvider.runWhenNoMoreOfficialCompetitorUpdatesPending(setResultsAreOfficial);
             } else {
