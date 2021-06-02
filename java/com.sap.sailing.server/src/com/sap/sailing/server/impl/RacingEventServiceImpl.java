@@ -3450,7 +3450,6 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             }
         }
         logoutput.append("Received " + competitorAndBoatStore.getCompetitorsCount() + " NEW competitors\n");
-
         logger.info("Reading device configurations...");
         raceManagerDeviceConfigurationsById.putAll((Map<UUID, DeviceConfiguration>) ois.readObject());
         logoutput.append("Received " + raceManagerDeviceConfigurationsById.size() + " NEW configuration entries\n");
@@ -3458,42 +3457,38 @@ implements RacingEventService, ClearStateTestSupport, RegattaListener, Leaderboa
             raceManagerDeviceConfigurationsByName.put(config.getName(), config);
             logoutput.append(String.format("%3s\n", config.getName()));
         }
-
         logger.info("Reading anniversary races...");
         final Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> knownAnniversaries = (Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>>) ois
                 .readObject();
         anniversaryRaceDeterminator.setKnownAnniversaries(knownAnniversaries);
         logoutput.append("Received " + knownAnniversaries.size() + " anniversary races\n");
-
         logger.info("Reading next anniversary...");
         final Pair<Integer, AnniversaryType> nextAnniversary = (Pair<Integer, AnniversaryType>) ois.readObject();
         anniversaryRaceDeterminator.setNextAnniversary(nextAnniversary);
         logoutput.append("Received next anniversary " + nextAnniversary + "\n");
-
         logger.info("Reading race count for anniversaries...");
         final int currentRaceCount = ois.readInt();
         anniversaryRaceDeterminator.setRaceCount(currentRaceCount);
         logoutput.append("Received race count for anniversaries " + currentRaceCount + "\n");
-
         logger.info("Reading remote sailing server references...");
         for (RemoteSailingServerReference remoteSailingServerReference : (Iterable<RemoteSailingServerReference>) ois
                 .readObject()) {
             remoteSailingServerSet.add(remoteSailingServerReference);
             logoutput.append("Received remote sailing server reference " + remoteSailingServerReference);
         }
-
         // make sure to initialize listeners correctly
         for (Regatta regatta : regattasByName.values()) {
             RegattaImpl regattaImpl = (RegattaImpl) regatta;
             regattaImpl.initializeSeriesAfterDeserialize();
             regattaImpl.addRaceColumnListener(raceLogReplicator);
         }
-        // re-establish RaceLogResolver references to this RacingEventService in all TrackedRace instances
+        // re-establish RaceLogResolver references to this RacingEventService and regatta listeners in all TrackedRace instances
         for (DynamicTrackedRegatta trackedRegatta : regattaTrackingCache.values()) {
             trackedRegatta.lockTrackedRacesForRead();
             try {
                 for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
+                    ((TrackedRaceImpl) trackedRace).registerRegattaListener();
                 }
             } finally {
                 trackedRegatta.unlockTrackedRacesAfterRead();

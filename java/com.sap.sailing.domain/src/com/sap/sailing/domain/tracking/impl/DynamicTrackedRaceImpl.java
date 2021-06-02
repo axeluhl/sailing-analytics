@@ -133,7 +133,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.courseDesignChangedListeners = new HashSet<>();
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
-        
         gpsFixReceived = new AtomicBoolean(false);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         if (!raceIsKnownToStartUpwind) {
@@ -144,7 +143,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             windSourcesToExclude.add(new WindSourceImpl(WindSourceType.COURSE_BASED));
             setWindSourcesToExclude(windSourcesToExclude);
         }
-        
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);

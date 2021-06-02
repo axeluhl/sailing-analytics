@@ -63,6 +63,8 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
@@ -431,6 +433,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final NamedReentrantReadWriteLock sensorTracksLock;
     
     /**
+     * When a regatta's {@link Regatta#useStartTimeInference()} or {@link Regatta#isControlTrackingFromStartAndFinishTimes()}
+     * changes, the tracking start/end times need to be recalculated. This regatta listener handles this. It has to be
+     * added to the tracked race's underlying regatta at construction time and after de-serialization (regatta listeners
+     * are transient and are not serialized together with the regatta).
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class TimingUpdaterCallback implements RegattaListener {
+        @Override
+        public void useStartTimeInferenceChanged(Regatta regatta, boolean newUseStartTimeInference) {
+            updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+        }
+
+        @Override
+        public void controlTrackingFromStartAndFinishTimesChanged(Regatta regatta,
+                boolean newControlTrackingFromStartAndFinishTimes) {
+            updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+        }
+    }
+    
+    /**
      * Constructs the tracked race with one-design ranking.
      */
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
@@ -455,6 +479,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
             RaceLogAndTrackedRaceResolver raceLogResolver, TrackingConnectorInfo trackingConnectorInfo) {
         super(race, trackedRegatta, windStore, millisecondsOverWhichToAverageWind);
+        registerRegattaListener();
         this.raceLogResolver = raceLogResolver;
         this.trackingConnectorInfo = trackingConnectorInfo;
         raceStates = new WeakHashMap<>();
@@ -901,6 +926,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
                     endOfTrackingFound = true;
                 }
+            }
+            if (!startOfTrackingFound) {
+                startOfTracking = null;
+            }
+            if (!endOfTrackingFound) {
+                endOfTracking = null;
             }
         }
         startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
@@ -3738,6 +3769,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public IsManagedByCache<DomainFactory> resolve(DomainFactory domainFactory) {
         this.raceLogResolver = domainFactory.getRaceLogResolver();
         return this;
+    }
+    
+    /**
+     * Regatta listeners are transient only; so after de-serialization we have to re-establish the regatta listener
+     * that is responsible for updating tracking times when the rules for how this works have changed on the regatta.
+     */
+    public void registerRegattaListener() {
+        trackedRegatta.getRegatta().addRegattaListener(new TimingUpdaterCallback());
     }
     
     @Override
