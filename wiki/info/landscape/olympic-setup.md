@@ -271,6 +271,23 @@ The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from
 
 ### Monitoring and e-Mail Alerting
 
+To be able to use ``sendmail`` to send notifications via email it needs to be installed and configured to use the AWS SES as smtp relay:
+```
+sudo apt install sendmail
+```
+
+Follow the instructions on [https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-sendmail.html) with one exception, the content that needs to be added to ``sendmail.mc`` looks like:
+```
+define(`SMART_HOST', `email-smtp.eu-west-1.amazonaws.com')dnl
+define(`RELAY_MAILER_ARGS', `TCP $h 587')dnl
+define(`confAUTH_MECHANISMS', `LOGIN PLAIN')dnl
+FEATURE(`authinfo', `hash -o /etc/mail/authinfo.db')dnl
+MASQUERADE_AS(`sapsailing.com')dnl
+FEATURE(masquerade_envelope)dnl
+FEATURE(masquerade_entire_domain)dnl
+```
+The authentication details can be fetched from the content of ``/root/mail.properties`` of any running sailing EC2 instance.
+
 Both laptops, ``sap-p1-1`` and ``sap-p1-2`` have monitoring scripts from the git folder ``configuration/on-site-scripts`` linked to ``/usr/local/bin``. These in particular include ``monitor-autossh-tunnels`` and ``monitor-mongo-replica-set-delay`` as well as a ``notify-operators`` script which contains the list of e-mail addresses to notify in case an alert occurs.
 
 The ``monitor-autossh-tunnels`` script checks all running ``autossh`` processes and looks for their corresponding ``ssh`` child processes. If any of them is missing, an alert is sent using ``notify-operators``.

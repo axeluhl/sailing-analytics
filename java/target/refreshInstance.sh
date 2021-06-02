@@ -139,19 +139,21 @@ load_from_release_file ()
     if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
         INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
         echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
-    fi
-    if [[ ${INSTALL_FROM_RELEASE} != "" ]]; then
+    else
         if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
           echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
         fi
+	RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
         cd ${SERVER_HOME}
         rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
         rm -rf *.tar.gz
-        echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz"
-        wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${INSTALL_FROM_RELEASE}.tar.gz
+	if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+	    scp ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
+	else
+	    echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
+	    wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
+	fi
         load_from_local_release_file
-    else
-        echo "The variable INSTALL_FROM_RELEASE has not been set therefore no release file will be installed!"
     fi
 }
 

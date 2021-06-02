@@ -4400,7 +4400,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         RaceLogDTO result = null;
         final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
-        if(raceLog != null) {
+        if (raceLog != null) {
             List<RaceLogEventDTO> entries = new ArrayList<RaceLogEventDTO>();
             result = new RaceLogDTO(leaderboardName, raceColumnDTO.getName(), fleet.getName(), raceLog.getCurrentPassId(), entries);
             raceLog.lockForRead();
