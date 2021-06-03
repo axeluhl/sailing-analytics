@@ -167,12 +167,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         Util.Triple<A, B, C> event = null;
         while (event == null || !isStopEvent(event)) {
             try {
-                event = queue.take();
-                if (!isStopEvent(event)) {
-                    handleEvent(event);
-                }
                 final Set<LoadingQueueDoneCallBack> callBacks;
                 synchronized (loadingQueueDoneCallBacks) {
+                    event = queue.take();
                     if (getSimulator() != null) {
                         // when simulator is running, loading is considered finished and all callbacks will
                         // be satisfied instantly
@@ -186,6 +183,9 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
                         // currently consumed and notify if any are found
                         callBacks = loadingQueueDoneCallBacks.remove(event);
                     }
+                }
+                if (!isStopEvent(event)) {
+                    handleEvent(event);
                 }
                 if (callBacks != null) {
                     for (LoadingQueueDoneCallBack callback : callBacks) {

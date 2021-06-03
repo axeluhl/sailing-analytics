@@ -250,10 +250,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         if (raceStatus == RaceStatusType.OFFICIAL && !resultsAreOfficial) {
             logger.info("Race status for race "+trackedRace.getName()+" is OFFICIAL with TracTrac and we have it as not official so far. Scheduling update.");
             final Runnable setResultsAreOfficial = ()->{
-                logger.info("Setting race status for race "+trackedRace.getName()+" to OFFICIAL");
+                logger.info("Setting race status for race "+trackedRace.getName()+" to OFFICIAL now");
                 RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
             };
             if (officialCompetitorUpdateProvider != null) {
+                logger.info("Enqueuing the setting of race status for race "+trackedRace.getName()+
+                        " to OFFICIAL until all competitor updates have been handled");
                 officialCompetitorUpdateProvider.runWhenNoMoreOfficialCompetitorUpdatesPending(setResultsAreOfficial);
             } else {
                 setResultsAreOfficial.run();
