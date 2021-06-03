@@ -262,12 +262,17 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
+            logger.info("RaceLog considered race as aborted ("+abortingFlagEvent+"), and the TracTrac race status "+raceStatus+
+                    " from "+raceStatusUpdateTime+" suggests it's not aborted. Starting a new pass.");
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         } else if (isAbortedState(raceStatus) &&
                 (abortingFlagEvent == null || (!abortingFlagMatches(raceStatus, abortingFlagEvent.getUpperFlag()) &&
                                                raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())))) {
+            final Flags upperFlag = flagForRaceStatus.get(raceStatus);
+            logger.info("RaceLog considered race as NOT aborted, and the TracTrac race status "+raceStatus+
+                    " from "+raceStatusUpdateTime+" suggests it's aborted. Adding abort flag event "+upperFlag+", starting a new pass.");
             final RaceLogFlagEventImpl flagEvent = new RaceLogFlagEventImpl(raceStatusUpdateTime, raceLogEventAuthor,
-                    defaultRaceLog.getCurrentPassId(), flagForRaceStatus.get(raceStatus), /* lower flag */ Flags.NONE,
+                    defaultRaceLog.getCurrentPassId(), upperFlag, /* lower flag */ Flags.NONE,
                     /* is displayed */ true);
             addRaceLogEventAndPreventRecursion(defaultRaceLog, flagEvent);
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
