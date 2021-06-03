@@ -1299,7 +1299,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {
-                if(windSource.getType() == WindSourceType.WEB) {
+                if (windSource.getType() == WindSourceType.WEB) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
@@ -1310,7 +1310,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         Iterator<Wind> windIter = windTrack.getRawFixes().iterator();
                         while (windIter.hasNext()) {
                             Wind wind = windIter.next();
-                            if(wind != null) {
+                            if (wind != null) {
                                 WindDTO windDTO = createWindDTO(wind, windTrack);
                                 windTrackInfoDTO.windFixes.add(windDTO);
                             }
@@ -1318,7 +1318,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     } finally {
                         windTrack.unlockAfterRead();
                     }
-
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }

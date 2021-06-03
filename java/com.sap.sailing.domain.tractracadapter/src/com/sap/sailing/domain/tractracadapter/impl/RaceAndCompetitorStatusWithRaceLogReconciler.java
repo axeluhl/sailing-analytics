@@ -267,7 +267,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 (abortingFlagEvent == null || (!abortingFlagMatches(raceStatus, abortingFlagEvent.getUpperFlag()) &&
                                                raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())))) {
             final RaceLogFlagEventImpl flagEvent = new RaceLogFlagEventImpl(raceStatusUpdateTime, raceLogEventAuthor,
-                    defaultRaceLog.getCurrentPassId(), flagForRaceStatus.get(raceStatus), /* lower flag */ null,
+                    defaultRaceLog.getCurrentPassId(), flagForRaceStatus.get(raceStatus), /* lower flag */ Flags.NONE,
                     /* is displayed */ true);
             addRaceLogEventAndPreventRecursion(defaultRaceLog, flagEvent);
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
