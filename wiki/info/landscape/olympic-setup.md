@@ -121,6 +121,8 @@ On both laptops, we maintain SSH connections to ``localhost`` with port forwards
 
 Furthermore, for administrative SSH access from outside, we establish reverse port forwards from our jump host ``tokyo-ssh.sapsailing.com`` to the SSH ports on ``sap-p1-1`` (on port 18122) and ``sap-p1-2`` (on port 18222).
 
+Both laptops have a forward from localhost:22222 to sapsailing.com:22 through tokyo-ssh, in order to be able to have a git remote ``ssh`` with the url ``ssh://trac@localhost:22222/home/trac/git``.
+
 The port forwards vary for exceptional situations, such as when the Internet connection is not available, or when ``sap-p1-1`` that regularly runs the master process fails and we need to make ``sap-p1-2`` the new master. See below for the details of the configurations for those scenarios.
 
 The tunnel configurations are established and configured using a set of scripts, each to be found under ``/usr/local/bin`` on each of the two laptops.

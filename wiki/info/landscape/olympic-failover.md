@@ -34,6 +34,42 @@ What are pro's and con's?
 
 I would like to see a somewhat detailed run-book.
 
+### Results and procedure tested in Medemblik 2021
+
+Check master.conf in ``/home/sailing/server/master`` on sap-p1-2 for the desired build and correct setting of the new variable ``INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT``. There is a tunnel listening on 22222 which forwards the traffic through tokyo-ssh to sapsailing.com:22.
+So a valid entry would be:
+```
+INSTALL_FROM_RELEASE=build-202106012325
+INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT="trac@localhost:22222"
+```
+
+Now execute, this will download and extract the build:
+```
+cd /home/sailing/servers/master; rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
+```
+
+Now we stop the replica, make sure you are user ``sailing``:
+```
+/home/sailing/servers/replica/stop
+```
+
+Wait for process to be stopped/killed.
+
+Start the correct tunnels script by executing:
+```
+sudo /usr/local/bin/tunnels-master
+```
+
+Start the master, make sure you are user ``sailing``!
+```
+/home/sailing/servers/master/start
+```
+
+Check sailing log:
+```
+tail -f /home/sailing/servers/master/logs/sailing0.log.0
+```
+
 ## Hardware failure on secondary Lenovo P1 with the Sailing Analytics Replica
 
 ### Scenario
