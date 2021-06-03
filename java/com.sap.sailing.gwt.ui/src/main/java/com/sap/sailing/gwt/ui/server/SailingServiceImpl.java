@@ -1290,13 +1290,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             if (windSources != null) {
                 windSourcesToDeliver.addAll(windSources);
             } else {
-                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.EXPEDITION));
-                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
+                windSourcesToDeliver.addAll(trackedRace.getWindSources(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {
                 if (windSource.getType() == WindSourceType.WEB) {
