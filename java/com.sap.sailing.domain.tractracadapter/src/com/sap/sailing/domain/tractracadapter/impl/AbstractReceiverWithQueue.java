@@ -168,8 +168,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         while (event == null || !isStopEvent(event)) {
             try {
                 final Set<LoadingQueueDoneCallBack> callBacks;
+                event = queue.take();
                 synchronized (loadingQueueDoneCallBacks) {
-                    event = queue.take();
                     if (getSimulator() != null) {
                         // when simulator is running, loading is considered finished and all callbacks will
                         // be satisfied instantly

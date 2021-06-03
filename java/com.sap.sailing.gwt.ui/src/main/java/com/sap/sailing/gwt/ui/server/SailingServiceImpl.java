@@ -1294,7 +1294,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (windSources != null) {
                 windSourcesToDeliver.addAll(windSources);
             } else {
-                windSourcesToDeliver.addAll(trackedRace.getWindSources(WindSourceType.WEB));
+                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {
                 if (windSource.getType() == WindSourceType.WEB) {
