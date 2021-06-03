@@ -1,0 +1,2 @@
+# Discover replicas
+aws --region eu-west-1 ec2 describe-instances --filters Name=tag:sailing-analytics-server,Values=tokyo2020 | jq .Reservations[].Instances[].PublicIpAddress -r
