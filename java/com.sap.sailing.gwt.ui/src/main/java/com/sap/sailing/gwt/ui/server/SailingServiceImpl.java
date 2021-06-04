@@ -2280,8 +2280,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
-                if (trackedLeg != null) {
-                    int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                if (trackedLeg != null || !trackedRace.getMarkPassings(competitor).isEmpty()) {
+                    int legNumberOneBased = trackedLeg==null ? 0 : race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                     Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
                     QuickRankDTO quickRankDTO = new QuickRankDTO(
                             baseDomainFactory.convertToCompetitorAndBoatDTO(competitor, boatOfCompetitor).getCompetitor(),
