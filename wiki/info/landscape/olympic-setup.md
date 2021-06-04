@@ -504,3 +504,31 @@ Moderators who need to comment on the races shall be given more elaborate permis
 To achieve this effect, the ``tokyo2020-server`` group has the ``sailing_viewer`` role assigned for all users, and all objects, except for the top-level ``Event`` object are owned by that group. This way, everything but the event are publicly visible.
 
 The ``Event`` object is owned by ``tokyo2020-moderators``, and that group grants the ``sailing_viewer`` role only to its members, meaning only the members of that group are allowed to see the ``Event`` object.
+
+## Landscape Upgrade Procedure
+
+update git on all replicas
+stop replication on all cloud replicas:
+```
+$ for i in `./get-replica-ips`; do ssh -o StrictHostKeyChecking=no sailing@$i "cd /home/sailing/servers/tokyo2020; /home/sailing/code/java/target/stopReplicating.sh 4qUrxMVQanLghETmM95XX3fshkHK0wNAQycuPAVNW0E="; done
+```
+
+stop replication on-site
+
+put release in /home/trac/
+
+refresh instance stop start on sap-p1-1 / on-site master
+
+after on-site master is healthy / available register cloud master forwarder to target groups, pay attention in eu-west-1 webserver instance works as cloud master forwarder
+
+./stop /start on on-site replica
+
+launch more like this with new user data, append (manual) to name of instance, make sure master target group has a healthy target.
+
+check :8888/gwt/status , if initial load is not starting most probably registration to master has failed (check log for Exception), if so login and do stop & start
+
+edit target group, deregister and register in the same window, save changes
+
+terminate old auto-replica
+
+wait for autoscaling group to create a new autoscaling instance, after healthy terminate manually launched instance/replica
