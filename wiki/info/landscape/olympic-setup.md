@@ -8,7 +8,15 @@ For the Olympic Summer Games 2020/2021 Tokyo we use a dedicated hardware set-up 
 
 The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
-Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this:
+Furthermore, both laptops have a MongoDB 3.6 installation configured through ``/etc/apt/sources.list.d/mongodb-org-3.6.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this.
+
+RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
+
+Both machines have been configured to use 2GB of swap space at ``/swapfile``.
+
+### Mongo Configuration
+
+On both laptops, the ``/etc/mongod.conf`` configuration configures ``/var/lib/mongodb`` to be the storage directory, and the in-memory cache size to be 2GB:
 
 ```
 storage:
@@ -20,17 +28,39 @@ storage:
       cacheSizeGB: 2
 ```
 
-On ``sap-p1-1`` we have a second MongoDB configuration ``/etc/mongod-security-service.conf`` which is used by the ``/lib/systemd/system/mongod-security-service.service`` unit which we created as a copy of ``/lib/systemd/system/mongod.service`` and adjusted the line
+The port is set to ``10201`` on ``sap-p1-1``:
+
+```
+# network interfaces
+net:
+  port: 10201
+  bindIp: 0.0.0.0
+```
+
+and to ``10202`` on ``sap-p1-2``:
+
+```
+# network interfaces
+net:
+  port: 10202
+  bindIp: 0.0.0.0
+```
+
+Furthermore, the replica set is configured to be ``tokyo2020`` on both:
+
+```
+replication:
+  oplogSizeMB: 10000
+  replSetName: tokyo2020
+```
+
+On both laptops we have a second MongoDB configuration ``/etc/mongod-security-service.conf`` which is used by the ``/lib/systemd/system/mongod-security-service.service`` unit which we created as a copy of ``/lib/systemd/system/mongod.service`` and adjusted the line
 
 ```
 ExecStart=/usr/bin/mongod --config /etc/mongod-security-service.conf
 ```
 
-This second database runs on the default port 27017 and is used as the target for a backup script for the ``security_service`` database. See below.
-
-RabbitMQ is part of the distribution natively, in version 3.6.10-1. It runs on both laptops. Both, RabbitMQ and MongoDB are installed as systemd service units and are launched during the boot sequence. The latest GWT version (currently 2.9.0) is installed under ``/opt/gwt-2.9.0`` in case any development work would need to be done on these machines.
-
-Both machines have been configured to use 2GB of swap space at ``/swapfile``.
+This second database runs as a replica set ``security_service`` on the default port 27017 and is used as the target for a backup script for the ``security_service`` database. See below. We increased the priority of the ``sap-p1-1`` node from 1 to 2.
 
 ### User Accounts
 
@@ -318,13 +348,13 @@ For RabbitMQ we run a separate host, based on AWS Ubuntu 20. It brings the ``rab
     loopback_users = none
 ```
 
-which allows clients from other hosts to connect. The security groups for the RabbitMQ server are configured such that only ``172.0.0.0/8`` addresses from our VPCs can connect.
+which allows clients from other hosts to connect (note how this works differently on different version of RabbitMQ; the local laptops have to use a different syntax in their ``rabbitmq.config`` file). The security groups for the RabbitMQ server are configured such that only ``172.0.0.0/8`` addresses from our VPCs can connect.
 
 The RabbitMQ management plugin is enabled using ``rabbitmq-plugins enable rabbitmq_management`` for access from localhost. This will require again an SSH tunnel to the host. The host's default user is ``ubuntu``. The RabbitMQ management plugin is active on port 15672 and accessible only from localhost or an SSH tunnel with port forward ending at this host. RabbitMQ itself listens on the default port 5672. With this set-up, RabbitMQ traffic for this event remains independent and undisturbed from any other RabbitMQ traffic from other servers in our default ``eu-west-1`` landscape, such as ``my.sapsailing.com``. The hostname pointing to the internal IP address of the RabbitMQ host is ``rabbit-ap-northeast-1.sapsailing.com`` and has a timeout of 60s.
 
 An autossh tunnel is established from ``tokyo-ssh.sapsailing.com`` to ``rabbit-ap-northeast-1.sapsailing.com`` which forwards port 15673 to port 15672, thus exposing the RabbitMQ web interface which otherwise only responds to localhost. This autossh tunnel is established by a systemctl service that is described in ``/etc/systemd/system/autossh-port-forwards.service`` in ``tokyo-ssh.sapsailing.com``.
 
-#### Local setup of rabbitmq
+### Local setup of rabbitmq
 
 The above configuration needs also to be set on the rabbitmq installations of the P1s. The rabbitmq-server package has version 3.6.10. In that version the config file is located in ``/etc/rabbitmq/rabbitmq.config``, the entry is ``[{rabbit, [{loopback_users, []}]}].`` Further documentation for this version can be found here: [http://previous.rabbitmq.com/v3_6_x/configure.html](http://previous.rabbitmq.com/v3_6_x/configure.html)
 
@@ -346,11 +376,11 @@ The Route53 entry ``tokyo2020.sapsailing.com`` now is an alias A record pointing
 
 ### Application Load Balancers (ALBs) and Target Groups
 
-In each region supported, two target groups with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public) and ``S-ded-tokyo2020-m`` (master). An application load balancer then must be created or identified that will then have the five rules distributing traffic for ``tokyo2020.sapsailing.com`` to either the public or the master target group, furthermore a general rule in the HTTP listener for port 80 that will redirect all HTTP traffic to HTTPS permanently.
+In each region supported, a dedicated load balancer for the Global Accelerator-based event setup has been set up (``Tokyo2020ALB`` or simply ``ALB``). A single target group with the usual settings (port 8888, health check on ``/gwt/status``, etc.) must exist: ``S-ded-tokyo2020`` (public).
 
-The master target group in all regions must contain an instance that forwards traffic on port 8888 to the master running on site, usually transitively through ``tokyo-ssh.sapsailing.com:8888``. Only in ap-northeast-1 the ``tokyo-ssh.sapsailing.com`` instance itself can be used as target in the ``S-ded-tokyo2020-m`` master target group. In ``eu-west-1`` the Webserver instance plays that role; it has a tmux running with the ``root`` user where an ``autossh`` connection is established to ``tokyo-ssh.sapsailing.com``, forwarding port 8888 accordingly.
+Note that no dedicated ``-m`` master target group is established. The reason is that the AWS Global Accelerator judges an ALB's health by looking at _all_ its target groups; should only a single target group not have a healthy target, the Global Accelerator considers the entire ALB unhealthy. With this, as soon as the on-site master server is unreachable, e.g., during an upgrade, all those ALBs would enter the "unhealthy" state from the Global Accelerator's perspective, and all public replicas which are still healthy would no longer receive traffic; the site would go "black." Therefore, we must ensure that the ALBs targeted by the Global Accelerator only have a single target group which only has the public replicas in that region as its targets.
 
-Similar set-ups with a region-local "jump host" can be established; the jump host doesn't need much bandwidth as it is mainly used for admin requests that are to be routed straight to the master instance running on site.
+Each ALB has an HTTP and an HTTPS listener. The HTTP listener has only a single rule redirecting all traffic permanently (301) to the corresponding HTTPS request. The HTTPS listener has three rules: the ``/`` path for ``tokyo2020.sapsailing.com`` is re-directed to the Olympic event with ID ``25c65ff1-68b8-4734-a35f-75c9641e52f8``. All other traffic for ``tokyo2020.sapsailing.com`` goes to the public target group holding the regional replica(s). A default rule returns a 404 status with a static ``Not found`` text.
 
 ## Landscape Architecture
 
@@ -370,8 +400,8 @@ The cloud replica is not supposed to become primary, except for maybe in the unl
 
 ```
     tokyo2020:PRIMARY> cfg = rs.conf()
-    # Then search for the member localhost:10203; let's assume, it's in cfg.members[1]:
-    cfg.members[1].priority=0
+    # Then search for the member localhost:10203; let's assume, it's in cfg.members[0]:
+    cfg.members[0].priority=0
     rs.reconfig(cfg)
 ```
 
@@ -385,9 +415,9 @@ One way to monitor the health and replication status of the replica set is runni
   grep "\(^source:\)\|\(syncedTo:\)\|\(behind the primary\)"'
 ```
 
-It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s).
+It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s). We have a cron job monitoring this (see above) and sending out alerts if things start slowing down.
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db`` script once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@tokyo-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``tokyo2020`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
@@ -401,9 +431,12 @@ The master configuration is described in ``/home/sailing/servers/master/master.c
       rm env.sh; cat master.conf | ./refreshInstance.sh auto-install-from-stdin
 ```
 
+If the laptops cannot reach ``https://releases.sapsailing.com`` due to connectivity constraints, releases and environments can be downloaded through other channels to ``sap-p1-1:/home/trac/releases``, and the variable ``INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT`` can be set to ``sailing@sap-p1-1`` to fetch the release file and environment file from there by SCP. Alternatively, ``sap-p1-2:/home/trac/releases`` may be used for the same.
+
 This way, a clean new ``env.sh`` file will be produced from the config file, including the download and installation of a release. The ``master.conf`` file looks approximately like this:
 
 ```
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
 # RabbitMQ in eu-west-1 (rabbit.internal.sapsailing.com) is expected to be found through SSH tunnel on localhost:5675
@@ -433,6 +466,7 @@ The file looks like this:
 ```
 # Regular operations; sap-p1-2 replicates sap-p1-1 using the rabbit-ap-northeast-1.sapsailing.com RabbitMQ in the cloud through SSH tunnel.
 # Outbound replication, though not expected to become active, goes to a local RabbitMQ
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost:10201,localhost:10202,localhost:10203/${SERVER_NAME}-replica?replicaSet=tokyo2020&retryWrites=true&readPreference=nearest"
 # RabbitMQ in ap-northeast-1 is expected to be found locally on port 5673
@@ -452,7 +486,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 Replicas in region ``eu-west-1`` can be launched using the following user data, making use of the established MongoDB live replica set in the region:
 
 ```
-INSTALL_FROM_RELEASE=build-202105211058
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com,dbserver.internal.sapsailing.com:10203/tokyo2020-replica?replicaSet=live&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
@@ -471,7 +505,7 @@ ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
 In other regions, instead an instance-local MongoDB shall be used for each replica, not interfering with each other or with other databases:
 
 ```
-INSTALL_FROM_RELEASE=build-202105211058
+INSTALL_FROM_RELEASE=build-202106012325
 SERVER_NAME=tokyo2020
 MONGODB_URI="mongodb://localhost/tokyo2020-replica?replicaSet=replica&retryWrites=true&readPreference=nearest"
 USE_ENVIRONMENT=live-replica-server
