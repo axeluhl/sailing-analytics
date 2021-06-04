@@ -7,7 +7,6 @@ import com.sap.sse.gwt.adminconsole.AdminConsolePanelSupplier;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 
 public class FileStoragePanelSupplier extends AdminConsolePanelSupplier<FileStoragePanel> {
-
     private final Presenter presenter;
 
     public FileStoragePanelSupplier(final Presenter presenter) {
@@ -26,7 +25,6 @@ public class FileStoragePanelSupplier extends AdminConsolePanelSupplier<FileStor
     @Override
     public void getAsync(RunAsyncCallback callback) {
         GWT.runAsync(new RunAsyncCallback() {
-
             @Override
             public void onSuccess() {
                 widget = init();
@@ -39,5 +37,4 @@ public class FileStoragePanelSupplier extends AdminConsolePanelSupplier<FileStor
             }
         });
     }
-
 }
