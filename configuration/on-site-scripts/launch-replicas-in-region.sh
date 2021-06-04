@@ -52,12 +52,13 @@ VPC_ID=$( aws --region ${REGION} ec2 describe-vpcs --filters Name=tag:Name,Value
 echo "Found VPC ${VPC_ID}"
 SUBNETS=$( aws --region ${REGION} ec2 describe-subnets --filters Name=vpc-id,Values=${VPC_ID} )
 NUMBER_OF_SUBNETS=$( echo "${SUBNETS}" | jq -r '.Subnets | length' )
+PRIVATE_IPS=""
 i=0
 while [ $i -lt $COUNT ]; do
   SUBNET_INDEX=$(( $RANDOM * $NUMBER_OF_SUBNETS / 32768 ))
   SUBNET_ID=$( echo "${SUBNETS}" | jq -r '.Subnets['${SUBNET_INDEX}'].SubnetId' )
   echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
-  aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
+  PRIVATE_IP=$( aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
 SERVER_NAME=tokyo2020
 MONGODB_URI=\"mongodb://${REPLICA_SET_PRIMARY}/tokyo2020-replica?replicaSet=${REPLICA_SET_NAME}&retryWrites=true&readPreference=nearest\"
 USE_ENVIRONMENT=live-replica-server
@@ -68,6 +69,16 @@ REPLICATE_MASTER_SERVLET_PORT=8888
 REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
 REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
-ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].InstanceId'
+ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress' )
+  PRIVATE_IPS="${PRIVATE_IPS} ${PRIVATE_IP}"
   i=$(( i + 1 ))
+done
+# Now wait for those instances launched to become available
+echo "Waiting until all hosts with their IPs${PRIVATE_IPS} are healthy..."
+for PRIVATE_IP in ${PRIVATE_IPS}; do
+  echo "Waiting for instance with private IP ${PRIVATE_IP} to become healthy..."
+  while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no sailing@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
+    echo "${PRIVATE_IP} still not healthy. Trying again in 5s..."
+    sleep 5
+  done
 done
