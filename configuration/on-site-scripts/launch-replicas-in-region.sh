@@ -4,6 +4,7 @@ REPLICA_SET_NAME=replica
 REPLICA_SET_PRIMARY=localhost
 KEY_NAME=Axel
 VPC=Tokyo2020
+TARGET_GROUP_NAME=S-ded-tokyo2020
 COUNT=1
 
 if [ $# -eq 0 ]; then
@@ -52,13 +53,16 @@ VPC_ID=$( aws --region ${REGION} ec2 describe-vpcs --filters Name=tag:Name,Value
 echo "Found VPC ${VPC_ID}"
 SUBNETS=$( aws --region ${REGION} ec2 describe-subnets --filters Name=vpc-id,Values=${VPC_ID} )
 NUMBER_OF_SUBNETS=$( echo "${SUBNETS}" | jq -r '.Subnets | length' )
-PRIVATE_IPS=""
+TARGET_GROUP_ARN=$( aws elbv2 describe-target-groups --names ${TARGET_GROUP_NAME} | jq -r '.TargetGroups[].TargetGroupArn' )
+echo "Found target group with name ${TARGET_GROUP_NAME} and ARN ${TARGET_GROUP_ARN}"
+PRIVATE_IPS=
+INSTANCE_IDS=
 i=0
 while [ $i -lt $COUNT ]; do
   SUBNET_INDEX=$(( $RANDOM * $NUMBER_OF_SUBNETS / 32768 ))
   SUBNET_ID=$( echo "${SUBNETS}" | jq -r '.Subnets['${SUBNET_INDEX}'].SubnetId' )
   echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
-  PRIVATE_IP=$( aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
+  PRIVATE_IP_AND_INSTANCE_ID=$( aws --region ${REGION} ec2 run-instances --subnet-id ${SUBNET_ID} --instance-type ${INSTANCE_TYPE} --security-group-ids ${SECURITY_GROUP_ID} --image-id ${IMAGE_ID} --user-data "INSTALL_FROM_RELEASE=${RELEASE}
 SERVER_NAME=tokyo2020
 MONGODB_URI=\"mongodb://${REPLICA_SET_PRIMARY}/tokyo2020-replica?replicaSet=${REPLICA_SET_NAME}&retryWrites=true&readPreference=nearest\"
 USE_ENVIRONMENT=live-replica-server
@@ -69,8 +73,15 @@ REPLICATE_MASTER_SERVLET_PORT=8888
 REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
 REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
-ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress' )
+ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
+  PRIVATE_IP=$( echo ${PRIVATE_IP_AND_INSTANCE_ID} | awk '{print $1;}' )
+  INSTANCE_ID=$( echo ${PRIVATE_IP_AND_INSTANCE_ID} | awk '{print $2;}' )
   PRIVATE_IPS="${PRIVATE_IPS} ${PRIVATE_IP}"
+  if [ -z $INSTANCE_IDS ]; then
+    INSTANCE_IDS="Id=${INSTANCE_ID}"
+  else
+    INSTANCE_IDS="${INSTANCE_IDS},Id=${INSTANCE_ID}"
+  fi
   i=$(( i + 1 ))
 done
 # Now wait for those instances launched to become available
@@ -82,3 +93,16 @@ for PRIVATE_IP in ${PRIVATE_IPS}; do
     sleep 5
   done
 done
+OLD_VERSION_TARGET_IDS=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq -r '.TargetHealthDescriptions[].Target.Id' )
+TARGET_IDS_TO_DEREGISTER=""
+for OLD_VERSION_TARGET_ID in ${OLD_VERSION_TARGET_IDS}; do
+  if [ -z $TARGET_IDS_TO_DEREGISTER ]; then
+    TARGET_IDS_TO_DEREGISTER="Id=${OLD_VERSION_TARGET_ID}"
+  else
+    TARGET_IDS_TO_DEREGISTER="${TARGET_IDS_TO_DEREGISTER},Id=${OLD_VERSION_TARGET_ID}"
+  fi
+done
+echo "Registering instances ${INSTANCE_IDS} with target group ${TARGET_GROUP_NAME}"
+aws elbv2 register-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${INSTANCE_IDS}
+echo "De-registering old instances ${TARGET_IDS_TO_DEREGISTER} from target group ${TARGET_GROUP_NAME}"
+aws elbv2 deregister-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${TARGET_IDS_TO_DEREGISTER}
