@@ -1,6 +1,6 @@
 #!/bin/bash
 LAUNCH_CONFIGURATION_NAME_PATTERN="^tokyo2020-.*"
-AUTO_SCALING_GROUP_NAME="tokyo2020"
+AUTO_SCALING_GROUP_NAME_PATTERN="^tokyo2020.*"
 KEY_NAME=Axel
 
 if [ $# -eq 0 ]; then
@@ -41,20 +41,26 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
   LAUNCH_CONFIGURATION_JSON=$( aws autoscaling describe-launch-configurations --launch-configuration-name ${LAUNCH_CONFIGURATION_NAME} | jq -r '.LaunchConfigurations[0]' )
   OLD_USER_DATA=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.UserData' | base64 -d )
   if [ -z "${IMAGE_ID}" ]; then
-    IMAGE_ID=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.ImageId' )
+    REGIONAL_IMAGE_ID=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.ImageId' )
+  else
+    REGIONAL_IMAGE_ID=${IMAGE_ID}
   fi
   if [ -z "${INSTANCE_TYPE}" ]; then
-    INSTANCE_TYPE=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.InstanceType' )
+    REGIONAL_INSTANCE_TYPE=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.InstanceType' )
+  else
+    REGIONAL_INSTANCE_TYPE=${INSTANCE_TYPE}
   fi
   SECURITY_GROUP=$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.SecurityGroups[0]' )
   BLOCK_DEVICE_MAPPINGS="$( echo "${LAUNCH_CONFIGURATION_JSON}" | jq -r '.BlockDeviceMappings' )"
   NEW_USER_DATA=$( echo "${OLD_USER_DATA}" | sed -e 's/^INSTALL_FROM_RELEASE=.*$/INSTALL_FROM_RELEASE='${RELEASE}'/' )
   NEW_LAUNCH_CONFIGURATION_NAME=tokyo2020-${RELEASE}
   echo "Creating new launch configuration ${NEW_LAUNCH_CONFIGURATION_NAME}"
-  aws autoscaling create-launch-configuration --launch-configuration-name ${NEW_LAUNCH_CONFIGURATION_NAME} --image-id ${IMAGE_ID} --key-name ${KEY_NAME} --security-groups ${SECURITY_GROUP} --user-data "${NEW_USER_DATA}" --instance-type ${INSTANCE_TYPE} --block-device-mappings "${BLOCK_DEVICE_MAPPINGS}"
+  aws autoscaling create-launch-configuration --launch-configuration-name ${NEW_LAUNCH_CONFIGURATION_NAME} --image-id ${REGIONAL_IMAGE_ID} --key-name ${KEY_NAME} --security-groups ${SECURITY_GROUP} --user-data "${NEW_USER_DATA}" --instance-type ${REGIONAL_INSTANCE_TYPE} --block-device-mappings "${BLOCK_DEVICE_MAPPINGS}"
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" = "0" ]; then
-    echo "Creation of launch configuration ${NEW_LAUNCH_CONFIGURATION_NAME} successful. Continuing with updating the auto-scaling group ${AUTO_SCALING_GROUP_NAME}"
+    echo "Creation of launch configuration ${NEW_LAUNCH_CONFIGURATION_NAME} successful. Continuing with updating the auto-scaling group"
+    AUTO_SCALING_GROUP_NAME=$( aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups | map(select(.AutoScalingGroupName | test("'${AUTO_SCALING_GROUP_NAME_PATTERN}'")))[].AutoScalingGroupName' )
+    echo "Found auto-scaling group ${AUTO_SCALING_GROUP_NAME}"
     aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${AUTO_SCALING_GROUP_NAME} --launch-configuration-name ${NEW_LAUNCH_CONFIGURATION_NAME}
     EXIT_CODE=$?
     if [ "${EXIT_CODE}" = "0" ]; then

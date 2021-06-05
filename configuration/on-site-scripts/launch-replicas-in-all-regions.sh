@@ -66,6 +66,6 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     OPTIONS="${OPTIONS} -t ${INSTANCE_TYPE}"
   fi
   echo "Invoking launch-replicas-in-region.sh with options ${OPTIONS}"
-  #`dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
+  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
 done
 

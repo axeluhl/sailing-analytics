@@ -17,5 +17,5 @@ do
     esac
 done
 for i in `./get-replica-ips`; do
-  ssh -o StrictHostKeyChecking=no sailing@$i "cd /home/sailing/servers/tokyo2020; /home/sailing/code/java/target/stopReplicating.sh ${BEARER_TOKEN}"
+  ssh -o StrictHostKeyChecking=no root@$i "su - sailing -c \"cd /home/sailing/servers/tokyo2020; ./stopReplicating.sh ${BEARER_TOKEN}\""
 done
