@@ -18,7 +18,7 @@
 KEY_NAME=Axel
 INSTANCE_NAME_TO_TERMINATE="SL Tokyo2020 (auto-replica)"
 if [ $# -eq 0 ]; then
-    echo "$0 -R <release-name> [-t <instance-type>] [-i <ami-id>] [-k <key-pair-name>]"
+    echo "$0 -R <release-name> -b <replication-bearer-token> [-t <instance-type>] [-i <ami-id>] [-k <key-pair-name>]"
     echo ""
     echo "-b replication bearer token; mandatory"
     echo "-i Amazon Machine Image (AMI) ID to use to launch the instance; defaults to latest image tagged with image-type:sailing-analytics-server"
@@ -39,6 +39,7 @@ options='R:b:t:i:k:'
 while getopts $options option
 do
     case $option in
+	b) BEARER_TOKEN=$OPTARG;;
         i) IMAGE_ID=$OPTARG;;
         k) KEY_NAME=$OPTARG;;
         R) RELEASE=$OPTARG;;
@@ -58,34 +59,44 @@ function patch_conf_and_install () {
 echo " * Downloading the release file to sap-p1-1:/home/trac/releases/${RELEASE}"
 ssh sailing@sap-p1-1 "mkdir -p /home/trac/releases/${RELEASE}; scp -P 22222 trac@localhost:releases/${RELEASE}/${RELEASE_FILE} /home/trac/releases/${RELEASE}"
 echo " * Patching configurations on sap-p1-1 and sap-p1-2 to new release ${RELEASE} and installing"
-patch_conf sap-p1-1 master
-patch_conf sap-p1-1 security_service
-patch_conf sap-p1-2 replica
-patch_conf sap-p1-2 master
-patch_conf sap-p1-2 security_service
+patch_conf_and_install sap-p1-1 master
+patch_conf_and_install sap-p1-1 security_service
+patch_conf_and_install sap-p1-2 replica
+patch_conf_and_install sap-p1-2 master
+patch_conf_and_install sap-p1-2 security_service
 echo " * Updating launch configurations and auto-scaling groups"
-`dirname $0`/update-launch-configuration.sh
+OPTIONS="-R ${RELEASE}"
+if [ -n "${IMAGE_ID}" ]; then
+  OPTIONS="${OPTIONS} -i ${IMAGE_ID}"
+fi
+if [ -n "${KEY_NAME}" ]; then
+  OPTIONS="${OPTIONS} -k ${KEY_NAME}"
+fi
+if [ -n "${INSTANCE_TYPE}" ]; then
+  OPTIONS="${OPTIONS} -t ${INSTANCE_TYPE}"
+fi
+`dirname $0`/update-launch-configuration.sh ${OPTIONS}
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
   echo "Updating launch configurations failed with exit code ${EXIT_CODE}."
   exit ${EXIT_CODE}
 fi
 echo " * Telling all cloud replicas to stop replicating"
-`dirname $0`/stop-all-cloud-replicas.sh
+`dirname $0`/stop-all-cloud-replicas.sh -b ${BEARER_TOKEN}
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
   echo "Telling cloud replicas to stop replicating failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
 echo " * Telling replica on sap-p1-2 to stop replicating"
-ssh sailing@sap-p1-2 "cd server/replica; ./stopReplicating.sh"
+ssh sailing@sap-p1-2 "cd server/replica; ./stopReplicating.sh ${BEARER_TOKEN}"
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
   echo "Telling sap-p1-2 replica to stop replicating failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
 echo " * Re-launching master on sap-p1-1 to new release ${RELEASE} and waiting for it to become healthy"
-ssh sailing@sap-p1-1 "cd server/master; ./stop; ./start; while ! ./status do; echo \"Waiting for healthy master\"; sleep 5; done"
+ssh sailing@sap-p1-1 "cd server/master; ./stop; ./start; while ! ./status 2>/dev/null >/dev/null; do echo \"Waiting for healthy master\"; sleep 10; done"
 EXIT_CODE=$?
 if [ "${EXIT_CODE}" != "0" ]; then
   echo "Re-launching master on sap-p1-1 failed with exit code ${EXIT_CODE}"
@@ -115,7 +126,8 @@ if [ "${EXIT_CODE}" != "0" ]; then
   echo "Lanuching replicas in the regions failed with exit code ${EXIT_CODE}"
   exit ${EXIT_CODE}
 fi
-echo " * Terminating all instances named SL Tokyo2020 (auto-replica) to force auto-scaling group to launch and register upgraded ones"
+read -p "Press ENTER to terminate all ${INSTANCE_NAME_TO_TERMINATE} instances"
+echo " * Terminating all instances named ${INSTANCE_NAME_TO_TERMINATE} to force auto-scaling group to launch and register upgraded ones"
 for REGION in $( cat `dirname $0`/regions.txt ); do
   export AWS_DEFAULT_REGION=${REGION}
   echo "Terminating instances named  region ${REGION}"
@@ -130,3 +142,4 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     fi
   done
 done
+echo " * DONE"
