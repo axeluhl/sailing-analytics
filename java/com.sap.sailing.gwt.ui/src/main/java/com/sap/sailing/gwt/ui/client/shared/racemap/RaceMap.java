@@ -1820,7 +1820,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     double rotatedBearingDeg1 = 0.0;
                     double rotatedBearingDeg2 = 0.0;
                     if (lastBoatFix.legType == null) {
-                        GWT.log("no legType to display advantage line");
+                        GWT.log("no legType to display advantage line; competitor was "+visibleLeaderInfo.getB().getName()+
+                                ", fix from "+lastBoatFix.timepoint);
                     } else {
                         switch (lastBoatFix.legType) {
                         case UPWIND:
