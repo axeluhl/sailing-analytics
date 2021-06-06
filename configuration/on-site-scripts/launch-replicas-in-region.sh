@@ -21,11 +21,17 @@ if [ $# -eq 0 ]; then
     echo "-t Instance type; defaults to ${INSTANCE_TYPE}"
     echo "-v VPC name; defaults to ${VPC}"
     echo
-    echo "Example: $0 -r archive -p dbserver.internal.sapsailing.com:10201 -P 0"
+    echo "Example: $0 -g ap-southeast-2 -b 098toyw098typ9e8/87t9shytp98894y5= -R build-202106041327 -k Jan"
+    echo
+    echo "Will launch one or more (see -c) new replicas in the AWS region specified with -g  with the release specified with -R"
+    echo "which will register at the master proxy tokyo-ssh.internal.sapsailing.com:8888 and RabbitMQ at"
+    echo "rabbit-ap-northeast-1.sapsailing.com:5672, then when healthy get added to target group S-ded-tokyo2020"
+    echo "in that region, with all auto-replicas registered before removed from the target group."
+    echo "Specify -r and -p if you are launching in eu-west-1 because it has a special non-default environment."
     exit 2
 fi
 
-options='g:R:b:c:r:p:P:t:a:i:k:v:'
+options='g:R:b:c:r:p:t:i:k:v:'
 while getopts $options option
 do
     case $option in
@@ -43,7 +49,7 @@ do
             exit 4;;
     esac
 done
-export AWS_DEFAULT_REGION=$REGION
+export AWS_DEFAULT_REGION=${REGION}
 if [ -z $IMAGE_ID ]; then
   IMAGE_ID=$( `dirname $0`/../aws-automation/getLatestImageOfType.sh sailing-analytics-server )
 fi
@@ -58,7 +64,7 @@ echo "Found target group with name ${TARGET_GROUP_NAME} and ARN ${TARGET_GROUP_A
 PRIVATE_IPS=
 INSTANCE_IDS=
 i=0
-while [ $i -lt $COUNT ]; do
+while [ ${i} -lt ${COUNT} ]; do
   SUBNET_INDEX=$(( $RANDOM * $NUMBER_OF_SUBNETS / 32768 ))
   SUBNET_ID=$( echo "${SUBNETS}" | jq -r '.Subnets['${SUBNET_INDEX}'].SubnetId' )
   echo "Launching image with ID ${IMAGE_ID} into subnet #${SUBNET_INDEX} with ID ${SUBNET_ID} in VPC ${VPC_ID}"
@@ -74,6 +80,11 @@ REPLICATE_MASTER_EXCHANGE_NAME=tokyo2020
 REPLICATE_MASTER_QUEUE_HOST=rabbit-ap-northeast-1.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN=${BEARER_TOKEN}
 ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" --ebs-optimized --key-name $KEY_NAME --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)},{Key=sailing-analytics-server,Value=tokyo2020}]" "ResourceType=volume,Tags=[{Key=Name,Value=SL Tokyo2020 (Upgrade Replica)}]" | jq -r '.Instances[].PrivateIpAddress + " " + .Instances[].InstanceId' )
+  EXIT_CODE=$?
+  if [ "${EXIT_CODE}" != "0" ]; then
+    echo "Error launching instance. Exiting with status ${EXIT_CODE}"
+    exit ${EXIT_CODE}
+  fi
   PRIVATE_IP=$( echo ${PRIVATE_IP_AND_INSTANCE_ID} | awk '{print $1;}' )
   INSTANCE_ID=$( echo ${PRIVATE_IP_AND_INSTANCE_ID} | awk '{print $2;}' )
   PRIVATE_IPS="${PRIVATE_IPS} ${PRIVATE_IP}"
@@ -82,16 +93,13 @@ ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" 
   else
     INSTANCE_IDS="${INSTANCE_IDS},Id=${INSTANCE_ID}"
   fi
-  i=$(( i + 1 ))
-done
-# Now wait for those instances launched to become available
-echo "Waiting until all hosts with their IPs${PRIVATE_IPS} are healthy..."
-for PRIVATE_IP in ${PRIVATE_IPS}; do
+  # Now wait for those instances launched to become available
   echo "Waiting for instance with private IP ${PRIVATE_IP} to become healthy..."
   while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no sailing@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
-    echo "${PRIVATE_IP} still not healthy. Trying again in 5s..."
-    sleep 5
+    echo "${PRIVATE_IP} still not healthy. Trying again in 10s..."
+    sleep 10
   done
+  i=$(( i + 1 ))
 done
 OLD_VERSION_TARGET_IDS=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq -r '.TargetHealthDescriptions[].Target.Id' )
 TARGET_IDS_TO_DEREGISTER=""
@@ -104,5 +112,12 @@ for OLD_VERSION_TARGET_ID in ${OLD_VERSION_TARGET_IDS}; do
 done
 echo "Registering instances ${INSTANCE_IDS} with target group ${TARGET_GROUP_NAME}"
 aws elbv2 register-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${INSTANCE_IDS}
-echo "De-registering old instances ${TARGET_IDS_TO_DEREGISTER} from target group ${TARGET_GROUP_NAME}"
-aws elbv2 deregister-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${TARGET_IDS_TO_DEREGISTER}
+EXIT_CODE=$?
+if [ "${EXIT_CODE}" = "0" ]; then
+  echo "Registering instances was successful."
+  echo "De-registering old instances ${TARGET_IDS_TO_DEREGISTER} from target group ${TARGET_GROUP_NAME}"
+  aws elbv2 deregister-targets --target-group-arn ${TARGET_GROUP_ARN} --targets ${TARGET_IDS_TO_DEREGISTER}
+else
+  echo "Registering instances failed with exit code $?; not de-registering old instances."
+  exit ${EXIT_CODE}
+fi
