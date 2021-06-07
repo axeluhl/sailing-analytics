@@ -206,6 +206,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         // found; in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
                 raceIdForRaceDefinition, boatClass, trackedRegattaRegistry) : effectiveRegatta;
+        this.regatta.setControlTrackingFromStartAndFinishTimes(true);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceIdForRaceDefinition = new HashMap<>();
         trackedRacePerRaceID = new HashMap<>();

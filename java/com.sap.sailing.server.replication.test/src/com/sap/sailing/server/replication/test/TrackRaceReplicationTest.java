@@ -126,7 +126,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
                 new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
         assertNotSame(masterTrackedRace, replicaTrackedRace);

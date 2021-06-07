@@ -15,12 +15,50 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+       TracAPI 3.13.10
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 02/06/2021
+  Build number:
+
+ 1) Bugs
+
+ - ConcurrentModificationException: the callbacks used by the IRacesListener, ICompetitorsListener and the
+ IRaceObjectsListener are not thread-safe (Reported by Axel Uhl, 01/06/2021)
+
+********************************************
+       TracAPI 3.13.9
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 01/06/2021
+  Build number:
+
+ 1) Bugs
+
+     Compiled using a wrong version of Java
+
+
+********************************************
+       TracAPI 3.13.8
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 01/06/2021
+  Build number:
+
+  1) Bugs
+
+   - The UPDATE RACE messages are always sent (Requested by Jorge Piera, 01/06/2021)
+
+********************************************
        TracAPI 3.13.7
 ********************************************
 This is a final version. It adds two new values to the RaceCompetitorStatusType
 
   Release date: 02/03/2021
-  Build number:
+  Build number: 2d21ce3085f8a4c915fc9d81b09d1c0518e349c4
 
   1) Bugs
 
