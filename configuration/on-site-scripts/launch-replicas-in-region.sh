@@ -50,7 +50,7 @@ do
     esac
 done
 export AWS_DEFAULT_REGION=${REGION}
-if [ -z $IMAGE_ID ]; then
+if [ -z "$IMAGE_ID" ]; then
   IMAGE_ID=$( `dirname $0`/../aws-automation/getLatestImageOfType.sh sailing-analytics-server )
 fi
 SECURITY_GROUP_ID=$( aws ec2 describe-security-groups --filters Name=tag:Name,Values="Sailing Analytics App" | jq -r '.SecurityGroups[].GroupId' )
@@ -95,7 +95,7 @@ ADDITIONAL_JAVA_ARGS=\"${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true\"" 
   fi
   # Now wait for those instances launched to become available
   echo "Waiting for instance with private IP ${PRIVATE_IP} to become healthy..."
-  while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no sailing@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
+  while ! ssh -A -o StrictHostKeyChecking=no ec2-user@tokyo-ssh.sapsailing.com "ssh -o StrictHostKeyChecking=no root@${PRIVATE_IP} \"cd /home/sailing/servers/tokyo2020; ./status >/dev/null\""; do
     echo "${PRIVATE_IP} still not healthy. Trying again in 10s..."
     sleep 10
   done

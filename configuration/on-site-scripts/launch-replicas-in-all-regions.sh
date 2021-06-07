@@ -55,7 +55,7 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     VPC_NAME="Tokyo2020"
   fi
   echo "Using MongoDB primary ${MONGODB_PRIMARY} and replica set ${MONGODB_REPLICA_SET}"
-  OPTIONS="-b ${BEARER_TOKEN} -R ${RELEASE} -p ${MONGODB_PRIMARY} -r ${MONGODB_REPLICA_SET} -v ${VPC_NAME} -c ${HEALTHY_TARGETS_IN_REGION}"
+  OPTIONS="-g ${REGION} -b ${BEARER_TOKEN} -R ${RELEASE} -p ${MONGODB_PRIMARY} -r ${MONGODB_REPLICA_SET} -v ${VPC_NAME} -c ${HEALTHY_TARGETS_IN_REGION}"
   if [ -n "${IMAGE_ID}" ]; then
     OPTIONS="${OPTIONS} -i ${IMAGE_ID}"
   fi
@@ -66,6 +66,6 @@ for REGION in $( cat `dirname $0`/regions.txt ); do
     OPTIONS="${OPTIONS} -t ${INSTANCE_TYPE}"
   fi
   echo "Invoking launch-replicas-in-region.sh with options ${OPTIONS}"
-  #`dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
+  `dirname $0`/launch-replicas-in-region.sh ${OPTIONS} 
 done
 

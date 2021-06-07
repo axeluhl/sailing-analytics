@@ -1,44 +1,44 @@
 #!/bin/bash
 
 # source variables
-. `pwd`/env.sh
+. `dirname $0`/env.sh
 
-echo "Configuration for this server is:"
-echo ""
-echo "SERVER_NAME: $SERVER_NAME"
-echo "MEMORY: $MEMORY"
-echo "SERVER_PORT: $SERVER_PORT"
-echo "TELNET_PORT: $TELNET_PORT"
-echo "MONGODB_HOST: $MONGODB_HOST"
-echo "MONGODB_PORT: $MONGODB_PORT"
-echo "MONGODB_NAME: $MONGODB_NAME"
-echo "MONGODB_URI: $MONGODB_URI"
-echo "EXPEDITION_PORT: $EXPEDITION_PORT"
-echo "REPLICATION_HOST: $REPLICATION_HOST"
-echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL"
-echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS"
-echo ""
-echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE"
-echo "DEPLOY_TO: $DEPLOY_TO"
-echo "BUILD_BEFORE_START: $BUILD_BEFORE_START"
-echo "USE_ENVRIONMENT: $USE_ENVIRONMENT"
-echo ""
-echo "JAVA_HOME: $JAVA_HOME"
-echo "INSTANCE_ID: $INSTANCE_ID"
-echo ""
+echo "Configuration for this server is:" >&2
+echo "" >&2
+echo "SERVER_NAME: $SERVER_NAME" >&2
+echo "MEMORY: $MEMORY" >&2
+echo "SERVER_PORT: $SERVER_PORT" >&2
+echo "TELNET_PORT: $TELNET_PORT" >&2
+echo "MONGODB_HOST: $MONGODB_HOST" >&2
+echo "MONGODB_PORT: $MONGODB_PORT" >&2
+echo "MONGODB_NAME: $MONGODB_NAME" >&2
+echo "MONGODB_URI: $MONGODB_URI" >&2
+echo "EXPEDITION_PORT: $EXPEDITION_PORT" >&2
+echo "REPLICATION_HOST: $REPLICATION_HOST" >&2
+echo "REPLICATION_CHANNEL: $REPLICATION_CHANNEL" >&2
+echo "ADDITIONAL_ARGS: $ADDITIONAL_JAVA_ARGS" >&2
+echo "" >&2
+echo "INSTALL_FROM_RELEASE: $INSTALL_FROM_RELEASE" >&2
+echo "DEPLOY_TO: $DEPLOY_TO" >&2
+echo "BUILD_BEFORE_START: $BUILD_BEFORE_START" >&2
+echo "USE_ENVRIONMENT: $USE_ENVIRONMENT" >&2
+echo "" >&2
+echo "JAVA_HOME: $JAVA_HOME" >&2
+echo "INSTANCE_ID: $INSTANCE_ID" >&2
+echo "" >&2
 
 STATUS=$(curl -i http://127.0.0.1:$SERVER_PORT/gwt/status 2>/dev/null)
 RESPONSE_STATUS_CODE=$(echo $STATUS | head -n 1 | cut -d ' ' -f 2)
 
-echo "AVAILABILITY_STATUS: $RESPONSE_STATUS_CODE"
-echo "AVAILABILITY_DETAILS:"
+echo "AVAILABILITY_STATUS: $RESPONSE_STATUS_CODE" >&2
+echo "AVAILABILITY_DETAILS:" >&2
 echo "$STATUS" | grep "^\{" | jq .
 
 if [[ $RESPONSE_STATUS_CODE =~ 2.. ]]; then
-    echo "Server $SERVER_NAME is available on $SERVER_PORT"
+    echo "Server $SERVER_NAME is available on $SERVER_PORT" >&2
     exit 0
 else
-    echo "Server $SERVER_NAME is not available."
+    echo "Server $SERVER_NAME is not available." >&2
     exit 1
 fi
 
