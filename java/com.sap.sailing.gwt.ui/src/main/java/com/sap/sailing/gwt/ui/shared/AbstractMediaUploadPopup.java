@@ -45,7 +45,6 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
-import com.sap.sse.shared.media.MediaUtils;
 
 public abstract class AbstractMediaUploadPopup extends DialogBox {
     
@@ -293,9 +292,25 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         } else if (isVimeoUrl(url)) {
             mimeType = MimeType.vimeo;
         } else {
-            mimeType = MediaUtils.detectMimeTypeFromUrl(url);
+            mimeType = detectMimeTypeFromUrl(url);
         }
         return mimeType;
+    }
+    
+    private MimeType detectMimeTypeFromUrl(String url) {
+        MimeType result = MimeType.unknown;
+        if (url != null) {
+            for (MimeType mimeType: MimeType.values()) {
+                if (mimeType.endingPattern.length() > 0) {
+                    String regex = "[a-z\\-_0-9\\/\\:\\.]*\\.(" + mimeType.getEndingPattern() + ")";
+                    if (matches(url, regex)) {
+                        result = mimeType;
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
     
     private boolean matches(String matcher, String pattern) {
