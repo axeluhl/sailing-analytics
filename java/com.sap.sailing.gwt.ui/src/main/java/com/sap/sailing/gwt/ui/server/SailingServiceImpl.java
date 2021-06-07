@@ -1290,16 +1290,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             if (windSources != null) {
                 windSourcesToDeliver.addAll(windSources);
             } else {
-                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.EXPEDITION));
                 windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.WEB));
             }
             for (WindSource windSource : windSourcesToDeliver) {
-                if(windSource.getType() == WindSourceType.WEB) {
+                if (windSource.getType() == WindSourceType.WEB) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
@@ -1310,7 +1308,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                         Iterator<Wind> windIter = windTrack.getRawFixes().iterator();
                         while (windIter.hasNext()) {
                             Wind wind = windIter.next();
-                            if(wind != null) {
+                            if (wind != null) {
                                 WindDTO windDTO = createWindDTO(wind, windTrack);
                                 windTrackInfoDTO.windFixes.add(windDTO);
                             }
@@ -1318,7 +1316,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                     } finally {
                         windTrack.unlockAfterRead();
                     }
-
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                 }
             }
@@ -2283,8 +2280,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, actualTimePoint);
-                if (trackedLeg != null) {
-                    int legNumberOneBased = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
+                if (trackedLeg != null || !trackedRace.getMarkPassings(competitor).isEmpty()) {
+                    int legNumberOneBased = trackedLeg==null ? 0 : race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                     Boat boatOfCompetitor = trackedRace.getBoatOfCompetitor(competitor);
                     QuickRankDTO quickRankDTO = new QuickRankDTO(
                             baseDomainFactory.convertToCompetitorAndBoatDTO(competitor, boatOfCompetitor).getCompetitor(),
@@ -4400,7 +4397,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         RaceLogDTO result = null;
         final RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
-        if(raceLog != null) {
+        if (raceLog != null) {
             List<RaceLogEventDTO> entries = new ArrayList<RaceLogEventDTO>();
             result = new RaceLogDTO(leaderboardName, raceColumnDTO.getName(), fleet.getName(), raceLog.getCurrentPassId(), entries);
             raceLog.lockForRead();

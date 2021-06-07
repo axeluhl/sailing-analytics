@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
@@ -70,6 +71,14 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     private OfficialCompetitorUpdateProvider officialCompetitorUpdateProvider;
     private final static Map<RaceStatusType, Flags> flagForRaceStatus;
     
+    /**
+     * When this reconciler adds {@link RaceLogFinishPositioningConfirmedEvent} events to the race log on which it listens with its
+     * {@link RaceLogListener}, in order to avoid endless recursion those events are added to this thread-safe queue. When any of these
+     * events then expectedly reaches this reconciler's race log listener, it is removed from this queue again to clean up and
+     * avoid leaking.
+     */
+    private final ConcurrentLinkedQueue<RaceLogEvent> raceLogEventsAddedToRaceLogByMyself;
+    
     static {
         flagForRaceStatus = new HashMap<>();
         flagForRaceStatus.put(RaceStatusType.ABANDONED, Flags.NOVEMBER);
@@ -85,7 +94,14 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
      * on the type of even. Instances of this type are registered with race logs because the enclosing
      * {@link RaceAndCompetitorStatusWithRaceLogReconciler} object has to get informed about race log attachments/detachments
      * in its {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogAttached(TrackedRace, RaceLog)} and
-     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogDetached(TrackedRace, RaceLog)} methods.
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogDetached(TrackedRace, RaceLog)} methods.<p>
+     * 
+     * In order to avoid endless recursions for events added to the race log by the enclosing reconciler itself, a
+     * thread-safe collection of those events added by the enclosing reconciler is maintained in
+     * {@link RaceAndCompetitorStatusWithRaceLogReconciler#raceLogEventsAddedToRaceLogByMyself}. Each {@code visit}
+     * method overridden by this listener must check for the event received in and remove it from that collection,
+     * and in case it was contained in the collection ignore it, so as to avoid the endless recursion. See also bug 5565
+     * for details.
      * 
      * @author Axel Uhl (D043530)
      *
@@ -113,35 +129,43 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
 
         @Override
         public void visit(RaceLogFlagEvent event) {
-            reconcileRaceStatus(tractracRace, trackedRace);
+            if (!raceLogEventsAddedToRaceLogByMyself.remove(event)) {
+                reconcileRaceStatus(tractracRace, trackedRace);
+            }
         }
 
         @Override
         public void visit(RaceLogPassChangeEvent event) {
-            reconcileRaceStatus(tractracRace, trackedRace);
-            reconcileAllCompetitors(trackedRace);
+            if (!raceLogEventsAddedToRaceLogByMyself.remove(event)) {
+                reconcileRaceStatus(tractracRace, trackedRace);
+                reconcileAllCompetitors(trackedRace);
+            }
         }
 
         @Override
         public void visit(RaceLogFinishPositioningConfirmedEvent event) {
-            reconcileCompetitorsWithResults(event);
+            if (!raceLogEventsAddedToRaceLogByMyself.remove(event)) {
+                reconcileCompetitorsWithResults(event);
+            }
         }
 
         @Override
         public void visit(RaceLogRevokeEvent event) {
-            final RaceLogEvent revokedEvent;
-            raceLog.lockForRead();
-            try {
-                revokedEvent = raceLog.getEventById(event.getRevokedEventId());
-            } finally {
-                raceLog.unlockAfterRead();
-            }
-            if (revokedEvent != null) {
-                if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
-                    final RaceLogFinishPositioningConfirmedEvent revokedResultsEvent = (RaceLogFinishPositioningConfirmedEvent) revokedEvent;
-                    reconcileCompetitorsWithResults(revokedResultsEvent);
-                } else if (revokedEvent instanceof RaceLogFlagEvent || revokedEvent instanceof RaceLogPassChangeEvent) {
-                    reconcileRaceStatus(tractracRace, trackedRace);
+            if (!raceLogEventsAddedToRaceLogByMyself.remove(event)) {
+                final RaceLogEvent revokedEvent;
+                raceLog.lockForRead();
+                try {
+                    revokedEvent = raceLog.getEventById(event.getRevokedEventId());
+                } finally {
+                    raceLog.unlockAfterRead();
+                }
+                if (revokedEvent != null) {
+                    if (revokedEvent instanceof RaceLogFinishPositioningConfirmedEvent) {
+                        final RaceLogFinishPositioningConfirmedEvent revokedResultsEvent = (RaceLogFinishPositioningConfirmedEvent) revokedEvent;
+                        reconcileCompetitorsWithResults(revokedResultsEvent);
+                    } else if (revokedEvent instanceof RaceLogFlagEvent || revokedEvent instanceof RaceLogPassChangeEvent) {
+                        reconcileRaceStatus(tractracRace, trackedRace);
+                    }
                 }
             }
         }
@@ -158,6 +182,7 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
     
     public RaceAndCompetitorStatusWithRaceLogReconciler(DomainFactory domainFactory, RaceLogResolver raceLogResolver, IRace tractracRace) {
         super();
+        this.raceLogEventsAddedToRaceLogByMyself = new ConcurrentLinkedQueue<>();
         this.domainFactory = domainFactory;
         this.raceLogResolver = raceLogResolver;
         this.tractracRace = tractracRace;
@@ -221,27 +246,48 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
             }
         }
         final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
-        if (raceStatus == RaceStatusType.OFFICIAL && !ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial()) {
-            final Runnable setResultsAreOfficial = ()->RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+        final boolean resultsAreOfficial = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, defaultRaceLog).isResultsAreOfficial();
+        if (raceStatus == RaceStatusType.OFFICIAL && !resultsAreOfficial) {
+            logger.info("Race status for race "+trackedRace.getName()+" is OFFICIAL with TracTrac and we have it as not official so far. Scheduling update.");
+            final Runnable setResultsAreOfficial = ()->{
+                logger.info("Setting race status for race "+trackedRace.getName()+" to OFFICIAL now");
+                RaceStateImpl.create(raceLogResolver, defaultRaceLog, raceLogEventAuthor).setResultsAreOfficial(raceStatusUpdateTime);
+            };
             if (officialCompetitorUpdateProvider != null) {
+                logger.info("Enqueuing the setting of race status for race "+trackedRace.getName()+
+                        " to OFFICIAL until all competitor updates have been handled");
                 officialCompetitorUpdateProvider.runWhenNoMoreOfficialCompetitorUpdatesPending(setResultsAreOfficial);
             } else {
                 setResultsAreOfficial.run();
             }
         }
         if (abortingFlagEvent != null && !isAbortedState(raceStatus) && raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())) {
+            logger.info("RaceLog considered race "+trackedRace.getName()+" as aborted ("+abortingFlagEvent+"), and the TracTrac race status "+raceStatus+
+                    " from "+raceStatusUpdateTime+" suggests it's not aborted. Starting a new pass.");
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         } else if (isAbortedState(raceStatus) &&
                 (abortingFlagEvent == null || (!abortingFlagMatches(raceStatus, abortingFlagEvent.getUpperFlag()) &&
                                                raceStatusUpdateTime.after(abortingFlagEvent.getLogicalTimePoint())))) {
-            defaultRaceLog.add(new RaceLogFlagEventImpl(raceStatusUpdateTime, raceLogEventAuthor, defaultRaceLog.getCurrentPassId(),
-                    flagForRaceStatus.get(raceStatus), /* lower flag */ null, /* is displayed */ true));
+            final Flags upperFlag = flagForRaceStatus.get(raceStatus);
+            logger.info("RaceLog considered race "+trackedRace.getName()+" as NOT aborted, and the TracTrac race status "+raceStatus+
+                    " from "+raceStatusUpdateTime+" suggests it's aborted. Adding abort flag event "+upperFlag+", starting a new pass.");
+            final RaceLogFlagEventImpl flagEvent = new RaceLogFlagEventImpl(raceStatusUpdateTime, raceLogEventAuthor,
+                    defaultRaceLog.getCurrentPassId(), upperFlag, /* lower flag */ Flags.NONE,
+                    /* is displayed */ true);
+            addRaceLogEventAndPreventRecursion(defaultRaceLog, flagEvent);
             startNewPass(raceStatusUpdateTime, defaultRaceLog);
         }
     }
+    
+    private void addRaceLogEventAndPreventRecursion(RaceLog raceLog, RaceLogEvent event) {
+        raceLogEventsAddedToRaceLogByMyself.add(event);
+        raceLog.add(event);
+    }
 
     protected void startNewPass(final TimePoint timePointForStartOfNewPass, final RaceLog raceLog) {
-        raceLog.add(new RaceLogPassChangeEventImpl(timePointForStartOfNewPass, raceLogEventAuthor, raceLog.getCurrentPassId() + 1));
+        final RaceLogPassChangeEventImpl passChangeEvent = new RaceLogPassChangeEventImpl(timePointForStartOfNewPass,
+                raceLogEventAuthor, raceLog.getCurrentPassId() + 1);
+        addRaceLogEventAndPreventRecursion(raceLog, passChangeEvent);
     }
 
     private boolean abortingFlagMatches(RaceStatusType raceStatus, Flags upperFlag) {
@@ -351,8 +397,11 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         final int officialRank = raceCompetitor.getOfficialRank();
         final long officialFinishingTime = raceCompetitor.getOfficialFinishTime();
         final long timePointForStatusEvent = raceCompetitor.getStatusTime();
-        logger.info("Received a status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+": officialRank: " + officialRank
-                + ", officialFinishingTime: " + officialFinishingTime + ", statusTime: " + timePointForStatusEvent);
+        logger.info("Received a status change for competitor " + raceCompetitor + " in race "+trackedRace.getRaceIdentifier()+
+                ": officialRank: " + officialRank+
+                ", officialFinishingTime: "+officialFinishingTime+
+                ", competitorStatus: "+raceCompetitor.getStatus()+
+                ", statusTime: " + timePointForStatusEvent);
         if (timePointForStatusEvent != 0) {
             // there is an official result for the competitor on TracTrac's side
             // find out if we already have this information represented in the race log(s) and if not if the TracTrac information is newer:
@@ -367,6 +416,9 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                             : resultFromRaceLogAndItsCreationTimePoint.getA().getFinishingTime().asMillis()) != officialFinishingTime
                      || resultFromRaceLogAndItsCreationTimePoint.getA().getMaxPointsReason() != officialMaxPointsReason)
                     && resultFromRaceLogAndItsCreationTimePoint.getB().before(officialResultTime))) {
+                logger.info("Applying official competitor result because its time point "+officialResultTime
+                        +" is newer than the latest result for that competitor from the race log "+
+                        (resultFromRaceLogAndItsCreationTimePoint==null?"null":resultFromRaceLogAndItsCreationTimePoint.getB()));
                 // We have received an update from TracTrac, rank or finishing time or penalty varies and is newer
                 // than the last thing we see in the race log (including we may not have anything in the race
                 // log for the results of that competitor at all yet).
@@ -382,9 +434,11 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
                 final CompetitorResults resultsForRaceLog = new CompetitorResultsImpl();
                 resultsForRaceLog.add(resultForRaceLog);
                 final RaceLog defaultRaceLog = getDefaultRaceLog(trackedRace);
-                defaultRaceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(officialResultTime, officialResultTime,
-                        raceLogEventAuthor,
-                        UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog));
+                final RaceLogFinishPositioningConfirmedEventImpl raceLogEvent = new RaceLogFinishPositioningConfirmedEventImpl(
+                        officialResultTime, officialResultTime, raceLogEventAuthor,
+                        UUID.randomUUID(), defaultRaceLog.getCurrentPassId(), resultsForRaceLog);
+                // Avoid an endless recursion in case this event triggers this reconciler's race log listener; see bug 5565
+                addRaceLogEventAndPreventRecursion(defaultRaceLog, raceLogEvent);
                 logger.info("Added the following result to the race log of " + trackedRace.getRaceIdentifier()
                         + " for competitor " + raceCompetitor + ": " + resultForRaceLog);
             } else {

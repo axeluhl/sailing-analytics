@@ -41,8 +41,9 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
         lockForRead();
         try {
             // return pass id of last event, as pass is the top-level sorting criterion in RaceLogEventComparator
-            if (!getUnrevokedEvents().isEmpty()) {
-                return getUnrevokedEvents().last().getPassId();
+            final NavigableSet<RaceLogEvent> unrevokedEvents = getUnrevokedEvents();
+            if (!unrevokedEvents.isEmpty()) {
+                return unrevokedEvents.last().getPassId();
             } else {
                 return DefaultPassId;
             }
