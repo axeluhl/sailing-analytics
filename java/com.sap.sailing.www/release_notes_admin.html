@@ -25,7 +25,10 @@
                 <div class="innerContent">
                     <h2 class="articleSubheadline">June 2021</h2>
                     <ul class="bulletList">
-			<li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>
+                        <li>Infer a tracking start/end time from race start/end time only if the regatta is marked accordingly.</li>
+                        <li>Bugfix in landscape management: when upgrading a replica set whose SERVER_NAME property does
+			                not equal the hostname used to address it, the temporary replica was trying to replicate
+			                from {SERVER_NAME}.sapsailing.com instead of {hostname}.sapsailing.com.</li>
                     </ul>
                     <h2 class="articleSubheadline">May 2021</h2>
                     <ul class="bulletList">
