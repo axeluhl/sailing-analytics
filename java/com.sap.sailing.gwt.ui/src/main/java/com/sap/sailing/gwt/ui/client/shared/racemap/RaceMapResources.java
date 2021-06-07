@@ -37,6 +37,18 @@ public interface RaceMapResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/uploadVideoButton.png")
     @MimeType("image/png")
     DataResource uploadVideoIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/minus.svg")
+    @MimeType("image/svg+xml")
+    DataResource minusIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/plus.svg")
+    @MimeType("image/svg+xml")
+    DataResource plusIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/more.svg")
+    @MimeType("image/svg+xml")
+    DataResource moreIcon();
     
     @Source("RaceMap.css")
     RaceMapStyle raceMapStyle();

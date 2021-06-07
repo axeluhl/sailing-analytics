@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -69,6 +70,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PopupPanel.AnimationType;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -173,6 +176,7 @@ import com.sap.sse.gwt.shared.DebugConstants;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
+    private final Logger logger = Logger.getLogger(getClass().getName());
     /* Line colors */
     static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d"); // selected by Larry Rosenfeld...
     static final Color ADVANTAGE_LINE_COLOR = new RGBColor("#ff9900"); // orange
@@ -657,7 +661,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
-        addVideoToRaceButton = createAddVideoToRaceButton(map);
+        addVideoToRaceButton = createAddVideoToRaceButton();
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
         initializeData(settings.isShowMapControls(), showHeaderPanel);
@@ -780,7 +784,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
-                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false, showSatelliteLayer);
+                MapOptions mapOptions = getMapOptions(false, /* wind up */ false, showSatelliteLayer);
                 map = new MapWidget(mapOptions);
                 rootPanel.add(map, 0, 0);
                 if (showHeaderPanel) {
@@ -931,19 +935,65 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     createHeaderPanel(map);
                 }
                 final VerticalPanel sharingAndVideoPanel = new VerticalPanel();
+                final VerticalPanel popupContent = new VerticalPanel();
+                popupContent.addStyleName(raceMapStyle.moreOptions());
                 // add-video button
-                sharingAndVideoPanel.add(addVideoToRaceButton);
                 if (shareLinkAction != null) {
-                    final Button shareLinkButton = createShareLinkButton(map);
-                    sharingAndVideoPanel.add(shareLinkButton);
+                    final Button shareLinkButton = createShareLinkButton();
+                    popupContent.add(shareLinkButton);
                 }
-                map.setControls(ControlPosition.RIGHT_BOTTOM, sharingAndVideoPanel);
+                
+                Button testButton = createMoreOptionsButton();
+                PopupPanel testPopup = new PopupPanel();
+                testPopup.setAnimationEnabled(true);
+                testPopup.setAnimationType(AnimationType.ONE_WAY_CORNER);
+                testPopup.setGlassEnabled(false);
+                testPopup.setModal(false);
+                testButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        logger.info("Zoom: " + map.getZoom());
+                        if (testPopup.isShowing()) {
+                            testPopup.hide();
+                            
+                        } else {
+                            testPopup.showRelativeTo(testButton);
+                        }
+                    }
+                });
+                Button zoomIn = createInZoomButton();
+                zoomIn.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        map.setZoom(map.getZoom() + 1);
+                    }
+                });
+                Button zoomOut = createOutZoomButton();
+                zoomOut.addClickHandler(new ClickHandler() {
+                    
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        if (map.getZoom() > 1) {
+                            map.setZoom(map.getZoom() - 1);
+                        }
+                    }
+                });
+                popupContent.add(zoomOut);
+                popupContent.add(zoomIn);
+                testPopup.add(popupContent);
+                sharingAndVideoPanel.add(testButton);
+                //sharingAndVideoPanel.add(testPopup);
+
+                popupContent.add(addVideoToRaceButton);
+                map.setControls(ControlPosition.RIGHT_TOP, sharingAndVideoPanel);
+                
                 
                 if (showMapControls) {
                     final VerticalPanel settingsCotrolFlowPanel = new VerticalPanel();
                     final Button settingsButton = createSettingsButton(map);
-                    settingsCotrolFlowPanel.add(settingsButton);
-                    map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
+                    //settingsCotrolFlowPanel.add(settingsButton);
+                    popupContent.add(settingsButton);
+                    //map.setControls(ControlPosition.RIGHT_TOP, settingsCotrolFlowPanel);
                 }
                 // Data has been initialized
                 RaceMap.this.redraw();
@@ -1026,7 +1076,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return settingsButton;
     }
     
-    private Button createShareLinkButton(MapWidget map) {
+    private Button createShareLinkButton() {
         Button shareLinkButton = new Button();
         shareLinkButton.setStyleName(floatingSharingButtonsResources.css().sharing_item());
         shareLinkButton.addStyleName(floatingSharingButtonsResources.css().sharing_itemshare());
@@ -1042,13 +1092,37 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return shareLinkButton;
     }
     
-    private Button createAddVideoToRaceButton(MapWidget map) {
+    private Button createAddVideoToRaceButton() {
         Button addVideoButton = new Button();
         addVideoButton.setStylePrimaryName(raceMapStyle.raceMapVideoUploadButton());
         addVideoButton.setTitle(stringMessages.addMediaTrack());
         addVideoButton.ensureDebugId("addVideoAudioButton");
         addVideoButton.setVisible(false);
         return addVideoButton;
+    }
+    
+    private Button createInZoomButton() {
+        Button zoomInButton = new Button();
+        zoomInButton.setStylePrimaryName(raceMapStyle.zoomInButton());
+        zoomInButton.setTitle(stringMessages.zoomIn());
+        zoomInButton.ensureDebugId("zoomInButton");
+        return zoomInButton;
+    }
+    
+    private Button createOutZoomButton() {
+        Button zoomOutButton = new Button();
+        zoomOutButton.setStylePrimaryName(raceMapStyle.zoomOutButton());
+        zoomOutButton.setTitle(stringMessages.zoomOut());
+        zoomOutButton.ensureDebugId("zoomOutButton");
+        return zoomOutButton;
+    }
+    
+    private Button createMoreOptionsButton() {
+        Button moreOptionsButton = new Button();
+        moreOptionsButton.setStylePrimaryName(raceMapStyle.moreOptionsButton());
+        moreOptionsButton.setTitle(stringMessages.zoomOut());
+        moreOptionsButton.ensureDebugId("moreOptionsButton");
+        return moreOptionsButton;
     }
 
     private void removeTransitions() {
@@ -3311,7 +3385,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapOptions.setMapTypeControl(false);
         mapOptions.setPanControl(showMapControls);
         mapOptions.setZoomControl(showMapControls);
-        mapOptions.setScaleControl(true);
+        mapOptions.setDisableDefaultUi(true);
+        mapOptions.setScaleControl(false);
         if (windUp) {
             mapOptions.setMinZoom(8);
         } else {

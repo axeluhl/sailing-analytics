@@ -22,4 +22,8 @@ public interface RaceMapStyle extends CssResource {
     public String estimatedDurationWithHeader();
     public String raceMapShareLinkButton();
     public String raceMapVideoUploadButton();
+    public String zoomOutButton();
+    public String zoomInButton();
+    public String moreOptionsButton();
+    public String moreOptions();
 }
