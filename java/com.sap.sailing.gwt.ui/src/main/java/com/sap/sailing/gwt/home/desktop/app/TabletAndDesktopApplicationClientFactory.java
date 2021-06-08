@@ -41,7 +41,7 @@ import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
