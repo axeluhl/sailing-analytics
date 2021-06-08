@@ -3980,7 +3980,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    //??
+    // FIXME See bug 5569: this shall move to SailingServiceWriteImpl 
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
         getService().apply(new UpdateServerConfiguration(
@@ -4010,7 +4010,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                                     viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, /* forAll */ true);
                         } else {
                             getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }

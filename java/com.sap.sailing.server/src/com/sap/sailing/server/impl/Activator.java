@@ -239,8 +239,8 @@ public class Activator implements BundleActivator {
                     }
                     if (securityService.isInitialOrMigration()) {
                         // sailing_viewer role is publicly readable
-                                securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
-                                        null, DefaultActions.READ.name());
+                        securityService.addToAccessControlList(sailingViewerRoleDefinition.getIdentifier(),
+                                null, DefaultActions.READ.name());
                     }
                 }, null));
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
