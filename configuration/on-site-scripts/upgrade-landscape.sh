@@ -136,11 +136,11 @@ read -p "Press ENTER to terminate all ${INSTANCE_NAME_TO_TERMINATE} instances"
 echo " * Terminating all instances named ${INSTANCE_NAME_TO_TERMINATE} to force auto-scaling group to launch and register upgraded ones"
 for REGION in $( cat `dirname $0`/regions.txt ); do
   export AWS_DEFAULT_REGION=${REGION}
-  echo "Terminating instances named  region ${REGION}"
+  echo "Terminating instances named region ${REGION}"
   echo "-------------------------------------------------------"
   for INSTANCE_ID in $( aws ec2 describe-instances --filters Name=tag:Name,Values="${INSTANCE_NAME_TO_TERMINATE}" | jq -r '.Reservations[].Instances[].InstanceId' ); do
     echo "  Terminating instance ${INSTANCE_ID}"
-    aws ec2 terminate-instance --instance-ids ${INSTANCE_ID}
+    aws ec2 terminate-instances --instance-ids ${INSTANCE_ID}
     EXIT_CODE=$?
     if [ "${EXIT_CODE}" != "0" ]; then
       echo "Terminating instance ${INSTANCE_ID} failed with exit code ${EXIT_CODE}"

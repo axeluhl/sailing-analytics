@@ -150,27 +150,26 @@ load_from_release_file ()
     if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
         INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
         echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
-    else
-        if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
-          echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
-        fi
-	RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
-        cd ${SERVER_HOME}
-        rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
-        rm -rf *.tar.gz
-	if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
-		SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
-	    if [ -n "${SCP_PORT}" ]; then
-                SCP_PORT_OPTION="-P ${SCP_PORT}"
-	    fi
-	    SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
-	    scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
-	else
-	    echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
-	    wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
-	fi
-        load_from_local_release_file
     fi
+    if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
+      echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+    fi
+    RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
+    cd ${SERVER_HOME}
+    rm -f ${SERVER_HOME}/${INSTALL_FROM_RELEASE}.tar.gz*
+    rm -rf *.tar.gz
+    if [[ ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} != "" ]]; then
+            SCP_PORT=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^[^:]*:\?\([0-9]*\)\?$/\1/' )
+        if [ -n "${SCP_PORT}" ]; then
+            SCP_PORT_OPTION="-P ${SCP_PORT}"
+        fi
+        SCP_HOST=$( echo ${INSTALL_FROM_SCP_USER_AT_HOST_AND_PORT} | sed -e 's/^\([^:]*\):\?\([0-9]*\)\?$/\1/' )
+        scp ${SCP_PORT_OPTION} ${SCP_HOST}:/home/trac/releases/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME} .
+    else
+        echo "Loading from release file https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}"
+        wget https://releases.sapsailing.com/${INSTALL_FROM_RELEASE}/${RELEASE_FILE_NAME}
+    fi
+    load_from_local_release_file
 }
 
 load_from_local_release_file ()
