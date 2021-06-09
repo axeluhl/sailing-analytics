@@ -10,14 +10,10 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.HasChangeHandlers;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -280,26 +276,10 @@ public abstract class DataEntryDialog<T> {
      */
     protected SuggestBox createSuggestBox(SuggestOracle suggestOracle) {
         final SuggestBox result = new SuggestBox(suggestOracle);
-        result.getValueBox().addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                validateAndUpdate();
-            }
-        });
-        result.getValueBox().addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        result.getValueBox().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), result.getValueBox());
-        DialogUtils.linkEscapeToButton(getCancelButton(), result.getValueBox());
+        ensureHasValueIsValidated(result.getValueBox());
+        ensureChangeableIsValidated(result.getValueBox());
+        result.getValueBox().addKeyUpHandler(event -> validateAndUpdate());
+        ensureFocusWidgetIsLinkedToKeyStrokes(result.getValueBox());
         return result;
     }
     
@@ -336,14 +316,8 @@ public abstract class DataEntryDialog<T> {
         textBox.setVisibleLength(visibleLength);
         textBox.setText(initialValue == null ? "" : initialValue);
         DialogUtils.addFocusUponKeyUpToggler(textBox);
-        textBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), textBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), textBox);
+        ensureChangeableIsValidated(textBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(textBox);
         return textBox;
     }
     
@@ -369,19 +343,13 @@ public abstract class DataEntryDialog<T> {
     }
         
     private PasswordTextBox createPasswordTextBoxInternal(String initialValue, int visibleLength) {
-        PasswordTextBox parrwordTextBox = new PasswordTextBox();
-        parrwordTextBox.setVisibleLength(visibleLength);
-        parrwordTextBox.setText(initialValue == null ? "" : initialValue);
-        DialogUtils.addFocusUponKeyUpToggler(parrwordTextBox);
-        parrwordTextBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), parrwordTextBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), parrwordTextBox);
-        return parrwordTextBox;
+        PasswordTextBox passwordTextBox = new PasswordTextBox();
+        passwordTextBox.setVisibleLength(visibleLength);
+        passwordTextBox.setText(initialValue == null ? "" : initialValue);
+        DialogUtils.addFocusUponKeyUpToggler(passwordTextBox);
+        ensureChangeableIsValidated(passwordTextBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(passwordTextBox);
+        return passwordTextBox;
     }
     
     /**
@@ -394,12 +362,7 @@ public abstract class DataEntryDialog<T> {
         TextArea textArea = new TextArea();
         textArea.setText(initialValue == null ? "" : initialValue);
         DialogUtils.addFocusUponKeyUpToggler(textArea);
-        textArea.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent arg0) {
-                validateAndUpdate();
-            }
-        });
+        ensureChangeableIsValidated(textArea);
         DialogUtils.linkEscapeToButton(getCancelButton(), textArea);
         return textArea;
     }
@@ -415,14 +378,8 @@ public abstract class DataEntryDialog<T> {
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(longBox);
-        longBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), longBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), longBox);
+        ensureChangeableIsValidated(longBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(longBox);
         return longBox;
     }
 
@@ -439,14 +396,8 @@ public abstract class DataEntryDialog<T> {
         doubleBox.setVisibleLength(visibleLength);
         doubleBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(doubleBox);
-        doubleBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), doubleBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), doubleBox);
+        ensureChangeableIsValidated(doubleBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(doubleBox);
         return doubleBox;
     }
 
@@ -468,14 +419,8 @@ public abstract class DataEntryDialog<T> {
         dateBox.setFireNullValues(true);
         dateBox.setValue(initialDate);
         DialogUtils.addFocusUponKeyUpToggler(dateBox.getTextBox());
-        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), dateBox.getTextBox());
-        DialogUtils.linkEscapeToButton(getCancelButton(), dateBox.getTextBox());
+        ensureHasValueIsValidated(dateBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(dateBox.getTextBox());
         return dateBox;
     }
 
@@ -490,14 +435,8 @@ public abstract class DataEntryDialog<T> {
         intBox.setVisibleLength(visibleLength);
         intBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(intBox);
-        intBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), intBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), intBox);
+        ensureChangeableIsValidated(intBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(intBox);
         return intBox;
     }
 
@@ -506,14 +445,8 @@ public abstract class DataEntryDialog<T> {
         longBox.setVisibleLength(visibleLength);
         longBox.setValue(initialValue);
         DialogUtils.addFocusUponKeyUpToggler(longBox);
-        longBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), longBox);
-        DialogUtils.linkEscapeToButton(getCancelButton(), longBox);
+        ensureChangeableIsValidated(longBox);
+        ensureFocusWidgetIsLinkedToKeyStrokes(longBox);
         return longBox;
     }
 
@@ -539,15 +472,23 @@ public abstract class DataEntryDialog<T> {
     public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
         result.setWordWrap(false);
-        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), result);
-        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        ensureHasValueIsValidated(result);
+        ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void ensureHasValueIsValidated(HasValueChangeHandlers hasValue){
+        hasValue.addValueChangeHandler(event -> validateAndUpdate());
+    }
+    
+    public void ensureChangeableIsValidated(HasChangeHandlers changeable) {
+        changeable.addChangeHandler(event -> validateAndUpdate());
+    }
+    
+    public void ensureFocusWidgetIsLinkedToKeyStrokes(FocusWidget widget) {
+        DialogUtils.linkEnterToButton(getOkButton(), widget);
+        DialogUtils.linkEscapeToButton(getCancelButton(), widget);
     }
     
     public void addTooltip(IsWidget widget, String tooltip) {
@@ -557,14 +498,8 @@ public abstract class DataEntryDialog<T> {
     public RadioButton createRadioButton(String radioButtonGroupName, String radioButtonLabel) {
         RadioButton result = new RadioButton(radioButtonGroupName, radioButtonLabel);
         result.setWordWrap(false);
-        result.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), result);
-        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        ensureHasValueIsValidated(result);
+        ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
     }
 
@@ -584,28 +519,16 @@ public abstract class DataEntryDialog<T> {
             boolean isMultipleSelect) {
         GenericListBox<ListItemT> result = new GenericListBox<>(valueBuilder);
         result.setMultipleSelect(isMultipleSelect);
-        result.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), result);
-        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        ensureChangeableIsValidated(result);
+        ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
     }
     
     public ListBox createListBox(boolean isMultipleSelect) {
         ListBox result = new ListBox();
         result.setMultipleSelect(isMultipleSelect);
-        result.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                validateAndUpdate();
-            }
-        });
-        DialogUtils.linkEnterToButton(getOkButton(), result);
-        DialogUtils.linkEscapeToButton(getCancelButton(), result);
+        ensureChangeableIsValidated(result);
+        ensureFocusWidgetIsLinkedToKeyStrokes(result);
         return result;
     }
 
